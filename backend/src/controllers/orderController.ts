@@ -71,6 +71,12 @@ export async function adminUpdateOrderStatus(req: Request, res: Response): Promi
   res.status(200).json(successResponse(order));
 }
 
+export async function adminUpdateOrder(req: Request, res: Response): Promise<void> {
+  requireAuthUser(req);
+  const order = await orderService.adminUpdateOrder(req.params.id, req.body ?? {});
+  res.status(200).json(successResponse(order));
+}
+
 /**
  * POST /api/orders/:id/payment-session
  *

@@ -835,3 +835,176 @@ export async function updateAdminUserRole(req: Request, res: Response, next: Nex
     next(error);
   }
 }
+
+// ─── Manual Subscription Management ──────────────────────────────────────────
+
+const VALID_PLAN_CODES = new Set(["PLUS", "FREE"]);
+const TWELVE_WEEKS_MS_SUB = 12 * 7 * 24 * 60 * 60 * 1000;
+
+function normalizePlanCode(value: unknown): string {
+  if (typeof value !== "string") {
+    throw new ApiError(400, "planCode must be a string.", undefined, "invalid_payload");
+  }
+  const normalized = value.trim().toUpperCase();
+  if (!VALID_PLAN_CODES.has(normalized)) {
+    throw new ApiError(400, 'planCode must be "PLUS" or "FREE".', undefined, "invalid_plan_code");
+  }
+  return normalized;
+}
+
+function normalizeBillingCycle(value: unknown): string | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (typeof value !== "string") return undefined;
+  const normalized = value.trim().toLowerCase();
+  if (normalized === "twelve_week" || normalized === "monthly" || normalized === "yearly") {
+    return normalized;
+  }
+  return undefined;
+}
+
+export async function updateAdminUserSubscription(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const uid = req.params.uid?.trim();
+    if (!uid) {
+      throw new ApiError(400, "User uid is required.", undefined, "missing_uid");
+    }
+
+    const planCode = normalizePlanCode(req.body?.planCode);
+    const billingCycle = normalizeBillingCycle(req.body?.billingCycle) ?? "twelve_week";
+
+    const user = await UserModel.findOne({ firebaseUid: uid });
+    if (!user) {
+      throw new ApiError(404, "User not found.", undefined, "user_not_found");
+    }
+
+    const adminUser = requireAuthUser(req);
+
+    if (planCode === "PLUS") {
+      // Upsert a PLUS subscription via the billing service (manual provider)
+      const now = new Date();
+      const currentPeriodEnd = new Date(now.getTime() + TWELVE_WEEKS_MS_SUB);
+      const providerEventId = `manual_admin_${uid}_${now.getTime()}`;
+      const payloadHash = hashEmailPayload(
+        JSON.stringify({ userId: uid, planCode: "PLUS", billingCycle, adminUid: adminUser.uid }),
+      );
+
+      await billingService.upsertSubscriptionFromProviderEvent({
+        provider: "manual",
+        providerEventId,
+        eventType: "manual_admin_upgrade",
+        payloadHash,
+        userId: uid,
+        planCode: "PLUS",
+        status: "active",
+        billingCycle: billingCycle as "twelve_week" | "monthly" | "yearly",
+        currentPeriodStart: now,
+        currentPeriodEnd,
+        providerSubscriptionId: providerEventId,
+      });
+    } else {
+      // FREE: cancel any existing active subscription
+      const existingSub = await BillingSubscriptionModel.findOne({
+        userId: uid,
+        status: { $in: ["active", "trialing"] },
+      }).sort({ createdAt: -1 });
+
+      if (existingSub) {
+        existingSub.status = "canceled";
+        existingSub.currentPeriodEnd = new Date();
+        existingSub.canceledAt = new Date();
+        await existingSub.save();
+      }
+    }
+
+    // Return updated user detail (same shape as getAdminUserDetail)
+    const [updatedUser, subscription, goals, paymentOrders, physicalOrders] = await Promise.all([
+      UserModel.findOne({ firebaseUid: uid }).lean(),
+      BillingSubscriptionModel.findOne({ userId: uid }).sort({ createdAt: -1 }).lean(),
+      (await import("../models/GoalModel")).GoalModel.find({ userId: uid, deletedAt: null })
+        .select("title category description deadline status focusArea readinessScore createdAt")
+        .sort({ createdAt: -1 })
+        .limit(20)
+        .lean(),
+      PaymentOrderModel.find({ userId: uid })
+        .select("orderId planCode billingCycle amount currency status provider createdAt completedAt")
+        .sort({ createdAt: -1 })
+        .limit(10)
+        .lean(),
+      OrderModel.find({ userId: uid })
+        .select("status totalVnd fullName email phone createdAt")
+        .sort({ createdAt: -1 })
+        .limit(10)
+        .lean(),
+    ]);
+
+    if (!updatedUser) {
+      throw new ApiError(404, "User not found after update.", undefined, "user_not_found");
+    }
+
+    res.status(200).json(
+      successResponse(
+        {
+          user: {
+            firebaseUid: updatedUser.firebaseUid,
+            email: updatedUser.email,
+            displayName: updatedUser.displayName ?? "",
+            role: updatedUser.role,
+            onboardingCompletedAt: (updatedUser as Record<string, unknown>).onboardingCompletedAt ?? null,
+            termsAcceptedAt: (updatedUser as Record<string, unknown>).termsAcceptedAt ?? null,
+            avatarUrl: (updatedUser as Record<string, unknown>).avatarUrl ?? null,
+            locale: (updatedUser as Record<string, unknown>).locale ?? "vi",
+            createdAt: updatedUser.createdAt,
+            updatedAt: (updatedUser as Record<string, unknown>).updatedAt ?? null,
+          },
+          subscription: serializeSubscription(
+            subscription
+              ? {
+                  ...subscription,
+                  billingCycle: subscription.billingCycle ?? undefined,
+                  currentPeriodEnd: subscription.currentPeriodEnd ?? undefined,
+                } as LeanSubscriptionSummary
+              : undefined,
+          ),
+          goals: (goals as Array<Record<string, unknown>>).map((g) => ({
+            id: String(g._id),
+            title: g.title,
+            category: g.category,
+            description: g.description,
+            deadline: g.deadline,
+            status: g.status,
+            focusArea: g.focusArea,
+            readinessScore: g.readinessScore,
+            createdAt: g.createdAt,
+          })),
+          paymentOrders: (paymentOrders as Array<Record<string, unknown>>).map((po) => ({
+            orderId: po.orderId,
+            planCode: po.planCode,
+            billingCycle: po.billingCycle,
+            amount: po.amount,
+            currency: po.currency,
+            status: po.status,
+            provider: po.provider,
+            createdAt: po.createdAt,
+            completedAt: po.completedAt,
+          })),
+          physicalOrders: (physicalOrders as Array<Record<string, unknown>>).map((o) => ({
+            id: String(o._id),
+            status: o.status,
+            totalVnd: o.totalVnd,
+            fullName: o.fullName,
+            createdAt: o.createdAt,
+          })),
+        },
+        planCode === "PLUS"
+          ? "User upgraded to PLUS."
+          : "User subscription cancelled (FREE).",
+      ),
+    );
+  } catch (error) {
+    next(error);
+  }
+}

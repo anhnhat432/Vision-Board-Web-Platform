@@ -40,6 +40,15 @@ export interface AdminUpdateStatusPayload {
   adminNote?: string;
 }
 
+export interface AdminUpdateOrderPayload {
+  fullName?: string;
+  email?: string;
+  phone?: string;
+  shippingAddress?: ShippingAddress;
+  note?: string;
+  adminNote?: string;
+}
+
 const VALID_STATUSES: OrderStatus[] = [
   "pending",
   "confirmed",
@@ -343,6 +352,49 @@ class OrderService {
 
     const updated = await this.orderRepository.updateOrderStatus(orderId, updateData);
     if (!updated) throw new ApiError(404, "Order not found.");
+    return updated;
+  }
+
+  async adminUpdateOrder(orderId: string, payload: AdminUpdateOrderPayload) {
+    const order = await this.orderRepository.getOrderById(orderId);
+    if (!order) throw new ApiError(404, "Order not found.");
+
+    // Validate shipping address if provided
+    if (payload.shippingAddress !== undefined) {
+      const addr = payload.shippingAddress;
+      if (!addr.line1 || addr.line1.trim().length === 0) {
+        throw new ApiError(400, "shippingAddress.line1 is required.", undefined, "invalid_payload");
+      }
+    }
+
+    // Validate email format if provided
+    if (payload.email !== undefined) {
+      const email = payload.email.trim();
+      if (!email || !email.includes("@")) {
+        throw new ApiError(400, "Invalid email format.", undefined, "invalid_payload");
+      }
+    }
+
+    // Validate phone if provided
+    if (payload.phone !== undefined && payload.phone.trim().length === 0) {
+      throw new ApiError(400, "phone cannot be empty.", undefined, "invalid_payload");
+    }
+
+    // Validate fullName if provided
+    if (payload.fullName !== undefined && payload.fullName.trim().length === 0) {
+      throw new ApiError(400, "fullName cannot be empty.", undefined, "invalid_payload");
+    }
+
+    const updated = await this.orderRepository.updateAdminOrderFields(orderId, {
+      fullName: payload.fullName?.trim(),
+      email: payload.email?.trim(),
+      phone: payload.phone?.trim(),
+      shippingAddress: payload.shippingAddress,
+      note: payload.note,
+      adminNote: payload.adminNote,
+    });
+
+    if (!updated) throw new ApiError(404, "Order not found after update.");
     return updated;
   }
 }

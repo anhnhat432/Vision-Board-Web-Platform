@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import {
   adminGetOrders,
+  adminUpdateOrder,
   adminUpdateOrderStatus,
   cancelOrder,
   createKitPaymentSession,
@@ -41,6 +42,16 @@ orderRoutes.patch(
     getTargetId: (req) => req.params.id,
     validators: [validateObjectIdParam("id", "orderId"), validateJsonObjectBody],
     handler: adminUpdateOrderStatus,
+  }),
+);
+orderRoutes.patch(
+  "/admin/orders/:id",
+  auditedAdminAction({
+    action: "adminUpdateOrder",
+    target: "physical_order",
+    getTargetId: (req) => req.params.id,
+    validators: [validateObjectIdParam("id", "orderId"), validateJsonObjectBody],
+    handler: adminUpdateOrder,
   }),
 );
 

@@ -94,6 +94,15 @@ export interface UpdateOrderStatusData {
   deliveredAt?: Date;
 }
 
+export interface UpdateAdminOrderData {
+  fullName?: string;
+  email?: string;
+  phone?: string;
+  shippingAddress?: ShippingAddress;
+  note?: string;
+  adminNote?: string;
+}
+
 
 function mapOrderDiscount(docDiscount: unknown): OrderDiscount | undefined {
   if (!docDiscount || typeof docDiscount !== "object") return undefined;
@@ -251,6 +260,30 @@ export class MongoOrderRepository {
         $set: setFields,
         $push: { statusHistory: historyEntry },
       },
+      { new: true, runValidators: true },
+    ).lean();
+
+    return doc ? mapOrder(doc) : null;
+  }
+
+  async updateAdminOrderFields(id: string, data: UpdateAdminOrderData): Promise<OrderEntity | null> {
+    const setFields: Record<string, unknown> = {};
+
+    if (data.fullName !== undefined) setFields.fullName = data.fullName;
+    if (data.email !== undefined) setFields.email = data.email;
+    if (data.phone !== undefined) setFields.phone = data.phone;
+    if (data.shippingAddress !== undefined) setFields.shippingAddress = data.shippingAddress;
+    if (data.note !== undefined) setFields.note = data.note || undefined;
+    if (data.adminNote !== undefined) setFields.adminNote = data.adminNote || undefined;
+
+    if (Object.keys(setFields).length === 0) {
+      const doc = await OrderModel.findById(id).lean();
+      return doc ? mapOrder(doc) : null;
+    }
+
+    const doc = await OrderModel.findByIdAndUpdate(
+      id,
+      { $set: setFields },
       { new: true, runValidators: true },
     ).lean();
 

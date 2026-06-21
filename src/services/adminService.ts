@@ -429,6 +429,20 @@ export function adminUpdateUserRole(uid: string, role: "user" | "admin"): Promis
   return patch<AdminUpdateUserRoleResult, { role: string }>(`/admin/users/${uid}/role`, { role });
 }
 
+// ─── Manual Subscription Management ──────────────────────────────────────────
+
+export interface AdminUpdateSubscriptionPayload {
+  planCode: "PLUS" | "FREE";
+  billingCycle?: string;
+}
+
+export function adminUpdateUserSubscription(
+  uid: string,
+  payload: AdminUpdateSubscriptionPayload,
+): Promise<AdminUserDetail> {
+  return patch<AdminUserDetail, AdminUpdateSubscriptionPayload>(`/admin/users/${uid}/subscription`, payload);
+}
+
 // ─── Audit Logs ──────────────────────────────────────────────────────────────
 
 export interface AdminAuditLogEntry {

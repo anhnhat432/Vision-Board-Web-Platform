@@ -11,6 +11,7 @@ import {
   getReconciliationLastRun,
   sendExpiringBillingReminders,
   updateAdminUserRole,
+  updateAdminUserSubscription,
 } from "../controllers/adminController";
 import { getAdminAuditLogs } from "../controllers/auditLogController";
 import {
@@ -220,6 +221,16 @@ adminRoutes.patch(
     getTargetId: (req) => req.params.uid ?? null,
     validators: [validateOptionalJsonObjectBody],
     handler: updateAdminUserRole,
+  }),
+);
+adminRoutes.patch(
+  "/admin/users/:uid/subscription",
+  auditedAdminAction({
+    action: "updateUserSubscription",
+    target: "user_subscription",
+    getTargetId: (req) => req.params.uid ?? null,
+    validators: [validateOptionalJsonObjectBody],
+    handler: updateAdminUserSubscription,
   }),
 );
 

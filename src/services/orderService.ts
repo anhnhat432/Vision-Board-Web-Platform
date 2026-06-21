@@ -126,3 +126,18 @@ export function adminGetOrders(): Promise<ApiOrder[]> {
 export function adminUpdateOrderStatus(orderId: string, payload: AdminUpdateStatusPayload): Promise<ApiOrder> {
   return patch<ApiOrder, AdminUpdateStatusPayload>(`/admin/orders/${orderId}/status`, payload);
 }
+
+// ─── Admin Order Edit ────────────────────────────────────────────────────────
+
+export interface AdminUpdateOrderPayload {
+  fullName?: string;
+  email?: string;
+  phone?: string;
+  shippingAddress?: ApiShippingAddress;
+  note?: string;
+  adminNote?: string;
+}
+
+export function adminUpdateOrder(orderId: string, payload: AdminUpdateOrderPayload): Promise<ApiOrder> {
+  return patch<ApiOrder, AdminUpdateOrderPayload>(`/admin/orders/${orderId}`, payload);
+}
