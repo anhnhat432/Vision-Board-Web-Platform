@@ -10,17 +10,13 @@ import {
   RefreshCw,
   Shield,
   Sparkles,
+  TicketPercent,
 } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { apiClient, toAppError } from "@/lib/api/apiClient";
 import { useOptionalAuthContext } from "@/lib/auth/AuthContext";
-import { BillingPlusIllustration } from "../../app/components/illustrations/BillingPlusIllustration";
-import { BillingTrustSignals } from "../../app/components/BillingTrustSignals";
-import { PageHero } from "../../app/components/layout/PageHero";
-import { PrimaryActionCard } from "../../app/components/layout/PrimaryActionCard";
-import { SectionBlock } from "../../app/components/layout/SectionBlock";
 import { ScreenGuide } from "../../app/components/ScreenGuide";
 import { SCREEN_GUIDES } from "../../app/components/screen-guides";
 import { UpgradePaywallDialog } from "../../app/components/UpgradePaywallDialog";
@@ -36,7 +32,6 @@ import {
 } from "../../app/components/ui/alert-dialog";
 import { Badge } from "../../app/components/ui/badge";
 import { Button } from "../../app/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../app/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -97,8 +92,7 @@ import type {
 } from "./types";
 import { useCheckoutReturn } from "./useCheckoutReturn";
 import { usePaymentHistory } from "./usePaymentHistory";
-import { BillingDiscountSection } from "./BillingDiscountSection";
-import type { DiscountInfo } from "./useCouponValidation";
+import { useCouponValidation, type DiscountInfo } from "./useCouponValidation";
 import { PLUS_MONTHLY_PRICE_VND, formatVndAmount } from "@/app/utils/billing-pricing";
 
 interface SaleEventInfo {
@@ -159,7 +153,26 @@ export function BillingPlan() {
   const [refundFormError, setRefundFormError] = useState<string | null>(null);
   const [isSubmittingRefund, setIsSubmittingRefund] = useState(false);
 
-  // Handle checkout return URL
+  // Coupon validation
+  const {
+    status: couponStatus,
+    discount: couponDiscount,
+    error: couponError,
+    validate: validateCoupon,
+    reset: resetCoupon,
+  } = useCouponValidation({ planCode: "PLUS", purpose: "plus_subscription", originalAmount: PLUS_MONTHLY_PRICE_VND });
+  const [couponCode, setCouponCode] = useState(sessionStorage.getItem("billing:couponCode") ?? "");
+
+  // Sync coupon validation state with sessionStorage
+  useEffect(() => {
+    if (couponStatus === "valid" && couponDiscount) {
+      handleCouponChange(couponDiscount);
+    } else if (couponStatus === "invalid" || couponStatus === "idle") {
+      handleCouponChange(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [couponStatus, couponDiscount]);
+
   const returnStatus = searchParams.get("status");
   const isCheckoutReturn = returnStatus === "success" && realMode;
   const signedInUserId = authContext?.user?.uid ?? null;
@@ -182,6 +195,7 @@ export function BillingPlan() {
   const subscription = userData.subscription;
   const expiryInfo = useMemo(() => getBillingExpiryInfo(subscription), [subscription]);
   const graceState = useMemo(() => getSubscriptionGraceState(userData), [userData]);
+
   const handleCouponChange = (discount: DiscountInfo | null) => {
     try {
       if (discount?.discountCode) {
@@ -533,9 +547,21 @@ export function BillingPlan() {
     }
   };
 
+  // Compute discount info
+  const activeDiscount = couponDiscount?.valid ? couponDiscount : null;
+  const effectiveSaleEvent = saleEvent;
+  const saleFinalAmount = effectiveSaleEvent?.finalAmount ?? (effectiveSaleEvent ? getPlusSaleFallbackFinalAmount(effectiveSaleEvent) : undefined);
+  const displayDiscountAmount = activeDiscount
+    ? (activeDiscount.discountAmount ?? (activeDiscount.discountPercent ? Math.round(PLUS_MONTHLY_PRICE_VND * activeDiscount.discountPercent / 100) : activeDiscount.discountValue ?? 0))
+    : undefined;
+  const displayFinalAmount = activeDiscount?.finalAmount ?? (displayDiscountAmount ? Math.max(PLUS_MONTHLY_PRICE_VND - displayDiscountAmount, 1000) : undefined);
+  const hasActiveDiscount = activeDiscount !== null || effectiveSaleEvent !== null;
+
   return (
-    <div className="stack-section mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
+    <main className="mx-auto flex max-w-[1000px] flex-col gap-[18px] px-4 pb-16 pt-4 sm:px-6 lg:px-9">
       <ScreenGuide {...SCREEN_GUIDES.billingPlan} autoOpen />
+
+      {/* ===== DIALOGS (giữ nguyên logic) ===== */}
       <Dialog open={refundDialogOrder !== null} onOpenChange={(open) => !open && setRefundDialogOrder(null)}>
         <DialogContent className="sm:max-w-2xl">
           <DialogHeader>
@@ -546,73 +572,32 @@ export function BillingPlan() {
           </DialogHeader>
           <div className="grid gap-4">
             <div className="grid gap-2">
-              <label htmlFor="refund-order-id" className="text-sm font-medium text-app-ink">
-                Mã đơn hàng
-              </label>
+              <label htmlFor="refund-order-id" className="text-sm font-medium text-app-ink">Mã đơn hàng</label>
               <Input id="refund-order-id" value={refundForm.orderId} readOnly className="bg-app-bg" />
             </div>
             <div className="grid gap-2">
-              <label htmlFor="refund-contact-email" className="text-sm font-medium text-app-ink">
-                Email liên hệ
-              </label>
-              <Input
-                id="refund-contact-email"
-                type="email"
-                value={refundForm.contactEmail}
-                onChange={(event) => setRefundForm((current) => ({ ...current, contactEmail: event.target.value }))}
-                placeholder="you@example.com"
-              />
+              <label htmlFor="refund-contact-email" className="text-sm font-medium text-app-ink">Email liên hệ</label>
+              <Input id="refund-contact-email" type="email" value={refundForm.contactEmail} onChange={(event) => setRefundForm((current) => ({ ...current, contactEmail: event.target.value }))} placeholder="you@example.com" />
             </div>
             <div className="grid gap-2">
-              <label htmlFor="refund-reason" className="text-sm font-medium text-app-ink">
-                Lý do hoàn tiền
-              </label>
-              <Textarea
-                id="refund-reason"
-                value={refundForm.reason}
-                onChange={(event) => setRefundForm((current) => ({ ...current, reason: event.target.value }))}
-                placeholder="Cho chúng tôi biết lý do bạn muốn hoàn tiền."
-              />
+              <label htmlFor="refund-reason" className="text-sm font-medium text-app-ink">Lý do hoàn tiền</label>
+              <Textarea id="refund-reason" value={refundForm.reason} onChange={(event) => setRefundForm((current) => ({ ...current, reason: event.target.value }))} placeholder="Cho chúng tôi biết lý do bạn muốn hoàn tiền." />
             </div>
             <div className="grid gap-2">
-              <label htmlFor="refund-account" className="text-sm font-medium text-app-ink">
-                Số tài khoản ngân hàng nhận tiền hoàn
-              </label>
-              <Input
-                id="refund-account"
-                value={refundForm.refundAccount}
-                onChange={(event) => setRefundForm((current) => ({ ...current, refundAccount: event.target.value }))}
-                placeholder="Ngân hàng - Số TK - Chủ TK"
-              />
-              <p className="text-xs leading-5 text-app-ink-muted">
-                Đây là thông tin PII, chỉ dùng để support chuyển khoản hoàn tiền thủ công.
-              </p>
+              <label htmlFor="refund-account" className="text-sm font-medium text-app-ink">Số tài khoản ngân hàng nhận tiền hoàn</label>
+              <Input id="refund-account" value={refundForm.refundAccount} onChange={(event) => setRefundForm((current) => ({ ...current, refundAccount: event.target.value }))} placeholder="Ngân hàng - Số TK - Chủ TK" />
+              <p className="text-xs leading-5 text-app-ink-muted">Đây là thông tin PII, chỉ dùng để support chuyển khoản hoàn tiền thủ công.</p>
             </div>
             {refundFormError ? (
-              <div className="rounded-lg border border-app-status-error/20 bg-app-status-error/8 p-3 text-sm text-app-status-error">
-                {refundFormError}
-              </div>
+              <div className="rounded-lg border border-app-status-error/20 bg-app-status-error/8 p-3 text-sm text-app-status-error">{refundFormError}</div>
             ) : null}
             {emailNeedsVerification ? (
-              <div className="rounded-lg border border-app-line bg-app-warm-soft p-3 text-sm text-app-warm">
-                Bạn cần xác minh email tài khoản trước khi yêu cầu hoàn tiền.
-              </div>
+              <div className="rounded-lg border border-app-line bg-app-warm-soft p-3 text-sm text-app-warm">Bạn cần xác minh email tài khoản trước khi yêu cầu hoàn tiền.</div>
             ) : null}
           </div>
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setRefundDialogOrder(null)}
-              disabled={isSubmittingRefund}
-            >
-              Huỷ
-            </Button>
-            <Button
-              type="button"
-              onClick={handleSubmitRefundRequest}
-              disabled={!canSubmitRefundRequest || emailNeedsVerification}
-            >
+            <Button type="button" variant="outline" onClick={() => setRefundDialogOrder(null)} disabled={isSubmittingRefund}>Huỷ</Button>
+            <Button type="button" onClick={handleSubmitRefundRequest} disabled={!canSubmitRefundRequest || emailNeedsVerification}>
               {isSubmittingRefund ? "Đang gửi…" : "Gửi yêu cầu hoàn tiền"}
             </Button>
           </DialogFooter>
@@ -630,58 +615,110 @@ export function BillingPlan() {
         onCheckoutComplete={handleCheckoutComplete}
       />
 
-      <PageHero
-        className="page-enter"
-        eyebrow="GÓI & THANH TOÁN"
-        title="Chọn gói phù hợp với bạn"
-        description="Nâng cấp, kiểm tra quyền nâng cao và quản lý thanh toán cho tài khoản. Quyền Plus chỉ mở sau khi hệ thống xác nhận giao dịch."
-        aside={
-          <div className="relative overflow-hidden rounded-card-lg border border-app-line dark:border-app-line shadow-app-sm aspect-[4/3] w-full max-w-[320px] mx-auto flex items-center justify-center bg-app-surface p-6">
-            <BillingPlusIllustration className="h-full w-full max-h-48 text-app-accent" />
-          </div>
-        }
-      />
+      {/* ===== CÁCH DÙNG MÀN NÀY PILL ===== */}
+      <div className="flex justify-end">
+        <button type="button" className="relative inline-flex items-center gap-2 rounded-full border border-app-line bg-white px-[15px] py-[9px] text-[12.5px] font-semibold text-app-ink-soft">
+          <span className="absolute -right-[3px] -top-[3px] h-[9px] w-[9px] rounded-full bg-app-accent" />
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+          Cách dùng màn này
+        </button>
+      </div>
 
+      {/* ===== HERO ===== */}
+      <section className="relative grid items-center gap-7 overflow-hidden rounded-[22px] border border-app-line bg-white px-8 py-8 sm:px-[34px] sm:py-[34px] lg:grid-cols-[1fr_280px]">
+        <div>
+          <div className="mb-[13px] flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.14em] text-app-accent">
+            <span className="inline-block h-[6px] w-[6px] rounded-full bg-app-accent" />
+            Gói &amp; thanh toán
+          </div>
+          <h1 className="font-serif text-[clamp(26px,3vw,38px)] font-extrabold leading-[1.03] tracking-[-0.02em] text-app-ink mb-[13px]">
+            Chọn gói phù hợp với bạn
+          </h1>
+          <p className="max-w-[50ch] text-[14.5px] leading-[1.55] text-app-ink-soft">
+            Nâng cấp, kiểm tra quyền nâng cao và quản lý thanh toán cho tài khoản. Quyền Plus chỉ mở sau khi hệ thống xác nhận giao dịch.
+          </p>
+        </div>
+        <div className="relative flex min-h-[180px] items-center justify-center self-stretch rounded-[18px] border border-[rgba(12,94,58,0.12)] bg-gradient-to-br from-app-accent-subtle to-[#F4ECDD]">
+          <span className="absolute h-[120px] w-[120px] animate-[dof-ring_3s_ease-out_infinite] rounded-full border-2 border-app-accent/30" />
+          <span className="relative flex h-24 w-24 items-center justify-center text-app-accent">
+            <svg width="96" height="96" viewBox="0 0 24 24" fill="rgba(12,94,58,0.12)" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
+              <path d="M12 8v8"/><path d="M8 12h8"/>
+            </svg>
+          </span>
+        </div>
+      </section>
+
+      {/* ===== TRUST ===== */}
+      <section className="rounded-[18px] border border-app-line bg-white px-[26px] py-6">
+        <div className="mb-[18px] flex items-start justify-between gap-4">
+          <div>
+            <div className="mb-[5px] text-[10px] font-extrabold uppercase tracking-[0.1em] text-app-accent">Tin cậy khi thanh toán</div>
+            <h2 className="font-serif text-[18px] font-bold tracking-[-0.01em] text-app-ink">Chuyển khoản rõ ràng, hỗ trợ sau thanh toán.</h2>
+          </div>
+          <span className="inline-flex shrink-0 items-center gap-2 rounded-full border border-app-accent/20 bg-app-accent-subtle py-[5px] pl-[5px] pr-[6px]">
+            <span className="rounded-full bg-app-accent px-[6px] py-[3px] font-mono text-[10px] font-bold text-white">VN</span>
+            <span className="pr-[6px] text-xs font-semibold text-app-accent">Bank</span>
+          </span>
+        </div>
+        <div className="grid grid-cols-1 gap-[13px] sm:grid-cols-2">
+          <div className="flex items-start gap-3 rounded-[13px] border border-app-line bg-[#FAF8F3] p-[15px_17px]">
+            <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg bg-app-accent-subtle text-app-accent">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+            </span>
+            <span className="text-[13px] leading-[1.45] text-app-ink-soft">Thanh toán tự động được xác nhận qua nhà cung cấp thanh toán.</span>
+          </div>
+          <div className="flex items-start gap-3 rounded-[13px] border border-app-line bg-[#FAF8F3] p-[15px_17px]">
+            <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg bg-app-accent-subtle text-app-accent">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            </span>
+            <span className="text-[13px] leading-[1.45] text-app-ink-soft">Biên nhận điện tử gửi qua email trong 1–2 phút.</span>
+          </div>
+          <div className="flex items-start gap-3 rounded-[13px] border border-app-line bg-[#FAF8F3] p-[15px_17px]">
+            <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg bg-app-accent-subtle text-app-accent">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+            </span>
+            <span className="text-[13px] leading-[1.45] text-app-ink-soft">Hoàn tiền linh hoạt theo{" "}<strong className="font-semibold text-app-ink">chính sách hoàn tiền</strong>.</span>
+          </div>
+          <div className="flex items-start gap-3 rounded-[13px] border border-app-line bg-[#FAF8F3] p-[15px_17px]">
+            <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg bg-app-accent-subtle text-app-accent">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/></svg>
+            </span>
+            <span className="text-[13px] leading-[1.45] text-app-ink-soft">
+              Liên hệ hỗ trợ:{" "}
+              <strong className="font-semibold text-app-ink">
+                {BILLING_SUPPORT_EMAIL ? (
+                  <a href={`mailto:${BILLING_SUPPORT_EMAIL}`} className="hover:underline">{BILLING_SUPPORT_EMAIL}</a>
+                ) : "support@dearourfuture.com"}
+              </strong>{" "}— phản hồi trong 24h.
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* ===== BANNERS ===== */}
       {paidCheckoutDisabled && (
-        <div
-          data-testid="paid-checkout-disabled-banner"
-          className="rounded-card border border-app-warm-border bg-app-warm-soft p-4"
-        >
+        <div data-testid="paid-checkout-disabled-banner" className="rounded-card border border-app-warm-border bg-app-warm-soft p-4">
           <div className="flex items-start gap-3">
             <LockKeyhole className="mt-0.5 h-5 w-5 text-app-warm" />
             <div className="flex-1">
               <p className="font-medium text-app-ink">Thanh toán đang tạm khóa.</p>
               <p className="mt-1 text-sm leading-6 text-app-ink-soft">
-                Đang hoàn tất tích hợp hệ thống thanh toán mới — sẵn sàng trong tuần tới. Quyền hiện có không bị ảnh
-                hưởng. Nếu bạn muốn nâng cấp ngay, liên hệ{" "}
+                Đang hoàn tất tích hợp hệ thống thanh toán mới — sẵn sàng trong tuần tới. Quyền hiện có không bị ảnh hưởng. Nếu bạn muốn nâng cấp ngay, liên hệ{" "}
                 {BILLING_SUPPORT_EMAIL ? (
-                  <a
-                    href={`mailto:${BILLING_SUPPORT_EMAIL}`}
-                    className="font-medium text-app-ink underline-offset-4 hover:underline"
-                  >
-                    {BILLING_SUPPORT_EMAIL}
-                  </a>
-                ) : (
-                  "đội hỗ trợ"
-                )}{" "}
-                để mở Plus thủ công.
+                  <a href={`mailto:${BILLING_SUPPORT_EMAIL}`} className="font-medium text-app-ink underline-offset-4 hover:underline">{BILLING_SUPPORT_EMAIL}</a>
+                ) : ("đội hỗ trợ")}{" "}để mở Plus thủ công.
               </p>
             </div>
           </div>
         </div>
       )}
 
-      {/* Checkout return status */}
       {checkoutReturnStatus === "pending" && (
         <div className="rounded-card border border-app-line bg-app-warm-soft p-4">
           <div className="flex items-center gap-3">
             <Loader2 className="h-5 w-5 animate-spin text-app-warm" />
-            <div>
-              <p className="font-medium text-app-ink">Đang chờ xác nhận thanh toán</p>
-              <p className="text-sm text-app-ink-soft">
-                Thanh toán đang được xử lý. Quyền sẽ được cập nhật khi hệ thống xác nhận.
-              </p>
-            </div>
+            <div><p className="font-medium text-app-ink">Đang chờ xác nhận thanh toán</p><p className="text-sm text-app-ink-soft">Thanh toán đang được xử lý. Quyền sẽ được cập nhật khi hệ thống xác nhận.</p></div>
           </div>
         </div>
       )}
@@ -689,13 +726,8 @@ export function BillingPlan() {
         <div className="rounded-card border border-app-accent-soft bg-app-accent-soft p-4">
           <div className="flex items-center gap-3">
             <Shield className="h-5 w-5 text-app-accent" />
-            <div>
-              <p className="font-medium text-app-ink">Thanh toán đã xác nhận</p>
-              <p className="text-sm text-app-ink-soft">Quyền Plus đã được kích hoạt trên tài khoản của bạn.</p>
-            </div>
-            <Button asChild size="sm" className="ml-auto bg-app-accent text-white hover:bg-app-accent">
-              <Link to="/12-week-system">Bắt đầu kế hoạch 12 tuần</Link>
-            </Button>
+            <div><p className="font-medium text-app-ink">Thanh toán đã xác nhận</p><p className="text-sm text-app-ink-soft">Quyền Plus đã được kích hoạt trên tài khoản của bạn.</p></div>
+            <Button asChild size="sm" className="ml-auto bg-app-accent text-white hover:bg-app-accent"><Link to="/12-week-system">Bắt đầu kế hoạch 12 tuần</Link></Button>
           </div>
         </div>
       )}
@@ -703,44 +735,25 @@ export function BillingPlan() {
         <div className="rounded-card border border-app-status-error/20 bg-app-status-error/8 p-4">
           <div className="flex items-center gap-3">
             <Shield className="h-5 w-5 text-app-status-error" />
-            <div>
-              <p className="font-medium text-app-status-error">Không thể kiểm tra thanh toán</p>
-              <p className="text-sm text-app-ink-soft">Vui lòng nhấn "Kiểm tra quyền" bên dưới hoặc thử lại sau.</p>
-            </div>
-            <Button variant="outline" size="sm" onClick={retryCheckoutEntitlement} className="ml-auto">
-              Thử lại
-            </Button>
+            <div><p className="font-medium text-app-status-error">Không thể kiểm tra thanh toán</p><p className="text-sm text-app-ink-soft">Vui lòng nhấn "Kiểm tra quyền" bên dưới hoặc thử lại sau.</p></div>
+            <Button variant="outline" size="sm" onClick={retryCheckoutEntitlement} className="ml-auto">Thử lại</Button>
           </div>
         </div>
       )}
 
       {shouldShowExpiryNotice && (
-        <div
-          className={`rounded-card p-4 ${isExpired ? "border-app-status-error/20 bg-app-status-error/8" : "border-app-line bg-app-warm-soft"}`}
-        >
+        <div className={`rounded-card p-4 ${isExpired ? "border-app-status-error/20 bg-app-status-error/8" : "border-app-line bg-app-warm-soft"}`}>
           <div className="flex items-start gap-3">
             <AlertTriangle className={`mt-0.5 h-5 w-5 ${isExpired ? "text-app-status-error" : "text-app-warm"}`} />
             <div className="flex-1">
               <p className={`font-medium ${isExpired ? "text-app-status-error" : "text-app-ink"}`}>
-                {isInRenewalPriority
-                  ? `Đang trong giai đoạn ưu tiên gia hạn — còn ${graceState.daysRemaining} ngày`
-                  : isExpired
-                    ? "Gói Plus đã hết hạn"
-                    : `Gói Plus còn ${expiryInfo.daysLeft ?? 0} ngày`}
+                {isInRenewalPriority ? `Đang trong giai đoạn ưu tiên gia hạn — còn ${graceState.daysRemaining} ngày` : isExpired ? "Gói Plus đã hết hạn" : `Gói Plus còn ${expiryInfo.daysLeft ?? 0} ngày`}
               </p>
               <p className={`mt-1 text-sm leading-6 ${isExpired ? "text-app-status-error" : "text-app-ink-soft"}`}>
-                {isInRenewalPriority
-                  ? "Quyền Plus vẫn được giữ trong thời gian này. Gia hạn ngay để không bị tạm dừng."
-                  : isExpired
-                    ? "Quyền Plus đã được thu hồi. Gia hạn để mở lại mẫu nâng cao, góc nhìn review và thống kê."
-                    : `Chu kỳ hiện tại hết hạn ngày ${formatBillingExpiryDate(expiryInfo.expiresAt)}. Gia hạn sớm để không bị gián đoạn quyền Plus.`}
+                {isInRenewalPriority ? "Quyền Plus vẫn được giữ trong thời gian này. Gia hạn ngay để không bị tạm dừng." : isExpired ? "Quyền Plus đã được thu hồi. Gia hạn để mở lại mẫu nâng cao, góc nhìn review và thống kê." : `Chu kỳ hiện tại hết hạn ngày ${formatBillingExpiryDate(expiryInfo.expiresAt)}. Gia hạn sớm để không bị gián đoạn quyền Plus.`}
               </p>
             </div>
-            <Button
-              onClick={handleRenewPlan}
-              disabled={paidCheckoutDisabled}
-              className="ml-auto bg-app-accent text-white hover:bg-app-accent"
-            >
+            <Button onClick={handleRenewPlan} disabled={paidCheckoutDisabled} className="ml-auto bg-app-accent text-white hover:bg-app-accent">
               <RefreshCw className="mr-2 h-4 w-4" />
               {paidCheckoutDisabled ? "Tạm khóa thanh toán" : isInRenewalPriority ? "Gia hạn ngay" : "Gia hạn Plus"}
             </Button>
@@ -748,164 +761,97 @@ export function BillingPlan() {
         </div>
       )}
 
-      <BillingTrustSignals supportEmail={BILLING_SUPPORT_EMAIL} />
+      {/* ===== CURRENT PLAN ===== */}
+      <section className="relative overflow-hidden rounded-[18px] border border-app-line bg-white px-[28px] py-[26px]">
+        <div className="mb-[11px] flex items-center gap-[7px] text-[10px] font-extrabold uppercase tracking-[0.1em] text-app-accent">
+          <Crown className="h-3.5 w-3.5" />
+          Tài khoản
+        </div>
+        <h2 className="mb-[5px] font-serif text-xl font-bold tracking-[-0.01em] text-app-ink">Gói hiện tại</h2>
+        <p className="mb-4 text-[13.5px] text-app-ink-soft">
+          {currentPlanCode === "FREE" ? "Bạn đang dùng gói miễn phí." : `Bạn đang dùng ${currentPlanName} trên tài khoản này và có thể tiếp tục trên thiết bị khác sau khi đăng nhập.`}
+        </p>
+        <div className="mb-5 flex items-center gap-[11px]">
+          <span className={`inline-flex rounded-full border px-[13px] py-[5px] text-[11.5px] font-semibold ${
+            currentPlanCode !== "FREE" ? "border-app-accent-soft bg-app-accent-soft text-app-accent" : "border-app-line bg-app-bg text-app-ink-soft"
+          }`}>{currentPlanName}</span>
+          <span className="font-mono text-sm font-semibold text-app-ink">
+            {currentPlanCode !== "FREE" ? (currentPlanDefinition?.priceLabel ?? getPlanLabel(currentPlanCode)) : "0đ"}
+          </span>
+          {isInRenewalPriority ? (
+            <span className="rounded-full border border-app-line bg-app-warm-soft px-3 py-1 text-xs font-semibold text-app-warm">Còn {graceState.daysRemaining} ngày để gia hạn ưu tiên</span>
+          ) : isExpired ? (
+            <span className="rounded-full border border-app-status-error/20 bg-app-status-error/8 px-3 py-1 text-xs font-semibold text-app-status-error">Đã hết hạn</span>
+          ) : null}
+        </div>
 
-      {/* Current plan */}
-      <SectionBlock title="Khu vực gói đang dùng" headerVisuallyHidden>
-        <PrimaryActionCard
-          title="Gói hiện tại"
-          titleAs="h2"
-          titleClassName="text-xl font-semibold tracking-tight text-foreground sm:text-2xl"
-          eyebrow="Tài khoản"
-          icon={<Crown className="h-4 w-4" />}
-          description={
-            currentPlanCode === "FREE"
-              ? "Bạn đang dùng gói miễn phí."
-              : `Bạn đang dùng ${currentPlanName} trên tài khoản này và có thể tiếp tục trên thiết bị khác sau khi đăng nhập.`
-          }
-          action={
-            isInRenewalPriority && realMode ? (
-              <Button className="w-full sm:w-auto" onClick={handleRenewPlan} disabled={paidCheckoutDisabled}>
-                <RefreshCw className="mr-2 h-4 w-4" />
-                {paidCheckoutDisabled ? "Tạm khóa thanh toán" : "Gia hạn ngay"}
-              </Button>
-            ) : currentPlanCode === "FREE" ? (
-              <Button
-                className="w-full bg-app-accent text-white hover:bg-app-accent sm:w-auto"
-                onClick={() => handleOpenUpgrade("plan")}
-                disabled={paidCheckoutDisabled}
-                data-testid="billing-plan-upgrade-cta"
-              >
-                <Sparkles className="mr-2 h-4 w-4" />
-                {paidCheckoutDisabled ? "Tạm khóa thanh toán" : "Nâng cấp Plus"}
-              </Button>
-            ) : realMode || billingStatus.manageBillingReady ? (
-              <Button
-                variant="outline"
-                onClick={handleOpenPortal}
-                disabled={isOpeningPortal || !billingStatus.manageBillingReady}
-              >
-                <CreditCard className="mr-2 h-4 w-4" />
-                {billingStatus.manageBillingReady ? (isOpeningPortal ? "Đang mở…" : "Quản lý gói") : "Đang chuẩn bị"}
-              </Button>
-            ) : null
-          }
-          actionClassName="pt-1"
-          contentClassName="stack-stack"
-        >
-          <div className="flex flex-wrap items-center gap-3">
-            <Badge
-              variant="outline"
-              className={
-                currentPlanCode !== "FREE"
-                  ? "border-app-accent-soft bg-app-accent-soft text-app-accent"
-                  : "border-app-line bg-app-bg text-app-ink-muted"
-              }
-            >
-              {currentPlanName}
-            </Badge>
-            {currentPlanDefinition && (
-              <span className="text-sm text-app-ink-muted">{currentPlanDefinition.priceLabel}</span>
-            )}
-            {isInRenewalPriority ? (
-              <Badge variant="outline" className="border-app-line bg-app-warm-soft text-app-warm">
-                Còn {graceState.daysRemaining} ngày để gia hạn ưu tiên
-              </Badge>
-            ) : isExpired ? (
-              <Badge
-                variant="outline"
-                className="border-app-status-error/20 bg-app-status-error/8 text-app-status-error"
-              >
-                Đã hết hạn
-              </Badge>
-            ) : null}
-          </div>
+        {isInRenewalPriority && realMode ? (
+          <Button onClick={handleRenewPlan} disabled={paidCheckoutDisabled} className="bg-app-accent text-white hover:bg-app-accent shadow-[0_12px_26px_-14px_rgba(12,94,58,0.8)]">
+            <RefreshCw className="mr-2 h-4 w-4" />
+            {paidCheckoutDisabled ? "Tạm khóa thanh toán" : "Gia hạn ngay"}
+          </Button>
+        ) : currentPlanCode === "FREE" ? (
+          <Button
+            onClick={() => handleOpenUpgrade("plan")}
+            disabled={paidCheckoutDisabled}
+            data-testid="billing-plan-upgrade-cta"
+            className="inline-flex items-center gap-[9px] rounded-[11px] bg-app-accent px-[22px] py-3 text-[13.5px] font-bold text-white shadow-[0_12px_26px_-14px_rgba(12,94,58,0.8)] hover:bg-app-accent-hover"
+          >
+            <Sparkles className="h-[15px] w-[15px]" />
+            {paidCheckoutDisabled ? "Tạm khóa thanh toán" : "Nâng cấp Plus"}
+          </Button>
+        ) : realMode || billingStatus.manageBillingReady ? (
+          <Button variant="outline" onClick={handleOpenPortal} disabled={isOpeningPortal || !billingStatus.manageBillingReady}>
+            <CreditCard className="mr-2 h-4 w-4" />
+            {billingStatus.manageBillingReady ? (isOpeningPortal ? "Đang mở…" : "Quản lý gói") : "Đang chuẩn bị"}
+          </Button>
+        ) : null}
 
-          {isPaidPlan && (
-            <div className="grid gap-3 text-sm sm:grid-cols-2 lg:grid-cols-4">
+        {isPaidPlan && (
+          <>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <div className="rounded-card border border-app-line bg-app-bg p-4">
-                <p className="text-app-ink-muted">Gia hạn</p>
-                <p className="font-medium text-app-ink">{renewalLabel}</p>
+                <p className="text-xs text-app-ink-muted">Gia hạn</p><p className="mt-1 text-sm font-medium text-app-ink">{renewalLabel}</p>
               </div>
               <div className="rounded-card border border-app-line bg-app-bg p-4">
-                <p className="text-app-ink-muted">Đơn vị thanh toán</p>
-                <p className="flex items-center gap-2 font-medium text-app-ink">
-                  <CreditCard className="h-4 w-4 text-app-ink-muted" />
-                  Thanh toán qua {providerLabel}
+                <p className="text-xs text-app-ink-muted">Đơn vị thanh toán</p><p className="mt-1 flex items-center gap-2 text-sm font-medium text-app-ink"><CreditCard className="h-4 w-4 text-app-ink-muted" />Thanh toán qua {providerLabel}</p>
+              </div>
+              <div className="rounded-card border border-app-line bg-app-bg p-4">
+                <p className="text-xs text-app-ink-muted">Trạng thái</p>
+                <p className="mt-1 text-sm font-medium text-app-ink">
+                  {isInRenewalPriority ? "Đang chờ gia hạn ưu tiên" : subscription?.status === "active" ? "Đang hoạt động" : subscription?.status === "trialing" ? "Đang trong thời gian ưu đãi" : subscription?.status === "canceled" ? "Đã hủy" : subscription ? "Không hoạt động" : "Đang chuẩn bị"}
                 </p>
               </div>
               <div className="rounded-card border border-app-line bg-app-bg p-4">
-                <p className="text-app-ink-muted">Trạng thái</p>
-                <p className="font-medium text-app-ink">
-                  {isInRenewalPriority
-                    ? "Đang chờ gia hạn ưu tiên"
-                    : subscription?.status === "active"
-                      ? "Đang hoạt động"
-                      : subscription?.status === "trialing"
-                        ? "Đang trong thời gian ưu đãi"
-                        : subscription?.status === "canceled"
-                          ? "Đã hủy"
-                          : subscription
-                            ? "Không hoạt động"
-                            : "Đang chuẩn bị"}
-                </p>
-              </div>
-              <div className="rounded-card border border-app-line bg-app-bg p-4">
-                <p className="text-app-ink-muted">Chu kỳ</p>
-                <p className="font-medium text-app-ink">
-                  {subscription?.billingCycle === "monthly"
-                    ? "Tháng"
-                    : subscription?.billingCycle === "quarterly"
-                      ? "Quý"
-                      : subscription
-                        ? "Trọn chu kỳ"
-                        : "Đang chuẩn bị"}
+                <p className="text-xs text-app-ink-muted">Chu kỳ</p>
+                <p className="mt-1 text-sm font-medium text-app-ink">
+                  {subscription?.billingCycle === "monthly" ? "Tháng" : subscription?.billingCycle === "quarterly" ? "Quý" : subscription ? "Trọn chu kỳ" : "Đang chuẩn bị"}
                 </p>
               </div>
             </div>
-          )}
-
-          {currentPlanCode !== "FREE" && (
-            <div className="grid gap-3 pt-2 sm:flex sm:flex-wrap">
+            <div className="mt-4 flex flex-wrap gap-3">
               {realMode && (
-                <Button
-                  onClick={handleRenewPlan}
-                  disabled={paidCheckoutDisabled}
-                  className="bg-app-accent text-white hover:bg-app-accent"
-                >
+                <Button onClick={handleRenewPlan} disabled={paidCheckoutDisabled} className="bg-app-accent text-white hover:bg-app-accent">
                   <RefreshCw className="mr-2 h-4 w-4" />
                   {paidCheckoutDisabled ? "Tạm khóa thanh toán" : isInRenewalPriority ? "Gia hạn ngay" : "Gia hạn Plus"}
                 </Button>
               )}
               {realMode && (
-                <Button
-                  variant="outline"
-                  className="border-app-line text-app-ink hover:bg-app-bg"
-                  onClick={() => setShowStopUsingConfirm(true)}
-                >
-                  Tôi không muốn dùng nữa
-                </Button>
+                <Button variant="outline" className="border-app-line text-app-ink hover:bg-app-bg" onClick={() => setShowStopUsingConfirm(true)}>Tôi không muốn dùng nữa</Button>
               )}
               {realMode && (
-                <Button
-                  variant="outline"
-                  className="border-app-line text-app-warm hover:bg-app-warm-soft"
-                  onClick={handleRequestUnusedCycleRefund}
-                >
-                  Yêu cầu hoàn tiền cho chu kỳ chưa dùng
-                </Button>
+                <Button variant="outline" className="border-app-line text-app-warm hover:bg-app-warm-soft" onClick={handleRequestUnusedCycleRefund}>Yêu cầu hoàn tiền cho chu kỳ chưa dùng</Button>
               )}
             </div>
-          )}
-        </PrimaryActionCard>
+          </>
+        )}
+
         <AlertDialog open={showStopUsingConfirm} onOpenChange={setShowStopUsingConfirm}>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Ghi nhận bạn không muốn dùng nữa?</AlertDialogTitle>
               <AlertDialogDescription>
-                Plus hiện không tự động gia hạn, nên không có auto-renewal cần hủy. Quyền Plus vẫn hoạt động đến{" "}
-                {cancelEffectiveDate}. Nếu muốn hoàn tiền cho phần chu kỳ chưa dùng và đơn còn đủ điều kiện, hãy gửi yêu
-                cầu hoàn tiền riêng.
+                Plus hiện không tự động gia hạn, nên không có auto-renewal cần hủy. Quyền Plus vẫn hoạt động đến{" "}{cancelEffectiveDate}. Nếu muốn hoàn tiền cho phần chu kỳ chưa dùng và đơn còn đủ điều kiện, hãy gửi yêu cầu hoàn tiền riêng.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -914,444 +860,354 @@ export function BillingPlan() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-      </SectionBlock>
+      </section>
 
-      {/* Payment history */}
+      {/* ===== PAYMENT HISTORY ===== */}
       {realMode && (
-        <SectionBlock title="Khu vực lịch sử thanh toán" headerVisuallyHidden>
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ReceiptText className="h-5 w-5 text-app-status-info" />
-                Lịch sử thanh toán
-              </CardTitle>
-              <CardDescription>
-                Các giao dịch gần đây của tài khoản này qua đơn vị thanh toán đang cấu hình.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="stack-stack">
-              {isLoadingPaymentHistory && (
-                <div className="flex items-center gap-3 rounded-card border border-app-line bg-app-bg p-4 text-sm text-app-ink-muted">
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Đang tải lịch sử thanh toán...
-                </div>
-              )}
+        <section className="rounded-[18px] border border-app-line bg-white px-[26px] py-6">
+          <div className="mb-[7px] flex items-center gap-[9px]">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-app-ink-soft"><path d="M15 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/></svg>
+            <h2 className="font-serif text-[17px] font-bold tracking-[-0.01em] text-app-ink">Lịch sử thanh toán</h2>
+          </div>
+          <p className="mb-4 text-[13px] text-[#8C887C]">Các giao dịch gần đây của tài khoản này qua đơn vị thanh toán đang cấu hình.</p>
 
-              {!isLoadingPaymentHistory && paymentHistoryError && (
-                <div className="flex flex-col gap-3 rounded-card border border-app-line bg-app-bg p-4 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-sm text-app-status-error">{paymentHistoryError}</p>
-                  <Button variant="outline" size="sm" onClick={loadPaymentHistory}>
-                    Thử lại
-                  </Button>
-                </div>
-              )}
-
-              {!isLoadingPaymentHistory && !paymentHistoryError && paymentHistory.length === 0 && (
-                <div className="rounded-card border border-app-line bg-app-bg p-4">
-                  <p className="text-sm font-medium text-app-ink">Chưa có giao dịch nào.</p>
-                  <p className="mt-1 text-sm text-app-ink-muted">
-                    Khi đơn vị thanh toán gửi lịch sử thanh toán, giao dịch và hóa đơn sẽ xuất hiện tại đây.
-                  </p>
-                </div>
-              )}
-
-              {!isLoadingPaymentHistory && !paymentHistoryError && paymentHistory.length > 0 && (
-                <div className="divide-y divide-app-line overflow-hidden rounded-lg border border-app-line bg-app-surface">
-                  {paymentHistory.map((order) => (
-                    <div key={order.orderId} className="grid gap-3 p-4 sm:grid-cols-[1fr_auto] sm:items-center">
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <p className="font-semibold text-app-ink">{order.orderId}</p>
-                          <Badge variant="outline" className={getPaymentStatusClassName(order.status)}>
-                            {getPaymentStatusLabel(order.status)}
-                          </Badge>
-                        </div>
-                        <p className="mt-1 text-sm text-app-ink-muted">
-                          {getBillingCycleLabel(order.billingCycle)} · {formatPaymentDate(order.createdAt)}
-                        </p>
-                        {order.status === "completed" && (
-                          <div className="mt-1 space-y-1 text-xs">
-                            <p className="text-app-accent">Xác nhận lúc {formatPaymentDate(order.completedAt)}</p>
-                            {order.receiptSentAt ? (
-                              <p className="text-app-accent">
-                                ✓ Biên nhận đã gửi ngày {formatPaymentDate(order.receiptSentAt)}
-                              </p>
-                            ) : (
-                              <p className="text-app-warm">Biên nhận chưa ghi nhận đã gửi.</p>
-                            )}
-                            {order.refundRequest ? (
-                              <p className="text-app-warm">
-                                Hoàn tiền: {getRefundStatusLabel(order.refundRequest.status)}
-                                {order.refundRequest.createdAt
-                                  ? ` — gửi lúc ${formatPaymentDate(order.refundRequest.createdAt)}`
-                                  : ""}
-                              </p>
-                            ) : null}
-                          </div>
-                        )}
+          {isLoadingPaymentHistory && (
+            <div className="flex items-center gap-3 rounded-[13px] border border-app-line bg-app-bg p-4 text-sm text-app-ink-muted">
+              <Loader2 className="h-4 w-4 animate-spin" />Đang tải lịch sử thanh toán...
+            </div>
+          )}
+          {!isLoadingPaymentHistory && paymentHistoryError && (
+            <div className="flex flex-col gap-3 rounded-[13px] border border-app-line bg-app-bg p-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-app-status-error">{paymentHistoryError}</p>
+              <Button variant="outline" size="sm" onClick={loadPaymentHistory}>Thử lại</Button>
+            </div>
+          )}
+          {!isLoadingPaymentHistory && !paymentHistoryError && paymentHistory.length === 0 && (
+            <div className="rounded-[13px] border border-app-line bg-[#FAF8F3] px-5 py-[18px]">
+              <p className="mb-1 text-[13.5px] font-bold text-app-ink">Chưa có giao dịch nào.</p>
+              <p className="text-[12.5px] leading-[1.5] text-[#8C887C]">Khi đơn vị thanh toán gửi lịch sử thanh toán, giao dịch và hóa đơn sẽ xuất hiện tại đây.</p>
+            </div>
+          )}
+          {!isLoadingPaymentHistory && !paymentHistoryError && paymentHistory.length > 0 && (
+            <div className="divide-y divide-app-line overflow-hidden rounded-lg border border-app-line bg-app-surface">
+              {paymentHistory.map((order) => (
+                <div key={order.orderId} className="grid gap-3 p-4 sm:grid-cols-[1fr_auto] sm:items-center">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-semibold text-app-ink">{order.orderId}</p>
+                      <Badge variant="outline" className={getPaymentStatusClassName(order.status)}>{getPaymentStatusLabel(order.status)}</Badge>
+                    </div>
+                    <p className="mt-1 text-sm text-app-ink-muted">{getBillingCycleLabel(order.billingCycle)} · {formatPaymentDate(order.createdAt)}</p>
+                    {order.status === "completed" && (
+                      <div className="mt-1 space-y-1 text-xs">
+                        <p className="text-app-accent">Xác nhận lúc {formatPaymentDate(order.completedAt)}</p>
+                        {order.receiptSentAt ? <p className="text-app-accent">✓ Biên nhận đã gửi ngày {formatPaymentDate(order.receiptSentAt)}</p> : <p className="text-app-warm">Biên nhận chưa ghi nhận đã gửi.</p>}
+                        {order.refundRequest ? <p className="text-app-warm">Hoàn tiền: {getRefundStatusLabel(order.refundRequest.status)}{order.refundRequest.createdAt ? ` — gửi lúc ${formatPaymentDate(order.refundRequest.createdAt)}` : ""}</p> : null}
                       </div>
-                      <div className="flex flex-wrap items-center gap-3 sm:justify-end">
-                        <p className="font-semibold text-app-ink">
-                          {formatPaymentAmount(order.amount, order.currency)}
-                        </p>
-                        {order.status === "pending" && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              if (paidCheckoutDisabled) return;
-                              navigate(`/billing/checkout/${encodeURIComponent(order.orderId)}`);
-                            }}
-                            disabled={paidCheckoutDisabled}
-                            className="border-app-line hover:bg-app-bg"
-                          >
-                            {paidCheckoutDisabled ? "Tạm khóa thanh toán" : "Tiếp tục thanh toán"}
-                          </Button>
-                        )}
-                        {order.status === "completed" && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleResendReceipt(order.orderId)}
-                            disabled={resendingReceiptOrderId === order.orderId}
-                            className="border-app-line hover:bg-app-bg"
-                          >
-                            {resendingReceiptOrderId === order.orderId ? "Đang gửi..." : "Gửi lại biên nhận"}
-                          </Button>
-                        )}
-                        {order.status === "completed" && !order.refundRequest && isOrderRefundEligible(order) && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="border-app-line text-app-warm hover:bg-app-warm-soft"
-                            onClick={() => openRefundDialog(order)}
-                            disabled={emailNeedsVerification}
-                            title={
-                              emailNeedsVerification ? "Bạn cần xác minh email trước khi yêu cầu hoàn tiền." : undefined
-                            }
-                          >
-                            Yêu cầu hoàn tiền
-                          </Button>
-                        )}
-                        {order.invoiceUrl ? (
-                          <Button variant="outline" size="sm" asChild className="border-app-line hover:bg-app-bg">
-                            <a href={order.invoiceUrl} target="_blank" rel="noreferrer">
-                              Xem hóa đơn
-                            </a>
-                          </Button>
-                        ) : null}
-                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3 sm:justify-end">
+                    <p className="font-semibold text-app-ink">{formatPaymentAmount(order.amount, order.currency)}</p>
+                    {order.status === "pending" && (
+                      <Button variant="outline" size="sm" onClick={() => { if (paidCheckoutDisabled) return; navigate(`/billing/checkout/${encodeURIComponent(order.orderId)}`); }} disabled={paidCheckoutDisabled} className="border-app-line hover:bg-app-bg">
+                        {paidCheckoutDisabled ? "Tạm khóa thanh toán" : "Tiếp tục thanh toán"}
+                      </Button>
+                    )}
+                    {order.status === "completed" && (
+                      <Button variant="outline" size="sm" onClick={() => handleResendReceipt(order.orderId)} disabled={resendingReceiptOrderId === order.orderId} className="border-app-line hover:bg-app-bg">
+                        {resendingReceiptOrderId === order.orderId ? "Đang gửi..." : "Gửi lại biên nhận"}
+                      </Button>
+                    )}
+                    {order.status === "completed" && !order.refundRequest && isOrderRefundEligible(order) && (
+                      <Button variant="outline" size="sm" className="border-app-line text-app-warm hover:bg-app-warm-soft" onClick={() => openRefundDialog(order)} disabled={emailNeedsVerification} title={emailNeedsVerification ? "Bạn cần xác minh email trước khi yêu cầu hoàn tiền." : undefined}>
+                        Yêu cầu hoàn tiền
+                      </Button>
+                    )}
+                    {order.invoiceUrl ? (
+                      <Button variant="outline" size="sm" asChild className="border-app-line hover:bg-app-bg"><a href={order.invoiceUrl} target="_blank" rel="noreferrer">Xem hóa đơn</a></Button>
+                    ) : null}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* ===== PAYMENT SUPPORT ===== */}
+      {realMode && (
+        <section className="rounded-[18px] border border-app-line bg-white px-[26px] py-6">
+          <div className="mb-[7px] flex items-center gap-[9px]">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-app-accent"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <h2 className="font-serif text-[17px] font-bold tracking-[-0.01em] text-app-ink">Hỗ trợ thanh toán</h2>
+          </div>
+          <p className="mb-4 text-[13px] text-[#8C887C]">Nếu đơn vị thanh toán đã xác nhận nhưng Plus chưa mở sau vài phút, gửi mã đơn để kiểm tra thủ công.</p>
+          <div className="flex items-center gap-[14px] rounded-[13px] border border-app-line bg-[#FAF8F3] px-[18px] py-[15px]">
+            <div className="min-w-0 flex-1">
+              <div className="mb-[3px] text-[11px] font-semibold text-[#8C887C]">Email hỗ trợ</div>
+              <div className="text-[13.5px] font-semibold text-app-ink">
+                {BILLING_SUPPORT_EMAIL ? (
+                  <a href={`mailto:${BILLING_SUPPORT_EMAIL}`} className="hover:underline">{BILLING_SUPPORT_EMAIL}</a>
+                ) : "Chưa cấu hình email hỗ trợ"}
+              </div>
+            </div>
+            <Button variant="outline" onClick={handleCopySupportMessage} className="shrink-0 rounded-[11px] border-app-line px-4 py-[10px] text-[12.5px] font-semibold text-app-ink-soft hover:bg-[#FAF8F3]">Sao chép nội dung hỗ trợ</Button>
+            {BILLING_SUPPORT_EMAIL ? (
+              <Button asChild className="shrink-0 rounded-[11px] bg-app-accent px-[18px] py-[10px] text-[12.5px] font-bold text-white hover:bg-app-accent-hover">
+                <a href={`mailto:${BILLING_SUPPORT_EMAIL}?subject=${encodeURIComponent("Hỗ trợ thanh toán Dear Our Future")}`}>Liên hệ hỗ trợ</a>
+              </Button>
+            ) : (
+              <Button variant="outline" disabled className="shrink-0 rounded-[11px] border-app-line px-[18px] py-[10px] text-[12.5px] font-bold text-app-ink-muted">Chưa cấu hình email</Button>
+            )}
+          </div>
+          <p className="mt-[13px] text-[11.5px] leading-[1.55] text-[#8C887C]">
+            Khi tiếp tục thanh toán, bạn đồng ý với{" "}
+            <Link to="/terms" className="font-semibold text-app-ink hover:text-app-accent hover:underline">Điều khoản</Link>,{" "}
+            <Link to="/privacy" className="font-semibold text-app-ink hover:text-app-accent hover:underline">Chính sách bảo mật</Link>{" "}
+            và{" "}
+            <Link to="/refund-policy" className="font-semibold text-app-ink hover:text-app-accent hover:underline">Chính sách hoàn tiền</Link>. Xem thêm{" "}
+            <Link to="/billing/faq" className="font-semibold text-app-ink hover:text-app-accent hover:underline">câu hỏi thanh toán</Link>.
+          </p>
+        </section>
+      )}
+
+      {/* ===== PERMISSIONS / ENTITLEMENTS ===== */}
+      <section className="rounded-[18px] border border-app-line bg-white px-[26px] py-6">
+        <div className="mb-[7px] flex items-center gap-[9px]">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-app-accent"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+          <h2 className="font-serif text-[17px] font-bold tracking-[-0.01em] text-app-ink">Quyền truy cập</h2>
+        </div>
+        <p className="mb-4 text-[13px] text-[#8C887C]">{realMode ? "Quyền nâng cao được quản lý qua tài khoản của bạn." : "Các quyền Plus đang mở trên trình duyệt này."}</p>
+        <div className="grid gap-[13px] sm:grid-cols-2">
+          {premiumStatusItems.map((key) => {
+            const isActive = entitlementKeys.includes(key);
+            return (
+              <div key={key} className={`flex items-center gap-3 rounded-[13px] border p-[14px_17px] ${isActive ? "border-app-accent-soft bg-app-accent-soft" : "border-app-line bg-[#FAF8F3]"}`}>
+                <span className={`flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg text-base ${isActive ? "bg-app-accent text-white" : "bg-[#ECEAE2] text-[#B0AB9E]"}`}>
+                  {isActive ? <Check className="h-4 w-4" /> : "—"}
+                </span>
+                <div>
+                  <div className={`text-[13px] font-semibold ${isActive ? "text-app-accent" : "text-app-ink"}`}>{getEntitlementLabel(key)}</div>
+                  <div className="mt-[1px] text-[11.5px] text-[#A8A296]">{isActive ? (realMode ? "Đang hoạt động" : "Đang mở") : "Chưa kích hoạt"}</div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ===== ACTIONS ===== */}
+      <section className="rounded-[18px] border border-app-line bg-white px-[26px] py-6">
+        <h2 className="mb-[6px] font-serif text-[17px] font-bold tracking-[-0.01em] text-app-ink">Thao tác</h2>
+        <p className="mb-4 text-[13px] text-[#8C887C]">Kiểm tra quyền nâng cao, khôi phục giao dịch đã mua hoặc quay lại trang chính.</p>
+        <div className="flex flex-wrap gap-[11px]">
+          <Button variant="outline" onClick={handleSyncEntitlements} disabled={isSyncing} className="inline-flex items-center gap-[9px] rounded-[11px] border-app-line px-[18px] py-[11px] text-[13px] font-semibold text-app-ink-soft hover:bg-[#FAF8F3]">
+            <RefreshCw className={`h-[15px] w-[15px] ${isSyncing ? "animate-spin" : ""}`} />
+            {isSyncing ? "Đang kiểm tra…" : "Kiểm tra quyền nâng cao"}
+          </Button>
+          <Button variant="outline" onClick={handleRestoreAccess} disabled={isRestoring} className="inline-flex items-center gap-[9px] rounded-[11px] border-app-line px-[18px] py-[11px] text-[13px] font-semibold text-app-ink-soft hover:bg-[#FAF8F3]">
+            {isRestoring ? "Đang khôi phục…" : "Khôi phục quyền đã mua"}
+          </Button>
+          <Button variant="outline" onClick={() => navigate("/")} className="inline-flex items-center gap-[9px] rounded-[11px] border-app-line px-[18px] py-[11px] text-[13px] font-semibold text-app-ink-soft hover:bg-[#FAF8F3]">
+            Quay lại Trang chính
+          </Button>
+        </div>
+        {(lastEntitlementSync || lastRestoreAccess) && (
+          <div className="mt-4 space-y-1 text-xs text-[#8C887C]">
+            {lastEntitlementSync && (
+              <p>Kiểm tra quyền gần nhất: <span className="font-mono">{formatDate(lastEntitlementSync.at)}</span> — {lastEntitlementSync.message}</p>
+            )}
+            {lastRestoreAccess && (
+              <p>Khôi phục gần nhất: <span className="font-mono">{formatDate(lastRestoreAccess.at)}</span> — {lastRestoreAccess.message}</p>
+            )}
+          </div>
+        )}
+      </section>
+
+      {/* ===== DISCOUNT ===== */}
+      {!paidCheckoutDisabled && currentPlanCode === "FREE" && (
+        <section className="rounded-[18px] border border-app-line bg-white px-[26px] py-6">
+          <div className="mb-4 flex items-center gap-[9px]">
+            <TicketPercent className="h-4 w-4 text-app-accent" />
+            <span className="text-[15px] font-bold text-app-ink">Mã giảm giá / Ưu đãi</span>
+          </div>
+
+          {/* Active discount banner */}
+          {hasActiveDiscount && (
+            <div className="mb-[14px] flex items-start gap-[10px] rounded-[13px] border border-app-accent/20 bg-app-accent-subtle px-4 py-[13px]">
+              <Check className="mt-[2px] h-4 w-4 shrink-0 text-app-accent" strokeWidth={2.4} />
+              <div>
+                {activeDiscount ? (
+                  <>
+                    <div className="text-[13.5px] font-bold text-app-ink">{activeDiscount.discountName ?? "Mã giảm giá"}</div>
+                    <div className="mt-[2px] text-xs text-[#5C7A5C]">
+                      Giảm {activeDiscount.discountPercent ? `${activeDiscount.discountPercent}%` : activeDiscount.discountValue ? formatVndAmount(activeDiscount.discountValue) : formatVndAmount(displayDiscountAmount ?? 0)} — còn{" "}
+                      <span className="font-mono font-semibold">{formatVndAmount(displayFinalAmount ?? PLUS_MONTHLY_PRICE_VND)}</span>
+                    </div>
+                  </>
+                ) : effectiveSaleEvent ? (
+                  <>
+                    <div className="text-[13.5px] font-bold text-app-ink">{effectiveSaleEvent.name}</div>
+                    <div className="mt-[2px] text-xs text-[#5C7A5C]">
+                      {effectiveSaleEvent.discountPercent ? `Giảm ${effectiveSaleEvent.discountPercent}%` : effectiveSaleEvent.discountValue ? `Giảm ${formatVndAmount(effectiveSaleEvent.discountValue)}` : ""} — còn{" "}
+                      <span className="font-mono font-semibold">{formatVndAmount(saleFinalAmount ?? PLUS_MONTHLY_PRICE_VND)}</span>
+                    </div>
+                  </>
+                ) : null}
+              </div>
+            </div>
+          )}
+
+          {/* Coupon input */}
+          <div className="mb-3 flex gap-[11px]">
+            <input
+              type="text"
+              placeholder="NHẬP MÃ GIẢM GIÁ"
+              value={couponCode}
+              onChange={(e) => setCouponCode(e.target.value)}
+              className="h-11 flex-1 rounded-[11px] border border-app-line bg-white px-[14px] font-mono text-[12.5px] tracking-[0.04em] text-app-ink outline-none transition-[border-color,box-shadow] focus:border-app-accent focus:shadow-[0_0_0_3px_rgba(12,94,58,0.1)]"
+            />
+            {couponStatus === "valid" || activeDiscount ? (
+              <button type="button" onClick={() => { setCouponCode(""); resetCoupon(); handleCouponChange(null); }} className="shrink-0 rounded-[11px] bg-[#5C7A5C] px-[22px] text-[13px] font-bold text-white">
+                Xóa
+              </button>
+            ) : (
+              <button type="button" onClick={() => { if (couponCode.trim()) { validateCoupon(couponCode.trim()); } }} disabled={couponStatus === "loading" || !couponCode.trim()} className="shrink-0 rounded-[11px] bg-[#5C7A5C] px-[22px] text-[13px] font-bold text-white disabled:opacity-50">
+                {couponStatus === "loading" ? "Đang kiểm tra…" : "Áp dụng"}
+              </button>
+            )}
+          </div>
+          {couponStatus === "invalid" && couponError && (
+            <p className="mb-3 text-xs text-app-status-error">{couponError}</p>
+          )}
+
+          {/* Final price display */}
+          {(activeDiscount || effectiveSaleEvent) && (
+            <div className="flex items-baseline gap-[10px]">
+              <span className="font-mono text-[13px] text-[#A8A296] line-through">{formatVndAmount(PLUS_MONTHLY_PRICE_VND)}</span>
+              <span className="font-mono text-base font-bold text-app-ink">{formatVndAmount(displayFinalAmount ?? saleFinalAmount ?? PLUS_MONTHLY_PRICE_VND)}</span>
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* ===== PLAN COMPARISON ===== */}
+      <section className="rounded-[18px] border border-app-line bg-white px-[28px] py-[26px]">
+        <h2 className="mb-[5px] font-serif text-[18px] font-bold tracking-[-0.01em] text-app-ink">So sánh các gói</h2>
+        <p className="mb-5 text-[13px] text-[#8C887C]">Chọn gói phù hợp với nhu cầu của bạn.</p>
+        <div className="grid gap-4 md:grid-cols-2">
+          {PLAN_DEFINITIONS.map((plan) => {
+            const isPlus = plan.code === "PLUS";
+            const isCurrent = plan.code === currentPlanCode;
+            const isRecommended = isPlus && currentPlanCode === "FREE";
+            return (
+              <div
+                key={plan.code}
+                className={`relative flex flex-col rounded-2xl p-6 ${
+                  isRecommended
+                    ? "border-[1.5px] border-app-accent bg-white shadow-[0_16px_40px_-28px_rgba(12,94,58,0.4)]"
+                    : isCurrent
+                      ? "border-[1.5px] border-app-accent/40 bg-app-accent-soft/60"
+                      : "border border-app-line/10 bg-[#FAF8F3]"
+                }`}
+              >
+                {isRecommended && (
+                  <span className="absolute right-[18px] top-4 rounded-full bg-app-accent px-[11px] py-1 text-[10px] font-bold tracking-[0.04em] text-white">Phổ biến</span>
+                )}
+                {/* Label */}
+                <div className={`mb-[11px] text-[10px] font-bold uppercase tracking-[0.1em] ${isRecommended ? "text-app-accent" : "text-[#8C887C]"}`}>
+                  {plan.shortLabel}
+                </div>
+                {/* Name */}
+                <div className="font-serif text-[22px] font-extrabold tracking-[-0.01em] text-app-ink">{plan.name}</div>
+                {/* Price */}
+                {isPlus && saleEvent ? (
+                  <div className="mt-1.5 space-y-1">
+                    <div className="flex flex-wrap items-baseline gap-[9px]">
+                      <span className="font-mono text-[13px] text-[#A8A296] line-through">{plan.priceLabel}</span>
+                      <span className="font-serif text-[30px] font-extrabold leading-none text-app-ink">{formatVndAmount(saleEvent.finalAmount ?? getPlusSaleFallbackFinalAmount(saleEvent))}</span>
+                      {getSaleBadgeLabel(saleEvent) ? (
+                        <span className="rounded-full bg-app-accent-subtle px-2 py-[2px] text-[11px] font-bold text-app-accent">{getSaleBadgeLabel(saleEvent)}</span>
+                      ) : null}
+                    </div>
+                    <div className="text-[11.5px] font-semibold text-app-accent">Đang áp dụng: {saleEvent.name}</div>
+                  </div>
+                ) : isPlus ? (
+                  <div className="mt-1.5 flex flex-wrap items-baseline gap-[9px]">
+                    <span className="font-mono text-[13px] text-[#A8A296] line-through">{plan.priceLabel}</span>
+                    <span className="text-[11px] text-[#8C887C]">/ tháng</span>
+                    <span className="font-serif text-[30px] font-extrabold leading-none text-app-ink">{plan.priceLabel}</span>
+                  </div>
+                ) : (
+                  <div className="my-[6px]">
+                    <span className="font-serif text-[30px] font-extrabold leading-none text-app-ink">0đ</span>
+                  </div>
+                )}
+                {/* Description */}
+                <p className="mt-2 mb-[18px] text-[12.5px] leading-[1.55] text-app-ink-soft">{plan.description}</p>
+                {/* Highlights */}
+                <div className="mb-[22px] flex flex-col gap-[10px]">
+                  {plan.highlights.map((item) => (
+                    <div key={item} className="flex items-center gap-[9px] text-[12.5px] text-app-ink-soft">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-app-accent"><polyline points="20 6 9 17 4 12"/></svg>
+                      {item}
                     </div>
                   ))}
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </SectionBlock>
-      )}
-
-      {/* Billing support */}
-      {realMode && (
-        <SectionBlock title="Khu vực hỗ trợ thanh toán" headerVisuallyHidden>
-          <div className="surface-raised rounded-card-lg border border-app-line bg-app-surface p-5 sm:p-6">
-            <div className="mb-4 flex items-center gap-2">
-              <LifeBuoy className="h-5 w-5 text-app-accent" />
-              <h2 className="text-lg font-semibold text-app-ink">Hỗ trợ thanh toán</h2>
-            </div>
-            <p className="mb-6 text-sm text-app-ink-muted">
-              Nếu đơn vị thanh toán đã xác nhận nhưng Plus chưa mở sau vài phút, gửi mã đơn để kiểm tra thủ công.
-            </p>
-            <div className="grid gap-3 sm:grid-cols-[1fr_auto] sm:items-center">
-              <div className="rounded-card border border-app-line bg-app-bg p-4">
-                <p className="text-sm text-app-ink-muted">Email hỗ trợ</p>
-                <p className="mt-1 font-medium text-app-ink">{BILLING_SUPPORT_EMAIL || "Chưa cấu hình email hỗ trợ"}</p>
-              </div>
-              <div className="flex flex-col gap-2 sm:flex-row">
-                <Button
-                  variant="outline"
-                  className="border-app-line text-app-ink hover:bg-app-bg"
-                  onClick={handleCopySupportMessage}
-                >
-                  Sao chép nội dung hỗ trợ
-                </Button>
-                {BILLING_SUPPORT_EMAIL ? (
-                  <Button asChild className="bg-app-accent text-white hover:bg-app-accent">
-                    <a
-                      href={`mailto:${BILLING_SUPPORT_EMAIL}?subject=${encodeURIComponent(
-                        "Hỗ trợ thanh toán Dear Our Future",
-                      )}`}
-                    >
-                      Liên hệ hỗ trợ
-                    </a>
-                  </Button>
-                ) : (
-                  <Button variant="outline" className="border-app-line text-app-ink-muted hover:bg-app-bg" disabled>
-                    Chưa cấu hình email
-                  </Button>
-                )}
-              </div>
-              <p className="border-t border-app-line pt-3 text-xs leading-5 text-app-ink-muted">
-                Khi tiếp tục thanh toán, bạn đồng ý với{" "}
-                <Link
-                  to="/terms"
-                  className="font-medium text-app-ink underline-offset-4 hover:text-app-accent hover:underline"
-                >
-                  Điều khoản
-                </Link>
-                ,{" "}
-                <Link
-                  to="/privacy"
-                  className="font-medium text-app-ink underline-offset-4 hover:text-app-accent hover:underline"
-                >
-                  Chính sách bảo mật
-                </Link>{" "}
-                và{" "}
-                <Link
-                  to="/refund-policy"
-                  className="font-medium text-app-ink underline-offset-4 hover:text-app-accent hover:underline"
-                >
-                  Chính sách hoàn tiền
-                </Link>
-                . Xem thêm{" "}
-                <Link
-                  to="/billing/faq"
-                  className="font-medium text-app-ink underline-offset-4 hover:text-app-accent hover:underline"
-                >
-                  câu hỏi thanh toán
-                </Link>
-                .
-              </p>
-            </div>
-          </div>
-        </SectionBlock>
-      )}
-
-      {/* Entitlements */}
-      <SectionBlock title="Khu vực quyền truy cập" headerVisuallyHidden>
-        <div className="surface-raised rounded-card-lg border border-app-line bg-app-surface p-5 sm:p-6">
-          <div className="mb-2 flex items-center gap-2">
-            <Shield className="h-5 w-5 text-app-accent" />
-            <h2 className="text-lg font-semibold text-app-ink">Quyền truy cập</h2>
-          </div>
-          <p className="mb-6 text-sm text-app-ink-muted">
-            {realMode
-              ? "Quyền nâng cao được quản lý qua tài khoản của bạn."
-              : "Các quyền Plus đang mở trên trình duyệt này."}
-          </p>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {premiumStatusItems.map((key) => {
-              const isActive = entitlementKeys.includes(key);
-              return (
-                <div
-                  key={key}
-                  className={`flex items-center gap-3 rounded-card border p-4 ${
-                    isActive ? "border-app-accent-soft bg-app-accent-soft" : "border-app-line bg-app-bg"
-                  }`}
-                >
-                  <div
-                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold ${
-                      isActive ? "bg-app-accent text-white" : "bg-app-line text-app-ink-muted"
-                    }`}
-                  >
-                    {isActive ? <Check className="h-4 w-4" /> : <span className="text-app-ink-muted">—</span>}
-                  </div>
-                  <div>
-                    <p className={`text-sm font-medium ${isActive ? "text-app-accent" : "text-app-ink-soft"}`}>
-                      {getEntitlementLabel(key)}
-                    </p>
-                    <p className="text-xs text-app-ink-muted">
-                      {isActive ? (realMode ? "Đang hoạt động" : "Đang mở") : realMode ? "Chưa kích hoạt" : "Chưa mở"}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </SectionBlock>
-
-      {/* Actions */}
-      <SectionBlock title="Khu vực thao tác gói" headerVisuallyHidden>
-        <div className="surface-raised rounded-card-lg border border-app-line bg-app-surface p-5 sm:p-6">
-          <h2 className="mb-2 text-lg font-semibold text-app-ink">Thao tác</h2>
-          <p className="mb-6 text-sm text-app-ink-muted">
-            Kiểm tra quyền nâng cao, khôi phục giao dịch đã mua hoặc quay lại trang chính.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <Button
-              variant="outline"
-              onClick={handleSyncEntitlements}
-              disabled={isSyncing}
-              className="border-app-line text-app-ink hover:bg-app-bg"
-            >
-              <RefreshCw className={`mr-2 h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
-              {isSyncing ? "Đang kiểm tra…" : "Kiểm tra quyền nâng cao"}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleRestoreAccess}
-              disabled={isRestoring}
-              className="border-app-line text-app-ink hover:bg-app-bg"
-            >
-              {isRestoring ? "Đang khôi phục…" : "Khôi phục quyền đã mua"}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => navigate("/")}
-              className="border-app-line text-app-ink hover:bg-app-bg"
-            >
-              Quay lại Trang chính
-            </Button>
-          </div>
-
-          {(lastEntitlementSync || lastRestoreAccess) && (
-            <div className="mt-6 stack-tight text-xs text-app-ink-muted">
-              {lastEntitlementSync && (
-                <p>
-                  Kiểm tra quyền gần nhất: {formatDate(lastEntitlementSync.at)} — {lastEntitlementSync.message}
-                </p>
-              )}
-              {lastRestoreAccess && (
-                <p>
-                  Khôi phục gần nhất: {formatDate(lastRestoreAccess.at)} — {lastRestoreAccess.message}
-                </p>
-              )}
-            </div>
-          )}
-        </div>
-      </SectionBlock>
-
-      {/* Billing provider info (debug only) */}
-      {shouldShowBillingDebugUi() && (
-        <div className="surface-raised rounded-card-lg border border-app-line bg-app-surface p-5 sm:p-6">
-          <h2 className="mb-2 text-sm font-semibold text-app-ink">Thông tin nhà cung cấp thanh toán</h2>
-          <div className="grid gap-2 text-xs text-app-ink-muted sm:grid-cols-2">
-            <div>
-              <span className="text-app-ink-muted">Nhà cung cấp: </span>
-              {getBillingProviderModeLabel(billingStatus.mode)}
-              {billingStatus.providerLabel && ` (${billingStatus.providerLabel})`}
-            </div>
-            <div>
-              <span className="text-app-ink-muted">Thanh toán: </span>
-              {getBillingReadinessLabel(billingStatus.checkoutReady)}
-            </div>
-            <div>
-              <span className="text-app-ink-muted">Khôi phục: </span>
-              {getBillingReadinessLabel(billingStatus.restoreReady)}
-            </div>
-            <div>
-              <span className="text-app-ink-muted">Đồng bộ quyền: </span>
-              {getBillingReadinessLabel(billingStatus.entitlementSyncReady)}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Discount / Coupon section */}
-      {!paidCheckoutDisabled && currentPlanCode === "FREE" && (
-        <SectionBlock title="Khu vực mã giảm giá" headerVisuallyHidden>
-          <BillingDiscountSection
-            originalAmount={PLUS_MONTHLY_PRICE_VND}
-            planCode="PLUS"
-            purpose="plus_subscription"
-            saleEvent={saleEvent}
-            onCouponChange={handleCouponChange}
-          />
-        </SectionBlock>
-      )}
-
-      {/* Compare plans */}
-      <SectionBlock title="Khu vực so sánh gói" headerVisuallyHidden>
-        <div className="surface-raised rounded-card-lg border border-app-line bg-app-surface p-5 sm:p-6">
-          <h2 className="mb-2 text-lg font-semibold text-app-ink">So sánh các gói</h2>
-          <p className="mb-6 text-sm text-app-ink-muted">Chọn gói phù hợp với nhu cầu của bạn.</p>
-          <div className="grid gap-4 md:grid-cols-2">
-            {PLAN_DEFINITIONS.map((plan) => {
-              const isPlus = plan.code === "PLUS";
-              const isCurrent = plan.code === currentPlanCode;
-              const isRecommended = isPlus && currentPlanCode === "FREE";
-              return (
-                <div
-                  key={plan.code}
-                  className={`relative overflow-hidden rounded-card-lg border p-5 sm:p-6 ${
-                    isRecommended
-                      ? "border-app-accent/40 bg-app-surface bg-gradient-to-br from-app-accent-soft/30 to-transparent shadow-[var(--shadow-3)]"
-                      : isCurrent
-                        ? "border-app-accent/40 bg-app-accent-soft/60 shadow-[var(--shadow-1)]"
-                        : "border-app-line bg-app-surface shadow-[var(--shadow-1)]"
-                  }`}
-                >
-                  {isRecommended && (
-                    <span className="absolute right-4 top-4 rounded-full bg-app-accent px-3 py-1 text-xs font-medium text-white">
-                      Phổ biến
-                    </span>
-                  )}
-                  <div className="mb-4 pr-20">
-                    <span className="mb-2 inline-block rounded-full bg-app-bg px-3 py-1 text-xs font-semibold uppercase tracking-wider text-app-ink-muted">
-                      {plan.shortLabel}
-                    </span>
-                    <h3 className="font-serif text-2xl font-medium text-app-ink">{plan.name}</h3>
-                    {isPlus && saleEvent ? (
-                      <div className="mt-1 space-y-1">
-                        <div className="flex flex-wrap items-baseline gap-2">
-                          <span className="text-xl text-app-ink-muted line-through">{plan.priceLabel}</span>
-                          <span className="text-3xl font-medium text-app-status-success">
-                            {formatVndAmount(saleEvent.finalAmount ?? getPlusSaleFallbackFinalAmount(saleEvent))}
-                          </span>
-                          {getSaleBadgeLabel(saleEvent) ? (
-                            <span className="rounded-full bg-app-status-success/15 px-2 py-0.5 text-xs font-medium text-app-status-success">
-                              {getSaleBadgeLabel(saleEvent)}
-                            </span>
-                          ) : null}
-                        </div>
-                        <p className="text-xs font-medium text-app-status-success">
-                          Đang áp dụng: {saleEvent.name}
-                        </p>
-                      </div>
-                    ) : (
-                      <p className="mt-1 text-3xl font-medium text-app-ink">{plan.priceLabel}</p>
-                    )}
-                    <p className="mt-2 text-sm text-app-ink-soft">{plan.description}</p>
-                  </div>
-                  <ul className="space-y-2">
-                    {plan.highlights.map((item) => (
-                      <li key={item} className="flex items-start gap-2 text-sm text-app-ink-soft">
-                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" />
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
+                {/* Action button */}
+                <div className="mt-auto">
                   {isRecommended && (
                     <Button
-                      className="mt-6 w-full bg-app-accent text-white hover:bg-app-accent"
+                      className="flex w-full items-center justify-center gap-[9px] rounded-[11px] bg-app-accent py-[14px] text-[14px] font-bold text-white shadow-[0_14px_30px_-14px_rgba(12,94,58,0.85)] hover:bg-app-accent-hover"
                       onClick={() => handleOpenUpgrade("plan")}
                       disabled={paidCheckoutDisabled}
                     >
+                      <Sparkles className="h-4 w-4" />
                       {paidCheckoutDisabled ? "Tạm khóa thanh toán" : "Nâng cấp Plus"}
                     </Button>
                   )}
                   {isCurrent && !isPlus && (
-                    <Button
-                      className="mt-6 w-full border-app-line bg-app-surface text-app-ink hover:bg-app-bg"
-                      variant="outline"
-                    >
-                      Gói hiện tại
-                    </Button>
+                    <button type="button" disabled className="w-full rounded-[11px] border border-app-line bg-white py-[13px] text-[13px] font-semibold text-[#8C887C] cursor-default">Gói hiện tại</button>
                   )}
                   {isCurrent && isPlus && (
-                    <Button
-                      className="mt-6 w-full border-app-line bg-app-surface text-app-ink hover:bg-app-bg"
-                      variant="outline"
-                    >
-                      Đang dùng
+                    <button type="button" disabled className="w-full rounded-[11px] border border-app-line bg-white py-[13px] text-[13px] font-semibold text-app-ink cursor-default">Đang dùng</button>
+                  )}
+                  {!isCurrent && !isRecommended && (
+                    <Button className="w-full" onClick={() => handleOpenUpgrade("plan")} disabled={paidCheckoutDisabled}>
+                      {paidCheckoutDisabled ? "Tạm khóa thanh toán" : "Nâng cấp"}
                     </Button>
                   )}
                 </div>
-              );
-            })}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ===== FOOTER ===== */}
+      <footer className="mt-[6px] flex flex-wrap items-center justify-end gap-[14px] border-t border-app-line pt-[18px]">
+        <span className="font-mono text-xs text-[#A8A296]">
+          v1.0 ·{" "}
+          {BILLING_SUPPORT_EMAIL ? (
+            <a href={`mailto:${BILLING_SUPPORT_EMAIL}`} className="hover:text-app-accent hover:underline">{BILLING_SUPPORT_EMAIL}</a>
+          ) : "support@dearourfuture.com"}{" "}
+          ·{" "}
+          <Link to="/settings" className="font-semibold text-app-ink-soft hover:text-app-accent hover:underline">Cài đặt</Link>
+        </span>
+      </footer>
+
+      {/* ===== DEBUG INFO ===== */}
+      {shouldShowBillingDebugUi() && (
+        <div className="rounded-card-lg border border-app-line bg-app-surface p-5 sm:p-6">
+          <h2 className="mb-2 text-sm font-semibold text-app-ink">Thông tin nhà cung cấp thanh toán</h2>
+          <div className="grid gap-2 text-xs text-app-ink-muted sm:grid-cols-2">
+            <div><span className="text-app-ink-muted">Nhà cung cấp: </span>{getBillingProviderModeLabel(billingStatus.mode)}{billingStatus.providerLabel && ` (${billingStatus.providerLabel})`}</div>
+            <div><span className="text-app-ink-muted">Thanh toán: </span>{getBillingReadinessLabel(billingStatus.checkoutReady)}</div>
+            <div><span className="text-app-ink-muted">Khôi phục: </span>{getBillingReadinessLabel(billingStatus.restoreReady)}</div>
+            <div><span className="text-app-ink-muted">Đồng bộ quyền: </span>{getBillingReadinessLabel(billingStatus.entitlementSyncReady)}</div>
           </div>
         </div>
-      </SectionBlock>
-    </div>
+      )}
+    </main>
   );
 }
