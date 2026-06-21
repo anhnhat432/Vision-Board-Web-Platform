@@ -1,9 +1,10 @@
-import { CheckCircle2, CreditCard, Crown, LockKeyhole } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { CheckCircle2, CreditCard, Crown, LockKeyhole, Sparkles } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { useOptionalAuthContext } from "@/lib/auth/AuthContext";
 import { sendVerificationEmail } from "@/lib/auth/firebase";
+import { apiClient } from "@/lib/api/apiClient";
 import * as appMode from "../utils/app-mode";
 import { formatVndAmount, getPlusPriceLabel, PLUS_MONTHLY_PRICE_VND } from "../utils/billing-pricing";
 import { logBillingUiError, toastBillingNetworkError } from "../utils/billing-ui-monitoring";
@@ -24,6 +25,19 @@ import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
 import { FeaturedCard } from "./ui/featured-card";
+
+interface SaleEventInfo {
+  name: string;
+  discountPercent?: number;
+  discountValue?: number;
+  discountType?: "percentage" | "fixed";
+  discountAmount?: number;
+  finalAmount?: number;
+}
+
+function getNumberField(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
 
 const DEFAULT_BILLING_RETURN_PATH = "/12-week-system?tab=settings";
 
@@ -86,10 +100,53 @@ export function UpgradePaywallDialog({
     : billingProviderStatus.providerLabel || "nhà cung cấp thanh toán";
   const upgradeFeatureLabel = paywallCopy.bullets[0] ?? paywallCopy.title;
   const blockedFeatureLabel = title ?? upgradeFeatureLabel;
-  const plusPriceAmountLabel = formatVndAmount(PLUS_MONTHLY_PRICE_VND);
-  const plusPriceLabel = getPlusPriceLabel();
+  const [saleEvent, setSaleEvent] = useState<SaleEventInfo | null>(null);
+
+  const baseAmount = PLUS_MONTHLY_PRICE_VND;
+  const saleFinalAmount = saleEvent?.finalAmount ?? (saleEvent?.discountPercent
+    ? Math.round(baseAmount * (100 - saleEvent.discountPercent) / 100)
+    : saleEvent?.discountValue
+      ? Math.max(baseAmount - saleEvent.discountValue, 1000)
+      : undefined);
+  const displayAmount = saleFinalAmount ?? baseAmount;
+  const hasActiveSale = saleEvent !== null && saleFinalAmount !== undefined && saleFinalAmount < baseAmount;
+  const plusPriceAmountLabel = formatVndAmount(displayAmount);
+  const plusPriceLabel = hasActiveSale
+    ? `${formatVndAmount(saleFinalAmount)} / ${PLUS_MONTHLY_PRICE_VND > 0 ? "tháng" : ""}`
+    : getPlusPriceLabel();
   const receiptEmailLabel = BILLING_SUPPORT_EMAIL ? `email ${BILLING_SUPPORT_EMAIL}` : "email tài khoản của bạn";
   const emailVerificationRequired = Boolean(user) && !canUpgradeToPlus(user);
+
+  // Fetch active sale event when dialog opens so the price reflects what
+  // the user will actually pay (backend auto-applies it at checkout).
+  const fetchSaleEvent = useCallback(() => {
+    const params = new URLSearchParams({
+      purpose: "plus_subscription",
+      amount: String(PLUS_MONTHLY_PRICE_VND),
+    });
+    apiClient.get<{ active: boolean } & Record<string, unknown>>(`/billing/active-sale-event?${params.toString()}`)
+      .then((data) => {
+        if (data?.active) {
+          const discountType = data.discountType === "percentage" || data.discountType === "fixed" ? data.discountType : undefined;
+          setSaleEvent({
+            name: typeof data.name === "string" && data.name.trim() ? data.name : "Đang giảm giá",
+            discountPercent: discountType === "percentage" ? getNumberField(data.discountValue) : undefined,
+            discountValue: discountType === "fixed" ? getNumberField(data.discountValue) : undefined,
+            discountType,
+            discountAmount: getNumberField(data.discountAmount),
+            finalAmount: getNumberField(data.finalAmount),
+          });
+        } else {
+          setSaleEvent(null);
+        }
+      })
+      .catch(() => { /* sale event is optional */ });
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    fetchSaleEvent();
+  }, [open, fetchSaleEvent]);
 
   useEffect(() => {
     if (!open) return;
@@ -330,7 +387,22 @@ export function UpgradePaywallDialog({
 
                     <div className="mt-5 rounded-card border border-app-line bg-app-surface px-4 py-4">
                       <p className="text-xs uppercase tracking-[0.16em] text-app-ink-muted">Giá gói</p>
-                      <p className="mt-2 font-serif text-4xl font-medium text-app-ink">{plusPriceLabel}</p>
+                      {hasActiveSale ? (
+                        <>
+                          <div className="mt-2 flex items-baseline gap-3">
+                            <span className="font-serif text-4xl font-medium text-app-ink">{formatVndAmount(displayAmount)}</span>
+                            <span className="text-lg text-app-ink-muted line-through">{formatVndAmount(baseAmount)}</span>
+                          </div>
+                          {saleEvent?.name && (
+                            <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-app-accent">
+                              <Sparkles className="h-3.5 w-3.5" />
+                              {saleEvent.name}
+                            </p>
+                          )}
+                        </>
+                      ) : (
+                        <p className="mt-2 font-serif text-4xl font-medium text-app-ink">{plusPriceLabel}</p>
+                      )}
                       <p className="mt-2 flex items-center gap-2 text-sm font-medium text-app-ink-soft">
                         <CreditCard className="h-4 w-4 text-app-accent" />
                         Thanh toán qua {providerLabel}
@@ -398,7 +470,22 @@ export function UpgradePaywallDialog({
 
                     <div className="mt-5 rounded-card border border-app-line bg-app-surface px-4 py-4">
                       <p className="text-xs uppercase tracking-[0.16em] text-app-ink-muted">Giá gói</p>
-                      <p className="mt-2 font-serif text-4xl font-medium text-app-ink">{plusPriceLabel}</p>
+                      {hasActiveSale ? (
+                        <>
+                          <div className="mt-2 flex items-baseline gap-3">
+                            <span className="font-serif text-4xl font-medium text-app-ink">{formatVndAmount(displayAmount)}</span>
+                            <span className="text-lg text-app-ink-muted line-through">{formatVndAmount(baseAmount)}</span>
+                          </div>
+                          {saleEvent?.name && (
+                            <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-app-accent">
+                              <Sparkles className="h-3.5 w-3.5" />
+                              {saleEvent.name}
+                            </p>
+                          )}
+                        </>
+                      ) : (
+                        <p className="mt-2 font-serif text-4xl font-medium text-app-ink">{plusPriceLabel}</p>
+                      )}
                       <p className="mt-2 flex items-center gap-2 text-sm font-medium text-app-ink-soft">
                         <CreditCard className="h-4 w-4 text-app-accent" />
                         Thanh toán qua {providerLabel}
