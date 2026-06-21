@@ -214,7 +214,7 @@ export async function createCheckoutSession(req: Request, res: Response): Promis
   const originalAmount = getPlusPriceFromEnv();
   const normalizedCouponCode = normalizeCouponCode(couponCode);
   if (couponCode !== undefined && couponCode !== null && !normalizedCouponCode) {
-    throw new ApiError(400, "M? gi?m gi? kh?ng h?p l?.", undefined, "invalid_coupon_code");
+    throw new ApiError(400, "Mã giảm giá không hợp lệ.", undefined, "invalid_coupon_code");
   }
 
   const { finalAmount, appliedDiscount, discountInfo } = await resolveDiscountForCheckout(
@@ -321,7 +321,7 @@ export async function createPublicCheckoutSession(req: Request, res: Response): 
   const originalAmount = getPlusPriceFromEnv();
   const normalizedCouponCode = normalizeCouponCode(couponCode);
   if (couponCode !== undefined && couponCode !== null && !normalizedCouponCode) {
-    throw new ApiError(400, "M? gi?m gi? kh?ng h?p l?.", undefined, "invalid_coupon_code");
+    throw new ApiError(400, "Mã giảm giá không hợp lệ.", undefined, "invalid_coupon_code");
   }
 
   const publicUserId = getPublicCheckoutUserId(clientUserId.trim());

@@ -122,6 +122,7 @@ function serializePublicOrder(order: Parameters<typeof serializeOrder>[0]) {
     status: order.status,
     amount: order.amount,
     currency: order.currency,
+    discount: serializePaymentDiscount(order.metadata?.discount, order.amount),
     provider: order.provider,
     purpose: order.purpose ?? "plus_subscription",
     bankAccount: order.bankAccount,

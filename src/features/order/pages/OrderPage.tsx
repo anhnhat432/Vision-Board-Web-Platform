@@ -1,8 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/app/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogTitle,
+} from "@/app/components/ui/alert-dialog";
 import { isRealMode } from "@/app/utils/app-mode";
 import { ENV_DISCOUNT_PERCENT } from "@/app/utils/billing-pricing";
 import { apiClient, isRateLimitError } from "@/lib/api/apiClient";
@@ -294,6 +300,19 @@ export function OrderPage() {
     return "Không thể gửi đơn lên máy chủ. Vui lòng thử lại.";
   }
 
+  const handleCouponChange = useCallback((discount: DiscountInfo | null) => {
+    setCouponDiscount(discount);
+    try {
+      if (discount?.discountCode) {
+        sessionStorage.setItem("order:couponCode", discount.discountCode);
+      } else {
+        sessionStorage.removeItem("order:couponCode");
+      }
+    } catch {
+      // noop: sessionStorage can be unavailable in private/embedded browsers.
+    }
+  }, []);
+
   function buildOrderPayload() {
     return {
       itemIds: [...(draft.frameItemId ? [draft.frameItemId] : []), ...draft.themeItemIds],
@@ -530,16 +549,7 @@ export function OrderPage() {
                 originalAmount={total}
                 purpose="physical_order"
                 saleEvent={discountSectionSaleEvent}
-                onCouponChange={(d) => {
-                  setCouponDiscount(d);
-                  try {
-                    if (d?.discountCode) {
-                      sessionStorage.setItem("order:couponCode", d.discountCode);
-                    } else {
-                      sessionStorage.removeItem("order:couponCode");
-                    }
-                  } catch { /* noop */ }
-                }}
+                onCouponChange={handleCouponChange}
               />
             </div>
             {submitError && (
@@ -590,25 +600,10 @@ export function OrderPage() {
         </div>
       </div>
 
-      {showConfirmDialog && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-6"
-          style={{ background: "rgba(23,21,15,0.4)", backdropFilter: "blur(3px)" }}
-          onClick={() => setShowConfirmDialog(false)}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              width: "100%",
-              maxWidth: 380,
-              background: "#fff",
-              border: "1px solid rgba(23,21,15,0.08)",
-              borderRadius: 18,
-              boxShadow: "0 40px 80px -30px rgba(23,21,15,0.5)",
-              padding: "24px 26px",
-            }}
-          >
-            <h3 style={{
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent className="max-w-[420px] rounded-[18px] border border-[rgba(23,21,15,0.08)] bg-white p-0 shadow-[0_40px_80px_-30px_rgba(23,21,15,0.5)]">
+          <div className="w-full" style={{ padding: "24px 26px" }}>
+            <AlertDialogTitle style={{
               fontFamily: "'Be Vietnam Pro', system-ui, sans-serif",
               fontSize: 18,
               fontWeight: 800,
@@ -617,15 +612,15 @@ export function OrderPage() {
               color: "#17150F",
             }}>
               Xác nhận đặt đơn
-            </h3>
-            <p style={{
+            </AlertDialogTitle>
+            <AlertDialogDescription style={{
               fontSize: "12.5px",
               lineHeight: 1.55,
               color: "#7A6E5E",
               margin: "0 0 18px",
             }}>
               Vui lòng kiểm tra kỹ thông tin — đơn hàng sẽ được gửi đi và không thể thay đổi sau khi xác nhận.
-            </p>
+            </AlertDialogDescription>
 
             {/* Sản phẩm */}
             <div style={{
@@ -790,8 +785,8 @@ export function OrderPage() {
               </button>
             </div>
           </div>
-        </div>
-      )}
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

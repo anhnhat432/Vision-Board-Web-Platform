@@ -40,8 +40,8 @@ export function OrderSummary({
   const hasSelectedPreview = Boolean(selectedFrame || selectedThemes.length > 0 || selectedSticker);
   const hasDiscount = Boolean(discount && discount.discountAmount > 0);
   const discountLabel = discount?.discountCode
-    ? `M? ${discount.discountCode}`
-    : discount?.discountName ?? (discount?.source === "sale_event" ? "?u ??i ?ang ?p d?ng" : "Gi?m gi?");
+    ? `Mã ${discount.discountCode}`
+    : discount?.discountName ?? (discount?.source === "sale_event" ? "Ưu đãi đang áp dụng" : "Giảm giá");
 
   return (
     <aside className="rounded-[18px] border border-[var(--order-border)] bg-[var(--order-card)] p-5">
