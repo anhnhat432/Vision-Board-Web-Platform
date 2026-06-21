@@ -173,6 +173,27 @@ const apiContractBillingProvider: BillingProvider = {
           error && typeof error === "object" && "message" in error
             ? (error as { message: string }).message
             : "Lỗi không xác định";
+
+        // Only fall back to legacy endpoint on network errors.
+        // Server errors (4xx/5xx) mean the backend received and rejected the
+        // request — creating a second session via the legacy endpoint would
+        // risk a duplicate PaymentOrder.
+        const errObj = error && typeof error === "object" ? (error as Record<string, unknown>) : null;
+        const isServerError =
+          errObj !== null &&
+          typeof errObj.status === "number" &&
+          errObj.status >= 400;
+
+        if (isServerError) {
+          return {
+            ok: false,
+            status: "error",
+            providerMode: "api_contract",
+            planCode: getCurrentPlan(),
+            message: msg,
+          };
+        }
+
         console.warn("[billing] Backend checkout-session failed, trying legacy flow:", msg);
       }
     }

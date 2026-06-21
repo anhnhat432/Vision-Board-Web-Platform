@@ -1,6 +1,7 @@
 import { CheckCircle2, CreditCard, Loader2, LockKeyhole, Mail, ReceiptText, ShieldCheck } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router";
+import { toast } from "sonner";
 import { apiClient, toAppError } from "@/lib/api/apiClient";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { sendVerificationEmail } from "@/lib/auth/firebase";
@@ -13,6 +14,7 @@ import {
   getEmailVerificationRequiredMessage,
   rememberEmailVerificationReturnPath,
 } from "../utils/email-verification-guard";
+import { getBillingProvider, getBillingProviderStatus } from "../utils/production/billingProvider";
 import { getUserData } from "../utils/storage";
 
 interface CheckoutInfoResponse {
@@ -75,6 +77,19 @@ export function getCheckoutRedirectTarget(
   return null;
 }
 
+interface SaleEventInfo {
+  name: string;
+  discountPercent?: number;
+  discountValue?: number;
+  discountType?: "percentage" | "fixed";
+  discountAmount?: number;
+  finalAmount?: number;
+}
+
+function getNumberField(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
 export function BillingConfirm() {
   const navigate = useNavigate();
   const { authLoading, user } = useAuthContext();
@@ -85,13 +100,21 @@ export function BillingConfirm() {
   const [submitting, setSubmitting] = useState(false);
   const [sendingVerification, setSendingVerification] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [saleEvent, setSaleEvent] = useState<SaleEventInfo | null>(null);
 
   const paidCheckoutDisabled = isPaidCheckoutDisabled();
   const userEmail = user?.email?.trim() ?? "";
   const emailVerified = user?.emailVerified === true;
   const emailVerificationRequired = Boolean(user) && !canUpgradeToPlus(user);
   const canEditEmail = !user || !emailVerified;
-  const amount = getAmount(checkoutInfo);
+  const baseAmount = getAmount(checkoutInfo);
+  const saleFinalAmount = saleEvent?.finalAmount ?? (saleEvent?.discountPercent
+    ? Math.round(baseAmount * (100 - saleEvent.discountPercent) / 100)
+    : saleEvent?.discountValue
+      ? Math.max(baseAmount - saleEvent.discountValue, 1000)
+      : undefined);
+  const amount = saleFinalAmount ?? baseAmount;
+  const hasActiveSale = saleEvent !== null && saleFinalAmount !== undefined && saleFinalAmount < baseAmount;
   const planName = getPlanName(checkoutInfo?.billingCycle ?? "monthly");
   const emailInvalid = receiptEmail.trim().length > 0 && !isValidEmail(receiptEmail);
   const canSubmit =
@@ -127,6 +150,35 @@ export function BillingConfirm() {
     return () => {
       cancelled = true;
     };
+  }, []);
+
+  // Fetch active sale event so the confirmed amount matches what the user
+  // saw on /billing/plan (backend getCheckoutInfo returns base price only).
+  useEffect(() => {
+    let cancelled = false;
+    const params = new URLSearchParams({
+      purpose: "plus_subscription",
+      amount: String(PLUS_MONTHLY_PRICE_VND),
+    });
+
+    apiClient.get<{ active: boolean } & Record<string, unknown>>(`/billing/active-sale-event?${params.toString()}`)
+      .then((data) => {
+        if (cancelled) return;
+        if (data?.active) {
+          const discountType = data.discountType === "percentage" || data.discountType === "fixed" ? data.discountType : undefined;
+          setSaleEvent({
+            name: typeof data.name === "string" && data.name.trim() ? data.name : "Đang giảm giá",
+            discountPercent: discountType === "percentage" ? getNumberField(data.discountValue) : undefined,
+            discountValue: discountType === "fixed" ? getNumberField(data.discountValue) : undefined,
+            discountType,
+            discountAmount: getNumberField(data.discountAmount),
+            finalAmount: getNumberField(data.finalAmount),
+          });
+        }
+      })
+      .catch(() => { /* sale event is optional */ });
+
+    return () => { cancelled = true; };
   }, []);
 
   const submitLabel = useMemo(() => {
@@ -175,6 +227,56 @@ export function BillingConfirm() {
       if (couponCode) sessionStorage.removeItem("billing:couponCode");
     } catch { /* non-critical */ }
 
+    const billingStatus = getBillingProviderStatus();
+    const isNonContractMode = billingStatus.mode !== "api_contract";
+
+    // In local_test / mock_provider modes, delegate to the billing provider
+    // so local upgrade or mock checkout works without a real backend.
+    if (isNonContractMode) {
+      try {
+        const provider = getBillingProvider();
+        const checkoutResult = await provider.startCheckout({
+          planCode: "PLUS",
+          context: "plan",
+          returnUrl: `${window.location.origin}/billing/plan`,
+        });
+
+        if (checkoutResult.status === "upgraded" || checkoutResult.status === "already_active") {
+          toast.success(checkoutResult.message);
+          navigate("/billing/plan", { replace: true });
+          return;
+        }
+
+        if (checkoutResult.checkoutUrl) {
+          // Resolve redirect target (internal like /billing/mock-checkout or external)
+          const redirectTarget = getCheckoutRedirectTarget(
+            { checkoutSessionId: "", checkoutUrl: checkoutResult.checkoutUrl, provider: billingStatus.mode },
+            window.location.origin,
+          );
+          if (redirectTarget?.kind === "external") {
+            window.location.assign(redirectTarget.url);
+            return;
+          }
+          if (redirectTarget?.kind === "internal") {
+            navigate(redirectTarget.path, { replace: true });
+            return;
+          }
+          // Fallback: navigate directly
+          window.location.assign(checkoutResult.checkoutUrl);
+          return;
+        }
+
+        setError(checkoutResult.message || "Không thể tạo phiên thanh toán.");
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "Không thể tạo phiên thanh toán.");
+      } finally {
+        setSubmitting(false);
+      }
+      return;
+    }
+
+    // api_contract (real) mode: use the backend checkout-session endpoint directly
+    // so we can pass receiptEmail, billingCycle, couponCode, and clientUserId.
     try {
       const isPublicCheckout = !user;
       const result = await apiClient.post<CheckoutSessionResponse>(
@@ -240,11 +342,26 @@ export function BillingConfirm() {
 
           <div className="mt-6 grid gap-4 rounded-card border border-app-line bg-app-bg p-4">
             <ConfirmRow label="Tên gói" value={planName} />
-            <ConfirmRow
-              label="Số tiền"
-              value={loadingInfo ? "Đang tải..." : `${formatVndAmount(amount)} ${checkoutInfo?.currency ?? "VND"}`}
-              highlight
-            />
+            {loadingInfo ? (
+              <ConfirmRow label="Số tiền" value="Đang tải..." highlight />
+            ) : hasActiveSale ? (
+              <div className="flex items-center justify-between gap-3 rounded-[var(--r-tile)] bg-app-accent-soft/40 px-4 py-3">
+                <span className="text-sm font-medium text-app-ink">Số tiền</span>
+                <div className="text-right">
+                  <span className="text-sm text-app-ink-muted line-through">{formatVndAmount(baseAmount)}</span>
+                  <span className="ml-2 text-lg font-bold text-app-accent">{formatVndAmount(amount)} {checkoutInfo?.currency ?? "VND"}</span>
+                  {saleEvent?.name && (
+                    <p className="mt-0.5 text-xs font-medium text-app-accent">{saleEvent.name}</p>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <ConfirmRow
+                label="Số tiền"
+                value={`${formatVndAmount(amount)} ${checkoutInfo?.currency ?? "VND"}`}
+                highlight
+              />
+            )}
             <ConfirmRow label="Phương thức" value="Thanh toán tự động qua nhà cung cấp thanh toán" />
           </div>
 

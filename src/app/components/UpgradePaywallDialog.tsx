@@ -1,6 +1,7 @@
 import { CheckCircle2, CreditCard, Crown, LockKeyhole } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
+import { toast } from "sonner";
 import { useOptionalAuthContext } from "@/lib/auth/AuthContext";
 import { sendVerificationEmail } from "@/lib/auth/firebase";
 import * as appMode from "../utils/app-mode";
@@ -117,6 +118,9 @@ export function UpgradePaywallDialog({
 
   const handleUpgrade = async (planCode: Exclude<PricingPlanCode, "FREE">) => {
     if (paidCheckoutDisabled) {
+      toast.info(
+        "Đang hoàn tất tích hợp hệ thống thanh toán mới — sẵn sàng trong tuần tới. Quyền hiện có không bị ảnh hưởng. Nếu bạn muốn nâng cấp ngay, liên hệ support để mở Plus thủ công.",
+      );
       return;
     }
     if (emailVerificationRequired) {

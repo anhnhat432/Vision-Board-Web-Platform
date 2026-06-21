@@ -306,7 +306,7 @@ export function OrderStatusPage() {
             toast.success("Plus đã kích hoạt!");
           }
           window.setTimeout(() => {
-            navigate(isKitOrder ? "/orders" : "/billing/plan", { replace: true });
+            navigate(isKitOrder ? "/order" : "/billing/plan", { replace: true });
           }, REDIRECT_AFTER_SUCCESS_MS);
         }
       } catch (error: unknown) {
