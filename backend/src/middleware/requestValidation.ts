@@ -18,6 +18,8 @@ const MAX_URL_LENGTH = 2048;
 const MAX_LOCALE_LENGTH = 20;
 const MAX_CLIENT_USER_ID_LENGTH = 128;
 const CLIENT_USER_ID_REGEX = /^[A-Za-z0-9._:-]{4,128}$/;
+const MAX_COUPON_CODE_LENGTH = 50;
+const COUPON_CODE_REGEX = /^[A-Za-z0-9_-]+$/;
 const MAX_PROFILE_PATCH_FIELDS = 12;
 const MAX_RECEIPT_EMAIL_LENGTH = 254;
 const MAX_RECEIPT_NAME_LENGTH = 120;
@@ -156,6 +158,21 @@ function normalizeOptionalReceiptName(value: unknown): string | undefined {
   const trimmed = value.trim();
   if (trimmed.length === 0) return undefined;
   return trimmed.slice(0, MAX_RECEIPT_NAME_LENGTH);
+}
+
+function normalizeOptionalCouponCode(value: unknown): string | undefined {
+  if (value === undefined || value === null || value === "") return undefined;
+  if (typeof value !== "string") {
+    throw new ApiError(400, "couponCode must be a string.", undefined, "invalid_coupon_code");
+  }
+
+  const trimmed = value.trim().toUpperCase();
+  if (trimmed.length === 0) return undefined;
+  if (trimmed.length > MAX_COUPON_CODE_LENGTH || !COUPON_CODE_REGEX.test(trimmed)) {
+    throw new ApiError(400, "couponCode contains invalid characters.", undefined, "invalid_coupon_code");
+  }
+
+  return trimmed;
 }
 
 function normalizeStringField(
@@ -314,6 +331,7 @@ export const validateCheckoutSessionInput: RequestHandler = (req, _res, next) =>
     locale: normalizeOptionalLocale(body.locale),
     receiptEmail: normalizeOptionalReceiptEmail(body.receiptEmail),
     receiptName: normalizeOptionalReceiptName(body.receiptName),
+    couponCode: normalizeOptionalCouponCode(body.couponCode),
   };
 
   next();
@@ -337,6 +355,7 @@ export const validatePublicCheckoutSessionInput: RequestHandler = (req, _res, ne
     clientUserId: normalizeClientUserId(body.clientUserId),
     receiptEmail: normalizeOptionalReceiptEmail(body.receiptEmail),
     receiptName: normalizeOptionalReceiptName(body.receiptName),
+    couponCode: normalizeOptionalCouponCode(body.couponCode),
   };
 
   next();

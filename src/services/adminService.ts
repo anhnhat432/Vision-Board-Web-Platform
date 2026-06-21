@@ -1,4 +1,4 @@
-import { get, post } from "@/lib/api/apiClient";
+import { delete as apiDelete, get, post, put } from "@/lib/api/apiClient";
 
 export interface AdminEmailStatus {
   provider: string;
@@ -206,4 +206,118 @@ export function adminCompletePaymentOrderManually(
     `/admin/billing/payment-orders/${orderId}/complete`,
     payload,
   );
+}
+
+// ─── Discount Admin ──────────────────────────────────────────────────────────
+
+export interface AdminDiscountSummary {
+  _id: string;
+  type: "coupon" | "sale_event";
+  code: string;
+  name: string;
+  discountType: "percentage" | "fixed";
+  discountValue: number;
+  minAmount?: number | null;
+  maxUses?: number | null;
+  usedCount: number;
+  startsAt: string;
+  endsAt?: string | null;
+  appliesTo: ("PLUS" | "physical_order")[];
+  active: boolean;
+  createdBy?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminDiscountListResponse {
+  items: AdminDiscountSummary[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface AdminDiscountCreatePayload {
+  type: string;
+  code: string;
+  name: string;
+  discountType: string;
+  discountValue: number;
+  minAmount?: number | null;
+  maxUses?: number | null;
+  startsAt?: string;
+  endsAt?: string | null;
+  appliesTo?: string[];
+  active?: boolean;
+}
+
+export interface AdminDiscountUpdatePayload extends Partial<AdminDiscountCreatePayload> {
+  active?: boolean;
+}
+
+export interface AdminCouponUsageSummary {
+  _id: string;
+  discountId: string;
+  code: string;
+  userId: string;
+  orderId: string;
+  usedAt: string;
+}
+
+export interface AdminCouponUsageListResponse {
+  items: AdminCouponUsageSummary[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface AdminDiscountListParams {
+  q?: string;
+  type?: string;
+  active?: boolean;
+  page?: number;
+  limit?: number;
+}
+
+export function adminListDiscounts(
+  params: AdminDiscountListParams = {},
+): Promise<AdminDiscountListResponse> {
+  const searchParams = new URLSearchParams();
+  if (params.q?.trim()) searchParams.set("q", params.q.trim());
+  if (params.type) searchParams.set("type", params.type);
+  if (params.active !== undefined) searchParams.set("active", String(params.active));
+  if (params.page) searchParams.set("page", String(params.page));
+  if (params.limit) searchParams.set("limit", String(params.limit));
+
+  const query = searchParams.toString();
+  return get<AdminDiscountListResponse>(`/admin/discounts${query ? `?${query}` : ""}`);
+}
+
+export function adminCreateDiscount(
+  payload: AdminDiscountCreatePayload,
+): Promise<AdminDiscountSummary> {
+  return post<AdminDiscountSummary, AdminDiscountCreatePayload>("/admin/discounts", payload);
+}
+
+export function adminUpdateDiscount(
+  id: string,
+  payload: AdminDiscountUpdatePayload,
+): Promise<AdminDiscountSummary> {
+  return put<AdminDiscountSummary, AdminDiscountUpdatePayload>(`/admin/discounts/${id}`, payload);
+}
+
+export function adminDeleteDiscount(id: string): Promise<{ id: string; active: boolean }> {
+  return apiDelete<{ id: string; active: boolean }>(`/admin/discounts/${id}`);
+}
+
+export function adminListCouponUsages(
+  discountId: string,
+  page = 1,
+  limit = 20,
+): Promise<AdminCouponUsageListResponse> {
+  const searchParams = new URLSearchParams();
+  searchParams.set("page", String(page));
+  searchParams.set("limit", String(limit));
+  return get<AdminCouponUsageListResponse>(`/admin/discounts/${discountId}/usages?${searchParams.toString()}`);
 }

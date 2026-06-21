@@ -1,5 +1,5 @@
 import { CheckCircle2, CreditCard, Crown, LockKeyhole } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { useOptionalAuthContext } from "@/lib/auth/AuthContext";
 import { sendVerificationEmail } from "@/lib/auth/firebase";
@@ -71,6 +71,7 @@ export function UpgradePaywallDialog({
   source = "paywall_dialog",
 }: UpgradePaywallDialogProps) {
   const navigate = useNavigate();
+  const dialogTitleRef = useRef<HTMLHeadingElement>(null);
   const authContext = useOptionalAuthContext();
   const user = authContext?.user ?? null;
   const [isUpgrading, setIsUpgrading] = useState(false);
@@ -148,9 +149,15 @@ export function UpgradePaywallDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[calc(100vh-1rem)] w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] overflow-hidden rounded-card border border-app-line bg-app-surface p-0 shadow-app-md sm:!max-w-4xl">
-        <div className="max-h-[calc(100vh-1rem)] overflow-hidden rounded-card">
-          <div className="border-b border-app-line bg-app-surface px-5 py-6 sm:px-7 sm:py-7">
+      <DialogContent
+        className="!flex !max-h-[calc(100dvh-1rem)] w-[calc(100vw-1rem)] max-w-[calc(100vw-1rem)] !overflow-hidden rounded-card border border-app-line bg-app-surface !p-0 shadow-app-md sm:!max-w-4xl"
+        onOpenAutoFocus={(event) => {
+          event.preventDefault();
+          dialogTitleRef.current?.focus({ preventScroll: true });
+        }}
+      >
+        <div className="flex max-h-[calc(100dvh-1rem)] min-h-0 w-full flex-col overflow-hidden rounded-card">
+          <div className="shrink-0 border-b border-app-line bg-app-surface px-5 py-6 sm:px-7 sm:py-7">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="max-w-2xl">
                 <div className="inline-flex items-center gap-2 rounded-full border border-app-line bg-app-bg px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-app-ink-muted">
@@ -158,7 +165,11 @@ export function UpgradePaywallDialog({
                   Plus cho hệ 12 tuần
                 </div>
                 <DialogHeader className="mt-4 text-left">
-                  <DialogTitle className="font-serif text-3xl font-medium leading-tight tracking-tight text-app-ink">
+                  <DialogTitle
+                    ref={dialogTitleRef}
+                    tabIndex={-1}
+                    className="font-serif text-3xl font-medium leading-tight tracking-tight text-app-ink focus:outline-none"
+                  >
                     {title ?? paywallCopy.title}
                   </DialogTitle>
                   <DialogDescription className="mt-2 max-w-xl text-sm leading-7 text-app-ink-soft">
@@ -176,7 +187,7 @@ export function UpgradePaywallDialog({
             </div>
           </div>
 
-          <div className="grid max-h-[calc(100vh-14rem)] gap-6 overflow-y-auto bg-app-bg px-5 py-5 sm:px-7 sm:py-7 xl:grid-cols-[minmax(0,1fr)_360px]">
+          <div className="grid min-h-0 flex-1 gap-6 overflow-y-auto overscroll-contain bg-app-bg px-5 py-5 sm:px-7 sm:py-7 xl:grid-cols-[minmax(0,1fr)_360px]">
             <div className="min-w-0 space-y-4">
               <div className="rounded-card border border-app-line bg-app-surface p-5">
                 <p className="text-xs font-medium uppercase tracking-[0.18em] text-app-ink-muted">
@@ -423,7 +434,7 @@ export function UpgradePaywallDialog({
             </fieldset>
           </div>
 
-          <DialogFooter className="flex flex-col gap-3 border-t border-app-line bg-app-surface px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7 sm:py-5">
+          <DialogFooter className="flex shrink-0 flex-col gap-3 border-t border-app-line bg-app-surface px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7 sm:py-5">
             <p className="text-sm leading-7 text-app-ink-soft">
               Bạn sẽ thanh toán {plusPriceAmountLabel} qua nhà cung cấp thanh toán. Sau khi hệ thống xác nhận giao dịch,
               quyền Plus sẽ kích hoạt và biên nhận gửi về {receiptEmailLabel}. Xem thêm{" "}

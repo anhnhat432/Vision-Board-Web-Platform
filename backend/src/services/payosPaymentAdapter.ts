@@ -323,6 +323,7 @@ export function createPayosPaymentAdapter(options: CreatePayosPaymentAdapterOpti
         expiresAt: providerExpiresAt,
         metadata: {
           physicalOrderId: input.physicalOrderId || undefined,
+          discount: input.discount || undefined,
           payos: {
             orderCode,
             paymentLinkId: paymentLink.paymentLinkId,

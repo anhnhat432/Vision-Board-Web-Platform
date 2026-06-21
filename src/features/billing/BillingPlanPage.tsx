@@ -97,6 +97,8 @@ import type {
 } from "./types";
 import { useCheckoutReturn } from "./useCheckoutReturn";
 import { usePaymentHistory } from "./usePaymentHistory";
+import { BillingDiscountSection } from "./BillingDiscountSection";
+import type { DiscountInfo } from "./useCouponValidation";
 
 export function BillingPlan() {
   const navigate = useNavigate();
@@ -151,6 +153,16 @@ export function BillingPlan() {
   const subscription = userData.subscription;
   const expiryInfo = useMemo(() => getBillingExpiryInfo(subscription), [subscription]);
   const graceState = useMemo(() => getSubscriptionGraceState(userData), [userData]);
+  const [couponDiscount, setCouponDiscount] = useState<DiscountInfo | null>(null);
+
+  const handleCouponChange = (discount: DiscountInfo | null) => {
+    setCouponDiscount(discount);
+    if (discount?.discountCode) {
+      try {
+        sessionStorage.setItem("billing:couponCode", discount.discountCode);
+      } catch { /* non-critical */ }
+    }
+  };
 
   const lastEntitlementSync = useMemo(() => getLastEntitlementSyncSnapshot(), []);
   const lastRestoreAccess = useMemo(() => getLastRestoreAccessSnapshot(), []);
@@ -1176,6 +1188,18 @@ export function BillingPlan() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Discount / Coupon section */}
+      {!paidCheckoutDisabled && currentPlanCode === "FREE" && (
+        <SectionBlock title="Khu vực mã giảm giá" headerVisuallyHidden>
+          <BillingDiscountSection
+            originalAmount={99000}
+            planCode="PLUS"
+            purpose="plus_subscription"
+            onCouponChange={handleCouponChange}
+          />
+        </SectionBlock>
       )}
 
       {/* Compare plans */}

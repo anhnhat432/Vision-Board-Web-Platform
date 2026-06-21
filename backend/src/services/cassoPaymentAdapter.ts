@@ -196,8 +196,11 @@ export function createCassoPaymentAdapter(): PaymentProviderAdapter {
         receiptEmail: input.receiptEmail || input.customerEmail,
         receiptName: input.receiptName,
         expiresAt,
-        metadata: input.physicalOrderId
-          ? { physicalOrderId: input.physicalOrderId }
+        metadata: (input.physicalOrderId || input.discount)
+          ? {
+              ...(input.physicalOrderId ? { physicalOrderId: input.physicalOrderId } : {}),
+              ...(input.discount ? { discount: input.discount } : {}),
+            }
           : undefined,
       });
 

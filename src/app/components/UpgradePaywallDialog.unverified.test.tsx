@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -46,4 +46,19 @@ describe("UpgradePaywallDialog unverified email guard", () => {
     expect(within(dialog).getByRole("button", { name: "Gửi email xác thực" })).toBeInTheDocument();
     expect(within(dialog).getByRole("button", { name: "Tiếp tục thanh toán" })).toBeDisabled();
   });
+
+  it("keeps initial focus on the heading so payment content opens from the top", async () => {
+    render(
+      <MemoryRouter>
+        <UpgradePaywallDialog open onOpenChange={() => undefined} context="plan" currentPlan="FREE" />
+      </MemoryRouter>,
+    );
+
+    const dialog = await screen.findByRole("dialog");
+    const heading = within(dialog).getByRole("heading", { name: "Mở Plus để đi nhanh và chắc hơn" });
+
+    await waitFor(() => expect(heading).toHaveFocus());
+    expect(within(dialog).getByRole("button", { name: "Gửi email xác thực" })).not.toHaveFocus();
+  });
+
 });

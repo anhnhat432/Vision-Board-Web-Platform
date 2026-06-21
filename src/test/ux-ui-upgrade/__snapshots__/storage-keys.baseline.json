@@ -1,6 +1,6 @@
 {
   "generatedFrom": "production sources under src + src/app/utils/storage-constants.ts",
-  "keyCount": 86,
+  "keyCount": 88,
   "keys": [
     "assistant.action_audit_log",
     "assistant.chat.history",
@@ -26,6 +26,7 @@
     "backend_plan_links:auth:",
     "backend_vision_board_links",
     "backend_vision_board_links:auth:",
+    "billing:couponCode",
     "cloud_imported:",
     "daily_stoic_reflection_",
     "dof_sound_enabled",
@@ -45,6 +46,7 @@
     "offline-banner-dismissed",
     "onboarding-deferred",
     "onboarding_draft",
+    "order:couponCode",
     "pendingReflectionDraft_",
     "pending_12_week_plan_draft",
     "pending_12_week_setup_draft",

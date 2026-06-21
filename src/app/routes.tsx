@@ -209,6 +209,10 @@ export const appRoutes = [
             path: "catalog",
             ...lazyRoute(() => import("./pages/AdminCatalogPage"), "AdminCatalogPage"),
           },
+          {
+            path: "discounts",
+            ...lazyRoute(() => import("./pages/AdminDiscountsPage"), "AdminDiscountsPage"),
+          },
         ],
       },
       {

@@ -37,6 +37,8 @@ import { ShippingForm, type ShippingFormValue } from "../components/ShippingForm
 import { StepCard } from "../components/StepCard";
 import { StickerAddon } from "../components/StickerAddon";
 import { ThemePicker } from "../components/ThemePicker";
+import { BillingDiscountSection } from "@/features/billing/BillingDiscountSection";
+import type { DiscountInfo } from "@/features/billing/useCouponValidation";
 
 const FIELD_LABELS: Record<ValidateErrorKey, string> = {
   frame: "kích thước khung",
@@ -72,6 +74,7 @@ export function OrderPage() {
   const [touched, setTouched] = useState<Partial<Record<ValidateErrorKey, boolean>>>({});
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [couponDiscount, setCouponDiscount] = useState<DiscountInfo | null>(null);
 
   const { user } = useAuthContext();
   const emailVerified = isRealMode() ? (user?.emailVerified ?? false) : true;
@@ -398,6 +401,19 @@ export function OrderPage() {
               </div>
             )}
           </div>
+        </div>
+
+        <div className="mx-auto mt-4 max-w-6xl">
+          <BillingDiscountSection
+            originalAmount={total}
+            purpose="physical_order"
+            onCouponChange={(d) => {
+              setCouponDiscount(d);
+              if (d?.discountCode) {
+                try { sessionStorage.setItem("order:couponCode", d.discountCode); } catch { /* noop */ }
+              }
+            }}
+          />
         </div>
 
         <div className="fixed inset-x-0 bottom-0 z-30 border-t border-[var(--order-border)] bg-[var(--order-bg)]/95 px-4 py-3 shadow-[0_-4px_12px_rgba(0,0,0,0.04)] backdrop-blur lg:hidden">

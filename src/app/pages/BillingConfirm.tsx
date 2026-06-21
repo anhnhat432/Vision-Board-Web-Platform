@@ -168,6 +168,13 @@ export function BillingConfirm() {
 
     setSubmitting(true);
     setError(null);
+
+    let couponCode: string | undefined;
+    try {
+      couponCode = sessionStorage.getItem("billing:couponCode")?.trim() || undefined;
+      if (couponCode) sessionStorage.removeItem("billing:couponCode");
+    } catch { /* non-critical */ }
+
     try {
       const isPublicCheckout = !user;
       const result = await apiClient.post<CheckoutSessionResponse>(
@@ -179,6 +186,7 @@ export function BillingConfirm() {
           cancelUrl: `${window.location.origin}/billing/plan`,
           receiptEmail: receiptEmail.trim(),
           receiptName: user?.displayName ?? undefined,
+          ...(couponCode ? { couponCode } : {}),
           ...(isPublicCheckout ? { clientUserId: getUserData().userId } : {}),
         },
       );

@@ -3,6 +3,8 @@ import type { Request, Response } from "express";
 import { billingService } from "../services/billingServiceInstance";
 import { getPaymentProviderAdapter } from "../services/paymentProviderRegistry";
 import { PaymentProviderNotConfiguredError } from "../services/paymentProviderAdapter";
+import { resolveDiscountForCheckout, recordCouponUsage } from "../services/discountService";
+import { CouponUsageModel } from "../models/CouponUsageModel";
 import { ApiError } from "../utils/apiError";
 import { successResponse } from "../utils/apiResponse";
 import { requireAuthUser } from "./controllerHelpers";
@@ -58,6 +60,96 @@ function getPublicCheckoutUserId(clientUserId: string): string {
   return `public:${clientUserId}`;
 }
 
+function getPlusPriceFromEnv(): number {
+  return Number.parseInt(process.env.PLUS_PRICE_VND?.trim() ?? "99000", 10);
+}
+
+function normalizeCouponCodeFromBody(couponCode: unknown): string | undefined {
+  if (typeof couponCode !== "string") return undefined;
+  const trimmed = couponCode.trim();
+  return trimmed || undefined;
+}
+
+interface DiscountMetadata {
+  couponCode?: string;
+  discountId?: string;
+  discountName?: string;
+  discountPercent?: number;
+  discountAmount?: number;
+  originalAmount: number;
+}
+
+function buildAdapterDiscountMetadata(
+  appliedDiscount: { source: string; discountCode?: string; discountId?: string; discountName?: string; discountPercent?: number; discountAmount?: number },
+  originalAmount: number,
+): DiscountMetadata | undefined {
+  if (appliedDiscount.source === "none") return undefined;
+  return {
+    couponCode: appliedDiscount.discountCode,
+    discountId: appliedDiscount.discountId,
+    discountName: appliedDiscount.discountName,
+    discountPercent: appliedDiscount.discountPercent,
+    discountAmount: appliedDiscount.discountAmount,
+    originalAmount,
+  };
+}
+
+function buildResponseDiscount(
+  appliedDiscount: { source: string; discountName?: string; discountPercent?: number; discountAmount?: number },
+  originalAmount: number,
+  finalAmount: number,
+) {
+  if (appliedDiscount.source === "none") return undefined;
+  return {
+    source: appliedDiscount.source,
+    discountName: appliedDiscount.discountName,
+    discountPercent: appliedDiscount.discountPercent,
+    discountAmount: appliedDiscount.discountAmount,
+    originalAmount,
+    finalAmount,
+  };
+}
+
+async function recordCouponUsageIfNeeded(
+  appliedDiscount: { source: string; discountId?: string; discountCode?: string },
+  userId: string,
+  req: Request,
+): Promise<void> {
+  if (appliedDiscount.source !== "coupon" || !appliedDiscount.discountId || !appliedDiscount.discountCode) return;
+
+  const reservationId = `reserve_${Date.now()}_${userId}`;
+  const usageRecorded = await recordCouponUsage(
+    appliedDiscount.discountId,
+    appliedDiscount.discountCode,
+    userId,
+    reservationId,
+  );
+
+  if (!usageRecorded) {
+    throw new ApiError(429, "Mã giảm giá đã hết lượt sử dụng. Vui lòng thử lại.", undefined, "coupon_exhausted");
+  }
+
+  (req as Request & { _couponReservation?: { discountId: string; userId: string; reservationId: string } })._couponReservation = {
+    discountId: appliedDiscount.discountId,
+    userId,
+    reservationId,
+  };
+}
+
+async function updateCouponUsageOrderId(sessionId: string, req: Request): Promise<void> {
+  const reservation = (req as Request & { _couponReservation?: { discountId: string; userId: string; reservationId: string } })._couponReservation;
+  if (!reservation) return;
+
+  try {
+    await CouponUsageModel.updateOne(
+      { discountId: reservation.discountId, userId: reservation.userId, orderId: reservation.reservationId },
+      { orderId: sessionId },
+    );
+  } catch {
+    // Non-critical: the usage was already recorded; orderId is best-effort
+  }
+}
+
 /**
  * GET /api/billing/entitlement
  *
@@ -99,7 +191,7 @@ export async function createCheckoutSession(req: Request, res: Response): Promis
   }
 
   const user = requireAuthUser(req);
-  const { planCode, returnUrl, cancelUrl, billingCycle, locale, receiptEmail, receiptName } = req.body ?? {};
+  const { planCode, returnUrl, cancelUrl, billingCycle, locale, receiptEmail, receiptName, couponCode } = req.body ?? {};
 
   // Validate planCode
   if (!planCode || typeof planCode !== "string" || !ALLOWED_PLAN_CODES.has(planCode)) {
@@ -125,9 +217,26 @@ export async function createCheckoutSession(req: Request, res: Response): Promis
     }
   }
 
+  const originalAmount = getPlusPriceFromEnv();
+  const normalizedCouponCode = normalizeCouponCodeFromBody(couponCode);
+
+  const { finalAmount, appliedDiscount, discountInfo } = await resolveDiscountForCheckout(
+    originalAmount,
+    planCode as "PLUS",
+    "plus_subscription",
+    normalizedCouponCode,
+    user.uid,
+  );
+
+  if (discountInfo && !discountInfo.valid) {
+    throw new ApiError(400, discountInfo.reason ?? "Mã giảm giá không hợp lệ.", undefined, "invalid_coupon");
+  }
+
   const adapter = getPaymentProviderAdapter();
 
   try {
+    await recordCouponUsageIfNeeded(appliedDiscount, user.uid, req);
+
     const session = await adapter.createCheckoutSession({
       userId: user.uid,
       planCode: planCode as "PLUS",
@@ -138,7 +247,11 @@ export async function createCheckoutSession(req: Request, res: Response): Promis
       customerEmail: user.email,
       receiptEmail: typeof receiptEmail === "string" ? receiptEmail : user.email,
       receiptName: typeof receiptName === "string" ? receiptName : user.name,
+      amount: finalAmount,
+      discount: buildAdapterDiscountMetadata(appliedDiscount, originalAmount),
     });
+
+    await updateCouponUsageOrderId(session.sessionId, req);
 
     // Verify entitlement is NOT granted at this point
     const snapshot = await billingService.getCurrentEntitlementForUser(user.uid);
@@ -149,8 +262,7 @@ export async function createCheckoutSession(req: Request, res: Response): Promis
         checkoutUrl: session.checkoutUrl,
         provider: adapter.providerId,
         expiresAt: session.expiresAt,
-        // Explicitly include current entitlement state so frontend
-        // can confirm entitlement is unchanged after checkout creation
+        discount: buildResponseDiscount(appliedDiscount, originalAmount, finalAmount),
         currentEntitlement: {
           planCode: snapshot.planCode,
           status: snapshot.status,
@@ -178,7 +290,7 @@ export async function createPublicCheckoutSession(req: Request, res: Response): 
     throw new ApiError(503, PAID_CHECKOUT_DISABLED_MESSAGE, undefined, "checkout_disabled");
   }
 
-  const { planCode, returnUrl, cancelUrl, billingCycle, locale, clientUserId, receiptEmail, receiptName } = req.body ?? {};
+  const { planCode, returnUrl, cancelUrl, billingCycle, locale, clientUserId, receiptEmail, receiptName, couponCode } = req.body ?? {};
 
   if (!planCode || typeof planCode !== "string" || !ALLOWED_PLAN_CODES.has(planCode)) {
     throw new ApiError(
@@ -209,11 +321,30 @@ export async function createPublicCheckoutSession(req: Request, res: Response): 
     }
   }
 
+  const originalAmount = getPlusPriceFromEnv();
+  const normalizedCouponCode = normalizeCouponCodeFromBody(couponCode);
+
+  const publicUserId = getPublicCheckoutUserId(clientUserId.trim());
+
+  const { finalAmount, appliedDiscount, discountInfo } = await resolveDiscountForCheckout(
+    originalAmount,
+    planCode as "PLUS",
+    "plus_subscription",
+    normalizedCouponCode,
+    publicUserId,
+  );
+
+  if (discountInfo && !discountInfo.valid) {
+    throw new ApiError(400, discountInfo.reason ?? "Mã giảm giá không hợp lệ.", undefined, "invalid_coupon");
+  }
+
   const adapter = getPaymentProviderAdapter();
 
   try {
+    await recordCouponUsageIfNeeded(appliedDiscount, publicUserId, req);
+
     const session = await adapter.createCheckoutSession({
-      userId: getPublicCheckoutUserId(clientUserId.trim()),
+      userId: publicUserId,
       planCode: planCode as "PLUS",
       billingCycle: billingCycle ?? "twelve_week",
       successUrl: returnUrl,
@@ -221,7 +352,11 @@ export async function createPublicCheckoutSession(req: Request, res: Response): 
       locale,
       receiptEmail: typeof receiptEmail === "string" ? receiptEmail : undefined,
       receiptName: typeof receiptName === "string" ? receiptName : undefined,
+      amount: finalAmount,
+      discount: buildAdapterDiscountMetadata(appliedDiscount, originalAmount),
     });
+
+    await updateCouponUsageOrderId(session.sessionId, req);
 
     res.status(200).json(
       successResponse({
@@ -229,6 +364,7 @@ export async function createPublicCheckoutSession(req: Request, res: Response): 
         checkoutUrl: session.checkoutUrl,
         provider: adapter.providerId,
         expiresAt: session.expiresAt,
+        discount: buildResponseDiscount(appliedDiscount, originalAmount, finalAmount),
       }),
     );
   } catch (error) {

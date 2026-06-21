@@ -47,6 +47,15 @@ export interface CreateCheckoutSessionInput {
   purpose?: "plus_subscription" | "physical_order";
   /** Physical order ID when purpose is "physical_order". Server-authoritative, not from client. */
   physicalOrderId?: string;
+  /** Discount metadata applied to this checkout (server-authoritative). */
+  discount?: {
+    couponCode?: string;
+    discountId?: string;
+    discountName?: string;
+    discountPercent?: number;
+    discountAmount?: number;
+    originalAmount: number;
+  };
 }
 
 export interface CheckoutSessionResult {
