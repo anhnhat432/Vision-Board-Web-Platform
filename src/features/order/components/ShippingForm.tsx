@@ -1,6 +1,3 @@
-import { Input } from "@/app/components/ui/input";
-import { Label } from "@/app/components/ui/label";
-
 export interface ShippingFormValue {
   fullName: string;
   email: string;
@@ -17,42 +14,69 @@ export interface ShippingFormProps {
   goalOptions?: Array<{ id: string; title: string }>;
 }
 
+const fieldClass =
+  "w-full h-11 border border-[var(--order-border)] rounded-[11px] px-[14px] text-[13.5px] text-[var(--order-text)] bg-white outline-none font-[inherit] transition-all focus:border-[var(--order-accent)] focus:shadow-[0_0_0_3px_var(--order-accent-soft)]";
+const labelClass = "block text-xs font-semibold text-[var(--order-text-soft)] mb-[7px]";
+
 export function ShippingForm({ value, onChange, errors, goalOptions = [] }: ShippingFormProps) {
   function set<K extends keyof ShippingFormValue>(key: K, v: ShippingFormValue[K]) {
     onChange({ ...value, [key]: v });
   }
+
   return (
-    <div className="grid gap-3 sm:grid-cols-2">
-      <div className="sm:col-span-2">
-        <Label htmlFor="order-fullname">Họ và tên</Label>
-        <Input id="order-fullname" value={value.fullName} onChange={(e) => set("fullName", e.target.value)} />
+    <div className="flex flex-col gap-4">
+      <div>
+        <label className={labelClass} htmlFor="order-fullname">Họ và tên</label>
+        <input
+          id="order-fullname"
+          type="text"
+          className={fieldClass}
+          value={value.fullName}
+          onChange={(e) => set("fullName", e.target.value)}
+        />
         {errors?.fullName && <p className="mt-1 text-xs text-destructive">{errors.fullName}</p>}
       </div>
-      <div>
-        <Label htmlFor="order-email">Email</Label>
-        <Input id="order-email" type="email" value={value.email} onChange={(e) => set("email", e.target.value)} />
-        {errors?.email && <p className="mt-1 text-xs text-destructive">{errors.email}</p>}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-[14px]">
+        <div>
+          <label className={labelClass} htmlFor="order-email">Email</label>
+          <input
+            id="order-email"
+            type="email"
+            className={fieldClass}
+            value={value.email}
+            onChange={(e) => set("email", e.target.value)}
+          />
+          {errors?.email && <p className="mt-1 text-xs text-destructive">{errors.email}</p>}
+        </div>
+        <div>
+          <label className={labelClass} htmlFor="order-phone">Số điện thoại</label>
+          <input
+            id="order-phone"
+            type="tel"
+            className={fieldClass}
+            value={value.phone}
+            onChange={(e) => set("phone", e.target.value)}
+          />
+          {errors?.phone && <p className="mt-1 text-xs text-destructive">{errors.phone}</p>}
+        </div>
       </div>
       <div>
-        <Label htmlFor="order-phone">Số điện thoại</Label>
-        <Input id="order-phone" value={value.phone} onChange={(e) => set("phone", e.target.value)} />
-        {errors?.phone && <p className="mt-1 text-xs text-destructive">{errors.phone}</p>}
-      </div>
-      <div className="sm:col-span-2">
-        <Label htmlFor="order-address">Địa chỉ giao hàng</Label>
-        <Input
+        <label className={labelClass} htmlFor="order-address">Địa chỉ giao hàng</label>
+        <input
           id="order-address"
+          type="text"
+          className={fieldClass}
           value={value.shippingAddress}
           onChange={(e) => set("shippingAddress", e.target.value)}
         />
         {errors?.shippingAddress && <p className="mt-1 text-xs text-destructive">{errors.shippingAddress}</p>}
       </div>
       {goalOptions.length > 0 && (
-        <div className="sm:col-span-2">
-          <Label htmlFor="order-goal">Gắn với mục tiêu (tuỳ chọn)</Label>
+        <div>
+          <label className={labelClass} htmlFor="order-goal">Gắn với mục tiêu (tuỳ chọn)</label>
           <select
             id="order-goal"
-            className="w-full rounded border border-[color:var(--border)] bg-card px-3 py-2 text-sm"
+            className="w-full h-11 rounded-[11px] border border-[var(--order-border)] bg-white px-[14px] text-[13.5px] text-[var(--order-text)] outline-none font-[inherit]"
             value={value.goalId ?? ""}
             onChange={(e) => {
               const id = e.target.value || null;

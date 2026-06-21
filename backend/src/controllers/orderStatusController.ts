@@ -25,6 +25,40 @@ function toIsoString(value: Date | string | null | undefined): string | null {
   return Number.isNaN(date.getTime()) ? null : date.toISOString();
 }
 
+function asPositiveNumber(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : undefined;
+}
+
+function serializePaymentDiscount(raw: unknown, paymentAmount: number) {
+  if (!raw || typeof raw !== "object") return null;
+  const record = raw as Record<string, unknown>;
+  const discountAmount = asPositiveNumber(record.discountAmount);
+  const originalAmount = asPositiveNumber(record.originalAmount);
+  if (!discountAmount || !originalAmount) return null;
+
+  const rawSource = record.source;
+  const source = rawSource === "coupon" || rawSource === "sale_event" || rawSource === "env_fallback"
+    ? rawSource
+    : typeof record.couponCode === "string" && record.couponCode.trim()
+      ? "coupon"
+      : "sale_event";
+  const discountType = record.discountType === "percentage" || record.discountType === "fixed"
+    ? record.discountType
+    : undefined;
+
+  return {
+    source,
+    discountCode: typeof record.couponCode === "string" ? record.couponCode : undefined,
+    discountId: typeof record.discountId === "string" ? record.discountId : undefined,
+    discountName: typeof record.discountName === "string" ? record.discountName : undefined,
+    discountPercent: asPositiveNumber(record.discountPercent),
+    discountType,
+    discountAmount,
+    originalAmount,
+    finalAmount: asPositiveNumber(record.finalAmount) ?? paymentAmount,
+  };
+}
+
 function serializeOrder(order: {
   orderId: string;
   status: string;
@@ -39,6 +73,7 @@ function serializeOrder(order: {
   qrDataUrl: string;
   metadata?: {
     physicalOrderId?: string | null;
+    discount?: unknown;
     payos?: {
       checkoutUrl?: string;
     } | null;
@@ -59,6 +94,7 @@ function serializeOrder(order: {
     status: order.status,
     amount: order.amount,
     currency: order.currency,
+    discount: serializePaymentDiscount(order.metadata?.discount, order.amount),
     provider: order.provider,
     purpose: order.purpose ?? "plus_subscription",
     physicalOrderId: order.metadata?.physicalOrderId ?? null,

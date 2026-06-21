@@ -1,6 +1,16 @@
 import { CouponUsageModel } from "../models/CouponUsageModel";
 import { DiscountModel, type DiscountDocument, type DiscountAppliesTo } from "../models/DiscountModel";
 
+/** Normalize and sanitize a coupon code from client input.
+ *  Shared across billing and order endpoints for consistent validation. */
+export function normalizeCouponCode(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim().toUpperCase();
+  if (!trimmed) return undefined;
+  if (trimmed.length > 50 || !/^[A-Z0-9_-]+$/.test(trimmed)) return undefined;
+  return trimmed;
+}
+
 export interface DiscountInfo {
   valid: boolean;
   discountPercent?: number;
@@ -178,7 +188,7 @@ export async function validateCoupon(
     if (originalAmount < minAmount) {
       return {
         valid: false,
-        reason: `??n h?ng t?i thi?u ${minAmount.toLocaleString("vi-VN")} ? ?? ?p d?ng m? n?y.`,
+        reason: `Đơn hàng tối thiểu ${minAmount.toLocaleString("vi-VN")} ₫ để áp dụng mã này.`,
         minAmount,
       };
     }
@@ -189,7 +199,7 @@ export async function validateCoupon(
     if (originalAmount - discountAmount < 1000) {
       return {
         valid: false,
-        reason: "S? ti?n sau gi?m kh?ng ???c th?p h?n 1.000 ?.",
+        reason: "Số tiền sau giảm không được thấp hơn 1.000 ₫.",
       };
     }
 
@@ -313,6 +323,11 @@ export async function recordCouponUsage(
   orderId: string,
 ): Promise<boolean> {
   try {
+    const existingUsage = await CouponUsageModel.findOne({ discountId, userId }).lean<{ orderId?: string }>();
+    if (existingUsage) {
+      return existingUsage.orderId === orderId;
+    }
+
     const updated = await DiscountModel.findOneAndUpdate(
       {
         _id: discountId,

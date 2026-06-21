@@ -22,7 +22,7 @@ import { formatVnd } from "@/features/order/lib/pricing";
 import { apiClient } from "@/lib/api/apiClient";
 import { getBackendOrderId } from "@/lib/api/orderLinkStore";
 import { useAuthContext } from "@/lib/auth/AuthContext";
-import { type ApiOrder, type KitPaymentSessionResponse, createKitPaymentSession, getOrder as getBackendOrder } from "@/services/orderService";
+import { type ApiOrder, type ApiOrderDiscount, type KitPaymentSessionResponse, createKitPaymentSession, getOrder as getBackendOrder } from "@/services/orderService";
 import { PageHero } from "../components/layout/PageHero";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
@@ -38,6 +38,7 @@ import {
   getOrderStatusStepIndex,
   getOrders,
   type LocalOrder,
+  type LocalOrderDiscount,
   type OrderStatus,
   updateOrderStatus,
 } from "../utils/order-storage";
@@ -63,6 +64,7 @@ interface PaymentOrderStatusResponse {
   status: PaymentOrderStatus;
   amount: number;
   currency: string;
+  discount?: LocalOrderDiscount | null;
   provider?: string | null;
   bankAccount: string;
   bankName: string;
@@ -182,6 +184,29 @@ function normalizeBackendStatus(status: string): OrderStatus {
   }
 }
 
+function mapApiDiscountToLocal(discount: ApiOrderDiscount | null | undefined): LocalOrderDiscount | undefined {
+  if (!discount || discount.discountAmount <= 0) return undefined;
+  return {
+    source: discount.source,
+    discountCode: discount.discountCode,
+    discountId: discount.discountId,
+    discountName: discount.discountName,
+    discountPercent: discount.discountPercent,
+    discountType: discount.discountType,
+    discountAmount: discount.discountAmount,
+    originalAmount: discount.originalAmount,
+    finalAmount: discount.finalAmount,
+  };
+}
+
+function getDiscountDisplayLabel(discount: LocalOrderDiscount): string {
+  if (discount.discountCode) return `Mã ${discount.discountCode}`;
+  if (discount.discountName) return discount.discountName;
+  if (discount.source === "sale_event") return "Ưu đãi đang áp dụng";
+  if (discount.source === "env_fallback") return "Ưu đãi tự động";
+  return "Giảm giá";
+}
+
 /** Convert an ApiOrder to the LocalOrder display shape so the rest of the page renders unchanged. */
 function mapBackendOrderToLocal(api: ApiOrder, localOrder: LocalOrder | null): LocalOrder {
   const addressParts = [
@@ -205,7 +230,12 @@ function mapBackendOrderToLocal(api: ApiOrder, localOrder: LocalOrder | null): L
     email: api.email,
     phone: api.phone,
     shippingAddress: addressParts || localOrder?.shippingAddress || "",
-    keywords: localOrder?.keywords ?? [],
+    lines: api.lines ?? localOrder?.lines ?? [],
+    subtotalVnd: api.subtotalVnd ?? localOrder?.subtotalVnd ?? 0,
+    shippingVnd: api.shippingVnd ?? localOrder?.shippingVnd ?? 0,
+    totalVnd: api.totalVnd ?? localOrder?.totalVnd ?? 0,
+    discount: mapApiDiscountToLocal(api.discount) ?? localOrder?.discount,
+    keywords: api.keywords ?? localOrder?.keywords ?? [],
     note: api.note ?? localOrder?.note ?? "",
   };
 }
@@ -638,7 +668,7 @@ export function OrderStatusPage() {
               </p>
               <div className="mt-4 space-y-3">
                 <PaymentInfoRow
-                  label="Số tiền"
+                  label="Số tiền cần chuyển"
                   value={`${formatVndAmount(paymentOrder.amount)} ${paymentOrder.currency}`}
                   copyValue={String(paymentOrder.amount)}
                   copyKey="amount"
@@ -646,6 +676,18 @@ export function OrderStatusPage() {
                   onCopy={copyPaymentValue}
                   highlight
                 />
+                {paymentOrder.discount && paymentOrder.discount.discountAmount > 0 && (
+                  <div className="rounded-lg border border-app-status-success/20 bg-app-status-success/8 p-3 text-sm">
+                    <div className="flex items-center justify-between gap-3 text-app-ink-muted">
+                      <span>Tạm tính trước giảm</span>
+                      <span className="tabular-nums line-through">{formatVndAmount(paymentOrder.discount.originalAmount)}</span>
+                    </div>
+                    <div className="mt-1 flex items-center justify-between gap-3 font-medium text-app-status-success">
+                      <span>{getDiscountDisplayLabel(paymentOrder.discount)}</span>
+                      <span className="tabular-nums">-{formatVndAmount(paymentOrder.discount.discountAmount)}</span>
+                    </div>
+                  </div>
+                )}
                 <PaymentInfoRow
                   label="Ngân hàng nhận"
                   value={displayBankName}
@@ -924,6 +966,18 @@ export function OrderStatusPage() {
                     <p className="mt-[var(--space-inline)] text-sm leading-7 text-app-ink-soft">
                       Đơn này được tạo từ phiên bản trước. Vui lòng liên hệ shop để xác nhận chi tiết.
                     </p>
+                  )}
+                  {order.discount && order.discount.discountAmount > 0 && (
+                    <div className="mt-3 space-y-1 border-t border-app-line pt-3 text-sm">
+                      <div className="flex items-center justify-between gap-2 text-app-ink-muted">
+                        <span>Tạm tính trước giảm</span>
+                        <span className="tabular-nums line-through">{formatVnd(order.discount.originalAmount)}</span>
+                      </div>
+                      <div className="flex items-center justify-between gap-2 font-medium text-app-status-success">
+                        <span>{getDiscountDisplayLabel(order.discount)}</span>
+                        <span className="tabular-nums">-{formatVnd(order.discount.discountAmount)}</span>
+                      </div>
+                    </div>
                   )}
                   {typeof order.totalVnd === "number" && order.totalVnd > 0 && (
                     <div className="mt-3 flex items-center justify-between border-t border-app-line pt-3 text-sm font-semibold">
@@ -1264,9 +1318,28 @@ function KitPaymentCta({
       </CardHeader>
       <CardContent className="space-y-3">
         {typeof order.totalVnd === "number" && order.totalVnd > 0 ? (
-          <div className="flex items-center justify-between rounded-lg border border-app-line bg-app-surface px-3 py-2 text-sm">
-            <span className="text-app-ink-soft">Tổng đơn</span>
-            <span className="font-semibold tabular-nums text-app-accent">{formatVnd(order.totalVnd)}</span>
+          <div className="rounded-lg border border-app-line bg-app-surface px-3 py-2 text-sm">
+            {order.discount && order.discount.discountAmount > 0 ? (
+              <div className="space-y-1">
+                <div className="flex items-center justify-between gap-3 text-app-ink-muted">
+                  <span>Tạm tính</span>
+                  <span className="tabular-nums line-through">{formatVnd(order.discount.originalAmount)}</span>
+                </div>
+                <div className="flex items-center justify-between gap-3 font-medium text-app-status-success">
+                  <span>{getDiscountDisplayLabel(order.discount)}</span>
+                  <span className="tabular-nums">-{formatVnd(order.discount.discountAmount)}</span>
+                </div>
+                <div className="flex items-center justify-between gap-3 border-t border-app-line pt-1 font-semibold text-app-accent">
+                  <span>Tổng thanh toán</span>
+                  <span className="tabular-nums">{formatVnd(order.totalVnd)}</span>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                <span className="text-app-ink-soft">Tổng đơn</span>
+                <span className="font-semibold tabular-nums text-app-accent">{formatVnd(order.totalVnd)}</span>
+              </div>
+            )}
           </div>
         ) : null}
 

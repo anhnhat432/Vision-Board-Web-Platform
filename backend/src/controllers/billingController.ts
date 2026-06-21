@@ -3,7 +3,7 @@ import type { Request, Response } from "express";
 import { billingService } from "../services/billingServiceInstance";
 import { getPaymentProviderAdapter } from "../services/paymentProviderRegistry";
 import { PaymentProviderNotConfiguredError } from "../services/paymentProviderAdapter";
-import { resolveDiscountForCheckout, recordCouponUsage } from "../services/discountService";
+import { resolveDiscountForCheckout, recordCouponUsage, normalizeCouponCode } from "../services/discountService";
 import { CouponUsageModel } from "../models/CouponUsageModel";
 import { ApiError } from "../utils/apiError";
 import { successResponse } from "../utils/apiResponse";
@@ -62,12 +62,6 @@ function getPublicCheckoutUserId(clientUserId: string): string {
 
 function getPlusPriceFromEnv(): number {
   return Number.parseInt(process.env.PLUS_PRICE_VND?.trim() ?? "99000", 10);
-}
-
-function normalizeCouponCodeFromBody(couponCode: unknown): string | undefined {
-  if (typeof couponCode !== "string") return undefined;
-  const trimmed = couponCode.trim();
-  return trimmed || undefined;
 }
 
 interface DiscountMetadata {
@@ -218,7 +212,10 @@ export async function createCheckoutSession(req: Request, res: Response): Promis
   }
 
   const originalAmount = getPlusPriceFromEnv();
-  const normalizedCouponCode = normalizeCouponCodeFromBody(couponCode);
+  const normalizedCouponCode = normalizeCouponCode(couponCode);
+  if (couponCode !== undefined && couponCode !== null && !normalizedCouponCode) {
+    throw new ApiError(400, "M? gi?m gi? kh?ng h?p l?.", undefined, "invalid_coupon_code");
+  }
 
   const { finalAmount, appliedDiscount, discountInfo } = await resolveDiscountForCheckout(
     originalAmount,
@@ -322,7 +319,10 @@ export async function createPublicCheckoutSession(req: Request, res: Response): 
   }
 
   const originalAmount = getPlusPriceFromEnv();
-  const normalizedCouponCode = normalizeCouponCodeFromBody(couponCode);
+  const normalizedCouponCode = normalizeCouponCode(couponCode);
+  if (couponCode !== undefined && couponCode !== null && !normalizedCouponCode) {
+    throw new ApiError(400, "M? gi?m gi? kh?ng h?p l?.", undefined, "invalid_coupon_code");
+  }
 
   const publicUserId = getPublicCheckoutUserId(clientUserId.trim());
 

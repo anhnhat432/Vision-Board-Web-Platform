@@ -6,6 +6,7 @@ import { cn } from "@/app/components/ui/utils";
 export interface StepCardProps {
   step: number;
   title: string;
+  subtitle?: string;
   status?: "pending" | "current" | "done";
   hint?: string;
   errorText?: string;
@@ -13,27 +14,30 @@ export interface StepCardProps {
   id?: string;
 }
 
-export function StepCard({ step, title, status = "pending", hint, errorText, children, id }: StepCardProps) {
+export function StepCard({ step, title, subtitle, status = "pending", hint, errorText, children, id }: StepCardProps) {
   return (
     <section
       id={id}
-      className="rounded-[var(--r-card)] border border-[var(--order-border)] bg-[var(--order-card)] p-5 shadow-app-sm sm:p-6"
+      className="rounded-[18px] border border-[var(--order-border)] bg-[var(--order-card)] p-[22px_24px]"
     >
-      <header className="mb-4 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <span
-            className={cn(
-              "flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm font-semibold",
-              status === "done" && "bg-[var(--order-accent)] text-white",
-              status === "current" && "border-2 border-[var(--order-accent)] text-[var(--order-accent)]",
-              status === "pending" && "bg-[var(--order-border)] text-[var(--order-text-muted)]",
-            )}
-          >
-            {status === "done" ? <Check className="h-4 w-4" /> : step}
-          </span>
-          <h2 className="text-base font-semibold sm:text-lg">{title}</h2>
-        </div>
-        {hint && <span className="text-xs text-[var(--order-text-muted)]">{hint}</span>}
+      <header className="mb-4 flex items-center gap-[10px]">
+        <span
+          className={cn(
+            "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-bold font-mono",
+            status === "done" && "bg-[var(--order-accent)] text-white",
+            status === "current" && "border-[1.5px] border-[var(--order-accent)] text-[var(--order-accent)]",
+            status === "pending" && "border-[1.5px] border-[var(--order-accent)] text-[var(--order-accent)]",
+          )}
+        >
+          {status === "done" ? <Check className="h-3 w-3" /> : step}
+        </span>
+        <h2 className="text-[17px] font-bold m-0 tracking-[-0.01em]">
+          {title}
+          {subtitle && (
+            <span className="text-[13px] font-medium text-[var(--order-text-muted)] ml-1">{subtitle}</span>
+          )}
+        </h2>
+        {hint && <span className="text-xs text-[var(--order-text-muted)] ml-auto">{hint}</span>}
       </header>
       <div>{children}</div>
       {errorText && <p className="mt-2 text-xs text-destructive">{errorText}</p>}

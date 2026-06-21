@@ -26,6 +26,18 @@ export interface ApiGoalSnapshot {
   focusArea?: string;
 }
 
+export interface ApiOrderDiscount {
+  source: "coupon" | "sale_event" | "env_fallback";
+  discountCode?: string;
+  discountId?: string;
+  discountName?: string;
+  discountPercent?: number;
+  discountType?: "percentage" | "fixed";
+  discountAmount: number;
+  originalAmount: number;
+  finalAmount: number;
+}
+
 export interface ApiOrder {
   id: string;
   userId: string;
@@ -35,6 +47,7 @@ export interface ApiOrder {
   subtotalVnd?: number;
   shippingVnd?: number;
   totalVnd?: number;
+  discount?: ApiOrderDiscount;
   keywords?: string[];
   // Deprecated v2: kitType vẫn có thể tồn tại trên đơn cũ.
   kitType?: string;
@@ -67,6 +80,7 @@ export interface CreateOrderPayload {
   goalTitle?: string;
   keywords?: string[];
   note?: string;
+  couponCode?: string;
 }
 
 export function getOrders(): Promise<ApiOrder[]> {

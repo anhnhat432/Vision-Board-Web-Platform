@@ -182,10 +182,7 @@ export function BillingPlan() {
   const subscription = userData.subscription;
   const expiryInfo = useMemo(() => getBillingExpiryInfo(subscription), [subscription]);
   const graceState = useMemo(() => getSubscriptionGraceState(userData), [userData]);
-  const [couponDiscount, setCouponDiscount] = useState<DiscountInfo | null>(null);
-
   const handleCouponChange = (discount: DiscountInfo | null) => {
-    setCouponDiscount(discount);
     try {
       if (discount?.discountCode) {
         sessionStorage.setItem("billing:couponCode", discount.discountCode);

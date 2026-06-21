@@ -41,6 +41,22 @@ const orderLineSchema = new Schema(
   { _id: false },
 );
 
+
+const orderDiscountSchema = new Schema(
+  {
+    source: { type: String, required: true, enum: ["coupon", "sale_event", "env_fallback"] },
+    discountCode: { type: String, required: false, trim: true },
+    discountId: { type: String, required: false, trim: true },
+    discountName: { type: String, required: false, trim: true },
+    discountPercent: { type: Number, required: false, min: 0 },
+    discountType: { type: String, required: false, enum: ["percentage", "fixed"] },
+    discountAmount: { type: Number, required: true, min: 0 },
+    originalAmount: { type: Number, required: true, min: 0 },
+    finalAmount: { type: Number, required: true, min: 0 },
+  },
+  { _id: false },
+);
+
 const orderSchema = new Schema(
   {
     userId: {
@@ -77,6 +93,11 @@ const orderSchema = new Schema(
       type: Number,
       default: 0,
       min: 0,
+    },
+    discount: {
+      type: orderDiscountSchema,
+      required: false,
+      default: undefined,
     },
     keywords: {
       type: [String],

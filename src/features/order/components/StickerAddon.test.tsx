@@ -37,8 +37,10 @@ describe("StickerAddon", () => {
     expect(img.getAttribute("src")).toBe("/img/sticker.png");
   });
 
-  it("renders placeholder when thumbnail missing", () => {
+  it("renders emoji preview when thumbnail missing", () => {
     render(<StickerAddon sticker={sticker} value={null} onChange={() => {}} />);
-    expect(screen.getByTestId("catalog-thumbnail-placeholder")).toBeInTheDocument();
+    // The sticker shows a gradient div with 🌸 emoji
+    expect(screen.getByText("🌸")).toBeInTheDocument();
+    expect(screen.getByText("Sticker tròn HynBee")).toBeInTheDocument();
   });
 });

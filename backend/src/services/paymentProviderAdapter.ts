@@ -49,12 +49,15 @@ export interface CreateCheckoutSessionInput {
   physicalOrderId?: string;
   /** Discount metadata applied to this checkout (server-authoritative). */
   discount?: {
+    source?: "coupon" | "sale_event" | "env_fallback";
     couponCode?: string;
     discountId?: string;
     discountName?: string;
     discountPercent?: number;
+    discountType?: "percentage" | "fixed";
     discountAmount?: number;
     originalAmount: number;
+    finalAmount?: number;
   };
 }
 

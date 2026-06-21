@@ -2,6 +2,7 @@
 
 export type {
   CreateLocalOrderInput,
+  LocalOrderDiscount,
   LocalOrderV2,
   OrderLine,
   OrderStatus,

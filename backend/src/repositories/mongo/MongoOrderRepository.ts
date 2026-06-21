@@ -30,6 +30,18 @@ export interface OrderLine {
   lineTotalVnd: number;
 }
 
+export interface OrderDiscount {
+  source: "coupon" | "sale_event" | "env_fallback";
+  discountCode?: string;
+  discountId?: string;
+  discountName?: string;
+  discountPercent?: number;
+  discountType?: "percentage" | "fixed";
+  discountAmount: number;
+  originalAmount: number;
+  finalAmount: number;
+}
+
 export interface OrderEntity {
   id: string;
   userId: string;
@@ -39,6 +51,7 @@ export interface OrderEntity {
   subtotalVnd: number;
   shippingVnd: number;
   totalVnd: number;
+  discount?: OrderDiscount;
   keywords: string[];
   kitType?: string;
   fullName: string;
@@ -68,6 +81,7 @@ export interface CreateOrderData {
   subtotalVnd: number;
   shippingVnd: number;
   totalVnd: number;
+  discount?: OrderDiscount;
   keywords: string[];
   kitType?: string;
 }
@@ -78,6 +92,24 @@ export interface UpdateOrderStatusData {
   adminNote?: string;
   cancelledAt?: Date;
   deliveredAt?: Date;
+}
+
+
+function mapOrderDiscount(docDiscount: unknown): OrderDiscount | undefined {
+  if (!docDiscount || typeof docDiscount !== "object") return undefined;
+  const discount = docDiscount as Partial<OrderDiscount>;
+  if (!discount.source || typeof discount.discountAmount !== "number") return undefined;
+  return {
+    source: discount.source,
+    discountCode: discount.discountCode ?? undefined,
+    discountId: discount.discountId ?? undefined,
+    discountName: discount.discountName ?? undefined,
+    discountPercent: discount.discountPercent ?? undefined,
+    discountType: discount.discountType ?? undefined,
+    discountAmount: discount.discountAmount,
+    originalAmount: discount.originalAmount ?? 0,
+    finalAmount: discount.finalAmount ?? 0,
+  };
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Mongoose lean/toObject output is loosely typed
@@ -109,6 +141,7 @@ function mapOrder(doc: any): OrderEntity {
     subtotalVnd: doc.subtotalVnd ?? 0,
     shippingVnd: doc.shippingVnd ?? 0,
     totalVnd: doc.totalVnd ?? 0,
+    discount: mapOrderDiscount(doc.discount),
     keywords: Array.isArray(doc.keywords) ? doc.keywords : [],
     kitType: doc.kitType ?? undefined,
     fullName: doc.fullName,
@@ -153,6 +186,7 @@ export class MongoOrderRepository {
       subtotalVnd: data.subtotalVnd,
       shippingVnd: data.shippingVnd,
       totalVnd: data.totalVnd,
+      discount: data.discount,
       keywords: data.keywords,
       kitType: data.kitType,
       fullName: data.fullName,
@@ -181,6 +215,20 @@ export class MongoOrderRepository {
   async getAllOrders(): Promise<OrderEntity[]> {
     const docs = await OrderModel.find({}).sort({ createdAt: -1 }).lean();
     return docs.map((doc) => mapOrder(doc));
+  }
+
+  async patchOrder(id: string, fields: { totalVnd?: number; discount?: undefined }): Promise<OrderEntity | null> {
+    const setFields: Record<string, unknown> = {};
+    if (fields.totalVnd !== undefined) setFields.totalVnd = fields.totalVnd;
+    if (fields.discount === undefined) setFields.$unset = { discount: "" };
+
+    const doc = await OrderModel.findByIdAndUpdate(
+      id,
+      setFields,
+      { new: true, runValidators: true },
+    ).lean();
+
+    return doc ? mapOrder(doc) : null;
   }
 
   async updateOrderStatus(id: string, data: UpdateOrderStatusData): Promise<OrderEntity | null> {

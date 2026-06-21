@@ -1,9 +1,11 @@
 import { OrderCatalogModel } from "../models/OrderCatalogModel";
+import { normalizeCouponCode, resolveDiscountForCheckout } from "./discountService";
 import type { OrderStatus } from "../models/OrderModel";
 import { MongoGoalRepository } from "../repositories/mongo/MongoGoalRepository";
 import {
   MongoOrderRepository,
   type GoalSnapshot,
+  type OrderDiscount,
   type OrderLine,
   type OrderLineType,
   type ShippingAddress,
@@ -27,6 +29,7 @@ export interface CreateOrderPayload {
   goalId?: unknown;
   goalTitle?: unknown;
   keywords?: unknown;
+  couponCode?: unknown;
   kitType?: unknown;
   // Bất kỳ field nào khác client gửi (ví dụ priceVnd) sẽ bị bỏ qua bởi server.
   [key: string]: unknown;
@@ -66,6 +69,27 @@ interface CatalogItemLean {
 
 function asString(value: unknown): string {
   return typeof value === "string" ? value : "";
+}
+
+type CheckoutDiscountResult = Awaited<ReturnType<typeof resolveDiscountForCheckout>>;
+
+function buildOrderDiscount(
+  appliedDiscount: CheckoutDiscountResult["appliedDiscount"],
+  originalAmount: number,
+  finalAmount: number,
+): OrderDiscount | undefined {
+  if (appliedDiscount.source === "none" || !appliedDiscount.discountAmount) return undefined;
+  return {
+    source: appliedDiscount.source,
+    discountCode: appliedDiscount.discountCode,
+    discountId: appliedDiscount.discountId,
+    discountName: appliedDiscount.discountName,
+    discountPercent: appliedDiscount.discountPercent,
+    discountType: appliedDiscount.discountType,
+    discountAmount: appliedDiscount.discountAmount,
+    originalAmount,
+    finalAmount,
+  };
 }
 
 function buildShippingAddress(value: unknown): ShippingAddress {
@@ -186,7 +210,31 @@ class OrderService {
     const subtotalVnd = lines.reduce((s, l) => s + l.lineTotalVnd, 0);
     // TODO: cấu hình sau khi có bảng giá vận chuyển. Cần sync với frontend `pricing.ts`.
     const shippingVnd = 0;
-    const totalVnd = subtotalVnd + shippingVnd;
+    const originalTotalVnd = subtotalVnd + shippingVnd;
+    const couponCode = normalizeCouponCode(payload.couponCode);
+    if (payload.couponCode !== undefined && payload.couponCode !== null && !couponCode) {
+      throw new ApiError(400, "Mã giảm giá không hợp lệ.", undefined, "invalid_coupon_code");
+    }
+    const discountResult = await resolveDiscountForCheckout(
+      originalTotalVnd,
+      "PLUS",
+      "physical_order",
+      couponCode,
+      userId,
+    );
+
+    if (couponCode && discountResult.discountInfo && !discountResult.discountInfo.valid) {
+      throw new ApiError(
+        400,
+        discountResult.discountInfo.reason ?? "Mã giảm giá không hợp lệ hoặc đã hết hạn.",
+        undefined,
+        "invalid_coupon",
+      );
+    }
+
+    const totalVnd = discountResult.finalAmount;
+    const discount = buildOrderDiscount(discountResult.appliedDiscount, originalTotalVnd, totalVnd);
+
 
     // 7. Goal snapshot (optional)
     let goalSnapshot: GoalSnapshot | undefined;
@@ -216,13 +264,14 @@ class OrderService {
 
     const note = typeof payload.note === "string" ? payload.note.trim() || undefined : undefined;
 
-    return this.orderRepository.createOrder({
+    const order = await this.orderRepository.createOrder({
       userId,
       schemaVersion: 2,
       lines,
       subtotalVnd,
       shippingVnd,
       totalVnd,
+      discount,
       keywords,
       fullName,
       email,
@@ -231,6 +280,7 @@ class OrderService {
       note,
       goalSnapshot,
     });
+    return order;
   }
 
   async getUserOrders(userId: string) {

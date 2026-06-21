@@ -1,10 +1,39 @@
 import type { Request, Response } from "express";
 
 import { orderService } from "../services/orderService";
+import { recordCouponUsage } from "../services/discountService";
 import { getPaymentProviderAdapter } from "../services/paymentProviderRegistry";
 import { ApiError } from "../utils/apiError";
 import { successResponse } from "../utils/apiResponse";
 import { requireAuthUser } from "./controllerHelpers";
+
+function buildPhysicalOrderPaymentDiscount(physicalOrder: Awaited<ReturnType<typeof orderService.getOrder>>) {
+  if (!physicalOrder.discount) return undefined;
+  return {
+    source: physicalOrder.discount.source,
+    couponCode: physicalOrder.discount.discountCode,
+    discountId: physicalOrder.discount.discountId,
+    discountName: physicalOrder.discount.discountName,
+    discountPercent: physicalOrder.discount.discountPercent,
+    discountType: physicalOrder.discount.discountType,
+    discountAmount: physicalOrder.discount.discountAmount,
+    originalAmount: physicalOrder.discount.originalAmount,
+    finalAmount: physicalOrder.discount.finalAmount,
+  };
+}
+
+async function reservePhysicalOrderCouponUsage(
+  physicalOrder: Awaited<ReturnType<typeof orderService.getOrder>>,
+  userId: string,
+): Promise<void> {
+  const discount = physicalOrder.discount;
+  if (discount?.source !== "coupon" || !discount.discountId || !discount.discountCode) return;
+
+  const usageRecorded = await recordCouponUsage(discount.discountId, discount.discountCode, userId, physicalOrder.id);
+  if (!usageRecorded) {
+    throw new ApiError(429, "Mã giảm giá đã hết lượt sử dụng. Vui lòng thử lại.", undefined, "coupon_exhausted");
+  }
+}
 
 export async function createOrder(req: Request, res: Response): Promise<void> {
   const user = requireAuthUser(req);
@@ -66,6 +95,8 @@ export async function createKitPaymentSession(req: Request, res: Response): Prom
     throw new ApiError(400, "Tổng giá trị đơn hàng không hợp lệ.", undefined, "invalid_order_total");
   }
 
+  await reservePhysicalOrderCouponUsage(physicalOrder, user.uid);
+
   const frontendOrigin = process.env.FRONTEND_ORIGIN?.trim() || "";
 
   const adapter = getPaymentProviderAdapter();
@@ -81,6 +112,7 @@ export async function createKitPaymentSession(req: Request, res: Response): Prom
     physicalOrderId: orderId,
     receiptEmail: physicalOrder.email,
     receiptName: physicalOrder.fullName,
+    discount: buildPhysicalOrderPaymentDiscount(physicalOrder),
   });
 
   res.status(200).json(

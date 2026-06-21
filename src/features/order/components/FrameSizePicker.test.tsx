@@ -46,8 +46,10 @@ describe("FrameSizePicker", () => {
     expect(img.getAttribute("src")).toBe("/img/frame-20x30.png");
   });
 
-  it("renders placeholder when thumbnail missing", () => {
+  it("renders wood texture preview when thumbnail missing", () => {
     render(<FrameSizePicker frames={frames} selected={null} onChange={() => {}} />);
-    expect(screen.getAllByTestId("catalog-thumbnail-placeholder")).toHaveLength(2);
+    // Wood texture shows frame dimensions derived from label
+    expect(screen.getByText("20×30 cm")).toBeInTheDocument();
+    expect(screen.getByText("30×40 cm")).toBeInTheDocument();
   });
 });

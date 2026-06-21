@@ -17,6 +17,18 @@ export interface OrderLine {
   lineTotalVnd: number;
 }
 
+export interface LocalOrderDiscount {
+  source: "coupon" | "sale_event" | "env_fallback";
+  discountCode?: string;
+  discountId?: string;
+  discountName?: string;
+  discountPercent?: number;
+  discountType?: "percentage" | "fixed";
+  discountAmount: number;
+  originalAmount: number;
+  finalAmount: number;
+}
+
 export interface LocalOrderV2 {
   id: string;
   schemaVersion: 2;
@@ -27,6 +39,7 @@ export interface LocalOrderV2 {
   subtotalVnd: number;
   shippingVnd: number;
   totalVnd: number;
+  discount?: LocalOrderDiscount;
   fullName: string;
   email: string;
   phone: string;
@@ -100,6 +113,7 @@ export function createLocalOrder(input: CreateLocalOrderInput): LocalOrderV2 {
     subtotalVnd: input.subtotalVnd,
     shippingVnd: input.shippingVnd,
     totalVnd: input.totalVnd,
+    discount: input.discount,
     fullName: input.fullName,
     email: input.email,
     phone: input.phone,
