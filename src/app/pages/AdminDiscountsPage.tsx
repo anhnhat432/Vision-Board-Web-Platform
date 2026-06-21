@@ -1,4 +1,4 @@
-import { Percent, Plus, Loader2, RefreshCw, X } from "lucide-react";
+import { Percent, Plus, Loader2, RefreshCw, X, ArrowLeft, ArrowRight } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAuthContext } from "@/lib/auth/AuthContext";
@@ -41,6 +41,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { Switch } from "../components/ui/switch";
+import { Checkbox } from "../components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 
 const DISCOUNT_TYPE_LABELS: Record<string, string> = {
@@ -57,6 +58,9 @@ const DEFAULT_FORM: AdminDiscountCreatePayload = {
   startsAt: new Date().toISOString(),
   appliesTo: ["PLUS", "physical_order"],
 };
+
+type FormStep = 1 | 2 | 3;
+const TOTAL_STEPS = 3;
 
 function getDiscountLabel(d: AdminDiscountSummary): string {
   if (d.discountType === "percentage") return `${d.discountValue}%`;
@@ -85,6 +89,7 @@ export function AdminDiscountsPage() {
   const [editing, setEditing] = useState<AdminDiscountSummary | null>(null);
   const [form, setForm] = useState<AdminDiscountCreatePayload>({ ...DEFAULT_FORM });
   const [submitting, setSubmitting] = useState(false);
+  const [currentStep, setCurrentStep] = useState<FormStep>(1);
 
   const [deleteTarget, setDeleteTarget] = useState<AdminDiscountSummary | null>(null);
 
@@ -134,6 +139,7 @@ export function AdminDiscountsPage() {
 
   const openCreate = () => {
     setEditing(null);
+    setCurrentStep(1);
     setForm({
       ...DEFAULT_FORM,
       startsAt: new Date().toISOString(),
@@ -143,6 +149,7 @@ export function AdminDiscountsPage() {
 
   const openEdit = (d: AdminDiscountSummary) => {
     setEditing(d);
+    setCurrentStep(1);
     setForm({
       type: d.type,
       code: d.code,
@@ -223,6 +230,22 @@ export function AdminDiscountsPage() {
     if (!d.endsAt) return false;
     return new Date(d.endsAt) < new Date();
   };
+
+  const toggleAppliesTo = (target: string) => {
+    setForm((f) => {
+      const current = f.appliesTo ?? ["PLUS", "physical_order"];
+      if (current.includes(target)) {
+        const next = current.filter((t) => t !== target);
+        return { ...f, appliesTo: next.length > 0 ? next : ["PLUS"] };
+      }
+      return { ...f, appliesTo: [...current, target] };
+    });
+  };
+
+  const previewOriginal = 99000;
+  const previewFinal = form.discountType === "percentage"
+    ? Math.max(previewOriginal - Math.round(previewOriginal * form.discountValue / 100), 1000)
+    : Math.max(previewOriginal - form.discountValue, 1000);
 
   return (
     <div className="page-enter space-y-6">
@@ -375,175 +398,297 @@ export function AdminDiscountsPage() {
       )}
 
       {/* Create/Edit Dialog */}
-      <Dialog open={formOpen} onOpenChange={setFormOpen}>
-        <DialogContent className="max-w-lg">
+      <Dialog open={formOpen} onOpenChange={(v) => { setFormOpen(v); if (!v) setCurrentStep(1); }}>
+        <DialogContent className="max-w-xl">
           <DialogHeader>
             <DialogTitle>{editing ? "Sửa discount" : "Tạo discount mới"}</DialogTitle>
-            <DialogDescription>
-              {editing ? "Cập nhật thông tin discount." : "Điền thông tin để tạo discount mới."}
+            <DialogDescription className="flex items-center gap-2">
+              <span>
+                {editing ? "Cập nhật thông tin discount." : "Điền thông tin để tạo discount mới."}
+              </span>
+              <span className="ml-auto text-xs font-medium tabular-nums text-app-ink-muted">
+                Bước {currentStep}/{TOTAL_STEPS}
+              </span>
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label>Loại</Label>
-                <Select
-                  value={form.type}
-                  onValueChange={(v) => setForm({ ...form, type: v })}
-                  disabled={!!editing}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="coupon">Coupon</SelectItem>
-                    <SelectItem value="sale_event">Đợt sale</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label>Hình thức giảm</Label>
-                <Select
-                  value={form.discountType}
-                  onValueChange={(v) => setForm({ ...form, discountType: v })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="percentage">Phần trăm (%)</SelectItem>
-                    <SelectItem value="fixed">Số tiền cố định (VNĐ)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="space-y-1.5">
-              <Label>Mã code</Label>
-              <Input
-                value={form.code}
-                onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })}
-                placeholder="VD: SUMMER2026"
-                disabled={!!editing}
-                className="uppercase font-mono"
+
+          {/* Step progress bar */}
+          <div className="flex gap-1.5">
+            {([1, 2, 3] as FormStep[]).map((s) => (
+              <div
+                key={s}
+                className={`h-1 flex-1 rounded-full transition-colors ${
+                  s <= currentStep ? "bg-app-accent" : "bg-app-line"
+                }`}
               />
-            </div>
-            <div className="space-y-1.5">
-              <Label>Tên hiển thị</Label>
-              <Input
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="VD: Giảm 30% ra mắt"
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label>Giá trị giảm</Label>
-                <Input
-                  type="number"
-                  value={form.discountValue}
-                  onChange={(e) =>
-                    setForm({ ...form, discountValue: Math.max(0, Number(e.target.value)) })
-                  }
-                  min={0}
-                  max={form.discountType === "percentage" ? 100 : undefined}
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Đơn tối thiểu (VNĐ)</Label>
-                <Input
-                  type="number"
-                  value={form.minAmount ?? ""}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      minAmount: e.target.value ? Math.max(0, Number(e.target.value)) : undefined,
-                    })
-                  }
-                  min={0}
-                  placeholder="Không giới hạn"
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label>Số lượt dùng tối đa</Label>
-                <Input
-                  type="number"
-                  value={form.maxUses ?? ""}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      maxUses: e.target.value ? Math.max(1, Number(e.target.value)) : undefined,
-                    })
-                  }
-                  min={1}
-                  placeholder="Không giới hạn"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Áp dụng cho</Label>
-                <Select
-                  value={form.appliesTo?.[0] ?? "PLUS"}
-                  onValueChange={(v) => setForm({ ...form, appliesTo: [v] })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="PLUS">PLUS</SelectItem>
-                    <SelectItem value="physical_order">Vision Board Kit</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label>Bắt đầu</Label>
-                <Input
-                  type="datetime-local"
-                  value={form.startsAt ? form.startsAt.slice(0, 16) : ""}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      startsAt: e.target.value ? new Date(e.target.value).toISOString() : new Date().toISOString(),
-                    })
-                  }
-                />
-              </div>
-              <div className="space-y-1.5">
-                <Label>Kết thúc (để trống nếu không giới hạn)</Label>
-                <Input
-                  type="datetime-local"
-                  value={form.endsAt ? form.endsAt.slice(0, 16) : ""}
-                  onChange={(e) =>
-                    setForm({
-                      ...form,
-                      endsAt: e.target.value ? new Date(e.target.value).toISOString() : undefined,
-                    })
-                  }
-                />
-              </div>
-            </div>
-            {editing && (
-              <div className="flex items-center gap-2">
-                <Switch
-                  id="form-active"
-                  checked={form.active !== false}
-                  onCheckedChange={(v) => setForm({ ...form, active: v })}
-                />
-                <Label htmlFor="form-active" className="cursor-pointer">
-                  Kích hoạt
-                </Label>
-              </div>
+            ))}
+          </div>
+
+          <div className="space-y-5 py-2">
+            {/* ─── Step 1: Thông tin cơ bản ─── */}
+            {currentStep === 1 && (
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label>Loại</Label>
+                    <Select
+                      value={form.type}
+                      onValueChange={(v) => setForm({ ...form, type: v })}
+                      disabled={!!editing}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="coupon">Coupon</SelectItem>
+                        <SelectItem value="sale_event">Đợt sale</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-[11px] text-app-ink-muted">
+                      Coupon = mã nhập tay. Đợt sale = tự động áp dụng.
+                    </p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Hình thức giảm</Label>
+                    <Select
+                      value={form.discountType}
+                      onValueChange={(v) => setForm({ ...form, discountType: v })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="percentage">Phần trăm (%)</SelectItem>
+                        <SelectItem value="fixed">Số tiền cố định (VNĐ)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label>Mã code</Label>
+                  <Input
+                    value={form.code}
+                    onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })}
+                    placeholder="VD: SUMMER2026"
+                    disabled={!!editing}
+                    className="uppercase font-mono"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label>Tên hiển thị</Label>
+                  <Input
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    placeholder="VD: Giảm 30% ra mắt"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label>Giá trị giảm</Label>
+                  <Input
+                    type="number"
+                    value={form.discountValue}
+                    onChange={(e) =>
+                      setForm({ ...form, discountValue: Math.max(0, Number(e.target.value)) })
+                    }
+                    min={0}
+                    max={form.discountType === "percentage" ? 100 : undefined}
+                    className="max-w-[200px]"
+                  />
+                  {form.discountType === "percentage" && (
+                    <p className="text-[11px] text-app-ink-muted">
+                      {form.discountValue}% của giá gốc = {formatVnd(Math.round(previewOriginal * form.discountValue / 100))}
+                    </p>
+                  )}
+                </div>
+              </>
+            )}
+
+            {/* ─── Step 2: Điều kiện áp dụng ─── */}
+            {currentStep === 2 && (
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label>Đơn tối thiểu (VNĐ)</Label>
+                    <Input
+                      type="number"
+                      value={form.minAmount ?? ""}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          minAmount: e.target.value ? Math.max(0, Number(e.target.value)) : undefined,
+                        })
+                      }
+                      min={0}
+                      placeholder="Không giới hạn"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Số lượt dùng tối đa</Label>
+                    <Input
+                      type="number"
+                      value={form.maxUses ?? ""}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          maxUses: e.target.value ? Math.max(1, Number(e.target.value)) : undefined,
+                        })
+                      }
+                      min={1}
+                      placeholder="Không giới hạn"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Áp dụng cho</Label>
+                  <div className="space-y-2 rounded-card border border-app-line bg-app-muted/40 p-3">
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id="apply-plus"
+                        checked={(form.appliesTo ?? []).includes("PLUS")}
+                        onCheckedChange={() => toggleAppliesTo("PLUS")}
+                      />
+                      <Label htmlFor="apply-plus" className="cursor-pointer text-sm">
+                        <span className="font-medium">PLUS</span>
+                        <span className="ml-1.5 text-xs text-app-ink-muted">Gói nâng cấp</span>
+                      </Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id="apply-kit"
+                        checked={(form.appliesTo ?? []).includes("physical_order")}
+                        onCheckedChange={() => toggleAppliesTo("physical_order")}
+                      />
+                      <Label htmlFor="apply-kit" className="cursor-pointer text-sm">
+                        <span className="font-medium">Vision Board Kit</span>
+                        <span className="ml-1.5 text-xs text-app-ink-muted">Sản phẩm vật lý</span>
+                      </Label>
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* ─── Step 3: Thời gian + Kích hoạt + Preview ─── */}
+            {currentStep === 3 && (
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label>Bắt đầu</Label>
+                    <Input
+                      type="datetime-local"
+                      value={form.startsAt ? form.startsAt.slice(0, 16) : ""}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          startsAt: e.target.value ? new Date(e.target.value).toISOString() : new Date().toISOString(),
+                        })
+                      }
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Kết thúc</Label>
+                    <Input
+                      type="datetime-local"
+                      value={form.endsAt ? form.endsAt.slice(0, 16) : ""}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          endsAt: e.target.value ? new Date(e.target.value).toISOString() : undefined,
+                        })
+                      }
+                    />
+                    <p className="text-[11px] text-app-ink-muted">Để trống nếu không giới hạn</p>
+                  </div>
+                </div>
+
+                {editing && (
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      id="form-active"
+                      checked={form.active !== false}
+                      onCheckedChange={(v) => setForm({ ...form, active: v })}
+                    />
+                    <Label htmlFor="form-active" className="cursor-pointer">
+                      Kích hoạt
+                    </Label>
+                  </div>
+                )}
+
+                {/* Preview panel */}
+                <div className="rounded-card border border-app-line bg-app-muted/30 p-4">
+                  <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-app-ink-muted">
+                    Xem trước hiển thị
+                  </p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge variant="outline" className="text-xs">
+                      {DISCOUNT_TYPE_LABELS[form.type] ?? form.type}
+                    </Badge>
+                    <span className="font-mono text-sm uppercase text-app-ink">{form.code || "CODE"}</span>
+                  </div>
+                  <p className="text-sm font-semibold text-app-ink">{form.name || "Tên discount"}</p>
+                  <div className="mt-2 flex items-baseline gap-2">
+                    <span className="text-sm text-app-ink-muted line-through">
+                      {formatVnd(previewOriginal)}
+                    </span>
+                    <span className="text-lg font-semibold text-app-status-success">
+                      {formatVnd(previewFinal)}
+                    </span>
+                    <Badge className="ml-1 bg-app-status-success/15 text-app-status-success text-[11px]">
+                      {form.discountType === "percentage" ? `-${form.discountValue}%` : `-${formatVnd(form.discountValue)}`}
+                    </Badge>
+                  </div>
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {(form.appliesTo ?? ["PLUS"]).map((t) => (
+                      <Badge key={t} variant="outline" className="text-[10px]">
+                        {t === "PLUS" ? "PLUS" : "Vision Board Kit"}
+                      </Badge>
+                    ))}
+                  </div>
+                  {form.minAmount ? (
+                    <p className="mt-1.5 text-[11px] text-app-ink-muted">
+                      Đơn tối thiểu: {formatVnd(form.minAmount)}
+                    </p>
+                  ) : null}
+                  {form.maxUses ? (
+                    <p className="mt-0.5 text-[11px] text-app-ink-muted">
+                      Giới hạn: {form.maxUses} lượt
+                    </p>
+                  ) : null}
+                </div>
+              </>
             )}
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setFormOpen(false)}>
+
+          <DialogFooter className="flex items-center gap-2 sm:gap-0">
+            {currentStep > 1 && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentStep((s) => (s - 1) as FormStep)}
+              >
+                <ArrowLeft className="mr-1.5 h-4 w-4" />
+                Quay lại
+              </Button>
+            )}
+            <Button variant="outline" size="sm" onClick={() => { setFormOpen(false); setCurrentStep(1); }}>
               Hủy
             </Button>
-            <Button onClick={handleSubmit} disabled={submitting}>
-              {submitting ? "Đang lưu…" : editing ? "Cập nhật" : "Tạo"}
-            </Button>
+            <div className="flex-1" />
+            {currentStep < TOTAL_STEPS ? (
+              <Button size="sm" onClick={() => setCurrentStep((s) => (s + 1) as FormStep)}>
+                Tiếp theo
+                <ArrowRight className="ml-1.5 h-4 w-4" />
+              </Button>
+            ) : (
+              <Button size="sm" onClick={handleSubmit} disabled={submitting}>
+                {submitting ? "Đang lưu…" : editing ? "Cập nhật" : "Tạo discount"}
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
