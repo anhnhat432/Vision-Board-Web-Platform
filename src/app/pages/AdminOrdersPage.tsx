@@ -192,13 +192,13 @@ export function AdminOrdersPage() {
       />
 
       {error ? (
-        <div className="rounded-[var(--r-card)] border border-rose-500/30 bg-rose-500/10 p-5 text-sm text-rose-200">
-          <p className="font-semibold">Không tải được đơn in</p>
-          <p className="mt-1 leading-6 text-rose-100/80">{error}</p>
+        <div className="rounded-[var(--r-card)] border border-rose-300 bg-rose-50 p-5 text-sm dark:border-rose-500/30 dark:bg-rose-500/10">
+          <p className="font-semibold text-rose-700 dark:text-rose-200">Không tải được đơn in</p>
+          <p className="mt-1 leading-6 text-rose-600 dark:text-rose-100/80">{error}</p>
           <Button
             type="button"
             variant="outline"
-            className="mt-4 border-app-line bg-app-bg-subtle text-app-ink hover:bg-app-accent-soft hover:text-app-ink"
+            className="mt-4 rounded-xl border-app-line bg-app-bg-subtle text-app-ink hover:bg-app-accent-soft hover:text-app-ink"
             onClick={() => void loadOrders()}
           >
             Thử lại
@@ -245,14 +245,16 @@ export function AdminOrdersPage() {
               role="tab"
               aria-selected={active}
               onClick={() => setStatusFilter(status)}
-              className={`inline-flex items-center gap-2 rounded-[var(--r-pill)] border px-3 py-1.5 text-xs font-medium transition-colors ${
+              className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-150 ${
                 active
-                  ? "border-app-accent/40 bg-app-accent-soft text-app-accent"
-                  : "border-app-line bg-app-surface text-app-ink-soft hover:bg-app-accent-soft hover:text-app-ink"
+                  ? "border-app-accent/40 bg-app-accent-soft text-app-accent shadow-sm"
+                  : "border-app-line/60 bg-app-surface text-app-ink-soft hover:bg-app-accent-soft/50 hover:text-app-ink hover:border-app-accent/20"
               }`}
             >
               <span>{label}</span>
-              <span className="rounded-[var(--r-pill)] bg-app-accent-soft px-1.5 text-xs tabular-nums text-app-ink-soft">
+              <span className={`rounded-full px-1.5 text-xs tabular-nums ${
+                active ? "bg-app-accent/15 text-app-accent font-semibold" : "bg-app-bg-subtle text-app-ink-soft"
+              }`}>
                 {counts[status]}
               </span>
             </button>
@@ -302,13 +304,19 @@ export function AdminOrdersPage() {
             const frameLabel = order.lines?.find((line) => line.type === "frame")?.label ?? order.kitType ?? "—";
             const themeCount = order.lines?.filter((line) => line.type === "theme").length ?? 0;
             return (
-              <li key={order.id} className={`${adminSurface.card} p-5`}>
-                <div className="flex flex-wrap items-start justify-between gap-3 border-b border-app-line pb-4">
-                  <div className="min-w-0">
-                    <p className="text-base font-semibold text-app-ink">{order.fullName}</p>
-                    <p className="mt-1 text-sm text-app-ink-muted">
-                      {order.email} · {order.phone || "—"}
-                    </p>
+              <li key={order.id} className={`${adminSurface.card} ${adminSurface.cardHover} p-5`}>
+                <div className="flex flex-wrap items-start justify-between gap-3 border-b border-app-line/60 pb-4">
+                  <div className="min-w-0 flex items-center gap-3">
+                    {/* Avatar circle */}
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-app-accent-soft to-app-bg-subtle text-xs font-bold text-app-accent">
+                      {(order.fullName || "?").charAt(0).toUpperCase()}
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-base font-semibold text-app-ink">{order.fullName}</p>
+                      <p className="mt-0.5 text-xs text-app-ink-muted">
+                        {order.email} · {order.phone || "—"}
+                      </p>
+                    </div>
                   </div>
                   <AdminStatusBadge tone={ORDER_STATUS_TONES[order.status]}>
                     {ORDER_STATUS_LABELS[order.status]}
@@ -317,23 +325,23 @@ export function AdminOrdersPage() {
 
                 <div className="mt-4 grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2 lg:grid-cols-5">
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-app-ink-muted">Mã đơn</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-app-ink-muted/70">Mã đơn</p>
                     <p className="mt-0.5 truncate font-mono text-xs text-app-ink-soft">{order.id}</p>
                   </div>
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-app-ink-muted">Khung</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-app-ink-muted/70">Khung</p>
                     <p className="mt-0.5 text-app-ink-soft">{frameLabel}</p>
                   </div>
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-app-ink-muted">Số set ảnh</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-app-ink-muted/70">Số set ảnh</p>
                     <p className="mt-0.5 text-app-ink-soft">{themeCount}</p>
                   </div>
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-app-ink-muted">Ngày tạo</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-app-ink-muted/70">Ngày tạo</p>
                     <p className="mt-0.5 text-app-ink-soft">{formatDate(order.createdAt)}</p>
                   </div>
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-app-ink-muted">Mục tiêu</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-app-ink-muted/70">Mục tiêu</p>
                     <p className="mt-0.5 truncate text-app-ink-soft">
                       {order.goalSnapshot?.title ?? "Không gắn mục tiêu"}
                     </p>
@@ -341,13 +349,13 @@ export function AdminOrdersPage() {
                 </div>
 
                 {order.note ? (
-                  <div className="mt-4 rounded-[var(--r-control)] border border-app-line bg-app-bg-subtle px-4 py-3">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-app-ink-muted">Ghi chú</p>
+                  <div className="mt-4 rounded-xl border border-app-line/60 bg-app-bg-subtle/50 px-4 py-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-app-ink-muted/70">Ghi chú</p>
                     <p className="mt-1 text-sm leading-6 text-app-ink-soft">{order.note}</p>
                   </div>
                 ) : null}
 
-                <div className="mt-4 flex items-center justify-end border-t border-app-line pt-4">
+                <div className="mt-4 flex items-center justify-end border-t border-app-line/60 pt-4">
                   <OrderActions order={order} busy={busyOrderId === order.id} onTransition={handleTransition} />
                 </div>
               </li>

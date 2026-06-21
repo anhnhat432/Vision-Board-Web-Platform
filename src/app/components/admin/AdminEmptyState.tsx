@@ -2,7 +2,6 @@ import { Inbox } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
 
 import { cn } from "../ui/utils";
-import { adminSurface } from "./tokens";
 
 interface AdminEmptyStateProps {
   title: string;
@@ -14,16 +13,35 @@ interface AdminEmptyStateProps {
 
 /**
  * Friendly empty placeholder for admin lists.
+ *
+ * Features: gradient icon container, refined typography, warm feel.
  */
-export function AdminEmptyState({ title, description, icon: Icon = Inbox, action, className }: AdminEmptyStateProps) {
+export function AdminEmptyState({
+  title,
+  description,
+  icon: Icon = Inbox,
+  action,
+  className,
+}: AdminEmptyStateProps) {
   return (
-    <div className={cn(adminSurface.card, "flex flex-col items-center gap-3 px-6 py-10 text-center", className)}>
-      <span className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-app-bg-subtle text-app-ink-soft">
-        <Icon className="h-6 w-6" />
+    <div
+      className={cn(
+        "flex flex-col items-center gap-4 rounded-[var(--r-card)] border border-dashed border-app-line bg-app-bg-subtle/40 px-6 py-12 text-center",
+        className,
+      )}
+    >
+      <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-app-accent-soft to-app-bg-subtle text-app-accent shadow-sm">
+        <Icon className="h-7 w-7" />
       </span>
-      <p className="text-base font-semibold text-app-ink">{title}</p>
-      {description ? <p className="max-w-sm text-sm leading-6 text-app-ink-muted">{description}</p> : null}
-      {action ? <div className="mt-2">{action}</div> : null}
+      <div className="space-y-1.5">
+        <p className="text-base font-semibold text-app-ink">{title}</p>
+        {description ? (
+          <p className="max-w-sm text-sm leading-6 text-app-ink-muted">
+            {description}
+          </p>
+        ) : null}
+      </div>
+      {action ? <div className="mt-1">{action}</div> : null}
     </div>
   );
 }

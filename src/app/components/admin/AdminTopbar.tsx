@@ -1,4 +1,4 @@
-import { Menu, Search } from "lucide-react";
+import { ChevronRight, Menu, Search } from "lucide-react";
 import { useLocation } from "react-router";
 
 import { Button } from "../ui/button";
@@ -32,8 +32,9 @@ export function AdminTopbar({ onOpenSidebar }: AdminTopbarProps) {
   const searchActive = handler !== null;
 
   return (
-    <header className="sticky top-0 z-30 h-14 border-b border-app-line bg-app-bg/92 backdrop-blur">
-      <div className="flex h-full items-center justify-between gap-3 px-4 sm:px-6">
+    <header className="sticky top-0 z-30 border-b border-app-line bg-app-bg/85 backdrop-blur-md">
+      <div className="flex h-14 items-center justify-between gap-3 px-4 sm:px-6">
+        {/* Left: mobile menu + breadcrumb */}
         <div className="flex min-w-0 items-center gap-3">
           <Button
             type="button"
@@ -45,14 +46,26 @@ export function AdminTopbar({ onOpenSidebar }: AdminTopbarProps) {
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <nav aria-label="Breadcrumb" className="hidden min-w-0 items-center gap-2 text-sm lg:flex">
-            <span className="text-app-ink-muted">Admin</span>
-            <span className="text-app-ink-muted">/</span>
-            <span className="truncate font-medium text-app-ink">{label}</span>
+
+          {/* Desktop breadcrumb with chevron */}
+          <nav
+            aria-label="Breadcrumb"
+            className="hidden min-w-0 items-center gap-1.5 text-sm lg:flex"
+          >
+            <span className="rounded-md bg-app-accent-soft/50 px-2 py-0.5 text-xs font-semibold text-app-accent">
+              Admin
+            </span>
+            <ChevronRight className="h-3.5 w-3.5 text-app-ink-muted" />
+            <span className="truncate font-semibold text-app-ink">{label}</span>
           </nav>
-          <span className="truncate text-sm font-semibold text-app-ink lg:hidden">{label}</span>
+
+          {/* Mobile page label */}
+          <span className="truncate text-sm font-semibold text-app-ink lg:hidden">
+            {label}
+          </span>
         </div>
 
+        {/* Right: search */}
         <div className="hidden w-full max-w-xs md:block">
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted" />
@@ -62,7 +75,10 @@ export function AdminTopbar({ onOpenSidebar }: AdminTopbarProps) {
                 value={handler.value}
                 onChange={(event) => handler.onChange(event.target.value)}
                 placeholder={handler.placeholder}
-                className={cn(adminInput, "h-9 pl-9")}
+                className={cn(
+                  adminInput,
+                  "h-9 rounded-lg pl-9 border-app-line/60 bg-app-bg-subtle/60",
+                )}
                 aria-label="Tìm kiếm trên trang admin"
               />
             ) : (
@@ -70,7 +86,10 @@ export function AdminTopbar({ onOpenSidebar }: AdminTopbarProps) {
                 type="search"
                 disabled
                 placeholder="Tìm kiếm (chọn trang để mở)"
-                className={cn(adminInput, "h-9 pl-9 disabled:cursor-not-allowed disabled:opacity-70")}
+                className={cn(
+                  adminInput,
+                  "h-9 rounded-lg pl-9 border-app-line/60 bg-app-bg-subtle/60 disabled:cursor-not-allowed disabled:opacity-60",
+                )}
                 aria-label="Tìm kiếm trên trang admin"
                 title="Tìm kiếm hoạt động khi trang hỗ trợ"
               />

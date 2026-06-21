@@ -1,4 +1,14 @@
-import { ClipboardList, CreditCard, FileText, LayoutDashboard, LogOut, Package, Percent, Users, WalletCards } from "lucide-react";
+import {
+  ClipboardList,
+  CreditCard,
+  FileText,
+  LayoutDashboard,
+  LogOut,
+  Package,
+  Percent,
+  Users,
+  WalletCards,
+} from "lucide-react";
 import type { ComponentType } from "react";
 import { NavLink } from "react-router";
 
@@ -39,20 +49,39 @@ interface AdminSidebarProps {
  * Renders a 240px column on `lg+`. On mobile this component is rendered inside
  * a Sheet by the layout, so it doesn't gate its own visibility.
  */
-export function AdminSidebar({ email, onLogout, pendingCounts, onNavigate }: AdminSidebarProps) {
+export function AdminSidebar({
+  email,
+  onLogout,
+  pendingCounts,
+  onNavigate,
+}: AdminSidebarProps) {
   return (
     <aside className="flex h-full w-full flex-col border-r border-app-line bg-app-bg">
-      <div className="flex items-center gap-3 border-b border-app-line px-5 py-5">
-        <span className="flex h-9 w-9 items-center justify-center rounded-[var(--r-tile)] bg-app-accent-soft text-app-accent">
-          <LayoutDashboard className="h-4 w-4" />
-        </span>
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-app-ink">Admin</p>
-          <p className="truncate text-xs text-app-ink-muted">{email}</p>
+      {/* ── Brand header ── */}
+      <div className="relative overflow-hidden border-b border-app-line px-5 py-5">
+        {/* Subtle gradient backdrop */}
+        <div className="absolute inset-0 bg-gradient-to-br from-app-accent/8 via-transparent to-transparent" />
+        <div className="relative flex items-center gap-3">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-app-accent to-app-accent/70 text-white shadow-sm">
+            <LayoutDashboard className="h-5 w-5" />
+          </span>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-bold tracking-tight text-app-ink">
+              Admin Panel
+            </p>
+            <p className="truncate text-xs text-app-ink-muted">{email}</p>
+          </div>
         </div>
       </div>
 
-      <nav className="flex-1 space-y-1 px-3 py-4" aria-label="Admin navigation">
+      {/* ── Navigation ── */}
+      <nav
+        className="flex-1 space-y-0.5 px-3 py-4"
+        aria-label="Admin navigation"
+      >
+        <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-app-ink-muted/70">
+          Điều hướng
+        </p>
         {ADMIN_NAV_ITEMS.map((item) => {
           const badge = pendingCounts?.[item.to];
           return (
@@ -63,28 +92,46 @@ export function AdminSidebar({ email, onLogout, pendingCounts, onNavigate }: Adm
               end={item.to === "/admin/dashboard"}
               className={({ isActive }) =>
                 cn(
-                  "group flex items-center gap-3 rounded-[var(--r-control)] px-3 py-2 text-sm font-medium transition-colors",
-                  isActive ? "bg-app-accent-soft text-app-ink" : "text-app-ink-muted hover:bg-app-bg-subtle hover:text-app-ink",
+                  "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150",
+                  isActive
+                    ? "bg-app-accent-soft/80 text-app-ink shadow-sm"
+                    : "text-app-ink-muted hover:bg-app-bg-subtle hover:text-app-ink",
                 )
               }
             >
-              <item.icon className="h-4 w-4 shrink-0" />
-              <span className="flex-1 truncate">{item.label}</span>
-              {typeof badge === "number" && badge > 0 ? (
-                <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-[var(--r-pill)] bg-app-accent-soft px-1.5 text-xs font-semibold text-app-accent">
-                  {badge}
-                </span>
-              ) : null}
+              {({ isActive }) => (
+                <>
+                  {/* Active left accent bar */}
+                  {isActive && (
+                    <span className="absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-full bg-app-accent" />
+                  )}
+                  <item.icon
+                    className={cn(
+                      "h-4 w-4 shrink-0 transition-colors duration-150",
+                      isActive
+                        ? "text-app-accent"
+                        : "text-app-ink-muted group-hover:text-app-ink-soft",
+                    )}
+                  />
+                  <span className="flex-1 truncate">{item.label}</span>
+                  {typeof badge === "number" && badge > 0 ? (
+                    <span className="inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-app-accent px-1.5 text-[10px] font-bold text-white">
+                      {badge}
+                    </span>
+                  ) : null}
+                </>
+              )}
             </NavLink>
           );
         })}
       </nav>
 
+      {/* ── Logout ── */}
       <div className="border-t border-app-line p-3">
         <Button
           type="button"
           variant="ghost"
-          className="w-full justify-start gap-2 text-app-ink-soft hover:bg-app-accent-soft hover:text-app-ink"
+          className="w-full justify-start gap-2 rounded-xl text-app-ink-muted hover:bg-rose-50 hover:text-rose-600 dark:hover:bg-rose-500/10 dark:hover:text-rose-400 transition-colors duration-150"
           onClick={onLogout}
         >
           <LogOut className="h-4 w-4" />

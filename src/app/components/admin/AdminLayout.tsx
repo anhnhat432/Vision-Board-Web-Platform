@@ -189,7 +189,11 @@ function AdminLayoutShell({
 
   return (
     <div className="min-h-screen bg-app-bg text-app-ink">
-      <div className="flex min-h-screen">
+      {/* Subtle dotted background texture */}
+      <div className="fixed inset-0 pointer-events-none opacity-[0.015] dark:opacity-[0.03]"
+        style={{ backgroundImage: "radial-gradient(circle, currentColor 1px, transparent 1px)", backgroundSize: "24px 24px" }}
+      />
+      <div className="relative flex min-h-screen">
         <div className="hidden w-60 shrink-0 lg:block">
           <div className="sticky top-0 h-screen">
             <AdminSidebar email={email} onLogout={onLogout} pendingCounts={pendingCounts} />
