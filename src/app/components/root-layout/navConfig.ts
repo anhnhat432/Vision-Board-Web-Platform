@@ -1,15 +1,15 @@
 import {
-  Award,
   BookOpen,
   CalendarDays,
   CreditCard,
-  Images,
   LayoutDashboard,
+  Library,
   type LucideIcon,
   Package,
+  Scale,
   Sparkles,
   Target,
-  TrendingUp,
+  Trophy,
 } from "lucide-react";
 
 export interface NavItem {
@@ -24,9 +24,9 @@ export const NAV_ITEMS: NavItem[] = [
   { path: "/goals", label: "Mục tiêu", compactLabel: "Mục tiêu", icon: Target },
   { path: "/12-week-system", label: "Hệ thống 12 tuần", compactLabel: "12 tuần", icon: CalendarDays },
   { path: "/vision-board", label: "Vision board", compactLabel: "Vision", icon: Sparkles },
-  { path: "/gallery", label: "Thư viện", compactLabel: "Thư viện", icon: Images },
-  { path: "/life-balance", label: "Cân bằng cuộc sống", compactLabel: "Cân bằng", icon: TrendingUp },
-  { path: "/achievements", label: "Thành tựu", compactLabel: "Thành tựu", icon: Award },
+  { path: "/gallery", label: "Thư viện", compactLabel: "Thư viện", icon: Library },
+  { path: "/life-balance", label: "Cân bằng cuộc sống", compactLabel: "Cân bằng", icon: Scale },
+  { path: "/achievements", label: "Thành tựu", compactLabel: "Thành tựu", icon: Trophy },
   { path: "/journal", label: "Nhật ký", compactLabel: "Nhật ký", icon: BookOpen },
   { path: "/order", label: "Đặt kit", compactLabel: "Đặt kit", icon: Package },
   { path: "/billing/plan", label: "Gói & thanh toán", compactLabel: "Gói", icon: CreditCard },
