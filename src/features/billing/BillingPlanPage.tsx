@@ -99,7 +99,7 @@ import { useCheckoutReturn } from "./useCheckoutReturn";
 import { usePaymentHistory } from "./usePaymentHistory";
 import { BillingDiscountSection } from "./BillingDiscountSection";
 import type { DiscountInfo } from "./useCouponValidation";
-import { PLUS_MONTHLY_PRICE_VND } from "@/app/utils/billing-pricing";
+import { PLUS_MONTHLY_PRICE_VND, formatVndAmount } from "@/app/utils/billing-pricing";
 
 export function BillingPlan() {
   const navigate = useNavigate();
@@ -1258,7 +1258,29 @@ export function BillingPlan() {
                       {plan.shortLabel}
                     </span>
                     <h3 className="font-serif text-2xl font-medium text-app-ink">{plan.name}</h3>
-                    <p className="mt-1 text-3xl font-medium text-app-ink">{plan.priceLabel}</p>
+                    {isPlus && saleEvent ? (
+                      <div className="mt-1">
+                        <span className="text-xl text-app-ink-muted line-through">{plan.priceLabel}</span>
+                        <span className="ml-2 text-3xl font-medium text-app-status-success">
+                          {formatVndAmount(
+                            Math.max(
+                              PLUS_MONTHLY_PRICE_VND -
+                                (saleEvent.discountPercent
+                                  ? Math.round(PLUS_MONTHLY_PRICE_VND * saleEvent.discountPercent / 100)
+                                  : saleEvent.discountValue ?? 0),
+                              1000,
+                            ),
+                          )}
+                        </span>
+                        {saleEvent.discountPercent ? (
+                          <span className="ml-2 rounded-full bg-app-status-success/15 px-2 py-0.5 text-xs font-medium text-app-status-success">
+                            -{saleEvent.discountPercent}%
+                          </span>
+                        ) : null}
+                      </div>
+                    ) : (
+                      <p className="mt-1 text-3xl font-medium text-app-ink">{plan.priceLabel}</p>
+                    )}
                     <p className="mt-2 text-sm text-app-ink-soft">{plan.description}</p>
                   </div>
                   <ul className="space-y-2">
