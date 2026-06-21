@@ -130,11 +130,11 @@ describe("useCouponValidation", () => {
     expect(result.current.status).toBe("idle");
   });
 
-  it("gửi planCode và purpose khi được cấu hình", async () => {
+  it("g?i planCode, purpose v? originalAmount khi ???c c?u h?nh", async () => {
     mockPost.mockResolvedValue({ valid: true, discountPercent: 15 });
 
     const { result } = renderHook(() =>
-      useCouponValidation({ planCode: "PLUS", purpose: "physical_order" }),
+      useCouponValidation({ planCode: "PLUS", purpose: "physical_order", originalAmount: 250000 }),
     );
 
     await act(async () => {
@@ -143,7 +143,7 @@ describe("useCouponValidation", () => {
 
     expect(mockPost).toHaveBeenCalledWith(
       "/billing/validate-coupon",
-      { code: "KIT20", planCode: "PLUS", purpose: "physical_order" },
+      { code: "KIT20", planCode: "PLUS", purpose: "physical_order", originalAmount: 250000 },
       expect.objectContaining({ signal: expect.any(AbortSignal) }),
     );
   });

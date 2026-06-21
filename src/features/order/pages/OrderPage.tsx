@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
+import { MapPin, ShoppingBag } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/app/components/ui/button";
 import {
@@ -532,17 +533,20 @@ export function OrderPage() {
 
             {shipping.shippingAddress && (
               <div className="flex items-start gap-2 rounded-card border border-[var(--order-border)]/60 bg-[var(--order-bg)]/40 px-3 py-2.5 text-[12px] text-app-ink-muted">
-                <svg className="mt-0.5 h-3.5 w-3.5 shrink-0 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg>
+                <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0 opacity-50" />
                 <span>Giao đến: {shipping.shippingAddress}</span>
               </div>
             )}
           </div>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Xem lại</AlertDialogCancel>
+          <AlertDialogFooter className="gap-2 sm:gap-3">
+            <AlertDialogCancel className="text-app-ink-muted hover:text-app-ink hover:bg-app-bg">
+              Xem lại
+            </AlertDialogCancel>
             <AlertDialogAction
-              className="bg-[var(--order-accent)] text-white hover:bg-[var(--order-accent)]/90"
+              className="gap-2 bg-[var(--order-accent)] px-6 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[var(--order-accent)]/25 transition-all hover:bg-[var(--order-accent)]/90 hover:shadow-xl hover:shadow-[var(--order-accent)]/30 active:scale-[0.98]"
               onClick={handleConfirmSubmit}
             >
+              <ShoppingBag className="h-4 w-4" />
               Xác nhận đặt đơn
             </AlertDialogAction>
           </AlertDialogFooter>
