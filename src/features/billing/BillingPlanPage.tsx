@@ -11,7 +11,7 @@ import {
   Shield,
   Sparkles,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { apiClient, toAppError } from "@/lib/api/apiClient";
@@ -99,6 +99,7 @@ import { useCheckoutReturn } from "./useCheckoutReturn";
 import { usePaymentHistory } from "./usePaymentHistory";
 import { BillingDiscountSection } from "./BillingDiscountSection";
 import type { DiscountInfo } from "./useCouponValidation";
+import { PLUS_MONTHLY_PRICE_VND } from "@/app/utils/billing-pricing";
 
 export function BillingPlan() {
   const navigate = useNavigate();
@@ -163,6 +164,29 @@ export function BillingPlan() {
       } catch { /* non-critical */ }
     }
   };
+
+  const [saleEvent, setSaleEvent] = useState<{
+    name: string;
+    discountPercent?: number;
+    discountValue?: number;
+    discountType?: "percentage" | "fixed";
+  } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    apiClient.get<{ active: boolean } & Record<string, unknown>>("/billing/active-sale-event").then((data) => {
+      if (cancelled) return;
+      if (data?.active) {
+        setSaleEvent({
+          name: (data.name as string) ?? "Đang giảm giá",
+          discountPercent: data.discountType === "percentage" ? (data.discountValue as number) : undefined,
+          discountValue: data.discountType === "fixed" ? (data.discountValue as number) : undefined,
+          discountType: data.discountType as "percentage" | "fixed" | undefined,
+        });
+      }
+    }).catch(() => { /* sale event is optional */ });
+    return () => { cancelled = true; };
+  }, []);
 
   const lastEntitlementSync = useMemo(() => getLastEntitlementSyncSnapshot(), []);
   const lastRestoreAccess = useMemo(() => getLastRestoreAccessSnapshot(), []);
@@ -1194,9 +1218,10 @@ export function BillingPlan() {
       {!paidCheckoutDisabled && currentPlanCode === "FREE" && (
         <SectionBlock title="Khu vực mã giảm giá" headerVisuallyHidden>
           <BillingDiscountSection
-            originalAmount={99000}
+            originalAmount={PLUS_MONTHLY_PRICE_VND}
             planCode="PLUS"
             purpose="plus_subscription"
+            saleEvent={saleEvent}
             onCouponChange={handleCouponChange}
           />
         </SectionBlock>
