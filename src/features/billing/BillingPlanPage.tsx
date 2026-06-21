@@ -101,6 +101,34 @@ import { BillingDiscountSection } from "./BillingDiscountSection";
 import type { DiscountInfo } from "./useCouponValidation";
 import { PLUS_MONTHLY_PRICE_VND, formatVndAmount } from "@/app/utils/billing-pricing";
 
+interface SaleEventInfo {
+  name: string;
+  discountPercent?: number;
+  discountValue?: number;
+  discountType?: "percentage" | "fixed";
+  discountAmount?: number;
+  finalAmount?: number;
+  endsAt?: string | null;
+}
+
+function getNumberField(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function getPlusSaleFallbackFinalAmount(saleEvent: SaleEventInfo): number {
+  const discountAmount = saleEvent.discountAmount ?? (saleEvent.discountPercent
+    ? Math.round(PLUS_MONTHLY_PRICE_VND * saleEvent.discountPercent / 100)
+    : saleEvent.discountValue ?? 0);
+  return Math.max(PLUS_MONTHLY_PRICE_VND - discountAmount, 1000);
+}
+
+function getSaleBadgeLabel(saleEvent: SaleEventInfo): string | null {
+  if (saleEvent.discountPercent) return `-${saleEvent.discountPercent}%`;
+  if (saleEvent.discountValue) return `-${formatVndAmount(saleEvent.discountValue)}`;
+  if (saleEvent.discountAmount) return `-${formatVndAmount(saleEvent.discountAmount)}`;
+  return null;
+}
+
 export function BillingPlan() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -158,31 +186,39 @@ export function BillingPlan() {
 
   const handleCouponChange = (discount: DiscountInfo | null) => {
     setCouponDiscount(discount);
-    if (discount?.discountCode) {
-      try {
+    try {
+      if (discount?.discountCode) {
         sessionStorage.setItem("billing:couponCode", discount.discountCode);
-      } catch { /* non-critical */ }
-    }
+      } else {
+        sessionStorage.removeItem("billing:couponCode");
+      }
+    } catch { /* non-critical */ }
   };
 
-  const [saleEvent, setSaleEvent] = useState<{
-    name: string;
-    discountPercent?: number;
-    discountValue?: number;
-    discountType?: "percentage" | "fixed";
-  } | null>(null);
+  const [saleEvent, setSaleEvent] = useState<SaleEventInfo | null>(null);
 
   useEffect(() => {
     let cancelled = false;
-    apiClient.get<{ active: boolean } & Record<string, unknown>>("/billing/active-sale-event").then((data) => {
+    const params = new URLSearchParams({
+      purpose: "plus_subscription",
+      amount: String(PLUS_MONTHLY_PRICE_VND),
+    });
+
+    apiClient.get<{ active: boolean } & Record<string, unknown>>(`/billing/active-sale-event?${params.toString()}`).then((data) => {
       if (cancelled) return;
       if (data?.active) {
+        const discountType = data.discountType === "percentage" || data.discountType === "fixed" ? data.discountType : undefined;
         setSaleEvent({
-          name: (data.name as string) ?? "Đang giảm giá",
-          discountPercent: data.discountType === "percentage" ? (data.discountValue as number) : undefined,
-          discountValue: data.discountType === "fixed" ? (data.discountValue as number) : undefined,
-          discountType: data.discountType as "percentage" | "fixed" | undefined,
+          name: typeof data.name === "string" && data.name.trim() ? data.name : "Đang giảm giá",
+          discountPercent: discountType === "percentage" ? getNumberField(data.discountValue) : undefined,
+          discountValue: discountType === "fixed" ? getNumberField(data.discountValue) : undefined,
+          discountType,
+          discountAmount: getNumberField(data.discountAmount),
+          finalAmount: getNumberField(data.finalAmount),
+          endsAt: typeof data.endsAt === "string" ? data.endsAt : null,
         });
+      } else {
+        setSaleEvent(null);
       }
     }).catch(() => { /* sale event is optional */ });
     return () => { cancelled = true; };
@@ -1259,24 +1295,21 @@ export function BillingPlan() {
                     </span>
                     <h3 className="font-serif text-2xl font-medium text-app-ink">{plan.name}</h3>
                     {isPlus && saleEvent ? (
-                      <div className="mt-1">
-                        <span className="text-xl text-app-ink-muted line-through">{plan.priceLabel}</span>
-                        <span className="ml-2 text-3xl font-medium text-app-status-success">
-                          {formatVndAmount(
-                            Math.max(
-                              PLUS_MONTHLY_PRICE_VND -
-                                (saleEvent.discountPercent
-                                  ? Math.round(PLUS_MONTHLY_PRICE_VND * saleEvent.discountPercent / 100)
-                                  : saleEvent.discountValue ?? 0),
-                              1000,
-                            ),
-                          )}
-                        </span>
-                        {saleEvent.discountPercent ? (
-                          <span className="ml-2 rounded-full bg-app-status-success/15 px-2 py-0.5 text-xs font-medium text-app-status-success">
-                            -{saleEvent.discountPercent}%
+                      <div className="mt-1 space-y-1">
+                        <div className="flex flex-wrap items-baseline gap-2">
+                          <span className="text-xl text-app-ink-muted line-through">{plan.priceLabel}</span>
+                          <span className="text-3xl font-medium text-app-status-success">
+                            {formatVndAmount(saleEvent.finalAmount ?? getPlusSaleFallbackFinalAmount(saleEvent))}
                           </span>
-                        ) : null}
+                          {getSaleBadgeLabel(saleEvent) ? (
+                            <span className="rounded-full bg-app-status-success/15 px-2 py-0.5 text-xs font-medium text-app-status-success">
+                              {getSaleBadgeLabel(saleEvent)}
+                            </span>
+                          ) : null}
+                        </div>
+                        <p className="text-xs font-medium text-app-status-success">
+                          Đang áp dụng: {saleEvent.name}
+                        </p>
                       </div>
                     ) : (
                       <p className="mt-1 text-3xl font-medium text-app-ink">{plan.priceLabel}</p>

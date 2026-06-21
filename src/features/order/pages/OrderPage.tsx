@@ -411,9 +411,13 @@ export function OrderPage() {
             purpose="physical_order"
             onCouponChange={(d) => {
               setCouponDiscount(d);
-              if (d?.discountCode) {
-                try { sessionStorage.setItem("order:couponCode", d.discountCode); } catch { /* noop */ }
-              }
+              try {
+                if (d?.discountCode) {
+                  sessionStorage.setItem("order:couponCode", d.discountCode);
+                } else {
+                  sessionStorage.removeItem("order:couponCode");
+                }
+              } catch { /* noop */ }
             }}
           />
         </div>
@@ -460,55 +464,76 @@ export function OrderPage() {
               Vui lòng kiểm tra kỹ thông tin — đơn hàng sẽ được gửi đi và không thể thay đổi sau khi xác nhận.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <div className="space-y-2 text-sm">
-            {selectedFrame && (
-              <div className="flex justify-between">
-                <span className="text-app-ink-soft">Khung</span>
-                <span className="font-medium text-app-ink">{selectedFrame.label}</span>
-              </div>
-            )}
-            {selectedThemes.length > 0 && (
-              <div className="flex justify-between">
-                <span className="text-app-ink-soft">Set ảnh</span>
-                <span className="font-medium text-app-ink">{selectedThemes.map((t) => t.label).join(", ")}</span>
-              </div>
-            )}
-            {selectedSticker && (
-              <div className="flex justify-between">
-                <span className="text-app-ink-soft">Sticker</span>
-                <span className="font-medium text-app-ink">{selectedSticker.label} ×{draft.stickerSelection?.qty ?? 1}</span>
-              </div>
-            )}
-            <div className="flex justify-between">
-              <span className="text-app-ink-soft">Tạm tính</span>
-              <span className="font-medium text-app-ink">{formatVnd(subtotal)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-app-ink-soft">Vận chuyển</span>
-              <span className="font-medium text-app-ink">{formatVnd(shippingCost)}</span>
-            </div>
-            {couponDiscount?.discountAmount && couponDiscount.discountAmount > 0 && (
-              <div className="flex justify-between text-app-status-success">
-                <span className="flex items-center gap-1">
-                  Giảm giá
-                  {couponDiscount.discountCode && (
-                    <span className="rounded bg-app-status-success/15 px-1 text-[11px] font-mono uppercase">
-                      {couponDiscount.discountCode}
+          <div className="space-y-4">
+            {/* ── Sản phẩm ── */}
+            <div className="rounded-card border border-[var(--order-border)] bg-[var(--order-bg)]/60 p-3.5">
+              <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--order-text-muted)]">
+                Sản phẩm
+              </p>
+              <div className="space-y-1.5">
+                {selectedFrame && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-[13px] text-app-ink-soft">Khung</span>
+                    <span className="text-[13px] font-medium text-app-ink">{selectedFrame.label}</span>
+                  </div>
+                )}
+                {selectedThemes.length > 0 && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-[13px] text-app-ink-soft">Set ảnh</span>
+                    <span className="max-w-[180px] truncate text-right text-[13px] font-medium text-app-ink">
+                      {selectedThemes.map((t) => t.label).join(", ")}
                     </span>
-                  )}
-                </span>
-                <span className="font-medium">-{formatVnd(couponDiscount.discountAmount)}</span>
+                  </div>
+                )}
+                {selectedSticker && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-[13px] text-app-ink-soft">Sticker</span>
+                    <span className="text-[13px] font-medium text-app-ink">
+                      {selectedSticker.label} ×{draft.stickerSelection?.qty ?? 1}
+                    </span>
+                  </div>
+                )}
               </div>
-            )}
-            <div className="flex justify-between border-t border-[var(--order-border)] pt-2">
-              <span className="font-semibold text-app-ink">Tổng cộng</span>
-              <span className="font-semibold text-[var(--order-accent)]">
-                {formatVnd(Math.max(total - (couponDiscount?.discountAmount ?? 0), 1000))}
-              </span>
             </div>
+
+            {/* ── Thanh toán ── */}
+            <div className="rounded-card border border-[var(--order-border)] bg-[var(--order-bg)]/60 p-3.5">
+              <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-wider text-[var(--order-text-muted)]">
+                Thanh toán
+              </p>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[13px] text-app-ink-soft">Tạm tính</span>
+                  <span className="text-[13px] font-medium text-app-ink">{formatVnd(subtotal)}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-[13px] text-app-ink-soft">Vận chuyển</span>
+                  <span className="text-[13px] font-medium text-app-ink">{formatVnd(shippingCost)}</span>
+                </div>
+                {couponDiscount?.discountAmount && couponDiscount.discountAmount > 0 && (
+                  <div className="flex items-center justify-between rounded bg-app-status-success/8 px-2 py-1.5 -mx-2">
+                    <span className="flex items-center gap-1.5 text-[13px] font-medium text-app-status-success">
+                      <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-app-status-success/20 text-[10px]">%</span>
+                      Giảm giá
+                    </span>
+                    <span className="text-[13px] font-semibold text-app-status-success">
+                      -{formatVnd(couponDiscount.discountAmount)}
+                    </span>
+                  </div>
+                )}
+                <div className="flex items-center justify-between border-t border-[var(--order-border)] pt-2">
+                  <span className="text-sm font-semibold text-app-ink">Tổng thanh toán</span>
+                  <span className="text-lg font-bold tabular-nums text-[var(--order-accent)]">
+                    {formatVnd(Math.max(total - (couponDiscount?.discountAmount ?? 0), 1000))}
+                  </span>
+                </div>
+              </div>
+            </div>
+
             {shipping.shippingAddress && (
-              <div className="text-xs text-app-ink-muted">
-                Giao đến: {shipping.shippingAddress}
+              <div className="flex items-start gap-2 rounded-card border border-[var(--order-border)]/60 bg-[var(--order-bg)]/40 px-3 py-2.5 text-[12px] text-app-ink-muted">
+                <svg className="mt-0.5 h-3.5 w-3.5 shrink-0 opacity-50" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg>
+                <span>Giao đến: {shipping.shippingAddress}</span>
               </div>
             )}
           </div>

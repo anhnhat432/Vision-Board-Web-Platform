@@ -1,4 +1,4 @@
-﻿import { Check, Loader2, Tag, X } from "lucide-react";
+import { Check, Loader2, Tag, X } from "lucide-react";
 import { useState, useCallback, useEffect, useId } from "react";
 import type { ChangeEvent, KeyboardEvent } from "react";
 import { Button } from "@/app/components/ui/button";
@@ -62,9 +62,9 @@ function getFinalAmount(originalAmount: number, discountAmount: number): number 
 }
 
 function getSaleLabel(saleEvent: NonNullable<BillingDiscountSectionProps["saleEvent"]>, saleAmount: number): string {
-  if (saleEvent.discountPercent) return `Gi?m ${saleEvent.discountPercent}%`;
-  if (saleEvent.discountValue) return `Gi?m ${formatVndAmount(saleEvent.discountValue)}`;
-  return `Gi?m ${formatVndAmount(saleAmount)}`;
+  if (saleEvent.discountPercent) return `Giảm ${saleEvent.discountPercent}%`;
+  if (saleEvent.discountValue) return `Giảm ${formatVndAmount(saleEvent.discountValue)}`;
+  return `Giảm ${formatVndAmount(saleAmount)}`;
 }
 
 export function BillingDiscountSection({
@@ -146,7 +146,7 @@ export function BillingDiscountSection({
     <div className="rounded-card border border-app-line bg-app-surface p-4 sm:p-5">
       <div className="mb-4 flex items-center gap-2">
         <Tag className="h-4 w-4 text-app-accent" aria-hidden="true" />
-        <h3 className="text-sm font-semibold text-app-ink">M? gi?m gi? / ?u ??i</h3>
+        <h3 className="text-sm font-semibold text-app-ink">Mã giảm giá / Ưu đãi</h3>
       </div>
 
       {hasSaleEvent && saleEvent && (
@@ -156,7 +156,7 @@ export function BillingDiscountSection({
             <span className="min-w-0 break-words">{saleEvent.name}</span>
           </p>
           <p className="mt-1 text-xs text-app-ink-muted">
-            {getSaleLabel(saleEvent, saleAmount)} ? c?n {formatVndAmount(saleFinalAmount)}
+            {getSaleLabel(saleEvent, saleAmount)} — còn {formatVndAmount(saleFinalAmount)}
           </p>
         </div>
       )}
@@ -164,11 +164,11 @@ export function BillingDiscountSection({
       <div className="flex flex-col gap-2 sm:flex-row">
         <div className="relative min-w-0 flex-1">
           <label htmlFor={inputId} className="sr-only">
-            Nh?p m? gi?m gi?
+            Nhập mã giảm giá
           </label>
           <Input
             id={inputId}
-            placeholder="Nh?p m? gi?m gi?"
+            placeholder="Nhập mã giảm giá"
             value={inputValue}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
@@ -204,7 +204,7 @@ export function BillingDiscountSection({
         </div>
         {status === "valid" ? (
           <Button type="button" variant="outline" size="sm" onClick={handleClear} className="shrink-0 sm:w-auto">
-            X?a
+            Xóa
           </Button>
         ) : (
           <Button
@@ -214,7 +214,7 @@ export function BillingDiscountSection({
             disabled={!inputValue.trim() || status === "loading"}
             className="shrink-0 sm:w-auto"
           >
-            {status === "loading" ? "?ang ki?m tra?" : "?p d?ng"}
+            {status === "loading" ? "Đang kiểm tra…" : "Áp dụng"}
           </Button>
         )}
       </div>
@@ -229,11 +229,11 @@ export function BillingDiscountSection({
         <div id={statusId} className="mt-3 rounded-card border border-app-status-success/30 bg-app-status-success/8 p-3" aria-live="polite">
           <p className="flex items-start gap-2 text-sm font-medium text-app-status-success">
             <Check className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-            <span className="min-w-0 break-words">{effectiveDiscount.discountName ?? "M? gi?m gi? h?p l?"}</span>
+            <span className="min-w-0 break-words">{effectiveDiscount.discountName ?? "Mã giảm giá hợp lệ"}</span>
           </p>
           {effectiveDiscount.discountPercent !== undefined && (
             <p className="mt-1 text-xs text-app-ink-muted">
-              Gi?m {effectiveDiscount.discountPercent}%
+              Giảm {effectiveDiscount.discountPercent}%
             </p>
           )}
           {couponAmount > 0 && (
@@ -253,7 +253,7 @@ export function BillingDiscountSection({
         <div id={statusId} className="mt-3 rounded-card border border-app-accent/30 bg-app-accent-soft/40 p-3" aria-live="polite">
           <p className="flex items-start gap-2 text-sm font-medium text-app-accent">
             <Check className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
-            <span className="min-w-0 break-words">{saleEvent?.name} ?ang c? gi? t?t h?n m? v?a nh?p.</span>
+            <span className="min-w-0 break-words">{saleEvent?.name} đang có giá tốt hơn mã vừa nhập.</span>
           </p>
           <div className="mt-2 flex flex-wrap items-baseline gap-2">
             <span className="text-sm text-app-ink-muted line-through">
@@ -281,7 +281,7 @@ export function BillingDiscountSection({
         <div className="mt-3 rounded-card border border-app-accent/30 bg-app-accent-soft/40 p-3">
           <p className="flex items-center gap-2 text-sm font-medium text-app-accent">
             <Check className="h-4 w-4" aria-hidden="true" />
-            ?ang c? ?u ??i {envPercent}%
+            Đang có ưu đãi {envPercent}%
           </p>
           <div className="mt-2 flex flex-wrap items-baseline gap-2">
             <span className="text-sm text-app-ink-muted line-through">
