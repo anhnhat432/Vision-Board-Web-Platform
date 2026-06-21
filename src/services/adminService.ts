@@ -1,4 +1,4 @@
-import { delete as apiDelete, get, post, put } from "@/lib/api/apiClient";
+import { delete as apiDelete, get, patch, post, put } from "@/lib/api/apiClient";
 
 export interface AdminEmailStatus {
   provider: string;
@@ -320,4 +320,156 @@ export function adminListCouponUsages(
   searchParams.set("page", String(page));
   searchParams.set("limit", String(limit));
   return get<AdminCouponUsageListResponse>(`/admin/discounts/${discountId}/usages?${searchParams.toString()}`);
+}
+
+// ─── User Management ─────────────────────────────────────────────────────────
+
+export interface AdminUserListItem {
+  firebaseUid: string;
+  email: string;
+  displayName: string;
+  role: "user" | "admin";
+  onboardingCompletedAt: string | null;
+  locale: string;
+  createdAt: string;
+  updatedAt: string | null;
+  subscription: AdminSubscriptionSummary | null;
+  goalCount: number;
+}
+
+export interface AdminUserListResponse {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  items: AdminUserListItem[];
+}
+
+export interface AdminUserListParams {
+  q?: string;
+  role?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface AdminGoalSummary {
+  id: string;
+  title: string;
+  category: string;
+  description: string;
+  deadline: string;
+  status: string;
+  focusArea?: string;
+  readinessScore?: number;
+  createdAt: string;
+}
+
+export interface AdminUserPaymentOrderSummary {
+  orderId: string;
+  planCode: string;
+  billingCycle: string;
+  amount: number;
+  currency: string;
+  status: string;
+  provider: string;
+  createdAt: string;
+  completedAt?: string;
+}
+
+export interface AdminPhysicalOrderSummary {
+  id: string;
+  status: string;
+  totalVnd: number;
+  fullName: string;
+  createdAt: string;
+}
+
+export interface AdminUserDetail {
+  user: {
+    firebaseUid: string;
+    email: string;
+    displayName: string;
+    role: "user" | "admin";
+    onboardingCompletedAt: string | null;
+    termsAcceptedAt: string | null;
+    avatarUrl: string | null;
+    locale: string;
+    createdAt: string;
+    updatedAt: string | null;
+  };
+  subscription: AdminSubscriptionSummary | null;
+  goals: AdminGoalSummary[];
+  paymentOrders: AdminUserPaymentOrderSummary[];
+  physicalOrders: AdminPhysicalOrderSummary[];
+}
+
+export interface AdminUpdateUserRoleResult {
+  firebaseUid: string;
+  email: string;
+  displayName: string;
+  role: "user" | "admin";
+}
+
+export function adminListUsers(params: AdminUserListParams = {}): Promise<AdminUserListResponse> {
+  const searchParams = new URLSearchParams();
+  if (params.q?.trim()) searchParams.set("q", params.q.trim());
+  if (params.role && params.role !== "all") searchParams.set("role", params.role);
+  if (params.page) searchParams.set("page", String(params.page));
+  if (params.limit) searchParams.set("limit", String(params.limit));
+
+  const query = searchParams.toString();
+  return get<AdminUserListResponse>(`/admin/users${query ? `?${query}` : ""}`);
+}
+
+export function adminGetUserDetail(uid: string): Promise<AdminUserDetail> {
+  return get<AdminUserDetail>(`/admin/users/${uid}`);
+}
+
+export function adminUpdateUserRole(uid: string, role: "user" | "admin"): Promise<AdminUpdateUserRoleResult> {
+  return patch<AdminUpdateUserRoleResult, { role: string }>(`/admin/users/${uid}/role`, { role });
+}
+
+// ─── Audit Logs ──────────────────────────────────────────────────────────────
+
+export interface AdminAuditLogEntry {
+  _id?: string;
+  actorUid: string;
+  actorEmail?: string | null;
+  action: string;
+  target: string;
+  targetId?: string | null;
+  payload?: Record<string, unknown> | null;
+  ip?: string | null;
+  userAgent?: string | null;
+  timestamp: string;
+  success: boolean;
+}
+
+export interface AdminAuditLogListResponse {
+  page: number;
+  limit: number;
+  total: number;
+  items: AdminAuditLogEntry[];
+}
+
+export interface AdminAuditLogListParams {
+  actorUid?: string;
+  action?: string;
+  startDate?: string;
+  endDate?: string;
+  limit?: number;
+  page?: number;
+}
+
+export function adminListAuditLogs(params: AdminAuditLogListParams = {}): Promise<AdminAuditLogListResponse> {
+  const searchParams = new URLSearchParams();
+  if (params.actorUid?.trim()) searchParams.set("actorUid", params.actorUid.trim());
+  if (params.action?.trim()) searchParams.set("action", params.action.trim());
+  if (params.startDate) searchParams.set("startDate", params.startDate);
+  if (params.endDate) searchParams.set("endDate", params.endDate);
+  if (params.limit) searchParams.set("limit", String(params.limit));
+  if (params.page) searchParams.set("page", String(params.page));
+
+  const query = searchParams.toString();
+  return get<AdminAuditLogListResponse>(`/admin/audit-logs${query ? `?${query}` : ""}`);
 }

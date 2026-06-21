@@ -582,3 +582,256 @@ export async function completePaymentOrderManually(req: Request, res: Response, 
     next(error);
   }
 }
+
+// ─── User Management ─────────────────────────────────────────────────────────
+
+const DEFAULT_USER_LIMIT = 20;
+const MAX_USER_LIMIT = 100;
+const MAX_USER_SEARCH_LENGTH = 120;
+
+function parseUserLimit(value: unknown): number {
+  const parsed = typeof value === "string" ? Number(value.trim()) : typeof value === "number" ? value : NaN;
+  if (!Number.isFinite(parsed)) return DEFAULT_USER_LIMIT;
+  return Math.min(Math.max(Math.floor(parsed), 1), MAX_USER_LIMIT);
+}
+
+function parseUserPage(value: unknown): number {
+  const parsed = typeof value === "string" ? Number(value.trim()) : typeof value === "number" ? value : NaN;
+  if (!Number.isFinite(parsed)) return 1;
+  return Math.max(Math.floor(parsed), 1);
+}
+
+function normalizeUserSearch(value: unknown): string {
+  if (typeof value !== "string") return "";
+  return value.trim().slice(0, MAX_USER_SEARCH_LENGTH);
+}
+
+function normalizeUserRoleFilter(value: unknown): UserRole | "all" {
+  if (typeof value !== "string") return "all";
+  const normalized = value.trim().toLowerCase();
+  if (normalized === "admin" || normalized === "user") return normalized;
+  return "all";
+}
+
+export async function getAdminUsers(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const query = normalizeUserSearch(req.query.q ?? req.query.query ?? req.query.search);
+    const role = normalizeUserRoleFilter(req.query.role);
+    const limit = parseUserLimit(req.query.limit);
+    const page = parseUserPage(req.query.page);
+    const skip = (page - 1) * limit;
+
+    const filter: FilterQuery<typeof UserModel> = {};
+
+    if (role !== "all") {
+      filter.role = role;
+    }
+
+    if (query) {
+      const escapedSearch = escapeRegex(query);
+      const searchRegex = new RegExp(escapedSearch, "i");
+      filter.$or = [
+        { firebaseUid: searchRegex },
+        { email: searchRegex },
+        { displayName: searchRegex },
+      ];
+    }
+
+    const [total, users] = await Promise.all([
+      UserModel.countDocuments(filter),
+      UserModel.find(filter)
+        .select("firebaseUid email displayName role onboardingCompletedAt locale createdAt updatedAt")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean<Array<LeanUserSummary & { onboardingCompletedAt?: Date | null; locale?: string; updatedAt?: Date }>>(),
+    ]);
+
+    const userIds = users.map((user) => user.firebaseUid);
+    const subscriptions = userIds.length
+      ? await BillingSubscriptionModel.find({ userId: { $in: userIds } })
+          .select("userId planCode status provider billingCycle currentPeriodEnd createdAt")
+          .sort({ createdAt: -1 })
+          .lean<LeanSubscriptionSummary[]>()
+      : [];
+    const subscriptionByUserId = new Map<string, LeanSubscriptionSummary>();
+    for (const subscription of subscriptions) {
+      if (!subscriptionByUserId.has(subscription.userId)) {
+        subscriptionByUserId.set(subscription.userId, subscription);
+      }
+    }
+
+    // Count goals per user
+    const GoalModel = (await import("../models/GoalModel")).GoalModel;
+    const goalCounts = userIds.length
+      ? await GoalModel.aggregate<{ _id: string; count: number }>([
+          { $match: { userId: { $in: userIds }, deletedAt: null } },
+          { $group: { _id: "$userId", count: { $sum: 1 } } },
+        ])
+      : [];
+    const goalCountByUserId = new Map(goalCounts.map((g) => [g._id, g.count]));
+
+    res.status(200).json(
+      successResponse(
+        {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+          items: users.map((user) => ({
+            firebaseUid: user.firebaseUid,
+            email: user.email,
+            displayName: user.displayName ?? "",
+            role: user.role,
+            onboardingCompletedAt: (user as { onboardingCompletedAt?: Date | null }).onboardingCompletedAt ?? null,
+            locale: (user as { locale?: string }).locale ?? "vi",
+            createdAt: user.createdAt,
+            updatedAt: (user as { updatedAt?: Date }).updatedAt ?? null,
+          subscription: serializeSubscription(subscriptionByUserId.get(user.firebaseUid) ?? undefined),
+          goalCount: goalCountByUserId.get(user.firebaseUid) ?? 0,
+          })),
+        },
+        "Admin users loaded.",
+      ),
+    );
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getAdminUserDetail(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const uid = req.params.uid?.trim();
+    if (!uid) {
+      throw new ApiError(400, "User uid is required.", undefined, "missing_uid");
+    }
+
+    const [user, subscription] = await Promise.all([
+      UserModel.findOne({ firebaseUid: uid })
+        .lean<LeanUserSummary & { onboardingCompletedAt?: Date | null; locale?: string; termsAcceptedAt?: Date | null; avatarUrl?: string | null; updatedAt?: Date }>(),
+      BillingSubscriptionModel.findOne({ userId: uid })
+        .sort({ createdAt: -1 })
+        .lean<LeanSubscriptionSummary>(),
+    ]);
+
+    if (!user) {
+      throw new ApiError(404, "User not found.", undefined, "user_not_found");
+    }
+
+    // Get goals
+    const GoalModel = (await import("../models/GoalModel")).GoalModel;
+    const goals = await GoalModel.find({ userId: uid, deletedAt: null })
+      .select("title category description deadline status focusArea readinessScore createdAt")
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .lean();
+
+    // Get payment orders
+    const paymentOrders = await PaymentOrderModel.find({ userId: uid })
+      .select("orderId planCode billingCycle amount currency status provider createdAt completedAt")
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .lean();
+
+    // Get physical orders
+    const physicalOrders = await OrderModel.find({ userId: uid })
+      .select("status totalVnd fullName email phone createdAt")
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .lean();
+
+    res.status(200).json(
+      successResponse(
+        {
+          user: {
+            firebaseUid: user.firebaseUid,
+            email: user.email,
+            displayName: user.displayName ?? "",
+            role: user.role,
+            onboardingCompletedAt: user.onboardingCompletedAt ?? null,
+            termsAcceptedAt: user.termsAcceptedAt ?? null,
+            avatarUrl: user.avatarUrl ?? null,
+            locale: user.locale ?? "vi",
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt ?? null,
+          },
+          subscription: serializeSubscription(subscription ?? undefined),
+          goals: goals.map((g) => ({
+            id: String(g._id),
+            title: g.title,
+            category: g.category,
+            description: g.description,
+            deadline: g.deadline,
+            status: g.status,
+            focusArea: g.focusArea,
+            readinessScore: g.readinessScore,
+            createdAt: g.createdAt,
+          })),
+          paymentOrders: paymentOrders.map((po) => ({
+            orderId: po.orderId,
+            planCode: po.planCode,
+            billingCycle: po.billingCycle,
+            amount: po.amount,
+            currency: po.currency,
+            status: po.status,
+            provider: po.provider,
+            createdAt: po.createdAt,
+            completedAt: po.completedAt,
+          })),
+          physicalOrders: physicalOrders.map((o) => ({
+            id: String(o._id),
+            status: o.status,
+            totalVnd: o.totalVnd,
+            fullName: o.fullName,
+            createdAt: o.createdAt,
+          })),
+        },
+        "Admin user detail loaded.",
+      ),
+    );
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateAdminUserRole(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const uid = req.params.uid?.trim();
+    if (!uid) {
+      throw new ApiError(400, "User uid is required.", undefined, "missing_uid");
+    }
+
+    const newRole = req.body?.role;
+    if (newRole !== "user" && newRole !== "admin") {
+      throw new ApiError(400, "Role must be 'user' or 'admin'.", undefined, "invalid_role");
+    }
+
+    const user = await UserModel.findOne({ firebaseUid: uid });
+    if (!user) {
+      throw new ApiError(404, "User not found.", undefined, "user_not_found");
+    }
+
+    // Prevent self-demotion
+    const adminUser = requireAuthUser(req);
+    if (adminUser.uid === uid && newRole !== "admin") {
+      throw new ApiError(400, "Cannot remove your own admin role.", undefined, "self_demotion");
+    }
+
+    user.role = newRole;
+    await user.save();
+
+    res.status(200).json(
+      successResponse(
+        {
+          firebaseUid: user.firebaseUid,
+          email: user.email,
+          displayName: user.displayName,
+          role: user.role,
+        },
+        `User role updated to ${newRole}.`,
+      ),
+    );
+  } catch (error) {
+    next(error);
+  }
+}
