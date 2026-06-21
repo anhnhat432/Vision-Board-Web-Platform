@@ -123,6 +123,10 @@ export function adminGetOrders(): Promise<ApiOrder[]> {
   return get<ApiOrder[]>("/admin/orders");
 }
 
+export function adminGetOrder(orderId: string): Promise<ApiOrder> {
+  return get<ApiOrder>(`/admin/orders/${orderId}`);
+}
+
 export function adminUpdateOrderStatus(orderId: string, payload: AdminUpdateStatusPayload): Promise<ApiOrder> {
   return patch<ApiOrder, AdminUpdateStatusPayload>(`/admin/orders/${orderId}/status`, payload);
 }

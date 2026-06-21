@@ -1008,3 +1008,118 @@ export async function updateAdminUserSubscription(
     next(error);
   }
 }
+
+// ─── Subscription List ──────────────────────────────────────────────────────
+
+export async function getAdminSubscriptions(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const status = req.query.status as string | undefined;
+    const planCode = req.query.planCode as string | undefined;
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 30));
+    const skip = (page - 1) * limit;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const filter: FilterQuery<any> = {};
+    if (status && status !== "all") filter.status = status;
+    if (planCode && planCode !== "all") filter.planCode = planCode;
+
+    const [total, subscriptions] = await Promise.all([
+      BillingSubscriptionModel.countDocuments(filter),
+      BillingSubscriptionModel.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+    ]);
+
+    const userIds = [...new Set(subscriptions.map((s) => s.userId))];
+    const users = userIds.length
+      ? await UserModel.find({ firebaseUid: { $in: userIds } })
+          .select("firebaseUid email displayName")
+          .lean()
+      : [];
+    const userByUid = new Map(users.map((u) => [u.firebaseUid, u]));
+
+    res.status(200).json(
+      successResponse({
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        items: subscriptions.map((sub) => ({
+          id: (sub as Record<string, unknown>)._id as string,
+          userId: sub.userId,
+          userEmail: userByUid.get(sub.userId)?.email ?? sub.userId,
+          userDisplayName: userByUid.get(sub.userId)?.displayName ?? "",
+          planCode: sub.planCode,
+          status: sub.status,
+          provider: sub.provider,
+          billingCycle: sub.billingCycle ?? null,
+          currentPeriodStart: sub.currentPeriodStart ?? null,
+          currentPeriodEnd: sub.currentPeriodEnd ?? null,
+          canceledAt: sub.canceledAt ?? null,
+          createdAt: sub.createdAt,
+          updatedAt: sub.updatedAt,
+        })),
+      }, "Admin subscriptions loaded."),
+    );
+  } catch (error) {
+    next(error);
+  }
+}
+
+// ─── Email Events List ──────────────────────────────────────────────────────
+
+export async function getAdminEmailEvents(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 30));
+
+    const filter: FilterQuery<typeof BillingEventModel> = {
+      eventType: "billing_expiration_reminder",
+    };
+
+    const [total, events] = await Promise.all([
+      BillingEventModel.countDocuments(filter),
+      BillingEventModel.find(filter)
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean(),
+    ]);
+
+    const userIds = [...new Set(events.map((e) => e.userId).filter(Boolean))];
+    const users = userIds.length
+      ? await UserModel.find({ firebaseUid: { $in: userIds } })
+          .select("firebaseUid email displayName")
+          .lean()
+      : [];
+    const userByUid = new Map(users.map((u) => [u.firebaseUid, u]));
+
+    res.status(200).json(
+      successResponse({
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        items: events.map((evt) => {
+          const uid = String(evt.userId ?? "");
+          return {
+            id: (evt as Record<string, unknown>)._id as string,
+            userId: uid,
+            userEmail: userByUid.get(uid)?.email ?? uid,
+            userDisplayName: userByUid.get(uid)?.displayName ?? "",
+            status: evt.status,
+            providerEventId: evt.providerEventId,
+            processedAt: evt.processedAt ?? null,
+            error: evt.error ?? null,
+            createdAt: evt.createdAt,
+          };
+        }),
+      }, "Admin email events loaded."),
+    );
+  } catch (error) {
+    next(error);
+  }
+}

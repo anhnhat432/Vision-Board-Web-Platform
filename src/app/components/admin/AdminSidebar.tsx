@@ -4,8 +4,10 @@ import {
   FileText,
   LayoutDashboard,
   LogOut,
+  Mail,
   Package,
   Percent,
+  Settings,
   Users,
   WalletCards,
 } from "lucide-react";
@@ -27,10 +29,13 @@ export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
   { to: "/admin/dashboard", label: "Tổng quan", icon: LayoutDashboard },
   { to: "/admin/users", label: "Người dùng", icon: Users },
   { to: "/admin/orders", label: "Đơn hàng", icon: ClipboardList },
-  { to: "/admin/payments", label: "Thanh toán", icon: CreditCard },
-  { to: "/admin/refunds", label: "Hoàn tiền", icon: WalletCards },
+  { to: "/admin/subscriptions", label: "Subscription", icon: CreditCard },
+  { to: "/admin/payments", label: "Thanh toán", icon: WalletCards },
+  { to: "/admin/refunds", label: "Hoàn tiền", icon: FileText },
   { to: "/admin/discounts", label: "Giảm giá", icon: Percent },
   { to: "/admin/catalog", label: "Catalog", icon: Package },
+  { to: "/admin/email-history", label: "Email", icon: Mail },
+  { to: "/admin/settings", label: "Cài đặt", icon: Settings },
   { to: "/admin/audit-logs", label: "Audit Logs", icon: FileText },
 ];
 

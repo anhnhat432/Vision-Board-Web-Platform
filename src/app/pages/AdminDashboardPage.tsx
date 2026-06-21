@@ -1,4 +1,5 @@
 import {
+  BarChart3,
   Bell,
   CreditCard,
   Loader2,
@@ -414,6 +415,54 @@ export function AdminDashboardPage() {
         overview={overview}
         result={reminderResult}
       />
+
+      {/* Revenue Chart */}
+      {summary ? (
+        <div className={`${adminSurface.card} p-5`}>
+          <div className="flex items-center gap-2 mb-4">
+            <BarChart3 className="h-4 w-4 text-app-ink-muted" />
+            <div>
+              <p className="text-sm font-semibold text-app-ink">Doanh thu</p>
+              <p className="text-xs text-app-ink-muted">Tổng và 30 ngày gần nhất</p>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <div>
+              <div className="flex justify-between text-sm mb-1">
+                <span className="text-app-ink-soft">Tổng doanh thu</span>
+                <span className="font-semibold text-app-ink">{formatVnd(summary.revenueTotalVnd)}</span>
+              </div>
+              <div className="h-3 w-full rounded-full bg-app-bg-subtle overflow-hidden">
+                <div className="h-full rounded-full bg-app-accent" style={{ width: "100%" }} />
+              </div>
+            </div>
+            <div>
+              <div className="flex justify-between text-sm mb-1">
+                <span className="text-app-ink-soft">30 ngày qua</span>
+                <span className="font-semibold text-app-ink">{formatVnd(summary.revenueLast30DaysVnd)}</span>
+              </div>
+              <div className="h-3 w-full rounded-full bg-app-bg-subtle overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-emerald-500"
+                  style={{
+                    width: `${summary.revenueTotalVnd > 0 ? Math.min(100, Math.round((summary.revenueLast30DaysVnd / summary.revenueTotalVnd) * 100)) : 0}%`,
+                  }}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <div className="rounded-xl bg-app-bg-subtle p-3 text-center">
+                <p className="text-xs text-app-ink-muted">Plus đang dùng</p>
+                <p className="text-lg font-bold text-app-ink">{summary.activePlusSubscriptions}</p>
+              </div>
+              <div className="rounded-xl bg-app-bg-subtle p-3 text-center">
+                <p className="text-xs text-app-ink-muted">Đơn in</p>
+                <p className="text-lg font-bold text-app-ink">{summary.physicalOrders}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <section className="grid gap-4 lg:grid-cols-2">
         <div className={`${adminSurface.card} p-5`}>

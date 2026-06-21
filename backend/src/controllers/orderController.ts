@@ -65,6 +65,12 @@ export async function adminGetOrders(req: Request, res: Response): Promise<void>
   res.status(200).json(successResponse(orders));
 }
 
+export async function adminGetOrder(req: Request, res: Response): Promise<void> {
+  requireAuthUser(req);
+  const order = await orderService.adminGetOrder(req.params.id);
+  res.status(200).json(successResponse(order));
+}
+
 export async function adminUpdateOrderStatus(req: Request, res: Response): Promise<void> {
   const user = requireAuthUser(req);
   const order = await orderService.adminUpdateStatus(user.uid, req.params.id, req.body ?? {});

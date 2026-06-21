@@ -1,4 +1,4 @@
-import { CreditCard, Loader2, RefreshCw } from "lucide-react";
+import { CreditCard, Download, Loader2, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAuthContext } from "@/lib/auth/AuthContext";
@@ -17,6 +17,7 @@ import {
   PAYMENT_STATUS_LABELS,
   PAYMENT_STATUS_TONES,
 } from "../components/admin/statusMappings";
+import { downloadCsv } from "../components/admin/csvExport";
 import { formatDate, formatVnd, getErrorMessage } from "../components/admin/utils";
 import {
   AlertDialog,
@@ -146,22 +147,51 @@ export function AdminPaymentsPage() {
     }
   };
 
+  const handleExportCsv = () => {
+    if (items.length === 0) return;
+    const headers = ["Mã đơn", "User", "Gói", "Số tiền", "Trạng thái", "Provider", "Ngày tạo"];
+    const rows = items.map((p) => [
+      p.orderId,
+      getPaymentOwnerLabel(p),
+      p.planCode,
+      String(p.amount),
+      PAYMENT_STATUS_LABELS[p.status] ?? p.status,
+      p.provider,
+      formatDate(p.createdAt),
+    ]);
+    downloadCsv(`payments-${new Date().toISOString().slice(0, 10)}`, headers, rows);
+    toast.success(`Đã xuất ${items.length} đơn thanh toán.`);
+  };
+
   return (
     <div className="space-y-6">
       <AdminPageHeader
         title="Thanh toán tự động"
         description="Đối chiếu các giao dịch Plus được webhook ghi nhận, mở Plus thủ công khi cần khôi phục."
         actions={
-          <Button
-            type="button"
-            variant="outline"
-            className="gap-2 border-app-line bg-app-bg-subtle text-app-ink hover:bg-app-accent-soft hover:text-app-ink"
-            disabled={loading}
-            onClick={() => void loadPayments(query, statusFilter)}
-          >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
-            Tải lại
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="gap-1.5 border-app-line bg-app-bg-subtle text-app-ink hover:bg-app-accent-soft hover:text-app-ink"
+              disabled={loading || items.length === 0}
+              onClick={handleExportCsv}
+            >
+              <Download className="h-3.5 w-3.5" />
+              CSV
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="gap-2 border-app-line bg-app-bg-subtle text-app-ink hover:bg-app-accent-soft hover:text-app-ink"
+              disabled={loading}
+              onClick={() => void loadPayments(query, statusFilter)}
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+              Tải lại
+            </Button>
+          </div>
         }
       />
 

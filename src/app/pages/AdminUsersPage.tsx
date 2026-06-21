@@ -1,11 +1,13 @@
 import {
   ChevronLeft,
   ChevronRight,
+  Download,
   Search,
   Shield,
   Users as UsersIcon,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Link } from "react-router";
 import {
   type AdminUserListItem,
@@ -21,6 +23,7 @@ import {
   getErrorMessage,
   withTimeout,
 } from "../components/admin/utils";
+import { downloadCsv } from "../components/admin/csvExport";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 
@@ -91,11 +94,39 @@ export function AdminUsersPage() {
     void load({ page: newPage, role: roleFilter, q: search });
   };
 
+  const handleExportCsv = () => {
+    if (items.length === 0) return;
+    const headers = ["UID", "Email", "Tên", "Vai trò", "Gói", "Ngày tạo"];
+    const rows = items.map((u) => [
+      u.firebaseUid,
+      u.email,
+      u.displayName,
+      u.role === "admin" ? "Admin" : "User",
+      u.subscription?.planCode === "PLUS" ? "Plus" : "Free",
+      formatDate(u.createdAt),
+    ]);
+    downloadCsv(`users-${new Date().toISOString().slice(0, 10)}`, headers, rows);
+    toast.success(`Đã xuất ${items.length} người dùng.`);
+  };
+
   return (
     <div className="space-y-6">
       <AdminPageHeader
         title="Quản lý người dùng"
         description={`Tổng cộng ${total.toLocaleString("vi-VN")} người dùng`}
+        actions={
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="gap-1.5 border-app-line bg-app-bg-subtle text-app-ink hover:bg-app-accent-soft hover:text-app-ink"
+            disabled={loading || items.length === 0}
+            onClick={handleExportCsv}
+          >
+            <Download className="h-3.5 w-3.5" />
+            CSV
+          </Button>
+        }
       />
 
       {/* Filters */}

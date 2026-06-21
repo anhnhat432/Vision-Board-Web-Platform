@@ -443,6 +443,80 @@ export function adminUpdateUserSubscription(
   return patch<AdminUserDetail, AdminUpdateSubscriptionPayload>(`/admin/users/${uid}/subscription`, payload);
 }
 
+// ─── Subscription List ──────────────────────────────────────────────────────
+
+export interface AdminSubscriptionListItem {
+  id: string;
+  userId: string;
+  userEmail: string;
+  userDisplayName: string;
+  planCode: string;
+  status: string;
+  provider: string;
+  billingCycle: string | null;
+  currentPeriodStart: string | null;
+  currentPeriodEnd: string | null;
+  canceledAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminSubscriptionListResponse {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  items: AdminSubscriptionListItem[];
+}
+
+export function adminListSubscriptions(params: {
+  status?: string;
+  planCode?: string;
+  page?: number;
+  limit?: number;
+} = {}): Promise<AdminSubscriptionListResponse> {
+  const searchParams = new URLSearchParams();
+  if (params.status && params.status !== "all") searchParams.set("status", params.status);
+  if (params.planCode && params.planCode !== "all") searchParams.set("planCode", params.planCode);
+  if (params.page) searchParams.set("page", String(params.page));
+  if (params.limit) searchParams.set("limit", String(params.limit));
+  const query = searchParams.toString();
+  return get<AdminSubscriptionListResponse>(`/admin/subscriptions${query ? `?${query}` : ""}`);
+}
+
+// ─── Email Events ────────────────────────────────────────────────────────────
+
+export interface AdminEmailEventItem {
+  id: string;
+  userId: string;
+  userEmail: string;
+  userDisplayName: string;
+  status: string;
+  providerEventId: string;
+  processedAt: string | null;
+  error: string | null;
+  createdAt: string;
+}
+
+export interface AdminEmailEventListResponse {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  items: AdminEmailEventItem[];
+}
+
+export function adminListEmailEvents(params: {
+  page?: number;
+  limit?: number;
+} = {}): Promise<AdminEmailEventListResponse> {
+  const searchParams = new URLSearchParams();
+  if (params.page) searchParams.set("page", String(params.page));
+  if (params.limit) searchParams.set("limit", String(params.limit));
+  const query = searchParams.toString();
+  return get<AdminEmailEventListResponse>(`/admin/email-events${query ? `?${query}` : ""}`);
+}
+
 // ─── Audit Logs ──────────────────────────────────────────────────────────────
 
 export interface AdminAuditLogEntry {

@@ -194,6 +194,10 @@ export const appRoutes = [
             ...lazyRoute(() => import("./pages/AdminDashboardPage"), "AdminDashboardPage"),
           },
           {
+            path: "orders/:id",
+            ...lazyRoute(() => import("./pages/AdminOrderDetailPage"), "AdminOrderDetailPage"),
+          },
+          {
             path: "orders",
             ...lazyRoute(() => import("./pages/AdminOrdersPage"), "AdminOrdersPage"),
           },
@@ -220,6 +224,18 @@ export const appRoutes = [
           {
             path: "users/:uid",
             ...lazyRoute(() => import("./pages/AdminUserDetailPage"), "AdminUserDetailPage"),
+          },
+          {
+            path: "subscriptions",
+            ...lazyRoute(() => import("./pages/AdminSubscriptionsPage"), "AdminSubscriptionsPage"),
+          },
+          {
+            path: "email-history",
+            ...lazyRoute(() => import("./pages/AdminEmailHistoryPage"), "AdminEmailHistoryPage"),
+          },
+          {
+            path: "settings",
+            ...lazyRoute(() => import("./pages/AdminSettingsPage"), "AdminSettingsPage"),
           },
           {
             path: "audit-logs",

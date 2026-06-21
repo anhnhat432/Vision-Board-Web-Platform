@@ -4,8 +4,10 @@ import multer from "multer";
 
 import {
   completePaymentOrderManually,
-  getAdminPaymentOrders,
+  getAdminEmailEvents,
   getAdminOverview,
+  getAdminPaymentOrders,
+  getAdminSubscriptions,
   getAdminUserDetail,
   getAdminUsers,
   getReconciliationLastRun,
@@ -233,6 +235,9 @@ adminRoutes.patch(
     handler: updateAdminUserSubscription,
   }),
 );
+
+adminRoutes.get("/admin/subscriptions", asyncHandler(requireAdmin), asyncHandler(getAdminSubscriptions));
+adminRoutes.get("/admin/email-events", asyncHandler(requireAdmin), asyncHandler(getAdminEmailEvents));
 
 adminRoutes.get("/admin/billing/refund-requests", asyncHandler(requireAdmin), asyncHandler(getAdminRefundRequests));
 adminRoutes.post(

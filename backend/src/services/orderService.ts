@@ -355,6 +355,12 @@ class OrderService {
     return updated;
   }
 
+  async adminGetOrder(orderId: string) {
+    const order = await this.orderRepository.getOrderById(orderId);
+    if (!order) throw new ApiError(404, "Order not found.");
+    return order;
+  }
+
   async adminUpdateOrder(orderId: string, payload: AdminUpdateOrderPayload) {
     const order = await this.orderRepository.getOrderById(orderId);
     if (!order) throw new ApiError(404, "Order not found.");

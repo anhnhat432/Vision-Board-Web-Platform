@@ -1,6 +1,7 @@
 import { Router } from "express";
 
 import {
+  adminGetOrder,
   adminGetOrders,
   adminUpdateOrder,
   adminUpdateOrderStatus,
@@ -34,6 +35,12 @@ orderRoutes.post(
 
 // Admin-only routes
 orderRoutes.get("/admin/orders", asyncHandler(requireAdmin), asyncHandler(adminGetOrders));
+orderRoutes.get(
+  "/admin/orders/:id",
+  asyncHandler(requireAdmin),
+  validateObjectIdParam("id", "orderId"),
+  asyncHandler(adminGetOrder),
+);
 orderRoutes.patch(
   "/admin/orders/:id/status",
   auditedAdminAction({
