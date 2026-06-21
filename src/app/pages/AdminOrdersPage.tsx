@@ -1,8 +1,8 @@
-﻿import { ClipboardList, Loader2, RefreshCw } from "lucide-react";
+﻿import { ClipboardList, Loader2, Pencil, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useAuthContext } from "@/lib/auth/AuthContext";
-import { type ApiOrder, type ApiOrderStatus, adminGetOrders, adminUpdateOrderStatus } from "@/services/orderService";
+import { type ApiOrder, type ApiOrderStatus, type ApiShippingAddress, type AdminUpdateOrderPayload, adminGetOrders, adminUpdateOrder, adminUpdateOrderStatus } from "@/services/orderService";
 import { AdminEmptyState } from "../components/admin/AdminEmptyState";
 import { AdminPageHeader } from "../components/admin/AdminPageHeader";
 import { useAdminPendingCounts } from "../components/admin/AdminPendingCountsContext";
@@ -12,7 +12,18 @@ import { ADMIN_STATUS_TRANSITIONS, ORDER_STATUS_LABELS, ORDER_STATUS_TONES } fro
 import { adminInput, adminSurface } from "../components/admin/tokens";
 import { ADMIN_LOAD_TIMEOUT_MS, formatDate, getErrorMessage, withTimeout } from "../components/admin/utils";
 import { Button } from "../components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../components/ui/dialog";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import { Textarea } from "../components/ui/textarea";
 
 const STATUS_FILTER_ORDER: Array<ApiOrderStatus | "all"> = [
   "all",
@@ -82,6 +93,29 @@ export function AdminOrdersPage() {
   const [statusFilter, setStatusFilter] = useState<ApiOrderStatus | "all">("all");
   const [frameFilter, setFrameFilter] = useState<string>("all");
 
+  // Edit dialog state
+  const [editOrder, setEditOrder] = useState<ApiOrder | null>(null);
+  const [editSaving, setEditSaving] = useState(false);
+  const [editForm, setEditForm] = useState<{
+    fullName: string;
+    email: string;
+    phone: string;
+    line1: string;
+    line2: string;
+    city: string;
+    note: string;
+    adminNote: string;
+  }>({
+    fullName: "",
+    email: "",
+    phone: "",
+    line1: "",
+    line2: "",
+    city: "",
+    note: "",
+    adminNote: "",
+  });
+
   const handleSearchChange = useCallback((next: string) => setQuery(next), []);
   useAdminSearch(query, handleSearchChange, "Tìm email, mã đơn, họ tên, số điện thoại");
 
@@ -125,6 +159,48 @@ export function AdminOrdersPage() {
       .finally(() => {
         setBusyOrderId(null);
       });
+  };
+
+  const handleEditOpen = (order: ApiOrder) => {
+    setEditOrder(order);
+    setEditForm({
+      fullName: order.fullName || "",
+      email: order.email || "",
+      phone: order.phone || "",
+      line1: order.shippingAddress?.line1 || "",
+      line2: order.shippingAddress?.line2 || "",
+      city: order.shippingAddress?.city || "",
+      note: order.note || "",
+      adminNote: order.adminNote || "",
+    });
+  };
+
+  const handleEditSave = async () => {
+    if (!editOrder) return;
+    setEditSaving(true);
+    try {
+      const payload: AdminUpdateOrderPayload = {
+        fullName: editForm.fullName.trim() || undefined,
+        email: editForm.email.trim() || undefined,
+        phone: editForm.phone.trim() || undefined,
+        shippingAddress: {
+          line1: editForm.line1.trim(),
+          line2: editForm.line2.trim() || undefined,
+          city: editForm.city.trim(),
+          country: "",
+        },
+        note: editForm.note.trim() || undefined,
+        adminNote: editForm.adminNote.trim() || undefined,
+      };
+      const updated = await adminUpdateOrder(editOrder.id, payload);
+      setOrders((prev) => prev.map((o) => (o.id === updated.id ? updated : o)));
+      toast.success(`Đã cập nhật đơn ${editOrder.id.slice(-6)}.`);
+      setEditOrder(null);
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Không thể cập nhật đơn hàng."));
+    } finally {
+      setEditSaving(false);
+    }
   };
 
   const frameOptions = useMemo(() => {
@@ -302,7 +378,11 @@ export function AdminOrdersPage() {
         <ul className="space-y-3">
           {filteredOrders.map((order) => {
             const frameLabel = order.lines?.find((line) => line.type === "frame")?.label ?? order.kitType ?? "—";
-            const themeCount = order.lines?.filter((line) => line.type === "theme").length ?? 0;
+            const themeLabels = order.lines?.filter((line) => line.type === "theme").map((l) => l.label) ?? [];
+            const shippingAddr = order.shippingAddress;
+            const addressText = shippingAddr
+              ? [shippingAddr.line1, shippingAddr.line2, shippingAddr.city].filter(Boolean).join(", ")
+              : "—";
             return (
               <li key={order.id} className={`${adminSurface.card} ${adminSurface.cardHover} p-5`}>
                 <div className="flex flex-wrap items-start justify-between gap-3 border-b border-app-line/60 pb-4">
@@ -323,7 +403,7 @@ export function AdminOrdersPage() {
                   </AdminStatusBadge>
                 </div>
 
-                <div className="mt-4 grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2 lg:grid-cols-5">
+                <div className="mt-4 grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2 lg:grid-cols-6">
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-wider text-app-ink-muted/70">Mã đơn</p>
                     <p className="mt-0.5 truncate font-mono text-xs text-app-ink-soft">{order.id}</p>
@@ -333,8 +413,14 @@ export function AdminOrdersPage() {
                     <p className="mt-0.5 text-app-ink-soft">{frameLabel}</p>
                   </div>
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-wider text-app-ink-muted/70">Số set ảnh</p>
-                    <p className="mt-0.5 text-app-ink-soft">{themeCount}</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-app-ink-muted/70">Set ảnh</p>
+                    <p className="mt-0.5 text-app-ink-soft text-xs leading-relaxed">
+                      {themeLabels.length > 0 ? themeLabels.join(", ") : "—"}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-app-ink-muted/70">Địa chỉ</p>
+                    <p className="mt-0.5 text-app-ink-soft text-xs leading-relaxed">{addressText}</p>
                   </div>
                   <div>
                     <p className="text-[11px] font-semibold uppercase tracking-wider text-app-ink-muted/70">Ngày tạo</p>
@@ -350,12 +436,22 @@ export function AdminOrdersPage() {
 
                 {order.note ? (
                   <div className="mt-4 rounded-xl border border-app-line/60 bg-app-bg-subtle/50 px-4 py-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-wider text-app-ink-muted/70">Ghi chú</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-app-ink-muted/70">Ghi chú KH</p>
                     <p className="mt-1 text-sm leading-6 text-app-ink-soft">{order.note}</p>
                   </div>
                 ) : null}
 
-                <div className="mt-4 flex items-center justify-end border-t border-app-line/60 pt-4">
+                <div className="mt-4 flex items-center justify-between border-t border-app-line/60 pt-4">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="gap-1.5 text-app-ink-muted hover:text-app-ink hover:bg-app-accent-soft"
+                    onClick={() => handleEditOpen(order)}
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                    Sửa
+                  </Button>
                   <OrderActions order={order} busy={busyOrderId === order.id} onTransition={handleTransition} />
                 </div>
               </li>
@@ -363,6 +459,110 @@ export function AdminOrdersPage() {
           })}
         </ul>
       )}
+
+      {/* Edit Order Dialog */}
+      <Dialog open={editOrder !== null} onOpenChange={(open) => { if (!open) setEditOrder(null); }}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Sửa thông tin đơn hàng</DialogTitle>
+            <DialogDescription>
+              Mã đơn: <span className="font-mono text-xs">{editOrder?.id}</span> · {editOrder?.fullName}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-fullName">Họ tên</Label>
+                <Input
+                  id="edit-fullName"
+                  value={editForm.fullName}
+                  onChange={(e) => setEditForm((prev) => ({ ...prev, fullName: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="edit-phone">Số điện thoại</Label>
+                <Input
+                  id="edit-phone"
+                  value={editForm.phone}
+                  onChange={(e) => setEditForm((prev) => ({ ...prev, phone: e.target.value }))}
+                />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="edit-email">Email</Label>
+              <Input
+                id="edit-email"
+                type="email"
+                value={editForm.email}
+                onChange={(e) => setEditForm((prev) => ({ ...prev, email: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Địa chỉ giao hàng</Label>
+              <Input
+                placeholder="Địa chỉ (dòng 1)"
+                value={editForm.line1}
+                onChange={(e) => setEditForm((prev) => ({ ...prev, line1: e.target.value }))}
+              />
+              <Input
+                className="mt-2"
+                placeholder="Địa chỉ (dòng 2)"
+                value={editForm.line2}
+                onChange={(e) => setEditForm((prev) => ({ ...prev, line2: e.target.value }))}
+              />
+              <Input
+                className="mt-2"
+                placeholder="Thành phố"
+                value={editForm.city}
+                onChange={(e) => setEditForm((prev) => ({ ...prev, city: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="edit-note">Ghi chú khách hàng</Label>
+              <Textarea
+                id="edit-note"
+                rows={2}
+                value={editForm.note}
+                onChange={(e) => setEditForm((prev) => ({ ...prev, note: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="edit-adminNote">Ghi chú nội bộ (admin)</Label>
+              <Textarea
+                id="edit-adminNote"
+                rows={2}
+                value={editForm.adminNote}
+                onChange={(e) => setEditForm((prev) => ({ ...prev, adminNote: e.target.value }))}
+                placeholder="Ghi chú chỉ admin nhìn thấy..."
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setEditOrder(null)}
+              disabled={editSaving}
+            >
+              Hủy
+            </Button>
+            <Button
+              type="button"
+              disabled={editSaving}
+              onClick={() => void handleEditSave()}
+            >
+              {editSaving ? (
+                <>
+                  <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+                  Đang lưu...
+                </>
+              ) : (
+                "Lưu thay đổi"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { ArrowLeft, Calendar, CreditCard, Loader2, Mail, MapPin, Package, Shield, Target, User as UserIcon } from "lucide-react";
+import { ArrowLeft, ArrowUpCircle, Calendar, CreditCard, Loader2, Mail, MapPin, Package, Shield, Target, User as UserIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useParams, Link } from "react-router";
 import { toast } from "sonner";
@@ -6,10 +6,21 @@ import {
   type AdminUserDetail,
   adminGetUserDetail,
   adminUpdateUserRole,
+  adminUpdateUserSubscription,
 } from "@/services/adminService";
 import { AdminPageHeader } from "../components/admin/AdminPageHeader";
 import { adminSurface } from "../components/admin/tokens";
 import { ADMIN_LOAD_TIMEOUT_MS, formatDate, formatVnd, getErrorMessage, withTimeout } from "../components/admin/utils";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "../components/ui/alert-dialog";
 import { Button } from "../components/ui/button";
 
 function InfoRow({ label, value }: { label: string; value: string | null | undefined }) {
@@ -27,6 +38,9 @@ export function AdminUserDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [roleUpdating, setRoleUpdating] = useState(false);
+  const [subUpdating, setSubUpdating] = useState(false);
+  const [subConfirmOpen, setSubConfirmOpen] = useState(false);
+  const [pendingPlanCode, setPendingPlanCode] = useState<"PLUS" | "FREE" | null>(null);
 
   const load = useCallback(async () => {
     if (!uid) return;
@@ -69,6 +83,33 @@ export function AdminUserDetailPage() {
     } finally {
       setRoleUpdating(false);
     }
+  };
+
+  const handleSubscriptionChange = async () => {
+    if (!data || !uid || !pendingPlanCode) return;
+    setSubConfirmOpen(false);
+    setSubUpdating(true);
+    try {
+      const res = await adminUpdateUserSubscription(uid, {
+        planCode: pendingPlanCode,
+      });
+      setData(res);
+      toast.success(
+        pendingPlanCode === "PLUS"
+          ? "Đã nâng lên gói Plus."
+          : "Đã hạ về gói Free.",
+      );
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Không thể thay đổi gói dịch vụ."));
+    } finally {
+      setSubUpdating(false);
+      setPendingPlanCode(null);
+    }
+  };
+
+  const openSubConfirm = (planCode: "PLUS" | "FREE") => {
+    setPendingPlanCode(planCode);
+    setSubConfirmOpen(true);
   };
 
   if (loading) {
@@ -159,7 +200,68 @@ export function AdminUserDetailPage() {
           ) : (
             <p className="text-sm text-app-ink-muted">Chưa có gói dịch vụ nào.</p>
           )}
+          {/* Upgrade/Downgrade buttons */}
+          <div className="mt-4 pt-3 border-t border-app-line">
+            {subscription?.planCode === "PLUS" ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="w-full gap-1.5 border-app-line text-app-ink-muted hover:bg-rose-50 hover:text-rose-600 hover:border-rose-300 dark:hover:bg-rose-500/10 dark:hover:text-rose-400 dark:hover:border-rose-500/30 transition-colors duration-150"
+                disabled={subUpdating}
+                onClick={() => openSubConfirm("FREE")}
+              >
+                {subUpdating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ArrowUpCircle className="h-3.5 w-3.5 rotate-180" />}
+                Hạ về gói Free
+              </Button>
+            ) : (
+              <Button
+                type="button"
+                variant="default"
+                size="sm"
+                className="w-full gap-1.5 bg-app-accent text-white shadow-sm hover:bg-app-accent-hover transition-colors duration-150"
+                disabled={subUpdating}
+                onClick={() => openSubConfirm("PLUS")}
+              >
+                {subUpdating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ArrowUpCircle className="h-3.5 w-3.5" />}
+                Nâng lên gói Plus
+              </Button>
+            )}
+          </div>
         </div>
+
+        {/* Subscription Confirm Dialog */}
+        <AlertDialog open={subConfirmOpen} onOpenChange={setSubConfirmOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>
+                {pendingPlanCode === "PLUS" ? "Nâng lên gói Plus?" : "Hạ về gói Free?"}
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                {pendingPlanCode === "PLUS"
+                  ? `Xác nhận nâng gói cho ${user.email} lên Plus. Người dùng sẽ có quyền truy cập đầy đủ trong 12 tuần.`
+                  : `Xác nhận hạ gói của ${user.email} về Free. Gói Plus hiện tại sẽ bị hủy ngay lập tức. Hành động này không thể hoàn tác.`}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={subUpdating}>Hủy</AlertDialogCancel>
+              <AlertDialogAction
+                disabled={subUpdating}
+                className={
+                  pendingPlanCode === "FREE"
+                    ? "bg-rose-600 hover:bg-rose-700 text-white"
+                    : "bg-app-accent hover:bg-app-accent-hover text-white"
+                }
+                onClick={() => void handleSubscriptionChange()}
+              >
+                {subUpdating ? (
+                  <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+                ) : null}
+                {pendingPlanCode === "PLUS" ? "Nâng lên Plus" : "Hạ về Free"}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {/* Goals Summary Card */}
         <div className={`${adminSurface.card} p-5 space-y-3`}>
