@@ -43,9 +43,6 @@ function UserRowSkeleton() {
         <div className="h-5 w-12 animate-pulse rounded-full bg-app-accent-soft" />
       </td>
       <td className="px-4 py-3.5">
-        <div className="h-4 w-8 animate-pulse rounded bg-app-accent-soft" />
-      </td>
-      <td className="px-4 py-3.5">
         <div className="h-4 w-20 animate-pulse rounded bg-app-accent-soft" />
       </td>
     </tr>
@@ -164,9 +161,6 @@ export function AdminUsersPage() {
                   Gói
                 </th>
                 <th className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">
-                  Mục tiêu
-                </th>
-                <th className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">
                   Ngày tạo
                 </th>
               </tr>
@@ -182,7 +176,7 @@ export function AdminUsersPage() {
                 </>
               ) : items.length === 0 ? (
                 <tr>
-                  <td colSpan={5}>
+                  <td colSpan={4}>
                     <AdminEmptyState
                       icon={UsersIcon}
                       title="Không tìm thấy người dùng"
@@ -247,9 +241,6 @@ export function AdminUsersPage() {
                           ? "Plus"
                           : "Free"}
                       </span>
-                    </td>
-                    <td className="px-4 py-3.5 text-app-ink-soft font-medium tabular-nums">
-                      {user.goalCount}
                     </td>
                     <td className="px-4 py-3.5 text-app-ink-muted text-xs">
                       {formatDate(user.createdAt)}
