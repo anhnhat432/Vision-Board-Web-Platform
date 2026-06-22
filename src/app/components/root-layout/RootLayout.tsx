@@ -65,7 +65,7 @@ import { AppPublicFooter } from "../layout/AppPublicFooter";
 import { MotivationalReminder } from "../MotivationalReminder";
 import { MotionPageTransition } from "../motion";
 import { NewUserGuideDialog } from "../NewUserGuide";
-import { startScreenGuide } from "../ScreenGuide";
+import { startScreenGuide, ScreenGuideContext } from "../ScreenGuide";
 import { OfflineBanner } from "../states/OfflineBanner";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -589,7 +589,7 @@ export function RootLayout() {
             type="button"
             className={
               isMobile
-                ? "flex size-10 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                ? "flex size-11 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                 : "flex h-8 w-8 items-center justify-center rounded-full bg-app-accent text-white transition-colors duration-150 hover:bg-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
             }
             aria-label={triggerLabel}
@@ -924,6 +924,7 @@ export function RootLayout() {
     return (
       <AutoCloudSyncProvider>
         <AssistantPageContextProvider>
+          <ScreenGuideContext.Provider value={true}>
           <div className="app-shell min-h-screen bg-app-bg" data-route-tone={routeTone}>
             <OfflineBanner />
             <a href="#main-content" className="skip-to-content">
@@ -974,6 +975,7 @@ export function RootLayout() {
             </main>
             {showAssistant && user && <AIAssistant />}
           </div>
+          </ScreenGuideContext.Provider>
         </AssistantPageContextProvider>
       </AutoCloudSyncProvider>
     );
@@ -1216,7 +1218,7 @@ export function RootLayout() {
                         <TooltipTrigger asChild>
                           <button
                             type="button"
-                            className="hidden size-10 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:flex"
+                            className="hidden size-11 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:flex"
                             onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
                             aria-label={resolvedTheme === "dark" ? "Chế độ sáng" : "Chế độ tối"}
                           >
@@ -1245,7 +1247,7 @@ export function RootLayout() {
                             <DropdownMenuTrigger asChild>
                               <button
                                 type="button"
-                                className="relative flex size-10 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                                className="relative flex size-11 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                                 aria-label="Mở menu"
                               >
                                 <Menu className="h-[1.05rem] w-[1.05rem]" />
@@ -1302,7 +1304,7 @@ export function RootLayout() {
                             <TooltipTrigger asChild>
                               <button
                                 type="button"
-                                className="relative flex size-10 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                                className="relative flex size-11 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                                 onClick={handleOpenGuide}
                                 aria-label="Mở hướng dẫn sử dụng"
                               >
@@ -1322,7 +1324,7 @@ export function RootLayout() {
                       ) : (
                         <button
                           type="button"
-                          className="relative flex size-10 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                          className="relative flex size-11 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                           onClick={handleOpenGuide}
                           aria-label="Mở hướng dẫn sử dụng"
                         >
@@ -1338,7 +1340,7 @@ export function RootLayout() {
                       {!isSignedOutVisitor && (
                         <button
                           type="button"
-                          className="flex size-10 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                          className="flex size-11 items-center justify-center rounded-lg border border-app-line bg-app-surface text-app-ink-soft transition-colors duration-150 hover:bg-app-bg hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                           onClick={() => setMobileMenuOpen((open) => !open)}
                           aria-label={mobileMenuOpen ? "Đóng menu" : "Mở menu"}
                           aria-expanded={mobileMenuOpen}
@@ -1588,6 +1590,7 @@ export function RootLayout() {
                       <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                         <path d="M19.5 6.5a5 5 0 0 1-3.5-1.5V15a5 5 0 1 1-5-5v3a2 2 0 1 0 2 2V2h3a5 5 0 0 0 3.5 3.5z" />
                       </svg>
+                      <span className="sr-only">TikTok</span>
                     </a>
                     <a
                       href="https://www.instagram.com/dearourfuture"
@@ -1596,7 +1599,8 @@ export function RootLayout() {
                       aria-label="Instagram"
                       className="inline-flex size-7 items-center justify-center rounded-full text-app-ink-muted transition-colors duration-150 hover:text-app-accent"
                     >
-                      <Instagram className="h-3.5 w-3.5" />
+                      <Instagram className="h-3.5 w-3.5" aria-hidden="true" />
+                      <span className="sr-only">Instagram</span>
                     </a>
                     <a
                       href="https://www.facebook.com/profile.php?id=61589773962146"
@@ -1605,7 +1609,8 @@ export function RootLayout() {
                       aria-label="Facebook"
                       className="inline-flex size-7 items-center justify-center rounded-full text-app-ink-muted transition-colors duration-150 hover:text-app-accent"
                     >
-                      <Facebook className="h-3.5 w-3.5" />
+                      <Facebook className="h-3.5 w-3.5" aria-hidden="true" />
+                      <span className="sr-only">Facebook</span>
                     </a>
                   </div>
                 </div>

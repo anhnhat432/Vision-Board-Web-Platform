@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 import { SCREEN_GUIDE_SEEN_STORAGE_PREFIX } from "../utils/storage-constants";
-import { ScreenGuide, startScreenGuide } from "./ScreenGuide";
+import { ScreenGuide, ScreenGuideContext, startScreenGuide } from "./ScreenGuide";
 
 const FIRST_RUN_GUIDANCE_COMPLETED_KEY = "visionboard_first_run_guidance_completed_at";
 
@@ -31,7 +31,7 @@ describe("ScreenGuide", () => {
     expect(await screen.findByRole("dialog", { name: guideProps.title })).toBeInTheDocument();
     expect(localStorage.getItem(seenKey())).toBe("true");
 
-    fireEvent.click(screen.getByRole("button", { name: "Đã hiểu" }));
+    fireEvent.click(screen.getByRole("button", { name: "Tôi đã hiểu" }));
     await new Promise((resolve) => window.setTimeout(resolve, 550));
     expect(screen.queryByRole("dialog", { name: guideProps.title })).not.toBeInTheDocument();
 
@@ -53,6 +53,32 @@ describe("ScreenGuide", () => {
 
     expect(await screen.findByRole("dialog", { name: guideProps.title })).toBeInTheDocument();
     expect(localStorage.getItem(seenKey("lazy-screen"))).toBe("true");
+  });
+
+  it("restores focus to the shell launcher when the page-level trigger is hidden", async () => {
+    render(
+      <>
+        <button type="button" onClick={() => startScreenGuide(guideProps.screenId, { force: true })}>
+          Mở hướng dẫn shell
+        </button>
+        <ScreenGuideContext.Provider value={true}>
+          <ScreenGuide {...guideProps} autoOpen={false} />
+        </ScreenGuideContext.Provider>
+      </>,
+    );
+
+    const launcher = screen.getByRole("button", { name: "Mở hướng dẫn shell" });
+    launcher.focus();
+
+    fireEvent.click(launcher);
+    expect(await screen.findByRole("dialog", { name: guideProps.title })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Tôi đã hiểu" }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog", { name: guideProps.title })).not.toBeInTheDocument();
+      expect(launcher).toHaveFocus();
+    });
   });
 
   it("does not auto-open on later screens after first-run guidance already completed", async () => {

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { Check, HelpCircle, Lightbulb } from "lucide-react";
 
 import { hasCompletedFirstRunGuidance } from "../utils/new-user-guide";
@@ -9,6 +9,14 @@ import { cn } from "./ui/utils";
 
 export const SCREEN_GUIDE_EVENT = "screen-guide-start";
 const PENDING_SCREEN_GUIDE_TTL_MS = 8_000;
+
+/**
+ * Context that lets the app shell tell per-page ScreenGuide components that a
+ * global "Hướng dẫn" trigger already exists (e.g. in the top bar or sidebar).
+ * When true, ScreenGuide hides its own "Cách dùng màn này" button to avoid
+ * showing two near-identical help triggers on the same screen.
+ */
+export const ScreenGuideContext = createContext(false);
 
 export interface ScreenGuideStep {
   /** Short action-oriented instruction. Keep to one sentence. */
@@ -75,6 +83,14 @@ function markGuideSeen(screenId: string): void {
 }
 
 const pendingScreenGuideRequests = new Map<string, PendingScreenGuideRequest>();
+let lastScreenGuideLauncher: HTMLElement | null = null;
+
+function rememberScreenGuideLauncher(): void {
+  if (typeof document === "undefined") return;
+
+  const activeElement = document.activeElement;
+  lastScreenGuideLauncher = activeElement instanceof HTMLElement ? activeElement : null;
+}
 
 function rememberPendingScreenGuide(screenId: string, options: { force?: boolean }): void {
   pendingScreenGuideRequests.set(screenId, { ...options, requestedAt: Date.now() });
@@ -94,6 +110,7 @@ export function startScreenGuide(screenId: string, options: { force?: boolean } 
   if (typeof window === "undefined") return;
 
   rememberPendingScreenGuide(screenId, options);
+  rememberScreenGuideLauncher();
   window.dispatchEvent(
     new CustomEvent<ScreenGuideEventDetail>(SCREEN_GUIDE_EVENT, {
       detail: { screenId, ...options },
@@ -121,6 +138,8 @@ export function ScreenGuide({
 }: ScreenGuideProps) {
   const [open, setOpen] = useState(false);
   const [seen, setSeen] = useState(() => hasSeenGuide(screenId));
+  const hasShellTrigger = useContext(ScreenGuideContext);
+  const hiddenTriggerRef = useRef<HTMLSpanElement | null>(null);
 
   const openGuide = useCallback(
     (force = false) => {
@@ -190,35 +209,57 @@ export function ScreenGuide({
     setOpen(false);
   }, [screenId]);
 
+  const handleCloseAutoFocus = useCallback(
+    (event: Event) => {
+      if (!hasShellTrigger) return;
+
+      const launcher = lastScreenGuideLauncher;
+      if (!launcher?.isConnected || launcher === hiddenTriggerRef.current) return;
+
+      event.preventDefault();
+      launcher.focus({ preventScroll: true });
+    },
+    [hasShellTrigger],
+  );
+
   if (steps.length === 0) return null;
 
   return (
     <div className={cn("flex justify-end", className)}>
       <Popover open={open} onOpenChange={handleOpenChange}>
-        <PopoverTrigger asChild>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="relative min-h-11 gap-1.5 border border-app-line bg-app-surface px-4 text-app-ink-soft hover:bg-app-bg hover:text-app-ink"
-            aria-label={`Hướng dẫn nhanh: ${title}`}
-          >
-            <HelpCircle className="size-4" aria-hidden="true" />
-            Cách dùng màn này
-            {!seen ? (
-              <span className="absolute -right-0.5 -top-0.5 flex size-2">
-                <span className="absolute inline-flex size-full rounded-full bg-app-accent/70 motion-safe:animate-ping" />
-                <span className="relative inline-flex size-2 rounded-full bg-app-accent" />
-              </span>
-            ) : null}
-          </Button>
-        </PopoverTrigger>
+        {!hasShellTrigger ? (
+          <PopoverTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="relative min-h-11 gap-1.5 border border-app-line bg-app-surface px-4 text-app-ink-soft hover:bg-app-bg hover:text-app-ink"
+              aria-label={`Hướng dẫn nhanh: ${title}`}
+            >
+              <HelpCircle className="size-4" aria-hidden="true" />
+              Cách dùng màn này
+              {!seen ? (
+                <span className="absolute -right-0.5 -top-0.5 flex size-2">
+                  <span className="absolute inline-flex size-full rounded-full bg-app-accent/70 motion-safe:animate-ping" />
+                  <span className="relative inline-flex size-2 rounded-full bg-app-accent" />
+                </span>
+              ) : null}
+            </Button>
+          </PopoverTrigger>
+        ) : (
+          /* Invisible anchor so the popover still has a DOM trigger element,
+           * but the user sees only the shell "Hướng dẫn" button (top bar / sidebar). */
+          <PopoverTrigger asChild>
+            <span ref={hiddenTriggerRef} aria-hidden="true" className="hidden" />
+          </PopoverTrigger>
+        )}
         <PopoverContent
           align="end"
           sideOffset={8}
           className="w-[min(22rem,calc(100vw-2rem))] border-app-line bg-app-surface p-0 shadow-app-lg"
           role="dialog"
           aria-label={title}
+          onCloseAutoFocus={handleCloseAutoFocus}
         >
           <div className="space-y-3 p-4">
             <div className="flex items-start gap-2.5">

@@ -124,9 +124,13 @@ vi.mock("../hooks/usePageTour", () => ({
   startPageTour: pageTourMock.startPageTour,
 }));
 
-vi.mock("./ScreenGuide", () => ({
-  startScreenGuide: screenGuideMock.startScreenGuide,
-}));
+vi.mock("./ScreenGuide", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./ScreenGuide")>();
+  return {
+    ...actual,
+    startScreenGuide: screenGuideMock.startScreenGuide,
+  };
+});
 
 function setAuthContext(overrides: Record<string, unknown> = {}) {
   authContextMock.useAuthContext.mockReturnValue({
@@ -737,7 +741,7 @@ describe("RootLayout onboarding redirect", () => {
     const { router } = renderAppShell("/goals");
 
     expect(await screen.findByTestId("goals-page")).toBeInTheDocument();
-    expect(screen.getByAltText("Dear Our Future")).toHaveAttribute("src", "/favicon-512.png");
+    expect(screen.getAllByRole("button", { name: "Về trang chủ Dear Our Future" }).length).toBeGreaterThan(0);
     expect(screen.getByText("v1.0")).toBeInTheDocument();
     expect(screen.getAllByText("plus@example.com").length).toBeGreaterThan(0);
     expect(screen.getByRole("link", { name: "Cài đặt" })).toHaveAttribute("href", "/settings");

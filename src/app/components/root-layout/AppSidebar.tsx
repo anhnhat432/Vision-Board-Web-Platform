@@ -178,7 +178,7 @@ export function AppSidebar({
           <button
             type="button"
             onClick={onToggleTheme}
-            className="flex h-[38px] flex-1 items-center justify-center gap-2 rounded-[11px] border border-white/10 bg-white/[0.06] text-[12.5px] font-semibold text-[#E4E2DB] transition-all duration-200 hover:bg-white/[0.1] active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C6F24E]/30"
+            className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-[11px] border border-white/10 bg-white/[0.06] px-3 text-[12.5px] font-semibold text-[#E4E2DB] transition-all duration-200 hover:bg-white/[0.1] active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C6F24E]/30"
             aria-label={resolvedTheme === "dark" ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"}
           >
             {resolvedTheme === "dark" ? (
@@ -191,7 +191,7 @@ export function AppSidebar({
           <button
             type="button"
             onClick={onOpenGuide}
-            className="flex h-[38px] w-[38px] items-center justify-center rounded-[11px] border border-white/10 bg-white/[0.06] text-[#E4E2DB] transition-all duration-200 hover:bg-white/[0.1] active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C6F24E]/30"
+            className="flex size-11 items-center justify-center rounded-[11px] border border-white/10 bg-white/[0.06] text-[#E4E2DB] transition-all duration-200 hover:bg-white/[0.1] active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C6F24E]/30"
             aria-label="Mở hướng dẫn sử dụng"
             title="Hướng dẫn"
           >
