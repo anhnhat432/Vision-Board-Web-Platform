@@ -14,6 +14,7 @@ interface MockResponse {
 }
 
 interface MockCassoPaymentOrder {
+  _id: string;
   orderId: string;
   userId: string;
   planCode: string;
@@ -36,10 +37,12 @@ import { FailedReceiptQueueModel } from "../models/FailedReceiptQueueModel";
 
 type MockableModel = {
   findOne: unknown;
+  findOneAndUpdate: unknown;
   updateOne: unknown;
 };
 
 const originalPaymentOrderFindOne = PaymentOrderModel.findOne;
+const originalPaymentOrderFindOneAndUpdate = PaymentOrderModel.findOneAndUpdate;
 const originalPaymentOrderUpdateOne = PaymentOrderModel.updateOne;
 const originalFailedReceiptDeleteOne = FailedReceiptQueueModel.deleteOne;
 const originalFailedReceiptUpdateOne = FailedReceiptQueueModel.updateOne;
@@ -68,6 +71,7 @@ function createRequest(body: unknown, headers: Record<string, string> = {}): Req
 
 function createOrder(overrides: Partial<MockCassoPaymentOrder> = {}): MockCassoPaymentOrder {
   return {
+    _id: `payment_order_${Date.now()}`,
     orderId: "VBRCPT0001",
     userId: "user_casso_receipt",
     planCode: "PLUS",
@@ -110,12 +114,31 @@ function mockPaymentOrderPersistence(order: MockCassoPaymentOrder): void {
     if (filters.orderId === order.orderId && !("status" in filters)) return order;
     return null;
   };
+  (PaymentOrderModel as unknown as MockableModel).findOneAndUpdate = async (query: unknown, update: unknown) => {
+    const filters = query as Record<string, unknown>;
+    if (filters._id !== order._id || filters.status !== "pending" || order.status !== "pending") {
+      return null;
+    }
+
+    const set = (update as { $set?: Record<string, unknown> }).$set ?? {};
+    if (typeof set.status === "string") {
+      order.status = set.status as PaymentOrderStatus;
+    }
+    if (set.completedAt instanceof Date) {
+      order.completedAt = set.completedAt;
+    }
+    if (typeof set.cassoTransactionId === "string") {
+      order.cassoTransactionId = set.cassoTransactionId;
+    }
+    return order;
+  };
   (PaymentOrderModel as unknown as MockableModel).updateOne = async () => ({ acknowledged: true, modifiedCount: 1 });
 }
 
 afterEach(() => {
   mock.restoreAll();
   (PaymentOrderModel as unknown as MockableModel).findOne = originalPaymentOrderFindOne;
+  (PaymentOrderModel as unknown as MockableModel).findOneAndUpdate = originalPaymentOrderFindOneAndUpdate;
   (PaymentOrderModel as unknown as MockableModel).updateOne = originalPaymentOrderUpdateOne;
   (FailedReceiptQueueModel as any).deleteOne = originalFailedReceiptDeleteOne;
   (FailedReceiptQueueModel as any).updateOne = originalFailedReceiptUpdateOne;

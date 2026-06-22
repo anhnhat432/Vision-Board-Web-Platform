@@ -17,7 +17,7 @@ import type { Request, Response } from "express";
 
 import { billingService } from "../services/billingServiceInstance";
 import * as backendMonitoring from "../monitoring/sentry";
-import { PaymentOrderModel } from "../models/PaymentOrderModel";
+import { PaymentOrderModel, type PaymentOrderDocument } from "../models/PaymentOrderModel";
 import { OrderModel } from "../models/OrderModel";
 import type { CassoWebhookPayload, CassoTransaction } from "../services/cassoPaymentAdapter";
 import { deliverReceiptForOrder } from "../services/paymentReceiptDeliveryService";
@@ -106,12 +106,21 @@ function getRawWebhookPayload(req: Request): unknown {
   }
 }
 
-function isMongoDuplicateKeyError(error: unknown): boolean {
-  return Boolean(
-    error &&
-      typeof error === "object" &&
-      "code" in error &&
-      (error as { code?: unknown }).code === 11000,
+async function claimCassoOrderAsCompleted(
+  order: PaymentOrderDocument,
+  cassoTransactionId: string | undefined,
+  now: Date,
+): Promise<PaymentOrderDocument | null> {
+  return PaymentOrderModel.findOneAndUpdate(
+    { _id: order._id, status: "pending" },
+    {
+      $set: {
+        status: "completed",
+        completedAt: now,
+        ...(cassoTransactionId ? { cassoTransactionId } : {}),
+      },
+    },
+    { new: true },
   );
 }
 
@@ -327,17 +336,25 @@ export async function handleCassoWebhook(req: Request, res: Response): Promise<v
       continue;
     }
 
-    // Step 8: Complete payment based on purpose
+    // Step 8: Atomically claim the pending order before any side effects.
     const now = new Date();
+    const claimedOrder = await claimCassoOrderAsCompleted(order, cassoTxId || undefined, now);
+    if (!claimedOrder) {
+      if (cassoTxId) {
+        logCassoWebhookReplayIgnored(cassoTxId, orderId, "claim_lost");
+      }
+      continue;
+    }
+
     const payloadHash = createHash("sha256")
       .update(JSON.stringify(tx))
       .digest("hex");
 
-    const isPhysicalOrder = order.purpose === "physical_order";
+    const isPhysicalOrder = claimedOrder.purpose === "physical_order";
 
     try {
       if (isPhysicalOrder) {
-        const physicalResult = await completePhysicalOrderPayment(order, now);
+        const physicalResult = await completePhysicalOrderPayment(claimedOrder, now);
         if (physicalResult === "no_physical_order") {
           console.warn(`[casso-webhook] Physical order payment received but no matching physical order found for "${orderId}".`);
         }
@@ -347,7 +364,7 @@ export async function handleCassoWebhook(req: Request, res: Response): Promise<v
           providerEventId: `casso_${cassoTxId || orderId}`,
           eventType: "checkout_completed",
           payloadHash,
-          userId: order.userId,
+          userId: claimedOrder.userId,
           planCode: "PLUS",
           status: "active",
           billingCycle: "twelve_week",
@@ -356,11 +373,6 @@ export async function handleCassoWebhook(req: Request, res: Response): Promise<v
           providerSubscriptionId: orderId,
         });
       }
-
-      order.status = "completed";
-      order.completedAt = now;
-      order.cassoTransactionId = cassoTxId || undefined;
-      await order.save();
 
       const receiptResult = await deliverReceiptForOrder(orderId);
       if (!receiptResult.sent) {
@@ -374,17 +386,13 @@ export async function handleCassoWebhook(req: Request, res: Response): Promise<v
         transactionId: cassoTxId,
         accountId: orderId,
         amount,
-        purpose: order.purpose,
-        planCode: isPhysicalOrder ? (order.planCode ?? null) : "PLUS",
-        userId: order.userId,
+        purpose: claimedOrder.purpose,
+        planCode: isPhysicalOrder ? (claimedOrder.planCode ?? null) : "PLUS",
+        userId: claimedOrder.userId,
         ...(isPhysicalOrder ? { physicalOrder: true } : { subscriptionId: orderId }),
       });
       processedCount++;
     } catch (error: unknown) {
-      if (isMongoDuplicateKeyError(error) && cassoTxId) {
-        logCassoWebhookReplayIgnored(cassoTxId, orderId, "duplicate_key");
-        continue;
-      }
 
       failedCount++;
       const msg = error instanceof Error ? error.message : "Unknown error";

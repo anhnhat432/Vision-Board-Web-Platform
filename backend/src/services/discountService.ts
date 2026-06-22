@@ -1,3 +1,5 @@
+import { connection } from "mongoose";
+
 import { CouponUsageModel } from "../models/CouponUsageModel";
 import { DiscountModel, type DiscountDocument, type DiscountAppliesTo } from "../models/DiscountModel";
 
@@ -87,9 +89,18 @@ export async function getActiveSaleEvent(
     filter.appliesTo = appliesTo;
   }
 
-  const candidates = await DiscountModel.find(filter)
-    .sort({ startsAt: -1 })
-    .lean<DiscountDocument[]>();
+  if (connection.readyState !== 1) {
+    return null;
+  }
+
+  let candidates: DiscountDocument[];
+  try {
+    candidates = await DiscountModel.find(filter)
+      .sort({ startsAt: -1 })
+      .lean<DiscountDocument[]>();
+  } catch {
+    return null;
+  }
 
   const active = candidates.filter((s) => isDateActive(s.startsAt, s.endsAt, now));
   if (!active.length) return null;

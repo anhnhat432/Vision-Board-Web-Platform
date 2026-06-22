@@ -11,6 +11,34 @@ interface JsonResponse {
   body: Record<string, unknown>;
 }
 
+interface MultipartPart {
+  name: string;
+  filename?: string;
+  contentType?: string;
+  data: Buffer | string;
+}
+
+function buildMultipartBody(parts: MultipartPart[], boundary: string): Buffer {
+  const chunks: Buffer[] = [];
+  for (const part of parts) {
+    chunks.push(Buffer.from(`--${boundary}\r\n`, "utf-8"));
+    let header = `Content-Disposition: form-data; name="${part.name}"`;
+    if (part.filename !== undefined) {
+      header += `; filename="${part.filename}"`;
+    }
+    header += "\r\n";
+    if (part.contentType) {
+      header += `Content-Type: ${part.contentType}\r\n`;
+    }
+    header += "\r\n";
+    chunks.push(Buffer.from(header, "utf-8"));
+    chunks.push(typeof part.data === "string" ? Buffer.from(part.data, "utf-8") : part.data);
+    chunks.push(Buffer.from("\r\n", "utf-8"));
+  }
+  chunks.push(Buffer.from(`--${boundary}--\r\n`, "utf-8"));
+  return Buffer.concat(chunks);
+}
+
 function ensureBackendEnvForRouteImports(): void {
   process.env.MONGODB_URI ??= "mongodb://127.0.0.1:27017/assistant-test";
   process.env.FIREBASE_PROJECT_ID ??= "assistant-test";
@@ -82,6 +110,52 @@ async function requestJson(
       body: JSON.stringify(body),
     });
 
+    const text = await response.text();
+    let parsed: Record<string, unknown> = {};
+    try {
+      parsed = text ? JSON.parse(text) : {};
+    } catch {
+      parsed = {};
+    }
+    return {
+      status: response.status,
+      body: parsed,
+    };
+  } finally {
+    await new Promise<void>((resolve, reject) => {
+      server.close((error) => {
+        if (error) reject(error);
+        else resolve();
+      });
+    });
+  }
+}
+
+async function requestMultipart(
+  app: Express,
+  path: string,
+  parts: MultipartPart[],
+  token = "verified-token",
+): Promise<JsonResponse> {
+  const server = app.listen(0);
+  await new Promise<void>((resolve) => {
+    server.once("listening", resolve);
+  });
+
+  const address = server.address() as AddressInfo;
+  const boundary = `----AssistantBoundary${Math.random().toString(16).slice(2)}`;
+  const headers: Record<string, string> = {
+    accept: "application/json",
+    "content-type": `multipart/form-data; boundary=${boundary}`,
+  };
+  if (token) headers.authorization = `Bearer ${token}`;
+
+  try {
+    const response = await fetch(`http://127.0.0.1:${address.port}${path}`, {
+      method: "POST",
+      headers,
+      body: new Uint8Array(buildMultipartBody(parts, boundary)),
+    });
     const text = await response.text();
     let parsed: Record<string, unknown> = {};
     try {
@@ -320,5 +394,53 @@ describe("assistantRoutes", () => {
         server.close((error) => (error ? reject(error) : resolve()));
       });
     }
+  });
+
+  it("rejects unsupported transcribe MIME types before reading provider config", async () => {
+    const response = await requestMultipart(await createTestApp(), "/api/assistant/transcribe", [
+      {
+        name: "file",
+        filename: "note.txt",
+        contentType: "text/plain",
+        data: "not audio",
+      },
+    ]);
+
+    assert.equal(response.status, 400);
+    assert.equal(response.body.errorCode, "ASSISTANT_INVALID_AUDIO_TYPE");
+  });
+
+  it("rejects oversized transcribe uploads with 413", async () => {
+    const response = await requestMultipart(await createTestApp(), "/api/assistant/transcribe", [
+      {
+        name: "file",
+        filename: "large.webm",
+        contentType: "audio/webm",
+        data: Buffer.alloc(10 * 1024 * 1024 + 1),
+      },
+    ]);
+
+    assert.equal(response.status, 413);
+    assert.equal(response.body.errorCode, "ASSISTANT_FILE_TOO_LARGE");
+  });
+
+  it("rejects multiple transcribe files", async () => {
+    const response = await requestMultipart(await createTestApp(), "/api/assistant/transcribe", [
+      {
+        name: "file",
+        filename: "one.webm",
+        contentType: "audio/webm",
+        data: Buffer.from("audio-one"),
+      },
+      {
+        name: "file",
+        filename: "two.webm",
+        contentType: "audio/webm",
+        data: Buffer.from("audio-two"),
+      },
+    ]);
+
+    assert.equal(response.status, 400);
+    assert.equal(response.body.errorCode, "ASSISTANT_UPLOAD_ERROR");
   });
 });

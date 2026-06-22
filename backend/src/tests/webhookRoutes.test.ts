@@ -24,6 +24,7 @@ interface JsonResponse {
 }
 
 interface MockCassoPaymentOrder {
+  _id: string;
   orderId: string;
   userId: string;
   amount: number;
@@ -42,13 +43,16 @@ interface MockCassoPaymentOrder {
 
 type MockableModel = {
   findOne: unknown;
+  findOneAndUpdate: unknown;
 };
 
 const originalPaymentOrderFindOne = PaymentOrderModel.findOne;
+const originalPaymentOrderFindOneAndUpdate = PaymentOrderModel.findOneAndUpdate;
 const originalUserFindOne = UserModel.findOne;
 
 afterEach(() => {
   (PaymentOrderModel as unknown as MockableModel).findOne = originalPaymentOrderFindOne;
+  (PaymentOrderModel as unknown as MockableModel).findOneAndUpdate = originalPaymentOrderFindOneAndUpdate;
   (UserModel as unknown as MockableModel).findOne = originalUserFindOne;
   delete process.env.CASSO_WEBHOOK_SECRET;
   delete process.env.CASSO_WEBHOOK_CHECKSUM_KEY;
@@ -112,6 +116,7 @@ async function postWebhook(
 
 function createMockCassoPaymentOrder(overrides: Partial<MockCassoPaymentOrder> = {}): MockCassoPaymentOrder {
   const order: MockCassoPaymentOrder = {
+    _id: `payment_order_${Date.now()}`,
     orderId: "VBQA000001",
     userId: "user_casso_webhook",
     amount: 2000,
@@ -170,6 +175,25 @@ function mockCassoPersistence(order: MockCassoPaymentOrder | null): { paymentOrd
     }
 
     return null;
+  };
+
+  (PaymentOrderModel as unknown as MockableModel).findOneAndUpdate = async (query: unknown, update: unknown) => {
+    const filters = query as Record<string, unknown>;
+    if (!order || filters._id !== order._id || filters.status !== "pending" || order.status !== "pending") {
+      return null;
+    }
+
+    const set = (update as { $set?: Record<string, unknown> }).$set ?? {};
+    if (typeof set.status === "string") {
+      order.status = set.status as PaymentOrderStatus;
+    }
+    if (set.completedAt instanceof Date) {
+      order.completedAt = set.completedAt;
+    }
+    if (typeof set.cassoTransactionId === "string") {
+      order.cassoTransactionId = set.cassoTransactionId;
+    }
+    return order;
   };
 
   (UserModel as unknown as MockableModel).findOne = () => ({
@@ -427,7 +451,7 @@ describe("POST /api/billing/webhook/casso payment matching", () => {
     assert.equal(first.status, 200);
     assert.equal(first.body.processedCount, 1);
     assert.equal(order.status, "completed");
-    assert.equal(order.saveCalls, 1);
+    assert.equal(order.saveCalls, 0);
 
     const firstSnapshot = await billingService.getCurrentEntitlementForUser(userId);
     assert.equal(firstSnapshot.planCode, "PLUS");
@@ -439,7 +463,7 @@ describe("POST /api/billing/webhook/casso payment matching", () => {
     assert.equal(second.status, 200);
     assert.equal(second.body.processedCount, 0);
     assert.deepEqual(secondSnapshot.activeKeys, firstSnapshot.activeKeys);
-    assert.equal(order.saveCalls, 1);
+    assert.equal(order.saveCalls, 0);
   });
 
   it("does not grant PLUS when transferred amount is too low", async () => {

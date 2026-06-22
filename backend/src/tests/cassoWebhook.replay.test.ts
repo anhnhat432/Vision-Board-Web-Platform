@@ -17,6 +17,7 @@ interface MockResponse {
 }
 
 interface MockCassoPaymentOrder {
+  _id: string;
   orderId: string;
   userId: string;
   amount: number;
@@ -37,9 +38,11 @@ import { FailedReceiptQueueModel } from "../models/FailedReceiptQueueModel";
 
 type MockableModel = {
   findOne: unknown;
+  findOneAndUpdate: unknown;
 };
 
 const originalPaymentOrderFindOne = PaymentOrderModel.findOne;
+const originalPaymentOrderFindOneAndUpdate = PaymentOrderModel.findOneAndUpdate;
 const originalUserFindOne = UserModel.findOne;
 const originalFailedReceiptDeleteOne = FailedReceiptQueueModel.deleteOne;
 const originalFailedReceiptUpdateOne = FailedReceiptQueueModel.updateOne;
@@ -68,6 +71,7 @@ function createRequest(body: unknown, headers: Record<string, string> = {}): Req
 
 function createOrder(overrides: Partial<MockCassoPaymentOrder> = {}): MockCassoPaymentOrder {
   return {
+    _id: `payment_order_${Date.now()}`,
     orderId: "VBREPLAY01",
     userId: `user_casso_replay_${Date.now()}`,
     amount: 99000,
@@ -110,6 +114,24 @@ function mockPaymentOrderPersistence(order: MockCassoPaymentOrder): void {
     if (filters.orderId === order.orderId && !("status" in filters)) return order;
     return null;
   };
+  (PaymentOrderModel as unknown as MockableModel).findOneAndUpdate = async (query: unknown, update: unknown) => {
+    const filters = query as Record<string, unknown>;
+    if (filters._id !== order._id || filters.status !== "pending" || order.status !== "pending") {
+      return null;
+    }
+
+    const set = (update as { $set?: Record<string, unknown> }).$set ?? {};
+    if (typeof set.status === "string") {
+      order.status = set.status as PaymentOrderStatus;
+    }
+    if (set.completedAt instanceof Date) {
+      order.completedAt = set.completedAt;
+    }
+    if (typeof set.cassoTransactionId === "string") {
+      order.cassoTransactionId = set.cassoTransactionId;
+    }
+    return order;
+  };
 
   (UserModel as unknown as MockableModel).findOne = () => ({
     select() {
@@ -125,6 +147,7 @@ function mockPaymentOrderPersistence(order: MockCassoPaymentOrder): void {
 afterEach(() => {
   mock.restoreAll();
   (PaymentOrderModel as unknown as MockableModel).findOne = originalPaymentOrderFindOne;
+  (PaymentOrderModel as unknown as MockableModel).findOneAndUpdate = originalPaymentOrderFindOneAndUpdate;
   (UserModel as unknown as MockableModel).findOne = originalUserFindOne;
   (FailedReceiptQueueModel as any).deleteOne = originalFailedReceiptDeleteOne;
   (FailedReceiptQueueModel as any).updateOne = originalFailedReceiptUpdateOne;
@@ -160,41 +183,25 @@ describe("Casso webhook replay protection", () => {
     assert.equal(duplicateOrder.status, "pending");
   });
 
-  it("treats Mongo duplicate key during save as an idempotent replay", async () => {
+  it("does not grant entitlement when atomic claim loses race", async () => {
     process.env.CASSO_WEBHOOK_SECRET = "expected-secret";
-    const order = createOrder({
-      async save(this: MockCassoPaymentOrder) {
-        this.saveCalls++;
-        const duplicateKeyError = new Error("E11000 duplicate key error");
-        (duplicateKeyError as Error & { code?: number }).code = 11000;
-        throw duplicateKeyError;
-      },
-    });
+    const order = createOrder();
     const payload = createPayload(order.orderId, "tx_race_11000");
     mockPaymentOrderPersistence(order);
+    (PaymentOrderModel as unknown as MockableModel).findOneAndUpdate = async (query: unknown) => {
+      const filters = query as Record<string, unknown>;
+      if (filters._id === order._id && filters.status === "pending") {
+        order.status = "completed";
+        order.completedAt = new Date();
+        order.cassoTransactionId = "tx_race_11000";
+      }
+      return null;
+    };
 
     let grantCalls = 0;
-    mock.method(billingService, "upsertSubscriptionFromProviderEvent", async (event: ProviderSubscriptionEvent) => {
+    mock.method(billingService, "upsertSubscriptionFromProviderEvent", async () => {
       grantCalls++;
-      return {
-        subscription: {
-          id: "sub_race_11000",
-          userId: event.userId,
-          planCode: event.planCode,
-          status: event.status,
-          provider: event.provider,
-          source: "provider" as const,
-          providerSubscriptionId: event.providerSubscriptionId,
-          billingCycle: event.billingCycle,
-          currentPeriodStart: event.currentPeriodStart,
-          currentPeriodEnd: event.currentPeriodEnd,
-          entitlements: [],
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        eventStatus: "processed" as const,
-        eventId: "evt_race_11000",
-      };
+      throw new Error("should_not_grant_after_losing_atomic_claim");
     });
     const info = mock.method(console, "info", () => undefined);
 
@@ -210,15 +217,17 @@ describe("Casso webhook replay protection", () => {
       processedCount: 0,
       message: "Không có giao dịch nào khớp với đơn hàng đang chờ.",
     });
-    assert.equal(grantCalls, 1);
-    assert.equal(order.saveCalls, 1);
+    assert.equal(grantCalls, 0);
+    assert.equal(order.saveCalls, 0);
+    assert.equal(order.status, "completed");
+    assert.equal(order.cassoTransactionId, "tx_race_11000");
     const replayLog = info.mock.calls
       .map((call) => call.arguments[0])
       .find((arg): arg is Record<string, unknown> => {
         return Boolean(arg) && typeof arg === "object" && (arg as Record<string, unknown>).event === "casso_webhook_replay_ignored";
       });
     assert.ok(replayLog);
-    assert.equal(replayLog.reason, "duplicate_key");
+    assert.equal(replayLog.reason, "claim_lost");
     assert.equal(replayLog.transactionId, "tx_race_11000");
   });
 

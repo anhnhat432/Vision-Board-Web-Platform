@@ -5,6 +5,7 @@ import express, { type Express } from "express";
 
 import { createAuthMiddleware } from "../middleware/authMiddlewareCore";
 import { errorMiddleware } from "../middleware/errorMiddleware";
+import { DiscountModel } from "../models/DiscountModel";
 import { PaymentOrderModel } from "../models/PaymentOrderModel";
 import { billingRoutes, publicBillingRoutes } from "../routes/billingRoutes";
 import { billingService } from "../services/billingServiceInstance";
@@ -20,6 +21,22 @@ const checkoutUserId = "user_checkout_test";
 interface JsonResponse {
   status: number;
   body: Record<string, unknown>;
+}
+
+interface MockableDiscountModel {
+  find: unknown;
+}
+
+const originalDiscountFind = DiscountModel.find;
+
+function mockDiscountFindThrows(message = "DiscountModel.find should be skipped when Mongo is disconnected."): void {
+  (DiscountModel as unknown as MockableDiscountModel).find = () => {
+    throw new Error(message);
+  };
+}
+
+function restoreDiscountModel(): void {
+  (DiscountModel as unknown as MockableDiscountModel).find = originalDiscountFind;
 }
 
 function createBillingTestApp(): Express {
@@ -264,6 +281,7 @@ describe("POST /api/billing/checkout-session", () => {
 
   beforeEach(() => {
     _resetAdapterCacheForTesting();
+    restoreDiscountModel();
     delete process.env.BILLING_PROVIDER;
     delete process.env.BILLING_PAID_DISABLED;
     delete process.env.CASSO_WEBHOOK_SECRET;
@@ -275,6 +293,7 @@ describe("POST /api/billing/checkout-session", () => {
 
   afterEach(() => {
     _resetAdapterCacheForTesting();
+    restoreDiscountModel();
     delete process.env.BILLING_PROVIDER;
     delete process.env.BILLING_PAID_DISABLED;
     delete process.env.CASSO_WEBHOOK_SECRET;
@@ -345,7 +364,9 @@ describe("POST /api/billing/checkout-session", () => {
     assert.equal(response.body.success, true);
   });
 
-  it("creates a checkout session with mock provider and returns checkoutUrl", async () => {
+  it("creates a checkout session with mock provider even when sale lookup is unavailable", async () => {
+    mockDiscountFindThrows();
+
     // BILLING_PROVIDER defaults to mock
     const response = await requestJson(createBillingTestApp(), "POST", "/api/billing/checkout-session", {
       token: "checkout-token",
@@ -380,7 +401,8 @@ describe("POST /api/billing/checkout-session", () => {
     assert.deepEqual(entitlement.entitlements, []);
   });
 
-  it("returns 503 when PayOS provider env is missing", async () => {
+  it("returns 503 when PayOS provider env is missing even if sale lookup is unavailable", async () => {
+    mockDiscountFindThrows();
     process.env.BILLING_PROVIDER = "payos";
     process.env.BILLING_PAID_DISABLED = "false";
     delete process.env.PAYOS_CLIENT_ID;
@@ -440,6 +462,7 @@ describe("POST /api/billing/public-checkout-session", () => {
 
   beforeEach(() => {
     _resetAdapterCacheForTesting();
+    restoreDiscountModel();
     delete process.env.BILLING_PROVIDER;
     delete process.env.BILLING_PAID_DISABLED;
     delete process.env.CASSO_WEBHOOK_SECRET;
@@ -451,6 +474,7 @@ describe("POST /api/billing/public-checkout-session", () => {
 
   afterEach(() => {
     _resetAdapterCacheForTesting();
+    restoreDiscountModel();
     delete process.env.BILLING_PROVIDER;
     delete process.env.BILLING_PAID_DISABLED;
     delete process.env.CASSO_WEBHOOK_SECRET;
@@ -460,7 +484,9 @@ describe("POST /api/billing/public-checkout-session", () => {
     delete process.env.PLUS_PRICE_VND;
   });
 
-  it("creates a checkout session without requiring a Firebase token", async () => {
+  it("creates a checkout session without requiring a Firebase token when sale lookup is unavailable", async () => {
+    mockDiscountFindThrows();
+
     const response = await requestJson(createBillingTestApp(), "POST", "/api/billing/public-checkout-session", {
       token: null,
       body: validBody,
@@ -475,7 +501,8 @@ describe("POST /api/billing/public-checkout-session", () => {
     assert.equal(data.provider, "mock");
   });
 
-  it("returns 503 for public checkout when PayOS provider env is missing", async () => {
+  it("returns 503 for public checkout when PayOS provider env is missing even if sale lookup is unavailable", async () => {
+    mockDiscountFindThrows();
     process.env.BILLING_PROVIDER = "payos";
     process.env.BILLING_PAID_DISABLED = "false";
     delete process.env.PAYOS_CLIENT_ID;

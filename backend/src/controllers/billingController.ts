@@ -211,6 +211,12 @@ export async function createCheckoutSession(req: Request, res: Response): Promis
     }
   }
 
+  const adapter = getPaymentProviderAdapter();
+  if (!adapter.isConfigured) {
+    const error = new PaymentProviderNotConfiguredError(adapter.providerId);
+    throw new ApiError(503, error.message, undefined, "provider_not_configured");
+  }
+
   const originalAmount = getPlusPriceFromEnv();
   const normalizedCouponCode = normalizeCouponCode(couponCode);
   if (couponCode !== undefined && couponCode !== null && !normalizedCouponCode) {
@@ -228,8 +234,6 @@ export async function createCheckoutSession(req: Request, res: Response): Promis
   if (discountInfo && !discountInfo.valid) {
     throw new ApiError(400, discountInfo.reason ?? "Mã giảm giá không hợp lệ.", undefined, "invalid_coupon");
   }
-
-  const adapter = getPaymentProviderAdapter();
 
   try {
     await recordCouponUsageIfNeeded(appliedDiscount, user.uid, req);
@@ -318,6 +322,12 @@ export async function createPublicCheckoutSession(req: Request, res: Response): 
     }
   }
 
+  const adapter = getPaymentProviderAdapter();
+  if (!adapter.isConfigured) {
+    const error = new PaymentProviderNotConfiguredError(adapter.providerId);
+    throw new ApiError(503, error.message, undefined, "provider_not_configured");
+  }
+
   const originalAmount = getPlusPriceFromEnv();
   const normalizedCouponCode = normalizeCouponCode(couponCode);
   if (couponCode !== undefined && couponCode !== null && !normalizedCouponCode) {
@@ -337,8 +347,6 @@ export async function createPublicCheckoutSession(req: Request, res: Response): 
   if (discountInfo && !discountInfo.valid) {
     throw new ApiError(400, discountInfo.reason ?? "Mã giảm giá không hợp lệ.", undefined, "invalid_coupon");
   }
-
-  const adapter = getPaymentProviderAdapter();
 
   try {
     await recordCouponUsageIfNeeded(appliedDiscount, publicUserId, req);

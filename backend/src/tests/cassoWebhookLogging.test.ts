@@ -17,6 +17,7 @@ interface MockResponse {
 }
 
 interface MockCassoPaymentOrder {
+  _id: string;
   orderId: string;
   userId: string;
   amount: number;
@@ -35,9 +36,11 @@ interface MockCassoPaymentOrder {
 
 type MockableModel = {
   findOne: unknown;
+  findOneAndUpdate: unknown;
 };
 
 const originalPaymentOrderFindOne = PaymentOrderModel.findOne;
+const originalPaymentOrderFindOneAndUpdate = PaymentOrderModel.findOneAndUpdate;
 const originalUserFindOne = UserModel.findOne;
 
 function createResponse(): MockResponse {
@@ -69,6 +72,7 @@ function createRequest(body: unknown, headers: Record<string, string> = {}): Req
 
 function createOrder(overrides: Partial<MockCassoPaymentOrder> = {}): MockCassoPaymentOrder {
   return {
+    _id: `payment_order_${Date.now()}`,
     orderId: "VBLOG00001",
     userId: "user_casso_logging",
     amount: 2000,
@@ -108,6 +112,24 @@ function mockPersistence(order: MockCassoPaymentOrder | null): void {
     if (order && filters.orderId === order.orderId && filters.status === "pending") return order;
     return null;
   };
+  (PaymentOrderModel as unknown as MockableModel).findOneAndUpdate = async (query: unknown, update: unknown) => {
+    const filters = query as Record<string, unknown>;
+    if (!order || filters._id !== order._id || filters.status !== "pending" || order.status !== "pending") {
+      return null;
+    }
+
+    const set = (update as { $set?: Record<string, unknown> }).$set ?? {};
+    if (typeof set.status === "string") {
+      order.status = set.status as PaymentOrderStatus;
+    }
+    if (set.completedAt instanceof Date) {
+      order.completedAt = set.completedAt;
+    }
+    if (typeof set.cassoTransactionId === "string") {
+      order.cassoTransactionId = set.cassoTransactionId;
+    }
+    return order;
+  };
 
   (UserModel as unknown as MockableModel).findOne = () => ({
     select() {
@@ -123,6 +145,7 @@ function mockPersistence(order: MockCassoPaymentOrder | null): void {
 afterEach(() => {
   mock.restoreAll();
   (PaymentOrderModel as unknown as MockableModel).findOne = originalPaymentOrderFindOne;
+  (PaymentOrderModel as unknown as MockableModel).findOneAndUpdate = originalPaymentOrderFindOneAndUpdate;
   (UserModel as unknown as MockableModel).findOne = originalUserFindOne;
   delete process.env.CASSO_WEBHOOK_SECRET;
 });

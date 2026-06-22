@@ -7,7 +7,7 @@
  * POST /api/ai/assistant/stream (structured SSE streaming)
  */
 
-import { Router } from "express";
+import { type RequestHandler, Router } from "express";
 import multer from "multer";
 import {
   chatController,
@@ -22,9 +22,52 @@ import {
 import { assistantRateLimiter } from "../middleware/rateLimiters";
 import { requireAdmin } from "../middleware/requireAdmin";
 import { asyncHandler } from "../utils/asyncHandler";
+import { ApiError } from "../utils/apiError";
 
 const router = Router();
-const upload = multer({ storage: multer.memoryStorage() });
+const MAX_TRANSCRIBE_FILE_BYTES = 10 * 1024 * 1024;
+const ALLOWED_TRANSCRIBE_MIME_TYPES = new Set([
+  "audio/webm",
+  "audio/wav",
+  "audio/x-wav",
+  "audio/mpeg",
+  "audio/mp3",
+  "audio/mp4",
+  "audio/x-m4a",
+  "audio/aac",
+  "audio/ogg",
+  "audio/opus",
+]);
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { files: 1, fileSize: MAX_TRANSCRIBE_FILE_BYTES },
+  fileFilter(_req, file, cb) {
+    if (!ALLOWED_TRANSCRIBE_MIME_TYPES.has(file.mimetype)) {
+      cb(new ApiError(400, "Định dạng file âm thanh không được hỗ trợ.", undefined, "ASSISTANT_INVALID_AUDIO_TYPE"));
+      return;
+    }
+    cb(null, true);
+  },
+});
+
+const uploadTranscribeMiddleware: RequestHandler = (req, res, next) => {
+  upload.single("file")(req, res, (err: unknown) => {
+    if (err instanceof multer.MulterError) {
+      if (err.code === "LIMIT_FILE_SIZE") {
+        next(new ApiError(413, "File âm thanh quá lớn. Giới hạn tối đa là 10MB.", undefined, "ASSISTANT_FILE_TOO_LARGE"));
+        return;
+      }
+      next(new ApiError(400, `Upload error: ${err.message}`, undefined, "ASSISTANT_UPLOAD_ERROR"));
+      return;
+    }
+    if (err) {
+      next(err as Error);
+      return;
+    }
+    next();
+  });
+};
 
 // POST /assistant/chat - non-streaming fallback
 router.post("/assistant/chat", assistantRateLimiter, chatController);
@@ -56,6 +99,6 @@ router.get(
 );
 
 // POST /assistant/transcribe - Transcribe speech audio to text
-router.post("/assistant/transcribe", assistantRateLimiter, upload.single("file"), transcribeController);
+router.post("/assistant/transcribe", assistantRateLimiter, uploadTranscribeMiddleware, transcribeController);
 
 export { router as assistantRoutes };
