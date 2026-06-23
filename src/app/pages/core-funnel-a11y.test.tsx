@@ -339,7 +339,8 @@ describe("TwelveWeekSetup ReviewStep — summary stack", () => {
     expect(screen.getByRole("heading", { name: "Việc lặp lại mỗi tuần" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Chu kỳ và tuần đầu" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Chất lượng và gợi ý" })).toBeInTheDocument();
-    expect(screen.getAllByRole("button", { name: "Sửa" })).toHaveLength(4);
+    expect(screen.getAllByRole("button", { name: /Sửa/i })).toHaveLength(4);
+    expect(screen.getByRole("button", { name: "Sửa Kết quả 12 tuần" })).toBeInTheDocument();
   });
 
   it("shows the outcome summary content without requiring accordion expansion", () => {
@@ -474,7 +475,7 @@ describe("TwelveWeekSetup StepShellLab — mobile action bar", () => {
 
     expect(futureStep).toBeInstanceOf(HTMLButtonElement);
     expect(futureStep).toBeDisabled();
-    expect(futureStep).toHaveClass("disabled:cursor-not-allowed", "disabled:opacity-70");
+    expect(futureStep).toHaveClass("h-11", "w-11", "disabled:cursor-not-allowed", "disabled:opacity-70");
   });
 });
 

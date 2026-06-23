@@ -97,18 +97,27 @@ function ReviewSection({
   children: ReactNode;
 }) {
   return (
-    <section className="border-b border-app-line pb-5 last:border-0" aria-labelledby={`review-section-${stepIndex}`}>
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{caption}</p>
-          <h3 id={`review-section-${stepIndex}`} className="mt-1 font-serif text-xl font-medium text-app-ink">
+    <section
+      className="min-w-0 border-b border-app-line pb-5 last:border-0"
+      aria-labelledby={`review-section-${stepIndex}`}
+    >
+      <div className="flex min-w-0 items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="break-words text-xs font-semibold uppercase leading-snug tracking-[0.14em] text-app-ink-muted">
+            {caption}
+          </p>
+          <h3
+            id={`review-section-${stepIndex}`}
+            className="mt-1 break-words font-serif text-xl font-medium leading-snug text-app-ink"
+          >
             {title}
           </h3>
         </div>
         <button
           type="button"
           onClick={() => jumpToSetupStep(stepIndex)}
-          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full px-2 py-1 text-xs font-medium text-app-accent transition-colors duration-150 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+          aria-label={`Sửa ${title}`}
+          className="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-full px-2 py-1 text-xs font-medium text-app-accent transition-colors duration-150 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
         >
           Sửa
         </button>
@@ -120,9 +129,11 @@ function ReviewSection({
 
 function SummaryItem({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div>
-      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-app-ink-muted">{label}</p>
-      <div className="mt-1 text-sm leading-6 text-app-ink">{children}</div>
+    <div className="min-w-0">
+      <p className="break-words text-xs font-semibold uppercase leading-snug tracking-[0.14em] text-app-ink-muted">
+        {label}
+      </p>
+      <div className="mt-1 break-words text-sm leading-6 text-app-ink">{children}</div>
     </div>
   );
 }
@@ -352,12 +363,12 @@ export function ReviewStep({
                 {scheduledLeadIndicators.map((indicator) => (
                   <li key={indicator.id} className="rounded-lg border border-app-line bg-app-bg px-3 py-2">
                     <div className="flex flex-wrap items-center justify-between gap-2">
-                      <p className="text-sm font-medium text-app-ink">{indicator.name || "-"}</p>
+                      <p className="min-w-0 break-words text-sm font-medium text-app-ink">{indicator.name || "-"}</p>
                       <span className="rounded-full bg-app-accent-soft px-2.5 py-1 text-xs font-medium text-app-accent">
                         {indicator.type === "optional" ? "Tùy chọn" : "Cốt lõi"}
                       </span>
                     </div>
-                    <p className="mt-1 text-xs text-app-ink-muted">
+                    <p className="mt-1 break-words text-xs leading-relaxed text-app-ink-muted">
                       {indicator.target || "1"} {indicator.unit || "lần/tuần"} ·{" "}
                       {formatScheduleDayLabels(indicator.schedule)}
                     </p>
@@ -398,7 +409,7 @@ export function ReviewStep({
                   {weekOneTaskPreview.map((task) => (
                     <div
                       key={task}
-                      className="rounded-lg border border-app-line bg-app-bg px-3 py-2 text-sm text-app-ink-soft"
+                      className="min-w-0 break-words rounded-lg border border-app-line bg-app-bg px-3 py-2 text-sm leading-6 text-app-ink-soft"
                     >
                       {task}
                     </div>
@@ -478,10 +489,10 @@ export function ReviewStep({
                   open={suggestionsOpen}
                   onToggle={(event) => setSuggestionsOpen(event.currentTarget.open)}
                 >
-                  <summary className="cursor-pointer list-none text-xs font-medium text-app-accent">
+                  <summary className="flex min-h-11 cursor-pointer list-none items-center break-words text-xs font-medium leading-snug text-app-accent">
                     Gợi ý cải thiện ({planQuality.suggestions.length})
                   </summary>
-                  <ul className="mt-2 space-y-1 text-sm leading-6 text-app-ink-soft">
+                  <ul className="mt-2 space-y-1 break-words text-sm leading-6 text-app-ink-soft">
                     {planQuality.suggestions.map((suggestion) => (
                       <li key={suggestion}>• {suggestion}</li>
                     ))}
@@ -537,7 +548,7 @@ export function ReviewStep({
                     <Wrench className="h-3.5 w-3.5" aria-hidden="true" />
                     <span>Nếu bạn thấy chưa khớp, có thể đổi</span>
                   </p>
-                  <ul className="mt-2 space-y-1 text-sm leading-6 text-app-ink-soft">
+                  <ul className="mt-2 space-y-1 break-words text-sm leading-6 text-app-ink-soft">
                     {planRationale.adjustments.map((adjustment) => (
                       <li key={adjustment.id} data-adjustment-id={adjustment.id}>
                         • {adjustment.text}
@@ -578,7 +589,7 @@ export function ReviewStep({
       </div>
 
       <details className="surface-raised rounded-xl border border-app-line bg-app-surface p-4">
-        <summary className="cursor-pointer list-none text-sm font-medium text-app-ink">
+        <summary className="flex min-h-11 cursor-pointer list-none items-center break-words text-sm font-medium leading-snug text-app-ink">
           Mở phần nâng cao (tùy chọn)
         </summary>
         <div className="mt-4 space-y-4">

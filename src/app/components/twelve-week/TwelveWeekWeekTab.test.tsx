@@ -154,7 +154,10 @@ describe("TwelveWeekWeekTab review flow", () => {
     const input = screen.getByLabelText(/cam kết của tuần tới/i);
     await user.type(input, "Plan a{Enter}");
 
-    expect(screen.getByLabelText("Cam kết: Plan a")).toBeInTheDocument();
+    const chip = screen.getByLabelText("Cam kết: Plan a");
+    expect(chip).toBeInTheDocument();
+    expect(within(chip).getByText("Plan a")).toHaveClass("break-words");
+    expect(within(chip).getByRole("button", { name: "Xóa cam kết: Plan a" })).toHaveClass("h-8", "w-8");
     expect(input).toHaveValue("");
   });
 
@@ -239,6 +242,7 @@ describe("TwelveWeekWeekTab review flow", () => {
     );
     expect(within(actionBar).getByText("Tiến độ review 2/4")).toBeInTheDocument();
     expect(within(actionBar).getByText(/Thiếu 2 mục/i)).toBeInTheDocument();
+    expect(within(actionBar).getByRole("button", { name: /Chốt review tuần này/i })).toHaveClass("min-h-12");
   });
 
   it("blocks weekly review submit for a future week number", async () => {
@@ -369,6 +373,9 @@ describe("TwelveWeekWeekTab review flow", () => {
     expect(screen.getByText("Publish draft")).toBeInTheDocument();
     for (const button of screen.getAllByRole("button", { name: /chốt review tuần này/i })) {
       expect(button).toBeDisabled();
+      if (!button.closest('[data-testid="weekly-review-mobile-sticky-cta"]')) {
+        expect(button).toHaveClass("min-h-11");
+      }
     }
   });
 

@@ -129,16 +129,16 @@ export function NextWeekCommitmentsEditor({
                 aria-label={`Cam kết: ${commitment}`}
                 data-state={duplicateKey === key ? "duplicate" : "idle"}
                 className={cn(
-                  "inline-flex max-w-full min-w-0 items-center gap-1 rounded-full border bg-app-surface px-3 py-1 text-xs font-semibold text-app-warm transition-colors",
+                  "inline-flex max-w-full min-w-0 items-start gap-1 rounded-full border bg-app-surface px-3 py-1 text-xs font-semibold leading-snug text-app-warm transition-colors",
                   duplicateKey === key ? "border-app-warm-border bg-app-warm-soft text-app-warm" : "border-app-line",
                 )}
               >
-                <span className="min-w-0 truncate">{commitment}</span>
+                <span className="min-w-0 break-words pr-0.5">{commitment}</span>
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="h-5 w-5 shrink-0 rounded-full p-0 text-app-warm hover:bg-app-warm-soft"
+                  className="h-8 w-8 shrink-0 rounded-full p-0 text-app-warm hover:bg-app-warm-soft"
                   onClick={() => removeCommitment(commitment)}
                   disabled={disabled}
                   aria-label={`Xóa cam kết: ${commitment}`}

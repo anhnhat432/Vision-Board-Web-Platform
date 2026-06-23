@@ -166,18 +166,18 @@ function isCommitmentAnswered(status: WeeklyCommitmentStatus | undefined): boole
 function getCommitmentButtonClass(status: WeeklyCommitmentStatus, currentStatus: WeeklyCommitmentStatus): string {
   const isActive = status === currentStatus;
   if (!isActive) {
-    return "w-full border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg-subtle text-xs px-3 py-2 sm:px-2.5 sm:py-1.5 min-h-[40px] sm:min-h-[36px] flex items-center justify-center rounded-lg text-center transition-all duration-200 weekly-btn-press";
+    return "w-full border-app-line bg-app-surface px-3 py-2 text-xs min-h-11 sm:px-3 sm:py-2 sm:min-h-11 flex items-center justify-center rounded-lg text-center leading-tight text-app-ink-soft transition-all duration-200 hover:bg-app-bg-subtle weekly-btn-press";
   }
 
   switch (status) {
     case "kept":
-      return "w-full border-app-status-success/30 bg-app-status-success/10 text-app-status-success hover:bg-app-status-success/20 font-semibold text-xs px-3 py-2 sm:px-2.5 sm:py-1.5 min-h-[40px] sm:min-h-[36px] flex items-center justify-center rounded-lg text-center shadow-2xs ring-1 ring-app-status-success/15 weekly-btn-press";
+      return "w-full border-app-status-success/30 bg-app-status-success/10 px-3 py-2 text-xs min-h-11 sm:px-3 sm:py-2 sm:min-h-11 flex items-center justify-center rounded-lg text-center font-semibold leading-tight text-app-status-success shadow-2xs ring-1 ring-app-status-success/15 transition-all duration-200 hover:bg-app-status-success/20 weekly-btn-press";
     case "missed":
-      return "w-full border-app-status-error/30 bg-app-status-error/10 text-app-status-error hover:bg-app-status-error/20 font-semibold text-xs px-3 py-2 sm:px-2.5 sm:py-1.5 min-h-[40px] sm:min-h-[36px] flex items-center justify-center rounded-lg text-center shadow-2xs ring-1 ring-app-status-error/15 weekly-btn-press";
+      return "w-full border-app-status-error/30 bg-app-status-error/10 px-3 py-2 text-xs min-h-11 sm:px-3 sm:py-2 sm:min-h-11 flex items-center justify-center rounded-lg text-center font-semibold leading-tight text-app-status-error shadow-2xs ring-1 ring-app-status-error/15 transition-all duration-200 hover:bg-app-status-error/20 weekly-btn-press";
     case "not_set":
-      return "w-full border-app-line-strong bg-app-bg-subtle text-app-ink-soft hover:bg-app-line-strong/20 font-semibold text-xs px-3 py-2 sm:px-2.5 sm:py-1.5 min-h-[40px] sm:min-h-[36px] flex items-center justify-center rounded-lg text-center shadow-2xs weekly-btn-press";
+      return "w-full border-app-line-strong bg-app-bg-subtle px-3 py-2 text-xs min-h-11 sm:px-3 sm:py-2 sm:min-h-11 flex items-center justify-center rounded-lg text-center font-semibold leading-tight text-app-ink-soft shadow-2xs transition-all duration-200 hover:bg-app-line-strong/20 weekly-btn-press";
     default:
-      return "w-full border-app-ink bg-app-ink text-white font-semibold text-xs px-3 py-2 sm:px-2.5 sm:py-1.5 min-h-[40px] sm:min-h-[36px] flex items-center justify-center rounded-lg text-center shadow-2xs weekly-btn-press";
+      return "w-full border-app-ink bg-app-ink px-3 py-2 text-xs min-h-11 sm:px-3 sm:py-2 sm:min-h-11 flex items-center justify-center rounded-lg text-center font-semibold leading-tight text-white shadow-2xs transition-all duration-200 weekly-btn-press";
   }
 }
 
@@ -634,7 +634,9 @@ export function TwelveWeekWeekTab({
                             data-tactic-status={status}
                             className={`weekly-status-dot h-2.5 w-2.5 rounded-full shrink-0 ${st.dot}`}
                           />
-                          <span className="text-sm font-semibold text-app-ink truncate flex-1">{indicator.name}</span>
+                          <span className="min-w-0 flex-1 break-words text-sm font-semibold leading-snug text-app-ink">
+                            {indicator.name}
+                          </span>
                           <Badge
                             variant={indicator.isCore ? "success" : "warning"}
                             className="shadow-none rounded-md text-[9px] px-1.5 py-0 font-bold shrink-0"
@@ -690,7 +692,7 @@ export function TwelveWeekWeekTab({
               <Button
                 type="button"
                 variant="outline"
-                className="h-10 w-full rounded-card border-app-line bg-app-surface px-4.5 py-2.5 text-xs font-semibold text-app-ink shadow-2xs transition-all weekly-btn-press hover:bg-app-bg sm:w-auto sm:shrink-0"
+                className="min-h-11 w-full rounded-card border-app-line bg-app-surface px-4.5 py-2.5 text-xs font-semibold text-app-ink shadow-2xs transition-all hover:bg-app-bg weekly-btn-press sm:w-auto sm:shrink-0"
                 onClick={() => setIsStartingEarly(true)}
               >
                 Bắt đầu review sớm
@@ -767,7 +769,7 @@ export function TwelveWeekWeekTab({
                       {lagScoreValue}%
                     </span>
                   </div>
-                  <span className="text-xs text-app-ink-muted truncate font-medium">
+                  <span className="min-w-0 break-words text-xs font-medium leading-snug text-app-ink-muted">
                     {system.lagMetric.name}: {lagMetricValue}
                   </span>
                 </div>
@@ -1020,7 +1022,7 @@ export function TwelveWeekWeekTab({
                       item.done ? "bg-app-accent shadow-[0_0_6px_rgba(42,84,71,0.35)]" : "bg-app-line/80",
                     )}
                   />
-                  <span className="min-w-0 truncate">{item.label}</span>
+                  <span className="min-w-0 break-words leading-snug">{item.label}</span>
                 </div>
               ))}
             </div>
@@ -1031,7 +1033,7 @@ export function TwelveWeekWeekTab({
               <Button
                 type="button"
                 variant="outline"
-                className="h-9.5 rounded-card border-app-line bg-app-surface px-4 py-2 text-xs font-semibold text-app-ink-soft transition-all hover:bg-app-bg weekly-btn-press"
+                className="min-h-11 rounded-card border-app-line bg-app-surface px-4 py-2 text-xs font-semibold text-app-ink-soft transition-all hover:bg-app-bg weekly-btn-press"
                 onClick={() => {
                   setIsEditingReview(false);
                   setIsStartingEarly(false);
@@ -1042,7 +1044,7 @@ export function TwelveWeekWeekTab({
             )}
             <Button
               size="sm"
-              className="h-10 rounded-card bg-app-warm px-4.5 py-2.5 text-xs font-semibold text-white shadow-2xs transition-all hover:bg-app-warm-hover active:shadow-app-sm weekly-btn-press sm:h-9.5"
+              className="min-h-11 rounded-card bg-app-warm px-4.5 py-2.5 text-xs font-semibold text-white shadow-2xs transition-all hover:bg-app-warm-hover active:shadow-app-sm weekly-btn-press"
               onClick={handleSaveReviewClick}
               disabled={isSavingReview || !canSubmitWeeklyReview}
               aria-busy={isSavingReview}
@@ -1119,7 +1121,7 @@ export function TwelveWeekWeekTab({
                     >
                       {lagScoreValue}%
                     </p>
-                    <p className="text-xs text-app-ink-soft font-semibold mt-1 truncate">
+                    <p className="mt-1 break-words text-xs font-semibold leading-snug text-app-ink-soft">
                       {system.lagMetric.name}: {lagMetricValue}
                     </p>
                   </div>
@@ -1151,7 +1153,9 @@ export function TwelveWeekWeekTab({
                           key={indicator.id || indicator.name}
                           className="flex items-center justify-between text-xs sm:text-sm text-app-ink bg-app-bg/5 p-3 rounded-card border border-app-line/10 hover:bg-app-accent-subtle/15 transition-colors duration-200"
                         >
-                          <span className="truncate max-w-[70%] font-medium">· {indicator.name}</span>
+                          <span className="min-w-0 max-w-[70%] break-words font-medium leading-snug">
+                            · {indicator.name}
+                          </span>
                           <span className="font-mono text-xs text-app-ink-soft font-bold shrink-0 bg-app-surface px-2 py-0.5 rounded-md border border-app-line/25">
                             {completed}/{total} ({percent}%)
                           </span>
@@ -1264,7 +1268,7 @@ export function TwelveWeekWeekTab({
                 <Button
                   type="button"
                   variant="outline"
-                  className="rounded-card border border-app-line bg-app-surface px-4 py-2.5 text-xs font-semibold text-app-ink-soft transition-all hover:bg-app-bg weekly-btn-press sm:px-4.5"
+                  className="min-h-11 rounded-card border border-app-line bg-app-surface px-4 py-2.5 text-xs font-semibold text-app-ink-soft transition-all hover:bg-app-bg weekly-btn-press sm:px-4.5"
                   onClick={() => setIsEditingReview(true)}
                 >
                   Chỉnh sửa đánh giá
@@ -1288,7 +1292,7 @@ export function TwelveWeekWeekTab({
                 <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:items-center">
                   <Button
                     type="button"
-                    className="bg-app-warm hover:bg-app-warm-hover text-white text-xs font-semibold px-4 py-2 rounded-card shadow-xs h-9 weekly-btn-press"
+                    className="min-h-11 rounded-card bg-app-warm px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-app-warm-hover weekly-btn-press"
                     onClick={onAcceptNextWeekRecommendation}
                   >
                     Áp dụng gợi ý tuần sau
@@ -1297,7 +1301,7 @@ export function TwelveWeekWeekTab({
                     <Button
                       type="button"
                       variant="outline"
-                      className="text-xs font-semibold px-4 py-2 rounded-card border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg h-9 weekly-btn-press"
+                      className="min-h-11 rounded-card border-app-line bg-app-surface px-4 py-2 text-xs font-semibold text-app-ink-soft hover:bg-app-bg weekly-btn-press"
                       onClick={onOpenTodayTab}
                     >
                       Quay lại hôm nay
@@ -1359,8 +1363,8 @@ export function TwelveWeekWeekTab({
           className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] left-0 right-0 z-40 border-t border-app-line/80 bg-app-surface/95 px-4 pb-4 pt-3 shadow-[0_-18px_40px_-30px_rgba(23,21,15,0.45)] backdrop-blur-md md:hidden"
         >
           <div className="mx-auto flex w-full max-w-[42rem] flex-col gap-2.5 md:max-w-none">
-            <div className="flex items-center justify-between gap-3 text-[11px] font-semibold text-app-ink-muted">
-              <span>Tiến độ review {reviewReadyCount}/4</span>
+            <div className="flex items-start justify-between gap-3 text-[11px] font-semibold text-app-ink-muted">
+              <span className="min-w-0 break-words leading-snug">Tiến độ review {reviewReadyCount}/4</span>
               <span className={canSubmitWeeklyReview ? "text-app-warm-strong" : "text-app-ink-muted"}>
                 {reviewStickyStatus}
               </span>
