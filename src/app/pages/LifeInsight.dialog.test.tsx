@@ -4,6 +4,16 @@ import userEvent from "@testing-library/user-event";
 import { renderAppRoute, resetTestStorage, updateUserData } from "../../test/app-flow-helpers";
 import { APP_STORAGE_KEYS, LIFE_AREAS } from "../utils/storage";
 
+async function findLifeInsightPrimaryCta() {
+  const buttons = await screen.findAllByRole("button", { name: /Tiếp → Viết mục tiêu/i });
+  const [primaryCta] = buttons;
+  if (!primaryCta) {
+    throw new Error("Missing LifeInsight primary CTA");
+  }
+
+  return primaryCta;
+}
+
 describe("LifeInsight draft switch dialog", () => {
   beforeEach(() => {
     resetTestStorage();
@@ -36,7 +46,7 @@ describe("LifeInsight draft switch dialog", () => {
     const { router } = renderAppRoute("/life-insight");
     const user = userEvent.setup();
 
-    await user.click(await screen.findByRole("button", { name: /Tiếp → Viết mục tiêu/i }));
+    await user.click(await findLifeInsightPrimaryCta());
     expect(await screen.findByText("Bạn có bản nháp mục tiêu chưa lưu")).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Huỷ" }));

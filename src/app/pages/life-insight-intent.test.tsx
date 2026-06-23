@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -34,6 +34,10 @@ function seedRealLifeBalance(): void {
     syncOutbox: [],
   } as unknown as UserData;
   saveUserData(base);
+}
+
+function setViewportWidth(width: number) {
+  Object.defineProperty(window, "innerWidth", { configurable: true, value: width });
 }
 
 beforeEach(() => {
@@ -126,5 +130,33 @@ describe("LifeInsight — intent picker", () => {
     const clearButton = await screen.findByRole("button", { name: /Bỏ chọn/i });
     await user.click(clearButton);
     expect(localStorage.getItem("user_intent")).toBeNull();
+  });
+
+  it("renders a mobile action bar with focus status and reserved bottom space", async () => {
+    setViewportWidth(375);
+
+    render(
+      <MemoryRouter>
+        <LifeInsight />
+      </MemoryRouter>,
+    );
+
+    const shell = document.querySelector("[data-life-insight-shell]");
+    const actionBar = document.querySelector("[data-life-insight-mobile-action-bar]");
+
+    expect(shell).toHaveClass("pb-[calc(9rem+env(safe-area-inset-bottom))]", "lg:pb-0");
+    expect(actionBar).toHaveClass(
+      "fixed",
+      "bottom-0",
+      "bg-app-surface/95",
+      "pb-[calc(1rem+env(safe-area-inset-bottom))]",
+    );
+
+    expect(within(actionBar as HTMLElement).getByText(/Bước 2\/6 · Trọng tâm/i)).toBeInTheDocument();
+    expect(within(actionBar as HTMLElement).getByText("Đề xuất tự động")).toBeInTheDocument();
+    expect(
+      within(actionBar as HTMLElement).getByText("Bạn có thể chọn định hướng bây giờ hoặc viết mục tiêu ngay."),
+    ).toBeInTheDocument();
+    expect(within(actionBar as HTMLElement).getByRole("button", { name: /Tiếp → Viết mục tiêu/i })).toBeInTheDocument();
   });
 });

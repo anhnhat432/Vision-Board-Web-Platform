@@ -227,6 +227,9 @@ export function LifeInsight() {
   };
 
   const intentOptions = getUserIntentOptions();
+  const selectedIntentLabel = selectedIntent
+    ? intentOptions.find((option) => option.id === selectedIntent)?.label ?? null
+    : null;
 
   const lowestArea = useMemo(() => {
     if (lifeAreas.length === 0) return null;
@@ -382,7 +385,10 @@ export function LifeInsight() {
 
         <CoreFlowProgress currentStepId="life_insight" onExit={() => navigate("/")} />
 
-        <div className="space-y-6 pb-20 lg:pb-0">
+        <div
+          data-life-insight-shell
+          className="space-y-6 pb-[calc(9rem+env(safe-area-inset-bottom))] lg:pb-0"
+        >
           {/* Header section - Chánh niệm & Serif Heading */}
           <div className="max-w-3xl animate-fade-in space-y-2.5">
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-app-accent">
@@ -773,7 +779,7 @@ export function LifeInsight() {
                       onClick={handleStartGoalSetup}
                       className="group inline-flex items-center justify-center gap-2 bg-app-accent py-4 px-6 text-sm font-bold text-white shadow-app-sm hover:bg-app-accent-hover hover:shadow-app-md active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg w-full transition-all duration-200 cursor-pointer"
                     >
-                      Tạo mục tiêu SMART
+                      Tiếp → Viết mục tiêu
                       <ArrowRight
                         className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
                         aria-hidden="true"
@@ -809,13 +815,38 @@ export function LifeInsight() {
       </div>
 
       {/* Sticky Bottom CTA cho Mobile */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-app-surface/95 backdrop-blur-md border-t border-app-line p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] shadow-xl">
-        <div className="max-w-md mx-auto">
+      <div
+        data-life-insight-mobile-action-bar
+        className="fixed bottom-0 left-0 right-0 z-40 border-t border-app-line/80 bg-app-surface/95 px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-3 shadow-[0_-18px_40px_-30px_rgba(23,21,15,0.45)] backdrop-blur-md lg:hidden"
+      >
+        <div className="mx-auto flex w-full max-w-[42rem] flex-col gap-3">
+          <div className="flex items-center justify-between gap-3 text-[11px] font-semibold" aria-live="polite">
+            <span className="min-w-0 truncate text-app-ink-muted">Bước 2/6 · Trọng tâm {focusAreaLabel}</span>
+            <span
+              className={cn(
+                "shrink-0 rounded-full border px-2.5 py-1",
+                isCustomSelection
+                  ? "border-app-status-warning/20 bg-app-status-warning/10 text-app-status-warning"
+                  : "border-app-status-success/20 bg-app-status-success/10 text-app-status-success",
+              )}
+            >
+              {isCustomSelection ? "Bạn đã chọn" : "Đề xuất tự động"}
+            </span>
+          </div>
+
+          {selectedIntentLabel ? (
+            <p className="text-[11px] leading-relaxed text-app-ink-muted">
+              Định hướng đã chọn: <span className="font-semibold text-app-ink">{selectedIntentLabel}</span>
+            </p>
+          ) : (
+            <p className="text-[11px] leading-relaxed text-app-ink-muted">Bạn có thể chọn định hướng bây giờ hoặc viết mục tiêu ngay.</p>
+          )}
+
           <Button
             onClick={handleStartGoalSetup}
             className="group inline-flex min-h-11 items-center justify-center gap-2 bg-app-accent px-6 py-3.5 text-sm font-bold leading-snug text-white shadow-app-sm hover:bg-app-accent-hover active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg w-full transition-all duration-200 cursor-pointer"
           >
-            Tạo mục tiêu SMART
+            Tiếp → Viết mục tiêu
             <ArrowRight
               className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
               aria-hidden="true"

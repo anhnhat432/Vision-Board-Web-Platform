@@ -386,6 +386,14 @@ export function SmartGoalStepShell({
   const isFinalStep = stepIndex === totalSteps - 1;
   const primaryCtaLabel = isFinalStep && finalPrimaryCtaLabel ? finalPrimaryCtaLabel : STEP_CTA_LABELS[step.key];
   const showFinalSecondaryCta = isFinalStep && finalSecondaryCtaLabel && onFinalSecondaryAction;
+  const mobileProgressLabel = showReview
+    ? `Bước ${stepIndex + 1}/${totalSteps} · Độ rõ ${clarityDoneCount}/${clarityItems.length}`
+    : `Bước ${stepIndex + 1}/${totalSteps}`;
+  const mobileReadinessLabel = isCurrentStepValid
+    ? isFinalStep
+      ? "Sẵn sàng chọn kế hoạch"
+      : "Sẵn sàng tiếp tục"
+    : "Cần hoàn thiện bước này";
 
   const getPersonaData = (
     tone: "empathetic" | "pragmatic" | "strategic",
@@ -756,7 +764,10 @@ export function SmartGoalStepShell({
   return (
     <div
       data-smart-goal-shell
-      className="w-full animate-[fade-in_0.3s_ease-out] pb-[calc(9rem+env(safe-area-inset-bottom))] lg:pb-0"
+      className={cn(
+        "w-full animate-[fade-in_0.3s_ease-out] pb-[calc(9rem+env(safe-area-inset-bottom))] lg:pb-0",
+        showFinalSecondaryCta && "pb-[calc(12rem+env(safe-area-inset-bottom))]",
+      )}
     >
       <style>{`
         @keyframes shake {
@@ -1156,6 +1167,19 @@ export function SmartGoalStepShell({
                 className="fixed bottom-0 left-0 right-0 z-40 border-t border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white/95 dark:bg-app-surface/95 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-3 shadow-[0_-18px_40px_-30px_rgba(23,21,15,0.5)] backdrop-blur-md lg:hidden"
               >
                 <div className="mx-auto flex w-full max-w-[42rem] flex-col gap-3">
+                  <div className="flex items-center justify-between gap-3 text-[11px] font-semibold" aria-live="polite">
+                    <span className="min-w-0 truncate text-app-ink-muted">{mobileProgressLabel}</span>
+                    <span
+                      className={cn(
+                        "shrink-0 rounded-full border px-2.5 py-1",
+                        isCurrentStepValid
+                          ? "border-[#0C5E3A]/20 bg-[#EDF7E0] text-[#0C5E3A]"
+                          : "border-[rgba(201,151,0,0.28)] bg-[#FFF8DE] text-[#6B5520]",
+                      )}
+                    >
+                      {mobileReadinessLabel}
+                    </span>
+                  </div>
                   <div className="flex justify-between gap-3">
                   <button
                     type="button"

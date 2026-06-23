@@ -9,6 +9,16 @@ vi.setConfig({ testTimeout: 30_000, hookTimeout: 30_000 });
 
 const INTEGRATION_TEST_TIMEOUT_MS = 10_000;
 
+async function findLifeInsightPrimaryCta() {
+  const buttons = await screen.findAllByRole("button", { name: /Tiếp → Viết mục tiêu/i });
+  const [primaryCta] = buttons;
+  if (!primaryCta) {
+    throw new Error("Missing LifeInsight primary CTA");
+  }
+
+  return primaryCta;
+}
+
 describe("life insight flow", () => {
   beforeEach(() => {
     resetTestStorage();
@@ -50,14 +60,14 @@ describe("life insight flow", () => {
     const { router } = renderAppRoute("/life-insight");
     const user = userEvent.setup();
 
-    expect(await screen.findByRole("heading", { name: "Nhìn lại để bước tiếp" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Chọn một điểm tựa cho 12 tuần tới" })).toBeInTheDocument();
     expect(screen.getByText("Đề xuất ưu tiên: Sức khỏe")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Sức khỏe" })).toBeInTheDocument();
     expect(screen.getByText(/Điểm hiện tại/i)).toBeInTheDocument();
     expect(screen.getAllByText("4/10").length).toBeGreaterThan(0);
     expect(screen.getByText(/sức khỏe tốt hơn sẽ giúp tôi có năng lượng ổn định hơn/i)).toBeInTheDocument();
 
-    const primaryCta = screen.getByRole("button", { name: /Tiếp → Viết mục tiêu/i });
+    const primaryCta = await findLifeInsightPrimaryCta();
     expect(primaryCta).toHaveTextContent("Tiếp → Viết mục tiêu");
     await user.click(primaryCta);
 
@@ -97,7 +107,7 @@ describe("life insight flow", () => {
       const { router } = renderAppRoute("/life-insight");
       const user = userEvent.setup();
 
-      const primaryCta = await screen.findByRole("button", { name: /Tiếp → Viết mục tiêu/i });
+      const primaryCta = await findLifeInsightPrimaryCta();
 
       await user.click(primaryCta);
       expect(await screen.findByText("Bạn có bản nháp mục tiêu chưa lưu")).toBeInTheDocument();

@@ -585,9 +585,75 @@ describe("SmartGoalStepShell — a11y", () => {
 
     expect(shell).toHaveClass("pb-[calc(9rem+env(safe-area-inset-bottom))]", "lg:pb-0");
     expect(actionBar).toHaveClass("pb-[calc(env(safe-area-inset-bottom)+1rem)]");
+    expect(within(actionBar as HTMLElement).getByText("Bước 1/5")).toBeInTheDocument();
+    expect(within(actionBar as HTMLElement).getByText("Cần hoàn thiện bước này")).toBeInTheDocument();
     expect(feedback).not.toBeNull();
     expect(actionBar).not.toBeNull();
     expect(feedback?.compareDocumentPosition(actionBar as Node)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  it("reserves extra mobile space when the final step shows a secondary CTA", () => {
+    setViewportWidth(375);
+    const headingRef = createRef<HTMLHeadingElement>();
+    const finalStep: SmartStepDefinition = {
+      ...step,
+      key: "timeBound",
+      label: "Thời hạn",
+      title: "Khi nào bạn muốn hoàn thành?",
+    };
+    const mockStarter = {
+      specificGoalStatement: "Statement",
+      metricName: "Metric",
+      baselineValue: "0",
+      targetValue: "10",
+      weeklyHours: "4",
+      requiredSkills: "Skills",
+      supportResources: "Resources",
+      motivationReason: "Motivation",
+      lifeDimensionAlignment: "Alignment",
+      targetWeeks: "12",
+    };
+
+    render(
+      <SmartGoalStepShell
+        stepIndex={4}
+        totalSteps={5}
+        step={finalStep}
+        headingRef={headingRef}
+        starterPreview="Một ví dụ ngắn."
+        clarityItems={[{ id: "specific", label: "Specific", done: true, stepKey: "specific" }]}
+        clarityDoneCount={1}
+        clarityProgress={100}
+        summaryRows={[]}
+        showReview
+        currentStepError={null}
+        currentStepSoftWarning={null}
+        isCurrentStepValid
+        qualityFeedback={null}
+        smartData={makeSmartData({ timeBound: { mode: "weeks", target_date: "", target_weeks: "12" } })}
+        smartGoalStarter={mockStarter}
+        onApplyStarter={() => {}}
+        onJumpToStep={() => {}}
+        onBack={() => {}}
+        onNext={() => {}}
+        finalPrimaryCtaLabel="Tạo kế hoạch nhanh"
+        finalSecondaryCtaLabel="Kiểm tra khả thi nâng cao"
+        onFinalSecondaryAction={() => {}}
+      >
+        <div />
+      </SmartGoalStepShell>,
+    );
+
+    const shell = document.querySelector("[data-smart-goal-shell]");
+    const actionBar = document.querySelector("[data-smart-mobile-action-bar]");
+
+    expect(shell).toHaveClass("pb-[calc(12rem+env(safe-area-inset-bottom))]", "lg:pb-0");
+    expect(within(actionBar as HTMLElement).getByText("Bước 5/5 · Độ rõ 1/1")).toBeInTheDocument();
+    expect(within(actionBar as HTMLElement).getByText("Sẵn sàng chọn kế hoạch")).toBeInTheDocument();
+    expect(within(actionBar as HTMLElement).getByRole("button", { name: /Tạo kế hoạch nhanh/i })).toBeInTheDocument();
+    expect(
+      within(actionBar as HTMLElement).getByRole("button", { name: /Kiểm tra khả thi nâng cao/i }),
+    ).toBeInTheDocument();
   });
 });
 
