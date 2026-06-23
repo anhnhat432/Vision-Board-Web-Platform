@@ -165,7 +165,7 @@ export function ResultStep({
   // Custom visual feedback for each feasibility result type
   const resultHeaderCopy = {
     realistic: {
-      answer: "Mục tiêu rất thực tế! 🎉",
+      answer: "Mục tiêu rất thực tế",
       desc: "Nền tảng vững vàng — sẵn sàng chuyển thành hành động.",
       cardBg:
         "from-app-status-success/10 via-app-status-success/5 to-app-status-success/10 border-app-status-success/30 dark:from-app-status-success/20 dark:via-app-status-success/10 dark:to-app-status-success/20",
@@ -173,7 +173,7 @@ export function ResultStep({
       icon: CheckCircle2,
     },
     challenging: {
-      answer: "Khả thi nếu đi đúng hướng! 🌱",
+      answer: "Khả thi nếu đi đúng hướng",
       desc: "Tinh chỉnh nhẹ nhịp độ và quỹ thời gian để đi đường dài lâu.",
       cardBg:
         "from-app-status-warning/10 via-app-status-warning/5 to-app-status-warning/10 border-app-status-warning/30 dark:from-app-status-warning/20 dark:via-app-status-warning/10 dark:to-app-status-warning/20",
@@ -181,7 +181,7 @@ export function ResultStep({
       icon: Compass,
     },
     too_ambitious: {
-      answer: "Nên điều chỉnh một chút để chắc thắng! 🧗",
+      answer: "Nên điều chỉnh một chút để chắc thắng",
       desc: "Thu nhỏ chặng 12 tuần để tích lũy chiến thắng đầu tiên vững chắc.",
       cardBg:
         "from-app-status-error/10 via-app-status-error/5 to-app-status-error/10 border-app-status-error/30 dark:from-app-status-error/20 dark:via-app-status-error/10 dark:to-app-status-error/20",
@@ -195,15 +195,15 @@ export function ResultStep({
 
   return (
     <section
-      className="mt-8 relative overflow-hidden rounded-card border border-app-line bg-app-surface/60 dark:bg-app-surface/40 backdrop-blur-xl shadow-app-lg p-6 sm:p-8 md:p-10 group"
+      className="group relative mt-4 overflow-hidden rounded-card border border-app-line bg-app-surface/70 p-4 shadow-app-md backdrop-blur-xl dark:bg-app-surface/40 sm:mt-6 sm:p-6 md:p-8"
       aria-labelledby="feasibility-result-title"
     >
       {/* Premium Background Glow effects */}
-      <div className="absolute -top-24 -left-24 w-48 h-48 bg-app-accent/10 rounded-full blur-3xl pointer-events-none transition-all duration-500 group-hover:bg-app-accent/20" />
-      <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-app-status-success/10 dark:bg-app-status-success/15 rounded-full blur-3xl pointer-events-none transition-all duration-500 group-hover:bg-app-status-success/20" />
+      <div className="pointer-events-none absolute -left-24 -top-24 h-40 w-40 rounded-full bg-app-accent/5 blur-3xl transition-all duration-500 group-hover:bg-app-accent/10" />
+      <div className="pointer-events-none absolute -bottom-24 -right-24 h-40 w-40 rounded-full bg-app-status-success/5 blur-3xl transition-all duration-500 dark:bg-app-status-success/10 group-hover:bg-app-status-success/10" />
 
       {/* ── KHU VỰC 1: Mục tiêu có thực tế không? ── */}
-      <div className="relative z-10 space-y-6">
+      <div className="relative z-10 space-y-5 sm:space-y-6">
         <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-app-accent">Kết quả đánh giá khả thi</p>
           <span className="w-fit rounded-pill bg-app-accent-soft px-3.5 py-1.5 text-xs font-bold text-app-accent border border-app-line shadow-app-sm">
@@ -214,30 +214,30 @@ export function ResultStep({
         {/* Hero Banner Khẳng định tính thực tế */}
         <div
           className={cn(
-            "rounded-card border p-6 bg-gradient-to-br shadow-app-md flex gap-4 items-start transition-all duration-300 hover:shadow-app-lg",
+            "flex items-start gap-3 rounded-card border bg-gradient-to-br p-4 shadow-app-sm transition-all duration-300 hover:shadow-app-md sm:gap-4 sm:p-5",
             resultHeaderCopy.cardBg,
           )}
         >
-          <div className="p-3 rounded-control bg-app-surface shadow-app-sm shrink-0">
-            <ActionIcon className={cn("h-6 w-6", resultHeaderCopy.textClass)} aria-hidden="true" />
+          <div className="shrink-0 rounded-control bg-app-surface p-2.5 shadow-app-sm sm:p-3">
+            <ActionIcon className={cn("h-5 w-5 sm:h-6 sm:w-6", resultHeaderCopy.textClass)} aria-hidden="true" />
           </div>
           <div className="space-y-1.5">
             <h1
               id="feasibility-result-title"
-              className={cn("font-serif text-2xl sm:text-3xl font-bold tracking-tight", resultHeaderCopy.textClass)}
+              className={cn("font-serif text-[22px] font-bold leading-tight tracking-tight sm:text-3xl", resultHeaderCopy.textClass)}
             >
               {resultHeaderCopy.answer}
             </h1>
-            <p className="text-sm leading-relaxed text-app-ink-soft font-normal">{resultHeaderCopy.desc}</p>
+            <p className="text-[13px] font-normal leading-relaxed text-app-ink-soft sm:text-sm">{resultHeaderCopy.desc}</p>
           </div>
         </div>
 
         {/* Thang đo khả thi trực quan (Visual static scale block) - Loại bỏ border, tăng tương phản nền */}
-        <div className="rounded-card bg-app-bg-subtle/50 p-6 backdrop-blur-[2px]">
-          <div className="flex flex-col gap-6 md:flex-row md:items-center">
-            <div className="relative flex shrink-0 flex-col items-center justify-center text-center sm:w-48 gap-4">
+        <div className="rounded-card bg-app-bg-subtle/50 p-4 backdrop-blur-[2px] sm:p-5 md:p-6">
+          <div className="flex flex-col gap-5 md:flex-row md:items-center md:gap-6">
+            <div className="relative flex shrink-0 flex-col items-center justify-center gap-3 text-center sm:w-48 sm:gap-4">
               {/* Cán cân thăng bằng tĩnh sau hiệu chuẩn */}
-              <div className="w-full max-w-[200px] h-[130px] flex items-center justify-center select-none bg-app-surface/40 rounded-card border border-app-line p-2 shadow-inner">
+              <div className="flex h-[112px] w-full max-w-[180px] items-center justify-center rounded-card border border-app-line bg-app-surface/40 p-2 shadow-inner select-none sm:h-[130px] sm:max-w-[200px]">
                 <FeasibilityScaleSVG
                   tiltAngle={tiltAngle}
                   isHeavyLeft={averageScore < 2.3}
@@ -256,7 +256,7 @@ export function ResultStep({
             </div>
 
             <div className="min-w-0 flex-1 space-y-5">
-              <div className="rounded-card bg-app-accent-soft/70 p-4 shadow-app-sm text-sm font-normal leading-relaxed text-app-accent">
+              <div className="rounded-card bg-app-accent-soft/70 p-3.5 text-[13px] font-normal leading-relaxed text-app-accent shadow-app-sm sm:p-4 sm:text-sm">
                 {result.summary}
               </div>
 
@@ -281,29 +281,29 @@ export function ResultStep({
                   <span className="absolute left-[50%] top-0 h-full w-px bg-app-line/10" />
                   <span className="absolute left-[75%] top-0 h-full w-px bg-app-line/10" />
                 </div>
-                <div className="flex justify-between text-xs font-bold text-app-ink-muted uppercase tracking-widest">
+                <div className="flex justify-between gap-2 text-[10px] font-bold uppercase tracking-[0.08em] text-app-ink-muted sm:text-xs sm:tracking-widest">
                   <span>Khuyên điều chỉnh (1-2)</span>
                   <span>Cân bằng (2.3-2.7)</span>
                   <span>Vững vàng (2.8-4)</span>
                 </div>
               </div>
-              <p className="text-sm leading-relaxed text-app-ink-soft font-normal">{result.recommendation}</p>
+              <p className="text-[13px] font-normal leading-relaxed text-app-ink-soft sm:text-sm">{result.recommendation}</p>
             </div>
           </div>
         </div>
 
         {/* ── ROADMAP TINH CHỈNH & GIA CỐ (Adjustment Roadmap) ── */}
-        <div className="space-y-5">
+        <div className="space-y-4 sm:space-y-5">
           <h2 className="text-xs font-bold uppercase tracking-[0.2em] text-app-ink-muted">
             Lộ trình điều chỉnh để mục tiêu chắc thắng
           </h2>
 
-          <div className="grid gap-5 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2 md:gap-5">
             {/* Cột trái: Phân tích Thế mạnh & Điểm nghẽn - Loại bỏ card border */}
             <div className="space-y-4">
               {/* Thẻ Thế mạnh (Điểm tựa vững chắc) */}
               {strongAxes.length > 0 && (
-                <div className="rounded-card bg-app-status-success/5 p-5 space-y-2">
+                <div className="space-y-2 rounded-card bg-app-status-success/5 p-4 sm:p-5">
                   <h3 className="text-sm font-semibold text-app-status-success flex items-center gap-1.5">
                     <Sparkles className="h-4 w-4" /> Điểm tựa vững vàng
                   </h3>
@@ -322,7 +322,7 @@ export function ResultStep({
               {/* Thẻ Điểm nghẽn (Trở ngại chính) */}
               <div
                 className={cn(
-                  "rounded-card p-5 space-y-2 relative overflow-hidden",
+                  "relative space-y-2 overflow-hidden rounded-card p-4 sm:p-5",
                   result.type === "too_ambitious"
                     ? "bg-app-status-error/10 text-app-status-error border border-app-status-error/20"
                     : result.type === "challenging"
@@ -342,7 +342,7 @@ export function ResultStep({
             {/* Cột phải: 3 Bước hành động cụ thể - Bỏ border */}
             <div className="space-y-4">
               {/* Bước 1: Trước khi lập kế hoạch */}
-              <div className="rounded-card bg-app-surface/30 p-4 flex gap-3.5 items-start hover:scale-[1.01] transition-transform border-none">
+              <div className="flex items-start gap-3.5 rounded-card border-none bg-app-surface/30 p-3.5 transition-transform hover:scale-[1.01] sm:p-4">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-control bg-app-accent-soft text-app-accent font-bold shadow-app-sm">
                   <Key className="h-4 w-4" />
                 </div>
@@ -353,7 +353,7 @@ export function ResultStep({
               </div>
 
               {/* Bước 2: Tuần khởi động */}
-              <div className="rounded-card bg-app-surface/30 p-4 flex gap-3.5 items-start hover:scale-[1.01] transition-transform border-none">
+              <div className="flex items-start gap-3.5 rounded-card border-none bg-app-surface/30 p-3.5 transition-transform hover:scale-[1.01] sm:p-4">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-control bg-app-accent-soft text-app-accent font-bold shadow-app-sm">
                   <Sparkles className="h-4 w-4" />
                 </div>
@@ -367,7 +367,7 @@ export function ResultStep({
 
               {/* Bước 3: Điều chỉnh quy mô mục tiêu */}
               {result.scopeRecommendation && (
-                <div className="rounded-card bg-app-surface/30 p-4 flex gap-3.5 items-start hover:scale-[1.01] transition-transform border-none">
+                <div className="flex items-start gap-3.5 rounded-card border-none bg-app-surface/30 p-3.5 transition-transform hover:scale-[1.01] sm:p-4">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-control bg-app-accent-soft text-app-accent font-bold shadow-app-sm">
                     <Compass className="h-4 w-4" />
                   </div>
@@ -384,7 +384,7 @@ export function ResultStep({
         </div>
 
         {showRiskWarning && result.smartGoalQualityNote ? (
-          <div className="rounded-card bg-app-status-warning/5 p-4 text-app-ink border-none">
+          <div className="rounded-card border-none bg-app-status-warning/5 p-3.5 text-app-ink sm:p-4">
             <div className="flex gap-3">
               <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-app-status-warning" aria-hidden="true" />
               <div className="space-y-1">
@@ -401,12 +401,12 @@ export function ResultStep({
         <Collapsible
           key={isDesktop ? "feasibility-details-desktop" : "feasibility-details-mobile"}
           defaultOpen={false}
-          className="mt-6 border-t border-app-line pt-5"
+          className="mt-5 border-t border-app-line pt-4 sm:mt-6 sm:pt-5"
         >
           <CollapsibleTrigger asChild>
             <button
               type="button"
-              className="inline-flex w-full items-center justify-between rounded-control border border-app-line bg-app-surface/70 px-5 py-3 text-sm font-bold text-app-ink hover:bg-app-bg-subtle transition-all duration-150 shadow-app-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-bg)]"
+              className="inline-flex w-full items-center justify-between gap-3 rounded-control border border-app-line bg-app-surface/70 px-4 py-3 text-left text-sm font-bold text-app-ink shadow-app-sm transition-all duration-150 hover:bg-app-bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-bg)] sm:px-5"
             >
               <span className="flex items-center gap-2">
                 <Info className="h-4.5 w-4.5 text-app-accent" />
@@ -507,19 +507,19 @@ export function ResultStep({
         </Collapsible>
 
         {/* ── KHU VỰC 4: Bật đèn xanh & CTA Tiếp tục ── */}
-        <div className="mt-10 pt-8 border-t border-app-line flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5 relative z-10">
+        <div className="relative z-10 mt-7 flex flex-col gap-4 border-t border-app-line pt-5 sm:mt-8 sm:pt-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-1">
             <h4 className="text-sm font-bold text-app-ink">Đã sẵn sàng hành động?</h4>
             <p className="text-xs text-app-ink-soft font-normal">
               Bất kể mức độ khả thi, hãy biến mục tiêu của bạn thành kế hoạch 12 tuần thích nghi.
             </p>
           </div>
-          <div className="flex flex-col-reverse sm:flex-row gap-3 w-full lg:w-auto shrink-0">
+          <div className="flex w-full shrink-0 flex-col-reverse gap-3 sm:flex-row lg:w-auto">
             <motion.button
               whileHover={{ scale: 1.015 }}
               whileTap={{ scale: 0.985 }}
               type="button"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-control border border-app-line bg-app-surface px-6 py-3.5 text-sm font-bold text-app-ink-soft transition-all duration-200 hover:bg-app-bg-subtle shadow-app-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 lg:w-auto font-sans"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-control border border-app-line bg-app-surface px-5 py-3 text-sm font-bold text-app-ink-soft shadow-app-sm transition-all duration-200 hover:bg-app-bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 lg:w-auto font-sans"
               onClick={onAdjustGoal}
             >
               <ArrowLeft className="h-4.5 w-4.5" aria-hidden="true" />
@@ -529,10 +529,10 @@ export function ResultStep({
               whileHover={{ scale: 1.015 }}
               whileTap={{ scale: 0.985 }}
               type="button"
-              className="inline-flex w-full items-center justify-center gap-2.5 rounded-control bg-app-accent px-7 py-3.5 text-sm font-bold text-white transition-all duration-200 hover:bg-app-accent-hover shadow-app-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 lg:w-auto font-sans"
+              className="inline-flex w-full items-center justify-center gap-2.5 rounded-control bg-app-accent px-5 py-3 text-sm font-bold text-white shadow-app-md transition-all duration-200 hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 lg:w-auto font-sans"
               onClick={onContinue}
             >
-              Bắt đầu lập Kế hoạch 12 tuần ngay 🚀
+              Bắt đầu lập Kế hoạch 12 tuần ngay
               <ArrowRight className="h-4.5 w-4.5" aria-hidden="true" />
             </motion.button>
           </div>

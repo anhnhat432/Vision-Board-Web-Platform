@@ -21,19 +21,6 @@ interface FeasibilityStepShellProps {
   headingRef: Ref<HTMLHeadingElement>;
 }
 
-function getOptionEmoji(qId: number, value: string): string {
-  const emojiMap: Record<number, Record<string, string>> = {
-    1: { lt1: "⏳", "1to3": "🕐", "3to5": "📅", gt5: "⚡" },
-    2: { energy_drained: "😭", energy_low: "🥱", energy_stable: "🙂", energy_high: "🔥" },
-    3: { resources_missing: "🤷‍♂️", resources_basic: "📚", resources_mostly_ready: "🛠️", resources_ready: "🚀" },
-    4: { overwhelming: "🤯", challenging: "🧗‍♂️", realistic: "🎯", very_realistic: "👑" },
-    5: { motivation: "💤", time: "⏰", resources: "📦", complexity: "🌀", none: "☀️" },
-    6: { rarely: "🏜️", sometimes: "⛅", mostly: "🏡", always: "⚓" },
-    7: { exploring: "🤔", interested: "👀", ready: "👍", committed: "🦁" },
-  };
-  return emojiMap[qId]?.[value] || "✨";
-}
-
 export function FeasibilityStepShell({
   currentQuestion,
   currentStep,
@@ -62,11 +49,11 @@ export function FeasibilityStepShell({
     <section
       data-feasibility-step-shell
       ref={targetRef}
-      className="relative overflow-hidden rounded-card border border-app-line bg-app-surface/60 p-4 pb-[calc(7rem+env(safe-area-inset-bottom))] shadow-app-lg backdrop-blur-md transition-all duration-300 dark:bg-app-surface/40 sm:p-8 sm:pb-8 md:p-10 md:pb-10 group"
+      className="group relative overflow-hidden rounded-card border border-app-line bg-app-surface/70 p-3.5 pb-[calc(6.5rem+env(safe-area-inset-bottom))] shadow-app-md backdrop-blur-md transition-all duration-300 dark:bg-app-surface/40 sm:p-7 sm:pb-8 md:p-8 md:pb-9"
       aria-labelledby={`feasibility-question-${currentQuestion.id}`}
     >
       {/* Background radial soft light */}
-      <div className="absolute top-0 right-0 w-48 h-48 bg-app-accent/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="pointer-events-none absolute right-0 top-0 h-40 w-40 rounded-full bg-app-accent/5 blur-3xl" />
 
       <AnimatePresence mode="wait">
         <motion.div
@@ -75,7 +62,7 @@ export function FeasibilityStepShell({
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -15 }}
           transition={{ duration: 0.28, ease: [0.34, 1.56, 0.64, 1] }}
-          className="relative z-10 space-y-4 sm:space-y-6"
+          className="relative z-10 space-y-3.5 sm:space-y-5"
         >
           <div className="flex flex-col gap-2.5 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
             <div className="min-w-0">
@@ -86,13 +73,13 @@ export function FeasibilityStepShell({
                 ref={headingRef}
                 id={`feasibility-question-${currentQuestion.id}`}
                 tabIndex={-1}
-                className="mt-2 font-serif text-[20px] font-bold leading-[1.2] text-app-ink focus:outline-none sm:mt-2.5 sm:text-2xl sm:leading-normal"
+                className="mt-1.5 font-serif text-[20px] font-bold leading-[1.16] text-app-ink focus:outline-none sm:mt-2.5 sm:text-2xl sm:leading-normal"
               >
                 {currentQuestion.question}
               </h2>
               <p
                 id={`feasibility-question-${currentQuestion.id}-helper`}
-                className="mt-1.5 text-[13px] font-medium leading-[1.55] text-app-ink-soft sm:mt-2 sm:text-sm sm:leading-relaxed"
+                className="mt-1.5 text-[13px] font-medium leading-[1.48] text-app-ink-soft sm:mt-2 sm:text-sm sm:leading-relaxed"
               >
                 {currentQuestion.helper}
               </p>
@@ -105,7 +92,7 @@ export function FeasibilityStepShell({
           <Progress
             value={progressValue}
             aria-label={`Tiến độ câu hỏi khả thi ${currentStep + 1}/${totalSteps}`}
-            className="h-2 bg-app-line/20"
+            className="h-1.5 bg-app-line/20 sm:h-2"
           />
 
           <RadioGroup
@@ -113,7 +100,7 @@ export function FeasibilityStepShell({
             onValueChange={handleAnswerSelect}
             aria-labelledby={`feasibility-question-${currentQuestion.id}`}
             aria-describedby={`feasibility-question-${currentQuestion.id}-helper`}
-            className="mt-4 grid gap-3 sm:mt-6 sm:grid-cols-2 sm:gap-5"
+            className="mt-3 grid gap-2.5 sm:mt-5 sm:grid-cols-2 sm:gap-4"
           >
             {currentQuestion.options.map((option, index) => {
               const isSelected = selectedAnswer === option.value;
@@ -123,15 +110,15 @@ export function FeasibilityStepShell({
                   key={option.value}
                   whileHover={{ scale: 1.015 }}
                   whileTap={{ scale: 0.985 }}
-                  className="group flex w-full transition-all duration-300"
+                  className="group flex w-full transition-all duration-200"
                 >
                   <Label
                     htmlFor={`feasibility-${currentQuestion.id}-${option.value}`}
                     className={cn(
-                      "relative flex h-auto min-h-[4.25rem] w-full cursor-pointer items-center justify-start gap-3 rounded-card border p-3.5 text-sm font-medium transition-all duration-300 focus-within:ring-2 focus-within:ring-app-accent/30 focus-visible:outline-none sm:min-h-[5.5rem] sm:flex-col sm:justify-between sm:p-5 sm:pb-6",
+                      "relative flex h-auto min-h-[3.75rem] w-full cursor-pointer items-center justify-start gap-3 rounded-card border p-3 text-sm font-medium transition-all duration-200 focus-within:ring-2 focus-within:ring-app-accent/30 focus-visible:outline-none sm:min-h-[4.75rem] sm:flex-col sm:justify-between sm:p-4 sm:pb-5",
                       isSelected
-                        ? "border-app-line-strong bg-app-accent-soft text-app-accent shadow-app-md -translate-y-0.5"
-                        : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-line-strong hover:bg-app-bg-subtle hover:-translate-y-1 hover:shadow-app-md",
+                        ? "-translate-y-0.5 border-app-line-strong bg-app-accent-soft text-app-accent shadow-app-sm"
+                        : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-line-strong hover:bg-app-bg-subtle hover:shadow-app-sm",
                     )}
                   >
                     {/* Radial sheen highlight when selected */}
@@ -152,17 +139,6 @@ export function FeasibilityStepShell({
                           {index + 1}
                         </span>
 
-                        {/* Emoji container with subtle glow */}
-                        <span
-                          className={cn(
-                            "inline-flex rounded-control p-2 text-xl shadow-app-sm transition-all duration-300 sm:text-2xl",
-                            isSelected
-                              ? "bg-app-surface group-hover:rotate-12 group-hover:scale-120"
-                              : "bg-app-bg-subtle group-hover:bg-app-accent-soft group-hover:rotate-6 group-hover:scale-115",
-                          )}
-                        >
-                          {getOptionEmoji(currentQuestion.id, option.value)}
-                        </span>
                       </span>
                       <RadioGroupItem
                         value={option.value}
@@ -180,7 +156,7 @@ export function FeasibilityStepShell({
                       ) : null}
                     </span>
 
-                    <span className="relative z-10 block text-left text-[14px] font-bold leading-snug text-app-ink sm:mt-4 sm:text-[15px] sm:leading-relaxed">
+                    <span className="relative z-10 block text-left text-[14px] font-bold leading-snug text-app-ink sm:mt-3 sm:text-[15px] sm:leading-relaxed">
                       {option.label}
                     </span>
                   </Label>
@@ -196,7 +172,7 @@ export function FeasibilityStepShell({
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
-                className="w-full border-t border-app-line pt-4 space-y-2 text-left text-xs overflow-hidden min-h-[50px]"
+                className="w-full space-y-2 overflow-hidden border-t border-app-line pt-3 text-left text-xs sm:pt-4"
               >
                 {selectedOptionData.impact && (
                   <div className="flex items-start gap-1.5 text-app-accent font-semibold leading-relaxed">
@@ -229,7 +205,7 @@ export function FeasibilityStepShell({
               data-feasibility-step-feedback
               id={`feasibility-question-${currentQuestion.id}-next-hint`}
               role="status"
-              className="mt-2 flex items-center gap-1.5 text-[12.5px] font-semibold text-app-accent sm:mt-4 sm:text-[13px]"
+              className="mt-1.5 flex items-center gap-1.5 text-[12.5px] font-semibold text-app-accent sm:mt-3 sm:text-[13px]"
             >
               <span>💡</span> Chọn một lựa chọn phù hợp để tiếp tục hành trình.
             </p>
@@ -237,7 +213,7 @@ export function FeasibilityStepShell({
         </motion.div>
       </AnimatePresence>
 
-      <div className="relative z-10 mt-10 hidden flex-col gap-4 border-t border-app-line pt-7 sm:flex">
+      <div className="relative z-10 mt-7 hidden flex-col gap-3 border-t border-app-line pt-5 sm:flex">
         <p className="text-xs font-semibold text-app-ink-soft uppercase tracking-wider text-left">
           Tiến trình tìm hiểu: {currentStep + 1} / {totalSteps} khía cạnh
         </p>
@@ -246,7 +222,7 @@ export function FeasibilityStepShell({
             whileHover={{ scale: 1.015 }}
             whileTap={{ scale: 0.985 }}
             type="button"
-            className="inline-flex flex-1 sm:flex-none items-center justify-center gap-2 rounded-control border border-app-line bg-app-surface px-4 py-3 text-sm font-bold text-app-ink-soft transition-all duration-200 hover:bg-app-bg-subtle disabled:cursor-not-allowed disabled:opacity-50 shadow-app-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:px-6 sm:py-3.5 sm:w-auto font-sans"
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-control border border-app-line bg-app-surface px-4 py-3 text-sm font-bold text-app-ink-soft shadow-app-sm transition-all duration-200 hover:bg-app-bg-subtle disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto sm:flex-none sm:px-5 sm:py-3 font-sans"
             onClick={() => {
               soundService.click();
               onBack();
@@ -260,7 +236,7 @@ export function FeasibilityStepShell({
             whileHover={{ scale: 1.015 }}
             whileTap={{ scale: 0.985 }}
             type="button"
-            className="inline-flex flex-[2] sm:flex-none items-center justify-center gap-2.5 rounded-control bg-app-accent px-4 py-3 text-sm font-bold text-white transition-all duration-200 hover:bg-app-accent-hover disabled:cursor-not-allowed disabled:bg-app-line/50 disabled:text-app-ink-muted disabled:opacity-60 shadow-app-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:px-6 sm:py-3.5 sm:w-auto font-sans"
+            className="inline-flex flex-[2] items-center justify-center gap-2.5 rounded-control bg-app-accent px-4 py-3 text-sm font-bold text-white shadow-app-md transition-all duration-200 hover:bg-app-accent-hover disabled:cursor-not-allowed disabled:bg-app-line/50 disabled:text-app-ink-muted disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto sm:flex-none sm:px-5 sm:py-3 font-sans"
             onClick={() => {
               soundService.click();
               onNext();
@@ -286,7 +262,7 @@ export function FeasibilityStepShell({
             <motion.button
               whileTap={{ scale: 0.985 }}
               type="button"
-              className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-xl border border-app-line bg-app-surface px-4 py-2 text-xs font-bold text-app-ink transition-all duration-150 hover:bg-app-bg active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+            className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-xl border border-app-line bg-app-surface px-4 py-2 text-xs font-bold text-app-ink transition-all duration-150 hover:bg-app-bg active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
               onClick={() => {
                 soundService.click();
                 onBack();
@@ -299,7 +275,7 @@ export function FeasibilityStepShell({
             <motion.button
               whileTap={{ scale: 0.985 }}
               type="button"
-              className="inline-flex min-h-11 flex-[2] items-center justify-center gap-1.5 rounded-xl bg-app-accent px-5 py-2.5 text-xs font-bold text-white transition-all duration-150 hover:bg-app-accent-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-app-ink-muted disabled:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+            className="inline-flex min-h-10 flex-[2] items-center justify-center gap-1.5 rounded-xl bg-app-accent px-5 py-2 text-xs font-bold text-white transition-all duration-150 hover:bg-app-accent-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-app-ink-muted disabled:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
               onClick={() => {
                 soundService.click();
                 onNext();

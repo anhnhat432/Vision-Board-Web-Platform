@@ -387,17 +387,17 @@ export function LifeInsight() {
 
         <div
           data-life-insight-shell
-          className="space-y-6 pb-[calc(10rem+env(safe-area-inset-bottom))] lg:pb-0"
+          className="space-y-5 pb-[calc(8.5rem+env(safe-area-inset-bottom))] lg:space-y-6 lg:pb-0"
         >
           {/* Header section - Chánh niệm & Serif Heading */}
-          <div className="max-w-3xl animate-fade-in space-y-2.5">
+          <div className="max-w-3xl animate-fade-in space-y-2">
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-app-accent">
               BƯỚC 2 / 6 · GÓC NHÌN CUỘC SỐNG
             </p>
-            <h1 className="font-serif text-3xl md:text-4xl font-semibold leading-tight tracking-tight text-app-ink">
+            <h1 className="font-serif text-[26px] font-semibold leading-tight tracking-tight text-app-ink sm:text-3xl md:text-4xl">
               Chọn một điểm tựa cho 12 tuần tới
             </h1>
-            <p className="max-w-2xl text-sm leading-relaxed text-app-ink-soft">
+            <p className="max-w-2xl text-[13px] leading-relaxed text-app-ink-soft sm:text-sm">
               “Lắng nghe bản thân để chọn ra một điểm tựa vững chắc hoặc một cơ hội cần cải thiện cho chu kỳ 12 tuần
               này.”
             </p>
@@ -431,35 +431,35 @@ export function LifeInsight() {
           </div>
 
           {/* Main layout: 2 columns on desktop, stacked on mobile */}
-          <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-8 items-start">
+          <div className="grid grid-cols-1 items-start gap-5 lg:grid-cols-[1.2fr_1fr] lg:gap-8">
             {/* LEFT COLUMN: VISUALIZATION & ANALYSIS REPORT */}
-            <div className="space-y-6 order-1 lg:order-1">
+            <div className="order-1 space-y-4 lg:order-1 lg:space-y-6">
               {/* Radar chart & Life Pattern Integrated Card */}
-              <div className="surface-raised rounded-2xl border border-app-line/80 bg-gradient-to-br from-app-surface via-app-surface to-app-accent-subtle/5 p-5 md:p-6 transition-all duration-300 hover:shadow-app-md">
+              <div className="surface-raised rounded-2xl border border-app-line/80 bg-gradient-to-br from-app-surface via-app-surface to-app-accent-subtle/5 p-4 transition-all duration-300 hover:shadow-app-md sm:p-5 md:p-6">
                 <div className="flex items-center justify-between pb-3 border-b border-app-line/60">
                   <h3 className="text-sm font-bold tracking-wide text-app-ink">Bản đồ trạng thái cuộc sống</h3>
                   <p className="text-xs font-semibold text-app-ink-muted">Bánh xe 8 khía cạnh</p>
                 </div>
 
-                <div className="mt-4 flex items-center justify-center min-h-[300px] select-none">
+                <div className="mt-3 flex min-h-[240px] items-center justify-center select-none sm:mt-4 sm:min-h-[300px]">
                   <SimpleRadarChart data={radarData} />
                 </div>
 
                 {/* Life Pattern Tóm tắt tích hợp dưới biểu đồ */}
                 {lifePattern && (
-                  <div className={`mt-4 rounded-xl border p-4 leading-relaxed ${lifePattern.bgColor}`}>
+                  <div className={`mt-3 rounded-xl border p-3.5 leading-relaxed sm:mt-4 sm:p-4 ${lifePattern.bgColor}`}>
                     <h4 className={`text-xs font-bold flex items-center gap-1.5 ${lifePattern.accentColor}`}>
                       <Sparkles className="h-3.5 w-3.5 shrink-0 motion-safe:animate-pulse" aria-hidden="true" />
                       {lifePattern.title}
                     </h4>
-                    <p className="mt-1.5 text-xs text-app-ink-soft leading-relaxed">{lifePattern.description}</p>
+                    <p className="mt-1.5 text-xs leading-relaxed text-app-ink-soft">{lifePattern.description}</p>
                   </div>
                 )}
 
                 {/* Khối so sánh trực quan Mạnh nhất vs Yếu nhất tích hợp gọn gàng trong cùng card */}
                 {strongestArea && lowestArea && (
-                  <div className="mt-5 grid grid-cols-2 gap-4 border-t border-app-line/60 pt-4">
-                    <div className="flex items-start gap-2.5 p-3 rounded-xl bg-app-surface/60 border border-app-line/40 shadow-3xs">
+                    <div className="mt-4 grid grid-cols-1 gap-3 border-t border-app-line/60 pt-3.5 sm:grid-cols-2 sm:pt-4 lg:mt-5 lg:gap-4">
+                      <div className="flex items-start gap-2.5 rounded-xl border border-app-line/40 bg-app-surface/60 p-3 shadow-3xs">
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-app-status-success/10 text-app-status-success">
                         {(() => {
                           const Icon = getLifeAreaIcon(strongestArea.name);
@@ -479,7 +479,7 @@ export function LifeInsight() {
                       </div>
                     </div>
 
-                    <div className="flex items-start gap-2.5 p-3 rounded-xl bg-app-surface/60 border border-app-line/40 shadow-3xs">
+                      <div className="flex items-start gap-2.5 rounded-xl border border-app-line/40 bg-app-surface/60 p-3 shadow-3xs">
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-app-status-warning/10 text-app-status-warning">
                         {(() => {
                           const Icon = getLifeAreaIcon(lowestArea.name);
@@ -520,10 +520,10 @@ export function LifeInsight() {
               </div>
 
               {/* Life areas grid switcher */}
-              <div className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5 md:p-6 shadow-app-sm">
+              <div className="surface-raised rounded-2xl border border-app-line bg-app-surface p-4 shadow-app-sm sm:p-5 md:p-6">
                 <div className="pb-3 border-b border-app-line/60">
                   <div className="flex items-center justify-between">
-                    <div>
+                    <div className="min-w-0 pr-3">
                       <h3 className="text-sm font-bold text-app-ink">Hoặc tự chọn một trọng tâm khác</h3>
                       <p className="mt-1 text-xs text-app-ink-muted">
                         Nhấp vào lĩnh vực bạn muốn đặt mục tiêu hành động trong 12 tuần này
@@ -595,10 +595,10 @@ export function LifeInsight() {
             </div>
 
             {/* RIGHT COLUMN: ACTION & CTA */}
-            <div className="lg:sticky lg:top-6 space-y-6 order-2 lg:order-2">
-              <div className="surface-raised rounded-2xl border border-app-line bg-app-bg-subtle p-6 shadow-app-md relative overflow-hidden transition-all duration-300">
+            <div className="order-2 space-y-4 lg:sticky lg:top-6 lg:order-2 lg:space-y-6">
+              <div className="surface-raised relative overflow-hidden rounded-2xl border border-app-line bg-app-bg-subtle p-4 shadow-app-md transition-all duration-300 sm:p-5 lg:p-6">
                 {/* Paperclip sticker mockup */}
-                <div className="absolute -top-1.5 right-6 z-10 rotate-[-12deg] text-app-accent/60">
+                <div className="absolute -top-1.5 right-6 z-10 hidden rotate-[-12deg] text-app-accent/60">
                   <svg
                     width="24"
                     height="30"
@@ -617,12 +617,12 @@ export function LifeInsight() {
 
                 <div>
                   {/* Visual Anchor: Focus Scrapbook Card replacing the static image */}
-                  <div className="relative group w-full mb-6">
+                  <div className="relative mb-4 w-full sm:mb-6">
                     {/* Băng keo dán xéo trang trí */}
-                    <div className="absolute -top-2.5 left-12 z-10 w-16 h-5 bg-app-accent-soft/60 border border-app-accent/20 rotate-3 pointer-events-none shadow-3xs" />
+                    <div className="pointer-events-none absolute -top-2.5 left-12 z-10 hidden h-5 w-16 rotate-3 border border-app-accent/20 bg-app-accent-soft/60 shadow-3xs" />
 
                     {/* Ghim giấy trang trí */}
-                    <div className="absolute -top-3 right-12 z-10 w-6 h-6 text-app-accent/55 rotate-[-12deg] pointer-events-none drop-shadow-sm">
+                    <div className="pointer-events-none absolute -top-3 right-12 z-10 hidden h-6 w-6 rotate-[-12deg] text-app-accent/55 drop-shadow-sm">
                       <svg
                         width="24"
                         height="24"
@@ -638,9 +638,9 @@ export function LifeInsight() {
                       </svg>
                     </div>
 
-                    <div className="bg-app-surface border border-app-line p-6 pb-6 rounded-sm shadow-app-md text-center relative overflow-hidden flex flex-col items-center justify-center min-h-[220px]">
+                    <div className="relative flex min-h-[184px] flex-col items-center justify-center overflow-hidden rounded-2xl border border-app-line bg-app-surface p-4 text-center shadow-app-sm sm:min-h-[220px] sm:p-6 sm:pb-6">
                       {/* Vòng tròn hào quang & Đèn thắp sáng FocusLantern ở chính tâm */}
-                      <div className="py-3.5 flex justify-center items-center h-28 relative">
+                      <div className="relative flex h-24 items-center justify-center py-2 sm:h-28 sm:py-3.5">
                         <FocusLantern Icon={FocusAreaIcon} label={focusArea.name} />
                       </div>
 
@@ -649,7 +649,7 @@ export function LifeInsight() {
                         <span className="text-[10px] font-bold uppercase tracking-wider text-app-accent">
                           LĨNH VỰC TRỌNG TÂM
                         </span>
-                        <h2 className="text-3xl font-serif font-bold text-app-ink leading-tight">{focusAreaLabel}</h2>
+                        <h2 className="font-serif text-2xl font-bold leading-tight text-app-ink sm:text-3xl">{focusAreaLabel}</h2>
                         <div className="inline-flex items-center gap-1.5 bg-app-bg-subtle px-3 py-1 rounded-full border border-app-line/60 text-xs font-semibold text-app-ink-soft mt-1">
                           Điểm hiện tại: <span className="font-bold text-app-ink">{focusArea.score}/10</span>
                         </div>
@@ -671,8 +671,8 @@ export function LifeInsight() {
                   </div>
 
                   {/* Đề xuất mục tiêu SMART 12 tuần cụ thể và lý do */}
-                  <div className="mt-5 p-4 rounded-xl border border-app-line bg-app-surface space-y-2 relative shadow-sm">
-                    <div className="absolute -top-2 left-6 z-10">
+                  <div className="relative mt-4 space-y-2 rounded-xl border border-app-line bg-app-surface p-3.5 shadow-sm sm:mt-5 sm:p-4">
+                    <div className="absolute -top-2 left-6 z-10 hidden">
                       <div className="h-3.5 w-14 bg-app-accent-soft/40 backdrop-blur-[1px] transform rotate-2 border-x border-app-accent/20" />
                     </div>
                     <span className="text-[9px] font-bold uppercase tracking-wider text-app-accent flex items-center gap-1">
@@ -688,13 +688,13 @@ export function LifeInsight() {
                   </div>
 
                   {/* Intent Options - Đồng bộ hóa tiêu đề và class chosen để khớp tests */}
-                  <div className="mt-6 pt-5 border-t border-app-line">
+                  <div className="mt-5 border-t border-app-line pt-4 sm:mt-6 sm:pt-5">
                     <h3 className="text-xs font-bold text-app-ink uppercase tracking-wider">
                       Mục đích chính của bạn với lĩnh vực này
                     </h3>
                     <p className="mt-1 text-xs text-app-ink-muted">Chọn định hướng giúp gợi ý viết mục tiêu SMART</p>
 
-                    <div className="mt-3.5 grid grid-cols-2 gap-2 max-h-[300px] overflow-y-auto pr-1">
+                    <div className="mt-3 grid grid-cols-1 gap-2 pr-1 sm:mt-3.5 sm:max-h-[300px] sm:grid-cols-2 sm:overflow-y-auto">
                       {intentOptions.map((option) => {
                         const isSelected = selectedIntent === option.id;
                         const OptionIcon = INTENT_ICONS[option.id];
@@ -705,7 +705,7 @@ export function LifeInsight() {
                             type="button"
                             onClick={() => handleIntentSelect(option.id)}
                             className={cn(
-                              "group flex min-h-11 items-center gap-2 rounded-xl border p-2.5 text-left w-full transition-all duration-200 outline-none select-none relative cursor-pointer",
+                              "group relative flex min-h-11 w-full cursor-pointer select-none items-center gap-2 rounded-xl border p-2.5 text-left outline-none transition-all duration-200",
                               "after:absolute after:h-[44px] after:min-w-[44px] after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2",
                               isSelected
                                 ? "border-transparent bg-app-accent-soft"
@@ -758,7 +758,7 @@ export function LifeInsight() {
                     </div>
 
                     {selectedIntent !== null && (
-                      <div className="mt-3.5 flex items-center justify-between pt-3 border-t border-app-line">
+                      <div className="mt-3.5 flex flex-col gap-2 border-t border-app-line pt-3 sm:flex-row sm:items-center sm:justify-between">
                         <p className="text-xs text-app-ink-muted">Đã ghi nhận định hướng hỗ trợ lập mục tiêu.</p>
                         <button
                           type="button"
@@ -773,7 +773,7 @@ export function LifeInsight() {
                 </div>
 
                 {/* Main CTA Section - Ẩn trên Mobile vì đã có Sticky Bottom CTA */}
-                <div className="hidden lg:block mt-6 pt-5 border-t border-app-line">
+                <div className="mt-6 hidden border-t border-app-line pt-5 lg:block">
                   <div className="flex flex-col gap-3">
                     <Button
                       onClick={handleStartGoalSetup}
@@ -795,7 +795,7 @@ export function LifeInsight() {
           </div>
 
           {/* Mobile-only secondary action footer */}
-          <div className="mt-8 pt-6 border-t border-app-line/60 flex flex-col items-center gap-2 lg:hidden">
+          <div className="mt-6 flex flex-col items-center gap-2 border-t border-app-line/60 pt-4 lg:hidden">
             <button
               type="button"
               onClick={() => navigate("/onboarding")}
@@ -817,9 +817,9 @@ export function LifeInsight() {
       {/* Sticky Bottom CTA cho Mobile */}
       <div
         data-life-insight-mobile-action-bar
-        className="fixed bottom-0 left-0 right-0 z-40 border-t border-app-line/80 bg-app-surface/95 px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-3 shadow-[0_-18px_40px_-30px_rgba(23,21,15,0.45)] backdrop-blur-md lg:hidden"
+        className="fixed bottom-0 left-0 right-0 z-40 border-t border-app-line/80 bg-app-surface/95 px-4 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-2 shadow-[0_-18px_40px_-30px_rgba(23,21,15,0.45)] backdrop-blur-md lg:hidden"
       >
-        <div className="mx-auto flex w-full max-w-[42rem] flex-col gap-3">
+        <div className="mx-auto flex w-full max-w-[42rem] flex-col gap-2">
           <div className="flex items-center justify-between gap-3 text-[11px] font-semibold" aria-live="polite">
             <span className="min-w-0 truncate text-app-ink-muted">Bước 2/6 · Trọng tâm {focusAreaLabel}</span>
             <span
@@ -844,7 +844,7 @@ export function LifeInsight() {
 
           <Button
             onClick={handleStartGoalSetup}
-            className="group inline-flex min-h-11 items-center justify-center gap-2 bg-app-accent px-6 py-3.5 text-sm font-bold leading-snug text-white shadow-app-sm hover:bg-app-accent-hover active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg w-full transition-all duration-200 cursor-pointer"
+            className="group inline-flex min-h-10 w-full cursor-pointer items-center justify-center gap-2 bg-app-accent px-6 py-2.5 text-sm font-bold leading-snug text-white shadow-app-sm transition-all duration-200 hover:bg-app-accent-hover active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg"
           >
             Tiếp → Viết mục tiêu
             <ArrowRight
