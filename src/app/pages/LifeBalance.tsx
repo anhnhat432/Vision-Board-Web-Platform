@@ -438,7 +438,7 @@ export function LifeBalance() {
           <div className="flex flex-wrap items-center gap-2">
             {formattedLastSaved ? (
               <span className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-white dark:bg-app-surface px-3 py-1.5 text-xs font-medium text-app-ink-soft">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                <svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
                 Cập nhật lần cuối: <span className="font-mono text-app-ink">{formattedLastSaved}</span>
               </span>
             ) : null}
@@ -447,46 +447,54 @@ export function LifeBalance() {
                 <span className="font-mono">{historyCount}</span> lần ghi nhận
               </span>
             ) : null}
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-white dark:bg-app-surface px-3 py-1.5 text-xs font-medium text-app-ink-soft">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.801 10A10 10 0 1 1 17 3.335"/><path d="m9 11 3 3L22 4"/></svg>
-              Đã lưu cục bộ
-            </span>
+            <AutoSaveIndicator
+              status={hasChanges ? autoSaveStatus : "saved"}
+              lastSavedAt={lastSavedAt}
+              variant="prominent"
+              className="bg-white dark:bg-app-surface"
+            />
           </div>
         </header>
 
         {/* KPI ROW */}
-        <section className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="rounded-[18px] border border-app-line bg-white dark:bg-app-surface p-5 md:p-6">
-            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-app-ink-muted mb-3.5">Trung bình</p>
-            <p className="font-[family-name:var(--app-font-serif)] text-[38px] font-extrabold leading-none text-app-ink">
+        <section data-life-balance-kpi-grid className="mt-6 grid grid-cols-3 gap-3 sm:gap-4">
+          <div className="min-w-0 rounded-[18px] border border-app-line bg-white p-4 dark:bg-app-surface sm:p-5 md:p-6">
+            <p className="mb-2.5 text-[9px] font-bold uppercase leading-[1.35] tracking-[0.12em] text-app-ink-muted sm:mb-3.5 sm:text-[10px]">Trung bình</p>
+            <p className="font-[family-name:var(--app-font-serif)] text-[30px] font-extrabold leading-none text-app-ink sm:text-[38px]">
               <CountUp value={averageScore} precision={1} />
-              <span className="ml-1 text-lg font-bold text-app-ink-muted">/10</span>
+              <span className="ml-1 text-sm font-bold text-app-ink-muted sm:text-lg">/10</span>
             </p>
-            <div className="mt-3.5 h-[7px] rounded-full bg-app-bg overflow-hidden">
+            <div className="mt-3 h-[7px] overflow-hidden rounded-full bg-app-bg sm:mt-3.5">
               <div
                 className="h-full rounded-full bg-[#0C5E3A] transition-all duration-700 ease-out"
                 style={{ width: `${avgPercent}%` }}
               />
             </div>
           </div>
-          <div className="rounded-[18px] border border-app-line bg-white dark:bg-app-surface p-5 md:p-6">
-            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-app-ink-muted mb-3.5">Lĩnh vực mạnh nhất</p>
-            <p className="font-[family-name:var(--app-font-serif)] text-[38px] font-extrabold leading-none text-app-ink">
-              <CountUp value={strongestArea.score} />
-              <span className="ml-1 text-lg font-bold text-app-ink-muted">/10</span>
+          <div className="min-w-0 rounded-[18px] border border-app-line bg-white p-4 dark:bg-app-surface sm:p-5 md:p-6">
+            <p className="mb-2.5 text-[9px] font-bold uppercase leading-[1.35] tracking-[0.12em] text-app-ink-muted sm:mb-3.5 sm:text-[10px]">
+              <span className="sm:hidden">Mạnh nhất</span>
+              <span className="hidden sm:inline">Lĩnh vực mạnh nhất</span>
             </p>
-            <p className="mt-3.5 text-[13px] font-semibold text-[#0C5E3A] flex items-center gap-1.5">
+            <p className="font-[family-name:var(--app-font-serif)] text-[30px] font-extrabold leading-none text-app-ink sm:text-[38px]">
+              <CountUp value={strongestArea.score} />
+              <span className="ml-1 text-sm font-bold text-app-ink-muted sm:text-lg">/10</span>
+            </p>
+            <p className="mt-3 flex items-center gap-1.5 text-[12px] font-semibold leading-snug text-[#0C5E3A] sm:mt-3.5 sm:text-[13px]">
               <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: getAreaColorConfig(strongestArea.name).accent }} />
               {getLifeAreaLabel(strongestArea.name)}
             </p>
           </div>
-          <div className="rounded-[18px] border border-[rgba(176,103,60,0.22)] dark:border-app-line bg-[#F4ECDD] dark:bg-app-bg-subtle p-5 md:p-6">
-            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#A07A4A] mb-3.5">Lĩnh vực cần ưu tiên</p>
-            <p className="font-[family-name:var(--app-font-serif)] text-[38px] font-extrabold leading-none text-[#8A5A2B]">
-              <CountUp value={weakestArea.score} />
-              <span className="ml-1 text-lg font-bold text-[#B79B72]">/10</span>
+          <div className="min-w-0 rounded-[18px] border border-[rgba(176,103,60,0.22)] bg-[#F4ECDD] p-4 dark:border-app-line dark:bg-app-bg-subtle sm:p-5 md:p-6">
+            <p className="mb-2.5 text-[9px] font-bold uppercase leading-[1.35] tracking-[0.12em] text-[#A07A4A] sm:mb-3.5 sm:text-[10px]">
+              <span className="sm:hidden">Ưu tiên</span>
+              <span className="hidden sm:inline">Lĩnh vực cần ưu tiên</span>
             </p>
-            <p className="mt-3.5 text-[13px] font-semibold text-[#8A5A2B] flex items-center gap-1.5">
+            <p className="font-[family-name:var(--app-font-serif)] text-[30px] font-extrabold leading-none text-[#8A5A2B] sm:text-[38px]">
+              <CountUp value={weakestArea.score} />
+              <span className="ml-1 text-sm font-bold text-[#B79B72] sm:text-lg">/10</span>
+            </p>
+            <p className="mt-3 flex items-center gap-1.5 text-[12px] font-semibold leading-snug text-[#8A5A2B] sm:mt-3.5 sm:text-[13px]">
               <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: getAreaColorConfig(weakestArea.name).accent }} />
               {getLifeAreaLabel(weakestArea.name)}
             </p>

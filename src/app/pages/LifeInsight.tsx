@@ -387,7 +387,7 @@ export function LifeInsight() {
 
         <div
           data-life-insight-shell
-          className="space-y-6 pb-[calc(9rem+env(safe-area-inset-bottom))] lg:pb-0"
+          className="space-y-6 pb-[calc(10rem+env(safe-area-inset-bottom))] lg:pb-0"
         >
           {/* Header section - Chánh niệm & Serif Heading */}
           <div className="max-w-3xl animate-fade-in space-y-2.5">

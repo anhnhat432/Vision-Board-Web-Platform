@@ -1,4 +1,19 @@
-import { ArrowRight, CalendarCheck, Clock, Flame, Frown, Meh, MoreVertical, Pencil, Plus, Search, Smile } from "lucide-react";
+import {
+  ArrowRight,
+  BookOpen,
+  CalendarCheck,
+  Clock,
+  Flame,
+  Frown,
+  Heart,
+  Meh,
+  MoreVertical,
+  Pencil,
+  Plus,
+  Search,
+  Smile,
+  TrendingUp,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -365,8 +380,11 @@ function ReflectionJournalContent() {
       </AlertDialog>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden rounded-[22px] border border-app-line bg-app-surface p-8 sm:p-9 grid grid-cols-1 md:grid-cols-[1fr_360px] gap-7 items-center page-enter">
-        <div>
+      <section
+        data-reflection-journal-hero
+        className="relative grid grid-cols-[1fr_88px] items-start gap-4 overflow-hidden rounded-[22px] border border-app-line bg-app-surface p-5 page-enter sm:gap-7 sm:p-9 md:grid-cols-[1fr_360px] md:items-center"
+      >
+        <div className="min-w-0">
           <div className="flex items-center gap-2 mb-3.5 text-[10px] font-extrabold uppercase tracking-[0.14em] text-app-warm">
             <span className="w-1.5 h-1.5 rounded-full bg-app-warm" />
             Phản tư
@@ -374,10 +392,10 @@ function ReflectionJournalContent() {
           <h1 className="font-serif text-[clamp(28px,3.2vw,40px)] font-bold leading-[1.02] tracking-[-0.02em] text-app-ink mb-3">
             Nhật ký phản tư
           </h1>
-          <p className="text-sm leading-relaxed text-app-ink-soft mb-6 max-w-[44ch] sm:text-[14.5px]">
+          <p className="mb-5 max-w-[44ch] text-sm leading-relaxed text-app-ink-soft sm:mb-6 sm:text-[14.5px]">
             Ghi lại điều bạn học được, điều biết ơn, và điều muốn cải thiện. Mỗi dòng là một dấu chân trên hành trình 12 tuần.
           </p>
-          <div className="flex flex-wrap gap-2.5">
+          <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
             <Button
               onClick={() => setIsAddingReflection(true)}
               className="bg-app-warm text-white hover:bg-app-warm-hover hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.97] transition-all duration-200 rounded-full px-5 py-3 h-auto text-[13.5px] font-bold shadow-lg shadow-app-warm/25 gap-2.5"
@@ -398,7 +416,7 @@ function ReflectionJournalContent() {
             </Button>
           </div>
         </div>
-        <div className="relative rounded-[18px] overflow-hidden self-stretch min-h-[210px] shadow-[0_24px_48px_-28px_rgba(23,21,15,0.5)] animate-[float_5s_ease-in-out_infinite]">
+        <div className="relative h-24 w-24 overflow-hidden rounded-[18px] self-start shadow-[0_18px_34px_-24px_rgba(23,21,15,0.5)] animate-[float_5s_ease-in-out_infinite] md:h-auto md:w-auto md:self-stretch md:min-h-[210px] md:shadow-[0_24px_48px_-28px_rgba(23,21,15,0.5)]">
           <img
             src="/reflection_journal.png"
             alt="Nhật ký phản tư"
@@ -756,11 +774,11 @@ function ReflectionJournalContent() {
                     style={{ backgroundColor: item.iconBg, color: item.iconColor }}
                   >
                     {item.title === "Điều tôi học được" ? (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/></svg>
+                      <BookOpen className="h-4 w-4" aria-hidden="true" />
                     ) : item.title === "Điều tôi biết ơn" ? (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+                      <Heart className="h-4 w-4" aria-hidden="true" />
                     ) : (
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 17V7l6 5 6-9 6 14"/></svg>
+                      <TrendingUp className="h-4 w-4" aria-hidden="true" />
                     )}
                   </span>
                   <span className="block text-[13px] font-bold text-app-ink mb-1">{item.title}</span>

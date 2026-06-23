@@ -1,10 +1,14 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { APP_STORAGE_KEYS, getUserData, LIFE_AREAS, saveUserData } from "../utils/storage";
 import { LifeBalance } from "./LifeBalance";
+
+function setViewportWidth(width: number) {
+  Object.defineProperty(window, "innerWidth", { configurable: true, value: width });
+}
 
 function renderLifeBalance(initialEntry = "/life-balance") {
   const router = createMemoryRouter(
@@ -69,6 +73,7 @@ function seedRealLifeBalance() {
 describe("LifeBalance", () => {
   beforeEach(() => {
     localStorage.clear();
+    setViewportWidth(1024);
   });
 
   it("treats the default zero-score wheel as missing Life Balance data", async () => {
@@ -111,13 +116,24 @@ describe("LifeBalance", () => {
     expect(weakestCard).toHaveTextContent("4");
   });
 
-  it("auto-saves after editing a score", async () => {
-    const user = userEvent.setup();
+  it("uses a compact 3-column KPI row on mobile so tabs appear sooner", async () => {
+    setViewportWidth(375);
     seedRealLifeBalance();
     renderLifeBalance();
 
-    await user.click(await screen.findByRole("button", { name: /Bắt đầu Check-in nhanh/i }));
-    await user.click(await screen.findByRole("button", { name: /Tăng Sự nghiệp/i }));
+    await waitFor(() => {
+      expect(document.querySelector("[data-life-balance-kpi-grid]")).not.toBeNull();
+    });
+
+    expect(document.querySelector("[data-life-balance-kpi-grid]")).toHaveClass("grid-cols-3", "gap-3", "sm:gap-4");
+  });
+
+  it("auto-saves after editing a score", async () => {
+    seedRealLifeBalance();
+    renderLifeBalance();
+
+    fireEvent.click(await screen.findByRole("button", { name: /Bắt đầu Check-in nhanh/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /Tăng Sự nghiệp/i }));
 
     await waitFor(() => {
       expect(getUserData().currentWheelOfLife[0]?.score).toBe(8);
@@ -125,13 +141,12 @@ describe("LifeBalance", () => {
   });
 
   it("opens the merged focus tab from the onboarding handoff and saves the chosen focus area", async () => {
-    const user = userEvent.setup();
     seedRealLifeBalance();
     const { router } = renderLifeBalance("/life-balance?tab=focus");
 
     const continueButton = await screen.findByRole("button", { name: /Tạo mục tiêu SMART/i });
-    await user.click(screen.getByRole("button", { name: /Sự nghiệp/i }));
-    await user.click(continueButton);
+    fireEvent.click(screen.getByRole("button", { name: /Sự nghiệp/i }));
+    fireEvent.click(continueButton);
 
     await waitFor(() => {
       expect(router.state.location.pathname).toBe("/smart-goal-setup");

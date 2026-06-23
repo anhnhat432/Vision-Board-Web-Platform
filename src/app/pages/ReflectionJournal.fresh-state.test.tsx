@@ -5,6 +5,10 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { getUserData, saveUserData } from "../utils/storage";
 import { ReflectionJournal } from "./ReflectionJournal";
 
+function setViewportWidth(width: number) {
+  Object.defineProperty(window, "innerWidth", { configurable: true, value: width });
+}
+
 function seedFreshJournal() {
   const data = getUserData();
   data.onboardingCompleted = false;
@@ -41,13 +45,29 @@ describe("ReflectionJournal fresh state", () => {
     renderJournal();
 
     // New design: simpler empty state with app tokens
-    expect(await screen.findByText(/Bắt đầu nhật ký của bạn/i)).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /Trang giấy còn trắng/i })).toBeInTheDocument();
     // Stats cards should not show when no reflections
     expect(screen.queryByText("Tổng số")).not.toBeInTheDocument();
     // Filter pills exist but filter by type
     expect(screen.getByRole("button", { name: "Review tuần" })).toBeInTheDocument();
     // CTA button exists
     expect(screen.getByRole("button", { name: /Viết entry đầu tiên/i })).toBeInTheDocument();
+  });
+
+  it("uses a compact mobile hero so search stays closer to the first viewport", async () => {
+    setViewportWidth(375);
+    renderJournal();
+
+    const hero = document.querySelector("[data-reflection-journal-hero]");
+
+    expect(hero).toHaveClass(
+      "grid-cols-[1fr_88px]",
+      "items-start",
+      "gap-4",
+      "p-5",
+      "md:grid-cols-[1fr_360px]",
+    );
+    expect(screen.getByRole("searchbox")).toBeInTheDocument();
   });
 
   it.skip("has onboarding CTA for fresh users", async () => {

@@ -144,7 +144,7 @@ describe("LifeInsight — intent picker", () => {
     const shell = document.querySelector("[data-life-insight-shell]");
     const actionBar = document.querySelector("[data-life-insight-mobile-action-bar]");
 
-    expect(shell).toHaveClass("pb-[calc(9rem+env(safe-area-inset-bottom))]", "lg:pb-0");
+    expect(shell).toHaveClass("pb-[calc(10rem+env(safe-area-inset-bottom))]", "lg:pb-0");
     expect(actionBar).toHaveClass(
       "fixed",
       "bottom-0",
