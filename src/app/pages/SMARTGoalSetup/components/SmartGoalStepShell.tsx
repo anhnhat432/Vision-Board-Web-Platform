@@ -763,8 +763,8 @@ export function SmartGoalStepShell({
     <div
       data-smart-goal-shell
       className={cn(
-        "w-full animate-[fade-in_0.3s_ease-out] pb-[calc(9rem+env(safe-area-inset-bottom))] lg:pb-0",
-        showFinalSecondaryCta && "pb-[calc(12rem+env(safe-area-inset-bottom))]",
+        "w-full animate-[fade-in_0.3s_ease-out] pb-[calc(7.75rem+env(safe-area-inset-bottom))] lg:pb-0",
+        showFinalSecondaryCta && "pb-[calc(10.5rem+env(safe-area-inset-bottom))]",
       )}
     >
       <style>{`
@@ -808,10 +808,10 @@ export function SmartGoalStepShell({
         )}
       </AnimatePresence>
 
-      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[1fr_348px] lg:gap-[18px]">
+      <div className="grid grid-cols-1 items-start gap-3.5 lg:grid-cols-[1fr_348px] lg:gap-[18px]">
         <div
           className={cn(
-            "relative min-w-0 space-y-4 overflow-hidden rounded-[18px] border border-[rgba(23,21,15,0.08)] bg-white p-4 shadow-[0_18px_40px_-32px_rgba(23,21,15,0.4)] transition-all duration-200 dark:border-app-line dark:bg-app-surface sm:space-y-6 sm:rounded-[22px] sm:p-7 sm:pl-12",
+            "relative min-w-0 space-y-3.5 overflow-hidden rounded-[18px] border border-[rgba(23,21,15,0.08)] bg-white p-3.5 shadow-[0_18px_40px_-32px_rgba(23,21,15,0.4)] transition-all duration-200 dark:border-app-line dark:bg-app-surface sm:space-y-6 sm:rounded-[22px] sm:p-7 sm:pl-12",
             isPageFlipping && !shouldReduceMotion && "page-flip-effect",
           )}
         >
@@ -825,7 +825,7 @@ export function SmartGoalStepShell({
             aria-hidden="true"
           />
 
-          <div className="mb-1 flex items-start justify-between gap-3">
+          <div className="mb-0.5 flex items-start justify-between gap-3 sm:mb-1">
             <div className="min-w-0">
               <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#0C5E3A] flex items-center gap-2">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#0C5E3A]" />
@@ -835,12 +835,12 @@ export function SmartGoalStepShell({
                 id="smart-step-title"
                 ref={headingRef}
                 tabIndex={-1}
-                className="mt-1.5 text-[22px] font-extrabold leading-[1.12] tracking-[-0.02em] text-[#17150F] focus:outline-none dark:text-app-ink sm:text-[25px]"
+                className="mt-1 text-[20px] font-extrabold leading-[1.12] tracking-[-0.02em] text-[#17150F] focus:outline-none dark:text-app-ink sm:mt-1.5 sm:text-[25px]"
                 style={{ fontFamily: "'Bricolage Grotesque', serif" }}
               >
                 {step.title}
               </h2>
-              <p className="mt-2 max-w-[52ch] text-[13px] leading-[1.5] text-[#5C574B] dark:text-app-ink-soft sm:text-[13.5px] sm:leading-[1.55]">
+              <p className="mt-1.5 max-w-[52ch] text-[12.5px] leading-[1.45] text-[#5C574B] dark:text-app-ink-soft sm:mt-2 sm:text-[13.5px] sm:leading-[1.55]">
                 {step.description}
               </p>
             </div>
@@ -849,9 +849,9 @@ export function SmartGoalStepShell({
             </span>
           </div>
 
-          <div className="relative mt-4 sm:mt-5">
+          <div className="relative mt-3 sm:mt-5">
             <div
-              className="absolute left-[10%] right-[10%] top-[18px] z-0 h-[3px] overflow-hidden rounded-full bg-[#E4E0D4] sm:top-[22px]"
+              className="absolute left-[10%] right-[10%] top-[16px] z-0 h-[3px] overflow-hidden rounded-full bg-[#E4E0D4] sm:top-[22px]"
               aria-hidden="true"
             >
               <div
@@ -880,7 +880,7 @@ export function SmartGoalStepShell({
                       disabled={!canJump}
                       onClick={() => handleWizardJump(index)}
                       className={cn(
-                        "flex h-full w-full flex-col items-center gap-1 rounded-[12px] border px-1 py-2 transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 enabled:cursor-pointer enabled:hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0 sm:gap-2 sm:rounded-[14px] sm:px-1.5 sm:py-3.5",
+                        "flex h-full w-full flex-col items-center gap-1 rounded-[12px] border px-1 py-1.5 transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 enabled:cursor-pointer enabled:hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0 sm:gap-2 sm:rounded-[14px] sm:px-1.5 sm:py-3.5",
                         isActive
                           ? "border-[1.5px] border-[#0C5E3A] bg-[#E9F3DF] shadow-[0_8px_20px_-14px_rgba(12,94,58,0.7)]"
                           : isDone
@@ -890,7 +890,7 @@ export function SmartGoalStepShell({
                     >
                       <span
                         className={cn(
-                          "flex h-8 w-8 items-center justify-center rounded-full transition-all duration-300 sm:h-[34px] sm:w-[34px]",
+                          "flex h-7 w-7 items-center justify-center rounded-full transition-all duration-300 sm:h-[34px] sm:w-[34px]",
                           isActive
                             ? "bg-white dark:bg-app-surface text-[#0C5E3A]"
                             : isDone
@@ -898,11 +898,11 @@ export function SmartGoalStepShell({
                               : "bg-[#F2EFE6] dark:bg-app-bg-subtle text-[#A8A296] dark:text-app-ink-muted",
                         )}
                       >
-                        <StepIcon className="h-4 w-4 sm:h-[17px] sm:w-[17px]" aria-hidden="true" />
+                        <StepIcon className="h-3.5 w-3.5 sm:h-[17px] sm:w-[17px]" aria-hidden="true" />
                       </span>
                       <span
                         className={cn(
-                          "text-[12px] font-extrabold leading-none sm:text-[13px]",
+                          "text-[11px] font-extrabold leading-none sm:text-[13px]",
                           isActive
                             ? "text-[#0C5E3A]"
                             : isDone
@@ -933,7 +933,7 @@ export function SmartGoalStepShell({
             </ol>
           </div>
 
-          <div className="my-4 h-px bg-[rgba(23,21,15,0.08)] sm:my-5" aria-hidden="true" />
+          <div className="my-3 h-px bg-[rgba(23,21,15,0.08)] sm:my-5" aria-hidden="true" />
 
           <AnimatePresence mode="wait">
             <motion.div
@@ -942,20 +942,20 @@ export function SmartGoalStepShell({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-              className="space-y-4 sm:space-y-5"
+              className="space-y-3.5 sm:space-y-5"
             >
               {children}
 
               {/* Polaroid Live Preview hiển thị ở trên cùng trên mobile dưới dạng collapsible */}
-              <div className="block lg:hidden select-none mb-3">
+              <div className="mb-2.5 block select-none lg:hidden sm:mb-3">
                 {step.key === "timeBound" ? (
                   renderPolaroidCard(true)
                 ) : (
-                  <div className="rounded-card border border-app-line bg-app-surface overflow-hidden shadow-sm">
+                  <div className="overflow-hidden rounded-card border border-app-line bg-app-surface shadow-sm">
                     <button
                       type="button"
                       onClick={() => setIsPolaroidExpanded(!isPolaroidExpanded)}
-                      className="w-full flex items-center justify-between px-4 py-3 text-xs font-bold text-app-ink-soft hover:bg-app-bg transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:outline-none"
+                      className="flex w-full cursor-pointer items-center justify-between px-3.5 py-2.5 text-xs font-bold text-app-ink-soft transition-colors hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent sm:px-4 sm:py-3"
                     >
                       <span className="flex items-center gap-2">
                         📸 <span>Bản phác thảo Polaroid {isSpecFilled ? "(Đã cập nhật)" : "(Chưa có nội dung)"}</span>
@@ -1023,7 +1023,7 @@ export function SmartGoalStepShell({
               )}
 
               {/* Cố vấn mục tiêu AI tích hợp sẵn, hiển thị nhẹ nhàng */}
-              <div className="relative overflow-hidden rounded-[16px] border border-dashed border-[rgba(23,21,15,0.1)] dark:border-app-line bg-[#FBF6EC] dark:bg-app-bg-subtle p-4 space-y-3">
+              <div className="relative space-y-2.5 overflow-hidden rounded-[16px] border border-dashed border-[rgba(23,21,15,0.1)] bg-[#FBF6EC] p-3.5 dark:border-app-line dark:bg-app-bg-subtle sm:space-y-3 sm:p-4">
                 <button
                   type="button"
                   onClick={() => setIsAiCoachExpanded(!isAiCoachExpanded)}
@@ -1173,9 +1173,9 @@ export function SmartGoalStepShell({
               {/* Sticky Bottom CTA cho Mobile */}
               <div
                 data-smart-mobile-action-bar
-                className="fixed bottom-0 left-0 right-0 z-40 border-t border-[rgba(23,21,15,0.08)] bg-white/95 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-2 shadow-[0_-18px_40px_-30px_rgba(23,21,15,0.5)] backdrop-blur-md dark:border-app-line dark:bg-app-surface/95 lg:hidden"
+                  className="fixed bottom-0 left-0 right-0 z-40 border-t border-[rgba(23,21,15,0.08)] bg-white/95 px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-2 shadow-[0_-18px_40px_-30px_rgba(23,21,15,0.5)] backdrop-blur-md dark:border-app-line dark:bg-app-surface/95 lg:hidden"
               >
-                <div className="mx-auto flex w-full max-w-[42rem] flex-col gap-2">
+                <div className="mx-auto flex w-full max-w-[42rem] flex-col gap-1.5 sm:gap-2">
                   <div className="sr-only" aria-live="polite">
                     <span className="min-w-0 truncate text-app-ink-muted">{mobileProgressLabel}</span>
                     <span
@@ -1192,7 +1192,7 @@ export function SmartGoalStepShell({
                   <div className="flex justify-between gap-2.5">
                     <button
                       type="button"
-                      className="inline-flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-[11px] border border-[rgba(23,21,15,0.1)] bg-white py-2.5 text-[13px] font-semibold text-[#5C574B] transition-all duration-200 hover:bg-[#FAF8F3] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A]/35 dark:border-app-line dark:bg-app-surface dark:text-app-ink-soft dark:hover:bg-app-bg-subtle"
+                      className="inline-flex min-h-10 flex-1 cursor-pointer items-center justify-center gap-2 rounded-[11px] border border-[rgba(23,21,15,0.1)] bg-white py-2 text-[13px] font-semibold text-[#5C574B] transition-all duration-200 hover:bg-[#FAF8F3] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A]/35 dark:border-app-line dark:bg-app-surface dark:text-app-ink-soft dark:hover:bg-app-bg-subtle sm:py-2.5"
                       onClick={onBack}
                     >
                       <ArrowLeft className="h-4 w-4" aria-hidden="true" />
@@ -1200,7 +1200,7 @@ export function SmartGoalStepShell({
                     </button>
                     <button
                       type="button"
-                      className="inline-flex flex-[2] cursor-pointer items-center justify-center gap-2 rounded-[11px] bg-[#0C5E3A] py-2.5 text-[13px] font-bold text-white shadow-[0_4px_12px_rgba(12,94,58,0.3)] transition-all duration-200 hover:bg-[#16A34A] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A]/35"
+                      className="inline-flex min-h-10 flex-[2] cursor-pointer items-center justify-center gap-2 rounded-[11px] bg-[#0C5E3A] py-2 text-[13px] font-bold text-white shadow-[0_4px_12px_rgba(12,94,58,0.3)] transition-all duration-200 hover:bg-[#16A34A] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A]/35 sm:py-2.5"
                       onClick={handleNextClick}
                     >
                       {primaryCtaLabel}
@@ -1210,7 +1210,7 @@ export function SmartGoalStepShell({
                   {showFinalSecondaryCta ? (
                     <button
                       type="button"
-                      className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-[11px] border border-[rgba(23,21,15,0.1)] bg-white py-2 text-[13px] font-semibold text-[#17150F] transition-all duration-200 hover:bg-[#FAF8F3] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A]/35 dark:border-app-line dark:bg-app-surface dark:text-app-ink dark:hover:bg-app-bg-subtle"
+                      className="inline-flex min-h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-[11px] border border-[rgba(23,21,15,0.1)] bg-white py-2 text-[13px] font-semibold text-[#17150F] transition-all duration-200 hover:bg-[#FAF8F3] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A]/35 dark:border-app-line dark:bg-app-surface dark:text-app-ink dark:hover:bg-app-bg-subtle"
                       onClick={handleFinalSecondaryClick}
                     >
                       <ShieldCheck className="h-4 w-4" aria-hidden="true" />
@@ -1349,7 +1349,7 @@ export function SmartGoalStepShell({
       </div>
 
       {!showReview && (
-        <details className="mt-6 group rounded-[16px] border border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white dark:bg-app-surface p-4 transition-all duration-200">
+        <details className="group mt-4 rounded-[16px] border border-[rgba(23,21,15,0.08)] bg-white p-3.5 transition-all duration-200 dark:border-app-line dark:bg-app-surface sm:mt-6 sm:p-4">
           <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-[13px] font-semibold text-[#17150F] dark:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2 rounded-lg p-1 [&::-webkit-details-marker]:hidden">
             <p className="flex items-center gap-2 font-semibold">
               Xem chi tiết nội dung đang viết

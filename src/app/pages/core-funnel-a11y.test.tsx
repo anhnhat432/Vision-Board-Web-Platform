@@ -583,8 +583,8 @@ describe("SmartGoalStepShell — a11y", () => {
     const feedback = document.querySelector("[data-smart-step-feedback]");
     const actionBar = document.querySelector("[data-smart-mobile-action-bar]");
 
-    expect(shell).toHaveClass("pb-[calc(9rem+env(safe-area-inset-bottom))]", "lg:pb-0");
-    expect(actionBar).toHaveClass("pb-[calc(env(safe-area-inset-bottom)+1rem)]");
+    expect(shell).toHaveClass("pb-[calc(7.75rem+env(safe-area-inset-bottom))]", "lg:pb-0");
+    expect(actionBar).toHaveClass("pb-[calc(env(safe-area-inset-bottom)+0.75rem)]");
     expect(within(actionBar as HTMLElement).getByText("Bước 1/5")).toBeInTheDocument();
     expect(within(actionBar as HTMLElement).getByText("Cần hoàn thiện bước này")).toBeInTheDocument();
     expect(feedback).not.toBeNull();
@@ -647,7 +647,7 @@ describe("SmartGoalStepShell — a11y", () => {
     const shell = document.querySelector("[data-smart-goal-shell]");
     const actionBar = document.querySelector("[data-smart-mobile-action-bar]");
 
-    expect(shell).toHaveClass("pb-[calc(12rem+env(safe-area-inset-bottom))]", "lg:pb-0");
+    expect(shell).toHaveClass("pb-[calc(10.5rem+env(safe-area-inset-bottom))]", "lg:pb-0");
     expect(within(actionBar as HTMLElement).getByText("Bước 5/5 · Độ rõ 1/1")).toBeInTheDocument();
     expect(within(actionBar as HTMLElement).getByText("Sẵn sàng chọn kế hoạch")).toBeInTheDocument();
     expect(within(actionBar as HTMLElement).getByRole("button", { name: /Tạo kế hoạch nhanh/i })).toBeInTheDocument();

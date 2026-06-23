@@ -336,7 +336,7 @@ export function TwelveWeekSystemTabs({
 
   return (
     <>
-      <nav id="twelve-week-tabs-nav" className="mt-4" aria-label="Điều hướng hệ 12 tuần">
+      <nav id="twelve-week-tabs-nav" className="mt-3 sm:mt-4" aria-label="Điều hướng hệ 12 tuần">
         <Tabs value={activeTab} onValueChange={handleTabChange} className="block overflow-x-auto scrollbar-none">
           <TabsList
             aria-label="Điều hướng hệ 12 tuần"
@@ -352,7 +352,7 @@ export function TwelveWeekSystemTabs({
                   value={value}
                   aria-controls={tabPanelId}
                   aria-label={`Mở tab ${label}`}
-                  className={`relative flex-none rounded-[10px] px-[18px] py-[10px] text-[13px] transition-all duration-150 gap-2 flex items-center justify-center min-h-[38px] cursor-pointer font-semibold data-[state=active]:bg-[#0C5E3A] dark:data-[state=active]:bg-[#1A3A2A] data-[state=active]:text-white data-[state=inactive]:text-app-ink-soft hover:data-[state=inactive]:text-app-ink`}
+                  className={`relative flex min-h-9 flex-none cursor-pointer items-center justify-center gap-1.5 rounded-[10px] px-3 py-2 text-[12px] font-semibold transition-all duration-150 data-[state=active]:bg-[#0C5E3A] data-[state=active]:text-white data-[state=inactive]:text-app-ink-soft hover:data-[state=inactive]:text-app-ink dark:data-[state=active]:bg-[#1A3A2A] sm:min-h-[38px] sm:gap-2 sm:px-[18px] sm:py-[10px] sm:text-[13px]`}
                 >
                   <Icon
                     className="h-[15px] w-[15px] shrink-0 transition-transform duration-150 group-hover:scale-110"

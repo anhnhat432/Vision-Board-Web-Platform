@@ -159,13 +159,13 @@ export function TwelveWeekDashboardNotice({
   const role = tone === "success" ? "status" : "alert";
 
   return (
-    <div role={role} className={`rounded-2xl border p-5 md:p-6 transition-all duration-150 ${toneClass}`}>
+    <div role={role} className={`rounded-2xl border p-4 transition-all duration-150 md:p-6 ${toneClass}`}>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-app-bg/50 border border-app-line/30 shadow-3xs">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-app-line/30 bg-app-bg/50 shadow-3xs sm:h-11 sm:w-11">
           <Icon className={`h-5 w-5 ${iconClass}`} aria-hidden="true" />
         </div>
         <div className="min-w-0 flex-1 space-y-0.5">
-          <p className={`text-base ${titleClass}`}>{title}</p>
+          <p className={`text-sm sm:text-base ${titleClass}`}>{title}</p>
           <p className="text-sm leading-relaxed text-app-ink-soft">{description}</p>
         </div>
         {children ? (
@@ -201,20 +201,20 @@ export function TwelveWeekDashboardHeader({
   system,
   activePlanCode,
   currentWeek,
-  syncBadgeClass,
+  syncBadgeClass: _syncBadgeClass,
   syncBadgeLabel,
   reviewDueToday,
   todayRemainingCount,
   todayCompletedCount,
   weekCompletion,
-  reviewStatusLabel,
-  firstPriorityTask,
+  reviewStatusLabel: _reviewStatusLabel,
+  firstPriorityTask: _firstPriorityTask,
   onOpenFocusTab,
   onOpenGoals,
   onRenameGoal,
 }: TwelveWeekDashboardHeaderProps) {
   const phaseInfo = getHeaderPhaseInfo(currentWeek);
-  const PhaseIcon = phaseInfo.icon;
+  const _PhaseIcon = phaseInfo.icon;
   const _domainLabel = activeGoal.focusArea || activeGoal.category;
   const cyclePercent = Math.max(
     0,
