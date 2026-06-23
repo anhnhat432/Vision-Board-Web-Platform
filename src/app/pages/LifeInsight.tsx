@@ -228,7 +228,7 @@ export function LifeInsight() {
 
   const intentOptions = getUserIntentOptions();
   const selectedIntentLabel = selectedIntent
-    ? intentOptions.find((option) => option.id === selectedIntent)?.label ?? null
+    ? (intentOptions.find((option) => option.id === selectedIntent)?.label ?? null)
     : null;
 
   const lowestArea = useMemo(() => {
@@ -407,22 +407,22 @@ export function LifeInsight() {
           <div className="flex flex-wrap gap-2 animate-fade-in">
             {isCustomSelection ? (
               <>
-                <span className="inline-flex items-center rounded-full bg-app-status-warning/10 px-3 py-1.5 text-xs font-semibold text-app-status-warning shadow-sm border border-app-status-warning/20">
+                <span className="inline-flex min-w-0 items-center gap-1.5 break-words rounded-full border border-app-status-warning/20 bg-app-status-warning/10 px-3 py-1.5 text-xs font-semibold text-app-status-warning shadow-sm">
                   <Sparkles className="mr-1.5 h-3.5 w-3.5 motion-safe:animate-pulse" aria-hidden="true" />
                   Trọng tâm chọn: {focusAreaLabel}
                 </span>
-                <span className="inline-flex items-center rounded-full border border-app-line bg-app-surface px-3 py-1.5 text-xs font-semibold text-app-ink-soft shadow-3xs">
+                <span className="inline-flex min-w-0 items-center gap-1.5 break-words rounded-full border border-app-line bg-app-surface px-3 py-1.5 text-xs font-semibold text-app-ink-soft shadow-3xs">
                   <Target className="mr-1.5 h-3.5 w-3.5 text-app-ink-muted" aria-hidden="true" />
                   Gợi ý mặc định: {getLifeAreaLabel(lowestArea.name)}
                 </span>
               </>
             ) : (
               <>
-                <span className="inline-flex items-center rounded-full bg-app-status-success/10 px-3 py-1.5 text-xs font-semibold text-app-status-success shadow-sm border border-app-status-success/20">
+                <span className="inline-flex min-w-0 items-center gap-1.5 break-words rounded-full border border-app-status-success/20 bg-app-status-success/10 px-3 py-1.5 text-xs font-semibold text-app-status-success shadow-sm">
                   <Target className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
                   Đề xuất ưu tiên: {focusAreaLabel}
                 </span>
-                <span className="inline-flex items-center rounded-full border border-app-line bg-app-surface px-3 py-1.5 text-xs font-semibold text-app-ink-soft shadow-3xs">
+                <span className="inline-flex min-w-0 items-center gap-1.5 break-words rounded-full border border-app-line bg-app-surface px-3 py-1.5 text-xs font-semibold text-app-ink-soft shadow-3xs">
                   <Compass className="mr-1.5 h-3.5 w-3.5 text-app-ink-muted" aria-hidden="true" />
                   Đang chọn tự động
                 </span>
@@ -452,14 +452,16 @@ export function LifeInsight() {
                       <Sparkles className="h-3.5 w-3.5 shrink-0 motion-safe:animate-pulse" aria-hidden="true" />
                       {lifePattern.title}
                     </h4>
-                    <p className="mt-1.5 text-xs leading-relaxed text-app-ink-soft">{lifePattern.description}</p>
+                    <p className="mt-1.5 max-w-[65ch] break-words text-xs leading-relaxed text-app-ink-soft">
+                      {lifePattern.description}
+                    </p>
                   </div>
                 )}
 
                 {/* Khối so sánh trực quan Mạnh nhất vs Yếu nhất tích hợp gọn gàng trong cùng card */}
                 {strongestArea && lowestArea && (
-                    <div className="mt-4 grid grid-cols-1 gap-3 border-t border-app-line/60 pt-3.5 sm:grid-cols-2 sm:pt-4 lg:mt-5 lg:gap-4">
-                      <div className="flex items-start gap-2.5 rounded-xl border border-app-line/40 bg-app-surface/60 p-3 shadow-3xs">
+                  <div className="mt-4 grid grid-cols-1 gap-3 border-t border-app-line/60 pt-3.5 sm:grid-cols-2 sm:pt-4 lg:mt-5 lg:gap-4">
+                    <div className="flex items-start gap-2.5 rounded-xl border border-app-line/40 bg-app-surface/60 p-3 shadow-3xs">
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-app-status-success/10 text-app-status-success">
                         {(() => {
                           const Icon = getLifeAreaIcon(strongestArea.name);
@@ -470,7 +472,7 @@ export function LifeInsight() {
                         <p className="text-[10px] font-bold uppercase tracking-wider text-app-status-success">
                           Điểm tựa mạnh nhất
                         </p>
-                        <div className="text-xs font-bold text-app-ink mt-0.5 truncate">
+                        <div className="mt-0.5 break-words text-xs font-bold leading-snug text-app-ink">
                           {getLifeAreaLabel(strongestArea.name)}
                         </div>
                         <p className="text-xs font-serif font-bold text-app-status-success mt-0.5">
@@ -479,7 +481,7 @@ export function LifeInsight() {
                       </div>
                     </div>
 
-                      <div className="flex items-start gap-2.5 rounded-xl border border-app-line/40 bg-app-surface/60 p-3 shadow-3xs">
+                    <div className="flex items-start gap-2.5 rounded-xl border border-app-line/40 bg-app-surface/60 p-3 shadow-3xs">
                       <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-app-status-warning/10 text-app-status-warning">
                         {(() => {
                           const Icon = getLifeAreaIcon(lowestArea.name);
@@ -490,7 +492,7 @@ export function LifeInsight() {
                         <p className="text-[10px] font-bold uppercase tracking-wider text-app-status-warning">
                           Cơ hội cải thiện
                         </p>
-                        <div className="text-xs font-bold text-app-ink mt-0.5 truncate">
+                        <div className="mt-0.5 break-words text-xs font-bold leading-snug text-app-ink">
                           {getLifeAreaLabel(lowestArea.name)}
                         </div>
                         <p className="text-xs font-serif font-bold text-app-status-warning mt-0.5">
@@ -533,13 +535,16 @@ export function LifeInsight() {
                     <button
                       type="button"
                       onClick={() => setIsAreasGridOpen(!isAreasGridOpen)}
-                      className="lg:hidden inline-flex min-h-11 items-center justify-center text-xs font-bold text-app-accent hover:underline px-3 py-2 cursor-pointer font-sans"
+                      aria-expanded={isAreasGridOpen}
+                      aria-controls="life-insight-areas-grid"
+                      className="lg:hidden inline-flex min-h-11 items-center justify-center rounded-xl px-3 py-2 text-xs font-bold text-app-accent transition-colors hover:bg-app-accent-soft/40 hover:text-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg cursor-pointer font-sans"
                     >
-                      {isAreasGridOpen ? "Thu gọn ▲" : "Thay đổi ▼"}
+                      {isAreasGridOpen ? "Ẩn danh sách lĩnh vực ▲" : "Mở danh sách lĩnh vực ▼"}
                     </button>
                   </div>
                 </div>
                 <div
+                  id="life-insight-areas-grid"
                   className={cn(
                     "mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 transition-all duration-200 overflow-hidden",
                     !isAreasGridOpen && "max-h-0 lg:max-h-none opacity-0 lg:opacity-100",
@@ -553,6 +558,7 @@ export function LifeInsight() {
                       <button
                         key={area.name}
                         type="button"
+                        aria-pressed={isSelected}
                         onClick={() => setSelectedAreaName(area.name === lowestArea.name ? null : area.name)}
                         className={cn(
                           "group min-h-12 rounded-xl border p-2.5 text-left transition-all duration-200 outline-none cursor-pointer select-none",
@@ -576,7 +582,7 @@ export function LifeInsight() {
                           <div className="min-w-0 flex-1">
                             <p
                               className={cn(
-                                "truncate text-xs font-bold",
+                                "break-words text-xs font-bold leading-snug",
                                 isSelected ? colors.text : "text-app-ink-soft group-hover:text-app-ink",
                               )}
                             >
@@ -606,8 +612,8 @@ export function LifeInsight() {
                     fill="none"
                     xmlns="http://www.w3.org/2000/svg"
                     className="drop-shadow-md"
+                    aria-hidden="true"
                   >
-                    <title>Góc kẹp giấy</title>
                     <path
                       d="M12 2C8.686 2 6 4.686 6 8v12c0 2.209 1.791 4 4 4s4-1.791 4-4V8c0-1.103-.897-2-2-2s-2 .897-2 2v10c0 .553.447 1 1 1s1-.447 1-1V8c0-.552.448-1 1-1s1 .448 1 1v12c0 3.309-2.691 6-6 6s-6-2.691-6-6V8c0-4.963 4.037-9 9-9s9 4.037 9 9v12c0 .553-.447 1-1 1s-1-.447-1-1V8c0-3.859-3.141-7-7-7Z"
                       fill="currentColor"
@@ -645,22 +651,24 @@ export function LifeInsight() {
                       </div>
 
                       {/* Tên khía cạnh viết tay & Điểm số */}
-                      <div className="space-y-1">
+                      <div className="max-w-[28ch] space-y-1">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-app-accent">
                           LĨNH VỰC TRỌNG TÂM
                         </span>
-                        <h2 className="font-serif text-2xl font-bold leading-tight text-app-ink sm:text-3xl">{focusAreaLabel}</h2>
-                        <div className="inline-flex items-center gap-1.5 bg-app-bg-subtle px-3 py-1 rounded-full border border-app-line/60 text-xs font-semibold text-app-ink-soft mt-1">
+                        <h2 className="break-words font-serif text-2xl font-bold leading-tight text-app-ink sm:text-3xl">
+                          {focusAreaLabel}
+                        </h2>
+                        <div className="mt-1 inline-flex items-center gap-1.5 rounded-full border border-app-line/60 bg-app-bg-subtle px-3 py-1 text-xs font-semibold text-app-ink-soft">
                           Điểm hiện tại: <span className="font-bold text-app-ink">{focusArea.score}/10</span>
                         </div>
-                        <p className="mt-2 text-xs text-app-ink-soft flex items-center justify-center gap-1 font-semibold">
+                        <p className="mt-2 flex items-center justify-center gap-1 break-words text-xs font-semibold text-app-ink-soft">
                           {focusArea.score === lowestArea.score ? (
-                            <span className="inline-flex items-center text-app-status-warning font-medium">
+                            <span className="inline-flex items-center break-words text-app-status-warning font-medium">
                               <TrendingDown className="mr-1 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                               Khía cạnh thấp điểm nhất ({focusArea.score}/10)
                             </span>
                           ) : (
-                            <span className="inline-flex items-center text-app-accent font-medium">
+                            <span className="inline-flex items-center break-words text-app-accent font-medium">
                               <TrendingUp className="mr-1 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                               Khía cạnh bạn chọn tập trung ({focusArea.score}/10)
                             </span>
@@ -679,10 +687,10 @@ export function LifeInsight() {
                       <Target className="h-3 w-3" aria-hidden="true" />
                       Gợi ý hướng đi tiếp theo
                     </span>
-                    <p className="text-xs font-serif italic font-medium text-app-ink leading-relaxed">
+                    <p className="max-w-[62ch] break-words text-xs font-serif italic font-medium leading-relaxed text-app-ink">
                       “{smartGoalStarter.specificGoalStatement}”
                     </p>
-                    <p className="text-xs text-app-ink-muted italic leading-relaxed pt-2 border-t border-app-line">
+                    <p className="break-words border-t border-app-line pt-2 text-xs italic leading-relaxed text-app-ink-muted">
                       Lý do: {smartGoalStarter.motivationReason}
                     </p>
                   </div>
@@ -692,7 +700,9 @@ export function LifeInsight() {
                     <h3 className="text-xs font-bold text-app-ink uppercase tracking-wider">
                       Mục đích chính của bạn với lĩnh vực này
                     </h3>
-                    <p className="mt-1 text-xs text-app-ink-muted">Chọn định hướng giúp gợi ý viết mục tiêu SMART</p>
+                    <p className="mt-1 max-w-[56ch] text-xs leading-relaxed text-app-ink-muted">
+                      Chọn định hướng để gợi ý viết mục tiêu SMART sát với điều bạn muốn làm.
+                    </p>
 
                     <div className="mt-3 grid grid-cols-1 gap-2 pr-1 sm:mt-3.5 sm:max-h-[300px] sm:grid-cols-2 sm:overflow-y-auto">
                       {intentOptions.map((option) => {
@@ -703,6 +713,7 @@ export function LifeInsight() {
                           <button
                             key={option.id}
                             type="button"
+                            aria-pressed={isSelected}
                             onClick={() => handleIntentSelect(option.id)}
                             className={cn(
                               "group relative flex min-h-11 w-full cursor-pointer select-none items-center gap-2 rounded-xl border p-2.5 text-left outline-none transition-all duration-200",
@@ -745,7 +756,7 @@ export function LifeInsight() {
                             </span>
                             <span
                               className={cn(
-                                "text-xs font-semibold leading-snug whitespace-normal",
+                                "min-w-0 break-words text-xs font-semibold leading-snug whitespace-normal",
                                 isSelected ? colors.selectedText : "text-app-ink",
                               )}
                               style={isSelected ? { color: colorConfig.accent } : {}}
@@ -821,7 +832,9 @@ export function LifeInsight() {
       >
         <div className="mx-auto flex w-full max-w-[42rem] flex-col gap-2">
           <div className="flex items-center justify-between gap-3 text-[11px] font-semibold" aria-live="polite">
-            <span className="min-w-0 truncate text-app-ink-muted">Bước 2/6 · Trọng tâm {focusAreaLabel}</span>
+            <span className="min-w-0 flex-1 break-words pr-1 leading-snug text-app-ink-muted">
+              Bước 2/6 · Trọng tâm {focusAreaLabel}
+            </span>
             <span
               className={cn(
                 "shrink-0 rounded-full border px-2.5 py-1",
@@ -835,16 +848,18 @@ export function LifeInsight() {
           </div>
 
           {selectedIntentLabel ? (
-            <p className="text-[11px] leading-relaxed text-app-ink-muted">
+            <p className="max-w-[62ch] break-words text-[11px] leading-relaxed text-app-ink-muted">
               Định hướng đã chọn: <span className="font-semibold text-app-ink">{selectedIntentLabel}</span>
             </p>
           ) : (
-            <p className="text-[11px] leading-relaxed text-app-ink-muted">Bạn có thể chọn định hướng bây giờ hoặc viết mục tiêu ngay.</p>
+            <p className="max-w-[62ch] break-words text-[11px] leading-relaxed text-app-ink-muted">
+              Bạn có thể chọn định hướng bây giờ hoặc viết mục tiêu ngay.
+            </p>
           )}
 
           <Button
             onClick={handleStartGoalSetup}
-            className="group inline-flex min-h-10 w-full cursor-pointer items-center justify-center gap-2 bg-app-accent px-6 py-2.5 text-sm font-bold leading-snug text-white shadow-app-sm transition-all duration-200 hover:bg-app-accent-hover active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg"
+            className="group inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 bg-app-accent px-6 py-2.5 text-sm font-bold leading-snug text-white shadow-app-sm transition-all duration-200 hover:bg-app-accent-hover active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg"
           >
             Tiếp → Viết mục tiêu
             <ArrowRight

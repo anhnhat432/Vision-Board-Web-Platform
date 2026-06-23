@@ -586,10 +586,71 @@ describe("SmartGoalStepShell — a11y", () => {
     expect(shell).toHaveClass("pb-[calc(8.75rem+env(safe-area-inset-bottom))]", "lg:pb-0");
     expect(actionBar).toHaveClass("pb-[calc(env(safe-area-inset-bottom)+0.75rem)]");
     expect(within(actionBar as HTMLElement).getByText("Bước 1/5")).toBeInTheDocument();
+    expect(within(actionBar as HTMLElement).getByRole("button", { name: /Lưu mục tiêu cụ thể/i })).toHaveClass(
+      "min-h-11",
+    );
+    expect(within(actionBar as HTMLElement).getByRole("button", { name: /Quay lại/i })).toHaveClass("min-h-11");
     expect(within(actionBar as HTMLElement).getByText("Cần hoàn thiện bước này")).toBeInTheDocument();
     expect(feedback).not.toBeNull();
     expect(actionBar).not.toBeNull();
     expect(feedback?.compareDocumentPosition(actionBar as Node)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  it("exposes expanded state for mobile helper disclosures", async () => {
+    setViewportWidth(375);
+    const user = userEvent.setup();
+    const headingRef = createRef<HTMLHeadingElement>();
+    const mockStarter = {
+      specificGoalStatement: "Statement",
+      metricName: "Metric",
+      baselineValue: "0",
+      targetValue: "10",
+      weeklyHours: "4",
+      requiredSkills: "Skills",
+      supportResources: "Resources",
+      motivationReason: "Motivation",
+      lifeDimensionAlignment: "Alignment",
+      targetWeeks: "12",
+    };
+
+    render(
+      <SmartGoalStepShell
+        stepIndex={0}
+        totalSteps={5}
+        step={step}
+        headingRef={headingRef}
+        starterPreview="Một ví dụ ngắn."
+        clarityItems={[]}
+        clarityDoneCount={0}
+        clarityProgress={0}
+        summaryRows={[]}
+        showReview={false}
+        currentStepError={null}
+        currentStepSoftWarning={null}
+        isCurrentStepValid={false}
+        qualityFeedback={null}
+        smartData={makeSmartData()}
+        smartGoalStarter={mockStarter}
+        onApplyStarter={() => {}}
+        onJumpToStep={() => {}}
+        onBack={() => {}}
+        onNext={() => {}}
+      >
+        <div />
+      </SmartGoalStepShell>,
+    );
+
+    const polaroidToggle = screen.getByRole("button", { name: /Bản phác thảo Polaroid/i });
+    expect(polaroidToggle).toHaveAttribute("aria-expanded", "false");
+
+    await user.click(polaroidToggle);
+    expect(polaroidToggle).toHaveAttribute("aria-expanded", "true");
+
+    const aiCoachToggle = screen.getByRole("button", { name: /Cố vấn mục tiêu AI/i });
+    expect(aiCoachToggle).toHaveAttribute("aria-expanded", "false");
+
+    await user.click(aiCoachToggle);
+    expect(aiCoachToggle).toHaveAttribute("aria-expanded", "true");
   });
 
   it("reserves extra mobile space when the final step shows a secondary CTA", () => {
@@ -649,6 +710,12 @@ describe("SmartGoalStepShell — a11y", () => {
 
     expect(shell).toHaveClass("pb-[calc(11.25rem+env(safe-area-inset-bottom))]", "lg:pb-0");
     expect(within(actionBar as HTMLElement).getByText("Bước 5/5 · Độ rõ 1/1")).toBeInTheDocument();
+    expect(within(actionBar as HTMLElement).getByRole("button", { name: /Tạo kế hoạch nhanh/i })).toHaveClass(
+      "min-h-11",
+    );
+    expect(within(actionBar as HTMLElement).getByRole("button", { name: /Kiểm tra khả thi nâng cao/i })).toHaveClass(
+      "min-h-11",
+    );
     expect(within(actionBar as HTMLElement).getByText("Sẵn sàng chọn kế hoạch")).toBeInTheDocument();
     expect(within(actionBar as HTMLElement).getByRole("button", { name: /Tạo kế hoạch nhanh/i })).toBeInTheDocument();
     expect(

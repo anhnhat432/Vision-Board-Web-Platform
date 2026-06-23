@@ -259,6 +259,7 @@ export function FocusLantern({ Icon, label }: FocusLanternProps) {
       >
         <Icon
           className={`h-5 w-5 transition-transform duration-500 ${triggerGlow ? "rotate-[15deg] scale-110" : ""}`}
+          aria-hidden="true"
         />
       </div>
     </div>

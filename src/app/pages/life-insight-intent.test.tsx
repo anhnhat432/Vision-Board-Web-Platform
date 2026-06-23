@@ -78,13 +78,26 @@ describe("LifeInsight — intent picker", () => {
 
     const target = await screen.findByRole("button", { name: /Học một kỹ năng/i });
     expect(target).not.toHaveClass("bg-app-accent-soft");
+    expect(target).toHaveAttribute("aria-pressed", "false");
 
     await user.click(target);
 
     expect(target).toHaveClass("bg-app-accent-soft");
+    expect(target).toHaveAttribute("aria-pressed", "true");
     const raw = localStorage.getItem("user_intent");
     expect(raw).toBeTruthy();
     expect(JSON.parse(raw ?? "{}")).toMatchObject({ intent: "learn_skill" });
+  });
+
+  it("exposes pressed state for the selected focus area card", async () => {
+    render(
+      <MemoryRouter>
+        <LifeInsight />
+      </MemoryRouter>,
+    );
+
+    const recommendedFocus = await screen.findByRole("button", { name: /Sự nghiệp/i });
+    expect(recommendedFocus).toHaveAttribute("aria-pressed", "true");
   });
 
   it("lets the user skip by not choosing (default state is nothing stored)", async () => {
@@ -151,6 +164,9 @@ describe("LifeInsight — intent picker", () => {
       "bg-app-surface/95",
       "pb-[calc(0.75rem+env(safe-area-inset-bottom))]",
     );
+    expect(within(actionBar as HTMLElement).getByRole("button", { name: /Tiếp → Viết mục tiêu/i })).toHaveClass(
+      "min-h-11",
+    );
 
     expect(within(actionBar as HTMLElement).getByText(/Bước 2\/6 · Trọng tâm/i)).toBeInTheDocument();
     expect(within(actionBar as HTMLElement).getByText("Đề xuất tự động")).toBeInTheDocument();
@@ -158,5 +174,26 @@ describe("LifeInsight — intent picker", () => {
       within(actionBar as HTMLElement).getByText("Bạn có thể chọn định hướng bây giờ hoặc viết mục tiêu ngay."),
     ).toBeInTheDocument();
     expect(within(actionBar as HTMLElement).getByRole("button", { name: /Tiếp → Viết mục tiêu/i })).toBeInTheDocument();
+  });
+
+  it("uses a specific mobile toggle label and exposes its expanded state", async () => {
+    const user = userEvent.setup();
+    setViewportWidth(375);
+
+    render(
+      <MemoryRouter>
+        <LifeInsight />
+      </MemoryRouter>,
+    );
+
+    const toggle = await screen.findByRole("button", { name: /Mở danh sách lĩnh vực/i });
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+
+    await user.click(toggle);
+
+    expect(await screen.findByRole("button", { name: /Ẩn danh sách lĩnh vực/i })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
   });
 });
