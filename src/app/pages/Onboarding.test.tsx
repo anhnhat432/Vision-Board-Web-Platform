@@ -200,7 +200,23 @@ describe("Onboarding", () => {
     expect(summary).toHaveTextContent("1/8");
     expect(summary).toHaveTextContent(/Điểm trung bình/i);
     expect(summary).toHaveTextContent(/Cần chăm sóc/i);
-    expect(screen.getByText("Quan hệ")).toBeInTheDocument();
+    expect(screen.getByText(/Quan hệ/)).toBeInTheDocument();
+  });
+
+  it("uses a compact mobile assessment layout for area grid, score grid and bottom actions", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter>
+        <Onboarding />
+      </MemoryRouter>,
+    );
+
+    await user.click(await screen.findByRole("button", { name: /Mở bản đồ cuộc sống/i }));
+
+    expect(document.querySelector("[data-onboarding-area-grid]")).toHaveClass("grid-cols-2", "sm:grid-cols-4");
+    expect(document.querySelector("[data-onboarding-score-grid]")).toHaveClass("grid", "grid-cols-4", "sm:flex");
+    expect(document.querySelector("[data-onboarding-bottom-nav]")).toHaveClass("flex-col", "sm:flex-row");
   });
 
   it("allows skipping an individual area without changing its score", async () => {

@@ -422,17 +422,17 @@ export function LifeBalance() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <div ref={pageTopRef} className="pb-12">
+      <div ref={pageTopRef} className="pb-10 sm:pb-12">
         {/* HERO */}
-        <header className="page-enter">
-          <div className="flex items-center gap-2 mb-3">
+        <header className="page-enter max-w-3xl">
+          <div className="mb-2.5 flex items-center gap-2 sm:mb-3">
             <span className="inline-block w-2 h-2 rounded-full bg-[#0C5E3A]" />
             <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#0C5E3A]">Bánh xe cuộc sống</p>
           </div>
-          <h1 className="font-[family-name:var(--app-font-serif)] text-[clamp(28px,3.2vw,38px)] font-extrabold leading-[1.02] tracking-[-0.02em] text-app-ink mb-3">
+          <h1 className="mb-2.5 font-[family-name:var(--app-font-serif)] text-[clamp(28px,3.2vw,38px)] font-extrabold leading-[1.06] text-app-ink sm:mb-3 sm:leading-[1.02]">
             Bức tranh hiện tại của bạn
           </h1>
-          <p className="text-sm leading-relaxed text-app-ink-soft mb-4 max-w-[54ch]">
+          <p className="mb-3.5 max-w-[54ch] text-[13px] leading-[1.55] text-app-ink-soft sm:mb-4 sm:text-sm">
             Nhìn 8 lĩnh vực để biết bạn đang mạnh ở đâu, mỏng ở đâu.
           </p>
           <div className="flex flex-wrap items-center gap-2">
@@ -457,76 +457,76 @@ export function LifeBalance() {
         </header>
 
         {/* KPI ROW */}
-        <section data-life-balance-kpi-grid className="mt-6 grid grid-cols-3 gap-3 sm:gap-4">
-          <div className="min-w-0 rounded-[18px] border border-app-line bg-white p-4 dark:bg-app-surface sm:p-5 md:p-6">
-            <p className="mb-2.5 text-[9px] font-bold uppercase leading-[1.35] tracking-[0.12em] text-app-ink-muted sm:mb-3.5 sm:text-[10px]">Trung bình</p>
-            <p className="font-[family-name:var(--app-font-serif)] text-[30px] font-extrabold leading-none text-app-ink sm:text-[38px]">
+        <section data-life-balance-kpi-grid className="mt-5 grid grid-cols-3 gap-2 sm:mt-6 sm:gap-4">
+          <div className="min-w-0 overflow-hidden rounded-[16px] border border-app-line bg-white p-3 dark:bg-app-surface sm:rounded-[18px] sm:p-5 md:p-6">
+            <p className="mb-2 text-[8.5px] font-bold uppercase leading-[1.35] tracking-[0.12em] text-app-ink-muted sm:mb-3.5 sm:text-[10px]">Trung bình</p>
+            <p className="font-[family-name:var(--app-font-serif)] text-[25px] font-extrabold leading-none text-app-ink sm:text-[38px]">
               <CountUp value={averageScore} precision={1} />
-              <span className="ml-1 text-sm font-bold text-app-ink-muted sm:text-lg">/10</span>
+              <span className="ml-0.5 text-xs font-bold text-app-ink-muted sm:ml-1 sm:text-lg">/10</span>
             </p>
-            <div className="mt-3 h-[7px] overflow-hidden rounded-full bg-app-bg sm:mt-3.5">
+            <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-app-bg sm:mt-3.5 sm:h-[7px]">
               <div
                 className="h-full rounded-full bg-[#0C5E3A] transition-all duration-700 ease-out"
                 style={{ width: `${avgPercent}%` }}
               />
             </div>
           </div>
-          <div className="min-w-0 rounded-[18px] border border-app-line bg-white p-4 dark:bg-app-surface sm:p-5 md:p-6">
-            <p className="mb-2.5 text-[9px] font-bold uppercase leading-[1.35] tracking-[0.12em] text-app-ink-muted sm:mb-3.5 sm:text-[10px]">
+          <div className="min-w-0 overflow-hidden rounded-[16px] border border-app-line bg-white p-3 dark:bg-app-surface sm:rounded-[18px] sm:p-5 md:p-6">
+            <p className="mb-2 text-[8.5px] font-bold uppercase leading-[1.35] tracking-[0.12em] text-app-ink-muted sm:mb-3.5 sm:text-[10px]">
               <span className="sm:hidden">Mạnh nhất</span>
               <span className="hidden sm:inline">Lĩnh vực mạnh nhất</span>
             </p>
-            <p className="font-[family-name:var(--app-font-serif)] text-[30px] font-extrabold leading-none text-app-ink sm:text-[38px]">
+            <p className="font-[family-name:var(--app-font-serif)] text-[25px] font-extrabold leading-none text-app-ink sm:text-[38px]">
               <CountUp value={strongestArea.score} />
-              <span className="ml-1 text-sm font-bold text-app-ink-muted sm:text-lg">/10</span>
+              <span className="ml-0.5 text-xs font-bold text-app-ink-muted sm:ml-1 sm:text-lg">/10</span>
             </p>
-            <p className="mt-3 flex items-center gap-1.5 text-[12px] font-semibold leading-snug text-[#0C5E3A] sm:mt-3.5 sm:text-[13px]">
-              <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: getAreaColorConfig(strongestArea.name).accent }} />
-              {getLifeAreaLabel(strongestArea.name)}
+            <p className="mt-2.5 flex min-w-0 items-center gap-1.5 text-[11px] font-semibold leading-snug text-[#0C5E3A] sm:mt-3.5 sm:text-[13px]">
+              <span className="inline-block h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: getAreaColorConfig(strongestArea.name).accent }} />
+              <span className="truncate">{getLifeAreaLabel(strongestArea.name)}</span>
             </p>
           </div>
-          <div className="min-w-0 rounded-[18px] border border-[rgba(176,103,60,0.22)] bg-[#F4ECDD] p-4 dark:border-app-line dark:bg-app-bg-subtle sm:p-5 md:p-6">
-            <p className="mb-2.5 text-[9px] font-bold uppercase leading-[1.35] tracking-[0.12em] text-[#A07A4A] sm:mb-3.5 sm:text-[10px]">
+          <div className="min-w-0 overflow-hidden rounded-[16px] border border-[rgba(176,103,60,0.22)] bg-[#F4ECDD] p-3 dark:border-app-line dark:bg-app-bg-subtle sm:rounded-[18px] sm:p-5 md:p-6">
+            <p className="mb-2 text-[8.5px] font-bold uppercase leading-[1.35] tracking-[0.12em] text-[#A07A4A] sm:mb-3.5 sm:text-[10px]">
               <span className="sm:hidden">Ưu tiên</span>
               <span className="hidden sm:inline">Lĩnh vực cần ưu tiên</span>
             </p>
-            <p className="font-[family-name:var(--app-font-serif)] text-[30px] font-extrabold leading-none text-[#8A5A2B] sm:text-[38px]">
+            <p className="font-[family-name:var(--app-font-serif)] text-[25px] font-extrabold leading-none text-[#8A5A2B] sm:text-[38px]">
               <CountUp value={weakestArea.score} />
-              <span className="ml-1 text-sm font-bold text-[#B79B72] sm:text-lg">/10</span>
+              <span className="ml-0.5 text-xs font-bold text-[#B79B72] sm:ml-1 sm:text-lg">/10</span>
             </p>
-            <p className="mt-3 flex items-center gap-1.5 text-[12px] font-semibold leading-snug text-[#8A5A2B] sm:mt-3.5 sm:text-[13px]">
-              <span className="inline-block w-2 h-2 rounded-full" style={{ backgroundColor: getAreaColorConfig(weakestArea.name).accent }} />
-              {getLifeAreaLabel(weakestArea.name)}
+            <p className="mt-2.5 flex min-w-0 items-center gap-1.5 text-[11px] font-semibold leading-snug text-[#8A5A2B] sm:mt-3.5 sm:text-[13px]">
+              <span className="inline-block h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: getAreaColorConfig(weakestArea.name).accent }} />
+              <span className="truncate">{getLifeAreaLabel(weakestArea.name)}</span>
             </p>
           </div>
         </section>
 
         {/* TABS */}
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="mt-6">
-          <TabsList className="bg-white dark:bg-app-surface border border-app-line rounded-2xl p-1.5 gap-1 w-max">			
-            <TabsTrigger value="current" className="rounded-xl text-[13.5px] font-semibold data-[state=active]:bg-app-bg data-[state=active]:text-app-ink data-[state=active]:shadow-none px-4 py-2">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="mt-5 sm:mt-6">
+          <TabsList data-life-balance-tabs-list className="grid w-full grid-cols-3 gap-1 rounded-2xl border border-app-line bg-white p-1 dark:bg-app-surface sm:inline-grid sm:w-auto sm:p-1.5">
+            <TabsTrigger value="current" className="min-h-10 rounded-xl px-3 py-2 text-[13px] font-semibold data-[state=active]:bg-app-bg data-[state=active]:text-app-ink data-[state=active]:shadow-none sm:px-4 sm:text-[13.5px]">
               Hiện tại
             </TabsTrigger>
-            <TabsTrigger value="focus" className="rounded-xl text-[13.5px] font-semibold data-[state=active]:bg-app-bg data-[state=active]:text-app-ink data-[state=active]:shadow-none px-4 py-2">
+            <TabsTrigger value="focus" className="min-h-10 rounded-xl px-3 py-2 text-[13px] font-semibold data-[state=active]:bg-app-bg data-[state=active]:text-app-ink data-[state=active]:shadow-none sm:px-4 sm:text-[13.5px]">
               <Target className="mr-1.5 h-3.5 w-3.5" />
               Trọng tâm
             </TabsTrigger>
-            <TabsTrigger value="history" disabled={historicalData.length === 0} className="rounded-xl text-[13.5px] font-semibold data-[state=active]:bg-app-bg data-[state=active]:text-app-ink data-[state=active]:shadow-none px-4 py-2">
+            <TabsTrigger value="history" disabled={historicalData.length === 0} className="min-h-10 rounded-xl px-3 py-2 text-[13px] font-semibold data-[state=active]:bg-app-bg data-[state=active]:text-app-ink data-[state=active]:shadow-none sm:px-4 sm:text-[13.5px]">
               Lịch sử
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="current" className="mt-5">
-            <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_400px] items-start">
+          <TabsContent value="current" className="mt-4 sm:mt-5">
+            <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[1fr_400px] lg:gap-5">
               {/* LEFT COLUMN */}
-              <div className="space-y-5 min-w-0">
+              <div className="min-w-0 space-y-4 lg:space-y-5">
                 {/* Radar chart card */}
-                <section className="rounded-[20px] border border-app-line bg-white dark:bg-app-surface p-5 md:p-6">
-                  <header className="mb-3">
+                <section className="rounded-[20px] border border-app-line bg-white p-4 dark:bg-app-surface md:p-6">
+                  <header className="mb-2.5 sm:mb-3">
                     <h2 className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-app-ink">Bản đồ Cân bằng cuộc sống</h2>
                     <p className="text-xs text-app-ink-muted mt-0.5">Trạng thái hiện tại của 8 khía cạnh cốt lõi</p>
                   </header>
-                  <div className="flex justify-center">
+                  <div className="flex min-h-[230px] justify-center overflow-hidden sm:min-h-[280px]">
                     <SimpleRadarChart
                       data={radarData}
                     />
@@ -534,13 +534,13 @@ export function LifeBalance() {
                 </section>
 
                 {/* Priority insight card */}
-                <section className="rounded-[20px] border border-[rgba(176,103,60,0.2)] dark:border-app-line bg-[#F4ECDD] dark:bg-app-bg-subtle p-5 md:p-6 relative overflow-hidden">
+                <section className="relative overflow-hidden rounded-[20px] border border-[rgba(176,103,60,0.2)] bg-[#F4ECDD] p-4 dark:border-app-line dark:bg-app-bg-subtle md:p-6">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-[rgba(176,103,60,0.06)] rounded-full blur-3xl pointer-events-none" />
-                  <header className="flex items-start gap-3 mb-4">
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white dark:bg-app-surface border border-[rgba(176,103,60,0.22)] text-[#B0673C]">
+                  <header className="mb-3.5 flex items-start gap-3 sm:mb-4">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[rgba(176,103,60,0.22)] bg-white text-[#B0673C] dark:bg-app-surface sm:h-10 sm:w-10">
                       <Target className="h-5 w-5" />
                     </span>
-                    <div>
+                    <div className="min-w-0">
                       <h2 className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-[#8A5A2B]">Trọng tâm hành động đề xuất</h2>
                       <p className="text-xs text-[#A07A4A] mt-0.5">Tìm ra điểm nghẽn cuộc sống</p>
                     </div>
@@ -572,11 +572,11 @@ export function LifeBalance() {
               </div>
 
               {/* RIGHT COLUMN */}
-              <div className="space-y-5 min-w-0">
+              <div className="min-w-0 space-y-4 lg:space-y-5">
                 {!isCheckInMode ? (
                   <>
                     {/* Check-in banner */}
-                    <section className="rounded-[20px] border border-[rgba(12,94,58,0.18)] dark:border-[rgba(91,165,144,0.25)] bg-[#EDF5EA] dark:bg-[#1A2218] p-5 md:p-6">
+                    <section className="rounded-[20px] border border-[rgba(12,94,58,0.18)] bg-[#EDF5EA] p-4 dark:border-[rgba(91,165,144,0.25)] dark:bg-[#1A2218] md:p-6">
                       <p className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-[#0C5E3A] mb-3">Check-in cân bằng</p>
                       <div className="flex items-center gap-2.5 mb-3">
                         <Compass className="h-5 w-5 text-[#0C5E3A]" />
@@ -590,7 +590,7 @@ export function LifeBalance() {
                         whileTap={{ scale: 0.98 }}
                         type="button"
                         onClick={handleStartCheckIn}
-                        className="w-full flex items-center justify-center gap-2.5 bg-[#0C5E3A] text-white text-sm font-bold py-3.5 rounded-[13px] hover:bg-[#0a4f30] transition-colors shadow-[0_12px_26px_-14px_rgba(12,94,58,0.75)]"
+                        className="flex min-h-11 w-full items-center justify-center gap-2.5 rounded-[13px] bg-[#0C5E3A] px-4 py-3 text-sm font-bold text-white shadow-[0_12px_26px_-14px_rgba(12,94,58,0.75)] transition-colors hover:bg-[#0a4f30] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
                       >
                         Bắt đầu Check-in nhanh
                         <ArrowRight className="h-4 w-4" />
@@ -598,7 +598,7 @@ export function LifeBalance() {
                     </section>
 
                     {/* Area scores (static) */}
-                    <section className="rounded-[20px] border border-app-line bg-white dark:bg-app-surface p-5 md:p-6">
+                    <section className="rounded-[20px] border border-app-line bg-white p-4 dark:bg-app-surface md:p-6">
                       <h3 className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-app-ink mb-4">Điểm số hiện tại của 8 lĩnh vực</h3>
                       <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
                         {lifeAreas.map((area) => {
@@ -645,8 +645,8 @@ export function LifeBalance() {
                   </>
                 ) : (
                   /* CHECK-IN EDIT MODE */
-                  <section className="rounded-[20px] border border-[rgba(12,94,58,0.18)] bg-white dark:bg-app-surface p-5 md:p-6 shadow-md">
-                    <header className="pb-4 mb-1 border-b border-app-line/60">
+                  <section className="rounded-[20px] border border-[rgba(12,94,58,0.18)] bg-white p-4 shadow-md dark:bg-app-surface md:p-6">
+                    <header className="mb-1 border-b border-app-line/60 pb-3.5 sm:pb-4">
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-[#0C5E3A]">Đang Check-in</h3>
                         <span className="text-[10px] font-bold text-app-ink-muted font-mono">
@@ -661,7 +661,7 @@ export function LifeBalance() {
                       </div>
                     </header>
 
-                    <div className="mt-5 space-y-4">
+                    <div className="mt-4 space-y-3.5 sm:mt-5 sm:space-y-4">
                       {lifeAreas.map((area, index) => {
                         const AreaIcon = getLifeAreaIcon(area.name);
                         const colorConfig = getAreaColorConfig(area.name);
@@ -671,7 +671,7 @@ export function LifeBalance() {
                         return (
                           <div
                             key={area.name}
-                            className="rounded-xl border p-4 space-y-3 transition-all"
+                            className="space-y-3 rounded-xl border p-3.5 transition-all sm:p-4"
                             style={{
                               borderColor: isChanged
                                 ? `color-mix(in oklab, ${colorConfig.accent} 40%, transparent)`
@@ -681,15 +681,15 @@ export function LifeBalance() {
                                 : "var(--app-bg)",
                             }}
                           >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2.5">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex min-w-0 items-start gap-2.5">
                                 <span
-                                  className="flex h-9 w-9 items-center justify-center rounded-xl text-white shadow-sm"
+                                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white shadow-sm"
                                   style={{ backgroundColor: colorConfig.accent }}
                                 >
                                   <AreaIcon className="h-5 w-5" />
                                 </span>
-                                <div>
+                                <div className="min-w-0">
                                   <h4 className="text-xs font-bold text-app-ink">{label}</h4>
                                   <p className="text-[10px] text-app-ink-muted font-medium leading-normal mt-0.5">
                                     {LIFE_AREA_DETAILS[area.name]}
@@ -697,7 +697,7 @@ export function LifeBalance() {
                                 </div>
                               </div>
                               <div
-                                className="flex items-baseline gap-1 px-2.5 py-1 rounded-lg border text-sm"
+                                className="flex shrink-0 items-baseline gap-1 rounded-lg border px-2.5 py-1 text-sm"
                                 style={{
                                   borderColor: `color-mix(in oklab, ${colorConfig.accent} 25%, transparent)`,
                                   backgroundColor: `color-mix(in oklab, ${colorConfig.accent} 16%, var(--app-bg))`,
@@ -750,7 +750,7 @@ export function LifeBalance() {
                               </motion.button>
                             </div>
 
-                            <div className="flex justify-between text-[9px] font-bold text-app-ink-muted uppercase tracking-wider px-1">
+                            <div className="grid grid-cols-2 gap-1 px-1 text-[9px] font-bold uppercase tracking-wider text-app-ink-muted sm:grid-cols-5">
                               <span className={cn("rounded-full px-1.5 py-0.5 transition-colors", area.score <= 2 && "bg-[#0C5E3A]/15 text-[#0C5E3A]")}>1–2 Rất chật vật</span>
                               <span className={cn("rounded-full px-1.5 py-0.5 transition-colors", area.score >= 3 && area.score <= 4 && "bg-[#0C5E3A]/15 text-[#0C5E3A]")}>3–4 Thiếu ổn định</span>
                               <span className={cn("rounded-full px-1.5 py-0.5 transition-colors", area.score >= 5 && area.score <= 6 && "bg-[#0C5E3A]/15 text-[#0C5E3A]")}>5–6 Tạm ổn</span>
@@ -762,13 +762,13 @@ export function LifeBalance() {
                       })}
                     </div>
 
-                    <footer className="mt-5 pt-4 border-t border-app-line/60 flex items-center justify-end gap-3">
+                    <footer className="mt-5 flex flex-col-reverse gap-2.5 border-t border-app-line/60 pt-4 sm:flex-row sm:items-center sm:justify-end sm:gap-3">
                       <motion.button
                         whileHover={{ scale: 1.015 }}
                         whileTap={{ scale: 0.985 }}
                         type="button"
                         onClick={handleCancelCheckIn}
-                        className="inline-flex min-h-11 items-center justify-center rounded-full border border-app-line bg-white dark:bg-app-surface px-5 py-2.5 text-xs font-semibold text-app-ink-soft hover:bg-app-bg hover:text-app-ink transition-colors cursor-pointer"
+                        className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-full border border-app-line bg-white px-5 py-2.5 text-xs font-semibold text-app-ink-soft transition-colors hover:bg-app-bg hover:text-app-ink dark:bg-app-surface sm:w-auto"
                       >
                         Hủy bỏ
                       </motion.button>
@@ -777,7 +777,7 @@ export function LifeBalance() {
                         whileTap={{ scale: 0.985 }}
                         type="button"
                         onClick={handleFinishCheckIn}
-                        className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-full bg-[#0C5E3A] hover:bg-[#0a4f30] px-6 py-2.5 text-xs font-bold text-white transition-all shadow-md cursor-pointer"
+                        className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-1.5 rounded-full bg-[#0C5E3A] px-6 py-2.5 text-xs font-bold text-white shadow-md transition-all hover:bg-[#0a4f30] sm:w-auto"
                       >
                         Lưu & Xem kết quả
                         <Save className="h-4 w-4" />
@@ -789,7 +789,7 @@ export function LifeBalance() {
             </div>
           </TabsContent>
 
-          <TabsContent value="history" className="mt-5">
+          <TabsContent value="history" className="mt-4 sm:mt-5">
             <section className="surface-raised rounded-xl border border-app-line bg-app-surface p-5 md:p-6">
               <header>
                 <h2 className="text-base font-semibold text-app-ink">Diễn biến 6 đợt gần nhất</h2>
@@ -815,12 +815,12 @@ export function LifeBalance() {
             </section>
           </TabsContent>
 
-          <TabsContent value="focus" className="mt-5">
+          <TabsContent value="focus" className="mt-4 sm:mt-5">
             {focusArea && focusSmartGoalStarter ? (
-              <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-                <div className="space-y-5">
-                  <section className="surface-raised rounded-2xl border border-app-status-success/20 bg-app-status-success/5 p-5">
-                    <h3 className="text-sm font-bold text-app-ink flex items-center gap-2">
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-5">
+                <div className="space-y-4 lg:space-y-5">
+                  <section className="surface-raised rounded-2xl border border-app-status-success/20 bg-app-status-success/5 p-4 sm:p-5">
+                    <h3 className="flex items-center gap-2 text-sm font-bold text-app-ink">
                       <Target className="h-4 w-4 text-app-status-success" />
                       {focusArea.name === weakestArea?.name ? "Đề xuất trọng tâm" : "Trọng tâm bạn chọn"}
                     </h3>
@@ -832,14 +832,14 @@ export function LifeBalance() {
                     </p>
                   </section>
 
-                  <section className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5">
+                  <section className="surface-raised rounded-2xl border border-app-line bg-app-surface p-4 sm:p-5">
                     <header className="pb-3 border-b border-app-line/60">
                       <h3 className="text-xs font-bold uppercase tracking-wider text-app-ink">
                         Hoặc tự chọn lĩnh vực khác
                       </h3>
                       <p className="mt-1 text-xs text-app-ink-muted">Nhấp vào lĩnh vực bạn muốn đặt mục tiêu</p>
                     </header>
-                    <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
+                    <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2">
                       {lifeAreas.map((area) => {
                         const isSelected = focusArea.name === area.name;
                         const AreaIcon = getLifeAreaIcon(area.name);
@@ -850,17 +850,17 @@ export function LifeBalance() {
                             type="button"
                             onClick={() => setSelectedFocusAreaName(area.name === weakestArea.name ? null : area.name)}
                             className={cn(
-                              "group min-h-12 rounded-xl border p-2.5 text-left transition-all duration-200 outline-none cursor-pointer select-none",
+                              "group min-h-11 rounded-xl border p-2.5 text-left outline-none transition-all duration-200 cursor-pointer select-none sm:min-h-12",
                               isSelected
                                 ? colors.selectedBg
                                 : "border-app-line bg-app-surface hover:bg-app-bg hover:border-app-line/80 active:scale-[0.97]",
                               "focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg focus-visible:outline-none",
                             )}
                           >
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2.5">
                               <div
                                 className={cn(
-                                  "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-colors",
+                                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors",
                                   isSelected
                                     ? colors.iconSelectedBg
                                     : "bg-app-bg text-app-ink-muted group-hover:bg-app-line group-hover:text-app-ink",
@@ -894,18 +894,18 @@ export function LifeBalance() {
                   </section>
                 </div>
 
-                <div className="space-y-5 lg:sticky lg:top-6">
-                  <section className="surface-raised rounded-2xl border border-app-accent/20 bg-app-bg-subtle p-6 shadow-app-md relative overflow-hidden">
+                <div className="space-y-4 lg:sticky lg:top-6 lg:space-y-5">
+                  <section className="surface-raised relative overflow-hidden rounded-2xl border border-app-accent/20 bg-app-bg-subtle p-4 shadow-app-md sm:p-5 lg:p-6">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-app-accent">
                       LĨNH VỰC TRỌNG TÂM
                     </span>
-                    <h2 className="mt-2 font-[family-name:var(--app-font-serif)] text-2xl font-bold text-app-ink">
+                    <h2 className="mt-2 font-[family-name:var(--app-font-serif)] text-[26px] font-bold leading-tight text-app-ink sm:text-3xl">
                       {getLifeAreaLabel(focusArea.name)}
                     </h2>
                     <p className="mt-1 text-xs text-app-ink-soft">Điểm hiện tại: {focusArea.score}/10</p>
 
-                    <div className="mt-4 p-4 rounded-xl border border-app-line bg-app-surface space-y-2">
-                      <span className="text-[9px] font-bold uppercase tracking-wider text-app-accent flex items-center gap-1">
+                    <div className="mt-4 space-y-2 rounded-xl border border-app-line bg-app-surface p-3.5 sm:p-4">
+                      <span className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-app-accent">
                         <Sparkles className="h-3 w-3" />
                         Gợi ý mục tiêu 12 tuần
                       </span>
@@ -922,7 +922,7 @@ export function LifeBalance() {
                       whileTap={{ scale: 0.985 }}
                       type="button"
                       onClick={handleContinueToGoalSetup}
-                      className="mt-6 group inline-flex min-h-12 w-full items-center justify-center gap-2 bg-app-accent px-6 py-3 rounded-card text-sm font-bold text-white shadow-app-sm hover:bg-app-accent-hover active:scale-[0.97] transition-all cursor-pointer"
+                      className="group mt-5 inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-card bg-app-accent px-5 py-3 text-sm font-bold text-white shadow-app-sm transition-all hover:bg-app-accent-hover active:scale-[0.97] sm:mt-6 sm:min-h-12 sm:px-6"
                     >
                       Tạo mục tiêu SMART
                       <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
@@ -931,10 +931,10 @@ export function LifeBalance() {
                       Bước tiếp: biến trọng tâm thành mục tiêu 12 tuần rõ ràng.
                     </p>
 
-                    <div className="mt-4 pt-4 border-t border-app-line/60 flex justify-center">
+                    <div className="mt-4 flex justify-center border-t border-app-line/60 pt-4">
                       <Link
                         to="/life-insight"
-                        className="inline-flex min-h-11 items-center gap-1 px-3 py-2 text-xs font-medium text-app-ink-soft hover:text-app-ink transition-colors"
+                        className="inline-flex min-h-11 items-center gap-1 px-3 py-2 text-center text-xs font-medium text-app-ink-soft transition-colors hover:text-app-ink"
                       >
                         Xem bản đầy đủ trang Góc nhìn
                       </Link>

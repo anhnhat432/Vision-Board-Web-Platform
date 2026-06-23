@@ -279,13 +279,13 @@ function LifeAtlasPanel({
   return (
     <section
       aria-label={`Bản đồ cuộc sống ${areaCount} vùng`}
-      className="relative overflow-hidden rounded-[22px] border border-app-line bg-app-surface p-6 shadow-app-md sm:p-7"
+      className="relative overflow-hidden rounded-[22px] border border-app-line bg-app-surface p-4 shadow-app-md sm:p-6 lg:p-7"
     >
-      <div className="relative space-y-5">
+      <div className="relative space-y-4 sm:space-y-5">
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-app-accent">Atlas gấp mở</p>
-            <h2 className="mt-1 font-serif text-[21px] font-bold leading-tight tracking-tight text-app-ink">
+            <h2 className="mt-1 font-serif text-[20px] font-bold leading-tight tracking-tight text-app-ink sm:text-[21px]">
               Bản đồ cuộc sống của bạn
             </h2>
           </div>
@@ -294,7 +294,7 @@ function LifeAtlasPanel({
           </span>
         </div>
 
-        <div className="relative mx-auto aspect-square w-full max-w-[360px] rounded-[18px] border border-app-line bg-app-bg-subtle p-3.5">
+        <div className="relative mx-auto aspect-square w-full max-w-[320px] rounded-[18px] border border-app-line bg-app-bg-subtle p-3 sm:max-w-[360px] sm:p-3.5">
           <svg
             role="img"
             aria-label={`Atlas cuộc sống gồm ${areaCount} vùng, vùng đã chấm được tô rõ hơn`}
@@ -415,7 +415,7 @@ function LifeAtlasPanel({
         </div>
 
         {showPreview ? (
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-2.5 sm:grid-cols-3 sm:gap-3">
             <div className="group rounded-[14px] border border-app-line bg-app-bg-subtle p-3.5 transition-[transform,border-color] duration-150 hover:-translate-y-0.5 hover:border-app-accent/30">
               <strong className="block text-[13px] font-bold text-app-ink">{`1. Rà ${areaCount} vùng`}</strong>
               <span className="mt-1 block text-[11.5px] leading-relaxed text-app-ink-muted">Chọn điểm đủ thật.</span>
@@ -433,7 +433,7 @@ function LifeAtlasPanel({
           </div>
         ) : (
           <div
-            className="grid grid-cols-2 gap-3 text-left"
+            className="grid grid-cols-2 gap-2.5 text-left sm:gap-3"
             data-testid={summaryTestId}
             role="status"
             aria-live="polite"
@@ -764,7 +764,7 @@ export function Onboarding() {
           ) : (
             <>
               {isReturning ? (
-                <div className="flex items-center gap-3 rounded-[14px] border border-[rgba(12,94,58,0.18)] bg-[#EDF7E0] px-[18px] py-3.5">
+                <div className="flex items-start gap-3 rounded-[14px] border border-[rgba(12,94,58,0.18)] bg-[#EDF7E0] px-4 py-3.5 sm:items-center sm:px-[18px]">
                   <svg
                     width="18"
                     height="18"
@@ -789,15 +789,15 @@ export function Onboarding() {
 
               {draftBanner}
 
-              <section className="grid gap-5 lg:grid-cols-2 lg:items-start">
+              <section className="grid gap-4 lg:grid-cols-2 lg:items-start lg:gap-5">
                 {/* LEFT: intro card */}
-                <div className="space-y-[22px] rounded-[22px] border border-[rgba(23,21,15,0.08)] bg-white p-7 sm:p-8">
+                <div className="space-y-5 rounded-[22px] border border-[rgba(23,21,15,0.08)] bg-white p-5 sm:space-y-[22px] sm:p-8">
                   <span className="inline-flex items-center gap-2 rounded-[999px] bg-[#EDF7E0] px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.06em] text-[#0C5E3A]">
                     Bước 1 / 3 · Atlas cuộc sống · 3 phút
                   </span>
-                  <div className="space-y-[13px]">
+                  <div className="space-y-3 sm:space-y-[13px]">
                     <h1
-                      className="text-[clamp(26px,2.6vw,34px)] font-extrabold leading-[1.06] -tracking-[0.02em] text-[#17150F]"
+                      className="text-[clamp(26px,2.6vw,34px)] font-extrabold leading-[1.08] text-[#17150F] sm:leading-[1.06]"
                       style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
                     >
                       Mở bản đồ cuộc sống 12 tuần của bạn
@@ -807,11 +807,11 @@ export function Onboarding() {
                     </p>
                   </div>
 
-                  <div className="grid gap-3 sm:grid-cols-3">
+                  <div className="grid gap-2.5 sm:grid-cols-3 sm:gap-3">
                     {JOURNEY_STEPS.map((item) => (
                       <div
                         key={item.title}
-                        className="group rounded-[14px] border border-[rgba(23,21,15,0.08)] bg-[#FAF8F3] p-[15px] transition-[transform,border-color] duration-[0.15s] hover:-translate-y-0.5 hover:!border-[rgba(12,94,58,0.3)]"
+                        className="group rounded-[14px] border border-[rgba(23,21,15,0.08)] bg-[#FAF8F3] p-3.5 transition-[transform,border-color] duration-[0.15s] hover:-translate-y-0.5 hover:!border-[rgba(12,94,58,0.3)] sm:p-[15px]"
                       >
                         <span
                           className="text-[13px] font-semibold text-[#0C5E3A]"
@@ -859,10 +859,10 @@ export function Onboarding() {
                     </AnimatePresence>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
                     <button
                       type="button"
-                      className="dof-primary inline-flex min-h-[50px] items-center justify-center gap-2 rounded-[13px] bg-[#0C5E3A] px-6 py-3.5 text-[14px] font-bold text-white shadow-[0_14px_30px_-14px_rgba(12,94,58,0.8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2"
+                      className="dof-primary inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-[13px] bg-[#0C5E3A] px-6 py-3 text-[14px] font-bold text-white shadow-[0_14px_30px_-14px_rgba(12,94,58,0.8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2 sm:min-h-[50px] sm:w-auto sm:py-3.5"
                       onClick={handleStartAssessment}
                     >
                       Mở bản đồ cuộc sống
@@ -870,7 +870,7 @@ export function Onboarding() {
                     </button>
                     <button
                       type="button"
-                      className="inline-flex min-h-[50px] items-center justify-center gap-2 rounded-[13px] border border-[rgba(23,21,15,0.14)] bg-white px-5 py-3.5 text-[13.5px] font-semibold text-[#17150F] transition-colors hover:bg-[#FAF8F3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2"
+                      className="inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-[13px] border border-[rgba(23,21,15,0.14)] bg-white px-5 py-3 text-[13.5px] font-semibold text-[#17150F] transition-colors hover:bg-[#FAF8F3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2 sm:min-h-[50px] sm:w-auto sm:py-3.5"
                       onClick={() => setShowBreathing(true)}
                     >
                       <Smile className="h-[15px] w-[15px]" aria-hidden="true" />
@@ -878,7 +878,7 @@ export function Onboarding() {
                     </button>
                     <button
                       type="button"
-                      className="inline-flex min-h-[44px] items-center justify-center rounded-[13px] px-2 py-3 text-[13.5px] font-semibold text-[#8C887C] transition-colors hover:text-[#5C574B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2"
+                      className="inline-flex min-h-[44px] w-full items-center justify-center rounded-[13px] px-2 py-2.5 text-[13.5px] font-semibold text-[#8C887C] transition-colors hover:text-[#5C574B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2 sm:w-auto sm:justify-start sm:py-3"
                       onClick={handleDefer}
                     >
                       Để sau
@@ -915,15 +915,15 @@ export function Onboarding() {
         {progressHeader}
         {draftBanner}
 
-        <header className="space-y-2">
+        <header className="space-y-2 max-w-3xl">
           <div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-app-accent">
             <Sparkles className="h-3.5 w-3.5 motion-safe:animate-pulse motion-reduce:animate-none" aria-hidden="true" />
             Bước 1 / 3 · Bánh xe cuộc sống
           </div>
-          <h1 className="font-serif text-3xl font-semibold leading-tight text-app-ink sm:text-4xl">
+          <h1 className="font-serif text-[28px] font-semibold leading-tight text-app-ink sm:text-4xl">
             Rà 8 lĩnh vực để mở Life Insight
           </h1>
-          <p className="max-w-2xl text-sm leading-6 text-app-ink-soft sm:text-base">
+          <p className="max-w-2xl text-[13px] leading-[1.55] text-app-ink-soft sm:text-base sm:leading-6">
             Chấm theo cảm nhận hiện tại. Bản đồ bên cạnh sẽ chỉ ra vùng mạnh và vùng cần chăm sóc đầu tiên.
           </p>
         </header>
@@ -948,7 +948,7 @@ export function Onboarding() {
               <p className="mb-3 text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#A8A296] sm:mb-[14px]">
                 Chọn lĩnh vực đang rà
               </p>
-              <div className="grid grid-cols-4 gap-2 sm:gap-[11px]">
+              <div data-onboarding-area-grid className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-[11px]">
                 {lifeAreas.map((area, index) => {
                   const AreaIcon = getCalmLifeAreaIcon(area.name);
                   const isSelected = activeAreaIndex === index;
@@ -976,7 +976,7 @@ export function Onboarding() {
                         <AreaIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
                       </span>
                       <span className="block text-[11.5px] font-bold leading-tight text-[#17150F] sm:text-[12.5px]">
-                        <span className="sm:hidden">{compactLabel}</span>
+                        <span className="sm:hidden">{index + 1}. {compactLabel}</span>
                         <span className="hidden sm:inline">
                           {index + 1}. {label}
                         </span>
@@ -1022,7 +1022,7 @@ export function Onboarding() {
                       >
                         <AreaIcon className="h-5 w-5 sm:h-[22px] sm:w-[22px]" aria-hidden="true" />
                       </span>
-                      <div>
+                      <div className="min-w-0">
                         <p className="mb-[3px] text-[10px] font-bold uppercase tracking-[0.1em] text-[#A8A296]">
                           Lĩnh vực {index + 1} / 8
                         </p>
@@ -1071,7 +1071,7 @@ export function Onboarding() {
 
                   {/* Number buttons 0-10 */}
                   <p className="mb-3 text-[13px] font-semibold text-[#17150F]">Chọn điểm theo cảm nhận hiện tại</p>
-                  <div className="mb-5 flex flex-wrap gap-2 sm:mb-[22px] sm:gap-[9px]">
+                  <div data-onboarding-score-grid className="mb-5 grid grid-cols-4 gap-2 sm:mb-[22px] sm:flex sm:flex-wrap sm:gap-[9px]">
                     {SCORE_VALUES.map((scoreVal) => {
                       const isCurrentScore = area.score === scoreVal;
                       return (
@@ -1079,7 +1079,7 @@ export function Onboarding() {
                           key={`score-${scoreVal}`}
                           type="button"
                           onClick={() => handleScoreChangeWrapped(index, [scoreVal])}
-                          className="dof-num inline-flex h-[42px] w-[42px] cursor-pointer items-center justify-center rounded-full border font-[inherit] text-[14px] font-bold transition-[transform,background,color] duration-[0.12s] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2"
+                          className="dof-num inline-flex h-[42px] w-full cursor-pointer items-center justify-center rounded-full border font-[inherit] text-[14px] font-bold transition-[transform,background,color] duration-[0.12s] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2 sm:w-[42px]"
                           style={{
                             borderColor: isCurrentScore ? designStyle.accent : "rgba(23,21,15,0.12)",
                             background: isCurrentScore ? designStyle.accent : "#FAF8F3",
@@ -1183,10 +1183,10 @@ export function Onboarding() {
                       {area.score}đ · {sliderBadge}
                     </span>
                   </div>
-                  <div className="mb-[26px] flex items-center gap-[14px]">
+                  <div className="mb-[22px] flex items-center gap-3 sm:mb-[26px] sm:gap-[14px]">
                     <button
                       type="button"
-                      className="flex h-[38px] w-[38px] shrink-0 cursor-pointer items-center justify-center rounded-full border border-[rgba(23,21,15,0.14)] bg-white font-[inherit] text-[20px] font-semibold text-[#5C574B]"
+                      className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-[rgba(23,21,15,0.14)] bg-white font-[inherit] text-[20px] font-semibold text-[#5C574B]"
                       onClick={() => handleScoreChangeWrapped(index, [Math.max(0, area.score - 1)])}
                       aria-label="Giảm 1 điểm"
                     >
@@ -1206,7 +1206,7 @@ export function Onboarding() {
                     />
                     <button
                       type="button"
-                      className="flex h-[38px] w-[38px] shrink-0 cursor-pointer items-center justify-center rounded-full border border-[rgba(23,21,15,0.14)] bg-white font-[inherit] text-[20px] font-semibold text-[#5C574B]"
+                      className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-[rgba(23,21,15,0.14)] bg-white font-[inherit] text-[20px] font-semibold text-[#5C574B]"
                       onClick={() => handleScoreChangeWrapped(index, [Math.min(10, area.score + 1)])}
                       aria-label="Tăng 1 điểm"
                     >
@@ -1215,10 +1215,10 @@ export function Onboarding() {
                   </div>
 
                   {/* Area prev/next navigation */}
-                  <div className="flex items-center justify-between gap-3 border-t border-[rgba(23,21,15,0.08)] pt-5">
+                  <div className="flex flex-col gap-3 border-t border-[rgba(23,21,15,0.08)] pt-5 sm:flex-row sm:items-center sm:justify-between">
                     <button
                       type="button"
-                      className="inline-flex cursor-pointer items-center gap-2 rounded-[11px] border border-[rgba(23,21,15,0.14)] bg-white px-[18px] py-[11px] font-[inherit] text-[13px] font-semibold text-[#5C574B] transition-colors hover:bg-[#FAF8F3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-[11px] border border-[rgba(23,21,15,0.14)] bg-white px-[18px] py-[11px] font-[inherit] text-[13px] font-semibold text-[#5C574B] transition-colors hover:bg-[#FAF8F3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto sm:justify-start"
                       disabled={index === 0}
                       onClick={() => setActiveAreaIndex(index - 1)}
                     >
@@ -1239,10 +1239,10 @@ export function Onboarding() {
                       Lĩnh vực trước
                     </button>
 
-                    <div className="flex min-w-0 items-center gap-3 sm:gap-[14px]">
+                    <div className="flex w-full min-w-0 flex-col-reverse gap-2.5 sm:w-auto sm:flex-row sm:items-center sm:gap-[14px]">
                       <button
                         type="button"
-                        className="cursor-pointer border-none bg-transparent font-[inherit] text-[13px] font-semibold text-[#8C887C] transition-colors hover:text-[#5C574B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2"
+                        className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-[11px] border border-[rgba(23,21,15,0.12)] bg-white px-4 py-2.5 font-[inherit] text-[13px] font-semibold text-[#8C887C] transition-colors hover:text-[#5C574B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2 sm:min-h-0 sm:w-auto sm:justify-start sm:rounded-none sm:border-none sm:bg-transparent sm:px-0 sm:py-0"
                         onClick={() => {
                           handleSkipArea(index);
                           if (index < 7) setActiveAreaIndex(index + 1);
@@ -1253,7 +1253,7 @@ export function Onboarding() {
 
                       <button
                         type="button"
-                        className="dof-primary inline-flex cursor-pointer items-center gap-[9px] rounded-[11px] border-none px-[22px] py-3 font-[inherit] text-[13.5px] font-bold text-white transition-[transform,box-shadow] duration-[0.18s] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2"
+                        className="dof-primary inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-[9px] rounded-[11px] border-none px-[22px] py-3 font-[inherit] text-[13.5px] font-bold text-white transition-[transform,box-shadow] duration-[0.18s] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2 sm:min-h-0 sm:w-auto"
                         style={{
                           background: designStyle.accent,
                           boxShadow: `0 12px 26px -14px ${designStyle.accent}cc`,
@@ -1343,11 +1343,11 @@ export function Onboarding() {
         </div>
 
         {/* ---- BOTTOM NAV (Clio design) ---- */}
-        <footer className="flex items-center justify-between gap-[14px] border-t border-[rgba(23,21,15,0.08)] pt-[18px]">
-          <div className="flex items-center gap-4">
+        <footer data-onboarding-bottom-nav className="flex flex-col gap-3 border-t border-[rgba(23,21,15,0.08)] pt-[18px] sm:flex-row sm:items-center sm:justify-between sm:gap-[14px]">
+          <div className="flex w-full flex-col gap-2.5 sm:w-auto sm:flex-row sm:items-center sm:gap-4">
             <button
               type="button"
-              className="inline-flex cursor-pointer items-center gap-2 rounded-[11px] border border-[rgba(23,21,15,0.14)] bg-white px-[18px] py-3 font-[inherit] text-[13px] font-semibold text-[#5C574B] transition-colors hover:bg-[#FAF8F3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2"
+              className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-[11px] border border-[rgba(23,21,15,0.14)] bg-white px-[18px] py-3 font-[inherit] text-[13px] font-semibold text-[#5C574B] transition-colors hover:bg-[#FAF8F3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2 sm:w-auto sm:justify-start"
               onClick={() => setStep("welcome")}
             >
               <svg
@@ -1368,7 +1368,7 @@ export function Onboarding() {
             </button>
             <button
               type="button"
-              className="cursor-pointer border-none bg-transparent font-[inherit] text-[13px] font-semibold text-[#8C887C] transition-colors hover:text-[#5C574B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2"
+              className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-[11px] border border-[rgba(23,21,15,0.12)] bg-white px-4 py-2.5 font-[inherit] text-[13px] font-semibold text-[#8C887C] transition-colors hover:text-[#5C574B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2 sm:min-h-0 sm:w-auto sm:justify-start sm:rounded-none sm:border-none sm:bg-transparent sm:px-0 sm:py-0"
               onClick={handleDefer}
             >
               Để sau
@@ -1377,7 +1377,7 @@ export function Onboarding() {
           <button
             id="btn-complete-onboarding"
             type="button"
-            className="dof-primary inline-flex cursor-pointer items-center gap-[9px] rounded-[13px] border-none bg-[#0C5E3A] px-[26px] py-[13px] font-[inherit] text-[14px] font-bold text-white shadow-[0_14px_30px_-14px_rgba(12,94,58,0.8)] transition-[transform,box-shadow] duration-[0.18s] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2"
+            className="dof-primary inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-[9px] rounded-[13px] border-none bg-[#0C5E3A] px-[26px] py-[13px] font-[inherit] text-[14px] font-bold text-white shadow-[0_14px_30px_-14px_rgba(12,94,58,0.8)] transition-[transform,box-shadow] duration-[0.18s] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2 sm:w-auto"
             onClick={canCompleteAssessment ? handleComplete : handleDeferAssessment}
           >
             Chọn trọng tâm

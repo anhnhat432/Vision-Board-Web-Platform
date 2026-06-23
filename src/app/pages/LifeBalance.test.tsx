@@ -125,7 +125,8 @@ describe("LifeBalance", () => {
       expect(document.querySelector("[data-life-balance-kpi-grid]")).not.toBeNull();
     });
 
-    expect(document.querySelector("[data-life-balance-kpi-grid]")).toHaveClass("grid-cols-3", "gap-3", "sm:gap-4");
+    expect(document.querySelector("[data-life-balance-kpi-grid]")).toHaveClass("grid-cols-3", "gap-2", "sm:gap-4");
+    expect(document.querySelector("[data-life-balance-tabs-list]")).toHaveClass("grid", "w-full", "grid-cols-3");
   });
 
   it("auto-saves after editing a score", async () => {
