@@ -400,7 +400,10 @@ export function TwelveWeekWeekTab({
   };
 
   return (
-    <div className="flex flex-col gap-5 pt-2 pb-24 md:pb-0">
+    <div
+      data-testid="weekly-review-shell"
+      className={`flex flex-col gap-5 pt-2 ${showForm && canShowFormReview ? "pb-[calc(8.5rem+env(safe-area-inset-bottom))] md:pb-0" : "pb-24 md:pb-0"}`}
+    >
       <AlertDialog open={showEarlyReviewConfirm} onOpenChange={setShowEarlyReviewConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -1204,24 +1207,32 @@ export function TwelveWeekWeekTab({
       {showForm && canShowFormReview && (
         <div
           data-testid="weekly-review-mobile-sticky-cta"
-          className="sticky bottom-20 z-40 border-t border-app-line bg-app-surface/95 p-4 backdrop-blur-sm md:bottom-4 md:mx-auto md:max-w-md md:rounded-card md:border md:shadow-app-lg"
+          className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] left-0 right-0 z-40 border-t border-app-line/80 bg-app-surface/95 px-4 pb-4 pt-3 shadow-[0_-18px_40px_-30px_rgba(23,21,15,0.45)] backdrop-blur-md md:sticky md:bottom-4 md:left-auto md:right-auto md:mx-auto md:max-w-md md:rounded-card md:border md:p-4 md:shadow-app-lg"
         >
-          <Button
-            size="lg"
-            className="w-full bg-app-warm text-white shadow-app-lg hover:bg-app-warm-hover rounded-card weekly-btn-press"
-            onClick={handleSaveReviewClick}
-            disabled={isSavingReview || !canSubmitWeeklyReview}
-            aria-busy={isSavingReview}
-          >
-            {isSavingReview ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin mr-1.5" aria-hidden="true" />
-                Đang lưu...
-              </>
-            ) : (
-              "Chốt review tuần này"
-            )}
-          </Button>
+          <div className="mx-auto flex w-full max-w-[42rem] flex-col gap-2.5 md:max-w-none">
+            <div className="flex items-center justify-between gap-3 text-[11px] font-semibold text-app-ink-muted">
+              <span>Tiến độ review {reviewReadyCount}/4</span>
+              <span className={canSubmitWeeklyReview ? "text-app-warm-strong" : "text-app-ink-muted"}>
+                {canSubmitWeeklyReview ? "Sẵn sàng chốt" : "Cần đủ 4 bước"}
+              </span>
+            </div>
+            <Button
+              size="lg"
+              className="min-h-12 w-full rounded-xl bg-app-warm px-4 py-3 text-sm font-bold text-white shadow-app-sm transition-all duration-150 hover:bg-app-warm-hover active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-app-ink-muted disabled:opacity-70 weekly-btn-press"
+              onClick={handleSaveReviewClick}
+              disabled={isSavingReview || !canSubmitWeeklyReview}
+              aria-busy={isSavingReview}
+            >
+              {isSavingReview ? (
+                <>
+                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin" aria-hidden="true" />
+                  Đang lưu...
+                </>
+              ) : (
+                "Chốt review tuần này"
+              )}
+            </Button>
+          </div>
         </div>
       )}
     </div>

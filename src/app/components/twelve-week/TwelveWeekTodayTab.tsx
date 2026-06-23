@@ -413,7 +413,10 @@ export function TwelveWeekTodayTab({
   ) : null;
 
   return (
-    <div className="flex min-w-0 flex-col gap-[18px]">
+    <div
+      data-twelve-week-today-shell
+      className={`flex min-w-0 flex-col gap-[18px] ${showMobileStickyCheckIn ? "pb-[calc(7.5rem+env(safe-area-inset-bottom))] sm:pb-0" : ""}`}
+    >
       {/* ── Status chips (nhịp hôm nay) — bổ sung cho bảng tiến độ ở header, không lặp lại ── */}
       <div data-testid="today-dashboard-cards" className="order-0 flex flex-wrap items-center gap-2.5">
         <span
@@ -1066,8 +1069,6 @@ export function TwelveWeekTodayTab({
             </Card>
           </div>
         </div>
-
-
       {rescueStatus && rescueStatus.severity !== "none" && (
         <div className="order-5">
           <TwelveWeekRescueNudge
@@ -1081,28 +1082,34 @@ export function TwelveWeekTodayTab({
         </div>
       )}
 
-      {showMobileStickyCheckIn ? <div aria-hidden="true" className="order-last sm:hidden mb-20" /> : null}
-
       {showMobileStickyCheckIn ? (
-        <div className="above-mobile-nav sm:hidden fixed inset-x-0 z-40 border-t border-app-line bg-app-surface/96 backdrop-blur p-3">
-          <Button
-            size="lg"
-            variant="secondary"
-            className="w-full py-3 text-base"
-            onClick={handleSaveCheckInClick}
-            disabled={isSavingCheckIn}
-            aria-busy={isSavingCheckIn}
-            aria-label="Lưu check-in hôm nay"
-          >
-            {isSavingCheckIn ? (
-              <>
-                <Loader2 className={loadingIconClassName} aria-hidden="true" />
-                Đang lưu check-in...
-              </>
-            ) : (
-              "Ghi dấu ngày hôm nay"
-            )}
-          </Button>
+        <div
+          data-twelve-week-today-mobile-checkin-bar
+          className="above-mobile-nav fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] left-0 right-0 z-40 border-t border-app-line/80 bg-app-surface/95 px-4 pb-4 pt-3 shadow-[0_-18px_40px_-30px_rgba(23,21,15,0.45)] backdrop-blur-md sm:hidden"
+        >
+          <div className="mx-auto flex w-full max-w-[42rem] flex-col gap-2.5">
+            <p className="text-[11px] font-semibold text-app-ink-muted">
+              Check-in hôm nay chưa được lưu. Ghi lại năng lượng và một ghi chú ngắn trước khi rời tab này.
+            </p>
+            <Button
+              size="lg"
+              variant="default"
+              className="min-h-12 w-full rounded-xl bg-app-accent px-4 py-3 text-sm font-bold text-white shadow-app-sm transition-all duration-150 hover:bg-app-accent-hover active:scale-[0.98]"
+              onClick={handleSaveCheckInClick}
+              disabled={isSavingCheckIn}
+              aria-busy={isSavingCheckIn}
+              aria-label="Lưu check-in hôm nay"
+            >
+              {isSavingCheckIn ? (
+                <>
+                  <Loader2 className={loadingIconClassName} aria-hidden="true" />
+                  Đang lưu check-in...
+                </>
+              ) : (
+                "Lưu check-in hôm nay"
+              )}
+            </Button>
+          </div>
         </div>
       ) : null}
     </div>

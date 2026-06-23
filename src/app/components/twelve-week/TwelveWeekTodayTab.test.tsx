@@ -473,22 +473,27 @@ describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
       />,
     );
 
-    const stickyButton = screen
-      .getAllByRole("button", { name: /^Lưu check-in hôm nay$/i })
-      .find((button) => button.closest(".above-mobile-nav.fixed.inset-x-0"));
-    expect(stickyButton).toBeInTheDocument();
-    expect(stickyButton?.closest("div")).toHaveClass(
+    const shell = document.querySelector("[data-twelve-week-today-shell]");
+    const actionBar = document.querySelector("[data-twelve-week-today-mobile-checkin-bar]");
+
+    expect(shell).toHaveClass("pb-[calc(7.5rem+env(safe-area-inset-bottom))]", "sm:pb-0");
+    expect(actionBar).toHaveClass(
       "above-mobile-nav",
       "sm:hidden",
       "fixed",
-      "inset-x-0",
+      "left-0",
+      "right-0",
+      "bottom-[calc(5rem+env(safe-area-inset-bottom))]",
       "z-40",
       "border-t",
-      "border-app-line",
-      "bg-app-surface/96",
-      "backdrop-blur",
-      "p-3",
+      "border-app-line/80",
+      "bg-app-surface/95",
+      "px-4",
+      "pb-4",
+      "pt-3",
+      "backdrop-blur-md",
     );
+    expect(within(actionBar as HTMLElement).getByRole("button", { name: /^Lưu check-in hôm nay$/i })).toBeInTheDocument();
 
     rerender(
       <TwelveWeekTodayTab
@@ -500,10 +505,8 @@ describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
     );
 
     expect(
-      screen
-        .queryAllByRole("button", { name: /^Lưu check-in hôm nay$/i })
-        .find((button) => button.closest(".above-mobile-nav.fixed.inset-x-0")),
-    ).toBeUndefined();
+      document.querySelector("[data-twelve-week-today-mobile-checkin-bar]"),
+    ).toBeNull();
   });
 });
 

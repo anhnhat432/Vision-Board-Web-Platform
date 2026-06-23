@@ -233,6 +233,38 @@ describe("FeasibilityStepShell — a11y", () => {
     const helper = document.getElementById(describedBy ?? "");
     expect(helper?.textContent).toContain("giờ thực tế");
   });
+
+  it("keeps mobile feedback above the fixed action bar and reserves bottom space", () => {
+    setViewportWidth(375);
+    const headingRef = createRef<HTMLHeadingElement>();
+    const targetRef = createRef<HTMLDivElement>();
+
+    render(
+      <FeasibilityStepShell
+        currentQuestion={question}
+        currentStep={0}
+        totalSteps={5}
+        answeredQuestionCount={0}
+        selectedAnswer={undefined}
+        onAnswerChange={() => {}}
+        onBack={() => {}}
+        onNext={() => {}}
+        targetRef={targetRef}
+        headingRef={headingRef}
+      />,
+    );
+
+    const shell = document.querySelector("[data-feasibility-step-shell]");
+    const feedback = document.querySelector("[data-feasibility-step-feedback]");
+    const actionBar = document.querySelector("[data-feasibility-mobile-action-bar]");
+
+    expect(shell).toHaveClass("pb-[calc(8.5rem+env(safe-area-inset-bottom))]", "sm:pb-8", "md:pb-10");
+    expect(actionBar).toHaveClass("fixed", "bottom-0", "pb-[calc(env(safe-area-inset-bottom)+1rem)]", "sm:hidden");
+    expect(feedback).not.toBeNull();
+    expect(actionBar).not.toBeNull();
+    expect(feedback?.compareDocumentPosition(actionBar as Node)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(within(actionBar as HTMLElement).getByRole("button", { name: /Tiếp theo/i })).toBeDisabled();
+  });
 });
 
 describe("Feasibility ResultStep — mobile detail disclosure", () => {

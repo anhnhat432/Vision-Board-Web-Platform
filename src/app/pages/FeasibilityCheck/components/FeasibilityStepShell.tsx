@@ -60,8 +60,9 @@ export function FeasibilityStepShell({
 
   return (
     <section
+      data-feasibility-step-shell
       ref={targetRef}
-      className="relative overflow-hidden rounded-card border border-app-line bg-app-surface/60 dark:bg-app-surface/40 backdrop-blur-md shadow-app-lg p-6 sm:p-8 md:p-10 transition-all duration-300 group"
+      className="relative overflow-hidden rounded-card border border-app-line bg-app-surface/60 p-6 pb-[calc(8.5rem+env(safe-area-inset-bottom))] shadow-app-lg backdrop-blur-md transition-all duration-300 dark:bg-app-surface/40 sm:p-8 sm:pb-8 md:p-10 md:pb-10 group"
       aria-labelledby={`feasibility-question-${currentQuestion.id}`}
     >
       {/* Background radial soft light */}
@@ -225,6 +226,7 @@ export function FeasibilityStepShell({
 
           {!selectedAnswer ? (
             <p
+              data-feasibility-step-feedback
               id={`feasibility-question-${currentQuestion.id}-next-hint`}
               role="status"
               className="text-app-accent font-semibold mt-4 text-[13px] flex items-center gap-1.5"
@@ -235,7 +237,7 @@ export function FeasibilityStepShell({
         </motion.div>
       </AnimatePresence>
 
-      <div className="mt-10 flex flex-col gap-4 border-t border-app-line pt-7 relative z-10">
+      <div className="relative z-10 mt-10 hidden flex-col gap-4 border-t border-app-line pt-7 sm:flex">
         <p className="text-xs font-semibold text-app-ink-soft uppercase tracking-wider text-left">
           Tiến trình tìm hiểu: {currentStep + 1} / {totalSteps} khía cạnh
         </p>
@@ -269,6 +271,46 @@ export function FeasibilityStepShell({
             {isLastStep ? "Xem phân tích khả thi" : "Tiếp theo"}
             <ArrowRight className="h-4.5 w-4.5" aria-hidden="true" />
           </motion.button>
+        </div>
+      </div>
+
+      <div
+        data-feasibility-mobile-action-bar
+        className="fixed bottom-0 left-0 right-0 z-40 border-t border-app-line/80 bg-app-surface/95 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-3 shadow-[0_-18px_40px_-30px_rgba(23,21,15,0.45)] backdrop-blur-md sm:hidden"
+      >
+        <div className="mx-auto flex w-full max-w-[42rem] flex-col gap-2.5">
+          <p className="text-[11px] font-semibold text-app-ink-muted">
+            Câu {currentStep + 1}/{totalSteps} · Đã trả lời {answeredQuestionCount}/{totalSteps}
+          </p>
+          <div className="flex w-full gap-2.5">
+            <motion.button
+              whileTap={{ scale: 0.985 }}
+              type="button"
+              className="inline-flex min-h-12 flex-1 items-center justify-center gap-1.5 rounded-xl border border-app-line bg-app-surface px-4 py-2.5 text-xs font-bold text-app-ink transition-all duration-150 hover:bg-app-bg active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+              onClick={() => {
+                soundService.click();
+                onBack();
+              }}
+              disabled={isFirstStep}
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              Quay lại
+            </motion.button>
+            <motion.button
+              whileTap={{ scale: 0.985 }}
+              type="button"
+              className="inline-flex min-h-12 flex-[2] items-center justify-center gap-1.5 rounded-xl bg-app-accent px-5 py-3 text-xs font-bold text-white transition-all duration-150 hover:bg-app-accent-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-app-ink-muted disabled:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+              onClick={() => {
+                soundService.click();
+                onNext();
+              }}
+              disabled={!selectedAnswer}
+              aria-describedby={!selectedAnswer ? `feasibility-question-${currentQuestion.id}-next-hint` : undefined}
+            >
+              <span className="truncate">{isLastStep ? "Xem phân tích" : "Tiếp theo"}</span>
+              <ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" />
+            </motion.button>
+          </div>
         </div>
       </div>
     </section>

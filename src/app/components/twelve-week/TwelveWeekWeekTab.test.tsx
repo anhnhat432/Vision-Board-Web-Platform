@@ -1,6 +1,6 @@
 import { type ComponentProps, useState } from "react";
 import "@testing-library/jest-dom/vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -218,7 +218,27 @@ describe("TwelveWeekWeekTab review flow", () => {
   it("keeps the mobile sticky CTA above the bottom navigation", () => {
     render(<TwelveWeekWeekTab {...makeProps()} />);
 
-    expect(screen.getByTestId("weekly-review-mobile-sticky-cta")).toHaveClass("bottom-20");
+    const shell = screen.getByTestId("weekly-review-shell");
+    const actionBar = screen.getByTestId("weekly-review-mobile-sticky-cta");
+
+    expect(shell).toHaveClass("pb-[calc(8.5rem+env(safe-area-inset-bottom))]", "md:pb-0");
+    expect(actionBar).toHaveClass(
+      "fixed",
+      "bottom-[calc(5rem+env(safe-area-inset-bottom))]",
+      "left-0",
+      "right-0",
+      "border-app-line/80",
+      "bg-app-surface/95",
+      "px-4",
+      "pb-4",
+      "pt-3",
+      "backdrop-blur-md",
+      "md:sticky",
+      "md:bottom-4",
+      "md:max-w-md",
+    );
+    expect(within(actionBar).getByText("Tiến độ review 2/4")).toBeInTheDocument();
+    expect(within(actionBar).getByText("Cần đủ 4 bước")).toBeInTheDocument();
   });
 
   it("blocks weekly review submit for a future week number", async () => {
