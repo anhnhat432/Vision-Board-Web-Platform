@@ -657,8 +657,13 @@ async function saveWeeklyReview() {
 
   await fill("#weekly-insights", WEEKLY_REVIEW_OBSTACLE);
   await addNextWeekCommitment(WEEKLY_REVIEW_PRIORITY);
-  await browserEval("window.__smokeOriginalWeeklyReviewConfirm = window.confirm; window.confirm = () => true;");
   await clickButton("chot review tuan nay");
+  const hasEarlyReviewDialog = await browserEval(
+    `Boolean(document.querySelector('[role="alertdialog"], [data-radix-alert-dialog-content]'))`,
+  );
+  if (hasEarlyReviewDialog) {
+    await clickButton("van luu som");
+  }
 
   await waitForSnapshot(
     "weekly review persisted",
@@ -680,9 +685,7 @@ async function saveWeeklyReview() {
 }
 
 async function assertProgressTrendHero() {
-  await clickTab("tien do").catch(async () => {
-    await openPage("/12-week-system?tab=progress");
-  });
+  await openPage("/12-week-system?tab=progress");
   await waitFor(
     "Progress tab trend hero",
     `document.querySelector('[data-testid="progress-trend-hero"]')`,

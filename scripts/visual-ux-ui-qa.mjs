@@ -599,6 +599,7 @@ async function seedFunnelState({ overdue = false } = {}) {
       localStorage.setItem("latest_12_week_goal_id", goalId);
       localStorage.setItem("latest_12_week_system_goal_id", goalId);
       localStorage.setItem("pending_smart_goal", JSON.stringify(pendingSmartGoal));
+      localStorage.setItem("feasibilityActiveGoal", JSON.stringify(pendingSmartGoal));
       localStorage.setItem("pending_feasibility_result", JSON.stringify(pendingFeasibilityResult));
       localStorage.setItem("pending_12_week_setup_draft", JSON.stringify(pending12WeekSetupDraft));
       localStorage.setItem("selected_focus_area", "Personal Growth");
@@ -677,10 +678,11 @@ async function captureSmartReview() {
 }
 
 async function captureFeasibilityResult() {
+  await seedFunnelState();
   await openPage("/feasibility");
   const onResult = await waitFor(
     "feasibility result",
-    `document.body.innerText.includes('Tạo kế hoạch 12 tuần') || document.body.innerText.includes('Mục tiêu này đủ thực tế')`,
+    `document.querySelector('#feasibility-result-title') || document.body.innerText.includes('Kết quả đánh giá khả thi')`,
     { timeoutMs: 15_000 },
   );
   if (!onResult) {
