@@ -697,17 +697,28 @@ async function capture12WeekSetupReview() {
 }
 
 async function captureTwelveWeekTab(tabKey, label, viewports = ["desktop", "mobile"]) {
-  await openPage("/12-week-system");
+  const tabReadyChecks = {
+    today: `document.querySelector('[data-tour-id="system-today-queue"]') || document.body.innerText.includes('Hàng việc hôm nay')`,
+    week: `document.querySelector('[data-testid="wam-section-score"]') || document.body.innerText.includes('Đã giữ')`,
+    progress: `document.querySelector('[data-testid="progress-trend-hero"]')`,
+    settings: `document.querySelector('[data-testid="weekly-time-block-chip"]') || document.body.innerText.includes('Lịch tuần tham chiếu') || document.body.innerText.includes('Cài đặt chu kỳ')`,
+  };
+
+  await openPage(`/12-week-system?tab=${tabKey}`);
   await waitFor(
-    "12-week system tab list",
-    `document.querySelector('[role="tablist"]')`,
+    `12-week system ${tabKey}`,
+    tabReadyChecks[tabKey] ?? `document.querySelector('[role="tablist"]')`,
     { timeoutMs: 30_000 },
   );
-  const switched = await clickTabByText(label);
-  if (!switched) warn(`Could not click tab "${label}" — capturing default tab anyway.`);
-  await sleep(700);
+
+  if (tabKey === "today") {
+    const switched = await clickTabByText(label);
+    if (!switched) warn(`Could not click tab "${label}" — capturing direct URL state instead.`);
+    await sleep(500);
+  }
+
   await captureCheckpoint(`12-week system ${tabKey}`, {
-    route: `/12-week-system#${tabKey}`,
+    route: `/12-week-system?tab=${tabKey}`,
     viewports,
   });
 }
