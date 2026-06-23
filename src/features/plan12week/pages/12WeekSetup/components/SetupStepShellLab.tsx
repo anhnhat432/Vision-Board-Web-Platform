@@ -97,11 +97,11 @@ export function SetupStepShellLab({
     <section
       data-twelve-week-setup-shell
       ref={stepShellRef}
-      className="overflow-hidden surface-raised rounded-card border border-app-line bg-app-surface p-4 pb-[calc(8.5rem+env(safe-area-inset-bottom))] shadow-app-sm sm:p-5 sm:pb-5 md:p-6 md:pb-6"
+      className="overflow-hidden surface-raised rounded-card border border-app-line bg-app-surface p-4 pb-[calc(7rem+env(safe-area-inset-bottom))] shadow-app-sm sm:p-5 sm:pb-5 md:p-6 md:pb-6"
       aria-labelledby="twelve-week-step-title"
     >
       <div>
-        <div className="mb-2.5 flex items-center gap-2">
+        <div className="mb-2 flex items-center gap-2 sm:mb-2.5">
           <div className="flex h-5 w-5 items-center justify-center rounded-full bg-app-accent/10">
             <StepIcon className="h-3 w-3 text-app-accent animate-pulse" aria-hidden="true" />
           </div>
@@ -113,14 +113,14 @@ export function SetupStepShellLab({
           id="twelve-week-step-title"
           ref={titleFocusRef}
           tabIndex={-1}
-          className="mt-1.5 font-serif text-2xl font-semibold leading-8 text-app-ink focus:outline-none sm:text-3xl"
+          className="mt-1 font-serif text-[22px] font-semibold leading-[1.15] text-app-ink focus:outline-none sm:mt-1.5 sm:text-3xl sm:leading-8"
         >
           {title}
         </h2>
-        <div className="mt-2 text-xs sm:text-sm leading-relaxed text-app-ink-soft">{description}</div>
+        <div className="mt-1.5 text-xs leading-relaxed text-app-ink-soft sm:mt-2 sm:text-sm">{description}</div>
 
         {/* Connected stepper timeline */}
-        <div className="relative my-7 flex items-center justify-between px-1">
+        <div className="relative my-5 flex items-center justify-between px-1 sm:my-7">
           {/* Stepper background track line */}
           <div
             className="absolute left-4 right-4 top-5 h-[3px] -translate-y-1/2 bg-app-line/40 rounded-full"
@@ -178,7 +178,7 @@ export function SetupStepShellLab({
                     {/* Step label: Luôn hiện trên desktop; trên mobile chỉ hiện cho bước active để không bị chồng chữ */}
                     <span
                       className={cn(
-                        "absolute -bottom-6 whitespace-nowrap text-[10px] font-bold transition-all duration-200",
+                        "absolute -bottom-5 whitespace-nowrap text-[10px] font-bold transition-all duration-200 sm:-bottom-6",
                         isActive
                           ? "block text-app-accent scale-105"
                           : isCompleted
@@ -200,7 +200,7 @@ export function SetupStepShellLab({
         </div>
 
         {/* 💡 Mẹo nhỏ trực quan - Không dùng Accordion giấu kín, đưa trực tiếp ra ngoài cực kỳ ngắn gọn và sinh động */}
-        <div className="mt-8 rounded-card border border-app-line bg-app-accent-soft/30 p-4 text-xs text-app-ink-soft flex gap-3 items-start animate-in fade-in duration-300">
+        <div className="mt-6 flex items-start gap-2.5 rounded-card border border-app-line bg-app-accent-soft/30 p-3 text-xs text-app-ink-soft animate-in fade-in duration-300 sm:mt-8 sm:gap-3 sm:p-4">
           <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-app-accent font-bold">
             💡
           </span>
@@ -208,7 +208,7 @@ export function SetupStepShellLab({
             <p className="font-bold text-app-accent">Ý nghĩa cốt lõi & Mẹo nhỏ:</p>
             <p className="leading-relaxed font-medium opacity-90">{stepMeta.caption}</p>
             {whyThisMatters && (
-              <div className="mt-1.5 leading-relaxed font-semibold text-app-ink-muted border-t border-app-line pt-1.5">
+              <div className="mt-1.5 hidden border-t border-app-line pt-1.5 font-semibold leading-relaxed text-app-ink-muted sm:block">
                 {whyThisMatters}
               </div>
             )}
@@ -216,7 +216,7 @@ export function SetupStepShellLab({
         </div>
       </div>
 
-      <div className="mt-5">
+      <div className="mt-4 sm:mt-5">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentStep}
@@ -302,16 +302,16 @@ export function SetupStepShellLab({
 
       <div
         data-twelve-week-mobile-action-bar
-        className="fixed bottom-0 left-0 right-0 z-40 border-t border-app-line/80 bg-app-surface/95 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-3 shadow-[0_-18px_40px_-30px_rgba(23,21,15,0.45)] backdrop-blur-md sm:hidden"
+        className="fixed bottom-0 left-0 right-0 z-40 border-t border-app-line/80 bg-app-surface/95 px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-2 shadow-[0_-18px_40px_-30px_rgba(23,21,15,0.45)] backdrop-blur-md sm:hidden"
       >
-        <div className="mx-auto flex w-full max-w-[42rem] flex-col gap-2.5">
-          <p className="text-[11px] font-semibold text-app-ink-muted">
+        <div className="mx-auto flex w-full max-w-[42rem] flex-col gap-2">
+          <p className="sr-only">
             Bước {currentStep + 1}/{stepCount} · Có thể chỉnh lại sau
           </p>
           <div className="flex w-full gap-2.5">
             <button
               type="button"
-              className="inline-flex min-h-12 flex-1 items-center justify-center gap-1.5 rounded-xl border border-app-line bg-app-surface px-4 py-2.5 text-xs font-bold text-app-ink transition-all duration-150 hover:bg-app-bg active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+              className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-xl border border-app-line bg-app-surface px-4 py-2 text-xs font-bold text-app-ink transition-all duration-150 hover:bg-app-bg active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
               onClick={onBack}
               disabled={isSubmitting}
             >
@@ -323,7 +323,7 @@ export function SetupStepShellLab({
               <button
                 type="button"
                 aria-label="Lưu kế hoạch"
-                className="inline-flex min-h-12 flex-[2] items-center justify-center gap-1.5 rounded-control bg-app-accent px-5 py-3 text-xs font-bold text-white transition-all duration-150 hover:bg-app-accent-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-app-ink-muted disabled:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+                className="inline-flex min-h-11 flex-[2] items-center justify-center gap-1.5 rounded-control bg-app-accent px-5 py-2.5 text-xs font-bold text-white transition-all duration-150 hover:bg-app-accent-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-app-ink-muted disabled:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
                 onClick={handleSubmitClick}
                 disabled={isSubmitting || isSubmitDisabled}
                 aria-busy={isSubmitting}
@@ -339,7 +339,7 @@ export function SetupStepShellLab({
               <button
                 type="button"
                 aria-label={nextButtonLabel}
-                className="inline-flex min-h-12 flex-[2] items-center justify-center gap-1.5 rounded-xl bg-app-accent px-5 py-3 text-xs font-bold text-white transition-all duration-150 hover:bg-app-accent-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-app-ink-muted disabled:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+                className="inline-flex min-h-11 flex-[2] items-center justify-center gap-1.5 rounded-xl bg-app-accent px-5 py-2.5 text-xs font-bold text-white transition-all duration-150 hover:bg-app-accent-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-app-ink-muted disabled:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
                 onClick={onNext}
                 disabled={isNextDisabled}
               >

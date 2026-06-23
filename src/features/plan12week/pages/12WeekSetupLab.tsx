@@ -1269,12 +1269,13 @@ export function TwelveWeekSetupLab() {
           currentStepId="twelve_week_setup"
           onExit={() => navigate("/")}
           className="[&_button]:min-h-10 [&_button]:px-3 [&_button]:py-2"
+          compactOnMobile
         />
 
         {/* Tiêu đề chính tối giản */}
-        <section aria-labelledby="twelve-week-setup-title" className="space-y-4">
+        <section aria-labelledby="twelve-week-setup-title" className="space-y-3 sm:space-y-4">
           {/* Banner visual anchor ở trên */}
-          <div className="overflow-hidden rounded-card border border-app-line aspect-[16/5] w-full bg-app-bg shadow-app-sm">
+          <div className="h-20 w-full overflow-hidden rounded-card border border-app-line bg-app-bg shadow-app-sm sm:h-auto sm:aspect-[16/5]">
             <img
               src="/twelve_week_roadmap.png"
               alt="Lộ trình hành trình 12 tuần"
@@ -1283,14 +1284,14 @@ export function TwelveWeekSetupLab() {
             />
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-3">
+          <div className="flex flex-col gap-2.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-app-ink-muted">
                 {getLifeAreaLabel(focusArea)} · Thiết lập kế hoạch 12 tuần
               </p>
               <h1
                 id="twelve-week-setup-title"
-                className="mt-3 max-w-3xl font-serif text-3xl font-medium leading-tight tracking-tight text-app-ink sm:text-4xl"
+                className="mt-2 max-w-3xl font-serif text-[27px] font-medium leading-[1.06] tracking-tight text-app-ink sm:mt-3 sm:text-4xl sm:leading-tight"
               >
                 Tạo kế hoạch 12 tuần
               </h1>
@@ -1308,7 +1309,7 @@ export function TwelveWeekSetupLab() {
             )}
           </div>
 
-          <div className="mt-3.5 max-w-2xl bg-app-bg-subtle/50 dark:bg-app-bg-subtle/10 border border-app-line/60 rounded-xl p-3.5 flex items-start gap-2.5 shadow-3xs">
+          <div className="mt-2.5 flex max-w-2xl items-start gap-2.5 rounded-xl border border-app-line/60 bg-app-bg-subtle/50 p-3 shadow-3xs dark:bg-app-bg-subtle/10 sm:mt-3.5 sm:p-3.5">
             <span
               className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-app-accent text-xs"
               aria-hidden="true"
@@ -1328,14 +1329,14 @@ export function TwelveWeekSetupLab() {
               Kế hoạch 12 tuần này phục vụ tầm nhìn 3 năm: {aspirationalVision.summary}
             </p>
           )}
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-app-ink-soft">
+          <p className="mt-1.5 hidden max-w-2xl text-sm leading-6 text-app-ink-soft sm:block">
             Dựa trên mục tiêu SMART của bạn, chúng tôi đã tự động chia nhỏ mốc lộ trình và điền sẵn kế hoạch. Bạn chỉ
             cần xem lại và bấm tiếp tục.
           </p>
         </section>
 
         {/* Giao diện 1 cột trung tâm "Journey Card Layout" */}
-        <div className="mx-auto max-w-2xl lg:max-w-3xl space-y-6">
+        <div className="mx-auto max-w-2xl space-y-4 lg:max-w-3xl sm:space-y-6">
           <SetupStepShellLab
             title={STEPS[currentStep].title}
             description={currentStepDescription}

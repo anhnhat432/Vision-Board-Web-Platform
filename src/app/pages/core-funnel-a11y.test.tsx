@@ -445,8 +445,8 @@ describe("TwelveWeekSetup StepShellLab — mobile action bar", () => {
     const feedback = document.querySelector("[data-twelve-week-step-feedback]");
     const actionBar = document.querySelector("[data-twelve-week-mobile-action-bar]");
 
-    expect(shell).toHaveClass("pb-[calc(8.5rem+env(safe-area-inset-bottom))]", "sm:pb-5", "md:pb-6");
-    expect(actionBar).toHaveClass("pb-[calc(env(safe-area-inset-bottom)+1rem)]", "sm:hidden");
+    expect(shell).toHaveClass("pb-[calc(7rem+env(safe-area-inset-bottom))]", "sm:pb-5", "md:pb-6");
+    expect(actionBar).toHaveClass("pb-[calc(env(safe-area-inset-bottom)+0.75rem)]", "sm:hidden");
     expect(feedback).not.toBeNull();
     expect(actionBar).not.toBeNull();
     expect(feedback?.compareDocumentPosition(actionBar as Node)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);

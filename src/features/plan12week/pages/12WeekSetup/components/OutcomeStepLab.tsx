@@ -88,17 +88,17 @@ export function OutcomeStepLab({
       {/* 🎯 SMART GOAL RECAP CARD - Visual Anchor dạng ảnh Polaroid Pinterest */}
       {smartGoal && (
         <MotionFadeIn>
-          <div className="relative mx-auto max-w-lg overflow-hidden rounded-card border border-app-line bg-app-bg-subtle/40 p-5 pt-7 pb-5 text-xs text-app-ink-soft select-none shadow-app-sm border-t-[3px] border-t-app-accent/60 flex flex-col items-center text-center">
+          <div className="relative mx-auto flex max-w-lg select-none flex-col items-center overflow-hidden rounded-card border border-app-line border-t-[3px] border-t-app-accent/60 bg-app-bg-subtle/40 p-3.5 pt-5 text-center text-xs text-app-ink-soft shadow-app-sm sm:p-5 sm:pt-7">
             {/* Ghim giấy giả lập Notion/Pinterest */}
             <div
               className="absolute top-2 left-1/2 -translate-x-1/2 w-12 h-3 bg-app-line/40 dark:bg-app-line/20 rounded-full border border-app-line/20 shadow-3xs"
               aria-hidden="true"
             />
 
-            <p className="font-bold text-app-accent uppercase tracking-wider text-[10px] mb-2 flex items-center gap-1">
+            <p className="mb-1.5 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-app-accent sm:mb-2">
               🎯 Mục tiêu SMART của bạn
             </p>
-            <h4 className="font-serif text-base font-semibold text-app-ink leading-relaxed max-w-md italic">
+            <h4 className="max-w-md font-serif text-[15px] font-semibold italic leading-snug text-app-ink sm:text-base sm:leading-relaxed">
               “{smartGoal.specific}”
             </h4>
             {smartGoal.measurable && (
@@ -111,7 +111,7 @@ export function OutcomeStepLab({
             )}
 
             {feasibility?.smartGoalQualityNote && (
-              <div className="mt-4 pt-3.5 border-t border-app-line flex gap-2 items-start text-xs bg-app-accent-soft/20 p-3 rounded-card text-app-accent w-full text-left">
+              <div className="mt-3 flex w-full items-start gap-2 rounded-card border-t border-app-line bg-app-accent-soft/20 p-2.5 pt-3 text-left text-xs text-app-accent sm:mt-4 sm:p-3 sm:pt-3.5">
                 <span className="text-sm shrink-0">✨</span>
                 <div className="min-w-0">
                   <span className="font-extrabold uppercase tracking-wider text-[10px] text-app-accent block mb-0.5">
@@ -127,7 +127,7 @@ export function OutcomeStepLab({
 
       {/* 🎓 PHÂN LOẠI MỤC TIÊU - Đưa ra ngoài luồng chính, tương tác 1 chạm sinh động */}
       <section
-        className="rounded-card border border-app-line bg-app-surface p-4.5 sm:p-5 shadow-app-sm space-y-3"
+        className="space-y-3 rounded-card border border-app-line bg-app-surface p-3.5 shadow-app-sm sm:p-5"
         aria-labelledby="goal-type-section-title"
       >
         <div className="flex items-center gap-2">
@@ -146,7 +146,7 @@ export function OutcomeStepLab({
             </p>
           </div>
         </div>
-        <div className="flex flex-wrap gap-2 pt-1.5 justify-center sm:justify-start">
+        <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 pt-1.5 sm:mx-0 sm:flex-wrap sm:justify-start sm:overflow-visible sm:px-0 sm:pb-0">
           {GOAL_TYPES.map((item) => {
             const isActive = draft.goalType === item.value;
             const emoji = GOAL_TYPE_EMOJIS[item.value] || "🎯";
@@ -161,7 +161,7 @@ export function OutcomeStepLab({
                   onChange("goalType", item.value);
                 }}
                 className={cn(
-                  "flex items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-bold transition-all duration-200 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2",
+                  "flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-bold transition-all duration-200 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2",
                   isActive
                     ? "border-app-accent bg-app-accent text-white shadow-app-sm shadow-app-accent/20 scale-105"
                     : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/30",
@@ -177,10 +177,10 @@ export function OutcomeStepLab({
 
       {/* BIỂU MẪU LỘ TRÌNH CỐT LÕI (ĐÃ TỰ ĐIỀN) */}
       <section
-        className="relative overflow-hidden rounded-card border border-app-line bg-app-surface p-5 sm:p-6 shadow-app-sm space-y-5"
+        className="relative space-y-4 overflow-hidden rounded-card border border-app-line bg-app-surface p-4 shadow-app-sm sm:space-y-5 sm:p-6"
         aria-labelledby="outcome-required-title"
       >
-        <div className="flex items-center justify-between border-b border-app-line/60 pb-3">
+        <div className="flex flex-col gap-2 border-b border-app-line/60 pb-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h3
               id="outcome-required-title"
@@ -198,14 +198,14 @@ export function OutcomeStepLab({
           </span>
         </div>
 
-        <div className="space-y-5 pt-1">
+        <div className="space-y-4 pt-1 sm:space-y-5">
           {/* Đích đến cuối cùng Tuần 12 - BẮT BUỘC (CẦN ĐIỀN NGAY) */}
-          <div className="space-y-2 p-4.5 rounded-card bg-app-accent-soft/20 border border-app-accent/10">
+          <div className="space-y-2 rounded-card border border-app-accent/10 bg-app-accent-soft/20 p-3.5 sm:p-4.5">
             <label htmlFor="week-12-outcome" className={cn(labelClass, "flex flex-col gap-1 text-app-ink font-bold")}>
-              <div className="flex items-center gap-1.5">
+              <div className="flex flex-wrap items-center gap-1.5">
                 <Award className="h-4.5 w-4.5 text-app-accent shrink-0 animate-pulse" />
                 <span className="text-app-ink">🏆 Kết quả cụ thể nào sau 12 tuần sẽ làm bạn tự hào nhất?</span>
-                <span className="text-xs font-semibold text-app-accent ml-auto shrink-0">(Bắt buộc)</span>
+                <span className="text-xs font-semibold text-app-accent sm:ml-auto shrink-0">(Bắt buộc)</span>
               </div>
             </label>
             <Textarea
