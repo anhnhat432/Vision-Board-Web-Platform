@@ -181,7 +181,7 @@ export function ScheduleStepLab({
               }}
               className={cn(
                 "flex-1 min-w-[130px] rounded-xl border px-3.5 py-3 sm:py-2.5 text-center text-xs font-semibold transition-all duration-200 active:scale-95 focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 focus:outline-none",
-                 !isCustomDate && draft.startDate === nextMondayKey
+                !isCustomDate && draft.startDate === nextMondayKey
                   ? "border-app-accent bg-app-accent text-white shadow-app-sm shadow-app-accent/20 scale-102"
                   : "border-app-line bg-app-surface text-app-ink hover:border-app-accent/30",
               )}
@@ -496,7 +496,7 @@ export function ScheduleStepLab({
               type="button"
               onClick={() => handleDayClick(selectedMobileDay)}
               className={cn(
-                "w-full rounded-xl py-2 px-3 text-xs font-bold transition-all flex items-center justify-center gap-1.5 border active:scale-95 focus-visible:ring-2 focus-visible:ring-app-accent focus:outline-none",
+                "w-full min-h-11 rounded-xl px-3 py-2 text-xs font-bold leading-tight transition-all flex items-center justify-center gap-1.5 border active:scale-95 focus-visible:ring-2 focus-visible:ring-app-accent focus:outline-none",
                 draft.preferredDays.includes(selectedMobileDay)
                   ? "bg-app-accent text-white border-app-accent shadow-app-sm shadow-app-accent/20"
                   : "bg-app-surface text-app-ink-soft border-app-line hover:border-app-accent/30",
@@ -513,10 +513,10 @@ export function ScheduleStepLab({
                 getTacticsForDay(selectedMobileDay).map((tactic) => (
                   <div
                     key={tactic.id}
-                    className="text-xs font-semibold bg-app-bg-subtle/70 text-app-ink-soft px-3 py-2.5 rounded-xl border border-app-line flex items-center justify-between"
+                    className="text-xs font-semibold bg-app-bg-subtle/70 text-app-ink-soft px-3 py-2.5 rounded-xl border border-app-line flex items-start justify-between gap-2"
                   >
-                    <span className="truncate pr-2">🏃 {tactic.name}</span>
-                    <span className="text-[10px] font-extrabold text-app-accent shrink-0">
+                    <span className="min-w-0 flex-1 break-words leading-relaxed">🏃 {tactic.name}</span>
+                    <span className="text-[10px] font-extrabold leading-tight text-app-accent shrink-0 text-right">
                       {tactic.target} {tactic.unit}
                     </span>
                   </div>
@@ -592,7 +592,7 @@ export function ScheduleStepLab({
                       {dailyTactics.map((tactic) => (
                         <div
                           key={tactic.id}
-                          className="text-[9px] font-bold bg-app-accent-soft text-app-accent px-1.5 py-0.5 rounded border border-app-accent/10 truncate max-w-full block w-full text-right sm:text-left"
+                          className="block w-full max-w-full break-words rounded border border-app-accent/10 bg-app-accent-soft px-1.5 py-1 text-[9px] font-bold leading-relaxed text-app-accent text-right sm:text-left"
                           title={`${tactic.name} (${tactic.target} ${tactic.unit})`}
                         >
                           🏃 {tactic.name}

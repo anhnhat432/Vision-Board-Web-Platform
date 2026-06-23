@@ -352,7 +352,7 @@ export function TwelveWeekSystemTabs({
                   value={value}
                   aria-controls={tabPanelId}
                   aria-label={`Mở tab ${label}`}
-                  className={`relative flex min-h-9 flex-none cursor-pointer items-center justify-center gap-1.5 rounded-[10px] px-3 py-2 text-[12px] font-semibold transition-all duration-150 data-[state=active]:bg-[#0C5E3A] data-[state=active]:text-white data-[state=inactive]:text-app-ink-soft hover:data-[state=inactive]:text-app-ink dark:data-[state=active]:bg-[#1A3A2A] sm:min-h-[38px] sm:gap-2 sm:px-[18px] sm:py-[10px] sm:text-[13px]`}
+                  className={`relative flex min-h-11 flex-none cursor-pointer items-center justify-center gap-1.5 rounded-[10px] px-3 py-2 text-[12px] font-semibold leading-tight transition-all duration-150 data-[state=active]:bg-[#0C5E3A] data-[state=active]:text-white data-[state=inactive]:text-app-ink-soft hover:data-[state=inactive]:text-app-ink dark:data-[state=active]:bg-[#1A3A2A] sm:min-h-11 sm:gap-2 sm:px-[18px] sm:py-[10px] sm:text-[13px]`}
                 >
                   <Icon
                     className="h-[15px] w-[15px] shrink-0 transition-transform duration-150 group-hover:scale-110"

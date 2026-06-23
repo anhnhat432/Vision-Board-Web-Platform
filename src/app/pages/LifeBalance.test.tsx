@@ -109,11 +109,17 @@ describe("LifeBalance", () => {
     expect(strongestCard).not.toBeNull();
     expect(strongestCard).toHaveTextContent("Học tập");
     expect(strongestCard).toHaveTextContent("8");
+    const strongestLabel = strongestCard?.querySelector("span.min-w-0");
+    expect(strongestLabel).toHaveClass("break-words");
+    expect(strongestLabel).not.toHaveClass("truncate");
 
     const weakestCard = screen.getByText("Lĩnh vực cần ưu tiên").closest("div");
     expect(weakestCard).not.toBeNull();
     expect(weakestCard).toHaveTextContent("Mối quan hệ");
     expect(weakestCard).toHaveTextContent("4");
+    const weakestLabel = weakestCard?.querySelector("span.min-w-0");
+    expect(weakestLabel).toHaveClass("break-words");
+    expect(weakestLabel).not.toHaveClass("truncate");
   });
 
   it("uses a compact 3-column KPI row on mobile so tabs appear sooner", async () => {

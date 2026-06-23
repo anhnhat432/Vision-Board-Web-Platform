@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { TwelveWeekSetupDraft } from "../types";
 import { ScheduleStep } from "./ScheduleStep";
+import { ScheduleStepLab } from "./ScheduleStepLab";
 
 function makeDraft(overrides: Partial<TwelveWeekSetupDraft> = {}): TwelveWeekSetupDraft {
   return {
@@ -66,5 +67,46 @@ describe("ScheduleStep validation", () => {
     );
 
     expect(screen.getByText("Ngày bắt đầu cách hiện tại hơn 30 ngày. Hãy chắc chắn đây là chủ ý.")).toBeInTheDocument();
+  });
+  it("keeps schedule labels readable and touch targets large in lab mode", () => {
+    render(
+      <ScheduleStepLab
+        draft={makeDraft({
+          reviewDay: "Monday",
+          preferredDays: [0],
+          leadIndicators: [
+            {
+              id: "indicator_1",
+              name: "Viet outline phan mo dau that ro de khong bi cat chu tren mobile",
+              target: "1",
+              unit: "phien",
+              type: "core",
+              cadence: "spread",
+            },
+          ],
+        })}
+        cycleStartDate="2026-05-05"
+        cycleEndDate="2026-07-27"
+        setupGuideSupport={null}
+        setupGuideTemplate={null}
+        hasPreviewTasks
+        weekOneTaskPreview={[]}
+        weekOneTaskWarning={null}
+        onChange={vi.fn()}
+        todayDateKey="2026-05-09"
+      />,
+    );
+
+    const pinButton = screen.getByRole("button", { name: /ghim/i });
+    expect(pinButton).toHaveClass("min-h-11");
+
+    const tacticLabels = screen.getAllByText(/khong bi cat chu tren mobile/i);
+    const mobileTactic = tacticLabels.find((element) => element.tagName === "SPAN");
+    const desktopChip = tacticLabels.find((element) => element.tagName === "DIV");
+
+    expect(mobileTactic).toHaveClass("break-words", "leading-relaxed");
+    expect(mobileTactic).not.toHaveClass("truncate");
+    expect(desktopChip).toHaveClass("break-words", "leading-relaxed");
+    expect(desktopChip).not.toHaveClass("truncate");
   });
 });

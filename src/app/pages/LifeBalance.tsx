@@ -497,7 +497,7 @@ export function LifeBalance() {
                 className="inline-block h-2 w-2 shrink-0 rounded-full"
                 style={{ backgroundColor: getAreaColorConfig(strongestArea.name).accent }}
               />
-              <span className="truncate">{getLifeAreaLabel(strongestArea.name)}</span>
+              <span className="min-w-0 break-words">{getLifeAreaLabel(strongestArea.name)}</span>
             </p>
           </div>
           <div className="min-w-0 overflow-hidden rounded-[16px] border border-[rgba(176,103,60,0.22)] bg-[#F4ECDD] p-3 dark:border-app-line dark:bg-app-bg-subtle sm:rounded-[18px] sm:p-5 md:p-6">
@@ -514,7 +514,7 @@ export function LifeBalance() {
                 className="inline-block h-2 w-2 shrink-0 rounded-full"
                 style={{ backgroundColor: getAreaColorConfig(weakestArea.name).accent }}
               />
-              <span className="truncate">{getLifeAreaLabel(weakestArea.name)}</span>
+              <span className="min-w-0 break-words">{getLifeAreaLabel(weakestArea.name)}</span>
             </p>
           </div>
         </section>
