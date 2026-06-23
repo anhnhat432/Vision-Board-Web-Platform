@@ -29,10 +29,7 @@ import {
   type RescuePlanSummary,
 } from "../../utils/twelve-week-system-ui";
 import { playZenBell } from "../../utils/zen-bell";
-import {
-  EmptyTaskIllustration,
-  ZenLeafIllustration,
-} from "../illustrations";
+import { EmptyTaskIllustration, ZenLeafIllustration } from "../illustrations";
 import { EmptyState } from "../states";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
@@ -136,7 +133,6 @@ function getTaskCommitmentQuote(system: TwelveWeekSystem, task: TwelveWeekTaskIn
   return want ? `“${truncateCommitmentReminder(want)}”` : null;
 }
 
-
 function getMoodOptionStyle(value: DailyMood, isActive: boolean): string {
   if (!isActive) {
     return "border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg-subtle hover:border-app-line-strong hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 rounded-card-lg shadow-none";
@@ -210,6 +206,8 @@ export function TwelveWeekTodayTab({
   const [isSavingCheckIn, setIsSavingCheckIn] = useState(false);
   const [optimisticTaskCompletionById, setOptimisticTaskCompletionById] = useState<Record<string, boolean>>({});
   const [isHeroDismissed, setIsHeroDismissed] = useState(false);
+  const [isCheckInCardInView, setIsCheckInCardInView] = useState(true);
+  const checkInCardRef = useRef<HTMLDivElement | null>(null);
   const lastClickCoords = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
@@ -322,7 +320,40 @@ export function TwelveWeekTodayTab({
   const savedDailyMood = (todayCheckIn?.mood as DailyMood | undefined) ?? "steady";
   const savedDailyNote = todayCheckIn?.optionalNote?.trim() ?? "";
   const hasUnsavedDailyCheckInEdits = dailyMood !== savedDailyMood || dailyNote.trim() !== savedDailyNote;
-  const showMobileStickyCheckIn = !hasSavedTodayCheckIn && hasUnsavedDailyCheckInEdits;
+  const showMobileStickyCheckIn = !hasSavedTodayCheckIn && hasUnsavedDailyCheckInEdits && !isCheckInCardInView;
+  const todayCompletionLabel = `${todayCompletedCount}/${checkInTotal}`;
+
+  useEffect(() => {
+    const updateCheckInCardVisibility = () => {
+      if (window.innerWidth >= 640) {
+        setIsCheckInCardInView(true);
+        return;
+      }
+
+      const rect = checkInCardRef.current?.getBoundingClientRect();
+      if (!rect) {
+        setIsCheckInCardInView(true);
+        return;
+      }
+
+      if (rect.width === 0 && rect.height === 0) {
+        setIsCheckInCardInView(true);
+        return;
+      }
+
+      setIsCheckInCardInView(rect.top < window.innerHeight - 132 && rect.bottom > 156);
+    };
+
+    updateCheckInCardVisibility();
+    window.addEventListener("scroll", updateCheckInCardVisibility, { passive: true });
+    window.addEventListener("resize", updateCheckInCardVisibility);
+
+    return () => {
+      window.removeEventListener("scroll", updateCheckInCardVisibility);
+      window.removeEventListener("resize", updateCheckInCardVisibility);
+    };
+  }, []);
+
   const nextActionState: TodayNextActionState = (() => {
     if (!hasPlanTasks) {
       return {
@@ -420,10 +451,16 @@ export function TwelveWeekTodayTab({
       {/* ── Status chips (nhịp hôm nay) — bổ sung cho bảng tiến độ ở header, không lặp lại ── */}
       <div
         data-testid="today-dashboard-cards"
-        className="order-0 -mx-1 flex items-center gap-2 overflow-x-auto px-1 pb-1 scrollbar-none sm:mx-0 sm:flex-wrap sm:gap-2.5 sm:overflow-visible sm:px-0 sm:pb-0"
+        className="order-0 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-2.5"
       >
+        <span className="inline-flex min-w-0 items-center gap-2 rounded-full border border-app-accent/20 bg-app-accent-soft/40 px-3 py-1.5 text-[11px] font-semibold text-app-accent sm:px-3.5 sm:text-xs">
+          <CheckCircle2 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+          <span className="min-w-0 truncate">
+            <span className="font-mono font-bold tabular-nums">{todayCompletionLabel}</span> hôm nay
+          </span>
+        </span>
         <span
-          className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-semibold sm:px-3.5 sm:text-xs ${
+          className={`inline-flex min-w-0 items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-semibold sm:px-3.5 sm:text-xs ${
             overdueOpenCount > 0
               ? "border-app-warm-border/40 bg-app-warm-soft/30 text-app-warm"
               : "border-app-line/50 bg-app-surface text-app-ink-soft"
@@ -436,18 +473,18 @@ export function TwelveWeekTodayTab({
           >
             {overdueOpenCount}
           </span>
-          {overdueOpenCount > 0 ? "việc trễ hạn" : "không có việc trễ"}
+          <span className="min-w-0 truncate">{overdueOpenCount > 0 ? "việc trễ hạn" : "không có việc trễ"}</span>
         </span>
 
         <span
-          className={`inline-flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-semibold sm:px-3.5 sm:text-xs ${
+          className={`col-span-2 inline-flex min-w-0 items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-semibold sm:col-span-1 sm:px-3.5 sm:text-xs ${
             reviewDueToday
               ? "border-app-warm-border/40 bg-app-warm-soft/30 text-app-warm"
               : "border-app-accent/20 bg-app-accent-soft/40 text-app-accent"
           }`}
         >
           <CalendarClock className="h-3.5 w-3.5" aria-hidden="true" />
-          {reviewDueToday ? "Review tuần đến hạn" : "Review tuần đã xong"}
+          <span className="min-w-0 truncate">{reviewDueToday ? "Review tuần đến hạn" : "Review tuần đã xong"}</span>
         </span>
       </div>
 
@@ -492,12 +529,8 @@ export function TwelveWeekTodayTab({
               <span className="text-sm font-bold tabular-nums">{missedTasks.length}</span>
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-app-ink">
-                {missedTasks.length} việc trễ cần điều chỉnh
-              </p>
-              <p className="text-[11px] text-app-ink-muted">
-                Duy trì nhịp quan trọng hơn làm hết mọi việc.
-              </p>
+              <p className="text-sm font-semibold text-app-ink">{missedTasks.length} việc trễ cần điều chỉnh</p>
+              <p className="text-[11px] text-app-ink-muted">Duy trì nhịp quan trọng hơn làm hết mọi việc.</p>
             </div>
           </div>
           {hasSmartRescue && rescuePlanSummary && (
@@ -570,7 +603,7 @@ export function TwelveWeekTodayTab({
         >
           <div className="flex flex-col sm:flex-row">
             <div
-              className={`w-1.5 sm:w-2 shrink-0 ${
+              className={`h-1.5 w-full shrink-0 sm:h-auto sm:w-2 ${
                 isPrimaryTaskCompleted ? "bg-app-accent/40" : primaryTaskOverdue ? "bg-app-warm/50" : "bg-app-accent/50"
               }`}
               aria-hidden="true"
@@ -638,7 +671,7 @@ export function TwelveWeekTodayTab({
                   <div className="mt-4 flex flex-wrap items-center gap-2.5 sm:mt-5 sm:gap-3">
                     <Button
                       data-testid="today-primary-mark-done"
-                      className="h-10 rounded-card bg-app-accent px-4 text-sm font-semibold text-white shadow-app-sm transition-all hover:bg-app-accent-hover active:scale-[0.98] sm:h-11 sm:px-6"
+                      className="min-h-11 w-full rounded-card bg-app-accent px-4 text-sm font-semibold text-white shadow-app-sm transition-all hover:bg-app-accent-hover active:scale-[0.98] sm:w-auto sm:px-6"
                       onClick={() => handleTaskCompletionChange(firstPriorityTask.id, true)}
                     >
                       <Check className="mr-1.5 h-4 w-4" />
@@ -662,416 +695,421 @@ export function TwelveWeekTodayTab({
         </div>
       )}
 
-        <div
-          data-testid="today-main-work-grid"
-          className="order-3 grid min-w-0 gap-4 sm:gap-[18px] lg:grid-cols-[1.35fr_1fr]"
-        >
-          <div className={fadeInClassName}>
-            <Card
-              data-tour-id="system-today-queue"
-              className={`min-h-[360px] min-w-0 overflow-hidden rounded-[20px] border border-[rgba(23,21,15,0.08)] bg-white p-4 dark:border-app-line dark:bg-app-surface sm:min-h-[420px] sm:p-6 lg:h-full`}
-            >
-              <CardHeader className="min-w-0 [&>*+*]:mt-0 px-0 pt-0 pb-0">
-                <div className="flex min-w-0 flex-wrap items-end justify-between gap-3">
-                  <div className="min-w-0">
-                    <CardTitle as="h2" className="break-words text-app-ink text-[18px] font-bold m-0 mb-1">
-                      Hàng việc hôm nay
-                    </CardTitle>
-                    <CardDescription className="m-0 mb-4 break-words text-[12.5px] text-[#8C887C] dark:text-app-ink-muted sm:mb-[22px]">
-                      <span className="font-mono font-semibold text-[#0C5E3A]">
-                        {todayCompletedCount}/{checkInTotal}
-                      </span>{" "}
-                      hoàn thành · Ưu tiên việc quan trọng nhất trước
-                    </CardDescription>
-                  </div>
+      <div
+        data-testid="today-main-work-grid"
+        className="order-3 grid min-w-0 gap-4 sm:gap-[18px] lg:grid-cols-[1.35fr_1fr]"
+      >
+        <div className={fadeInClassName}>
+          <Card
+            data-tour-id="system-today-queue"
+            className={`min-h-[360px] min-w-0 overflow-hidden rounded-[20px] border border-[rgba(23,21,15,0.08)] bg-white p-4 dark:border-app-line dark:bg-app-surface sm:min-h-[420px] sm:p-6 lg:h-full`}
+          >
+            <CardHeader className="min-w-0 [&>*+*]:mt-0 px-0 pt-0 pb-0">
+              <div className="flex min-w-0 flex-wrap items-end justify-between gap-3">
+                <div className="min-w-0">
+                  <CardTitle as="h2" className="break-words text-app-ink text-[18px] font-bold m-0 mb-1">
+                    Hàng việc hôm nay
+                  </CardTitle>
+                  <CardDescription className="m-0 mb-4 break-words text-[12.5px] text-[#8C887C] dark:text-app-ink-muted sm:mb-[22px]">
+                    <span className="font-mono font-semibold text-[#0C5E3A]">
+                      {todayCompletedCount}/{checkInTotal}
+                    </span>{" "}
+                    hoàn thành · Ưu tiên việc quan trọng nhất trước
+                  </CardDescription>
                 </div>
-              </CardHeader>
-              <CardContent className="min-w-0 stack-tight px-0 pt-0 pb-0">
-                {todayQueue.length === 0 ? (
-                  hasPlanTasks ? (
-                    <EmptyState
-                      variant="dashed"
-                      testId="today-empty-state"
-                      illustration={<EmptyTaskIllustration className="w-full text-app-accent" />}
-                      icon={<Check className="h-5 w-5" />}
-                      title={reviewDueToday ? "Tuần đã sẵn sàng để chốt review" : "Hết việc hôm nay"}
-                      description={
-                        reviewDueToday
-                          ? "Mở tab Tuần để chốt review và khóa ưu tiên cho tuần sau."
-                          : "Lưu check-in ngắn ở bên cạnh, hoặc mở tab Tuần để chuẩn bị review."
-                      }
-                      actions={
-                        onOpenWeekTab && !reviewDueToday ? (
-                          <Button variant="outline" onClick={onOpenWeekTab} className="bg-app-surface rounded-card">
-                            Mở tab Tuần
-                            <ArrowRight className="ml-1 h-4 w-4" />
-                          </Button>
-                        ) : undefined
-                      }
-                    />
-                  ) : (
-                    <EmptyState
-                      variant="dashed"
-                      testId="today-empty-state"
-                      illustration={<ZenLeafIllustration className="w-full text-app-accent" />}
-                      title="Chưa có việc nào trong chu kỳ này"
-                      description={
-                        hasLeadMetrics
-                          ? "Chu kỳ đã có việc lặp lại, nhưng chưa có việc nào cho tuần này. Vào Setup để tạo lại chu kỳ."
-                          : "Chu kỳ chưa có việc lặp lại. Vào Setup để thêm 2-4 việc lặp lại trước."
-                      }
-                      actions={
-                        onNavigateToSetup ? (
-                          <Button variant="secondary" onClick={onNavigateToSetup} className="rounded-card">
-                            {hasLeadMetrics ? "Mở Setup để chỉnh" : "Đi tới Setup"}
-                            <ArrowRight className="ml-1 h-4 w-4" />
-                          </Button>
-                        ) : undefined
-                      }
-                    />
-                  )
+              </div>
+            </CardHeader>
+            <CardContent className="min-w-0 stack-tight px-0 pt-0 pb-0">
+              {todayQueue.length === 0 ? (
+                hasPlanTasks ? (
+                  <EmptyState
+                    variant="dashed"
+                    testId="today-empty-state"
+                    illustration={<EmptyTaskIllustration className="w-full text-app-accent" />}
+                    icon={<Check className="h-5 w-5" />}
+                    title={reviewDueToday ? "Tuần đã sẵn sàng để chốt review" : "Hết việc hôm nay"}
+                    description={
+                      reviewDueToday
+                        ? "Mở tab Tuần để chốt review và khóa ưu tiên cho tuần sau."
+                        : "Lưu check-in ngắn ở bên cạnh, hoặc mở tab Tuần để chuẩn bị review."
+                    }
+                    actions={
+                      onOpenWeekTab && !reviewDueToday ? (
+                        <Button variant="outline" onClick={onOpenWeekTab} className="bg-app-surface rounded-card">
+                          Mở tab Tuần
+                          <ArrowRight className="ml-1 h-4 w-4" />
+                        </Button>
+                      ) : undefined
+                    }
+                  />
                 ) : (
-                  <MotionStaggerList className="divide-y divide-app-line/15">
-                    {todayQueue.map((task, taskIndex) => {
-                      const taskCompleted = optimisticTaskCompletionById[task.id] ?? task.completed;
-                      const isOverdue = !taskCompleted && task.scheduledDate < todayDateKey;
-                      const isPrimaryTask = firstPriorityTask?.id === task.id && !taskCompleted;
-                      const statusLabel = taskCompleted
-                        ? "Đã chốt"
-                        : isOverdue
-                          ? "Đang trễ"
-                          : task.scheduledDate === todayDateKey
-                            ? "Hôm nay"
-                            : formatCalendarDate(task.scheduledDate);
-                      const taskCommitmentQuote = getTaskCommitmentQuote(system, task);
-                      const showTaskCommitmentQuote = Boolean(
-                        taskCommitmentQuote && !(isPrimaryTask && primaryTaskCommitmentQuote),
-                      );
-                      const taskNumber = String(taskIndex + 1).padStart(2, "0");
+                  <EmptyState
+                    variant="dashed"
+                    testId="today-empty-state"
+                    illustration={<ZenLeafIllustration className="w-full text-app-accent" />}
+                    title="Chưa có việc nào trong chu kỳ này"
+                    description={
+                      hasLeadMetrics
+                        ? "Chu kỳ đã có việc lặp lại, nhưng chưa có việc nào cho tuần này. Vào Setup để tạo lại chu kỳ."
+                        : "Chu kỳ chưa có việc lặp lại. Vào Setup để thêm 2-4 việc lặp lại trước."
+                    }
+                    actions={
+                      onNavigateToSetup ? (
+                        <Button variant="secondary" onClick={onNavigateToSetup} className="rounded-card">
+                          {hasLeadMetrics ? "Mở Setup để chỉnh" : "Đi tới Setup"}
+                          <ArrowRight className="ml-1 h-4 w-4" />
+                        </Button>
+                      ) : undefined
+                    }
+                  />
+                )
+              ) : (
+                <MotionStaggerList className="divide-y divide-app-line/15">
+                  {todayQueue.map((task, taskIndex) => {
+                    const taskCompleted = optimisticTaskCompletionById[task.id] ?? task.completed;
+                    const isOverdue = !taskCompleted && task.scheduledDate < todayDateKey;
+                    const isPrimaryTask = firstPriorityTask?.id === task.id && !taskCompleted;
+                    const statusLabel = taskCompleted
+                      ? "Đã chốt"
+                      : isOverdue
+                        ? "Đang trễ"
+                        : task.scheduledDate === todayDateKey
+                          ? "Hôm nay"
+                          : formatCalendarDate(task.scheduledDate);
+                    const taskCommitmentQuote = getTaskCommitmentQuote(system, task);
+                    const showTaskCommitmentQuote = Boolean(
+                      taskCommitmentQuote && !(isPrimaryTask && primaryTaskCommitmentQuote),
+                    );
+                    const taskNumber = String(taskIndex + 1).padStart(2, "0");
 
-                      return (
-                        <MotionStaggerItem
-                          key={task.id}
-                          className={`group flex min-w-0 items-start gap-3 py-[6px] px-0.5 pb-[18px] ${
-                            taskCompleted ? "opacity-50" : ""
-                          }`}
-                        >
-                          <span className="font-mono text-xs font-semibold text-[#C7C2B5] tabular-nums pt-0.5 shrink-0">
-                            {taskNumber}
-                          </span>
-                          <Checkbox
-                            aria-label={`Hoàn thành việc: ${task.title}`}
-                            checked={taskCompleted}
-                            className="mt-0 rounded-[7px] shrink-0 w-6 h-6 border-2"
-                            onCheckedChange={(checked) => handleTaskCompletionChange(task.id, checked === true)}
-                          />
-                          <div className="min-w-0 flex-1">
-                            <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
-                              <div className="min-w-0 flex-1">
-                                <p
-                                  className={`min-w-0 max-w-full break-words text-[14.5px] font-semibold leading-[1.4] ${
-                                    taskCompleted
-                                      ? "text-app-ink-muted/50 line-through"
-                                      : "text-app-ink"
-                                  }`}
-                                >
-                                  {task.title}
-                                </p>
-                                <p className="mt-[3px] text-[12px] text-[#8C887C] dark:text-app-ink-muted">
-                                  {task.leadIndicatorName}
-                                  {task.isCore && (
-                                    <span className="ml-1 inline-flex items-center bg-[#EDF7E0] text-[#0C5E3A] text-[9.5px] font-bold rounded-[5px] px-[7px] py-0.5 tracking-[0.06em]">
-                                      CỐT LÕI
-                                    </span>
-                                  )}
-                                </p>
-                                {showTaskCommitmentQuote ? (
-                                  <p className="mt-1 text-[11px] italic leading-5 text-app-ink-muted">
-                                    {taskCommitmentQuote}
-                                  </p>
-                                ) : null}
-                              </div>
-                              <span
-                                className={`shrink-0 text-[10px] font-extrabold uppercase tracking-[0.08em] ${
-                                  isOverdue
-                                    ? "text-app-warm"
-                                    : taskCompleted
-                                      ? "text-[#0C5E3A]"
-                                      : isPrimaryTask
-                                        ? "text-app-accent"
-                                        : "text-app-ink-muted"
+                    return (
+                      <MotionStaggerItem
+                        key={task.id}
+                        className={`group flex min-w-0 items-start gap-3 rounded-[14px] px-2.5 py-3 transition-colors duration-150 hover:bg-app-bg-subtle/60 ${
+                          taskCompleted ? "opacity-50" : ""
+                        }`}
+                      >
+                        <span className="font-mono text-xs font-semibold text-[#C7C2B5] tabular-nums pt-0.5 shrink-0">
+                          {taskNumber}
+                        </span>
+                        <Checkbox
+                          aria-label={`Hoàn thành việc: ${task.title}`}
+                          checked={taskCompleted}
+                          className="mt-0.5 h-7 w-7 shrink-0 rounded-[8px] border-2"
+                          onCheckedChange={(checked) => handleTaskCompletionChange(task.id, checked === true)}
+                        />
+                        <div className="min-w-0 flex-1">
+                          <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
+                            <div className="min-w-0 flex-1">
+                              <p
+                                className={`min-w-0 max-w-full break-words text-[14.5px] font-semibold leading-[1.4] ${
+                                  taskCompleted ? "text-app-ink-muted/50 line-through" : "text-app-ink"
                                 }`}
                               >
-                                {statusLabel}
-                              </span>
-                            </div>
-                            {isOverdue && canUseOverdueTaskActions ? (
-                              <div data-testid={`overdue-actions-${task.id}`} className="mt-2.5 space-y-2">
-                                <div className="flex flex-wrap gap-2">
-                                  {onRescheduleTaskWithinWeek && (
-                                    <Button
-                                      size="sm"
-                                      variant="ghost"
-                                      className="text-[11px] text-app-ink-soft hover:text-app-ink py-1 h-7 rounded-lg px-2 font-medium transition-all"
-                                      onClick={() => onRescheduleTaskWithinWeek(task.id)}
-                                      data-action="reschedule-within-week"
-                                      aria-label={`Đẩy ${task.title} sang ngày mai`}
-                                    >
-                                      <CalendarClock className="mr-1 h-3 w-3 text-app-ink-muted" />
-                                      Đẩy sang ngày mai
-                                    </Button>
-                                  )}
-                                  {onRescheduleTaskToNextWeek || (onSkipNonCoreTask && !task.isCore) ? (
-                                    <details className="group rounded-lg border border-app-line/40 bg-app-bg/30 px-3 py-1 transition-all duration-150 flex-1 sm:flex-initial">
-                                      <summary className="flex cursor-pointer list-none items-center justify-center gap-1 text-[11px] font-medium text-app-ink-muted h-6">
-                                        Khác
-                                        <ChevronDown className="h-3.5 w-3.5 transition-transform group-open:rotate-180" />
-                                      </summary>
-                                      <div className="mt-2 flex flex-wrap gap-1.5 justify-center">
-                                        {onRescheduleTaskToNextWeek && (
-                                          <Button
-                                            size="sm"
-                                            variant="ghost"
-                                            className="text-[10px] text-app-ink-soft font-medium rounded-lg px-2.5 py-0.5 h-7"
-                                            onClick={() => onRescheduleTaskToNextWeek(task.id)}
-                                            data-action="reschedule-next-week"
-                                            aria-label={`Dời ${task.title} sang tuần sau`}
-                                          >
-                                            <CalendarPlus className="mr-1 h-3 w-3" />
-                                            Sang tuần sau
-                                          </Button>
-                                        )}
-                                        {onSkipNonCoreTask && !task.isCore && (
-                                          <Button
-                                            size="sm"
-                                            variant="ghost"
-                                            className="text-[10px] text-app-ink-soft font-medium rounded-lg px-2.5 py-0.5 h-7"
-                                            onClick={() => onSkipNonCoreTask(task.id)}
-                                            data-action="skip-non-core"
-                                            aria-label={`Bỏ qua việc tùy chọn ${task.title}`}
-                                          >
-                                            <X className="mr-1 h-3 w-3" />
-                                            Bỏ qua
-                                          </Button>
-                                        )}
-                                      </div>
-                                    </details>
-                                  ) : null}
-                                </div>
-                                {task.isCore && (onRescheduleTaskWithinWeek || onRescheduleTaskToNextWeek) ? (
-                                  <span
-                                    data-testid={`overdue-core-note-${task.id}`}
-                                    className="block text-[10px] text-app-ink-muted font-medium italic pl-1"
-                                  >
-                                    Việc cốt lõi không thể bỏ — chỉ dời lịch.
+                                {task.title}
+                              </p>
+                              <p className="mt-[3px] text-[12px] text-[#8C887C] dark:text-app-ink-muted">
+                                {task.leadIndicatorName}
+                                {task.isCore && (
+                                  <span className="ml-1 inline-flex items-center bg-[#EDF7E0] text-[#0C5E3A] text-[9.5px] font-bold rounded-[5px] px-[7px] py-0.5 tracking-[0.06em]">
+                                    CỐT LÕI
                                   </span>
+                                )}
+                              </p>
+                              {showTaskCommitmentQuote ? (
+                                <p className="mt-1 text-[11px] italic leading-5 text-app-ink-muted">
+                                  {taskCommitmentQuote}
+                                </p>
+                              ) : null}
+                            </div>
+                            <span
+                              className={`shrink-0 text-[10px] font-extrabold uppercase tracking-[0.08em] ${
+                                isOverdue
+                                  ? "text-app-warm"
+                                  : taskCompleted
+                                    ? "text-[#0C5E3A]"
+                                    : isPrimaryTask
+                                      ? "text-app-accent"
+                                      : "text-app-ink-muted"
+                              }`}
+                            >
+                              {statusLabel}
+                            </span>
+                          </div>
+                          {isOverdue && canUseOverdueTaskActions ? (
+                            <div data-testid={`overdue-actions-${task.id}`} className="mt-2.5 space-y-2">
+                              <div className="flex flex-wrap gap-2">
+                                {onRescheduleTaskWithinWeek && (
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="text-[11px] text-app-ink-soft hover:text-app-ink py-1 h-7 rounded-lg px-2 font-medium transition-all"
+                                    onClick={() => onRescheduleTaskWithinWeek(task.id)}
+                                    data-action="reschedule-within-week"
+                                    aria-label={`Đẩy ${task.title} sang ngày mai`}
+                                  >
+                                    <CalendarClock className="mr-1 h-3 w-3 text-app-ink-muted" />
+                                    Đẩy sang ngày mai
+                                  </Button>
+                                )}
+                                {onRescheduleTaskToNextWeek || (onSkipNonCoreTask && !task.isCore) ? (
+                                  <details className="group rounded-lg border border-app-line/40 bg-app-bg/30 px-3 py-1 transition-all duration-150 flex-1 sm:flex-initial">
+                                    <summary className="flex cursor-pointer list-none items-center justify-center gap-1 text-[11px] font-medium text-app-ink-muted h-6">
+                                      Khác
+                                      <ChevronDown className="h-3.5 w-3.5 transition-transform group-open:rotate-180" />
+                                    </summary>
+                                    <div className="mt-2 flex flex-wrap gap-1.5 justify-center">
+                                      {onRescheduleTaskToNextWeek && (
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          className="text-[10px] text-app-ink-soft font-medium rounded-lg px-2.5 py-0.5 h-7"
+                                          onClick={() => onRescheduleTaskToNextWeek(task.id)}
+                                          data-action="reschedule-next-week"
+                                          aria-label={`Dời ${task.title} sang tuần sau`}
+                                        >
+                                          <CalendarPlus className="mr-1 h-3 w-3" />
+                                          Sang tuần sau
+                                        </Button>
+                                      )}
+                                      {onSkipNonCoreTask && !task.isCore && (
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          className="text-[10px] text-app-ink-soft font-medium rounded-lg px-2.5 py-0.5 h-7"
+                                          onClick={() => onSkipNonCoreTask(task.id)}
+                                          data-action="skip-non-core"
+                                          aria-label={`Bỏ qua việc tùy chọn ${task.title}`}
+                                        >
+                                          <X className="mr-1 h-3 w-3" />
+                                          Bỏ qua
+                                        </Button>
+                                      )}
+                                    </div>
+                                  </details>
                                 ) : null}
                               </div>
-                            ) : null}
-                          </div>
-                        </MotionStaggerItem>
-                      );
-                    })}
-                  </MotionStaggerList>
-                )}
-                {secondaryTodayTasks.length > 0 && (
-                  <details className="group min-w-0 rounded-card-lg border border-app-line bg-app-surface px-4 py-3.5 shadow-3xs transition-all duration-150">
-                    <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-xs font-semibold text-app-ink">
-                      <span>Sau việc đầu tiên</span>
-                      <span className="rounded-lg border border-app-line bg-app-bg px-2 py-0.5 text-[10px] font-medium text-app-ink-soft">
-                        {secondaryTodayTasks.length} việc
-                      </span>
-                    </summary>
-                    <p className="mt-1.5 text-[11px] text-app-ink-muted leading-relaxed">
-                      Tập trung hoàn thành việc ưu tiên trước khi chuyển năng lượng sang các việc phụ dưới đây.
-                    </p>
-                    <div className="mt-3 space-y-2">
-                      {secondaryPreviewTasks.map((task, index) => (
-                        <div
-                          key={task.id}
-                          className="flex min-w-0 items-center gap-3 rounded-card border border-app-line/20 bg-app-bg/20 px-3.5 py-2.5"
-                        >
-                          <div className="flex h-5.5 w-5.5 shrink-0 items-center justify-center rounded-lg bg-app-line/80 text-[10px] font-bold text-app-ink-soft">
-                            {index + 2}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-xs font-semibold text-app-ink">{task.title}</p>
-                            <p className="mt-0.5 text-[10px] text-app-ink-muted">{task.leadIndicatorName}</p>
-                          </div>
-                          <Badge
-                            variant={task.isCore ? "success" : "warning"}
-                            className="text-[9px] px-1.5 py-0 shadow-none rounded-md"
-                          >
-                            {task.isCore ? "Cốt lõi" : "Tùy chọn"}
-                          </Badge>
+                              {task.isCore && (onRescheduleTaskWithinWeek || onRescheduleTaskToNextWeek) ? (
+                                <span
+                                  data-testid={`overdue-core-note-${task.id}`}
+                                  className="block text-[10px] text-app-ink-muted font-medium italic pl-1"
+                                >
+                                  Việc cốt lõi không thể bỏ — chỉ dời lịch.
+                                </span>
+                              ) : null}
+                            </div>
+                          ) : null}
                         </div>
-                      ))}
-                    </div>
-                    {remainingSecondaryTasks > 0 && (
-                      <p className="mt-2.5 text-xs text-app-ink-muted italic pl-1">
-                        + {remainingSecondaryTasks} việc phụ khác đang được xếp hàng phía sau...
-                      </p>
-                    )}
-                  </details>
-                )}
-                <div className="rounded-[14px] border border-[rgba(23,21,15,0.08)] dark:border-app-line bg-[#FAF8F3] dark:bg-app-bg-subtle p-[16px_18px]">
-                  <div className="flex items-center justify-between mb-[9px]">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#A8A296] dark:text-app-ink-muted">
-                      Tiến độ tuần {currentWeek}
+                      </MotionStaggerItem>
+                    );
+                  })}
+                </MotionStaggerList>
+              )}
+              {secondaryTodayTasks.length > 0 && (
+                <details className="group min-w-0 rounded-card-lg border border-app-line bg-app-surface px-4 py-3.5 shadow-3xs transition-all duration-150">
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-xs font-semibold text-app-ink">
+                    <span>Sau việc đầu tiên</span>
+                    <span className="rounded-lg border border-app-line bg-app-bg px-2 py-0.5 text-[10px] font-medium text-app-ink-soft">
+                      {secondaryTodayTasks.length} việc
                     </span>
-                    <span className="font-mono text-[13px] font-bold text-[#0C5E3A]">{weekCompletion.percent}%</span>
-                  </div>
-                  <Progress value={weekCompletion.percent} className="h-2 shadow-none rounded-full" />
-                </div>
-                {primaryTaskCompletedToday && (
-                  <p
-                    data-testid="today-primary-done-nudge"
-                    className="rounded-card border border-app-accent/20 bg-app-accent-soft/40 px-4 py-3 text-xs leading-relaxed text-app-accent font-medium"
-                  >
-                    Việc quan trọng nhất đã chốt xong – hãy lưu check-in ngắn để khép lại hôm nay.
+                  </summary>
+                  <p className="mt-1.5 text-[11px] text-app-ink-muted leading-relaxed">
+                    Tập trung hoàn thành việc ưu tiên trước khi chuyển năng lượng sang các việc phụ dưới đây.
                   </p>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-          <div className={fadeInClassName} style={{ animationDelay: "0.06s" }}>
-            <Card className={`min-w-0 overflow-hidden rounded-[20px] border border-[rgba(23,21,15,0.08)] bg-white p-4 dark:border-app-line dark:bg-app-surface sm:p-6 lg:h-full`}>
-              <div className="min-w-0">
-                <div className="flex min-w-0 items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <h2 className="flex items-center gap-[9px] break-words text-app-ink text-[18px] font-bold m-0 mb-1">
-                      <span className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-lg bg-[#EDF7E0] text-[#0C5E3A]">
-                        <Gauge className="h-3.5 w-3.5" />
-                      </span>
-                      Check-in hôm nay
-                    </h2>
-                    <p className="text-[12.5px] text-[#8C887C] dark:text-app-ink-muted m-0 mb-5">
-                      30 giây · Lắng nghe bản thân
-                    </p>
-                  </div>
-                  {todayCheckIn && (
-                    <span className="shrink-0 inline-flex items-center gap-1 text-[10px] font-bold text-app-status-success uppercase tracking-[0.1em]">
-                      <CheckCircle2 className="h-3 w-3" />
-                      Đã lưu
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div className="min-w-0">
-                {todayCheckIn && (
-                  <div
-                    data-testid="today-check-in-saved"
-                    className="flex items-center gap-2 rounded-lg border border-app-status-success/15 bg-app-status-success/8 px-3 py-2 text-[11px] text-app-status-success font-medium mb-4"
-                  >
-                    <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
-                    <div className="flex-1">
-                      <span className="font-semibold">Đã lưu:</span>{" "}
-                      <span className="font-bold">
-                        {getMoodLabel((todayCheckIn.mood as DailyMood | undefined) ?? "steady")}
-                      </span>
-                      <span className="sr-only">{todayCheckIn.date}</span>
-                    </div>
-                  </div>
-                )}
-                <div>
-                  <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#A8A296] dark:text-app-ink-muted mb-2.5">
-                    Năng lượng
-                  </div>
-                  <div role="radiogroup" aria-label="Năng lượng" className="grid grid-cols-3 gap-2 mb-5">
-                    {MOOD_OPTIONS.map((option) => {
-                      const isActive = dailyMood === option.value;
-                      const moodStyle = getMoodOptionStyle(option.value, isActive);
-                      const emoji = option.value === "low" ? "🌙" : option.value === "high" ? "🔥" : "🌿";
-
-                      return (
-                        <Button
-                          key={option.value}
-                          type="button"
-                          role="radio"
-                          aria-checked={isActive}
-                          aria-label={`${option.label}: ${option.hint}`}
-                          variant="outline"
-                          className={`h-auto min-w-0 justify-center flex-col gap-[7px] px-[6px] py-[14px] rounded-[13px] border-[1.5px] text-[10px] font-extrabold uppercase tracking-[0.08em] transition-all duration-200 ${moodStyle}`}
-                          onClick={() => onDailyMoodChange(option.value)}
+                  <div className="mt-3 space-y-2">
+                    {secondaryPreviewTasks.map((task, index) => (
+                      <div
+                        key={task.id}
+                        className="flex min-w-0 items-center gap-3 rounded-card border border-app-line/20 bg-app-bg/20 px-3.5 py-2.5"
+                      >
+                        <div className="flex h-5.5 w-5.5 shrink-0 items-center justify-center rounded-lg bg-app-line/80 text-[10px] font-bold text-app-ink-soft">
+                          {index + 2}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-xs font-semibold text-app-ink">{task.title}</p>
+                          <p className="mt-0.5 text-[10px] text-app-ink-muted">{task.leadIndicatorName}</p>
+                        </div>
+                        <Badge
+                          variant={task.isCore ? "success" : "warning"}
+                          className="text-[9px] px-1.5 py-0 shadow-none rounded-md"
                         >
-                          <span className="text-lg shrink-0">{emoji}</span>
-                          <span>{option.label}</span>
-                        </Button>
-                      );
-                    })}
+                          {task.isCore ? "Cốt lõi" : "Tùy chọn"}
+                        </Badge>
+                      </div>
+                    ))}
                   </div>
-                </div>
-                <div>
-                  <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#A8A296] dark:text-app-ink-muted mb-2.5">
-                    Ghi chú nhanh
-                  </div>
-                  <Textarea
-                    id="daily-note"
-                    rows={2}
-                    value={dailyNote}
-                    onChange={(event) => onDailyNoteChange(event.target.value)}
-                    placeholder="Bài học nhỏ hay cảm nhận hôm nay..."
-                    className="border-[rgba(23,21,15,0.12)] dark:border-app-line bg-[#FAF8F3] dark:bg-app-bg-subtle text-[#17150F] dark:text-app-ink placeholder:text-app-ink-muted/50 focus:border-[#0C5E3A]/30 focus:ring-1 focus:ring-[#0C5E3A]/10 rounded-[12px] shadow-none text-[13px] transition-all duration-150 p-[12px_14px] h-[84px] mb-4"
-                  />
-                </div>
-                <Button
-                  variant="default"
-                  className="w-full bg-[#0C5E3A] hover:bg-[#0C5E3A]/90 text-white font-bold text-[13.5px] py-[13px] rounded-[12px] mb-[14px] transition-all active:scale-[0.98]"
-                  onClick={handleSaveCheckInClick}
-                  disabled={isSavingCheckIn}
-                  aria-busy={isSavingCheckIn}
-                  aria-label={hasSavedTodayCheckIn ? "Cập nhật check-in" : "Lưu check-in"}
-                  >
-                    {isSavingCheckIn ? (
-                      <>
-                        <Loader2 className={loadingIconClassName} aria-hidden="true" />
-                        Đang lưu...
-                      </>
-                    ) : hasSavedTodayCheckIn ? (
-                      "Cập nhật"
-                    ) : (
-                      "Lưu check-in"
-                    )}
-                  </Button>
-                {onOpenWeekTab && (
-                  <Button
-                    data-testid="today-check-in-open-week"
-                    variant="ghost"
-                    className="w-full justify-center text-[#0C5E3A] hover:text-[#0C5E3A]/80 text-[12.5px] font-bold h-auto py-1 transition-colors mb-4"
-                    onClick={onOpenWeekTab}
-                  >
-                    Xem đánh giá tuần
-                    <ArrowRight className="ml-2 h-3.5 w-3.5" />
-                  </Button>
-                )}
-                {upcomingStrategicBlock && (
-                  <div className="mt-5 pt-4 border-t border-app-line/20">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-app-accent mb-1">
-                      Khung giờ chiến lược
+                  {remainingSecondaryTasks > 0 && (
+                    <p className="mt-2.5 text-xs text-app-ink-muted italic pl-1">
+                      + {remainingSecondaryTasks} việc phụ khác đang được xếp hàng phía sau...
                     </p>
-                    <p className="text-xs font-semibold text-app-ink">{upcomingStrategicBlock.startTime} · {upcomingStrategicBlock.durationMinutes} phút</p>
-                    <p className="text-[11px] text-app-ink-muted mt-0.5">
-                      Dành thời gian không xao nhãng cho việc quan trọng nhất.
-                    </p>
-                  </div>
-                )}
-                <SecondaryPanel title="Lịch sử check-in" collapsible defaultOpen={false} className="mt-4">
-                  {latestCheckIn && (
-                    <div
-                      aria-live="polite"
-                      className="rounded-[12px] border border-[rgba(23,21,15,0.06)] dark:border-app-line bg-[#FAF8F3] dark:bg-app-bg-subtle p-[13px_16px] text-[11px] text-app-ink-muted leading-relaxed"
-                    >
-                      Gần nhất: {formatCalendarDate(latestCheckIn.date)} ·{" "}
-                      <span className="font-semibold text-[#17150F] dark:text-app-ink">
-                        {getMoodLabel((latestCheckIn.mood as DailyMood | undefined) ?? "steady")}
-                      </span>
-                    </div>
                   )}
-                </SecondaryPanel>
+                </details>
+              )}
+              <div className="rounded-[14px] border border-[rgba(23,21,15,0.08)] dark:border-app-line bg-[#FAF8F3] dark:bg-app-bg-subtle p-[16px_18px]">
+                <div className="flex items-center justify-between mb-[9px]">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#A8A296] dark:text-app-ink-muted">
+                    Tiến độ tuần {currentWeek}
+                  </span>
+                  <span className="font-mono text-[13px] font-bold text-[#0C5E3A]">{weekCompletion.percent}%</span>
+                </div>
+                <Progress value={weekCompletion.percent} className="h-2 shadow-none rounded-full" />
               </div>
-            </Card>
-          </div>
+              {primaryTaskCompletedToday && (
+                <p
+                  data-testid="today-primary-done-nudge"
+                  className="rounded-card border border-app-accent/20 bg-app-accent-soft/40 px-4 py-3 text-xs leading-relaxed text-app-accent font-medium"
+                >
+                  Việc quan trọng nhất đã chốt xong – hãy lưu check-in ngắn để khép lại hôm nay.
+                </p>
+              )}
+            </CardContent>
+          </Card>
         </div>
+        <div
+          ref={checkInCardRef}
+          data-twelve-week-checkin-card
+          className={fadeInClassName}
+          style={{ animationDelay: "0.06s" }}
+        >
+          <Card className="scroll-mt-24 min-w-0 overflow-hidden rounded-[20px] border border-[rgba(23,21,15,0.08)] bg-white p-4 dark:border-app-line dark:bg-app-surface sm:p-6 lg:h-full">
+            <div className="min-w-0">
+              <div className="flex min-w-0 items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <h2 className="flex items-center gap-[9px] break-words text-app-ink text-[18px] font-bold m-0 mb-1">
+                    <span className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-lg bg-[#EDF7E0] text-[#0C5E3A]">
+                      <Gauge className="h-3.5 w-3.5" />
+                    </span>
+                    Check-in hôm nay
+                  </h2>
+                  <p className="text-[12.5px] text-[#8C887C] dark:text-app-ink-muted m-0 mb-5">
+                    30 giây · Lắng nghe bản thân
+                  </p>
+                </div>
+                {todayCheckIn && (
+                  <span className="shrink-0 inline-flex items-center gap-1 text-[10px] font-bold text-app-status-success uppercase tracking-[0.1em]">
+                    <CheckCircle2 className="h-3 w-3" />
+                    Đã lưu
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="min-w-0">
+              {todayCheckIn && (
+                <div
+                  data-testid="today-check-in-saved"
+                  className="flex items-center gap-2 rounded-lg border border-app-status-success/15 bg-app-status-success/8 px-3 py-2 text-[11px] text-app-status-success font-medium mb-4"
+                >
+                  <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+                  <div className="flex-1">
+                    <span className="font-semibold">Đã lưu:</span>{" "}
+                    <span className="font-bold">
+                      {getMoodLabel((todayCheckIn.mood as DailyMood | undefined) ?? "steady")}
+                    </span>
+                    <span className="sr-only">{todayCheckIn.date}</span>
+                  </div>
+                </div>
+              )}
+              <div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#A8A296] dark:text-app-ink-muted mb-2.5">
+                  Năng lượng
+                </div>
+                <div role="radiogroup" aria-label="Năng lượng" className="grid grid-cols-3 gap-2 mb-5">
+                  {MOOD_OPTIONS.map((option) => {
+                    const isActive = dailyMood === option.value;
+                    const moodStyle = getMoodOptionStyle(option.value, isActive);
+                    const emoji = option.value === "low" ? "🌙" : option.value === "high" ? "🔥" : "🌿";
+
+                    return (
+                      <Button
+                        key={option.value}
+                        type="button"
+                        role="radio"
+                        aria-checked={isActive}
+                        aria-label={`${option.label}: ${option.hint}`}
+                        variant="outline"
+                        className={`h-auto min-w-0 justify-center flex-col gap-[7px] px-[6px] py-[14px] rounded-[13px] border-[1.5px] text-[10px] font-extrabold uppercase tracking-[0.08em] transition-all duration-200 ${moodStyle}`}
+                        onClick={() => onDailyMoodChange(option.value)}
+                      >
+                        <span className="text-lg shrink-0">{emoji}</span>
+                        <span>{option.label}</span>
+                      </Button>
+                    );
+                  })}
+                </div>
+              </div>
+              <div>
+                <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#A8A296] dark:text-app-ink-muted mb-2.5">
+                  Ghi chú nhanh
+                </div>
+                <Textarea
+                  id="daily-note"
+                  rows={2}
+                  value={dailyNote}
+                  onChange={(event) => onDailyNoteChange(event.target.value)}
+                  placeholder="Bài học nhỏ hay cảm nhận hôm nay..."
+                  className="border-[rgba(23,21,15,0.12)] dark:border-app-line bg-[#FAF8F3] dark:bg-app-bg-subtle text-[#17150F] dark:text-app-ink placeholder:text-app-ink-muted/50 focus:border-[#0C5E3A]/30 focus:ring-1 focus:ring-[#0C5E3A]/10 rounded-[12px] shadow-none text-[13px] transition-all duration-150 p-[12px_14px] h-[84px] mb-4"
+                />
+              </div>
+              <Button
+                variant="default"
+                className="w-full bg-[#0C5E3A] hover:bg-[#0C5E3A]/90 text-white font-bold text-[13.5px] py-[13px] rounded-[12px] mb-[14px] transition-all active:scale-[0.98]"
+                onClick={handleSaveCheckInClick}
+                disabled={isSavingCheckIn}
+                aria-busy={isSavingCheckIn}
+                aria-label={hasSavedTodayCheckIn ? "Cập nhật check-in" : "Lưu check-in"}
+              >
+                {isSavingCheckIn ? (
+                  <>
+                    <Loader2 className={loadingIconClassName} aria-hidden="true" />
+                    Đang lưu...
+                  </>
+                ) : hasSavedTodayCheckIn ? (
+                  "Cập nhật"
+                ) : (
+                  "Lưu check-in"
+                )}
+              </Button>
+              {onOpenWeekTab && (
+                <Button
+                  data-testid="today-check-in-open-week"
+                  variant="ghost"
+                  className="w-full justify-center text-[#0C5E3A] hover:text-[#0C5E3A]/80 text-[12.5px] font-bold h-auto py-1 transition-colors mb-4"
+                  onClick={onOpenWeekTab}
+                >
+                  Xem đánh giá tuần
+                  <ArrowRight className="ml-2 h-3.5 w-3.5" />
+                </Button>
+              )}
+              {upcomingStrategicBlock && (
+                <div className="mt-5 pt-4 border-t border-app-line/20">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-app-accent mb-1">
+                    Khung giờ chiến lược
+                  </p>
+                  <p className="text-xs font-semibold text-app-ink">
+                    {upcomingStrategicBlock.startTime} · {upcomingStrategicBlock.durationMinutes} phút
+                  </p>
+                  <p className="text-[11px] text-app-ink-muted mt-0.5">
+                    Dành thời gian không xao nhãng cho việc quan trọng nhất.
+                  </p>
+                </div>
+              )}
+              <SecondaryPanel title="Lịch sử check-in" collapsible defaultOpen={false} className="mt-4">
+                {latestCheckIn && (
+                  <div
+                    aria-live="polite"
+                    className="rounded-[12px] border border-[rgba(23,21,15,0.06)] dark:border-app-line bg-[#FAF8F3] dark:bg-app-bg-subtle p-[13px_16px] text-[11px] text-app-ink-muted leading-relaxed"
+                  >
+                    Gần nhất: {formatCalendarDate(latestCheckIn.date)} ·{" "}
+                    <span className="font-semibold text-[#17150F] dark:text-app-ink">
+                      {getMoodLabel((latestCheckIn.mood as DailyMood | undefined) ?? "steady")}
+                    </span>
+                  </div>
+                )}
+              </SecondaryPanel>
+            </div>
+          </Card>
+        </div>
+      </div>
       {rescueStatus && rescueStatus.severity !== "none" && (
         <div className="order-5">
           <TwelveWeekRescueNudge
@@ -1091,8 +1129,13 @@ export function TwelveWeekTodayTab({
           className="above-mobile-nav fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] left-0 right-0 z-40 border-t border-app-line/80 bg-app-surface/95 px-4 pb-4 pt-3 shadow-[0_-18px_40px_-30px_rgba(23,21,15,0.45)] backdrop-blur-md sm:hidden"
         >
           <div className="mx-auto flex w-full max-w-[42rem] flex-col gap-2.5">
-            <p className="text-[11px] font-semibold text-app-ink-muted">
-              Check-in hôm nay chưa được lưu. Ghi lại năng lượng và một ghi chú ngắn trước khi rời tab này.
+            <p className="flex items-center justify-between gap-3 text-[11px] font-semibold text-app-ink-muted">
+              <span className="min-w-0 leading-relaxed">
+                Check-in hôm nay có thay đổi chưa lưu. Lưu trước khi rời tab này.
+              </span>
+              <span className="shrink-0 rounded-full border border-app-warm-border/30 bg-app-warm-soft/30 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em] text-app-warm-strong">
+                Chưa lưu
+              </span>
             </p>
             <Button
               size="lg"

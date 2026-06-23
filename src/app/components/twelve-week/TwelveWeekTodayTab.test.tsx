@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ComponentProps } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -463,7 +463,13 @@ describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
     expect(screen.getAllByRole("button", { name: /Lưu check-in/i })).toHaveLength(1);
   });
 
-  it("shows a sticky mobile check-in CTA only while today's check-in form has unsaved edits", () => {
+  it("shows a sticky mobile check-in CTA only after an unsaved check-in scrolls out of view", async () => {
+    Object.defineProperty(window, "innerWidth", {
+      configurable: true,
+      writable: true,
+      value: 375,
+    });
+
     const { rerender } = render(
       <TwelveWeekTodayTab
         {...makeProps({
@@ -474,9 +480,31 @@ describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
     );
 
     const shell = document.querySelector("[data-twelve-week-today-shell]");
+    const checkInCard = document.querySelector("[data-twelve-week-checkin-card]") as HTMLElement | null;
+
+    expect(checkInCard).not.toBeNull();
+    expect(document.querySelector("[data-twelve-week-today-mobile-checkin-bar]")).toBeNull();
+
+    vi.spyOn(checkInCard as HTMLElement, "getBoundingClientRect").mockReturnValue({
+      x: 0,
+      y: -480,
+      width: 320,
+      height: 360,
+      top: -480,
+      right: 320,
+      bottom: -120,
+      left: 0,
+      toJSON: () => ({}),
+    });
+
+    act(() => {
+      window.dispatchEvent(new Event("scroll"));
+    });
+
+    await waitFor(() => expect(shell).toHaveClass("pb-[calc(7.5rem+env(safe-area-inset-bottom))]", "sm:pb-0"));
+
     const actionBar = document.querySelector("[data-twelve-week-today-mobile-checkin-bar]");
 
-    expect(shell).toHaveClass("pb-[calc(7.5rem+env(safe-area-inset-bottom))]", "sm:pb-0");
     expect(actionBar).toHaveClass(
       "above-mobile-nav",
       "sm:hidden",
@@ -493,7 +521,10 @@ describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
       "pt-3",
       "backdrop-blur-md",
     );
-    expect(within(actionBar as HTMLElement).getByRole("button", { name: /^Lưu check-in hôm nay$/i })).toBeInTheDocument();
+    expect(within(actionBar as HTMLElement).getByText("Chưa lưu")).toBeInTheDocument();
+    expect(
+      within(actionBar as HTMLElement).getByRole("button", { name: /^Lưu check-in hôm nay$/i }),
+    ).toBeInTheDocument();
 
     rerender(
       <TwelveWeekTodayTab
@@ -504,9 +535,7 @@ describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
       />,
     );
 
-    expect(
-      document.querySelector("[data-twelve-week-today-mobile-checkin-bar]"),
-    ).toBeNull();
+    expect(document.querySelector("[data-twelve-week-today-mobile-checkin-bar]")).toBeNull();
   });
 });
 
