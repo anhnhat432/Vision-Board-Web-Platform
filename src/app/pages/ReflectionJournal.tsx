@@ -296,10 +296,7 @@ function ReflectionJournalContent() {
   );
   const hasReflections = sortedReflections.length > 0;
 
-  const activeGoal = useMemo(
-    () => (userData ? getActiveTwelveWeekGoal(userData.goals) : null),
-    [userData],
-  );
+  const activeGoal = useMemo(() => (userData ? getActiveTwelveWeekGoal(userData.goals) : null), [userData]);
 
   const weekCompletion = useMemo(() => {
     if (!activeGoal?.twelveWeekSystem) return null;
@@ -393,7 +390,8 @@ function ReflectionJournalContent() {
             Nhật ký phản tư
           </h1>
           <p className="mb-5 max-w-[44ch] text-sm leading-relaxed text-app-ink-soft sm:mb-6 sm:text-[14.5px]">
-            Ghi lại điều bạn học được, điều biết ơn, và điều muốn cải thiện. Mỗi dòng là một dấu chân trên hành trình 12 tuần.
+            Ghi lại điều bạn học được, điều biết ơn, và điều muốn cải thiện. Mỗi dòng là một dấu chân trên hành trình 12
+            tuần.
           </p>
           <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
             <Button
@@ -428,7 +426,7 @@ function ReflectionJournalContent() {
       </section>
 
       {/* Search + Filters */}
-      <div className="flex flex-col gap-3.5">
+      <div className="rounded-[18px] border border-app-line bg-app-surface p-3.5 shadow-3xs sm:p-4">
         <div className="relative">
           <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#A8A296]" aria-hidden="true" />
           <Input
@@ -437,55 +435,63 @@ function ReflectionJournalContent() {
             placeholder="Tìm kiếm nhật ký…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-12 pl-[42px] rounded-[13px] border-app-line bg-app-surface text-[13.5px] placeholder:text-[#A8A296]"
+            className="h-12 rounded-[13px] border-app-line bg-app-bg/45 pl-[42px] text-[13.5px] placeholder:text-[#A8A296]"
           />
         </div>
-        <div className="flex flex-wrap items-center gap-2.5">
-          <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#A8A296] mr-0.5">Loại</span>
-          {(["all", "weekly-review", "freeform"] as const).map((type) => {
-            const isActive = filterType === type;
-            return (
-              <button
-                key={type}
-                type="button"
-                onClick={() => setFilterType(type)}
-                className={cn(
-                  "inline-flex items-center rounded-full border px-3.5 py-2 text-xs font-semibold transition-all duration-150 active:scale-[0.96]",
-                  isActive
-                    ? "border-app-warm bg-[#FBF4EE] dark:bg-app-warm-soft/20 text-app-warm"
-                    : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-warm/40 hover:text-app-warm",
-                )}
-              >
-                {type === "all" ? "Mọi loại" : type === "weekly-review" ? "Review tuần" : "Tự do"}
-              </button>
-            );
-          })}
-          <span className="w-px h-[22px] bg-app-line mx-1.5" />
-          <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#A8A296] mr-0.5">Tâm trạng</span>
-          {(["", "happy", "neutral", "sad"] as const).map((mood) => {
-            const labels: Record<string, string> = {
-              "": "Mọi tâm trạng",
-              happy: "Vui vẻ",
-              neutral: "Bình thường",
-              sad: "Suy tư",
-            };
-            const isActive = filterMood === mood;
-            return (
-              <button
-                key={mood}
-                type="button"
-                onClick={() => setFilterMood(mood)}
-                className={cn(
-                  "inline-flex items-center rounded-full border px-3.5 py-2 text-xs font-semibold transition-all duration-150 active:scale-[0.96]",
-                  isActive
-                    ? "border-app-warm bg-[#FBF4EE] dark:bg-app-warm-soft/20 text-app-warm"
-                    : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-warm/40 hover:text-app-warm",
-                )}
-              >
-                {labels[mood]}
-              </button>
-            );
-          })}
+        <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
+          <div className="min-w-0 space-y-2">
+            <span className="block text-[10px] font-bold uppercase tracking-[0.1em] text-[#A8A296]">Loại</span>
+            <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap">
+              {(["all", "weekly-review", "freeform"] as const).map((type) => {
+                const isActive = filterType === type;
+                return (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => setFilterType(type)}
+                    className={cn(
+                      "inline-flex min-h-11 min-w-0 items-center justify-center rounded-full border px-3 py-2 text-center text-xs font-semibold transition-all duration-150 active:scale-[0.96] sm:min-h-10 sm:px-3.5",
+                      isActive
+                        ? "border-app-warm bg-[#FBF4EE] text-app-warm dark:bg-app-warm-soft/20"
+                        : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-warm/40 hover:text-app-warm",
+                    )}
+                  >
+                    {type === "all" ? "Mọi loại" : type === "weekly-review" ? "Review tuần" : "Tự do"}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="min-w-0 space-y-2">
+            <span className="block text-[10px] font-bold uppercase tracking-[0.1em] text-[#A8A296]">Tâm trạng</span>
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
+              {(["", "happy", "neutral", "sad"] as const).map((mood) => {
+                const labels: Record<string, string> = {
+                  "": "Mọi tâm trạng",
+                  happy: "Vui vẻ",
+                  neutral: "Bình thường",
+                  sad: "Suy tư",
+                };
+                const isActive = filterMood === mood;
+                return (
+                  <button
+                    key={mood}
+                    type="button"
+                    onClick={() => setFilterMood(mood)}
+                    className={cn(
+                      "inline-flex min-h-11 min-w-0 items-center justify-center rounded-full border px-3 py-2 text-center text-xs font-semibold transition-all duration-150 active:scale-[0.96] sm:min-h-10 sm:px-3.5",
+                      isActive
+                        ? "border-app-warm bg-[#FBF4EE] text-app-warm dark:bg-app-warm-soft/20"
+                        : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-warm/40 hover:text-app-warm",
+                    )}
+                  >
+                    {labels[mood]}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -517,7 +523,9 @@ function ReflectionJournalContent() {
                 <MotionCountUp value={weekCompletion.completed} />
                 <span className="text-lg text-[#A8A296] font-bold"> / {weekCompletion.total}</span>
               </div>
-              <div className="text-[11.5px] text-[#7A6E5E] dark:text-app-ink-soft font-medium mt-1.5">task hoàn thành</div>
+              <div className="text-[11.5px] text-[#7A6E5E] dark:text-app-ink-soft font-medium mt-1.5">
+                task hoàn thành
+              </div>
             </div>
             <div>
               <div className="font-serif text-[40px] font-extrabold leading-none text-app-warm tabular-nums">
@@ -536,15 +544,17 @@ function ReflectionJournalContent() {
       )}
 
       <Dialog open={isAddingReflection} onOpenChange={setIsAddingReflection}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>Viết nhật ký mới</DialogTitle>
-            <DialogDescription>
-              Ghi lại bài học, cảm xúc, bước tiến hoặc bất kỳ điều gì bạn không muốn để trôi qua.
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent className="max-h-[calc(100dvh-2rem)] max-w-3xl overflow-y-auto p-0">
+          <div className="border-b border-app-line px-5 pb-4 pt-5 sm:px-6">
+            <DialogHeader>
+              <DialogTitle>Viết nhật ký mới</DialogTitle>
+              <DialogDescription>
+                Ghi lại bài học, cảm xúc, bước tiến hoặc bất kỳ điều gì bạn không muốn để trôi qua.
+              </DialogDescription>
+            </DialogHeader>
+          </div>
 
-          <div className="mt-4 grid gap-5">
+          <div className="grid gap-5 px-5 py-5 sm:px-6">
             {pendingReflectionDraft ? (
               <div className="rounded-xl border border-app-warm-border bg-app-warm-soft p-4 text-sm text-app-warm-strong">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -628,24 +638,26 @@ function ReflectionJournalContent() {
                 </Label>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {[
-                    { value: "happy" as MoodValue, label: "Vui vẻ", emoji: "😊" },
-                    { value: "neutral" as MoodValue, label: "Bình thường", emoji: "😐" },
-                    { value: "sad" as MoodValue, label: "Suy tư", emoji: "🤔" },
+                    { value: "happy" as MoodValue, label: "Vui vẻ", icon: Smile },
+                    { value: "neutral" as MoodValue, label: "Bình thường", icon: Meh },
+                    { value: "sad" as MoodValue, label: "Suy tư", icon: Frown },
                   ].map((item) => {
                     const isActive = newReflection.mood === item.value;
+                    const MoodIcon = item.icon;
                     return (
                       <button
                         key={item.value}
                         type="button"
+                        aria-pressed={isActive}
                         onClick={() => setNewReflection({ ...newReflection, mood: item.value })}
                         className={cn(
-                          "rounded-full border px-3 py-1.5 text-sm transition-all duration-150 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm focus-visible:ring-offset-2",
+                          "inline-flex min-h-11 items-center gap-2 rounded-full border px-3.5 py-2 text-sm transition-all duration-150 active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm focus-visible:ring-offset-2",
                           isActive
                             ? "bg-app-warm text-white border-app-warm shadow-app-sm font-semibold"
                             : "bg-app-surface border-app-warm-border text-app-ink-soft hover:bg-app-warm-soft",
                         )}
                       >
-                        <span className="mr-1">{item.emoji}</span>
+                        <MoodIcon className="h-4 w-4" aria-hidden="true" />
                         {item.label}
                       </button>
                     );
@@ -653,19 +665,28 @@ function ReflectionJournalContent() {
                 </div>
               </div>
 
-              <Button
-                onClick={handleAddReflection}
-                disabled={!newReflection.title || !newReflection.content}
-                className="mt-6 w-full bg-app-warm text-white hover:bg-app-warm-hover active:scale-[0.98] transition-all duration-150 focus-visible:ring-app-warm focus-visible:ring-offset-2 shadow-app-md shadow-app-warm/15"
-              >
-                Lưu nhật ký
-              </Button>
+              <div className="mt-5 rounded-xl border border-app-warm-border/70 bg-app-surface/70 p-3">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-xs leading-relaxed text-app-ink-soft">
+                    {newReflection.title && newReflection.content
+                      ? "Đã đủ nội dung để lưu. Bản nháp sẽ được xoá sau khi lưu thành công."
+                      : "Cần có tiêu đề và nội dung trước khi lưu nhật ký."}
+                  </p>
+                  <Button
+                    onClick={handleAddReflection}
+                    disabled={!newReflection.title || !newReflection.content}
+                    className="min-h-11 w-full bg-app-warm text-white shadow-app-md shadow-app-warm/15 transition-all duration-150 hover:bg-app-warm-hover active:scale-[0.98] focus-visible:ring-app-warm focus-visible:ring-offset-2 sm:w-auto"
+                  >
+                    Lưu nhật ký
+                  </Button>
+                </div>
+              </div>
             </div>
 
             <div className="rounded-xl border border-app-line bg-app-surface p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">Gợi ý bắt đầu</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                {JOURNAL_PROMPTS.map((prompt) => (
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                {JOURNAL_PROMPTS.map((prompt, index) => (
                   <button
                     key={prompt}
                     type="button"
@@ -676,9 +697,12 @@ function ReflectionJournalContent() {
                         return getReflectionInputForContent(content, prev);
                       });
                     }}
-                    className="rounded-full border border-app-line bg-app-bg px-3.5 py-2 text-sm text-app-ink-soft hover:bg-app-warm-soft hover:text-app-warm hover:border-app-warm/30 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm focus-visible:ring-offset-2 transition-all duration-150 text-left"
+                    className="min-h-[64px] rounded-card border border-app-line bg-app-bg px-3.5 py-3 text-left text-sm leading-relaxed text-app-ink-soft transition-all duration-150 hover:border-app-warm/30 hover:bg-app-warm-soft hover:text-app-warm active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm focus-visible:ring-offset-2"
                   >
-                    {prompt}
+                    <span className="mb-1 block text-[10px] font-bold uppercase tracking-[0.14em] text-app-ink-muted">
+                      Gợi ý {index + 1}
+                    </span>
+                    <span>{prompt}</span>
                   </button>
                 ))}
               </div>
@@ -733,29 +757,31 @@ function ReflectionJournalContent() {
           <div className="w-full max-w-[660px] border-t border-app-line pt-6">
             <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#A8A296] mb-3.5">Gợi ý mở đầu</div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {([
-                {
-                  title: "Điều tôi học được",
-                  hint: "Một bài học hoặc nhận ra hôm nay.",
-                  iconBg: "#EDF7E0",
-                  iconColor: "#0C5E3A",
-                  prompt: "Điều gì hôm nay khiến bạn tự hào về bản thân?",
-                },
-                {
-                  title: "Điều tôi biết ơn",
-                  hint: "Một điều nhỏ khiến hôm nay nhẹ hơn.",
-                  iconBg: "#FBEAE0",
-                  iconColor: "#B0673C",
-                  prompt: "Một điều bạn muốn làm tốt hơn vào ngày mai là gì?",
-                },
-                {
-                  title: "Điều muốn cải thiện",
-                  hint: "Một việc tuần tới làm tốt hơn.",
-                  iconBg: "#FFF8DE",
-                  iconColor: "#9A7B00",
-                  prompt: "Bạn đang học được điều gì từ chặng đường hiện tại?",
-                },
-              ] as const).map((item) => (
+              {(
+                [
+                  {
+                    title: "Điều tôi học được",
+                    hint: "Một bài học hoặc nhận ra hôm nay.",
+                    iconBg: "#EDF7E0",
+                    iconColor: "#0C5E3A",
+                    prompt: "Điều gì hôm nay khiến bạn tự hào về bản thân?",
+                  },
+                  {
+                    title: "Điều tôi biết ơn",
+                    hint: "Một điều nhỏ khiến hôm nay nhẹ hơn.",
+                    iconBg: "#FBEAE0",
+                    iconColor: "#B0673C",
+                    prompt: "Một điều bạn muốn làm tốt hơn vào ngày mai là gì?",
+                  },
+                  {
+                    title: "Điều muốn cải thiện",
+                    hint: "Một việc tuần tới làm tốt hơn.",
+                    iconBg: "#FFF8DE",
+                    iconColor: "#9A7B00",
+                    prompt: "Bạn đang học được điều gì từ chặng đường hiện tại?",
+                  },
+                ] as const
+              ).map((item) => (
                 <button
                   key={item.title}
                   type="button"
@@ -791,9 +817,18 @@ function ReflectionJournalContent() {
       ) : (
         /* Past Entries List */
         <section id="journal-entries">
-          <div className="mb-4">
-            <p className="text-xs uppercase tracking-[0.18em] text-app-ink-muted">GHI CHÉP CŨ</p>
-            <h2 className="mt-1 font-serif text-2xl font-medium text-app-ink">{filteredReflections.length} bài viết</h2>
+          <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-[0.18em] text-app-ink-muted">Ghi chép cũ</p>
+              <h2 className="mt-1 font-serif text-2xl font-medium text-app-ink">
+                {filteredReflections.length} bài viết
+              </h2>
+            </div>
+            {sortedReflections.length > 0 && (
+              <p className="max-w-[52ch] text-xs leading-relaxed text-app-ink-soft sm:text-right">
+                Danh sách được sắp theo ngày mới nhất. Dùng bộ lọc phía trên để tìm lại review tuần hoặc cảm xúc cụ thể.
+              </p>
+            )}
           </div>
 
           <div className="space-y-4">
@@ -803,7 +838,10 @@ function ReflectionJournalContent() {
               const phaseTone = getJournalPhaseTone();
 
               return (
-                <Card key={reflection.id} className="rounded-card border border-app-line bg-app-surface p-5 md:p-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_22px_46px_-30px_rgba(23,21,15,0.34)]">
+                <Card
+                  key={reflection.id}
+                  className="rounded-card border border-app-line bg-app-surface p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_22px_46px_-30px_rgba(23,21,15,0.34)] sm:p-5 md:p-6"
+                >
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
@@ -832,16 +870,18 @@ function ReflectionJournalContent() {
                         )}
                       </div>
 
-                      <h3 className="mt-2 font-serif text-lg font-medium text-app-ink">{reflection.title}</h3>
+                      <h3 className="mt-2 break-words font-serif text-lg font-medium leading-snug text-app-ink">
+                        {reflection.title}
+                      </h3>
 
-                      <p className="mt-2 text-sm leading-relaxed text-app-ink whitespace-pre-line">
+                      <p className="mt-2 max-w-[72ch] whitespace-pre-line break-words text-sm leading-relaxed text-app-ink">
                         {reflection.content}
                       </p>
 
                       {linkedGoal && (
                         <div className="mt-3 flex justify-end">
                           <Button variant="outline" size="sm" onClick={() => openLinkedCycle(reflection.linkedGoalId)}>
-                            Mở chu kỳ 12 tuần
+                            Mở chu kỳ liên quan
                             <ArrowRight className="h-3.5 w-3.5 ml-1" />
                           </Button>
                         </div>
@@ -854,7 +894,7 @@ function ReflectionJournalContent() {
                           variant="ghost"
                           size="icon"
                           aria-label={`Mở tuỳ chọn cho nhật ký ${reflection.title || formatCalendarDate(reflection.date)}`}
-                          className="shrink-0 text-app-ink-soft hover:text-app-ink"
+                          className="min-h-11 min-w-11 shrink-0 text-app-ink-soft hover:text-app-ink"
                         >
                           <MoreVertical className="h-4 w-4" aria-hidden="true" />
                         </Button>

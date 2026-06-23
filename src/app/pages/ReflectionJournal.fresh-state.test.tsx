@@ -60,13 +60,7 @@ describe("ReflectionJournal fresh state", () => {
 
     const hero = document.querySelector("[data-reflection-journal-hero]");
 
-    expect(hero).toHaveClass(
-      "grid-cols-[1fr_88px]",
-      "items-start",
-      "gap-4",
-      "p-5",
-      "md:grid-cols-[1fr_360px]",
-    );
+    expect(hero).toHaveClass("grid-cols-[1fr_88px]", "items-start", "gap-4", "p-5", "md:grid-cols-[1fr_360px]");
     expect(screen.getByRole("searchbox")).toBeInTheDocument();
   });
 

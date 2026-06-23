@@ -135,6 +135,8 @@ describe("TwelveWeekWeekTab review flow", () => {
     expect(screen.getByTestId("weekly-review-step-insights")).toHaveAttribute("data-done", "true");
     expect(screen.getByTestId("weekly-review-step-next")).toHaveAttribute("data-done", "true");
     expect(screen.getByTestId("weekly-review-readiness")).toHaveTextContent("4/4");
+    expect(screen.getByTestId("weekly-review-check-commitments")).toHaveTextContent(/cam/i);
+    expect(screen.getByTestId("weekly-review-check-next")).toHaveTextContent(/tuần/i);
   });
 
   it("renders WAM answer fields directly", () => {
@@ -233,12 +235,10 @@ describe("TwelveWeekWeekTab review flow", () => {
       "pb-4",
       "pt-3",
       "backdrop-blur-md",
-      "md:sticky",
-      "md:bottom-4",
-      "md:max-w-md",
+      "md:hidden",
     );
     expect(within(actionBar).getByText("Tiến độ review 2/4")).toBeInTheDocument();
-    expect(within(actionBar).getByText("Cần đủ 4 bước")).toBeInTheDocument();
+    expect(within(actionBar).getByText(/Thiếu 2 mục/i)).toBeInTheDocument();
   });
 
   it("blocks weekly review submit for a future week number", async () => {

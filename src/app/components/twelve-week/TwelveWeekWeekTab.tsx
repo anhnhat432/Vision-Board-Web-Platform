@@ -166,18 +166,18 @@ function isCommitmentAnswered(status: WeeklyCommitmentStatus | undefined): boole
 function getCommitmentButtonClass(status: WeeklyCommitmentStatus, currentStatus: WeeklyCommitmentStatus): string {
   const isActive = status === currentStatus;
   if (!isActive) {
-    return "border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg-subtle text-xs px-3 py-2 sm:px-2.5 sm:py-1.5 min-h-[36px] sm:min-h-0 flex items-center justify-center rounded-lg transition-all duration-200 weekly-btn-press";
+    return "w-full border-app-line bg-app-surface text-app-ink-soft hover:bg-app-bg-subtle text-xs px-3 py-2 sm:px-2.5 sm:py-1.5 min-h-[40px] sm:min-h-[36px] flex items-center justify-center rounded-lg text-center transition-all duration-200 weekly-btn-press";
   }
 
   switch (status) {
     case "kept":
-      return "border-app-status-success/30 bg-app-status-success/10 text-app-status-success hover:bg-app-status-success/20 font-semibold text-xs px-3 py-2 sm:px-2.5 sm:py-1.5 min-h-[36px] sm:min-h-0 flex items-center justify-center rounded-lg shadow-2xs ring-1 ring-app-status-success/15 weekly-btn-press";
+      return "w-full border-app-status-success/30 bg-app-status-success/10 text-app-status-success hover:bg-app-status-success/20 font-semibold text-xs px-3 py-2 sm:px-2.5 sm:py-1.5 min-h-[40px] sm:min-h-[36px] flex items-center justify-center rounded-lg text-center shadow-2xs ring-1 ring-app-status-success/15 weekly-btn-press";
     case "missed":
-      return "border-app-status-error/30 bg-app-status-error/10 text-app-status-error hover:bg-app-status-error/20 font-semibold text-xs px-3 py-2 sm:px-2.5 sm:py-1.5 min-h-[36px] sm:min-h-0 flex items-center justify-center rounded-lg shadow-2xs ring-1 ring-app-status-error/15 weekly-btn-press";
+      return "w-full border-app-status-error/30 bg-app-status-error/10 text-app-status-error hover:bg-app-status-error/20 font-semibold text-xs px-3 py-2 sm:px-2.5 sm:py-1.5 min-h-[40px] sm:min-h-[36px] flex items-center justify-center rounded-lg text-center shadow-2xs ring-1 ring-app-status-error/15 weekly-btn-press";
     case "not_set":
-      return "border-app-line-strong bg-app-bg-subtle text-app-ink-soft hover:bg-app-line-strong/20 font-semibold text-xs px-3 py-2 sm:px-2.5 sm:py-1.5 min-h-[36px] sm:min-h-0 flex items-center justify-center rounded-lg shadow-2xs weekly-btn-press";
+      return "w-full border-app-line-strong bg-app-bg-subtle text-app-ink-soft hover:bg-app-line-strong/20 font-semibold text-xs px-3 py-2 sm:px-2.5 sm:py-1.5 min-h-[40px] sm:min-h-[36px] flex items-center justify-center rounded-lg text-center shadow-2xs weekly-btn-press";
     default:
-      return "border-app-ink bg-app-ink text-white font-semibold text-xs px-3 py-2 sm:px-2.5 sm:py-1.5 min-h-[36px] sm:min-h-0 flex items-center justify-center rounded-lg shadow-2xs weekly-btn-press";
+      return "w-full border-app-ink bg-app-ink text-white font-semibold text-xs px-3 py-2 sm:px-2.5 sm:py-1.5 min-h-[40px] sm:min-h-[36px] flex items-center justify-center rounded-lg text-center shadow-2xs weekly-btn-press";
   }
 }
 
@@ -276,13 +276,31 @@ export function TwelveWeekWeekTab({
   const showForm = !reviewIsCompleted || isEditingReview;
 
   const reviewReadinessItems = [
-    { key: "score", label: "Điểm", done: true },
-    { key: "commitments", label: "Cam kết", done: allPreviousCommitmentsAnswered },
-    { key: "insights", label: "Góc nhìn", done: weeklyForm.insights.trim().length > 0 },
-    { key: "next", label: "Tuần tới", done: hasNextWeekCommitment },
+    { key: "score", label: "Điểm tuần", done: true },
+    { key: "commitments", label: "Cam kết cũ", done: allPreviousCommitmentsAnswered },
+    { key: "insights", label: "Bài học", done: weeklyForm.insights.trim().length > 0 },
+    { key: "next", label: "Tuần sau", done: hasNextWeekCommitment },
   ];
   const reviewReadyCount = reviewReadinessItems.filter((item) => item.done).length;
+  const reviewPendingItems = reviewReadinessItems.filter((item) => !item.done);
   const canSubmitWeeklyReview = allPreviousCommitmentsAnswered && hasNextWeekCommitment && !isFutureReviewWeek;
+  const reviewStatusTitle = isFutureReviewWeek
+    ? "Không thể chốt tuần tương lai."
+    : shouldConfirmEarlyReview
+      ? "Bạn đang chốt review sớm."
+      : canSubmitWeeklyReview
+        ? "Đã đủ 4 bước để lưu review."
+        : `Còn ${reviewPendingItems.length} mục cần hoàn tất.`;
+  const reviewStatusHint = isFutureReviewWeek
+    ? "Quay lại tuần hiện tại để chốt review này."
+    : canSubmitWeeklyReview
+      ? "Bạn có thể lưu ngay hoặc rà soát lại câu trả lời trước khi chốt."
+      : `Thiếu: ${reviewPendingItems.map((item) => item.label).join(", ")}.`;
+  const reviewStickyStatus = canSubmitWeeklyReview
+    ? "Sẵn sàng chốt"
+    : reviewPendingItems.length === 1
+      ? `Thiếu ${reviewPendingItems[0]?.label}`
+      : `Thiếu ${reviewPendingItems.length} mục`;
 
   const saveWeeklyReview = async () => {
     setIsSavingReview(true);
@@ -446,18 +464,18 @@ export function TwelveWeekWeekTab({
         <>
           {/* ── Hero Score Card ──────────────────────────────────────────────── */}
           <StaggerSection>
-            <div className="weekly-grain-overlay rounded-card border border-app-line/45 bg-gradient-to-br from-app-surface via-app-bg-subtle to-app-accent-soft/15 shadow-xs relative overflow-hidden p-6 sm:p-8 pt-10 weekly-card-lift">
+            <div className="weekly-grain-overlay relative overflow-hidden rounded-card border border-app-line/45 bg-gradient-to-br from-app-surface via-app-bg-subtle to-app-accent-soft/15 p-5 pt-9 shadow-xs weekly-card-lift sm:p-8 sm:pt-10">
               <PaperPin />
               <WashiTape className="opacity-75 rotate-[-1deg] -top-3.5" />
               {/* Large score focal glow */}
               <div className="weekly-score-hero rounded-card-lg" />
 
               {/* Header metadata row */}
-              <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest text-app-ink-muted relative z-10">
+              <div className="relative z-10 flex flex-wrap items-center justify-between gap-2 text-[10px] font-bold uppercase tracking-widest text-app-ink-muted">
                 <span className="font-serif text-sm font-bold tracking-normal normal-case text-app-ink bg-app-bg/85 px-2.5 py-0.5 rounded-md border border-app-line/20">
                   Tuần {currentWeekLimit} / {system.totalWeeks}
                 </span>
-                <span className="bg-app-bg/85 px-2.5 py-0.5 rounded-md border border-app-line/20 font-mono text-[11px]">
+                <span className="min-w-0 bg-app-bg/85 px-2.5 py-0.5 rounded-md border border-app-line/20 font-mono text-[11px]">
                   {currentWeekRange
                     ? `${formatCalendarDate(currentWeekRange.start)} – ${formatCalendarDate(currentWeekRange.end)}`
                     : "Chu kỳ hiện tại"}
@@ -466,12 +484,12 @@ export function TwelveWeekWeekTab({
 
               {/* Plan focus title */}
               {currentPlanFocus && (
-                <h2 className="font-serif text-2xl sm:text-3xl font-bold tracking-tight leading-tight sm:leading-snug text-app-ink mt-4 relative z-10">
+                <h2 className="relative z-10 mt-4 max-w-[18ch] text-balance font-serif text-2xl font-bold leading-tight tracking-tight text-app-ink sm:text-3xl sm:leading-snug">
                   {currentPlanFocus}
                 </h2>
               )}
               {currentPlanMilestone && (
-                <p className="text-xs text-app-ink-soft mt-1.5 relative z-10">
+                <p className="relative z-10 mt-1.5 max-w-[65ch] text-xs leading-relaxed text-app-ink-soft">
                   Cột mốc:{" "}
                   <span className="font-semibold text-app-ink bg-app-bg/60 px-2 py-0.5 rounded-md border border-app-line/10 font-sans">
                     {currentPlanMilestone}
@@ -488,7 +506,10 @@ export function TwelveWeekWeekTab({
                       Điểm thực thi
                     </span>
                     {weekCompletion.isEmpty ? (
-                      <span data-testid="weekly-lead-score" className="text-sm font-semibold text-app-ink-soft font-sans">
+                      <span
+                        data-testid="weekly-lead-score"
+                        className="text-sm font-semibold text-app-ink-soft font-sans"
+                      >
                         Chưa có việc
                       </span>
                     ) : (
@@ -519,6 +540,58 @@ export function TwelveWeekWeekTab({
                     </div>
                   )}
                 </div>
+
+                <div className="mt-5 grid gap-2.5 sm:grid-cols-2">
+                  <div className="rounded-card-lg border border-app-line/35 bg-app-bg/55 p-3.5">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">
+                      Tổng quan tuần này
+                    </p>
+                    <p className="mt-1.5 text-sm font-semibold leading-snug text-app-ink">
+                      {weekCompletion.isEmpty
+                        ? "Chưa có việc nào được lên lịch."
+                        : `Đã hoàn thành ${weekCompletion.completed}/${weekCompletion.total} việc.`}
+                    </p>
+                    <p className="mt-1 text-xs leading-relaxed text-app-ink-soft">
+                      {weekCompletion.isEmpty
+                        ? "Khi bạn thêm việc trong Hôm nay, tiến độ tuần sẽ hiển thị ở đây."
+                        : "Dùng review tuần để nhìn xem nhịp thực thi có đủ ổn định không."}
+                    </p>
+                  </div>
+
+                  <div className="rounded-card-lg border border-app-line/35 bg-app-bg/55 p-3.5">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">
+                      {lagScoreValue !== null ? "Chỉ số kết quả" : "Nhắc review"}
+                    </p>
+                    {lagScoreValue !== null ? (
+                      <>
+                        <div className="mt-1.5 flex items-end justify-between gap-3">
+                          <p className="font-serif text-2xl font-bold leading-none text-app-ink">{lagScoreValue}%</p>
+                          <span
+                            className={cn(
+                              "rounded-full border px-2.5 py-1 text-[10px] font-bold",
+                              scoreTone.panel,
+                              scoreTone.text,
+                            )}
+                          >
+                            {scoreInterpretation.headline}
+                          </span>
+                        </div>
+                        <p className="mt-1 break-words text-xs leading-relaxed text-app-ink-soft">
+                          {system.lagMetric.name}: <span className="font-semibold text-app-ink">{lagMetricValue}</span>
+                        </p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="mt-1.5 text-sm font-semibold leading-snug text-app-ink">
+                          Review chính thức mở vào {getReviewDayLabel(system.reviewDay)}.
+                        </p>
+                        <p className="mt-1 text-xs leading-relaxed text-app-ink-soft">
+                          Bạn có thể bắt đầu sớm nếu muốn chốt nhận xét trước khi tuần kết thúc.
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           </StaggerSection>
@@ -540,7 +613,8 @@ export function TwelveWeekWeekTab({
                     <span className="text-app-ink-muted text-lg font-serif">?</span>
                   </div>
                   <p className="text-xs text-app-ink-muted max-w-xs mx-auto leading-relaxed">
-                    Chưa có hành động cam kết nào cho tuần này. Khi các hành động lặp lại được lên lịch ở Hôm nay, chúng sẽ hiển thị ở đây.
+                    Chưa có hành động cam kết nào cho tuần này. Khi các hành động lặp lại được lên lịch ở Hôm nay, chúng
+                    sẽ hiển thị ở đây.
                   </p>
                 </div>
               ) : (
@@ -605,17 +679,18 @@ export function TwelveWeekWeekTab({
 
           {/* ── Review reminder ──────────────────────────────────────────────── */}
           <StaggerSection>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-5 rounded-card-lg border border-app-line/40 bg-app-bg/20 weekly-card-lift">
-              <div className="space-y-0.5">
-                <p className="text-sm font-semibold text-app-ink">Nhìn lại & Đánh giá tuần</p>
-                <p className="text-xs text-app-ink-soft">
+            <div className="flex flex-col gap-4 rounded-card-lg border border-app-line/40 bg-app-bg/20 p-4 weekly-card-lift sm:flex-row sm:items-center sm:justify-between sm:p-5">
+              <div className="min-w-0 space-y-1">
+                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">Chuẩn bị review</p>
+                <p className="text-sm font-semibold leading-snug text-app-ink">Nhìn lại và đánh giá tuần</p>
+                <p className="max-w-[65ch] text-xs leading-relaxed text-app-ink-soft">
                   Review chính thức sẽ mở vào {getReviewDayLabel(system.reviewDay)}.
                 </p>
               </div>
               <Button
                 type="button"
                 variant="outline"
-                className="text-xs font-semibold px-4.5 py-2.5 h-10 rounded-card border-app-line bg-app-surface text-app-ink hover:bg-app-bg transition-all shrink-0 shadow-2xs weekly-btn-press"
+                className="h-10 w-full rounded-card border-app-line bg-app-surface px-4.5 py-2.5 text-xs font-semibold text-app-ink shadow-2xs transition-all weekly-btn-press hover:bg-app-bg sm:w-auto sm:shrink-0"
                 onClick={() => setIsStartingEarly(true)}
               >
                 Bắt đầu review sớm
@@ -635,20 +710,35 @@ export function TwelveWeekWeekTab({
               <span className="font-serif text-sm font-semibold tracking-normal normal-case text-app-ink bg-app-bg/85 px-2.5 py-0.5 rounded-md border border-app-line/20">
                 Tuần {currentWeekLimit} / {system.totalWeeks}
               </span>
-              <span className="bg-app-bg/85 px-2.5 py-0.5 rounded-md border border-app-line/20 font-mono text-[11px]">
+              <span className="min-w-0 bg-app-bg/85 px-2.5 py-0.5 rounded-md border border-app-line/20 font-mono text-[11px]">
                 {currentWeekRange
                   ? `${formatCalendarDate(currentWeekRange.start)} – ${formatCalendarDate(currentWeekRange.end)}`
                   : "Chu kỳ hiện tại"}
               </span>
             </div>
             {currentPlanFocus && (
-              <p className="text-xs sm:text-sm text-app-ink-soft leading-relaxed mt-2">
+              <p className="mt-2 max-w-[65ch] text-xs leading-relaxed text-app-ink-soft sm:text-sm">
                 Tiêu điểm:{" "}
                 <span className="font-semibold text-app-ink bg-app-bg/40 px-2 py-0.5 rounded-md border border-app-line/10">
                   {currentPlanFocus}
                 </span>
               </p>
             )}
+
+            <div className="flex flex-wrap items-center gap-2">
+              <span
+                className={cn(
+                  "inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em]",
+                  scoreTone.panel,
+                  scoreTone.text,
+                )}
+              >
+                {scoreInterpretation.headline}
+              </span>
+              <span className="inline-flex items-center rounded-full border border-app-line/40 bg-app-bg/55 px-2.5 py-1 text-[10px] font-semibold text-app-ink-soft">
+                Tiến độ {reviewReadyCount}/4
+              </span>
+            </div>
 
             <div className="flex flex-col gap-3 border-t border-app-line/30 pt-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:pt-4">
               <div className="flex-1 space-y-2">
@@ -664,7 +754,9 @@ export function TwelveWeekWeekTab({
                     </span>
                   )}
                 </div>
-                {!weekCompletion.isEmpty && <Progress value={leadScoreValue} className="h-1.5 bg-app-bg rounded-full" />}
+                {!weekCompletion.isEmpty && (
+                  <Progress value={leadScoreValue} className="h-1.5 bg-app-bg rounded-full" />
+                )}
               </div>
 
               {lagScoreValue !== null && (
@@ -695,10 +787,8 @@ export function TwelveWeekWeekTab({
         >
           <WashiTape className="opacity-60 rotate-[-1deg] -top-3.5" />
           <div className="space-y-1 pt-1">
-            <h3 className="font-serif text-xl sm:text-2xl font-bold text-app-ink">
-              Đánh giá và cam kết tuần
-            </h3>
-            <p className="text-xs sm:text-sm text-app-ink-soft">
+            <h3 className="font-serif text-xl sm:text-2xl font-bold text-app-ink">Đánh giá và cam kết tuần</h3>
+            <p className="max-w-[65ch] text-xs leading-relaxed text-app-ink-soft sm:text-sm">
               Ghi chép lại bài học tuần cũ và thiết lập ưu tiên tuần mới để giữ nhịp thực thi ổn định.
             </p>
           </div>
@@ -790,12 +880,13 @@ export function TwelveWeekWeekTab({
                               {commitmentQuote}
                             </p>
                           )}
-                          <div className="flex flex-wrap gap-2 pt-1">
+                          <div className="grid grid-cols-3 gap-2 pt-1">
                             <Button
                               type="button"
                               variant="outline"
                               size="sm"
                               className={getCommitmentButtonClass("kept", currentStatus)}
+                              aria-pressed={currentStatus === "kept"}
                               onClick={() => setStatus("kept")}
                             >
                               Đã giữ
@@ -815,6 +906,7 @@ export function TwelveWeekWeekTab({
                               variant="outline"
                               size="sm"
                               className={getCommitmentButtonClass("missed", currentStatus)}
+                              aria-pressed={currentStatus === "missed"}
                               onClick={() => setStatus("missed")}
                             >
                               Bỏ lỡ
@@ -824,6 +916,7 @@ export function TwelveWeekWeekTab({
                               variant="outline"
                               size="sm"
                               className={getCommitmentButtonClass("not_set", currentStatus)}
+                              aria-pressed={currentStatus === "not_set"}
                               onClick={() => setStatus("not_set")}
                             >
                               Không đặt
@@ -893,33 +986,47 @@ export function TwelveWeekWeekTab({
           {/* Review readiness indicator */}
           <div
             data-testid="weekly-review-readiness"
-            className="flex flex-col gap-3 rounded-card border border-app-line/40 bg-app-bg/30 px-4 py-3 text-xs text-app-ink-soft sm:flex-row sm:items-center sm:justify-between"
+            className="space-y-3 rounded-card-lg border border-app-line/40 bg-app-bg/30 px-4 py-4 text-xs text-app-ink-soft"
           >
-            <p className="font-semibold text-app-ink shrink">
-              {isFutureReviewWeek
-                ? "Không thể chốt tuần tương lai."
-                : shouldConfirmEarlyReview
-                  ? "Xác nhận chốt review sớm."
-                  : "Chốt đủ WAM 4 câu trước khi lưu."}
-            </p>
-            <div className="flex shrink-0 flex-wrap items-center gap-1.5">
-              {[1, 2, 3, 4].map((step) => (
-                <span
-                  key={step}
-                  className={`h-2.5 w-2.5 rounded-full transition-all duration-300 ${
-                    step <= reviewReadyCount
-                      ? "bg-app-accent shadow-[0_0_6px_rgba(42,84,71,0.35)]"
-                      : "bg-app-line/80"
-                  }`}
-                />
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div className="min-w-0 space-y-1">
+                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">
+                  Checklist trước khi lưu
+                </p>
+                <p className="text-sm font-semibold text-app-ink">{reviewStatusTitle}</p>
+                <p className="max-w-[65ch] text-xs leading-relaxed text-app-ink-soft">{reviewStatusHint}</p>
+              </div>
+              <div className="shrink-0 rounded-card border border-app-line/40 bg-app-surface px-3 py-2 sm:text-right">
+                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-app-ink-muted">Tiến độ review</p>
+                <p className="text-base font-semibold text-app-ink">{reviewReadyCount}/4</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {reviewReadinessItems.map((item) => (
+                <div
+                  key={item.key}
+                  data-testid={`weekly-review-check-${item.key}`}
+                  className={cn(
+                    "flex min-w-0 items-center gap-2 rounded-card border px-3 py-2.5 text-xs font-medium transition-colors",
+                    item.done
+                      ? "border-app-accent/20 bg-app-accent-soft/35 text-app-ink"
+                      : "border-app-line/40 bg-app-surface text-app-ink-soft",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "h-2.5 w-2.5 shrink-0 rounded-full",
+                      item.done ? "bg-app-accent shadow-[0_0_6px_rgba(42,84,71,0.35)]" : "bg-app-line/80",
+                    )}
+                  />
+                  <span className="min-w-0 truncate">{item.label}</span>
+                </div>
               ))}
-              <span className="ml-1 text-[11px] font-semibold text-app-ink-soft">
-                Tiến độ review ({reviewReadyCount}/4)
-              </span>
             </div>
           </div>
 
-          <div className="flex flex-col-reverse gap-2 pt-1 sm:flex-row sm:items-center sm:justify-end">
+          <div className="hidden gap-2 pt-1 md:flex md:flex-row md:items-center md:justify-end">
             {(isEditingReview || isStartingEarly) && (
               <Button
                 type="button"
@@ -1055,17 +1162,87 @@ export function TwelveWeekWeekTab({
                 </div>
               )}
 
-              {/* Old commitments */}
-              <div className="space-y-1.5 pt-2">
-                <span className="text-xs uppercase tracking-wider text-app-ink-muted block font-semibold">
-                  Cam kết tuần cũ
-                </span>
-                <p className="font-semibold text-app-ink text-xs sm:text-sm leading-relaxed">
-                  Đã giữ {summaryCommitmentsKept.length}/{summaryCommitmentTotal} cam kết
-                </p>
-                {summaryCommitmentsKept.length > 0 && (
-                  <p className="text-app-ink-soft text-xs italic">Đã giữ: {summaryCommitmentsKept.join(", ")}</p>
-                )}
+              <div className="grid gap-3 pt-2 sm:grid-cols-2">
+                <div className="rounded-card-lg border border-app-line/35 bg-app-bg/20 p-4">
+                  <span className="block text-xs font-semibold uppercase tracking-wider text-app-ink-muted">
+                    Cam kết tuần cũ
+                  </span>
+                  <p className="mt-1.5 text-sm font-semibold leading-relaxed text-app-ink">
+                    Đã giữ {summaryCommitmentsKept.length}/{summaryCommitmentTotal} cam kết
+                  </p>
+
+                  <div className="mt-3 space-y-2 text-xs text-app-ink-soft">
+                    <div className="space-y-1.5">
+                      <p className="font-semibold text-app-ink">Giữ được</p>
+                      {summaryCommitmentsKept.length > 0 ? (
+                        <div className="flex flex-wrap gap-1.5">
+                          {summaryCommitmentsKept.map((commitment) => (
+                            <span
+                              key={`kept-${commitment}`}
+                              className="rounded-full border border-app-status-success/20 bg-app-status-success/10 px-2.5 py-1 text-[11px] font-semibold text-app-status-success"
+                            >
+                              {commitment}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <p>Chưa có cam kết nào được đánh dấu giữ được.</p>
+                      )}
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <p className="font-semibold text-app-ink">Bỏ lỡ</p>
+                      {summaryCommitmentsMissed.length > 0 ? (
+                        <div className="flex flex-wrap gap-1.5">
+                          {summaryCommitmentsMissed.map((commitment) => (
+                            <span
+                              key={`missed-${commitment}`}
+                              className="rounded-full border border-app-status-error/20 bg-app-status-error/10 px-2.5 py-1 text-[11px] font-semibold text-app-status-error"
+                            >
+                              {commitment}
+                            </span>
+                          ))}
+                        </div>
+                      ) : (
+                        <p>Không có cam kết nào bị bỏ lỡ.</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="rounded-card-lg border border-app-line/35 bg-app-bg/20 p-4">
+                  <span className="block text-xs font-semibold uppercase tracking-wider text-app-ink-muted">
+                    Tuần sau
+                  </span>
+                  <p className="mt-1.5 text-sm font-semibold leading-relaxed text-app-ink">
+                    Một danh sách nhỏ, rõ và giữ được sẽ giúp bạn vào tuần mới gọn hơn.
+                  </p>
+                  {summaryNextWeekCommitments.length > 0 ? (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {summaryNextWeekCommitments.map((commitment) => (
+                        <span
+                          key={commitment}
+                          className="rounded-full border border-app-warm-border/20 bg-app-warm-soft/70 px-3 py-1.5 text-xs font-semibold text-app-warm-strong shadow-3xs transition-colors duration-200 hover:bg-app-warm-soft"
+                        >
+                          {commitment}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="mt-3 text-xs leading-relaxed text-app-ink-soft">
+                      Chưa có cam kết mới được lưu cho tuần sau.
+                    </p>
+                  )}
+
+                  {summaryReview.workloadDecision && (
+                    <div className="mt-3 text-xs leading-relaxed text-app-ink-soft">
+                      Quyết định tải việc:{" "}
+                      <span className="font-semibold text-app-ink">
+                        {getWorkloadDecisionLabel(summaryReview.workloadDecision)}
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Lesson blockquote */}
@@ -1080,34 +1257,6 @@ export function TwelveWeekWeekTab({
                     </span>
                     <span className="relative z-10 pl-4 block">{summaryInsights}</span>
                   </blockquote>
-                </div>
-              )}
-
-              {/* Next week commitments pills */}
-              {summaryNextWeekCommitments.length > 0 && (
-                <div className="space-y-2.5 pt-2">
-                  <span className="text-xs uppercase tracking-wider text-app-ink-muted block font-semibold">
-                    Cam kết tuần sau
-                  </span>
-                  <div className="flex flex-wrap gap-2">
-                    {summaryNextWeekCommitments.map((commitment) => (
-                      <span
-                        key={commitment}
-                        className="rounded-full border border-app-warm-border/20 bg-app-warm-soft/70 px-3 py-1.5 text-xs font-semibold text-app-warm-strong shadow-3xs hover:bg-app-warm-soft transition-colors duration-200"
-                      >
-                        {commitment}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {summaryReview.workloadDecision && (
-                <div className="text-xs text-app-ink-soft pt-2">
-                  Quyết định tải việc:{" "}
-                  <span className="font-semibold text-app-ink">
-                    {getWorkloadDecisionLabel(summaryReview.workloadDecision)}
-                  </span>
                 </div>
               )}
 
@@ -1207,13 +1356,13 @@ export function TwelveWeekWeekTab({
       {showForm && canShowFormReview && (
         <div
           data-testid="weekly-review-mobile-sticky-cta"
-          className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] left-0 right-0 z-40 border-t border-app-line/80 bg-app-surface/95 px-4 pb-4 pt-3 shadow-[0_-18px_40px_-30px_rgba(23,21,15,0.45)] backdrop-blur-md md:sticky md:bottom-4 md:left-auto md:right-auto md:mx-auto md:max-w-md md:rounded-card md:border md:p-4 md:shadow-app-lg"
+          className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] left-0 right-0 z-40 border-t border-app-line/80 bg-app-surface/95 px-4 pb-4 pt-3 shadow-[0_-18px_40px_-30px_rgba(23,21,15,0.45)] backdrop-blur-md md:hidden"
         >
           <div className="mx-auto flex w-full max-w-[42rem] flex-col gap-2.5 md:max-w-none">
             <div className="flex items-center justify-between gap-3 text-[11px] font-semibold text-app-ink-muted">
               <span>Tiến độ review {reviewReadyCount}/4</span>
               <span className={canSubmitWeeklyReview ? "text-app-warm-strong" : "text-app-ink-muted"}>
-                {canSubmitWeeklyReview ? "Sẵn sàng chốt" : "Cần đủ 4 bước"}
+                {reviewStickyStatus}
               </span>
             </div>
             <Button
