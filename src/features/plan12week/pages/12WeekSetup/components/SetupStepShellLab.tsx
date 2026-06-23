@@ -95,8 +95,9 @@ export function SetupStepShellLab({
 
   return (
     <section
+      data-twelve-week-setup-shell
       ref={stepShellRef}
-      className="overflow-hidden surface-raised rounded-card border border-app-line bg-app-surface p-4 sm:p-5 md:p-6 shadow-app-sm"
+      className="overflow-hidden surface-raised rounded-card border border-app-line bg-app-surface p-4 pb-[calc(8.5rem+env(safe-area-inset-bottom))] shadow-app-sm sm:p-5 sm:pb-5 md:p-6 md:pb-6"
       aria-labelledby="twelve-week-step-title"
     >
       <div>
@@ -159,8 +160,8 @@ export function SetupStepShellLab({
                         ? "border-app-accent bg-app-accent text-white scale-110 shadow-app-md shadow-app-accent/20 ring-4 ring-app-accent-soft/35"
                         : isCompleted
                           ? "border-app-status-success bg-app-status-success/5 text-app-status-success hover:bg-app-status-success hover:text-white dark:bg-app-status-success/20 dark:text-app-status-success active:scale-[0.96]"
-                          : "border-app-line bg-app-surface text-app-ink-muted",
-                      canJump ? "cursor-pointer" : "cursor-default",
+                        : "border-app-line bg-app-surface text-app-ink-muted",
+                      canJump ? "cursor-pointer" : "cursor-default disabled:cursor-not-allowed disabled:opacity-70",
                     )}
                     disabled={!canJump}
                     onClick={() => {
@@ -227,6 +228,7 @@ export function SetupStepShellLab({
             {children}
             {stepError ? (
               <div
+                data-twelve-week-step-feedback
                 role="alert"
                 className="mt-4 rounded-card border border-app-line bg-app-bg-subtle p-3.5 text-app-ink shadow-app-sm flex items-start gap-2.5 animate-in shake duration-300"
               >
@@ -246,7 +248,7 @@ export function SetupStepShellLab({
       </div>
 
       {/* Điều khiển các bước to rõ hơn, thumb-friendly trên mobile */}
-      <div className="mt-8 flex flex-col gap-4 border-t border-app-line pt-6 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mt-8 hidden flex-col gap-4 border-t border-app-line pt-6 sm:flex sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs font-semibold text-app-ink-muted/95 sm:order-first">
           Bước {currentStep + 1} trên {stepCount} · Mọi thiết lập đều có thể tinh chỉnh lại sau này!
         </p>
@@ -295,6 +297,57 @@ export function SetupStepShellLab({
               <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </motion.button>
           )}
+        </div>
+      </div>
+
+      <div
+        data-twelve-week-mobile-action-bar
+        className="fixed bottom-0 left-0 right-0 z-40 border-t border-app-line/80 bg-app-surface/95 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-3 shadow-[0_-18px_40px_-30px_rgba(23,21,15,0.45)] backdrop-blur-md sm:hidden"
+      >
+        <div className="mx-auto flex w-full max-w-[42rem] flex-col gap-2.5">
+          <p className="text-[11px] font-semibold text-app-ink-muted">
+            Bước {currentStep + 1}/{stepCount} · Có thể chỉnh lại sau
+          </p>
+          <div className="flex w-full gap-2.5">
+            <button
+              type="button"
+              className="inline-flex min-h-12 flex-1 items-center justify-center gap-1.5 rounded-xl border border-app-line bg-app-surface px-4 py-2.5 text-xs font-bold text-app-ink transition-all duration-150 hover:bg-app-bg active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+              onClick={onBack}
+              disabled={isSubmitting}
+            >
+              <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+              Quay lại
+            </button>
+
+            {isLastStep ? (
+              <button
+                type="button"
+                aria-label="Lưu kế hoạch"
+                className="inline-flex min-h-12 flex-[2] items-center justify-center gap-1.5 rounded-control bg-app-accent px-5 py-3 text-xs font-bold text-white transition-all duration-150 hover:bg-app-accent-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-app-ink-muted disabled:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+                onClick={handleSubmitClick}
+                disabled={isSubmitting || isSubmitDisabled}
+                aria-busy={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <Loader2 className={prefersReducedMotion ? "h-4 w-4" : "h-4 w-4 animate-spin"} aria-hidden="true" />
+                ) : (
+                  <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
+                )}
+                <span className="truncate">{isSubmitting ? "Đang khởi tạo..." : "Kích hoạt"}</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                aria-label={nextButtonLabel}
+                className="inline-flex min-h-12 flex-[2] items-center justify-center gap-1.5 rounded-xl bg-app-accent px-5 py-3 text-xs font-bold text-white transition-all duration-150 hover:bg-app-accent-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-app-ink-muted disabled:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+                onClick={onNext}
+                disabled={isNextDisabled}
+              >
+                <span className="truncate">{nextButtonLabel}</span>
+                <ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" />
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </section>

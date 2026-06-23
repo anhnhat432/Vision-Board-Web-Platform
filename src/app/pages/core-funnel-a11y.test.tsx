@@ -8,11 +8,12 @@
  * narrow to avoid coupling to business logic.
  */
 
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createRef } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { PlanPreview } from "@/features/plan12week/components/PlanPreview";
+import { SetupStepShellLab } from "@/features/plan12week/pages/12WeekSetup/components/SetupStepShellLab";
 import { ReviewStep as TwelveWeekReviewStep } from "@/features/plan12week/pages/12WeekSetup/components/ReviewStep";
 import type {
   LeadIndicatorDraft as FeatureLeadIndicatorDraft,
@@ -388,6 +389,63 @@ describe("TwelveWeekSetup PlanPreview — accordion", () => {
   });
 });
 
+describe("TwelveWeekSetup StepShellLab — mobile action bar", () => {
+  it("keeps validation feedback above the fixed mobile action bar and reserves bottom space", () => {
+    setViewportWidth(375);
+
+    render(
+      <SetupStepShellLab
+        title="Build the 12-week rhythm"
+        description="Pick the outcome and weekly action rhythm."
+        currentStep={1}
+        stepCount={4}
+        onBack={() => {}}
+        onNext={() => {}}
+        onSubmit={() => {}}
+        stepError="Add at least 2 weekly lead actions."
+        nextButtonLabel="Set schedule"
+      >
+        <div>Lead action form</div>
+      </SetupStepShellLab>,
+    );
+
+    const shell = document.querySelector("[data-twelve-week-setup-shell]");
+    const feedback = document.querySelector("[data-twelve-week-step-feedback]");
+    const actionBar = document.querySelector("[data-twelve-week-mobile-action-bar]");
+
+    expect(shell).toHaveClass("pb-[calc(8.5rem+env(safe-area-inset-bottom))]", "sm:pb-5", "md:pb-6");
+    expect(actionBar).toHaveClass("pb-[calc(env(safe-area-inset-bottom)+1rem)]", "sm:hidden");
+    expect(feedback).not.toBeNull();
+    expect(actionBar).not.toBeNull();
+    expect(feedback?.compareDocumentPosition(actionBar as Node)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(within(actionBar as HTMLElement).getByRole("button", { name: /Set schedule/i })).toBeInTheDocument();
+  });
+
+  it("marks unavailable future steps as disabled instead of looking interactive", () => {
+    render(
+      <SetupStepShellLab
+        title="Build the 12-week rhythm"
+        description="Pick the outcome and weekly action rhythm."
+        currentStep={0}
+        stepCount={4}
+        onBack={() => {}}
+        onNext={() => {}}
+        onSubmit={() => {}}
+      >
+        <div>Lead action form</div>
+      </SetupStepShellLab>,
+    );
+
+    const futureStep = Array.from(document.querySelectorAll("button")).find((button) =>
+      button.getAttribute("aria-label")?.includes("2:"),
+    );
+
+    expect(futureStep).toBeInstanceOf(HTMLButtonElement);
+    expect(futureStep).toBeDisabled();
+    expect(futureStep).toHaveClass("disabled:cursor-not-allowed", "disabled:opacity-70");
+  });
+});
+
 describe("SmartGoalStepShell — a11y", () => {
   const step: SmartStepDefinition = {
     key: "specific",
@@ -400,6 +458,7 @@ describe("SmartGoalStepShell — a11y", () => {
   };
 
   it("gives the 'Dùng gợi ý' button a step-specific accessible name", async () => {
+    setViewportWidth(1024);
     const headingRef = createRef<HTMLHeadingElement>();
     const mockStarter = {
       specificGoalStatement: "Statement",
