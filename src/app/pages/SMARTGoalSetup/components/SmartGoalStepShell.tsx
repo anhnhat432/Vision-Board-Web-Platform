@@ -330,7 +330,7 @@ export function SmartGoalStepShell({
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 280) {
+      if (window.innerWidth < 1024 && window.scrollY > 420) {
         setShowStickyMini(true);
       } else {
         setShowStickyMini(false);
@@ -763,8 +763,8 @@ export function SmartGoalStepShell({
     <div
       data-smart-goal-shell
       className={cn(
-        "w-full animate-[fade-in_0.3s_ease-out] pb-[calc(7.75rem+env(safe-area-inset-bottom))] lg:pb-0",
-        showFinalSecondaryCta && "pb-[calc(10.5rem+env(safe-area-inset-bottom))]",
+        "w-full animate-[fade-in_0.3s_ease-out] pb-[calc(8.75rem+env(safe-area-inset-bottom))] lg:pb-0",
+        showFinalSecondaryCta && "pb-[calc(11.25rem+env(safe-area-inset-bottom))]",
       )}
     >
       <style>{`
@@ -808,10 +808,10 @@ export function SmartGoalStepShell({
         )}
       </AnimatePresence>
 
-      <div className="grid grid-cols-1 items-start gap-3.5 lg:grid-cols-[1fr_348px] lg:gap-[18px]">
+      <div className="grid grid-cols-1 items-start gap-3 lg:grid-cols-[1fr_348px] lg:gap-[18px]">
         <div
           className={cn(
-            "relative min-w-0 space-y-3.5 overflow-hidden rounded-[18px] border border-[rgba(23,21,15,0.08)] bg-white p-3.5 shadow-[0_18px_40px_-32px_rgba(23,21,15,0.4)] transition-all duration-200 dark:border-app-line dark:bg-app-surface sm:space-y-6 sm:rounded-[22px] sm:p-7 sm:pl-12",
+            "relative min-w-0 space-y-3 overflow-hidden rounded-[16px] border border-[rgba(23,21,15,0.08)] bg-white p-3 shadow-[0_18px_40px_-32px_rgba(23,21,15,0.4)] transition-all duration-200 dark:border-app-line dark:bg-app-surface sm:space-y-6 sm:rounded-[22px] sm:p-7 sm:pl-12",
             isPageFlipping && !shouldReduceMotion && "page-flip-effect",
           )}
         >
@@ -835,12 +835,12 @@ export function SmartGoalStepShell({
                 id="smart-step-title"
                 ref={headingRef}
                 tabIndex={-1}
-                className="mt-1 text-[20px] font-extrabold leading-[1.12] tracking-[-0.02em] text-[#17150F] focus:outline-none dark:text-app-ink sm:mt-1.5 sm:text-[25px]"
+                className="mt-1 text-[19px] font-extrabold leading-[1.1] tracking-[-0.02em] text-[#17150F] focus:outline-none dark:text-app-ink sm:mt-1.5 sm:text-[25px]"
                 style={{ fontFamily: "'Bricolage Grotesque', serif" }}
               >
                 {step.title}
               </h2>
-              <p className="mt-1.5 max-w-[52ch] text-[12.5px] leading-[1.45] text-[#5C574B] dark:text-app-ink-soft sm:mt-2 sm:text-[13.5px] sm:leading-[1.55]">
+              <p className="mt-1.5 max-w-[52ch] text-[12px] leading-[1.45] text-[#5C574B] dark:text-app-ink-soft sm:mt-2 sm:text-[13.5px] sm:leading-[1.55]">
                 {step.description}
               </p>
             </div>
@@ -849,7 +849,7 @@ export function SmartGoalStepShell({
             </span>
           </div>
 
-          <div className="relative mt-3 sm:mt-5">
+          <div className="relative mt-2.5 sm:mt-5">
             <div
               className="absolute left-[10%] right-[10%] top-[16px] z-0 h-[3px] overflow-hidden rounded-full bg-[#E4E0D4] sm:top-[22px]"
               aria-hidden="true"
@@ -933,7 +933,7 @@ export function SmartGoalStepShell({
             </ol>
           </div>
 
-          <div className="my-3 h-px bg-[rgba(23,21,15,0.08)] sm:my-5" aria-hidden="true" />
+          <div className="my-2.5 h-px bg-[rgba(23,21,15,0.08)] sm:my-5" aria-hidden="true" />
 
           <AnimatePresence mode="wait">
             <motion.div
@@ -942,7 +942,7 @@ export function SmartGoalStepShell({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-              className="space-y-3.5 sm:space-y-5"
+              className="space-y-3 sm:space-y-5"
             >
               {children}
 
@@ -1173,14 +1173,17 @@ export function SmartGoalStepShell({
               {/* Sticky Bottom CTA cho Mobile */}
               <div
                 data-smart-mobile-action-bar
-                  className="fixed bottom-0 left-0 right-0 z-40 border-t border-[rgba(23,21,15,0.08)] bg-white/95 px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-2 shadow-[0_-18px_40px_-30px_rgba(23,21,15,0.5)] backdrop-blur-md dark:border-app-line dark:bg-app-surface/95 lg:hidden"
+                className={cn(
+                  "fixed bottom-0 left-0 right-0 z-40 border-t border-[rgba(23,21,15,0.08)] bg-white/95 px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-2 shadow-[0_-18px_40px_-30px_rgba(23,21,15,0.5)] backdrop-blur-md transition-transform duration-200 dark:border-app-line dark:bg-app-surface/95 lg:hidden",
+                  showStickyMini ? "translate-y-0" : "translate-y-full",
+                )}
               >
                 <div className="mx-auto flex w-full max-w-[42rem] flex-col gap-1.5 sm:gap-2">
-                  <div className="sr-only" aria-live="polite">
+                  <div className="flex items-center justify-between gap-3 text-[11px] font-semibold" aria-live="polite">
                     <span className="min-w-0 truncate text-app-ink-muted">{mobileProgressLabel}</span>
                     <span
                       className={cn(
-                        "shrink-0 rounded-full border px-2.5 py-1",
+                        "shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-bold",
                         isCurrentStepValid
                           ? "border-[#0C5E3A]/20 bg-[#EDF7E0] text-[#0C5E3A]"
                           : "border-[rgba(201,151,0,0.28)] bg-[#FFF8DE] text-[#6B5520]",
