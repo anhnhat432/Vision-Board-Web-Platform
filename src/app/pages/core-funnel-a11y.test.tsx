@@ -561,6 +561,15 @@ describe("SmartGoalStepShell — a11y", () => {
 
     const button = screen.getByRole("button", { name: /Dùng gợi ý cho bước Cụ thể/i });
     expect(button).toBeInTheDocument();
+    expect(button).toHaveClass("min-h-11", "leading-tight");
+
+    for (const backButton of screen.getAllByRole("button", { name: /Quay lại/i })) {
+      expect(backButton).toHaveClass("min-h-11");
+    }
+
+    for (const nextButton of screen.getAllByRole("button", { name: /Lưu mục tiêu cụ thể/i })) {
+      expect(nextButton).toHaveClass("min-h-11", "leading-tight");
+    }
   });
 
   it("keeps mobile step feedback above the fixed action bar and reserves bottom space", () => {
@@ -611,7 +620,7 @@ describe("SmartGoalStepShell — a11y", () => {
     const actionBar = document.querySelector("[data-smart-mobile-action-bar]");
 
     expect(shell).toHaveClass("pb-[calc(8.75rem+env(safe-area-inset-bottom))]", "lg:pb-0");
-    expect(actionBar).toHaveClass("pb-[calc(env(safe-area-inset-bottom)+0.75rem)]");
+    expect(actionBar).toHaveClass("pb-[calc(env(safe-area-inset-bottom)+0.75rem)]", "motion-reduce:transition-none");
     expect(within(actionBar as HTMLElement).getByText("Bước 1/5")).toBeInTheDocument();
     expect(within(actionBar as HTMLElement).getByRole("button", { name: /Lưu mục tiêu cụ thể/i })).toHaveClass(
       "min-h-11",
@@ -669,12 +678,14 @@ describe("SmartGoalStepShell — a11y", () => {
 
     const polaroidToggle = screen.getByRole("button", { name: /Bản phác thảo Polaroid/i });
     expect(polaroidToggle).toHaveAttribute("aria-expanded", "false");
+    expect(polaroidToggle).toHaveClass("min-h-11", "leading-tight");
 
     await user.click(polaroidToggle);
     expect(polaroidToggle).toHaveAttribute("aria-expanded", "true");
 
     const aiCoachToggle = screen.getByRole("button", { name: /Cố vấn mục tiêu AI/i });
     expect(aiCoachToggle).toHaveAttribute("aria-expanded", "false");
+    expect(aiCoachToggle).toHaveClass("min-h-11");
 
     await user.click(aiCoachToggle);
     expect(aiCoachToggle).toHaveAttribute("aria-expanded", "true");
