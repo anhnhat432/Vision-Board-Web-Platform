@@ -157,7 +157,12 @@ describe("TwelveWeekWeekTab review flow", () => {
     const chip = screen.getByLabelText("Cam kết: Plan a");
     expect(chip).toBeInTheDocument();
     expect(within(chip).getByText("Plan a")).toHaveClass("break-words");
-    expect(within(chip).getByRole("button", { name: "Xóa cam kết: Plan a" })).toHaveClass("h-8", "w-8");
+    expect(within(chip).getByRole("button", { name: "Xóa cam kết: Plan a" })).toHaveClass(
+      "h-11",
+      "w-11",
+      "sm:h-8",
+      "sm:w-8",
+    );
     expect(input).toHaveValue("");
   });
 

@@ -43,15 +43,15 @@ export function TwelveWeekPremiumInsightSection({
       <CollapsibleTrigger asChild>
         <button
           type="button"
-          className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left motion-safe:transition-colors hover:bg-app-surface/50"
+          className="flex w-full items-start justify-between gap-3 px-4 py-3 text-left motion-safe:transition-colors hover:bg-app-surface/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg"
         >
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
               Phân tích ôn lại Plus
             </p>
-            <p className="mt-1 truncate text-sm font-semibold text-app-ink">{premiumInsight.headline}</p>
+            <p className="mt-1 break-words text-sm font-semibold leading-6 text-app-ink">{premiumInsight.headline}</p>
           </div>
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
             <Badge
               variant="outline"
               className={
@@ -167,7 +167,7 @@ export function TwelveWeekPremiumInsightSection({
             <div className="relative overflow-hidden rounded-lg border border-app-line bg-app-surface p-4">
               <div className="pointer-events-none select-none blur-[3px] opacity-60">
                 <p className="text-sm font-semibold text-app-ink">{premiumInsight.headline}</p>
-                <p className="mt-2 text-sm leading-6 text-app-ink-soft line-clamp-2">{premiumInsight.summary}</p>
+                <p className="mt-2 break-words text-sm leading-6 text-app-ink-soft">{premiumInsight.summary}</p>
                 <p className="mt-2 text-xs text-app-ink-muted">
                   Gợi ý chỉnh tải: {premiumInsight.recommendedAdjustment}
                 </p>

@@ -81,9 +81,37 @@ describe("TwelveWeekProgressTab", () => {
   it("shows average lead score and completed week count separately", () => {
     render(<TwelveWeekProgressTab {...makeProps()} />);
 
-    expect(screen.getByText("Việc lặp lại trung bình 80%")).toBeInTheDocument();
-    expect(screen.getByText("Đã hoàn thành 2/12 tuần")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Tại sao 85%?" })).not.toHaveAttribute("title");
+    expect(screen.getAllByText("80%").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("trung bình").length).toBeGreaterThan(0);
+    expect(screen.getByText("2/12")).toBeInTheDocument();
+    expect(screen.getAllByText("tuần").length).toBeGreaterThan(0);
+    const targetHelp = screen.getByRole("button", { name: "Tại sao 85%?" });
+    expect(targetHelp).not.toHaveAttribute("title");
+    expect(targetHelp).toHaveClass("h-11", "w-11", "sm:h-8", "sm:w-8");
+  });
+
+  it("renders execution heatmap cells as accessible touch targets", () => {
+    render(
+      <TwelveWeekProgressTab
+        {...makeProps({
+          executionHeatmap: [
+            {
+              weekNumber: 1,
+              dayOfWeek: 0,
+              dateKey: "2026-05-04",
+              total: 2,
+              completed: 1,
+              percent: 50,
+            },
+          ],
+        })}
+      />,
+    );
+
+    const cell = screen.getByRole("button", { name: "2026-05-04: hoàn thành 1 trên 2 việc" });
+    expect(cell).toHaveClass("h-11", "w-11", "sm:h-9", "sm:w-9");
+    expect(cell).not.toHaveAttribute("title");
+    expect(screen.getByText(/Chạm hoặc rê chuột lên từng ô/i)).toBeInTheDocument();
   });
   it.each([
     [

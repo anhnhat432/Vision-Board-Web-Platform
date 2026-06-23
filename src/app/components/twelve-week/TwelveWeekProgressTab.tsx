@@ -416,7 +416,7 @@ export function TwelveWeekProgressTab({
                     <TooltipTrigger asChild>
                       <button
                         type="button"
-                        className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-app-line bg-app-surface text-app-accent hover:bg-app-accent-soft/30 hover:scale-105 transition-all"
+                        className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-app-line bg-app-surface text-app-accent transition-all hover:scale-105 hover:bg-app-accent-soft/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-surface sm:h-8 sm:w-8"
                         aria-label="Tại sao 85%?"
                       >
                         <CircleHelp className="h-4 w-4" />
@@ -548,7 +548,7 @@ export function TwelveWeekProgressTab({
                       {["T2", "T3", "T4", "T5", "T6", "T7", "CN"].map((day) => (
                         <div
                           key={day}
-                          className="w-8 sm:w-9 text-center text-[10px] font-bold uppercase tracking-wider text-app-ink-muted"
+                          className="w-11 sm:w-9 text-center text-[10px] font-bold uppercase tracking-wider text-app-ink-muted"
                         >
                           {day}
                         </div>
@@ -560,7 +560,7 @@ export function TwelveWeekProgressTab({
 
                       return (
                         <div key={weekNumber} className="flex items-center gap-1">
-                          <span className="w-8 text-right text-[10px] font-bold text-app-ink-muted mr-1.5">
+                          <span className="w-11 pr-1 text-right text-[10px] font-bold text-app-ink-muted sm:w-8 sm:pr-0 sm:mr-1.5">
                             Tuần {weekNumber}
                           </span>
                           {cells.map((cell) => {
@@ -576,15 +576,22 @@ export function TwelveWeekProgressTab({
                                       : "bg-app-warm/40";
 
                             return (
-                              <div
-                                key={cell.dateKey}
-                                className={`h-8 w-8 sm:h-9 sm:w-9 rounded-[6px] transition-all duration-200 hover:scale-105 ${cellClass} ${
-                                  weekNumber === currentWeek
-                                    ? "ring-2 ring-app-accent ring-offset-2 ring-offset-app-surface"
-                                    : ""
-                                }`}
-                                title={`${cell.dateKey}: ${cell.completed}/${cell.total} xong`}
-                              />
+                              <Tooltip key={cell.dateKey}>
+                                <TooltipTrigger asChild>
+                                  <button
+                                    type="button"
+                                    aria-label={`${cell.dateKey}: hoàn thành ${cell.completed} trên ${cell.total} việc`}
+                                    className={`h-11 w-11 rounded-[6px] transition-all duration-200 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-surface sm:h-9 sm:w-9 ${cellClass} ${
+                                      weekNumber === currentWeek
+                                        ? "ring-2 ring-app-accent ring-offset-2 ring-offset-app-surface"
+                                        : ""
+                                    }`}
+                                  />
+                                </TooltipTrigger>
+                                <TooltipContent sideOffset={8}>
+                                  {cell.dateKey}: {cell.completed}/{cell.total} xong
+                                </TooltipContent>
+                              </Tooltip>
                             );
                           })}
                         </div>
@@ -609,7 +616,7 @@ export function TwelveWeekProgressTab({
                       </span>
                     </div>
                     <p className="mt-3.5 text-[11px] italic text-app-ink-muted">
-                      * Chạm vào ô ngày để xem số việc đã hoàn thành.
+                      * Chạm hoặc rê chuột lên từng ô để xem số việc đã hoàn thành.
                     </p>
                   </div>
                 </div>
