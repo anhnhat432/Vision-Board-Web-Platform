@@ -70,7 +70,7 @@ export function CoreFlowProgress({
   className = "",
   onExit,
   exitLabel = "Thoát",
-  exitTooltip = "Quay lại Trang chính — tiến độ đã nhập tự lưu trên thiết bị này",
+  exitTooltip = "Quay lại Trang chính - tiến độ đã nhập tự lưu trên thiết bị này",
   saveBadge,
 }: CoreFlowProgressProps) {
   const currentIndex = Math.max(
@@ -79,16 +79,29 @@ export function CoreFlowProgress({
   );
   const currentStep = CORE_FLOW_STEPS[currentIndex];
   const progressValue = ((currentIndex + 1) / CORE_FLOW_STEPS.length) * 100;
+  const currentLabel = currentStep.label.toLocaleUpperCase("vi-VN");
 
   return (
-    <section aria-label="Tiến độ đường chính" className={cn("flex flex-col gap-2.5", className)}>
-      {/* Header row */}
-      <div className="flex items-center justify-between gap-3">
-        <div className="text-[14px] font-semibold text-[#17150F]">
-          <span className="font-bold text-[#0C5E3A]">Bước {currentIndex + 1}/{CORE_FLOW_STEPS.length}</span>
-          {" "}&nbsp;{currentStep.label}
+    <section
+      aria-label="Tiến độ đường chính"
+      className={cn(
+        "rounded-card border border-app-line bg-app-surface/85 p-4 shadow-app-sm backdrop-blur sm:p-5",
+        className,
+      )}
+    >
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <p className="text-[13px] font-bold leading-5 text-app-ink">
+            <span className="text-app-accent">Bước {currentIndex + 1} / {CORE_FLOW_STEPS.length}</span>
+            <span className="px-1.5 text-app-ink-muted"> · </span>
+            <span className="break-words uppercase tracking-[0.04em] text-app-ink">{currentLabel}</span>
+          </p>
+          <h2 className="mt-1 font-serif text-lg font-semibold leading-tight text-app-ink sm:text-xl">
+            {currentStep.title}
+          </h2>
         </div>
-        <div className="flex items-center gap-3.5">
+
+        <div className="flex shrink-0 items-center justify-between gap-3.5 sm:justify-end">
           {saveBadge ?? null}
           {onExit ? (
             <button
@@ -96,42 +109,55 @@ export function CoreFlowProgress({
               onClick={onExit}
               title={exitTooltip}
               aria-label={exitTooltip}
-              className="inline-flex shrink-0 items-center gap-1.5 bg-transparent border-none text-[13px] font-semibold text-[#8C887C] cursor-pointer transition-colors duration-150 hover:text-[#5C574B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A]/30 rounded-md"
+              className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-control border border-app-line bg-app-bg-subtle px-3 py-2 text-[13px] font-semibold text-app-ink-soft transition-[background-color,color,border-color,transform] duration-150 hover:border-app-accent/35 hover:bg-app-accent-subtle hover:text-app-ink active:scale-[0.98] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg"
             >
               {exitLabel}
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M5 12h14" />
+                <path d="m12 5 7 7-7 7" />
+              </svg>
             </button>
           ) : null}
         </div>
       </div>
 
-      {/* Progress bar */}
       <div
         role="progressbar"
         aria-label={`Tiến độ đường chính: bước ${currentIndex + 1} trên ${CORE_FLOW_STEPS.length}`}
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={Math.round(progressValue)}
-        className="relative h-[6px] overflow-hidden rounded-[999px] bg-[#E4E0D4]"
+        className="relative mt-4 h-2 overflow-hidden rounded-pill bg-app-bg-subtle"
       >
         <span
-          className="dof-prog absolute inset-y-0 left-0 rounded-[999px]"
+          className="dof-prog absolute inset-y-0 left-0 rounded-pill shadow-[0_0_0_1px_rgba(255,255,255,0.25)_inset] motion-safe:transition-[width] motion-safe:duration-300 motion-reduce:transition-none"
           style={{
             width: `${progressValue}%`,
-            background: "linear-gradient(90deg, #0C5E3A, #16A34A)",
+            background: "linear-gradient(90deg, var(--app-accent), var(--app-status-success))",
           }}
           aria-hidden="true"
         />
       </div>
 
-      {/* Step labels */}
-      <div className="flex justify-between gap-x-1" aria-hidden="true">
+      <div className="-mx-1 mt-3 flex gap-1 overflow-x-auto px-1 pb-1 sm:justify-between sm:overflow-visible" aria-hidden="true">
         {CORE_FLOW_STEPS.map((step, index) => (
           <span
             key={step.id}
             className={cn(
-              "text-[11.5px] font-medium transition-colors duration-200",
-              index <= currentIndex ? "font-bold text-[#0C5E3A]" : "text-[#A8A296]",
+              "inline-flex min-h-8 shrink-0 items-center rounded-pill border px-2.5 text-[11px] font-semibold transition-colors duration-200 sm:min-h-0 sm:border-0 sm:bg-transparent sm:px-0 sm:text-[11.5px]",
+              index < currentIndex && "border-app-accent/15 bg-app-accent-subtle text-app-accent sm:text-app-accent",
+              index === currentIndex && "border-app-accent/30 bg-app-accent-soft text-app-accent sm:font-bold",
+              index > currentIndex && "border-app-line bg-app-bg-subtle text-app-ink-muted sm:text-app-ink-muted",
             )}
           >
             {step.label}

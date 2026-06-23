@@ -1,6 +1,7 @@
 import { Compass, Loader2 } from "lucide-react";
 
 import { CoreFlowProgress, type CoreFlowStepId } from "./CoreFlowProgress";
+import { Button } from "./ui/button";
 
 interface CoreFlowGateStateProps {
   currentStepId: CoreFlowStepId;
@@ -26,49 +27,48 @@ export function CoreFlowGateState({
   loading = false,
 }: CoreFlowGateStateProps) {
   return (
-    <div className="min-h-screen px-4 pb-8 pt-12 text-app-ink sm:px-6">
-      <div className="mx-auto w-full max-w-2xl">
+    <div className="min-h-screen px-4 pb-10 pt-8 text-app-ink sm:px-6 sm:pt-12">
+      <div className="mx-auto w-full max-w-3xl">
         <CoreFlowProgress currentStepId={currentStepId} />
 
-        <section className="rounded-card border border-app-line bg-app-surface p-8 text-center">
-          {loading ? (
-            <Loader2 className="mx-auto h-6 w-6 animate-spin text-app-accent" aria-hidden="true" />
-          ) : (
-            <div className="mx-auto mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
-              <Compass className="h-5 w-5" aria-hidden="true" />
+        <section className="mt-5 overflow-hidden rounded-card-lg border border-app-line bg-app-surface shadow-app-card">
+          <div className="grid gap-0 md:grid-cols-[0.9fr_1.1fr]">
+            <div className="flex min-h-[180px] items-center justify-center border-b border-app-line bg-app-bg-subtle p-8 md:border-b-0 md:border-r">
+              <div className="relative flex h-28 w-28 items-center justify-center rounded-[28px] border border-app-line bg-app-surface shadow-app-sm">
+                <div className="absolute inset-3 rounded-[22px] bg-app-accent-subtle" aria-hidden="true" />
+                {loading ? (
+                  <Loader2 className="relative h-8 w-8 animate-spin text-app-accent" aria-hidden="true" />
+                ) : (
+                  <Compass className="relative h-9 w-9 text-app-accent" aria-hidden="true" />
+                )}
+              </div>
             </div>
-          )}
 
-          <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-muted">{eyebrow}</p>
-          <h1 className="mx-auto mt-2 max-w-xl font-serif text-3xl font-medium leading-tight tracking-[-0.01em] text-app-ink">
-            {title}
-          </h1>
-          <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-app-ink-soft" role="status">
-            {description}
-          </p>
+            <div className="p-6 text-left sm:p-8">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-accent">{eyebrow}</p>
+              <h1 className="mt-3 max-w-xl font-serif text-3xl font-semibold leading-tight text-app-ink sm:text-4xl">
+                {title}
+              </h1>
+              <p className="mt-3 max-w-xl text-sm leading-6 text-app-ink-soft" role="status">
+                {description}
+              </p>
 
-          {(actionLabel && onAction) || (secondaryActionLabel && onSecondaryAction) ? (
-            <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
-              {actionLabel && onAction ? (
-                <button
-                  type="button"
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-app-accent px-5 py-2.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
-                  onClick={onAction}
-                >
-                  {actionLabel}
-                </button>
-              ) : null}
-              {secondaryActionLabel && onSecondaryAction ? (
-                <button
-                  type="button"
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-app-line bg-app-surface px-5 py-2.5 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
-                  onClick={onSecondaryAction}
-                >
-                  {secondaryActionLabel}
-                </button>
+              {(actionLabel && onAction) || (secondaryActionLabel && onSecondaryAction) ? (
+                <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+                  {actionLabel && onAction ? (
+                    <Button type="button" size="lg" className="w-full sm:w-auto" onClick={onAction} loading={loading}>
+                      {actionLabel}
+                    </Button>
+                  ) : null}
+                  {secondaryActionLabel && onSecondaryAction ? (
+                    <Button type="button" variant="outline" size="lg" className="w-full sm:w-auto" onClick={onSecondaryAction}>
+                      {secondaryActionLabel}
+                    </Button>
+                  ) : null}
+                </div>
               ) : null}
             </div>
-          ) : null}
+          </div>
         </section>
       </div>
     </div>
