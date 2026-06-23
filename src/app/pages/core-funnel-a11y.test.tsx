@@ -444,6 +444,60 @@ describe("SmartGoalStepShell — a11y", () => {
     const button = screen.getByRole("button", { name: /Dùng gợi ý cho bước Cụ thể/i });
     expect(button).toBeInTheDocument();
   });
+
+  it("keeps mobile step feedback above the fixed action bar and reserves bottom space", () => {
+    setViewportWidth(375);
+    const headingRef = createRef<HTMLHeadingElement>();
+    const mockStarter = {
+      specificGoalStatement: "Statement",
+      metricName: "Metric",
+      baselineValue: "0",
+      targetValue: "10",
+      weeklyHours: "4",
+      requiredSkills: "Skills",
+      supportResources: "Resources",
+      motivationReason: "Motivation",
+      lifeDimensionAlignment: "Alignment",
+      targetWeeks: "12",
+    };
+
+    render(
+      <SmartGoalStepShell
+        stepIndex={0}
+        totalSteps={5}
+        step={step}
+        headingRef={headingRef}
+        starterPreview="Một ví dụ ngắn."
+        clarityItems={[]}
+        clarityDoneCount={0}
+        clarityProgress={0}
+        summaryRows={[]}
+        showReview={false}
+        currentStepError="Cần điền mục tiêu cụ thể."
+        currentStepSoftWarning="Hãy thêm kết quả đo được."
+        isCurrentStepValid={false}
+        qualityFeedback={null}
+        smartData={makeSmartData()}
+        smartGoalStarter={mockStarter}
+        onApplyStarter={() => {}}
+        onJumpToStep={() => {}}
+        onBack={() => {}}
+        onNext={() => {}}
+      >
+        <div />
+      </SmartGoalStepShell>,
+    );
+
+    const shell = document.querySelector("[data-smart-goal-shell]");
+    const feedback = document.querySelector("[data-smart-step-feedback]");
+    const actionBar = document.querySelector("[data-smart-mobile-action-bar]");
+
+    expect(shell).toHaveClass("pb-[calc(9rem+env(safe-area-inset-bottom))]", "lg:pb-0");
+    expect(actionBar).toHaveClass("pb-[calc(env(safe-area-inset-bottom)+1rem)]");
+    expect(feedback).not.toBeNull();
+    expect(actionBar).not.toBeNull();
+    expect(feedback?.compareDocumentPosition(actionBar as Node)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
 });
 
 describe("SpecificStep — a11y", () => {

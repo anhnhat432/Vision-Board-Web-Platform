@@ -754,7 +754,10 @@ export function SmartGoalStepShell({
   };
 
   return (
-    <div className="w-full animate-[fade-in_0.3s_ease-out]">
+    <div
+      data-smart-goal-shell
+      className="w-full animate-[fade-in_0.3s_ease-out] pb-[calc(9rem+env(safe-area-inset-bottom))] lg:pb-0"
+    >
       <style>{`
         @keyframes shake {
           0%, 100% { transform: translateX(0); }
@@ -866,7 +869,7 @@ export function SmartGoalStepShell({
                       disabled={!canJump}
                       onClick={() => handleWizardJump(index)}
                       className={cn(
-                        "flex h-full w-full flex-col items-center gap-2 rounded-[14px] border py-3.5 px-1.5 transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 cursor-pointer hover:-translate-y-0.5",
+                        "flex h-full w-full flex-col items-center gap-2 rounded-[14px] border py-3.5 px-1.5 transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 hover:-translate-y-0.5 enabled:cursor-pointer disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0",
                         isActive
                           ? "border-[1.5px] border-[#0C5E3A] bg-[#E9F3DF] shadow-[0_8px_20px_-14px_rgba(12,94,58,0.7)]"
                           : isDone
@@ -973,6 +976,35 @@ export function SmartGoalStepShell({
               </div>
 
               {children}
+
+              {(currentStepError || currentStepSoftWarning) && (
+                <div data-smart-step-feedback className="space-y-3">
+                  {currentStepError && (
+                    <div
+                      className="rounded-[13px] border border-[rgba(201,151,0,0.3)] bg-[#FFF8DE] dark:bg-[#2A2410] px-4 py-2.5 text-[#6B5520] dark:text-[#E7B400] text-[12px] flex items-center gap-2 select-none"
+                      role="alert"
+                    >
+                      <CircleAlert className="h-3.5 w-3.5 shrink-0 text-[#C99700]" aria-hidden="true" />
+                      <span className="font-semibold">{currentStepError}</span>
+                    </div>
+                  )}
+
+                  {currentStepSoftWarning && (
+                    <div
+                      className="rounded-[14px] border border-[rgba(23,21,15,0.08)] dark:border-app-line bg-[#FAF8F3] dark:bg-app-bg-subtle p-4 text-[#5C574B] dark:text-app-ink-soft animate-[fade-in_0.3s_ease-out]"
+                      role="note"
+                    >
+                      <div className="flex items-start gap-2.5">
+                        <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-[#9A7B00] dark:text-[#E7B400]" aria-hidden="true" />
+                        <div>
+                          <p className="text-[13px] font-semibold text-[#17150F] dark:text-app-ink">Gợi ý để mục tiêu rõ hơn</p>
+                          <p className="mt-1 text-[12.5px] leading-5">{currentStepSoftWarning}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* Cố vấn mục tiêu AI tích hợp sẵn, hiển thị nhẹ nhàng */}
               <div className="relative overflow-hidden rounded-[16px] border border-dashed border-[rgba(23,21,15,0.1)] dark:border-app-line bg-[#FBF6EC] dark:bg-app-bg-subtle p-4 space-y-3">
@@ -1119,8 +1151,12 @@ export function SmartGoalStepShell({
               </div>
 
               {/* Sticky Bottom CTA cho Mobile */}
-              <div className="fixed bottom-0 left-0 right-0 z-40 p-4 border-t border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white/90 dark:bg-app-surface/90 backdrop-blur-md shadow-lg flex flex-col gap-3 lg:hidden">
-                <div className="flex justify-between gap-3">
+              <div
+                data-smart-mobile-action-bar
+                className="fixed bottom-0 left-0 right-0 z-40 border-t border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white/95 dark:bg-app-surface/95 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-3 shadow-[0_-18px_40px_-30px_rgba(23,21,15,0.5)] backdrop-blur-md lg:hidden"
+              >
+                <div className="mx-auto flex w-full max-w-[42rem] flex-col gap-3">
+                  <div className="flex justify-between gap-3">
                   <button
                     type="button"
                     className="flex-1 inline-flex items-center justify-center gap-2 rounded-[11px] border border-[rgba(23,21,15,0.1)] dark:border-app-line bg-white dark:bg-app-surface py-3 text-[13px] font-semibold text-[#5C574B] dark:text-app-ink-soft transition-all duration-200 hover:bg-[#FAF8F3] dark:hover:bg-app-bg-subtle active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A]/35 cursor-pointer"
@@ -1137,8 +1173,8 @@ export function SmartGoalStepShell({
                     {primaryCtaLabel}
                     <ArrowRight className="h-4 w-4" aria-hidden="true" />
                   </button>
-                </div>
-                {showFinalSecondaryCta ? (
+                  </div>
+                  {showFinalSecondaryCta ? (
                   <button
                     type="button"
                     className="inline-flex w-full items-center justify-center gap-2 rounded-[11px] border border-[rgba(23,21,15,0.1)] dark:border-app-line bg-white dark:bg-app-surface py-2.5 text-[13px] font-semibold text-[#17150F] dark:text-app-ink transition-all duration-200 hover:bg-[#FAF8F3] dark:hover:bg-app-bg-subtle active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A]/35 cursor-pointer"
@@ -1147,33 +1183,9 @@ export function SmartGoalStepShell({
                     <ShieldCheck className="h-4 w-4" aria-hidden="true" />
                     {finalSecondaryCtaLabel}
                   </button>
-                ) : null}
+                  ) : null}
+                </div>
               </div>
-
-              {currentStepError && (
-                <div
-                  className="rounded-[13px] border border-[rgba(201,151,0,0.3)] bg-[#FFF8DE] dark:bg-[#2A2410] px-4 py-2.5 text-[#6B5520] dark:text-[#E7B400] text-[12px] flex items-center gap-2 select-none"
-                  role="alert"
-                >
-                  <CircleAlert className="h-3.5 w-3.5 shrink-0 text-[#C99700]" aria-hidden="true" />
-                  <span className="font-semibold">{currentStepError}</span>
-                </div>
-              )}
-
-              {currentStepSoftWarning && (
-                <div
-                  className="rounded-[14px] border border-[rgba(23,21,15,0.08)] dark:border-app-line bg-[#FAF8F3] dark:bg-app-bg-subtle p-4 text-[#5C574B] dark:text-app-ink-soft animate-[fade-in_0.3s_ease-out]"
-                  role="note"
-                >
-                  <div className="flex items-start gap-2.5">
-                    <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-[#9A7B00] dark:text-[#E7B400]" aria-hidden="true" />
-                    <div>
-                      <p className="text-[13px] font-semibold text-[#17150F] dark:text-app-ink">Gợi ý để mục tiêu rõ hơn</p>
-                      <p className="mt-1 text-[12.5px] leading-5">{currentStepSoftWarning}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
             </motion.div>
           </AnimatePresence>
         </div>

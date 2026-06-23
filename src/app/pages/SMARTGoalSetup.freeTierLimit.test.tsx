@@ -1,5 +1,4 @@
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { beforeEach, describe, expect, it } from "vitest";
 
@@ -62,6 +61,18 @@ function renderSmartSetup() {
   render(<RouterProvider router={router} />);
 }
 
+function getMobileActionBar() {
+  const actionBar = document.querySelector("[data-smart-mobile-action-bar]");
+  if (!(actionBar instanceof HTMLElement)) {
+    throw new Error("Missing mobile action bar");
+  }
+  return actionBar;
+}
+
+function getMobileActionBarButtons() {
+  return Array.from(getMobileActionBar().querySelectorAll("button"));
+}
+
 beforeEach(() => {
   localStorage.clear();
 });
@@ -69,15 +80,17 @@ beforeEach(() => {
 describe("SMARTGoalSetup free tier limit", () => {
   it("opens the Plus paywall when a free user tries to create a fourth goal", async () => {
     seedFreeUserAtGoalLimit();
-    const user = userEvent.setup();
 
     renderSmartSetup();
 
-    await screen.findByRole("button", { name: "Tiếp tục" });
+    await screen.findByText("Bạn muốn đạt điều gì?");
     for (let index = 0; index < 4; index += 1) {
-      await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
+      const buttons = getMobileActionBarButtons();
+      fireEvent.click(buttons[1] as HTMLElement);
     }
-    await user.click(screen.getByRole("button", { name: "Kiểm tra độ khả thi" }));
+
+    const finalButtons = getMobileActionBarButtons();
+    fireEvent.click(finalButtons[2] as HTMLElement);
 
     expect((await screen.findAllByText("Bạn đã có 3 mục tiêu")).length).toBeGreaterThan(0);
     expect(screen.getByText(/Nâng cấp Plus để tạo thêm mục tiêu/)).toBeInTheDocument();
