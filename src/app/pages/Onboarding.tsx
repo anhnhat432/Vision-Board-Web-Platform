@@ -976,7 +976,9 @@ export function Onboarding() {
                         <AreaIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
                       </span>
                       <span className="block text-[11.5px] font-bold leading-tight text-[#17150F] sm:text-[12.5px]">
-                        <span className="sm:hidden">{index + 1}. {compactLabel}</span>
+                        <span className="sm:hidden">
+                          {index + 1}. {compactLabel}
+                        </span>
                         <span className="hidden sm:inline">
                           {index + 1}. {label}
                         </span>
@@ -1071,7 +1073,10 @@ export function Onboarding() {
 
                   {/* Number buttons 0-10 */}
                   <p className="mb-3 text-[13px] font-semibold text-[#17150F]">Chọn điểm theo cảm nhận hiện tại</p>
-                  <div data-onboarding-score-grid className="mb-5 grid grid-cols-4 gap-2 sm:mb-[22px] sm:flex sm:flex-wrap sm:gap-[9px]">
+                  <div
+                    data-onboarding-score-grid
+                    className="mb-5 grid grid-cols-4 gap-2 sm:mb-[22px] sm:flex sm:flex-wrap sm:gap-[9px]"
+                  >
                     {SCORE_VALUES.map((scoreVal) => {
                       const isCurrentScore = area.score === scoreVal;
                       return (
@@ -1186,7 +1191,7 @@ export function Onboarding() {
                   <div className="mb-[22px] flex items-center gap-3 sm:mb-[26px] sm:gap-[14px]">
                     <button
                       type="button"
-                      className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-[rgba(23,21,15,0.14)] bg-white font-[inherit] text-[20px] font-semibold text-[#5C574B]"
+                      className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-[rgba(23,21,15,0.14)] bg-white font-[inherit] text-[20px] font-semibold text-[#5C574B] transition-colors hover:bg-[#FAF8F3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2 sm:h-10 sm:w-10"
                       onClick={() => handleScoreChangeWrapped(index, [Math.max(0, area.score - 1)])}
                       aria-label="Giảm 1 điểm"
                     >
@@ -1206,7 +1211,7 @@ export function Onboarding() {
                     />
                     <button
                       type="button"
-                      className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-[rgba(23,21,15,0.14)] bg-white font-[inherit] text-[20px] font-semibold text-[#5C574B]"
+                      className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-[rgba(23,21,15,0.14)] bg-white font-[inherit] text-[20px] font-semibold text-[#5C574B] transition-colors hover:bg-[#FAF8F3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2 sm:h-10 sm:w-10"
                       onClick={() => handleScoreChangeWrapped(index, [Math.min(10, area.score + 1)])}
                       aria-label="Tăng 1 điểm"
                     >
@@ -1343,7 +1348,10 @@ export function Onboarding() {
         </div>
 
         {/* ---- BOTTOM NAV (Clio design) ---- */}
-        <footer data-onboarding-bottom-nav className="flex flex-col gap-3 border-t border-[rgba(23,21,15,0.08)] pt-[18px] sm:flex-row sm:items-center sm:justify-between sm:gap-[14px]">
+        <footer
+          data-onboarding-bottom-nav
+          className="flex flex-col gap-3 border-t border-[rgba(23,21,15,0.08)] pt-[18px] sm:flex-row sm:items-center sm:justify-between sm:gap-[14px]"
+        >
           <div className="flex w-full flex-col gap-2.5 sm:w-auto sm:flex-row sm:items-center sm:gap-4">
             <button
               type="button"
