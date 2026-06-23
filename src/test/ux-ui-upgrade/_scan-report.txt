@@ -1,7 +1,4 @@
-=== NEUTRAL VIOLATIONS (step screens): 2 ===
-{
-  "src/app/pages/GoalTracker.tsx": 2
-}
+=== NEUTRAL VIOLATIONS (step screens): 0 ===
+{}
 
-src/app/pages/GoalTracker.tsx:446:129 [primitive-palette] via-neutral-950
-src/app/pages/GoalTracker.tsx:446:150 [primitive-palette] to-neutral-950
+No token-compliance violations found.

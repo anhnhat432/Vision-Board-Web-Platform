@@ -275,3 +275,5 @@ Every completed task should report:
 - Remaining risks, TODOs, or assumptions.
 
 If a bug cannot be safely fixed in the requested scope, document it in the final response and, when requested, add a clear TODO or guideline note instead of making a risky large change.
+
+## Imported Claude Cowork project instructions
