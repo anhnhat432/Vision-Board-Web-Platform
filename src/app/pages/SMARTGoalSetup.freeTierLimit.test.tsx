@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { beforeEach, describe, expect, it } from "vitest";
 
@@ -36,12 +37,27 @@ function seedFreeUserAtGoalLimit() {
   localStorage.setItem(
     APP_STORAGE_KEYS.pendingSmartGoal,
     JSON.stringify({
-      focusArea: "Career",
-      specific: "Tăng doanh thu tư vấn lên mức ổn định hơn trong quý này",
-      measurable: "Doanh thu từ 10 lên 30 triệu VND",
-      achievable: "Dành 8 giờ mỗi tuần, cần kỹ năng bán hàng, dùng danh sách khách hàng hiện có",
-      relevant: "Mục tiêu này giúp tôi có nền tài chính vững hơn và tự tin hơn với nghề nghiệp.",
-      timeBound: "Trong 12 tuần",
+      id: "smart_goal_limit_test",
+      domain: "career",
+      specific: {
+        goal_statement: "Tăng doanh thu tư vấn lên mức ổn định hơn trong quý này",
+      },
+      measurable: {
+        metric_name: "Doanh thu tư vấn",
+        baseline_value: 10,
+        target_value: 30,
+      },
+      achievable: {
+        weekly_time_commitment_hours: 8,
+        required_skills: ["Bán hàng"],
+        support_resources: ["Danh sách khách hàng hiện có"],
+      },
+      relevant: {
+        motivation_reason: "Mục tiêu này giúp tôi có nền tài chính vững hơn và tự tin hơn với nghề nghiệp.",
+        life_dimension_alignment: "Sự nghiệp",
+      },
+      time_bound: { target_weeks: 12 },
+      created_at: now,
     }),
   );
 }
@@ -69,10 +85,6 @@ function getMobileActionBar() {
   return actionBar;
 }
 
-function getMobileActionBarButtons() {
-  return Array.from(getMobileActionBar().querySelectorAll("button"));
-}
-
 beforeEach(() => {
   localStorage.clear();
 });
@@ -82,15 +94,34 @@ describe("SMARTGoalSetup free tier limit", () => {
     seedFreeUserAtGoalLimit();
 
     renderSmartSetup();
+    const user = userEvent.setup();
 
-    await screen.findByText("Bạn muốn đạt điều gì?");
-    for (let index = 0; index < 4; index += 1) {
-      const buttons = getMobileActionBarButtons();
-      fireEvent.click(buttons[1] as HTMLElement);
-    }
+    await screen.findByText("Bạn muốn đạt được điều gì?");
 
-    const finalButtons = getMobileActionBarButtons();
-    fireEvent.click(finalButtons[2] as HTMLElement);
+    const specificAction = await within(getMobileActionBar()).findByRole("button", {
+      name: /Lưu mục tiêu cụ thể/i,
+    });
+    await user.click(specificAction);
+
+    const measurableAction = await within(getMobileActionBar()).findByRole("button", {
+      name: /Xác nhận chỉ số đo/i,
+    });
+    await user.click(measurableAction);
+
+    const achievableAction = await within(getMobileActionBar()).findByRole("button", {
+      name: /Thiết lập thời gian cam kết/i,
+    });
+    await user.click(achievableAction);
+
+    const relevantAction = await within(getMobileActionBar()).findByRole("button", {
+      name: /Xác nhận động lực này/i,
+    });
+    await user.click(relevantAction);
+
+    const finalAction = await within(getMobileActionBar()).findByRole("button", {
+      name: /Tạo kế hoạch nhanh/i,
+    });
+    await user.click(finalAction);
 
     expect((await screen.findAllByText("Bạn đã có 3 mục tiêu")).length).toBeGreaterThan(0);
     expect(screen.getByText(/Nâng cấp Plus để tạo thêm mục tiêu/)).toBeInTheDocument();

@@ -599,9 +599,9 @@ export function SMARTGoalSetup() {
         description="Nâng cấp Plus để tạo thêm mục tiêu. Dữ liệu hiện có vẫn được giữ nguyên."
         source="paywall_dialog"
       />
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         <div>
-          <CoreFlowProgress currentStepId="smart_goal" onExit={() => navigate("/")} className="mb-2" />
+          <CoreFlowProgress currentStepId="smart_goal" onExit={() => navigate("/")} className="mb-1 sm:mb-2" />
           <div className="sticky top-2 z-20 flex justify-end">
             <AutoSaveIndicator
               status={isDirty ? autoSaveStatus : "saved"}
@@ -613,7 +613,7 @@ export function SMARTGoalSetup() {
 
         {!isVisionPromptDismissed ? (
           <section
-            className="rounded-[14px] border border-app-accent-soft bg-app-accent-soft p-5 md:p-6"
+            className="hidden rounded-[14px] border border-app-accent-soft bg-app-accent-soft p-5 md:block md:p-6"
             aria-label="Tầm nhìn dài hạn"
           >
             <span className="inline-flex rounded-full bg-app-surface px-3 py-1 text-xs font-medium text-app-accent">

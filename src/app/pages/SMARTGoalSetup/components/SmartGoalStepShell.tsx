@@ -753,9 +753,7 @@ export function SmartGoalStepShell({
 
         <div className="mt-4 pt-3 border-t border-[rgba(23,21,15,0.06)] dark:border-app-line flex items-center justify-between text-[10px] font-bold select-none">
           <span className="text-[#5C574B] dark:text-app-ink-soft">★ Dear Our Future</span>
-          <span className="text-[#A8A296] dark:text-app-ink-muted flex items-center gap-1">
-            ✦ {areaLabel} ✦
-          </span>
+          <span className="text-[#A8A296] dark:text-app-ink-muted flex items-center gap-1">✦ {areaLabel} ✦</span>
         </div>
       </div>
     );
@@ -810,15 +808,15 @@ export function SmartGoalStepShell({
         )}
       </AnimatePresence>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_348px] gap-[18px] items-start">
+      <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[1fr_348px] lg:gap-[18px]">
         <div
           className={cn(
-            "relative min-w-0 space-y-6 rounded-[22px] border border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white dark:bg-app-surface p-6 sm:p-7 sm:pl-12 shadow-[0_18px_40px_-32px_rgba(23,21,15,0.4)] overflow-hidden transition-all duration-200",
+            "relative min-w-0 space-y-4 overflow-hidden rounded-[18px] border border-[rgba(23,21,15,0.08)] bg-white p-4 shadow-[0_18px_40px_-32px_rgba(23,21,15,0.4)] transition-all duration-200 dark:border-app-line dark:bg-app-surface sm:space-y-6 sm:rounded-[22px] sm:p-7 sm:pl-12",
             isPageFlipping && !shouldReduceMotion && "page-flip-effect",
           )}
         >
           <div
-            className="absolute left-0 top-0 bottom-0 w-[30px] border-r border-[rgba(23,21,15,0.05)] dark:border-app-line"
+            className="absolute bottom-0 left-0 top-0 hidden w-[30px] border-r border-[rgba(23,21,15,0.05)] dark:border-app-line sm:block"
             style={{
               backgroundImage: "radial-gradient(circle, #D8D3C5 1.6px, transparent 1.8px)",
               backgroundSize: "22px 17px",
@@ -827,7 +825,7 @@ export function SmartGoalStepShell({
             aria-hidden="true"
           />
 
-          <div className="flex items-start justify-between gap-3.5 mb-1">
+          <div className="mb-1 flex items-start justify-between gap-3">
             <div className="min-w-0">
               <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-[#0C5E3A] flex items-center gap-2">
                 <span className="h-1.5 w-1.5 rounded-full bg-[#0C5E3A]" />
@@ -837,21 +835,23 @@ export function SmartGoalStepShell({
                 id="smart-step-title"
                 ref={headingRef}
                 tabIndex={-1}
-                className="mt-1.5 text-[25px] font-extrabold leading-[1.12] tracking-[-0.02em] text-[#17150F] dark:text-app-ink focus:outline-none"
+                className="mt-1.5 text-[22px] font-extrabold leading-[1.12] tracking-[-0.02em] text-[#17150F] focus:outline-none dark:text-app-ink sm:text-[25px]"
                 style={{ fontFamily: "'Bricolage Grotesque', serif" }}
               >
                 {step.title}
               </h2>
-              <p className="mt-2 text-[13.5px] leading-[1.55] text-[#5C574B] dark:text-app-ink-soft max-w-[52ch]">{step.description}</p>
+              <p className="mt-2 max-w-[52ch] text-[13px] leading-[1.5] text-[#5C574B] dark:text-app-ink-soft sm:text-[13.5px] sm:leading-[1.55]">
+                {step.description}
+              </p>
             </div>
             <span className="inline-flex shrink-0 rounded-full bg-[#EDF7E0] px-2.5 py-0.5 text-xs font-semibold text-[#0C5E3A] border border-[#0C5E3A]/10">
               {stepIndex + 1}/{totalSteps}
             </span>
           </div>
 
-          <div className="relative mt-5">
+          <div className="relative mt-4 sm:mt-5">
             <div
-              className="absolute top-[22px] left-[10%] right-[10%] h-[3px] bg-[#E4E0D4] rounded-full z-0 overflow-hidden"
+              className="absolute left-[10%] right-[10%] top-[18px] z-0 h-[3px] overflow-hidden rounded-full bg-[#E4E0D4] sm:top-[22px]"
               aria-hidden="true"
             >
               <div
@@ -865,7 +865,7 @@ export function SmartGoalStepShell({
 
             <ol
               aria-label={`Bước ${stepIndex + 1} trên ${totalSteps}`}
-              className="relative z-10 grid grid-cols-5 gap-2"
+              className="relative z-10 grid grid-cols-5 gap-1.5 sm:gap-2"
             >
               {SMART_STEPS.map((smartStep, index) => {
                 const isActive = index === stepIndex;
@@ -880,7 +880,7 @@ export function SmartGoalStepShell({
                       disabled={!canJump}
                       onClick={() => handleWizardJump(index)}
                       className={cn(
-                        "flex h-full w-full flex-col items-center gap-2 rounded-[14px] border py-3.5 px-1.5 transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 hover:-translate-y-0.5 enabled:cursor-pointer disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0",
+                        "flex h-full w-full flex-col items-center gap-1 rounded-[12px] border px-1 py-2 transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 enabled:cursor-pointer enabled:hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0 sm:gap-2 sm:rounded-[14px] sm:px-1.5 sm:py-3.5",
                         isActive
                           ? "border-[1.5px] border-[#0C5E3A] bg-[#E9F3DF] shadow-[0_8px_20px_-14px_rgba(12,94,58,0.7)]"
                           : isDone
@@ -890,7 +890,7 @@ export function SmartGoalStepShell({
                     >
                       <span
                         className={cn(
-                          "flex h-[34px] w-[34px] items-center justify-center rounded-full transition-all duration-300",
+                          "flex h-8 w-8 items-center justify-center rounded-full transition-all duration-300 sm:h-[34px] sm:w-[34px]",
                           isActive
                             ? "bg-white dark:bg-app-surface text-[#0C5E3A]"
                             : isDone
@@ -898,11 +898,11 @@ export function SmartGoalStepShell({
                               : "bg-[#F2EFE6] dark:bg-app-bg-subtle text-[#A8A296] dark:text-app-ink-muted",
                         )}
                       >
-                        <StepIcon className="h-[17px] w-[17px]" />
+                        <StepIcon className="h-4 w-4 sm:h-[17px] sm:w-[17px]" aria-hidden="true" />
                       </span>
                       <span
                         className={cn(
-                          "font-extrabold text-[13px] leading-none",
+                          "text-[12px] font-extrabold leading-none sm:text-[13px]",
                           isActive
                             ? "text-[#0C5E3A]"
                             : isDone
@@ -915,7 +915,7 @@ export function SmartGoalStepShell({
                       </span>
                       <span
                         className={cn(
-                          "text-[10px] font-semibold truncate",
+                          "hidden truncate text-[10px] font-semibold sm:block",
                           isActive
                             ? "text-[#0C5E3A]"
                             : isDone
@@ -933,7 +933,7 @@ export function SmartGoalStepShell({
             </ol>
           </div>
 
-          <div className="my-5 h-px bg-[rgba(23,21,15,0.08)]" aria-hidden="true" />
+          <div className="my-4 h-px bg-[rgba(23,21,15,0.08)] sm:my-5" aria-hidden="true" />
 
           <AnimatePresence mode="wait">
             <motion.div
@@ -942,8 +942,10 @@ export function SmartGoalStepShell({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-              className="space-y-5"
+              className="space-y-4 sm:space-y-5"
             >
+              {children}
+
               {/* Polaroid Live Preview hiển thị ở trên cùng trên mobile dưới dạng collapsible */}
               <div className="block lg:hidden select-none mb-3">
                 {step.key === "timeBound" ? (
@@ -986,8 +988,6 @@ export function SmartGoalStepShell({
                 )}
               </div>
 
-              {children}
-
               {(currentStepError || currentStepSoftWarning) && (
                 <div data-smart-step-feedback className="space-y-3">
                   {currentStepError && (
@@ -1006,9 +1006,14 @@ export function SmartGoalStepShell({
                       role="note"
                     >
                       <div className="flex items-start gap-2.5">
-                        <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-[#9A7B00] dark:text-[#E7B400]" aria-hidden="true" />
+                        <Lightbulb
+                          className="mt-0.5 h-4 w-4 shrink-0 text-[#9A7B00] dark:text-[#E7B400]"
+                          aria-hidden="true"
+                        />
                         <div>
-                          <p className="text-[13px] font-semibold text-[#17150F] dark:text-app-ink">Gợi ý để mục tiêu rõ hơn</p>
+                          <p className="text-[13px] font-semibold text-[#17150F] dark:text-app-ink">
+                            Gợi ý để mục tiêu rõ hơn
+                          </p>
                           <p className="mt-1 text-[12.5px] leading-5">{currentStepSoftWarning}</p>
                         </div>
                       </div>
@@ -1063,7 +1068,9 @@ export function SmartGoalStepShell({
                     >
                       {/* Selector chọn giọng điệu nhỏ gọn */}
                       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[rgba(23,21,15,0.06)] dark:border-app-line pb-2.5">
-                        <span className="text-[11px] font-bold text-[#5C574B] dark:text-app-ink-soft">Chọn giọng điệu:</span>
+                        <span className="text-[11px] font-bold text-[#5C574B] dark:text-app-ink-soft">
+                          Chọn giọng điệu:
+                        </span>
                         <div className="flex items-center gap-1.5">
                           {(["empathetic", "pragmatic", "strategic"] as const).map((tone, idx) => {
                             const isActive = selectedTone === tone;
@@ -1082,7 +1089,7 @@ export function SmartGoalStepShell({
                                     "font-bold transition-all duration-150 hover:text-[#9A7B00] dark:text-[#E7B400] cursor-pointer text-[11px] py-1 px-2 focus-visible:ring-1 focus-visible:ring-app-accent/50 focus-visible:outline-none focus-visible:rounded-sm",
                                     isActive
                                       ? "text-[#9A7B00] dark:text-[#E7B400] underline decoration-2 underline-offset-2"
-                              : "text-[#A8A296] dark:text-app-ink-muted",
+                                      : "text-[#A8A296] dark:text-app-ink-muted",
                                   )}
                                 >
                                   {toneLabel}
@@ -1094,7 +1101,9 @@ export function SmartGoalStepShell({
                       </div>
 
                       <div className="space-y-2.5">
-                        <p className="text-[12.5px] text-[#5C574B] dark:text-app-ink-soft leading-relaxed italic">{typedCommentText}</p>
+                        <p className="text-[12.5px] text-[#5C574B] dark:text-app-ink-soft leading-relaxed italic">
+                          {typedCommentText}
+                        </p>
 
                         {typedDraftText && (
                           <div className="relative rounded-[13px] border-l-[3px] border-[#9A7B00] dark:border-[#E7B400] bg-[#FFF8DE] dark:bg-[#2A2410]/50 px-3.5 py-2.5 shadow-none">
@@ -1137,14 +1146,14 @@ export function SmartGoalStepShell({
                   Quay lại
                 </motion.button>
 
-              {showFinalSecondaryCta ? (
-                <motion.button
-                  whileHover={{ scale: 1.015 }}
-                  whileTap={{ scale: 0.985 }}
-                  type="button"
-                  onClick={handleFinalSecondaryClick}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-[11px] border border-[rgba(23,21,15,0.1)] dark:border-app-line bg-white dark:bg-app-surface px-5 py-2.5 text-[13px] font-semibold text-[#17150F] dark:text-app-ink transition-all duration-200 hover:bg-[#FAF8F3] dark:hover:bg-app-bg-subtle active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A]/35 sm:w-auto cursor-pointer"
-                >
+                {showFinalSecondaryCta ? (
+                  <motion.button
+                    whileHover={{ scale: 1.015 }}
+                    whileTap={{ scale: 0.985 }}
+                    type="button"
+                    onClick={handleFinalSecondaryClick}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-[11px] border border-[rgba(23,21,15,0.1)] dark:border-app-line bg-white dark:bg-app-surface px-5 py-2.5 text-[13px] font-semibold text-[#17150F] dark:text-app-ink transition-all duration-200 hover:bg-[#FAF8F3] dark:hover:bg-app-bg-subtle active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A]/35 sm:w-auto cursor-pointer"
+                  >
                     <ShieldCheck className="h-4 w-4" aria-hidden="true" />
                     {finalSecondaryCtaLabel}
                   </motion.button>
@@ -1164,10 +1173,10 @@ export function SmartGoalStepShell({
               {/* Sticky Bottom CTA cho Mobile */}
               <div
                 data-smart-mobile-action-bar
-                className="fixed bottom-0 left-0 right-0 z-40 border-t border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white/95 dark:bg-app-surface/95 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-3 shadow-[0_-18px_40px_-30px_rgba(23,21,15,0.5)] backdrop-blur-md lg:hidden"
+                className="fixed bottom-0 left-0 right-0 z-40 border-t border-[rgba(23,21,15,0.08)] bg-white/95 px-4 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-2 shadow-[0_-18px_40px_-30px_rgba(23,21,15,0.5)] backdrop-blur-md dark:border-app-line dark:bg-app-surface/95 lg:hidden"
               >
-                <div className="mx-auto flex w-full max-w-[42rem] flex-col gap-3">
-                  <div className="flex items-center justify-between gap-3 text-[11px] font-semibold" aria-live="polite">
+                <div className="mx-auto flex w-full max-w-[42rem] flex-col gap-2">
+                  <div className="sr-only" aria-live="polite">
                     <span className="min-w-0 truncate text-app-ink-muted">{mobileProgressLabel}</span>
                     <span
                       className={cn(
@@ -1180,33 +1189,33 @@ export function SmartGoalStepShell({
                       {mobileReadinessLabel}
                     </span>
                   </div>
-                  <div className="flex justify-between gap-3">
-                  <button
-                    type="button"
-                    className="flex-1 inline-flex items-center justify-center gap-2 rounded-[11px] border border-[rgba(23,21,15,0.1)] dark:border-app-line bg-white dark:bg-app-surface py-3 text-[13px] font-semibold text-[#5C574B] dark:text-app-ink-soft transition-all duration-200 hover:bg-[#FAF8F3] dark:hover:bg-app-bg-subtle active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A]/35 cursor-pointer"
-                    onClick={onBack}
-                  >
-                    <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-                    Quay lại
-                  </button>
-                  <button
-                    type="button"
-                    className="flex-[2] inline-flex items-center justify-center gap-2 rounded-[11px] bg-[#0C5E3A] py-3 text-[13px] font-bold text-white shadow-[0_4px_12px_rgba(12,94,58,0.3)] hover:bg-[#16A34A] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A]/35 transition-all duration-200 cursor-pointer"
-                    onClick={handleNextClick}
-                  >
-                    {primaryCtaLabel}
-                    <ArrowRight className="h-4 w-4" aria-hidden="true" />
-                  </button>
+                  <div className="flex justify-between gap-2.5">
+                    <button
+                      type="button"
+                      className="inline-flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-[11px] border border-[rgba(23,21,15,0.1)] bg-white py-2.5 text-[13px] font-semibold text-[#5C574B] transition-all duration-200 hover:bg-[#FAF8F3] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A]/35 dark:border-app-line dark:bg-app-surface dark:text-app-ink-soft dark:hover:bg-app-bg-subtle"
+                      onClick={onBack}
+                    >
+                      <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                      Quay lại
+                    </button>
+                    <button
+                      type="button"
+                      className="inline-flex flex-[2] cursor-pointer items-center justify-center gap-2 rounded-[11px] bg-[#0C5E3A] py-2.5 text-[13px] font-bold text-white shadow-[0_4px_12px_rgba(12,94,58,0.3)] transition-all duration-200 hover:bg-[#16A34A] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A]/35"
+                      onClick={handleNextClick}
+                    >
+                      {primaryCtaLabel}
+                      <ArrowRight className="h-4 w-4" aria-hidden="true" />
+                    </button>
                   </div>
                   {showFinalSecondaryCta ? (
-                  <button
-                    type="button"
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-[11px] border border-[rgba(23,21,15,0.1)] dark:border-app-line bg-white dark:bg-app-surface py-2.5 text-[13px] font-semibold text-[#17150F] dark:text-app-ink transition-all duration-200 hover:bg-[#FAF8F3] dark:hover:bg-app-bg-subtle active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A]/35 cursor-pointer"
-                    onClick={handleFinalSecondaryClick}
-                  >
-                    <ShieldCheck className="h-4 w-4" aria-hidden="true" />
-                    {finalSecondaryCtaLabel}
-                  </button>
+                    <button
+                      type="button"
+                      className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-[11px] border border-[rgba(23,21,15,0.1)] bg-white py-2 text-[13px] font-semibold text-[#17150F] transition-all duration-200 hover:bg-[#FAF8F3] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A]/35 dark:border-app-line dark:bg-app-surface dark:text-app-ink dark:hover:bg-app-bg-subtle"
+                      onClick={handleFinalSecondaryClick}
+                    >
+                      <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+                      {finalSecondaryCtaLabel}
+                    </button>
                   ) : null}
                 </div>
               </div>
@@ -1223,8 +1232,12 @@ export function SmartGoalStepShell({
           <div className="rounded-[16px] border border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white dark:bg-app-surface p-5 space-y-4">
             <div className="flex items-center gap-4">
               <div className="relative w-16 h-16 shrink-0 rounded-full border-2 border-[#E4E0D4] dark:border-app-line bg-white dark:bg-app-surface flex items-center justify-center select-none">
-                <span className="absolute top-0.5 text-[7px] font-extrabold text-[#A8A296] dark:text-app-ink-muted">N</span>
-                <span className="absolute bottom-0.5 text-[7px] font-extrabold text-[#A8A296] dark:text-app-ink-muted">S</span>
+                <span className="absolute top-0.5 text-[7px] font-extrabold text-[#A8A296] dark:text-app-ink-muted">
+                  N
+                </span>
+                <span className="absolute bottom-0.5 text-[7px] font-extrabold text-[#A8A296] dark:text-app-ink-muted">
+                  S
+                </span>
                 <motion.div
                   style={{ rotate: shouldReduceMotion ? clarityProgress * 2.7 - 135 : 0 }}
                   animate={shouldReduceMotion ? {} : { rotate: clarityProgress * 2.7 - 135 }}
@@ -1242,7 +1255,10 @@ export function SmartGoalStepShell({
                   La bàn định hướng (Clarity)
                 </h3>
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-2xl font-extrabold text-[#17150F] dark:text-app-ink" style={{ fontFamily: "'Bricolage Grotesque', serif" }}>
+                  <span
+                    className="text-2xl font-extrabold text-[#17150F] dark:text-app-ink"
+                    style={{ fontFamily: "'Bricolage Grotesque', serif" }}
+                  >
                     {Math.round(clarityProgress)}%
                   </span>
                   <span className="text-[11px] text-[#A8A296] dark:text-app-ink-muted font-medium">
@@ -1269,9 +1285,7 @@ export function SmartGoalStepShell({
                   <div
                     className={cn(
                       "flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full border",
-                      item.done
-                        ? "border-[#0C5E3A] bg-[#0C5E3A] text-white"
-                        : "border-[#A8A296]/30 text-transparent",
+                      item.done ? "border-[#0C5E3A] bg-[#0C5E3A] text-white" : "border-[#A8A296]/30 text-transparent",
                     )}
                   >
                     {item.done ? <Check className="h-2.5 w-2.5" /> : null}
@@ -1284,8 +1298,13 @@ export function SmartGoalStepShell({
           {isAchFilled && (
             <div className="rounded-[16px] border border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white dark:bg-app-surface p-5 space-y-3.5 select-none">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#A8A296] dark:text-app-ink-muted">Ống nghiệm khả thi</span>
-                <span className="text-lg font-extrabold text-[#0C5E3A]" style={{ fontFamily: "'Bricolage Grotesque', serif" }}>
+                <span className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#A8A296] dark:text-app-ink-muted">
+                  Ống nghiệm khả thi
+                </span>
+                <span
+                  className="text-lg font-extrabold text-[#0C5E3A]"
+                  style={{ fontFamily: "'Bricolage Grotesque', serif" }}
+                >
                   {feasibilityScore}%
                 </span>
               </div>
@@ -1300,8 +1319,9 @@ export function SmartGoalStepShell({
               </div>
 
               <p className="text-[12px] text-[#5C574B] dark:text-app-ink-soft leading-[1.6] font-medium">
-                Dành khoảng <span className="font-bold text-[#17150F] dark:text-app-ink">{parsedWeeklyHours} giờ/tuần</span>. Mức độ thời
-                gian khả thi giúp bạn tránh kiệt sức và dễ giữ nhịp bền hơn.
+                Dành khoảng{" "}
+                <span className="font-bold text-[#17150F] dark:text-app-ink">{parsedWeeklyHours} giờ/tuần</span>. Mức độ
+                thời gian khả thi giúp bạn tránh kiệt sức và dễ giữ nhịp bền hơn.
               </p>
             </div>
           )}
@@ -1338,7 +1358,10 @@ export function SmartGoalStepShell({
           </summary>
           <div className="mt-4 grid gap-3 border-t border-[rgba(23,21,15,0.08)] dark:border-app-line pt-4 sm:grid-cols-2 lg:grid-cols-3">
             {SMART_STEPS.map((stepItem) => (
-              <div key={stepItem.key} className="rounded-[11px] border border-[rgba(23,21,15,0.08)] dark:border-app-line bg-[#FAF8F3] dark:bg-app-bg-subtle p-3.5 text-xs">
+              <div
+                key={stepItem.key}
+                className="rounded-[11px] border border-[rgba(23,21,15,0.08)] dark:border-app-line bg-[#FAF8F3] dark:bg-app-bg-subtle p-3.5 text-xs"
+              >
                 <p className="font-extrabold uppercase tracking-wider text-[#0C5E3A] mb-1">{stepItem.label}</p>
                 <p className="leading-relaxed text-[#5C574B] dark:text-app-ink-soft">
                   {formatStepDraft(stepItem.key, smartData) || "Chưa có nội dung..."}
