@@ -144,7 +144,7 @@ export function ResultStep({
   const scoreCards = [
     {
       label: "Mức sẵn sàng tổng",
-      value: readinessPercent >= 75 ? "Sẵn sàng ✨" : readinessPercent >= 50 ? "Khá ổn 🌱" : "Cần lưu ý 🌊",
+      value: readinessPercent >= 75 ? "Sẵn sàng" : readinessPercent >= 50 ? "Khá ổn" : "Cần lưu ý",
       note: `Đạt ${result.readinessScore}/20 chỉ số tự đánh giá.`,
       progress: readinessPercent,
     },
@@ -214,21 +214,26 @@ export function ResultStep({
         {/* Hero Banner Khẳng định tính thực tế */}
         <div
           className={cn(
-            "flex items-start gap-3 rounded-card border bg-gradient-to-br p-4 shadow-app-sm transition-all duration-300 hover:shadow-app-md sm:gap-4 sm:p-5",
+            "flex items-start gap-3 rounded-card border bg-gradient-to-br p-4 shadow-app-sm transition-all duration-300 sm:gap-4 sm:p-5",
             resultHeaderCopy.cardBg,
           )}
         >
           <div className="shrink-0 rounded-control bg-app-surface p-2.5 shadow-app-sm sm:p-3">
             <ActionIcon className={cn("h-5 w-5 sm:h-6 sm:w-6", resultHeaderCopy.textClass)} aria-hidden="true" />
           </div>
-          <div className="space-y-1.5">
+          <div className="min-w-0 space-y-1.5">
             <h1
               id="feasibility-result-title"
-              className={cn("font-serif text-[22px] font-bold leading-tight tracking-tight sm:text-3xl", resultHeaderCopy.textClass)}
+              className={cn(
+                "break-words font-serif text-[22px] font-bold leading-tight tracking-tight sm:text-3xl",
+                resultHeaderCopy.textClass,
+              )}
             >
               {resultHeaderCopy.answer}
             </h1>
-            <p className="text-[13px] font-normal leading-relaxed text-app-ink-soft sm:text-sm">{resultHeaderCopy.desc}</p>
+            <p className="max-w-[68ch] text-[13px] font-normal leading-relaxed text-app-ink-soft sm:text-sm">
+              {resultHeaderCopy.desc}
+            </p>
           </div>
         </div>
 
@@ -256,7 +261,7 @@ export function ResultStep({
             </div>
 
             <div className="min-w-0 flex-1 space-y-5">
-              <div className="rounded-card bg-app-accent-soft/70 p-3.5 text-[13px] font-normal leading-relaxed text-app-accent shadow-app-sm sm:p-4 sm:text-sm">
+              <div className="max-w-[72ch] break-words rounded-card bg-app-accent-soft/70 p-3.5 text-[13px] font-normal leading-relaxed text-app-accent shadow-app-sm sm:p-4 sm:text-sm">
                 {result.summary}
               </div>
 
@@ -274,20 +279,21 @@ export function ResultStep({
                     className="h-full rounded-pill bg-gradient-to-r from-app-status-error via-app-status-warning to-app-status-success transition-all duration-500 ease-out relative"
                     style={{ width: `${(averageScore / 4) * 100}%` }}
                   >
-                    {/* Floating Indicator Bubble */}
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 h-2.5 w-2.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,1)] motion-safe:animate-ping" />
+                    <div className="absolute right-0 top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)]" />
                   </div>
                   <span className="absolute left-[25%] top-0 h-full w-px bg-app-line/10" />
                   <span className="absolute left-[50%] top-0 h-full w-px bg-app-line/10" />
                   <span className="absolute left-[75%] top-0 h-full w-px bg-app-line/10" />
                 </div>
-                <div className="flex justify-between gap-2 text-[10px] font-bold uppercase tracking-[0.08em] text-app-ink-muted sm:text-xs sm:tracking-widest">
-                  <span>Khuyên điều chỉnh (1-2)</span>
-                  <span>Cân bằng (2.3-2.7)</span>
-                  <span>Vững vàng (2.8-4)</span>
+                <div className="grid grid-cols-3 gap-2 text-[10px] font-bold uppercase tracking-[0.08em] text-app-ink-muted sm:text-xs sm:tracking-widest">
+                  <span className="min-w-0 break-words text-left">Khuyên điều chỉnh (1-2)</span>
+                  <span className="min-w-0 break-words text-center">Cân bằng (2.3-2.7)</span>
+                  <span className="min-w-0 break-words text-right">Vững vàng (2.8-4)</span>
                 </div>
               </div>
-              <p className="text-[13px] font-normal leading-relaxed text-app-ink-soft sm:text-sm">{result.recommendation}</p>
+              <p className="max-w-[72ch] break-words text-[13px] font-normal leading-relaxed text-app-ink-soft sm:text-sm">
+                {result.recommendation}
+              </p>
             </div>
           </div>
         </div>
@@ -310,9 +316,11 @@ export function ResultStep({
 
                   <ul className="space-y-1 text-xs text-app-ink font-bold">
                     {strongAxes.map((ax) => (
-                      <li key={ax.axis} className="flex items-center gap-1.5">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-app-status-success" />
-                        {ax.label} ({ax.score}/4)
+                      <li key={ax.axis} className="flex min-w-0 items-center gap-1.5">
+                        <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-app-status-success" aria-hidden="true" />
+                        <span className="min-w-0 break-words">
+                          {ax.label} ({ax.score}/4)
+                        </span>
                       </li>
                     ))}
                   </ul>
@@ -330,10 +338,11 @@ export function ResultStep({
                       : "bg-app-accent-soft text-app-accent border border-app-accent/20",
                 )}
               >
-                <h3 className="text-sm font-semibold flex items-center gap-1.5">
-                  <BlockerIcon className="h-4.5 w-4.5" /> Điểm lưu ý chính: {result.bottleneck.label}
+                <h3 className="flex min-w-0 items-center gap-1.5 text-sm font-semibold">
+                  <BlockerIcon className="h-4.5 w-4.5 shrink-0" aria-hidden="true" />
+                  <span className="min-w-0 break-words">Điểm lưu ý chính: {result.bottleneck.label}</span>
                 </h3>
-                <p className="text-xs leading-relaxed font-semibold text-app-ink">
+                <p className="break-words text-xs leading-relaxed font-semibold text-app-ink">
                   Khuyên điều chỉnh: {result.bottleneck.action}
                 </p>
               </div>
@@ -342,24 +351,26 @@ export function ResultStep({
             {/* Cột phải: 3 Bước hành động cụ thể - Bỏ border */}
             <div className="space-y-4">
               {/* Bước 1: Trước khi lập kế hoạch */}
-              <div className="flex items-start gap-3.5 rounded-card border-none bg-app-surface/30 p-3.5 transition-transform hover:scale-[1.01] sm:p-4">
+              <div className="flex items-start gap-3.5 rounded-card border border-app-line/70 bg-app-surface/60 p-3.5 sm:p-4">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-control bg-app-accent-soft text-app-accent font-bold shadow-app-sm">
-                  <Key className="h-4 w-4" />
+                  <Key className="h-4 w-4" aria-hidden="true" />
                 </div>
-                <div className="space-y-1">
+                <div className="min-w-0 space-y-1">
                   <h4 className="text-sm font-semibold text-app-accent">1. Chuẩn bị bệ đỡ</h4>
-                  <p className="text-xs leading-relaxed text-app-ink-soft font-normal text-left">{capitalizedAction}</p>
+                  <p className="break-words text-left text-xs font-normal leading-relaxed text-app-ink-soft">
+                    {capitalizedAction}
+                  </p>
                 </div>
               </div>
 
               {/* Bước 2: Tuần khởi động */}
-              <div className="flex items-start gap-3.5 rounded-card border-none bg-app-surface/30 p-3.5 transition-transform hover:scale-[1.01] sm:p-4">
+              <div className="flex items-start gap-3.5 rounded-card border border-app-line/70 bg-app-surface/60 p-3.5 sm:p-4">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-control bg-app-accent-soft text-app-accent font-bold shadow-app-sm">
-                  <Sparkles className="h-4 w-4" />
+                  <Sparkles className="h-4 w-4" aria-hidden="true" />
                 </div>
-                <div className="space-y-1">
+                <div className="min-w-0 space-y-1">
                   <h4 className="text-sm font-semibold text-app-accent">2. Tuần khởi động (Tuần 1)</h4>
-                  <p className="text-xs leading-relaxed text-app-ink-soft font-normal text-left">
+                  <p className="break-words text-left text-xs font-normal leading-relaxed text-app-ink-soft">
                     {result.firstWeekGuidance}
                   </p>
                 </div>
@@ -367,13 +378,13 @@ export function ResultStep({
 
               {/* Bước 3: Điều chỉnh quy mô mục tiêu */}
               {result.scopeRecommendation && (
-                <div className="flex items-start gap-3.5 rounded-card border-none bg-app-surface/30 p-3.5 transition-transform hover:scale-[1.01] sm:p-4">
+                <div className="flex items-start gap-3.5 rounded-card border border-app-line/70 bg-app-surface/60 p-3.5 sm:p-4">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-control bg-app-accent-soft text-app-accent font-bold shadow-app-sm">
-                    <Compass className="h-4 w-4" />
+                    <Compass className="h-4 w-4" aria-hidden="true" />
                   </div>
-                  <div className="space-y-1">
+                  <div className="min-w-0 space-y-1">
                     <h4 className="text-sm font-semibold text-app-accent">3. Tinh chỉnh quy mô mục tiêu</h4>
-                    <p className="text-xs leading-relaxed text-app-ink-soft font-normal text-left">
+                    <p className="break-words text-left text-xs font-normal leading-relaxed text-app-ink-soft">
                       {result.scopeRecommendation}
                     </p>
                   </div>
@@ -389,7 +400,7 @@ export function ResultStep({
               <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-app-status-warning" aria-hidden="true" />
               <div className="space-y-1">
                 <p className="font-bold text-sm text-app-status-warning">Lời khuyên tinh chỉnh SMART Goal</p>
-                <p className="text-xs sm:text-sm leading-relaxed text-app-ink-soft font-normal">
+                <p className="break-words text-xs font-normal leading-relaxed text-app-ink-soft sm:text-sm">
                   {result.smartGoalQualityNote}
                 </p>
               </div>
@@ -406,11 +417,11 @@ export function ResultStep({
           <CollapsibleTrigger asChild>
             <button
               type="button"
-              className="inline-flex w-full items-center justify-between gap-3 rounded-control border border-app-line bg-app-surface/70 px-4 py-3 text-left text-sm font-bold text-app-ink shadow-app-sm transition-all duration-150 hover:bg-app-bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-bg)] sm:px-5"
+              className="inline-flex min-h-11 w-full items-center justify-between gap-3 rounded-control border border-app-line bg-app-surface/70 px-4 py-3 text-left text-sm font-bold text-app-ink shadow-app-sm transition-all duration-150 hover:bg-app-bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-bg)] sm:px-5"
             >
-              <span className="flex items-center gap-2">
-                <Info className="h-4.5 w-4.5 text-app-accent" />
-                Xem phân tích chi tiết & 7 khía cạnh
+              <span className="flex min-w-0 items-center gap-2">
+                <Info className="h-4.5 w-4.5 shrink-0 text-app-accent" aria-hidden="true" />
+                <span className="min-w-0 break-words">Xem phân tích chi tiết & 7 khía cạnh</span>
               </span>
               <ChevronDown className="h-5 w-5 text-app-ink-muted transition-transform duration-200" />
             </button>
@@ -424,7 +435,9 @@ export function ResultStep({
                   className="rounded-card bg-app-surface/40 p-5 transition-all duration-300 hover:bg-app-surface/60 hover:shadow-app-md border-none"
                 >
                   <p className="text-xs font-bold uppercase tracking-widest text-app-ink-muted">{card.label}</p>
-                  <p className="mt-2 text-xl font-extrabold leading-normal text-app-ink tracking-tight">{card.value}</p>
+                  <p className="mt-2 break-words text-lg font-extrabold leading-snug text-app-ink tracking-tight sm:text-xl">
+                    {card.value}
+                  </p>
                   <div
                     className="mt-4 h-2 overflow-hidden rounded-pill bg-app-line/20 shadow-inner"
                     role="progressbar"
@@ -438,7 +451,7 @@ export function ResultStep({
                       style={{ width: `${card.progress}%` }}
                     />
                   </div>
-                  <p className="mt-3 text-xs leading-relaxed text-app-ink-muted font-normal">{card.note}</p>
+                  <p className="mt-3 break-words text-xs leading-relaxed text-app-ink-muted font-normal">{card.note}</p>
                 </div>
               ))}
             </div>
@@ -452,7 +465,7 @@ export function ResultStep({
                 {result.axisScores.map((axis) => (
                   <div key={axis.axis} className="rounded-card bg-app-surface/50 p-4 border-none">
                     <div className="flex items-center justify-between gap-3">
-                      <p className="text-sm font-bold text-app-ink">{axis.label}</p>
+                      <p className="min-w-0 break-words text-sm font-bold text-app-ink">{axis.label}</p>
                       <span className="text-xs font-bold text-app-ink-muted bg-app-bg-subtle px-2 py-0.5 rounded-control">
                         {axis.score}/{axis.maxScore}
                       </span>
@@ -470,7 +483,9 @@ export function ResultStep({
                         style={{ width: `${axis.percent}%` }}
                       />
                     </div>
-                    <p className="mt-3 text-xs leading-relaxed text-app-ink-soft font-normal">{axis.diagnostic}</p>
+                    <p className="mt-3 break-words text-xs leading-relaxed text-app-ink-soft font-normal">
+                      {axis.diagnostic}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -480,25 +495,25 @@ export function ResultStep({
             <div className="space-y-3 pt-2 border-t border-app-line">
               <h4 className="text-xs font-bold uppercase tracking-wider text-app-ink-muted">Mục tiêu SMART của bạn</h4>
               <div className="rounded-card bg-app-surface/40 p-5 space-y-4 border-none">
-                <p className="text-sm font-bold leading-relaxed text-app-ink p-4 rounded-card bg-app-bg-subtle shadow-app-sm border-none">
+                <p className="break-words rounded-card border-none bg-app-bg-subtle p-4 text-sm font-bold leading-relaxed text-app-ink shadow-app-sm">
                   {pendingGoal.specific}
                 </p>
                 <div className="grid gap-4 sm:grid-cols-3 text-sm leading-relaxed text-app-ink-soft">
                   <div>
                     <p className="text-xs font-bold uppercase tracking-widest text-app-ink-muted mb-1">Thời hạn</p>
-                    <p className="font-semibold text-app-ink">{pendingGoal.timeBound}</p>
+                    <p className="break-words font-semibold text-app-ink">{pendingGoal.timeBound}</p>
                   </div>
                   <div>
                     <p className="text-xs font-bold uppercase tracking-widest text-app-ink-muted mb-1">
                       Dấu hiệu hoàn thành
                     </p>
-                    <p className="font-semibold text-app-ink">{pendingGoal.measurable}</p>
+                    <p className="break-words font-semibold text-app-ink">{pendingGoal.measurable}</p>
                   </div>
                   <div>
                     <p className="text-xs font-bold uppercase tracking-widest text-app-ink-muted mb-1">
                       Lý do theo đuổi
                     </p>
-                    <p className="font-semibold text-app-ink">{pendingGoal.relevant}</p>
+                    <p className="break-words font-semibold text-app-ink">{pendingGoal.relevant}</p>
                   </div>
                 </div>
               </div>

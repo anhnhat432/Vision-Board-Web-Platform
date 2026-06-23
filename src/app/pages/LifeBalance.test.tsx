@@ -127,6 +127,8 @@ describe("LifeBalance", () => {
 
     expect(document.querySelector("[data-life-balance-kpi-grid]")).toHaveClass("grid-cols-3", "gap-2", "sm:gap-4");
     expect(document.querySelector("[data-life-balance-tabs-list]")).toHaveClass("grid", "w-full", "grid-cols-3");
+    expect(screen.getByRole("tab", { name: "Hiện tại" })).toHaveClass("min-h-11");
+    expect(screen.getByRole("tab", { name: /Trọng tâm/i })).toHaveClass("min-h-11");
   });
 
   it("auto-saves after editing a score", async () => {
@@ -146,7 +148,10 @@ describe("LifeBalance", () => {
     const { router } = renderLifeBalance("/life-balance?tab=focus");
 
     const continueButton = await screen.findByRole("button", { name: /Tạo mục tiêu SMART/i });
-    fireEvent.click(screen.getByRole("button", { name: /Sự nghiệp/i }));
+    const careerButton = screen.getByRole("button", { name: /Sự nghiệp/i });
+    expect(careerButton).toHaveAttribute("aria-pressed", "false");
+    fireEvent.click(careerButton);
+    expect(careerButton).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(continueButton);
 
     await waitFor(() => {

@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Lightbulb, Target } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState, type Ref } from "react";
 import { soundService } from "@/app/services/soundService";
@@ -75,7 +75,7 @@ export function FeasibilityStepShell({
       <section
         data-feasibility-step-shell
         ref={targetRef}
-        className="group relative overflow-hidden rounded-card border border-app-line bg-app-surface/70 p-3 pb-[calc(5.25rem+env(safe-area-inset-bottom))] shadow-app-md backdrop-blur-md transition-all duration-300 dark:bg-app-surface/40 sm:p-7 sm:pb-8 md:p-8 md:pb-9"
+        className="group relative overflow-hidden rounded-card border border-app-line bg-app-surface/70 p-3 pb-[calc(6.5rem+env(safe-area-inset-bottom))] shadow-app-md backdrop-blur-md transition-all duration-300 dark:bg-app-surface/40 sm:p-7 sm:pb-8 md:p-8 md:pb-9"
         aria-labelledby={`feasibility-question-${currentQuestion.id}`}
       >
         {/* Background radial soft light */}
@@ -136,12 +136,12 @@ export function FeasibilityStepShell({
                     key={option.value}
                     whileHover={{ scale: 1.015 }}
                     whileTap={{ scale: 0.985 }}
-                    className="group flex w-full transition-all duration-200"
+                    className="group flex min-w-0 w-full transition-all duration-200"
                   >
                     <Label
                       htmlFor={`feasibility-${currentQuestion.id}-${option.value}`}
                       className={cn(
-                        "relative flex h-auto min-h-[3.5rem] w-full cursor-pointer items-center justify-start gap-3 rounded-card border p-3 text-sm font-medium transition-all duration-200 focus-within:ring-2 focus-within:ring-app-accent/30 focus-visible:outline-none sm:min-h-[4.75rem] sm:flex-col sm:justify-between sm:p-4 sm:pb-5",
+                        "relative flex h-auto min-h-[3.5rem] min-w-0 w-full cursor-pointer items-center justify-start gap-3 rounded-card border p-3 text-sm font-medium transition-all duration-200 focus-within:ring-2 focus-within:ring-app-accent/30 focus-visible:outline-none sm:min-h-[4.75rem] sm:flex-col sm:justify-between sm:p-4 sm:pb-5",
                         isSelected
                           ? "-translate-y-0.5 border-app-line-strong bg-app-accent-soft text-app-accent shadow-app-sm"
                           : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-line-strong hover:bg-app-bg-subtle hover:shadow-app-sm",
@@ -181,7 +181,7 @@ export function FeasibilityStepShell({
                         ) : null}
                       </span>
 
-                      <span className="relative z-10 block text-left text-[13.5px] font-bold leading-snug text-app-ink sm:mt-3 sm:text-[15px] sm:leading-relaxed">
+                      <span className="relative z-10 block min-w-0 break-words text-left text-[13.5px] font-bold leading-snug text-app-ink sm:mt-3 sm:text-[15px] sm:leading-relaxed">
                         {option.label}
                       </span>
                     </Label>
@@ -200,24 +200,24 @@ export function FeasibilityStepShell({
                   className="w-full space-y-2 overflow-hidden border-t border-app-line pt-3 text-left text-xs sm:pt-4"
                 >
                   {selectedOptionData.impact && (
-                    <div className="flex items-start gap-1.5 text-app-accent font-semibold leading-relaxed">
-                      <span className="shrink-0 text-sm">🎯</span>
+                    <div className="flex items-start gap-2 text-app-accent font-semibold leading-relaxed">
+                      <Target className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
                       <div>
                         <span className="uppercase text-xs font-extrabold tracking-wider mr-1.5 text-app-accent/80 block sm:inline-block">
                           Tác động:
                         </span>
-                        <span className="text-app-ink">{selectedOptionData.impact}</span>
+                        <span className="break-words text-app-ink">{selectedOptionData.impact}</span>
                       </div>
                     </div>
                   )}
                   {selectedOptionData.example && (
-                    <div className="flex items-start gap-1.5 text-app-ink-soft leading-relaxed italic">
-                      <span className="shrink-0 text-sm">💡</span>
+                    <div className="flex items-start gap-2 text-app-ink-soft leading-relaxed italic">
+                      <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-app-ink-muted" aria-hidden="true" />
                       <div>
                         <span className="uppercase text-xs font-extrabold tracking-wider mr-1.5 text-app-ink-muted block sm:inline-block">
                           Ví dụ:
                         </span>
-                        <span>{selectedOptionData.example}</span>
+                        <span className="break-words">{selectedOptionData.example}</span>
                       </div>
                     </div>
                   )}
@@ -232,7 +232,8 @@ export function FeasibilityStepShell({
                 role="status"
                 className="mt-1 flex items-center gap-1.5 text-[12.5px] font-semibold leading-snug text-app-accent sm:mt-3 sm:text-[13px]"
               >
-                <span>💡</span> Chọn một lựa chọn phù hợp để tiếp tục hành trình.
+                <Lightbulb className="h-4 w-4 shrink-0" aria-hidden="true" />
+                <span>Chọn một lựa chọn phù hợp để tiếp tục hành trình.</span>
               </p>
             ) : null}
           </motion.div>
@@ -303,7 +304,7 @@ export function FeasibilityStepShell({
             <motion.button
               whileTap={{ scale: 0.985 }}
               type="button"
-              className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-xl border border-app-line bg-app-surface px-4 py-2 text-xs font-bold text-app-ink transition-all duration-150 hover:bg-app-bg active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+              className="inline-flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-control border border-app-line bg-app-surface px-4 py-2 text-xs font-bold text-app-ink transition-all duration-150 hover:bg-app-bg active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
               onClick={() => {
                 soundService.click();
                 onBack();
@@ -316,7 +317,7 @@ export function FeasibilityStepShell({
             <motion.button
               whileTap={{ scale: 0.985 }}
               type="button"
-              className="inline-flex min-h-10 flex-[2] items-center justify-center gap-1.5 rounded-xl bg-app-accent px-5 py-2 text-xs font-bold text-white transition-all duration-150 hover:bg-app-accent-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-app-ink-muted disabled:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+              className="inline-flex min-h-11 flex-[2] items-center justify-center gap-1.5 rounded-control bg-app-accent px-5 py-2 text-xs font-bold text-white transition-all duration-150 hover:bg-app-accent-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-app-ink-muted disabled:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
               onClick={() => {
                 soundService.click();
                 onNext();
