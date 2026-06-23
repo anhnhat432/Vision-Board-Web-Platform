@@ -4,6 +4,7 @@ import { SCREEN_GUIDE_SEEN_STORAGE_PREFIX } from "../utils/storage-constants";
 import { ScreenGuide, ScreenGuideContext, startScreenGuide } from "./ScreenGuide";
 
 const FIRST_RUN_GUIDANCE_COMPLETED_KEY = "visionboard_first_run_guidance_completed_at";
+const NEW_USER_GUIDE_SEEN_KEY = "visionboard_new_user_guide_seen_at";
 
 const guideProps = {
   screenId: "test-screen",
@@ -23,6 +24,7 @@ function seenKey(screenId = guideProps.screenId) {
 describe("ScreenGuide", () => {
   beforeEach(() => {
     localStorage.clear();
+    Object.defineProperty(window, "innerWidth", { configurable: true, writable: true, value: 1024 });
   });
 
   it("auto-opens only the first time and still lets the user reopen it", async () => {
@@ -92,5 +94,34 @@ describe("ScreenGuide", () => {
 
     fireEvent.click(screen.getAllByRole("button")[0]);
     expect(await screen.findByRole("dialog", { name: guideProps.title })).toBeInTheDocument();
+  });
+
+  it("does not auto-open while the overview guide is already active for first-run users", async () => {
+    localStorage.setItem(NEW_USER_GUIDE_SEEN_KEY, new Date().toISOString());
+
+    render(<ScreenGuide {...guideProps} screenId="later-screen" autoOpen />);
+
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog", { name: guideProps.title })).not.toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: `Hướng dẫn nhanh: ${guideProps.title}` }));
+    expect(await screen.findByRole("dialog", { name: guideProps.title })).toBeInTheDocument();
+  });
+
+  it("uses a bottom sheet presentation on mobile viewports", async () => {
+    Object.defineProperty(window, "innerWidth", { configurable: true, writable: true, value: 375 });
+
+    render(<ScreenGuide {...guideProps} autoOpen={false} />);
+
+    await waitFor(() => {
+      expect(document.querySelector('[data-slot="sheet-trigger"]')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: `Hướng dẫn nhanh: ${guideProps.title}` }));
+
+    const dialog = await screen.findByRole("dialog", { name: guideProps.title });
+    expect(dialog).toHaveAttribute("data-slot", "sheet-content");
+    expect(dialog).toHaveClass("rounded-t-[1.5rem]");
   });
 });
