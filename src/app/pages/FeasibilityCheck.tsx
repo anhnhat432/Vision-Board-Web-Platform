@@ -575,11 +575,11 @@ export function FeasibilityCheck() {
           </p>
           <h1
             id="feasibility-title"
-            className="mt-2 font-serif text-[27px] font-medium leading-[1.06] tracking-[-0.02em] text-app-ink sm:mt-3 sm:text-4xl sm:leading-tight"
+            className="mt-2 break-words font-serif text-[27px] font-medium leading-[1.08] tracking-[-0.02em] text-app-ink sm:mt-3 sm:text-4xl sm:leading-tight"
           >
             Hiệu chuẩn cán cân khả thi
           </h1>
-          <p className="mt-1.5 max-w-2xl text-[13px] leading-[1.55] text-app-ink-soft sm:mt-2 sm:text-sm sm:leading-6">
+          <p className="mt-1.5 max-w-2xl break-words text-[13px] leading-[1.55] text-app-ink-soft sm:mt-2 sm:text-sm sm:leading-6">
             Cùng chuẩn bị hành trang phù hợp để đảm bảo kế hoạch 12 tuần của bạn chắc thắng.
           </p>
 
@@ -590,13 +590,13 @@ export function FeasibilityCheck() {
                   <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-app-ink-muted sm:mb-2 sm:text-xs">
                     Mục tiêu của bạn
                   </p>
-                  <p className="line-clamp-2 text-[13px] font-bold leading-[1.55] text-app-ink sm:text-sm sm:leading-relaxed">
+                  <p className="break-words text-[13px] font-bold leading-[1.55] text-app-ink sm:text-sm sm:leading-relaxed">
                     {pendingGoal.specific}
                   </p>
                 </div>
                 <Link
                   to="/smart-goal-setup"
-                  className="shrink-0 text-xs font-bold text-app-accent transition-colors hover:text-app-accent-hover hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 p-1 sm:p-2 sm:-m-2"
+                  className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-control px-3 py-2 text-xs font-bold leading-tight text-app-accent transition-colors hover:text-app-accent-hover hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:-m-2"
                 >
                   Sửa mục tiêu ✏️
                 </Link>
@@ -664,7 +664,7 @@ export function FeasibilityCheck() {
                   type="button"
                   onClick={handleAdvancedToggle}
                   aria-expanded={showAdvancedQuestions}
-                  className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-control border border-app-line bg-app-surface px-3.5 py-2 text-sm font-bold text-app-ink transition-all duration-200 hover:bg-app-bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:min-h-11 sm:px-4 sm:py-2.5"
+                  className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-control border border-app-line bg-app-surface px-3.5 py-2 text-sm font-bold leading-tight text-app-ink transition-all duration-200 hover:bg-app-bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:px-4 sm:py-2.5"
                 >
                   <SlidersHorizontal className="h-4 w-4 text-app-accent" aria-hidden="true" />
                   {showAdvancedQuestions ? "Ẩn nâng cao" : "Mở nâng cao"}

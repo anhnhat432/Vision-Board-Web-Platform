@@ -122,6 +122,19 @@ describe("TwelveWeekTodayTab — primary task hero", () => {
     expect(hero.compareDocumentPosition(workGrid)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
+  it("lets status chip text wrap instead of truncating on mobile", () => {
+    render(<TwelveWeekTodayTab {...makeProps({ overdueOpenCount: 2, reviewDueToday: true })} />);
+
+    const strip = screen.getByTestId("today-dashboard-cards");
+    const chips = within(strip).getAllByText(/hôm nay|việc trễ hạn|Review tuần đến hạn/i);
+
+    for (const chip of chips) {
+      expect(chip).toHaveClass("break-words");
+      expect(chip).toHaveClass("leading-tight");
+      expect(chip).not.toHaveClass("truncate");
+    }
+  });
+
   it("renders 'Ưu tiên duy nhất' headline when there is an open primary task", () => {
     render(<TwelveWeekTodayTab {...makeProps()} />);
     expect(screen.getByTestId("today-primary-hero")).toBeInTheDocument();
@@ -864,6 +877,64 @@ describe("TwelveWeekTodayTab — overdue task actions", () => {
     const checkbox = screen.getAllByRole("checkbox")[0];
     await userEvent.click(checkbox);
     expect(onToggleTask).toHaveBeenCalledWith("task_overdue", true);
+  });
+
+  it("uses 44px controls for overdue actions and queue toggles", () => {
+    const overdue = makeTask({
+      id: "task_overdue",
+      scheduledDate: "2026-04-30",
+      isCore: false,
+    });
+    render(
+      <TwelveWeekTodayTab
+        {...makeProps({
+          todayQueue: [overdue],
+          firstPriorityTask: overdue,
+          todayDateKey: "2026-05-02",
+          onRescheduleTaskWithinWeek: vi.fn(),
+          onRescheduleTaskToNextWeek: vi.fn(),
+          onSkipNonCoreTask: vi.fn(),
+        })}
+      />,
+    );
+
+    const checkbox = screen.getAllByRole("checkbox")[0];
+    expect(checkbox).toHaveClass("h-11", "w-11");
+
+    const actions = screen.getByTestId("overdue-actions-task_overdue");
+    const reschedule = actions.querySelector('[data-action="reschedule-within-week"]');
+    const nextWeek = actions.querySelector('[data-action="reschedule-next-week"]');
+    const skip = actions.querySelector('[data-action="skip-non-core"]');
+    const detailsSummary = actions.querySelector("summary");
+
+    expect(reschedule).toHaveClass("min-h-11");
+    expect(nextWeek).toHaveClass("min-h-11");
+    expect(skip).toHaveClass("min-h-11");
+    expect(detailsSummary).toHaveClass("min-h-11");
+  });
+
+  it("wraps secondary task preview text instead of truncating", () => {
+    render(
+      <TwelveWeekTodayTab
+        {...makeProps({
+          secondaryTodayTasks: [
+            makeTask({
+              id: "secondary_1",
+              title: "Hoàn thiện bản nháp dài cho phần phản tư tuần này",
+              leadIndicatorName: "Viết reflection dài hơn bình thường",
+              isCore: false,
+            }),
+          ],
+        })}
+      />,
+    );
+
+    const title = screen.getByText("Hoàn thiện bản nháp dài cho phần phản tư tuần này");
+    const indicator = screen.getByText("Viết reflection dài hơn bình thường");
+
+    expect(title).toHaveClass("break-words");
+    expect(title).not.toHaveClass("truncate");
+    expect(indicator).toHaveClass("break-words");
   });
 });
 

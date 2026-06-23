@@ -382,21 +382,21 @@ function ReflectionJournalContent() {
         className="relative grid grid-cols-[1fr_88px] items-start gap-4 overflow-hidden rounded-[22px] border border-app-line bg-app-surface p-5 page-enter sm:gap-7 sm:p-9 md:grid-cols-[1fr_360px] md:items-center"
       >
         <div className="min-w-0">
-          <div className="flex items-center gap-2 mb-3.5 text-[10px] font-extrabold uppercase tracking-[0.14em] text-app-warm">
+          <div className="flex min-w-0 items-center gap-2 mb-3.5 break-words text-[10px] font-extrabold uppercase tracking-[0.14em] text-app-warm">
             <span className="w-1.5 h-1.5 rounded-full bg-app-warm" />
             Phản tư
           </div>
-          <h1 className="font-serif text-[clamp(28px,3.2vw,40px)] font-bold leading-[1.02] tracking-[-0.02em] text-app-ink mb-3">
+          <h1 className="break-words font-serif text-[clamp(28px,3.2vw,40px)] font-bold leading-[1.05] tracking-[-0.02em] text-app-ink mb-3">
             Nhật ký phản tư
           </h1>
-          <p className="mb-5 max-w-[44ch] text-sm leading-relaxed text-app-ink-soft sm:mb-6 sm:text-[14.5px]">
+          <p className="mb-5 max-w-[44ch] break-words text-sm leading-relaxed text-app-ink-soft sm:mb-6 sm:text-[14.5px]">
             Ghi lại điều bạn học được, điều biết ơn, và điều muốn cải thiện. Mỗi dòng là một dấu chân trên hành trình 12
             tuần.
           </p>
           <div className="flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
             <Button
               onClick={() => setIsAddingReflection(true)}
-              className="bg-app-warm text-white hover:bg-app-warm-hover hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.97] transition-all duration-200 rounded-full px-5 py-3 h-auto text-[13.5px] font-bold shadow-lg shadow-app-warm/25 gap-2.5"
+              className="min-h-11 bg-app-warm text-white hover:bg-app-warm-hover hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.97] transition-all duration-200 rounded-full px-5 py-3 text-[13.5px] font-bold leading-tight shadow-lg shadow-app-warm/25 gap-2.5"
             >
               <Pencil className="h-4 w-4" />
               Viết entry mới
@@ -407,14 +407,14 @@ function ReflectionJournalContent() {
                 const list = document.getElementById("journal-entries");
                 if (list) list.scrollIntoView({ behavior: "smooth" });
               }}
-              className="rounded-full px-5 py-3 h-auto text-[13.5px] font-semibold gap-2 border-app-line text-app-ink hover:bg-app-bg hover:-translate-y-0.5 active:scale-[0.97] transition-all duration-200"
+              className="min-h-11 rounded-full px-5 py-3 text-[13.5px] font-semibold leading-tight gap-2 border-app-line text-app-ink hover:bg-app-bg hover:-translate-y-0.5 active:scale-[0.97] transition-all duration-200"
             >
               <Clock className="h-[15px] w-[15px]" />
               Dòng thời gian
             </Button>
           </div>
         </div>
-        <div className="relative h-24 w-24 overflow-hidden rounded-[18px] self-start shadow-[0_18px_34px_-24px_rgba(23,21,15,0.5)] animate-[float_5s_ease-in-out_infinite] md:h-auto md:w-auto md:self-stretch md:min-h-[210px] md:shadow-[0_24px_48px_-28px_rgba(23,21,15,0.5)]">
+        <div className="relative h-24 w-24 overflow-hidden rounded-[18px] self-start shadow-[0_18px_34px_-24px_rgba(23,21,15,0.5)] animate-[float_5s_ease-in-out_infinite] motion-reduce:animate-none md:h-auto md:w-auto md:self-stretch md:min-h-[210px] md:shadow-[0_24px_48px_-28px_rgba(23,21,15,0.5)]">
           <img
             src="/reflection_journal.png"
             alt="Nhật ký phản tư"
@@ -450,7 +450,7 @@ function ReflectionJournalContent() {
                     type="button"
                     onClick={() => setFilterType(type)}
                     className={cn(
-                      "inline-flex min-h-11 min-w-0 items-center justify-center rounded-full border px-3 py-2 text-center text-xs font-semibold transition-all duration-150 active:scale-[0.96] sm:min-h-10 sm:px-3.5",
+                      "inline-flex min-h-11 min-w-0 items-center justify-center rounded-full border px-3 py-2 text-center text-xs font-semibold leading-tight transition-all duration-150 active:scale-[0.96] sm:min-h-11 sm:px-3.5",
                       isActive
                         ? "border-app-warm bg-[#FBF4EE] text-app-warm dark:bg-app-warm-soft/20"
                         : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-warm/40 hover:text-app-warm",
@@ -480,7 +480,7 @@ function ReflectionJournalContent() {
                     type="button"
                     onClick={() => setFilterMood(mood)}
                     className={cn(
-                      "inline-flex min-h-11 min-w-0 items-center justify-center rounded-full border px-3 py-2 text-center text-xs font-semibold transition-all duration-150 active:scale-[0.96] sm:min-h-10 sm:px-3.5",
+                      "inline-flex min-h-11 min-w-0 items-center justify-center rounded-full border px-3 py-2 text-center text-xs font-semibold leading-tight transition-all duration-150 active:scale-[0.96] sm:min-h-11 sm:px-3.5",
                       isActive
                         ? "border-app-warm bg-[#FBF4EE] text-app-warm dark:bg-app-warm-soft/20"
                         : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-warm/40 hover:text-app-warm",
@@ -504,10 +504,10 @@ function ReflectionJournalContent() {
             <div className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-app-warm mb-1.5">
               Tổng kết tuần {weekCompletion.weekNumber}
             </div>
-            <h2 className="font-serif text-[21px] font-bold text-app-ink tracking-[-0.01em] mb-1">
+            <h2 className="break-words font-serif text-[21px] font-bold text-app-ink tracking-[-0.01em] mb-1">
               Tuần này bạn đã làm được
             </h2>
-            <p className="text-xs text-[#7A6E5E] dark:text-app-ink-soft">
+            <p className="break-words text-xs text-[#7A6E5E] dark:text-app-ink-soft">
               Viết một dòng phản tư mỗi ngày để giữ chuỗi và nhìn lại tiến bộ.
             </p>
             {journalStreak > 0 && (
@@ -517,7 +517,7 @@ function ReflectionJournalContent() {
               </div>
             )}
           </div>
-          <div className="flex items-end gap-8 sm:gap-10 shrink-0">
+          <div className="flex w-full flex-wrap items-end gap-6 sm:w-auto sm:gap-10 shrink-0">
             <div>
               <div className="font-serif text-[40px] font-extrabold leading-none text-app-ink tabular-nums">
                 <MotionCountUp value={weekCompletion.completed} />
@@ -564,7 +564,7 @@ function ReflectionJournalContent() {
                       size="sm"
                       type="button"
                       onClick={handleRestoreReflectionDraft}
-                      className="transition-all duration-150 active:scale-[0.97] focus-visible:ring-app-warm focus-visible:ring-offset-2"
+                      className="min-h-11 transition-all duration-150 active:scale-[0.97] focus-visible:ring-app-warm focus-visible:ring-offset-2"
                     >
                       Khôi phục
                     </Button>
@@ -573,7 +573,7 @@ function ReflectionJournalContent() {
                       type="button"
                       variant="outline"
                       onClick={handleIgnoreReflectionDraft}
-                      className="transition-all duration-150 active:scale-[0.97]"
+                      className="min-h-11 transition-all duration-150 active:scale-[0.97]"
                     >
                       Bỏ qua
                     </Button>
@@ -614,7 +614,9 @@ function ReflectionJournalContent() {
                 </span>
               </div>
 
-              <p className="mb-4 font-serif text-lg font-medium leading-7 text-app-warm-strong">{JOURNAL_PROMPTS[0]}</p>
+              <p className="mb-4 break-words font-serif text-lg font-medium leading-7 text-app-warm-strong">
+                {JOURNAL_PROMPTS[0]}
+              </p>
 
               <Textarea
                 id="reflection-content"
@@ -747,7 +749,7 @@ function ReflectionJournalContent() {
           </p>
           <Button
             onClick={() => setIsAddingReflection(true)}
-            className="bg-app-warm text-white hover:bg-app-warm-hover hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.97] transition-all duration-200 rounded-full px-6 py-3.5 h-auto text-sm font-bold shadow-lg shadow-app-warm/25 gap-2.5 mb-7"
+            className="min-h-11 bg-app-warm text-white hover:bg-app-warm-hover hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.97] transition-all duration-200 rounded-full px-6 py-3.5 text-sm font-bold leading-tight shadow-lg shadow-app-warm/25 gap-2.5 mb-7"
           >
             <Plus className="h-4 w-4" strokeWidth={2.4} />
             Viết entry đầu tiên
@@ -793,7 +795,7 @@ function ReflectionJournalContent() {
                     }));
                     saveDraft(item.prompt);
                   }}
-                  className="text-left bg-[#FAF8F3] dark:bg-app-bg border border-app-line rounded-[14px] p-4 cursor-pointer transition-all duration-150 hover:border-app-warm/50 hover:bg-[#FBF5EF] dark:hover:bg-app-warm-soft/20 active:scale-[0.98]"
+                  className="min-h-28 text-left bg-[#FAF8F3] dark:bg-app-bg border border-app-line rounded-[14px] p-4 cursor-pointer transition-all duration-150 hover:border-app-warm/50 hover:bg-[#FBF5EF] dark:hover:bg-app-warm-soft/20 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm focus-visible:ring-offset-2"
                 >
                   <span
                     className="flex w-[30px] h-[30px] rounded-[9px] items-center justify-center mb-2.5"
@@ -817,10 +819,10 @@ function ReflectionJournalContent() {
       ) : (
         /* Past Entries List */
         <section id="journal-entries">
-          <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+          <div className="mb-4 flex min-w-0 flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.18em] text-app-ink-muted">Ghi chép cũ</p>
-              <h2 className="mt-1 font-serif text-2xl font-medium text-app-ink">
+              <h2 className="mt-1 break-words font-serif text-2xl font-medium text-app-ink">
                 {filteredReflections.length} bài viết
               </h2>
             </div>
@@ -842,29 +844,35 @@ function ReflectionJournalContent() {
                   key={reflection.id}
                   className="rounded-card border border-app-line bg-app-surface p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_22px_46px_-30px_rgba(23,21,15,0.34)] sm:p-5 md:p-6"
                 >
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex min-w-0 items-start justify-between gap-3 sm:gap-4">
                     <div className="min-w-0 flex-1">
                       <div className="flex flex-wrap items-center gap-2">
-                        <p className="text-xs uppercase tracking-[0.14em] text-app-ink-muted">
+                        <p className="break-words text-xs uppercase tracking-[0.14em] text-app-ink-muted">
                           {formatCalendarDate(reflection.date, "vi-VN", {
                             weekday: "short",
                             month: "short",
                             day: "numeric",
                           })}
                         </p>
-                        <Badge variant="outline" className={cn("rounded-full px-2.5 py-0.5 text-xs", mood.badge)}>
+                        <Badge
+                          variant="outline"
+                          className={cn("rounded-full px-2.5 py-0.5 text-xs leading-tight", mood.badge)}
+                        >
                           {mood.label}
                         </Badge>
                         {reflection.entryType === "weekly-review" && (
                           <Badge
                             variant="outline"
-                            className="rounded-full border-app-line bg-app-bg px-2.5 py-0.5 text-xs text-app-ink-soft"
+                            className="rounded-full border-app-line bg-app-bg px-2.5 py-0.5 text-xs leading-tight text-app-ink-soft"
                           >
                             Review tuần
                           </Badge>
                         )}
                         {reflection.linkedWeekNumber && (
-                          <Badge variant="outline" className={cn("rounded-full px-2.5 py-0.5 text-xs", phaseTone.soft)}>
+                          <Badge
+                            variant="outline"
+                            className={cn("rounded-full px-2.5 py-0.5 text-xs leading-tight", phaseTone.soft)}
+                          >
                             Tuần {reflection.linkedWeekNumber}
                           </Badge>
                         )}
@@ -880,7 +888,12 @@ function ReflectionJournalContent() {
 
                       {linkedGoal && (
                         <div className="mt-3 flex justify-end">
-                          <Button variant="outline" size="sm" onClick={() => openLinkedCycle(reflection.linkedGoalId)}>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => openLinkedCycle(reflection.linkedGoalId)}
+                            className="min-h-11 whitespace-normal leading-tight"
+                          >
                             Mở chu kỳ liên quan
                             <ArrowRight className="h-3.5 w-3.5 ml-1" />
                           </Button>

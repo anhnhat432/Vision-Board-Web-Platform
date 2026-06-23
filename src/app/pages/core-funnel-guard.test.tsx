@@ -252,6 +252,8 @@ describe("core funnel guards", () => {
 
     expect(await screen.findByText(/Mặc định 3 câu cốt lõi/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Mở nâng cao/i })).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByRole("button", { name: /Mở nâng cao/i })).toHaveClass("min-h-11", "leading-tight");
+    expect(screen.getByRole("link", { name: /Sửa mục tiêu/i })).toHaveClass("min-h-11", "leading-tight");
     expect(screen.getByText(/^3\s+câu cốt lõi$/i)).toBeInTheDocument();
 
     await screen.findByRole("heading", { name: /Mỗi tuần bạn có mấy giờ/i });

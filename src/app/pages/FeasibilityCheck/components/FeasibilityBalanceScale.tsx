@@ -129,24 +129,24 @@ export function FeasibilityBalanceScale({ answers }: FeasibilityBalanceScaleProp
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={tiltStyle}
-      className="relative overflow-hidden rounded-card bg-app-surface/70 dark:bg-app-surface/60 backdrop-blur-md border border-app-line shadow-app-sm p-6 flex flex-col items-center gap-5 transition-all duration-300 group"
+      className="relative flex min-w-0 flex-col items-center gap-5 overflow-hidden rounded-card border border-app-line bg-app-surface/70 p-4 shadow-app-sm backdrop-blur-md transition-all duration-300 group motion-reduce:transition-none dark:bg-app-surface/60 sm:p-6"
     >
       {/* ═══ Header ═══ */}
-      <div className="w-full flex flex-wrap items-center justify-between pb-3 border-b border-app-line gap-2">
-        <div className="flex items-center gap-2">
+      <div className="flex w-full min-w-0 flex-wrap items-center justify-between gap-2 border-b border-app-line pb-3">
+        <div className="flex min-w-0 items-center gap-2">
           <div className="p-1.5 rounded-control bg-app-accent-soft text-app-accent shrink-0">
             <Scale className="h-4 w-4" />
           </div>
-          <span className="text-xs font-semibold uppercase tracking-[0.05em] text-app-ink-muted whitespace-nowrap">
+          <span className="min-w-0 break-words text-xs font-semibold uppercase tracking-[0.05em] text-app-ink-muted">
             Cán cân 12 tuần
           </span>
         </div>
 
-        <div className="flex items-center gap-1.5 bg-app-bg-subtle px-3 py-1.5 rounded-pill border border-app-line shrink-0 whitespace-nowrap">
+        <div className="flex min-h-8 min-w-0 flex-wrap items-center gap-1.5 rounded-pill border border-app-line bg-app-bg-subtle px-3 py-1.5 leading-tight">
           {answeredCount > 0 && isHeavyRight && (
-            <Sparkles className="h-3 w-3 text-app-accent motion-safe:animate-pulse" />
+            <Sparkles className="h-3 w-3 shrink-0 text-app-accent motion-safe:animate-pulse motion-reduce:animate-none" />
           )}
-          <span className="text-xs font-semibold text-app-ink-muted">Mức khả thi</span>
+          <span className="break-words text-xs font-semibold text-app-ink-muted">Mức khả thi</span>
           <span
             className="text-sm font-extrabold tabular-nums text-app-accent"
             style={{ fontFeatureSettings: "'tnum'" }}
@@ -157,7 +157,7 @@ export function FeasibilityBalanceScale({ answers }: FeasibilityBalanceScaleProp
       </div>
 
       {/* ═══ SVG Cán Cân Thăng Bằng Dreamy ═══ */}
-      <div className="relative w-full max-w-[280px] h-[140px] flex flex-col items-center justify-center select-none">
+      <div className="relative flex h-[140px] w-full max-w-[280px] select-none flex-col items-center justify-center">
         <FeasibilityScaleSVG
           tiltAngle={tiltAngle}
           isHeavyLeft={isHeavyLeft}
@@ -168,22 +168,24 @@ export function FeasibilityBalanceScale({ answers }: FeasibilityBalanceScaleProp
       </div>
 
       {/* Nhãn 2 đĩa dưới SVG (Tăng margin-top để tạo khoảng cách an toàn tránh đè chữ khi đĩa cân nghiêng xuống tối đa) */}
-      <div className="w-full max-w-[280px] flex justify-between px-2 text-[10px] sm:text-[11px] font-bold text-app-ink-muted uppercase tracking-wider mt-3">
-        <span className="w-28 text-left leading-tight">Tham vọng & Trở ngại</span>
-        <span className="w-28 text-right leading-tight">Thời gian & Sức chứa</span>
+      <div className="mt-3 flex w-full max-w-[280px] justify-between gap-3 px-2 text-[10px] font-bold uppercase tracking-wider text-app-ink-muted sm:text-[11px]">
+        <span className="w-28 break-words text-left leading-tight">Tham vọng & Trở ngại</span>
+        <span className="w-28 break-words text-right leading-tight">Thời gian & Sức chứa</span>
       </div>
 
       {/* ═══ Status badge ═══ */}
       <div
-        className={`flex items-center gap-2 px-4 py-2.5 rounded-card border text-xs font-bold transition-all duration-300 shadow-app-sm ${statusInfo.badgeClass}`}
+        className={`flex min-w-0 items-start gap-2 rounded-card border px-4 py-2.5 text-xs font-bold leading-tight shadow-app-sm transition-all duration-300 motion-reduce:transition-none ${statusInfo.badgeClass}`}
       >
         <span className="text-sm">{statusInfo.emoji}</span>
-        <span>{statusInfo.label}</span>
+        <span className="min-w-0 break-words">{statusInfo.label}</span>
       </div>
 
       {/* ═══ Description ═══ */}
       <div className="w-full text-center">
-        <p className="text-xs text-app-ink-muted font-semibold uppercase tracking-wider">{statusInfo.sub}</p>
+        <p className="break-words text-xs font-semibold uppercase tracking-wider text-app-ink-muted">
+          {statusInfo.sub}
+        </p>
       </div>
     </div>
   );

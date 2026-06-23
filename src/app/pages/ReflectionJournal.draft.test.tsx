@@ -76,8 +76,8 @@ describe("ReflectionJournal bản nháp", () => {
     await openJournal(user);
 
     expect(await screen.findByText(/Tìm thấy bản nháp chưa lưu lúc/i)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Khôi phục" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Bỏ qua" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Khôi phục" })).toHaveClass("min-h-11");
+    expect(screen.getByRole("button", { name: "Bỏ qua" })).toHaveClass("min-h-11");
   });
 
   it("khôi phục bản nháp vào form", async () => {

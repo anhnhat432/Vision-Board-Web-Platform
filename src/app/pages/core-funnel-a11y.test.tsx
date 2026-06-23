@@ -23,6 +23,7 @@ import type { PendingSMARTGoal } from "@/lib/smart-goal";
 import { Card, CardHeader, CardTitle } from "../components/ui/card";
 import { LeadIndicatorsStep } from "./12WeekSetup/components/LeadIndicatorsStep";
 import type { LeadIndicatorDraft, TwelveWeekSetupDraft } from "./12WeekSetup/types";
+import { FeasibilityBalanceScale } from "./FeasibilityCheck/components/FeasibilityBalanceScale";
 import { FeasibilityStepShell } from "./FeasibilityCheck/components/FeasibilityStepShell";
 import { ResultStep } from "./FeasibilityCheck/components/ResultStep";
 import type { Question, ResultData } from "./FeasibilityCheck/types";
@@ -259,11 +260,36 @@ describe("FeasibilityStepShell — a11y", () => {
     const actionBar = document.querySelector("[data-feasibility-mobile-action-bar]");
 
     expect(shell).toHaveClass("pb-[calc(6.5rem+env(safe-area-inset-bottom))]", "sm:pb-8", "md:pb-9");
-    expect(actionBar).toHaveClass("fixed", "bottom-0", "pb-[calc(env(safe-area-inset-bottom)+0.75rem)]", "sm:hidden");
+    expect(actionBar).toHaveClass(
+      "fixed",
+      "bottom-0",
+      "pb-[calc(env(safe-area-inset-bottom)+0.75rem)]",
+      "sm:hidden",
+      "motion-reduce:transition-none",
+    );
     expect(feedback).not.toBeNull();
     expect(actionBar).not.toBeNull();
     expect(feedback?.compareDocumentPosition(actionBar as Node)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    expect(within(actionBar as HTMLElement).getByRole("button", { name: /Tiếp theo/i })).toBeDisabled();
+
+    const progressText = within(actionBar as HTMLElement).getByText(/Câu 1\/5/i);
+    expect(progressText).toHaveClass("break-words");
+
+    const nextButton = within(actionBar as HTMLElement).getByRole("button", { name: /Tiếp theo/i });
+    expect(nextButton).toBeDisabled();
+    expect(nextButton).toHaveClass("min-h-11");
+  });
+
+  it("keeps feasibility balance labels and status ready for narrow mobile widths", () => {
+    render(<FeasibilityBalanceScale answers={{}} />);
+
+    expect(screen.getByText(/Cán cân 12 tuần/i)).toHaveClass("break-words");
+    expect(screen.getByText(/Mức khả thi/i)).toHaveClass("break-words");
+
+    const emptyStatus = screen.getByText(/Cán cân đang thăng bằng/i);
+    expect(emptyStatus).toHaveClass("break-words");
+
+    const reducedMotionClass = document.querySelector('[class*="motion-reduce:transition-none"]');
+    expect(reducedMotionClass).toBeInTheDocument();
   });
 });
 

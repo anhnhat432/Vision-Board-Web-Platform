@@ -75,7 +75,7 @@ export function FeasibilityStepShell({
       <section
         data-feasibility-step-shell
         ref={targetRef}
-        className="group relative overflow-hidden rounded-card border border-app-line bg-app-surface/70 p-3 pb-[calc(6.5rem+env(safe-area-inset-bottom))] shadow-app-md backdrop-blur-md transition-all duration-300 dark:bg-app-surface/40 sm:p-7 sm:pb-8 md:p-8 md:pb-9"
+        className="group relative overflow-hidden rounded-card border border-app-line bg-app-surface/70 p-3 pb-[calc(6.5rem+env(safe-area-inset-bottom))] shadow-app-md backdrop-blur-md transition-all duration-300 motion-reduce:transition-none dark:bg-app-surface/40 sm:p-7 sm:pb-8 md:p-8 md:pb-9"
         aria-labelledby={`feasibility-question-${currentQuestion.id}`}
       >
         {/* Background radial soft light */}
@@ -99,18 +99,18 @@ export function FeasibilityStepShell({
                   ref={headingRef}
                   id={`feasibility-question-${currentQuestion.id}`}
                   tabIndex={-1}
-                  className="mt-1 font-serif text-[19px] font-bold leading-[1.1] text-app-ink focus:outline-none sm:mt-2.5 sm:text-2xl sm:leading-normal"
+                  className="mt-1 break-words font-serif text-[19px] font-bold leading-[1.12] text-app-ink focus:outline-none sm:mt-2.5 sm:text-2xl sm:leading-normal"
                 >
                   {currentQuestion.question}
                 </h2>
                 <p
                   id={`feasibility-question-${currentQuestion.id}-helper`}
-                  className="mt-1.5 text-[12.5px] font-medium leading-[1.45] text-app-ink-soft sm:mt-2 sm:text-sm sm:leading-relaxed"
+                  className="mt-1.5 break-words text-[12.5px] font-medium leading-[1.45] text-app-ink-soft sm:mt-2 sm:text-sm sm:leading-relaxed"
                 >
                   {currentQuestion.helper}
                 </p>
               </div>
-              <span className="inline-flex w-fit items-center justify-center rounded-pill border border-app-line bg-app-accent-soft px-3 py-1.5 text-xs font-bold text-app-accent shadow-app-sm select-none sm:px-4 sm:py-2">
+              <span className="inline-flex min-h-8 w-fit items-center justify-center rounded-pill border border-app-line bg-app-accent-soft px-3 py-1.5 text-xs font-bold leading-tight text-app-accent shadow-app-sm select-none sm:px-4 sm:py-2">
                 Đã trả lời {answeredQuestionCount}/{totalSteps}
               </span>
             </div>
@@ -248,7 +248,7 @@ export function FeasibilityStepShell({
               whileHover={{ scale: 1.015 }}
               whileTap={{ scale: 0.985 }}
               type="button"
-              className="inline-flex flex-1 items-center justify-center gap-2 rounded-control border border-app-line bg-app-surface px-4 py-3 text-sm font-bold text-app-ink-soft shadow-app-sm transition-all duration-200 hover:bg-app-bg-subtle disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto sm:flex-none sm:px-5 sm:py-3 font-sans"
+              className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-control border border-app-line bg-app-surface px-4 py-3 text-sm font-bold leading-tight text-app-ink-soft shadow-app-sm transition-all duration-200 hover:bg-app-bg-subtle disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto sm:flex-none sm:px-5 sm:py-3 font-sans"
               onClick={() => {
                 soundService.click();
                 onBack();
@@ -262,7 +262,7 @@ export function FeasibilityStepShell({
               whileHover={{ scale: 1.015 }}
               whileTap={{ scale: 0.985 }}
               type="button"
-              className="inline-flex flex-[2] items-center justify-center gap-2.5 rounded-control bg-app-accent px-4 py-3 text-sm font-bold text-white shadow-app-md transition-all duration-200 hover:bg-app-accent-hover disabled:cursor-not-allowed disabled:bg-app-line/50 disabled:text-app-ink-muted disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto sm:flex-none sm:px-5 sm:py-3 font-sans"
+              className="inline-flex min-h-11 flex-[2] items-center justify-center gap-2.5 rounded-control bg-app-accent px-4 py-3 text-sm font-bold leading-tight text-white shadow-app-md transition-all duration-200 hover:bg-app-accent-hover disabled:cursor-not-allowed disabled:bg-app-line/50 disabled:text-app-ink-muted disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto sm:flex-none sm:px-5 sm:py-3 font-sans"
               onClick={() => {
                 soundService.click();
                 onNext();
@@ -280,18 +280,21 @@ export function FeasibilityStepShell({
       <div
         data-feasibility-mobile-action-bar
         className={cn(
-          "fixed bottom-0 left-0 right-0 z-40 border-t border-app-line/80 bg-app-surface/95 px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-2 shadow-[0_-18px_40px_-30px_rgba(23,21,15,0.45)] backdrop-blur-md transition-transform duration-200 sm:hidden",
+          "fixed bottom-0 left-0 right-0 z-40 border-t border-app-line/80 bg-app-surface/95 px-4 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] pt-2 shadow-[0_-18px_40px_-30px_rgba(23,21,15,0.45)] backdrop-blur-md transition-transform duration-200 motion-reduce:transition-none sm:hidden",
           showMobileActionBar ? "translate-y-0" : "translate-y-full",
         )}
       >
         <div className="mx-auto flex w-full max-w-[42rem] flex-col gap-1.5">
-          <p className="flex items-center justify-between gap-3 text-[11px] font-semibold" aria-live="polite">
-            <span className="min-w-0 truncate text-app-ink-muted">
+          <p
+            className="flex items-start justify-between gap-3 text-[11px] font-semibold leading-tight"
+            aria-live="polite"
+          >
+            <span className="min-w-0 break-words text-app-ink-muted">
               {mobileProgressLabel} · Đã trả lời {answeredQuestionCount}/{totalSteps}
             </span>
             <span
               className={cn(
-                "shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-bold",
+                "shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-bold leading-tight",
                 selectedAnswer
                   ? "border-app-accent/20 bg-app-accent-soft text-app-accent"
                   : "border-app-status-warning/25 bg-app-status-warning/10 text-app-status-warning",
@@ -325,7 +328,7 @@ export function FeasibilityStepShell({
               disabled={!selectedAnswer}
               aria-describedby={!selectedAnswer ? `feasibility-question-${currentQuestion.id}-next-hint` : undefined}
             >
-              <span className="truncate">{isLastStep ? "Xem phân tích" : "Tiếp theo"}</span>
+              <span className="min-w-0 break-words leading-tight">{isLastStep ? "Xem phân tích" : "Tiếp theo"}</span>
               <ArrowRight className="h-4 w-4 shrink-0" aria-hidden="true" />
             </motion.button>
           </div>

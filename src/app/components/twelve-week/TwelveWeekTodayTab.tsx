@@ -455,7 +455,7 @@ export function TwelveWeekTodayTab({
       >
         <span className="inline-flex min-w-0 items-center gap-2 rounded-full border border-app-accent/20 bg-app-accent-soft/40 px-3 py-1.5 text-[11px] font-semibold text-app-accent sm:px-3.5 sm:text-xs">
           <CheckCircle2 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-          <span className="min-w-0 truncate">
+          <span className="min-w-0 break-words leading-tight">
             <span className="font-mono font-bold tabular-nums">{todayCompletionLabel}</span> hôm nay
           </span>
         </span>
@@ -473,7 +473,9 @@ export function TwelveWeekTodayTab({
           >
             {overdueOpenCount}
           </span>
-          <span className="min-w-0 truncate">{overdueOpenCount > 0 ? "việc trễ hạn" : "không có việc trễ"}</span>
+          <span className="min-w-0 break-words leading-tight">
+            {overdueOpenCount > 0 ? "việc trễ hạn" : "không có việc trễ"}
+          </span>
         </span>
 
         <span
@@ -484,7 +486,9 @@ export function TwelveWeekTodayTab({
           }`}
         >
           <CalendarClock className="h-3.5 w-3.5" aria-hidden="true" />
-          <span className="min-w-0 truncate">{reviewDueToday ? "Review tuần đến hạn" : "Review tuần đã xong"}</span>
+          <span className="min-w-0 break-words leading-tight">
+            {reviewDueToday ? "Review tuần đến hạn" : "Review tuần đã xong"}
+          </span>
         </span>
       </div>
 
@@ -536,14 +540,14 @@ export function TwelveWeekTodayTab({
           {hasSmartRescue && rescuePlanSummary && (
             <div className="flex items-center gap-2 rounded-lg bg-app-accent-soft/25 border border-app-accent/10 px-3 py-2 text-[11px]">
               <Crown className="h-3.5 w-3.5 text-app-accent shrink-0" />
-              <span className="flex-1 min-w-0 truncate">
+              <span className="flex-1 min-w-0 break-words leading-snug">
                 <span className="font-semibold text-app-ink">Plus: </span>
                 {rescuePlanSummary.headline}
               </span>
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-auto p-0 text-app-accent hover:text-app-accent/80 font-bold transition-colors text-[11px]"
+                className="min-h-11 px-2 text-app-accent hover:text-app-accent/80 font-bold transition-colors text-[11px]"
                 onClick={onApplyRecommendedReentry}
               >
                 Áp dụng
@@ -554,7 +558,7 @@ export function TwelveWeekTodayTab({
             <Button
               size="sm"
               variant="outline"
-              className="border-app-warm-border/30 bg-app-surface text-app-warm hover:bg-app-bg text-[11px] py-1 h-7.5 rounded-lg px-3 font-semibold transition-all"
+              className="min-h-11 border-app-warm-border/30 bg-app-surface text-app-warm hover:bg-app-bg text-[11px] py-2 rounded-lg px-3 font-semibold leading-tight transition-all"
               onClick={() => onReentry("push")}
             >
               Dời sang tuần sau
@@ -562,7 +566,7 @@ export function TwelveWeekTodayTab({
             <Button
               size="sm"
               variant="ghost"
-              className="text-app-ink-soft hover:text-app-ink text-[11px] py-1 h-7.5 rounded-lg px-2.5 font-medium transition-all"
+              className="min-h-11 text-app-ink-soft hover:text-app-ink text-[11px] py-2 rounded-lg px-2.5 font-medium leading-tight transition-all"
               onClick={() => onReentry("lighten")}
             >
               Giảm tải
@@ -570,7 +574,7 @@ export function TwelveWeekTodayTab({
             <Button
               size="sm"
               variant="ghost"
-              className="text-app-ink-soft hover:text-app-ink text-[11px] py-1 h-7.5 rounded-lg px-2.5 font-medium transition-all"
+              className="min-h-11 text-app-ink-soft hover:text-app-ink text-[11px] py-2 rounded-lg px-2.5 font-medium leading-tight transition-all"
               onClick={() => onReentry("restart")}
             >
               Khởi động lại
@@ -579,7 +583,7 @@ export function TwelveWeekTodayTab({
               <Button
                 size="sm"
                 variant="ghost"
-                className="text-app-accent hover:text-app-accent/80 text-[11px] py-1 h-7.5 ml-auto font-bold rounded-lg px-2.5 flex items-center gap-1 transition-all"
+                className="min-h-11 text-app-accent hover:text-app-accent/80 text-[11px] py-2 ml-auto font-bold rounded-lg px-2.5 flex items-center gap-1 leading-tight transition-all"
                 onClick={onOpenSmartRescue}
               >
                 <Crown className="h-3.5 w-3.5" />
@@ -680,7 +684,7 @@ export function TwelveWeekTodayTab({
                     {primaryTaskOverdue && onRescheduleTaskWithinWeek && (
                       <Button
                         variant="outline"
-                        className="h-10 rounded-card border-app-line bg-app-surface px-4 text-sm font-semibold text-app-ink shadow-3xs transition-all hover:bg-app-bg active:scale-[0.98] sm:h-11 sm:px-5"
+                        className="min-h-11 rounded-card border-app-line bg-app-surface px-4 text-sm font-semibold text-app-ink shadow-3xs transition-all hover:bg-app-bg active:scale-[0.98] sm:px-5"
                         onClick={() => onRescheduleTaskWithinWeek(firstPriorityTask.id)}
                       >
                         <CalendarClock className="mr-1.5 h-4 w-4 text-app-ink-soft" />
@@ -795,7 +799,7 @@ export function TwelveWeekTodayTab({
                         <Checkbox
                           aria-label={`Hoàn thành việc: ${task.title}`}
                           checked={taskCompleted}
-                          className="mt-0.5 h-7 w-7 shrink-0 rounded-[8px] border-2"
+                          className="mt-0.5 h-11 w-11 shrink-0 rounded-[10px] border-2 sm:h-8 sm:w-8"
                           onCheckedChange={(checked) => handleTaskCompletionChange(task.id, checked === true)}
                         />
                         <div className="min-w-0 flex-1">
@@ -843,7 +847,7 @@ export function TwelveWeekTodayTab({
                                   <Button
                                     size="sm"
                                     variant="ghost"
-                                    className="text-[11px] text-app-ink-soft hover:text-app-ink py-1 h-7 rounded-lg px-2 font-medium transition-all"
+                                    className="min-h-11 text-[11px] text-app-ink-soft hover:text-app-ink py-2 rounded-lg px-3 font-medium leading-tight transition-all"
                                     onClick={() => onRescheduleTaskWithinWeek(task.id)}
                                     data-action="reschedule-within-week"
                                     aria-label={`Đẩy ${task.title} sang ngày mai`}
@@ -854,7 +858,7 @@ export function TwelveWeekTodayTab({
                                 )}
                                 {onRescheduleTaskToNextWeek || (onSkipNonCoreTask && !task.isCore) ? (
                                   <details className="group rounded-lg border border-app-line/40 bg-app-bg/30 px-3 py-1 transition-all duration-150 flex-1 sm:flex-initial">
-                                    <summary className="flex cursor-pointer list-none items-center justify-center gap-1 text-[11px] font-medium text-app-ink-muted h-6">
+                                    <summary className="flex min-h-11 cursor-pointer list-none items-center justify-center gap-1 text-[11px] font-medium text-app-ink-muted leading-tight">
                                       Khác
                                       <ChevronDown className="h-3.5 w-3.5 transition-transform group-open:rotate-180" />
                                     </summary>
@@ -863,7 +867,7 @@ export function TwelveWeekTodayTab({
                                         <Button
                                           size="sm"
                                           variant="ghost"
-                                          className="text-[10px] text-app-ink-soft font-medium rounded-lg px-2.5 py-0.5 h-7"
+                                          className="min-h-11 text-[10px] text-app-ink-soft font-medium rounded-lg px-3 py-2 leading-tight"
                                           onClick={() => onRescheduleTaskToNextWeek(task.id)}
                                           data-action="reschedule-next-week"
                                           aria-label={`Dời ${task.title} sang tuần sau`}
@@ -876,7 +880,7 @@ export function TwelveWeekTodayTab({
                                         <Button
                                           size="sm"
                                           variant="ghost"
-                                          className="text-[10px] text-app-ink-soft font-medium rounded-lg px-2.5 py-0.5 h-7"
+                                          className="min-h-11 text-[10px] text-app-ink-soft font-medium rounded-lg px-3 py-2 leading-tight"
                                           onClick={() => onSkipNonCoreTask(task.id)}
                                           data-action="skip-non-core"
                                           aria-label={`Bỏ qua việc tùy chọn ${task.title}`}
@@ -926,8 +930,10 @@ export function TwelveWeekTodayTab({
                           {index + 2}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-xs font-semibold text-app-ink">{task.title}</p>
-                          <p className="mt-0.5 text-[10px] text-app-ink-muted">{task.leadIndicatorName}</p>
+                          <p className="break-words text-xs font-semibold leading-snug text-app-ink">{task.title}</p>
+                          <p className="mt-0.5 break-words text-[10px] leading-snug text-app-ink-muted">
+                            {task.leadIndicatorName}
+                          </p>
                         </div>
                         <Badge
                           variant={task.isCore ? "success" : "warning"}

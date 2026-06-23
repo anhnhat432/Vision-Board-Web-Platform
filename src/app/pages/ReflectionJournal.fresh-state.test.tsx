@@ -61,6 +61,9 @@ describe("ReflectionJournal fresh state", () => {
     const hero = document.querySelector("[data-reflection-journal-hero]");
 
     expect(hero).toHaveClass("grid-cols-[1fr_88px]", "items-start", "gap-4", "p-5", "md:grid-cols-[1fr_360px]");
+    expect(screen.getByRole("button", { name: /Viết entry đầu tiên/i })).toHaveClass("min-h-11", "leading-tight");
+    expect(screen.getByRole("button", { name: "Review tuần" })).toHaveClass("min-h-11", "leading-tight");
+    expect(document.querySelector('[class*="motion-reduce:animate-none"]')).toBeInTheDocument();
     expect(screen.getByRole("searchbox")).toBeInTheDocument();
   });
 
