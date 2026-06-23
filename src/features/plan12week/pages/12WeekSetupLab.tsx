@@ -1352,10 +1352,10 @@ export function TwelveWeekSetupLab() {
             isSubmitDisabled={false}
             nextButtonLabel={
               currentStep === 0
-                ? "Sắp xếp hành động cam kết ➔"
+                ? "Sắp xếp hành động cam kết"
                 : currentStep === 1
-                  ? "Thiết lập lịch trình 📅"
-                  : "Xem trước kế hoạch Hôm nay 👀"
+                  ? "Thiết lập lịch trình"
+                  : "Xem trước kế hoạch Hôm nay"
             }
           >
             {currentStep === 0 && (
