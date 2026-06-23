@@ -529,9 +529,14 @@ export function FeasibilityCheck() {
     return (
       <PageShell maxWidth="md">
         <ScreenGuide {...SCREEN_GUIDES.feasibility} autoOpen />
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           <div>
-            <CoreFlowProgress currentStepId="feasibility" onExit={() => navigate("/")} className="mb-2" />
+            <CoreFlowProgress
+              currentStepId="feasibility"
+              onExit={() => navigate("/")}
+              className="mb-1 sm:mb-2"
+              compactOnMobile
+            />
             <div className="flex justify-end">{autoSave}</div>
           </div>
 
@@ -551,10 +556,15 @@ export function FeasibilityCheck() {
   return (
     <PageShell maxWidth="xl">
       <ScreenGuide {...SCREEN_GUIDES.feasibility} autoOpen />
-      <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="space-y-4 sm:space-y-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
           <div className="flex-1">
-            <CoreFlowProgress currentStepId="feasibility" onExit={() => navigate("/")} className="mb-2" />
+            <CoreFlowProgress
+              currentStepId="feasibility"
+              onExit={() => navigate("/")}
+              className="mb-1 sm:mb-2"
+              compactOnMobile
+            />
           </div>
           <div className="shrink-0 flex items-center justify-end">{autoSave}</div>
         </div>
@@ -565,29 +575,33 @@ export function FeasibilityCheck() {
           </p>
           <h1
             id="feasibility-title"
-            className="mt-3 font-serif text-3xl font-medium leading-tight tracking-[-0.02em] text-app-ink sm:text-4xl"
+            className="mt-2 font-serif text-[27px] font-medium leading-[1.06] tracking-[-0.02em] text-app-ink sm:mt-3 sm:text-4xl sm:leading-tight"
           >
             Hiệu chuẩn cán cân khả thi
           </h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-app-ink-soft">
+          <p className="mt-1.5 max-w-2xl text-[13px] leading-[1.55] text-app-ink-soft sm:mt-2 sm:text-sm sm:leading-6">
             Cùng chuẩn bị hành trang phù hợp để đảm bảo kế hoạch 12 tuần của bạn chắc thắng.
           </p>
 
           <MotionFadeIn>
-            <div className="mt-6 rounded-card border border-app-line bg-app-bg-subtle p-5 shadow-app-sm">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="mt-3 rounded-card border border-app-line bg-app-bg-subtle p-3.5 shadow-app-sm sm:mt-6 sm:p-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                 <div className="min-w-0">
-                  <p className="text-xs font-bold uppercase tracking-wider text-app-ink-muted mb-2">Mục tiêu của bạn</p>
-                  <p className="line-clamp-2 text-sm font-bold leading-relaxed text-app-ink">{pendingGoal.specific}</p>
+                  <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-app-ink-muted sm:mb-2 sm:text-xs">
+                    Mục tiêu của bạn
+                  </p>
+                  <p className="line-clamp-2 text-[13px] font-bold leading-[1.55] text-app-ink sm:text-sm sm:leading-relaxed">
+                    {pendingGoal.specific}
+                  </p>
                 </div>
                 <Link
                   to="/smart-goal-setup"
-                  className="shrink-0 text-xs font-bold text-app-accent hover:text-app-accent-hover hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 transition-colors p-2 -m-2"
+                  className="shrink-0 text-xs font-bold text-app-accent transition-colors hover:text-app-accent-hover hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 p-1 sm:p-2 sm:-m-2"
                 >
                   Sửa mục tiêu ✏️
                 </Link>
               </div>
-              <div className="mt-4 flex flex-wrap gap-2 text-xs">
+              <div className="mt-2.5 flex flex-wrap gap-2 text-xs sm:mt-4">
                 <span className="rounded-pill bg-app-accent text-white px-3 py-1 font-semibold shadow-app-sm">
                   {getLifeAreaLabel(focusArea)}
                 </span>
@@ -601,7 +615,7 @@ export function FeasibilityCheck() {
           {/* Banner khôi phục câu trả lời cũ */}
           {showRestoreBanner && (
             <MotionFadeIn>
-              <div className="mt-4 rounded-card border border-app-status-warning/30 bg-app-status-warning/5 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div className="mt-4 flex flex-col gap-3 rounded-card border border-app-status-warning/30 bg-app-status-warning/5 p-3.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:p-4">
                 <div className="space-y-1">
                   <p className="text-sm font-bold text-app-status-warning flex items-center gap-1.5">
                     <span>💡</span> Phát hiện câu trả lời cũ
@@ -632,16 +646,16 @@ export function FeasibilityCheck() {
         </section>
 
         {/* Layout Grid 2 cột trên Desktop (cột cán cân sticky), di động cán cân đảo xuống dưới câu hỏi */}
-        <div className="mt-8 flex flex-col gap-6 md:grid md:grid-cols-12 md:items-start md:gap-8">
+        <div className="mt-4 flex flex-col gap-4 md:grid md:grid-cols-12 md:items-start md:gap-8 lg:mt-8">
           {/* Cột trái chứa câu hỏi khảo sát */}
           <div className="order-1 md:col-span-7 w-full">
-            <div className="mb-4 rounded-card border border-app-line bg-app-surface/70 p-4 shadow-app-sm">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="mb-3 rounded-card border border-app-line bg-app-surface/70 p-3 shadow-app-sm sm:mb-4 sm:p-4">
+              <div className="flex flex-col gap-2.5 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
                 <div className="min-w-0 space-y-1">
                   <p className="text-xs font-bold uppercase tracking-[0.18em] text-app-ink-muted">
                     Mặc định 3 câu cốt lõi
                   </p>
-                  <p className="text-sm leading-6 text-app-ink-soft">
+                  <p className="hidden text-[13.5px] leading-[1.6] text-app-ink-soft sm:block sm:text-sm sm:leading-6">
                     Time, Energy và Confidence là đủ để tạo kết quả khả thi. Mở phần nâng cao nếu bạn muốn tinh chỉnh
                     thêm Clarity, Obstacle, Routine và Resources.
                   </p>
@@ -650,7 +664,7 @@ export function FeasibilityCheck() {
                   type="button"
                   onClick={handleAdvancedToggle}
                   aria-expanded={showAdvancedQuestions}
-                  className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-control border border-app-line bg-app-surface px-4 py-2.5 text-sm font-bold text-app-ink transition-all duration-200 hover:bg-app-bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                  className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 rounded-control border border-app-line bg-app-surface px-3.5 py-2 text-sm font-bold text-app-ink transition-all duration-200 hover:bg-app-bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:min-h-11 sm:px-4 sm:py-2.5"
                 >
                   <SlidersHorizontal className="h-4 w-4 text-app-accent" aria-hidden="true" />
                   {showAdvancedQuestions ? "Ẩn nâng cao" : "Mở nâng cao"}
@@ -663,7 +677,7 @@ export function FeasibilityCheck() {
                   />
                 </button>
               </div>
-              <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
+              <div className="mt-2 flex flex-wrap gap-2 text-xs font-semibold sm:mt-3">
                 <span className="rounded-pill bg-app-accent-soft px-3 py-1 text-app-accent">
                   {CORE_QUESTION_IDS.length} câu cốt lõi
                 </span>

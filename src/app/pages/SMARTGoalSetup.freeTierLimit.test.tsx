@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { beforeEach, describe, expect, it } from "vitest";
@@ -85,6 +85,21 @@ function getMobileActionBar() {
   return actionBar;
 }
 
+async function findMobileActionButton(name: RegExp) {
+  let actionButton: HTMLElement | null = null;
+
+  await waitFor(() => {
+    actionButton = within(getMobileActionBar()).getByRole("button", { name });
+    expect(actionButton).toBeInTheDocument();
+  });
+
+  if (!actionButton) {
+    throw new Error(`Missing mobile action button: ${name}`);
+  }
+
+  return actionButton;
+}
+
 beforeEach(() => {
   localStorage.clear();
 });
@@ -98,29 +113,19 @@ describe("SMARTGoalSetup free tier limit", () => {
 
     await screen.findByText("Bạn muốn đạt được điều gì?");
 
-    const specificAction = await within(getMobileActionBar()).findByRole("button", {
-      name: /Lưu mục tiêu cụ thể/i,
-    });
+    const specificAction = await findMobileActionButton(/Lưu mục tiêu cụ thể/i);
     await user.click(specificAction);
 
-    const measurableAction = await within(getMobileActionBar()).findByRole("button", {
-      name: /Xác nhận chỉ số đo/i,
-    });
+    const measurableAction = await findMobileActionButton(/Xác nhận chỉ số đo/i);
     await user.click(measurableAction);
 
-    const achievableAction = await within(getMobileActionBar()).findByRole("button", {
-      name: /Thiết lập thời gian cam kết/i,
-    });
+    const achievableAction = await findMobileActionButton(/Thiết lập thời gian cam kết/i);
     await user.click(achievableAction);
 
-    const relevantAction = await within(getMobileActionBar()).findByRole("button", {
-      name: /Xác nhận động lực này/i,
-    });
+    const relevantAction = await findMobileActionButton(/Xác nhận động lực này/i);
     await user.click(relevantAction);
 
-    const finalAction = await within(getMobileActionBar()).findByRole("button", {
-      name: /Tạo kế hoạch nhanh/i,
-    });
+    const finalAction = await findMobileActionButton(/Tạo kế hoạch nhanh/i);
     await user.click(finalAction);
 
     expect((await screen.findAllByText("Bạn đã có 3 mục tiêu")).length).toBeGreaterThan(0);

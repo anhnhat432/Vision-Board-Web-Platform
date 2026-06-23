@@ -258,8 +258,8 @@ describe("FeasibilityStepShell — a11y", () => {
     const feedback = document.querySelector("[data-feasibility-step-feedback]");
     const actionBar = document.querySelector("[data-feasibility-mobile-action-bar]");
 
-    expect(shell).toHaveClass("pb-[calc(8.5rem+env(safe-area-inset-bottom))]", "sm:pb-8", "md:pb-10");
-    expect(actionBar).toHaveClass("fixed", "bottom-0", "pb-[calc(env(safe-area-inset-bottom)+1rem)]", "sm:hidden");
+    expect(shell).toHaveClass("pb-[calc(7rem+env(safe-area-inset-bottom))]", "sm:pb-8", "md:pb-10");
+    expect(actionBar).toHaveClass("fixed", "bottom-0", "pb-[calc(env(safe-area-inset-bottom)+0.75rem)]", "sm:hidden");
     expect(feedback).not.toBeNull();
     expect(actionBar).not.toBeNull();
     expect(feedback?.compareDocumentPosition(actionBar as Node)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);

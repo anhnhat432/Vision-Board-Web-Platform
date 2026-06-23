@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -56,6 +56,35 @@ function renderCoreFunnel(initialEntry: string) {
     router,
     ui: render(<RouterProvider router={router} />),
   };
+}
+
+function getFeasibilityMobileActionBar() {
+  const actionBar = document.querySelector<HTMLElement>("[data-feasibility-mobile-action-bar]");
+
+  if (!actionBar) {
+    throw new Error("Missing Feasibility mobile action bar");
+  }
+
+  return actionBar;
+}
+
+async function findFeasibilityMobileActionButton(name: RegExp) {
+  let actionButton: HTMLElement | null = null;
+
+  await waitFor(() => {
+    actionButton = within(getFeasibilityMobileActionBar()).getByRole("button", { name });
+    expect(actionButton).toBeInTheDocument();
+  });
+
+  if (!actionButton) {
+    throw new Error(`Missing Feasibility mobile action button: ${name}`);
+  }
+
+  return actionButton;
+}
+
+function clickWithoutPointer(element: HTMLElement) {
+  fireEvent.click(element);
 }
 
 function seedRealLifeBalanceWithoutInsight() {
@@ -202,7 +231,7 @@ describe("core funnel guards", () => {
 
     const { router } = renderCoreFunnel("/12-week-setup");
 
-    expect(await screen.findByRole("heading", { name: "Tạo kế hoạch 12 tuần" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { level: 1, name: "Tạo kế hoạch 12 tuần" })).toBeInTheDocument();
     expect(router.state.location.pathname).toBe("/12-week-setup");
 
     const savedResult = JSON.parse(localStorage.getItem(APP_STORAGE_KEYS.pendingFeasibilityResult) ?? "{}");
@@ -219,7 +248,6 @@ describe("core funnel guards", () => {
 
   it("completes Feasibility with the 3 default core questions and saves a 7-answer compatible payload", async () => {
     seedReadyFeasibilityFlow();
-    const user = userEvent.setup();
     const { router } = renderCoreFunnel("/feasibility");
 
     expect(await screen.findByText(/Mặc định 3 câu cốt lõi/i)).toBeInTheDocument();
@@ -227,19 +255,19 @@ describe("core funnel guards", () => {
     expect(screen.getByText(/^3\s+câu cốt lõi$/i)).toBeInTheDocument();
 
     await screen.findByRole("heading", { name: /Mỗi tuần bạn có mấy giờ/i });
-    await user.click(screen.getByLabelText(/Từ 3-5 giờ/i));
-    await user.click(screen.getByRole("button", { name: "Tiếp theo" }));
+    clickWithoutPointer(screen.getByLabelText(/Từ 3-5 giờ/i));
+    clickWithoutPointer(await findFeasibilityMobileActionButton(/Tiếp theo/i));
 
     await screen.findByRole("heading", { name: /Năng lượng còn lại/i });
-    await user.click(screen.getByLabelText(/Đủ dùng/i));
-    await user.click(screen.getByRole("button", { name: "Tiếp theo" }));
+    clickWithoutPointer(screen.getByLabelText(/Đủ dùng/i));
+    clickWithoutPointer(await findFeasibilityMobileActionButton(/Tiếp theo/i));
 
     await screen.findByRole("heading", { name: /Độ tự tin hoàn thành/i });
-    await user.click(screen.getByRole("radio", { name: /Tự tin \(nếu tuần đầu vừa sức\)/i }));
-    await user.click(screen.getByRole("button", { name: "Xem phân tích khả thi" }));
+    clickWithoutPointer(screen.getByRole("radio", { name: /Tự tin \(nếu tuần đầu vừa sức\)/i }));
+    clickWithoutPointer(await findFeasibilityMobileActionButton(/Xem phân tích/i));
 
     expect(await screen.findByText(/Kết quả đánh giá khả thi/i)).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: /Bắt đầu lập Kế hoạch 12 tuần/i }));
+    clickWithoutPointer(screen.getByRole("button", { name: /Bắt đầu lập Kế hoạch 12 tuần/i }));
 
     expect(router.state.location.pathname).toBe("/12-week-setup");
     const savedResult = JSON.parse(localStorage.getItem(APP_STORAGE_KEYS.pendingFeasibilityResult) ?? "{}");

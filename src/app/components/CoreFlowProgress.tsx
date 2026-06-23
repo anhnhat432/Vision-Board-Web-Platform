@@ -63,6 +63,8 @@ interface CoreFlowProgressProps {
   exitTooltip?: string;
   /** Optional save badge element rendered left of the exit button. */
   saveBadge?: React.ReactNode;
+  /** Reduce vertical chrome on narrow workflow screens. */
+  compactOnMobile?: boolean;
 }
 
 export function CoreFlowProgress({
@@ -72,6 +74,7 @@ export function CoreFlowProgress({
   exitLabel = "Thoát",
   exitTooltip = "Quay lại Trang chính - tiến độ đã nhập tự lưu trên thiết bị này",
   saveBadge,
+  compactOnMobile = false,
 }: CoreFlowProgressProps) {
   const currentIndex = Math.max(
     0,
@@ -86,17 +89,30 @@ export function CoreFlowProgress({
       aria-label="Tiến độ đường chính"
       className={cn(
         "rounded-card border border-app-line bg-app-surface/85 p-4 shadow-app-sm backdrop-blur sm:p-5",
+        compactOnMobile && "p-3 sm:p-5",
         className,
       )}
     >
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div
+        className={cn(
+          "flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between",
+          compactOnMobile && "gap-2 sm:gap-3",
+        )}
+      >
         <div className="min-w-0">
           <p className="text-[13px] font-bold leading-5 text-app-ink">
-            <span className="text-app-accent">Bước {currentIndex + 1} / {CORE_FLOW_STEPS.length}</span>
+            <span className="text-app-accent">
+              Bước {currentIndex + 1} / {CORE_FLOW_STEPS.length}
+            </span>
             <span className="px-1.5 text-app-ink-muted"> · </span>
             <span className="break-words uppercase tracking-[0.04em] text-app-ink">{currentLabel}</span>
           </p>
-          <h2 className="mt-1 font-serif text-lg font-semibold leading-tight text-app-ink sm:text-xl">
+          <h2
+            className={cn(
+              "mt-1 font-serif text-lg font-semibold leading-tight text-app-ink sm:text-xl",
+              compactOnMobile && "mt-0.5 text-base sm:mt-1 sm:text-xl",
+            )}
+          >
             {currentStep.title}
           </h2>
         </div>
@@ -109,7 +125,10 @@ export function CoreFlowProgress({
               onClick={onExit}
               title={exitTooltip}
               aria-label={exitTooltip}
-              className="inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-control border border-app-line bg-app-bg-subtle px-3 py-2 text-[13px] font-semibold text-app-ink-soft transition-[background-color,color,border-color,transform] duration-150 hover:border-app-accent/35 hover:bg-app-accent-subtle hover:text-app-ink active:scale-[0.98] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg"
+              className={cn(
+                "inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-control border border-app-line bg-app-bg-subtle px-3 py-2 text-[13px] font-semibold text-app-ink-soft transition-[background-color,color,border-color,transform] duration-150 hover:border-app-accent/35 hover:bg-app-accent-subtle hover:text-app-ink active:scale-[0.98] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/35 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg",
+                compactOnMobile && "min-h-10 px-2.5 py-1.5 sm:min-h-11 sm:px-3 sm:py-2",
+              )}
             >
               {exitLabel}
               <svg
@@ -137,7 +156,10 @@ export function CoreFlowProgress({
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={Math.round(progressValue)}
-        className="relative mt-4 h-2 overflow-hidden rounded-pill bg-app-bg-subtle"
+        className={cn(
+          "relative mt-4 h-2 overflow-hidden rounded-pill bg-app-bg-subtle",
+          compactOnMobile && "mt-3 sm:mt-4",
+        )}
       >
         <span
           className="dof-prog absolute inset-y-0 left-0 rounded-pill shadow-[0_0_0_1px_rgba(255,255,255,0.25)_inset] motion-safe:transition-[width] motion-safe:duration-300 motion-reduce:transition-none"
@@ -149,7 +171,13 @@ export function CoreFlowProgress({
         />
       </div>
 
-      <div className="-mx-1 mt-3 flex gap-1 overflow-x-auto px-1 pb-1 sm:justify-between sm:overflow-visible" aria-hidden="true">
+      <div
+        className={cn(
+          "-mx-1 mt-3 flex gap-1 overflow-x-auto px-1 pb-1 sm:justify-between sm:overflow-visible",
+          compactOnMobile && "mt-2 sm:mt-3",
+        )}
+        aria-hidden="true"
+      >
         {CORE_FLOW_STEPS.map((step, index) => (
           <span
             key={step.id}
