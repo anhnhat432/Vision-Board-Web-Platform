@@ -25,12 +25,12 @@ import { PageShell } from "../components/PageShell";
 import { ScreenGuide } from "../components/ScreenGuide";
 import { SCREEN_GUIDES } from "../components/screen-guides";
 import { InlineStatusMessage } from "../components/states/InlineStatusMessage";
+import { useIsMobile } from "../components/ui/use-mobile";
 import { cn } from "../components/ui/utils";
 import { useDirtyFormGuard } from "../hooks/useDirtyFormGuard";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import { hasRealLifeBalance } from "../utils/core-flow-guard";
-import { getAreaColorConfig } from "../utils/life-area-theme";
 import { getLifeAreaLabel, getUserData, LIFE_AREAS, type LifeArea, updateWheelOfLife } from "../utils/storage";
 import { mergeOnboardingLifeAreas } from "../utils/onboarding-life-areas";
 import { ZenBreathingGate } from "./Onboarding/components/ZenBreathingGate";
@@ -61,6 +61,10 @@ const LIFE_AREA_QUESTIONS: Record<string, string> = {
   Leisure: "Bạn hài lòng bao nhiêu với thời gian nghỉ ngơi và giải trí?",
 };
 
+const LIFE_AREA_SHORT_LABELS: Partial<Record<LifeArea["name"], string>> = {
+  Relationships: "Quan hệ",
+  "Personal Growth": "Phát triển",
+};
 interface ScoreAnchor {
   range: string;
   label: string;
@@ -74,6 +78,8 @@ const SCORE_ANCHORS: ScoreAnchor[] = [
   { range: "7–8", label: "Khá tốt", description: "Đang trên đà tiến triển tích cực" },
   { range: "9–10", label: "Rất tốt", description: "Rất hài lòng, đúng hướng và có năng lượng" },
 ];
+
+const SCORE_VALUES = Array.from({ length: 11 }, (_, score) => score);
 
 function getActiveScoreAnchor(score: number): ScoreAnchor | null {
   if (score <= 2) return SCORE_ANCHORS[0];
@@ -106,20 +112,20 @@ const DESIGN_WEDGE_COLORS: Array<{ stroke: string; fill: string }> = [
   { stroke: "#2BA8E0", fill: "#CDE9F8" }, // Leisure
 ];
 
-function getDesignWedgeColor(areaName: string, index: number) {
+function getDesignWedgeColor(_areaName: string, index: number) {
   return DESIGN_WEDGE_COLORS[index] ?? { stroke: "#A8A296", fill: "#F2EFE6" };
 }
 
 // Design-specific icon colors + backgrounds from Dear Our Future Clio design
 const AREA_DESIGN_ICON_STYLES: Array<{ accent: string; bg: string; border: string }> = [
-  { accent: "#2563EB", bg: "#EEF3FE", border: "rgba(37,99,235,0.3)" },   // Career
-  { accent: "#E7A400", bg: "#FDF6E3", border: "rgba(231,164,0,0.3)" },     // Finance
-  { accent: "#16A34A", bg: "#E9F7EE", border: "rgba(22,163,74,0.3)" },     // Health
-  { accent: "#7C5CFC", bg: "#F0EDFE", border: "rgba(124,92,252,0.3)" },    // Education
-  { accent: "#E8456B", bg: "#FDEBF0", border: "rgba(232,69,107,0.3)" },    // Relationships
-  { accent: "#0E9F8E", bg: "#E5F6F3", border: "rgba(14,159,142,0.3)" },    // Family
-  { accent: "#EA7A2B", bg: "#FDF1E7", border: "rgba(234,122,43,0.3)" },    // Personal Growth
-  { accent: "#2BA8E0", bg: "#E7F4FC", border: "rgba(43,168,224,0.3)" },    // Leisure
+  { accent: "#2563EB", bg: "#EEF3FE", border: "rgba(37,99,235,0.3)" }, // Career
+  { accent: "#E7A400", bg: "#FDF6E3", border: "rgba(231,164,0,0.3)" }, // Finance
+  { accent: "#16A34A", bg: "#E9F7EE", border: "rgba(22,163,74,0.3)" }, // Health
+  { accent: "#7C5CFC", bg: "#F0EDFE", border: "rgba(124,92,252,0.3)" }, // Education
+  { accent: "#E8456B", bg: "#FDEBF0", border: "rgba(232,69,107,0.3)" }, // Relationships
+  { accent: "#0E9F8E", bg: "#E5F6F3", border: "rgba(14,159,142,0.3)" }, // Family
+  { accent: "#EA7A2B", bg: "#FDF1E7", border: "rgba(234,122,43,0.3)" }, // Personal Growth
+  { accent: "#2BA8E0", bg: "#E7F4FC", border: "rgba(43,168,224,0.3)" }, // Leisure
 ];
 
 function getDesignIconStyle(index: number) {
@@ -214,18 +220,6 @@ function createOnboardingDraft(
     reviewedAreaIndices: [...reviewedAreaIndices],
     updatedAt: new Date().toISOString(),
   };
-}
-
-function getScaleGuidance(score: number): string {
-  if (score <= 3) return "Cần chăm sóc";
-  if (score <= 7) return "Ổn định";
-  return "Đang phát triển";
-}
-
-function getScaleGuidanceColor(score: number): string {
-  if (score <= 3) return "text-[color:var(--color-danger-fg)] bg-[color:var(--color-danger-bg)]";
-  if (score <= 7) return "text-[color:var(--color-warning-fg)] bg-[color:var(--color-warning-bg)]";
-  return "text-[color:var(--color-success-fg)] bg-[color:var(--color-success-bg)]";
 }
 
 function polarPoint(cx: number, cy: number, radius: number, angleDegrees: number) {
@@ -375,10 +369,27 @@ function LifeAtlasPanel({
               );
             })}
             <circle cx="140" cy="140" r="24" fill="var(--app-surface)" stroke="var(--app-line)" strokeWidth="1" />
-            <text x="140" y="136" fill="#A8A296" fontSize="10" fontWeight="700" letterSpacing="0.12em" textAnchor="middle" fontFamily="'Be Vietnam Pro', sans-serif">
+            <text
+              x="140"
+              y="136"
+              fill="#A8A296"
+              fontSize="10"
+              fontWeight="700"
+              letterSpacing="0.12em"
+              textAnchor="middle"
+              fontFamily="'Be Vietnam Pro', sans-serif"
+            >
               LIFE
             </text>
-            <text x="140" y="155" fill="#0C5E3A" fontSize="22" fontWeight="800" textAnchor="middle" fontFamily="'Bricolage Grotesque', sans-serif">
+            <text
+              x="140"
+              y="155"
+              fill="#0C5E3A"
+              fontSize="22"
+              fontWeight="800"
+              textAnchor="middle"
+              fontFamily="'Bricolage Grotesque', sans-serif"
+            >
               {averageScore.toFixed(1)}
             </text>
             <g className="dof-pin motion-safe:transition-transform motion-reduce:transition-none">
@@ -411,7 +422,9 @@ function LifeAtlasPanel({
             </div>
             <div className="group rounded-[14px] border border-app-line bg-app-bg-subtle p-3.5 transition-[transform,border-color] duration-150 hover:-translate-y-0.5 hover:border-app-accent/30">
               <strong className="block text-[13px] font-bold text-app-ink">2. Thấy Insight</strong>
-              <span className="mt-1 block text-[11.5px] leading-relaxed text-app-ink-muted">Biết nơi nên chăm sóc trước.</span>
+              <span className="mt-1 block text-[11.5px] leading-relaxed text-app-ink-muted">
+                Biết nơi nên chăm sóc trước.
+              </span>
             </div>
             <div className="group rounded-[14px] border border-app-line bg-app-bg-subtle p-3.5 transition-[transform,border-color] duration-150 hover:-translate-y-0.5 hover:border-app-accent/30">
               <strong className="block text-[13px] font-bold text-app-ink">3. Lập kế hoạch</strong>
@@ -434,7 +447,9 @@ function LifeAtlasPanel({
             </div>
             <div className="rounded-control border border-app-line bg-app-bg-subtle px-3 py-2">
               <span className="text-xs font-semibold uppercase tracking-wide text-app-ink-muted">Đã rà</span>
-              <p className="mt-1 font-serif text-xl font-bold tabular-nums text-app-ink">{reviewedAreaCount}/{areaCount}</p>
+              <p className="mt-1 font-serif text-xl font-bold tabular-nums text-app-ink">
+                {reviewedAreaCount}/{areaCount}
+              </p>
             </div>
             <div className="rounded-control border border-app-line bg-app-bg-subtle px-3 py-2">
               <span className="text-xs font-semibold uppercase tracking-wide text-app-ink-muted">Cần chăm sóc</span>
@@ -463,16 +478,18 @@ export function Onboarding() {
   const [reviewedAreaIndices, setReviewedAreaIndices] = useState<Set<number>>(new Set());
   const [isDirty, setIsDirty] = useState(false);
   const [availableDraft, setAvailableDraft] = useState<OnboardingDraft | null>(null);
-  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
-  const [autoSaveStatus, setAutoSaveStatus] = useState<AutoSaveDraftStatus>("saved");
+  const [_lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const [_autoSaveStatus, setAutoSaveStatus] = useState<AutoSaveDraftStatus>("saved");
   const flowTopRef = useRef<HTMLDivElement | null>(null);
   const activeAreaHeadingRef = useRef<HTMLHeadingElement | null>(null);
   const didFocusActiveAreaRef = useRef(false);
   const autosaveTimerRef = useRef<number | null>(null);
   const [showBreathing, setShowBreathing] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [isScoreGuideOpen, setIsScoreGuideOpen] = useState(false);
   const [activeAreaIndex, setActiveAreaIndex] = useState<number | null>(0);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -496,6 +513,15 @@ export function Onboarding() {
 
     activeAreaHeadingRef.current?.focus({ preventScroll: true });
   }, [activeAreaIndex, step]);
+
+  useEffect(() => {
+    if (!isMobile) {
+      setIsScoreGuideOpen(true);
+      return;
+    }
+
+    setIsScoreGuideOpen(false);
+  }, [isMobile]);
 
   const guardedRef = useRef(false);
   useEffect(() => {
@@ -678,7 +704,20 @@ export function Onboarding() {
         }}
         saveBadge={
           <span className="inline-flex items-center gap-1.5 text-[11.5px] font-medium text-[#7A6E5E] bg-white border border-[rgba(23,21,15,0.1)] px-3 py-1.5 rounded-[999px]">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21.801 10A10 10 0 1 1 17 3.335"/><path d="m9 11 3 3L22 4"/></svg>
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#16A34A"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M21.801 10A10 10 0 1 1 17 3.335" />
+              <path d="m9 11 3 3L22 4" />
+            </svg>
             Đã lưu cục bộ
           </span>
         }
@@ -726,10 +765,24 @@ export function Onboarding() {
             <>
               {isReturning ? (
                 <div className="flex items-center gap-3 rounded-[14px] border border-[rgba(12,94,58,0.18)] bg-[#EDF7E0] px-[18px] py-3.5">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0C5E3A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0"><path d="M21.801 10A10 10 0 1 1 17 3.335"/><path d="m9 11 3 3L22 4"/></svg>
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#0C5E3A"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="shrink-0"
+                    aria-hidden="true"
+                  >
+                    <path d="M21.801 10A10 10 0 1 1 17 3.335" />
+                    <path d="m9 11 3 3L22 4" />
+                  </svg>
                   <span className="text-[13px] leading-relaxed text-[#3F4A3F]">
-                    <strong className="font-semibold text-[#0C5E3A]">Cập nhật điểm hiện tại.</strong>{" "}
-                    Điểm cũ đã được tải sẵn, bạn chỉ điều chỉnh phần thay đổi, không tạo lại từ đầu.
+                    <strong className="font-semibold text-[#0C5E3A]">Cập nhật điểm hiện tại.</strong> Điểm cũ đã được
+                    tải sẵn, bạn chỉ điều chỉnh phần thay đổi, không tạo lại từ đầu.
                   </span>
                 </div>
               ) : null}
@@ -743,7 +796,10 @@ export function Onboarding() {
                     Bước 1 / 3 · Atlas cuộc sống · 3 phút
                   </span>
                   <div className="space-y-[13px]">
-                    <h1 className="text-[clamp(26px,2.6vw,34px)] font-extrabold leading-[1.06] -tracking-[0.02em] text-[#17150F]" style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}>
+                    <h1
+                      className="text-[clamp(26px,2.6vw,34px)] font-extrabold leading-[1.06] -tracking-[0.02em] text-[#17150F]"
+                      style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
+                    >
                       Mở bản đồ cuộc sống 12 tuần của bạn
                     </h1>
                     <p className="max-w-[46ch] text-[14px] leading-[1.55] text-[#5C574B]">
@@ -757,7 +813,12 @@ export function Onboarding() {
                         key={item.title}
                         className="group rounded-[14px] border border-[rgba(23,21,15,0.08)] bg-[#FAF8F3] p-[15px] transition-[transform,border-color] duration-[0.15s] hover:-translate-y-0.5 hover:!border-[rgba(12,94,58,0.3)]"
                       >
-                        <span className="text-[13px] font-semibold text-[#0C5E3A]" style={{ fontFamily: "'JetBrains Mono', monospace" }}>{item.number}</span>
+                        <span
+                          className="text-[13px] font-semibold text-[#0C5E3A]"
+                          style={{ fontFamily: "'JetBrains Mono', monospace" }}
+                        >
+                          {item.number}
+                        </span>
                         <h2 className="mt-2 text-[13.5px] font-bold leading-snug text-[#17150F]">{item.title}</h2>
                         <p className="mt-1 text-[11.5px] leading-[1.45] text-[#7A6E5E]">{item.description}</p>
                       </div>
@@ -845,7 +906,11 @@ export function Onboarding() {
 
   return (
     <PageShell maxWidth="xl" className="focus:outline-none">
-      <div ref={flowTopRef} tabIndex={-1} className="dof-stagger flex w-full max-w-full flex-col gap-5 focus:outline-none">
+      <div
+        ref={flowTopRef}
+        tabIndex={-1}
+        className="dof-stagger flex w-full max-w-full flex-col gap-5 focus:outline-none"
+      >
         <ScreenGuide {...SCREEN_GUIDES.onboarding} autoOpen />
         {progressHeader}
         {draftBanner}
@@ -863,8 +928,8 @@ export function Onboarding() {
           </p>
         </header>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_390px] lg:items-start">
-          <aside className="order-1 lg:sticky lg:top-6 lg:order-2">
+        <div className="grid grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_390px] lg:items-start">
+          <aside className="order-2 lg:sticky lg:top-6 lg:order-2">
             <LifeAtlasPanel
               lifeAreas={lifeAreas}
               reviewedAreaIndices={reviewedAreaIndices}
@@ -877,26 +942,27 @@ export function Onboarding() {
             />
           </aside>
 
-          <div className="order-2 min-w-0 space-y-[18px] lg:order-1">
+          <div className="order-1 min-w-0 space-y-4 sm:space-y-[18px] lg:order-1">
             {/* ---- AREA PICKER (Clio design) ---- */}
-            <div className="rounded-[20px] border border-[rgba(23,21,15,0.08)] bg-white px-6 py-[22px]">
-              <p className="mb-[14px] text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#A8A296]">
+            <div className="rounded-[18px] border border-[rgba(23,21,15,0.08)] bg-white px-4 py-4 sm:rounded-[20px] sm:px-6 sm:py-[22px]">
+              <p className="mb-3 text-[10px] font-extrabold uppercase tracking-[0.1em] text-[#A8A296] sm:mb-[14px]">
                 Chọn lĩnh vực đang rà
               </p>
-              <div className="grid grid-cols-4 gap-[11px]">
+              <div className="grid grid-cols-4 gap-2 sm:gap-[11px]">
                 {lifeAreas.map((area, index) => {
                   const AreaIcon = getCalmLifeAreaIcon(area.name);
                   const isSelected = activeAreaIndex === index;
                   const isReviewed = reviewedAreaIndices.has(index);
                   const designStyle = getDesignIconStyle(index);
                   const label = getLifeAreaLabel(area.name);
+                  const compactLabel = LIFE_AREA_SHORT_LABELS[area.name] ?? label;
 
                   return (
                     <button
                       key={area.name}
                       type="button"
                       onClick={() => setActiveAreaIndex(index)}
-                      className="dof-areachip cursor-pointer rounded-[14px] p-[13px_14px] text-left font-[inherit] transition-[transform,border-color,background] duration-[0.15s] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2"
+                      className="dof-areachip cursor-pointer rounded-[12px] p-2.5 text-left font-[inherit] transition-[transform,border-color,background] duration-[0.15s] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2 sm:rounded-[14px] sm:p-[13px_14px]"
                       style={{
                         border: `1.5px solid ${isSelected ? designStyle.accent : "rgba(23,21,15,0.1)"}`,
                         background: isSelected ? designStyle.bg : "#fff",
@@ -904,15 +970,18 @@ export function Onboarding() {
                       aria-pressed={isSelected}
                     >
                       <span
-                        className="mb-[10px] flex h-[30px] w-[30px] items-center justify-center rounded-[9px]"
+                        className="mb-2 flex h-7 w-7 items-center justify-center rounded-[8px] sm:mb-[10px] sm:h-[30px] sm:w-[30px] sm:rounded-[9px]"
                         style={{ background: designStyle.bg, color: designStyle.accent }}
                       >
                         <AreaIcon className="h-4 w-4 shrink-0" aria-hidden="true" />
                       </span>
-                      <span className="block text-[12.5px] font-bold leading-tight text-[#17150F]">
-                        {index + 1}. {label}
+                      <span className="block text-[11.5px] font-bold leading-tight text-[#17150F] sm:text-[12.5px]">
+                        <span className="sm:hidden">{compactLabel}</span>
+                        <span className="hidden sm:inline">
+                          {index + 1}. {label}
+                        </span>
                       </span>
-                      <span className="block text-[11px] text-[#8C887C]">
+                      <span className="mt-1 block text-[10.5px] leading-snug text-[#8C887C] sm:text-[11px]">
                         {isReviewed ? `Đã rà · ${area.score}đ` : "Chưa rà"}
                       </span>
                     </button>
@@ -932,18 +1001,26 @@ export function Onboarding() {
               const designStyle = getDesignIconStyle(index);
               const sliderPct = (area.score / 10) * 100;
               const sliderBadge =
-                area.score <= 2 ? "Rất thấp" : area.score <= 4 ? "Thấp" : area.score <= 6 ? "Tạm ổn" : area.score <= 8 ? "Ổn định" : "Rất tốt";
+                area.score <= 2
+                  ? "Rất thấp"
+                  : area.score <= 4
+                    ? "Thấp"
+                    : area.score <= 6
+                      ? "Tạm ổn"
+                      : area.score <= 8
+                        ? "Ổn định"
+                        : "Rất tốt";
 
               return (
-                <div className="rounded-[20px] border border-[rgba(23,21,15,0.08)] bg-white px-[26px] py-6">
+                <div className="rounded-[18px] border border-[rgba(23,21,15,0.08)] bg-white px-4 py-5 sm:rounded-[20px] sm:px-[26px] sm:py-6">
                   {/* Header: icon + name + score */}
-                  <div className="mb-5 flex items-center justify-between gap-4">
-                    <div className="flex items-center gap-[14px]">
+                  <div className="mb-4 flex items-start justify-between gap-3 sm:mb-5 sm:items-center sm:gap-4">
+                    <div className="flex min-w-0 items-center gap-3 sm:gap-[14px]">
                       <span
-                        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[13px]"
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] sm:h-12 sm:w-12 sm:rounded-[13px]"
                         style={{ background: designStyle.bg, color: designStyle.accent }}
                       >
-                        <AreaIcon className="h-[22px] w-[22px]" aria-hidden="true" />
+                        <AreaIcon className="h-5 w-5 sm:h-[22px] sm:w-[22px]" aria-hidden="true" />
                       </span>
                       <div>
                         <p className="mb-[3px] text-[10px] font-bold uppercase tracking-[0.1em] text-[#A8A296]">
@@ -952,7 +1029,7 @@ export function Onboarding() {
                         <h2
                           ref={activeAreaHeadingRef}
                           tabIndex={-1}
-                          className="text-[22px] font-bold leading-none -tracking-[0.01em] text-[#17150F] focus:outline-none"
+                          className="text-[20px] font-bold leading-tight -tracking-[0.01em] text-[#17150F] focus:outline-none sm:text-[22px] sm:leading-none"
                           style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
                         >
                           {areaLabel}
@@ -960,7 +1037,7 @@ export function Onboarding() {
                       </div>
                     </div>
                     <div
-                      className="rounded-[13px] border border-[rgba(23,21,15,0.08)] px-4 py-[11px] text-right"
+                      className="shrink-0 rounded-[12px] border border-[rgba(23,21,15,0.08)] px-3 py-[9px] text-right sm:rounded-[13px] sm:px-4 sm:py-[11px]"
                       style={{ background: "#FAF8F3" }}
                     >
                       <p className="mb-[3px] text-[9.5px] font-bold uppercase tracking-[0.08em] text-[#A8A296]">
@@ -978,13 +1055,13 @@ export function Onboarding() {
 
                   {/* Question card */}
                   <div
-                    className="mb-[22px] rounded-[14px] border border-[rgba(23,21,15,0.07)] p-[18px_20px]"
+                    className="mb-5 rounded-[13px] border border-[rgba(23,21,15,0.07)] p-4 sm:mb-[22px] sm:rounded-[14px] sm:p-[18px_20px]"
                     style={{ background: "#FAF8F3" }}
                   >
-                    <p className="mb-[9px] text-[10px] font-bold uppercase tracking-[0.1em] text-[#A8A296]">
+                    <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.1em] text-[#A8A296] sm:mb-[9px]">
                       Câu hỏi đánh giá
                     </p>
-                    <p className="mb-[6px] text-[15px] font-bold leading-[1.4] text-[#17150F]">
+                    <p className="mb-1.5 text-[14px] font-bold leading-[1.45] text-[#17150F] sm:mb-[6px] sm:text-[15px] sm:leading-[1.4]">
                       {LIFE_AREA_QUESTIONS[area.name] ?? "Bạn hài lòng bao nhiêu với khía cạnh này?"}
                     </p>
                     <p className="text-[12.5px] leading-[1.5] text-[#7A6E5E]">
@@ -994,12 +1071,12 @@ export function Onboarding() {
 
                   {/* Number buttons 0-10 */}
                   <p className="mb-3 text-[13px] font-semibold text-[#17150F]">Chọn điểm theo cảm nhận hiện tại</p>
-                  <div className="mb-[22px] flex flex-wrap gap-[9px]">
-                    {Array.from({ length: 11 }, (_, scoreVal) => {
+                  <div className="mb-5 flex flex-wrap gap-2 sm:mb-[22px] sm:gap-[9px]">
+                    {SCORE_VALUES.map((scoreVal) => {
                       const isCurrentScore = area.score === scoreVal;
                       return (
                         <button
-                          key={scoreVal}
+                          key={`score-${scoreVal}`}
                           type="button"
                           onClick={() => handleScoreChangeWrapped(index, [scoreVal])}
                           className="dof-num inline-flex h-[42px] w-[42px] cursor-pointer items-center justify-center rounded-full border font-[inherit] text-[14px] font-bold transition-[transform,background,color] duration-[0.12s] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2"
@@ -1007,9 +1084,7 @@ export function Onboarding() {
                             borderColor: isCurrentScore ? designStyle.accent : "rgba(23,21,15,0.12)",
                             background: isCurrentScore ? designStyle.accent : "#FAF8F3",
                             color: isCurrentScore ? "#fff" : "#5C574B",
-                            boxShadow: isCurrentScore
-                              ? `0 8px 18px -8px ${designStyle.accent}b3`
-                              : "none",
+                            boxShadow: isCurrentScore ? `0 8px 18px -8px ${designStyle.accent}b3` : "none",
                           }}
                           aria-label={`Chấm ${scoreVal} điểm`}
                           aria-pressed={isCurrentScore}
@@ -1021,44 +1096,81 @@ export function Onboarding() {
                   </div>
 
                   {/* Reference bands */}
-                  <p className="mb-[11px] text-[10px] font-bold uppercase tracking-[0.1em] text-[#A8A296]">
-                    Mốc tham khảo
-                  </p>
-                  <div className="mb-6 flex flex-col gap-2">
-                    {SCORE_ANCHORS.map((anchor) => {
-                      const activeAnchor = getActiveScoreAnchor(area.score);
-                      const isActive = activeAnchor === anchor;
-                      return (
-                        <div
-                          key={anchor.range}
-                          className="flex items-center gap-[11px] rounded-[11px] border p-[11px_14px]"
-                          style={{
-                            borderColor: isActive ? "rgba(12,94,58,0.3)" : "rgba(23,21,15,0.08)",
-                            background: isActive ? "#EDF7E0" : "#fff",
-                          }}
+                  <div className="mb-5 space-y-2.5 sm:mb-6">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#A8A296]">Mốc tham khảo</p>
+                      {isMobile ? (
+                        <button
+                          type="button"
+                          className="inline-flex items-center gap-1.5 rounded-full border border-[rgba(23,21,15,0.08)] bg-[#FAF8F3] px-3 py-1.5 text-[11px] font-semibold text-[#5C574B] transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2"
+                          onClick={() => setIsScoreGuideOpen((current) => !current)}
+                          aria-expanded={isScoreGuideOpen}
+                          aria-controls="onboarding-score-guide"
                         >
-                          <span
-                            className="shrink-0 rounded-[7px] px-[9px] py-[3px] font-['JetBrains_Mono',monospace] text-[11.5px] font-bold"
+                          {isScoreGuideOpen ? "Ẩn mốc" : "Xem đủ mốc"}
+                          {isScoreGuideOpen ? (
+                            <ChevronUp className="h-3.5 w-3.5" aria-hidden="true" />
+                          ) : (
+                            <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
+                          )}
+                        </button>
+                      ) : null}
+                    </div>
+                    {isMobile ? (
+                      <div className="flex items-center gap-[11px] rounded-[11px] border border-[rgba(12,94,58,0.18)] bg-[#EDF7E0] p-[11px_14px]">
+                        <span className="shrink-0 rounded-[7px] bg-[#0C5E3A] px-[9px] py-[3px] font-['JetBrains_Mono',monospace] text-[11.5px] font-bold text-white">
+                          {getActiveScoreAnchor(area.score)?.range}
+                        </span>
+                        <div className="min-w-0">
+                          <span className="text-[13px] font-bold text-[#0C5E3A]">
+                            {getActiveScoreAnchor(area.score)?.label}
+                          </span>
+                          <span className="mx-1.5 text-[#76927E]">·</span>
+                          <span className="text-[12.5px] text-[#5C6E61]">
+                            {getActiveScoreAnchor(area.score)?.description}
+                          </span>
+                        </div>
+                      </div>
+                    ) : null}
+                    <div
+                      id="onboarding-score-guide"
+                      className={cn("flex-col gap-2", isMobile ? (isScoreGuideOpen ? "flex" : "hidden") : "flex")}
+                    >
+                      {SCORE_ANCHORS.map((anchor) => {
+                        const activeAnchor = getActiveScoreAnchor(area.score);
+                        const isActive = activeAnchor === anchor;
+                        return (
+                          <div
+                            key={anchor.range}
+                            className="flex items-center gap-[11px] rounded-[11px] border p-[11px_14px]"
                             style={{
-                              background: isActive ? "#0C5E3A" : "#F2EFE6",
-                              color: isActive ? "#fff" : "#8C887C",
+                              borderColor: isActive ? "rgba(12,94,58,0.3)" : "rgba(23,21,15,0.08)",
+                              background: isActive ? "#EDF7E0" : "#fff",
                             }}
                           >
-                            {anchor.range}
-                          </span>
-                          <div className="min-w-0">
                             <span
-                              className="text-[13px] font-bold"
-                              style={{ color: isActive ? "#0C5E3A" : "#17150F" }}
+                              className="shrink-0 rounded-[7px] px-[9px] py-[3px] font-['JetBrains_Mono',monospace] text-[11.5px] font-bold"
+                              style={{
+                                background: isActive ? "#0C5E3A" : "#F2EFE6",
+                                color: isActive ? "#fff" : "#8C887C",
+                              }}
                             >
-                              {anchor.label}
+                              {anchor.range}
                             </span>
-                            <span className="mx-1.5 text-[#8C887C]">·</span>
-                            <span className="text-[12.5px] text-[#8C887C]">{anchor.description}</span>
+                            <div className="min-w-0">
+                              <span
+                                className="text-[13px] font-bold"
+                                style={{ color: isActive ? "#0C5E3A" : "#17150F" }}
+                              >
+                                {anchor.label}
+                              </span>
+                              <span className="mx-1.5 text-[#8C887C]">·</span>
+                              <span className="text-[12.5px] text-[#8C887C]">{anchor.description}</span>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      })}
+                    </div>
                   </div>
 
                   {/* Slider with -/+ buttons */}
@@ -1110,11 +1222,24 @@ export function Onboarding() {
                       disabled={index === 0}
                       onClick={() => setActiveAreaIndex(index - 1)}
                     >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+                      <svg
+                        width="14"
+                        height="14"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="m12 19-7-7 7-7" />
+                        <path d="M19 12H5" />
+                      </svg>
                       Lĩnh vực trước
                     </button>
 
-                    <div className="flex items-center gap-[14px]">
+                    <div className="flex min-w-0 items-center gap-3 sm:gap-[14px]">
                       <button
                         type="button"
                         className="cursor-pointer border-none bg-transparent font-[inherit] text-[13px] font-semibold text-[#8C887C] transition-colors hover:text-[#5C574B] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2"
@@ -1145,12 +1270,38 @@ export function Onboarding() {
                         {index < 7 ? (
                           <>
                             Rà lĩnh vực tiếp theo
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                            <svg
+                              width="15"
+                              height="15"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              aria-hidden="true"
+                            >
+                              <path d="M5 12h14" />
+                              <path d="m12 5 7 7-7 7" />
+                            </svg>
                           </>
                         ) : (
                           <>
                             Chọn trọng tâm
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                            <svg
+                              width="15"
+                              height="15"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              aria-hidden="true"
+                            >
+                              <path d="M5 12h14" />
+                              <path d="m12 5 7 7-7 7" />
+                            </svg>
                           </>
                         )}
                       </button>
@@ -1166,9 +1317,25 @@ export function Onboarding() {
                 aria-live="polite"
                 className="flex items-start gap-3 rounded-[14px] border border-[rgba(12,94,58,0.18)] bg-[#EDF7E0] p-4"
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0C5E3A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#0C5E3A"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="mt-0.5 shrink-0"
+                  aria-hidden="true"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 16v-4" />
+                  <path d="M12 8h.01" />
+                </svg>
                 <p className="text-[13px] font-medium leading-[1.5] text-[#3F4A3F]">
-                  Còn <strong className="font-semibold text-[#0C5E3A]">{remainingAreaCount} khía cạnh</strong> chưa chấm. Bạn có thể chọn trọng tâm với điểm mặc định 5 cho phần còn lại.
+                  Còn <strong className="font-semibold text-[#0C5E3A]">{remainingAreaCount} khía cạnh</strong> chưa
+                  chấm. Bạn có thể chọn trọng tâm với điểm mặc định 5 cho phần còn lại.
                 </p>
               </div>
             )}
@@ -1183,7 +1350,20 @@ export function Onboarding() {
               className="inline-flex cursor-pointer items-center gap-2 rounded-[11px] border border-[rgba(23,21,15,0.14)] bg-white px-[18px] py-3 font-[inherit] text-[13px] font-semibold text-[#5C574B] transition-colors hover:bg-[#FAF8F3] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0C5E3A] focus-visible:ring-offset-2"
               onClick={() => setStep("welcome")}
             >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="m12 19-7-7 7-7" />
+                <path d="M19 12H5" />
+              </svg>
               Quay lại chào mừng
             </button>
             <button
@@ -1202,7 +1382,20 @@ export function Onboarding() {
           >
             Chọn trọng tâm
             {!canCompleteAssessment ? <span className="sr-only"> (Dùng điểm mặc định)</span> : null}
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M5 12h14" />
+              <path d="m12 5 7 7-7 7" />
+            </svg>
           </button>
         </footer>
       </div>

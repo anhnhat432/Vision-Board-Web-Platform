@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, MemoryRouter, RouterProvider } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -44,9 +44,9 @@ describe("Onboarding", () => {
       </MemoryRouter>,
     );
 
-    const startButton = await screen.findByRole("button", { name: /Bắt đầu rà 8 lĩnh vực/i });
+    const startButton = await screen.findByRole("button", { name: /Mở bản đồ cuộc sống/i });
     const breathingStartButton = await screen.findByRole("button", { name: /Tập thở thư giãn/i });
-    expect(breathingStartButton).toHaveClass("bg-app-surface");
+    expect(breathingStartButton).toHaveClass("bg-white");
     expect(breathingStartButton).not.toHaveClass("gradient-brand");
 
     scrollToMock.mockClear();
@@ -75,7 +75,7 @@ describe("Onboarding", () => {
 
     expect(await screen.findByText(/Cập nhật điểm hiện tại/i)).toBeInTheDocument();
 
-    await user.click(await screen.findByRole("button", { name: /Bắt đầu rà 8 lĩnh vực/i }));
+    await user.click(await screen.findByRole("button", { name: /Mở bản đồ cuộc sống/i }));
     expect(await screen.findByRole("button", { name: /Chọn trọng tâm/i })).toBeEnabled();
   });
 
@@ -88,7 +88,7 @@ describe("Onboarding", () => {
 
     expect((await screen.findAllByText(/8 lĩnh vực/i)).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/3 phút/i).length).toBeGreaterThan(0);
-    expect(screen.getByRole("button", { name: /Bắt đầu rà 8 lĩnh vực/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Mở bản đồ cuộc sống/i })).toBeInTheDocument();
   });
 
   it("shows returning users that existing scores will be updated", async () => {
@@ -138,12 +138,11 @@ describe("Onboarding", () => {
     );
 
     // Go to assessment step first
-    await user.click(await screen.findByRole("button", { name: /Bắt đầu rà 8 lĩnh vực/i }));
+    await user.click(await screen.findByRole("button", { name: /Mở bản đồ cuộc sống/i }));
 
     // Modify first slider
     const firstSlider = screen.getAllByRole("slider")[0];
-    firstSlider.focus();
-    await user.keyboard("{ArrowRight}{ArrowRight}{ArrowRight}"); // 5 → 8
+    fireEvent.change(firstSlider, { target: { value: "8" } });
 
     // Go back to welcome step and save
     await user.click(await screen.findByRole("button", { name: /Quay lại chào mừng/i }));
@@ -175,11 +174,11 @@ describe("Onboarding", () => {
 
     // Go to assessment and verify first slider value
     const user = userEvent.setup();
-    await user.click(await screen.findByRole("button", { name: /Bắt đầu rà 8 lĩnh vực/i }));
+    await user.click(await screen.findByRole("button", { name: /Mở bản đồ cuộc sống/i }));
 
     // Verify the scores from storage are loaded (first area should show score 2)
     const sliders = screen.getAllByRole("slider");
-    expect(sliders[0]).toHaveAttribute("aria-valuenow", "2");
+    expect(sliders[0]).toHaveValue("2");
   });
 
   it("shows live assessment summary and reviewed count", async () => {
@@ -191,17 +190,17 @@ describe("Onboarding", () => {
       </MemoryRouter>,
     );
 
-    await user.click(await screen.findByRole("button", { name: /Bắt đầu rà 8 lĩnh vực/i }));
+    await user.click(await screen.findByRole("button", { name: /Mở bản đồ cuộc sống/i }));
     const summary = await screen.findByTestId("onboarding-assessment-summary");
     expect(summary).toHaveTextContent("0/8");
 
     const firstSlider = screen.getAllByRole("slider")[0];
-    firstSlider.focus();
-    await user.keyboard("{ArrowRight}");
+    fireEvent.change(firstSlider, { target: { value: "6" } });
 
     expect(summary).toHaveTextContent("1/8");
     expect(summary).toHaveTextContent(/Điểm trung bình/i);
     expect(summary).toHaveTextContent(/Cần chăm sóc/i);
+    expect(screen.getByText("Quan hệ")).toBeInTheDocument();
   });
 
   it("allows skipping an individual area without changing its score", async () => {
@@ -213,7 +212,7 @@ describe("Onboarding", () => {
       </MemoryRouter>,
     );
 
-    await user.click(await screen.findByRole("button", { name: /Bắt đầu rà 8 lĩnh vực/i }));
+    await user.click(await screen.findByRole("button", { name: /Mở bản đồ cuộc sống/i }));
     const summary = await screen.findByTestId("onboarding-assessment-summary");
     expect(summary).toHaveTextContent("0/8");
 
@@ -237,7 +236,7 @@ describe("Onboarding", () => {
     );
     render(<RouterProvider router={router} />);
 
-    await user.click(await screen.findByRole("button", { name: /Bắt đầu rà 8 lĩnh vực/i }));
+    await user.click(await screen.findByRole("button", { name: /Mở bản đồ cuộc sống/i }));
     const continueButton = await screen.findByRole("button", { name: /Chọn trọng tâm/i });
     await user.click(continueButton);
 

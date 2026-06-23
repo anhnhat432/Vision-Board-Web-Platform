@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -48,11 +48,10 @@ describe("Onboarding autosave", () => {
       </MemoryRouter>,
     );
 
-    await user.click(await screen.findByRole("button", { name: /Bắt đầu rà 8 lĩnh vực/i }));
+    await user.click(await screen.findByRole("button", { name: /Mở bản đồ cuộc sống/i }));
 
     const firstSlider = screen.getAllByRole("slider")[0];
-    firstSlider.focus();
-    await user.keyboard("{ArrowRight}");
+    fireEvent.change(firstSlider, { target: { value: "6" } });
 
     vi.advanceTimersByTime(600);
 
