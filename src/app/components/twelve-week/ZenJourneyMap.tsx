@@ -363,7 +363,7 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
               <span className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">
                 Chỉ số tiến triển
               </span>
-              <p className="mt-2 text-xs font-semibold text-app-ink leading-relaxed line-clamp-2">
+              <p className="mt-2 break-words text-xs font-semibold leading-relaxed text-app-ink">
                 {activeWeek.mainMetricProgress || "Chưa cập nhật chỉ số chính"}
               </p>
             </div>

@@ -388,7 +388,7 @@ export function TwelveWeekTodayTab({
         key: "check-in",
         title: "Chốt ngày hôm nay bằng check-in ngắn",
         description: "Việc chính đã đi qua. Lưu năng lượng và một ghi chú ngắn để ngày mai tiếp tục nhanh hơn.",
-        actionLabel: "Lưu check-in",
+        actionLabel: "Lưu check-in hôm nay",
         onAction: handleSaveCheckInClick,
       };
     }
@@ -411,7 +411,7 @@ export function TwelveWeekTodayTab({
       description: reviewDueToday
         ? "Nếu không còn việc cần làm, mở tab Tuần để chốt review."
         : "Không có việc nào đang chờ. Bạn có thể lưu check-in hoặc xem lại tuần.",
-      actionLabel: reviewDueToday ? "Mở tab Tuần" : "Lưu check-in",
+      actionLabel: reviewDueToday ? "Mở tab Tuần" : "Lưu check-in hôm nay",
       onAction: reviewDueToday ? onOpenWeekTab : handleSaveCheckInClick,
     };
   })();
@@ -654,7 +654,7 @@ export function TwelveWeekTodayTab({
                   <p className="mt-2 text-sm leading-relaxed text-app-ink-soft max-w-3xl">
                     {primaryTaskOverdue
                       ? "Việc này đang trễ – hôm nay hãy làm phiên bản gọn nhất. Duy trì nhịp quan trọng hơn làm hết."
-                      : `Thuộc nhóm việc lặp lại "${firstPriorityTask.leadIndicatorName}". Xong việc này là bạn đã giữ đúng tiến độ.`}
+                      : `Việc quan trọng hôm nay thuộc nhóm việc lặp lại "${firstPriorityTask.leadIndicatorName}". Xong việc này là bạn đã giữ đúng tiến độ.`}
                   </p>
                   {isFirstWeek && (
                     <p data-testid="today-first-week-encouragement" className="mt-2 text-xs text-app-ink-soft">
@@ -1062,7 +1062,7 @@ export function TwelveWeekTodayTab({
                 onClick={handleSaveCheckInClick}
                 disabled={isSavingCheckIn}
                 aria-busy={isSavingCheckIn}
-                aria-label={hasSavedTodayCheckIn ? "Cập nhật check-in" : "Lưu check-in"}
+                aria-label={hasSavedTodayCheckIn ? "Cập nhật check-in hôm nay" : "Lưu check-in hôm nay"}
               >
                 {isSavingCheckIn ? (
                   <>
@@ -1072,7 +1072,7 @@ export function TwelveWeekTodayTab({
                 ) : hasSavedTodayCheckIn ? (
                   "Cập nhật"
                 ) : (
-                  "Lưu check-in"
+                  "Lưu check-in hôm nay"
                 )}
               </Button>
               {onOpenWeekTab && (

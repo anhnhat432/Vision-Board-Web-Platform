@@ -1312,9 +1312,7 @@ export function TwelveWeekSystem() {
 
             <div className="my-4 p-3 rounded-xl bg-app-bg-subtle/50 border border-app-line/40 text-left">
               <p className="text-[9px] font-bold text-app-ink-muted uppercase tracking-[0.12em]">Mục tiêu của bạn:</p>
-              <p className="mt-0.5 text-xs font-semibold leading-snug text-app-ink break-words line-clamp-2">
-                {activeGoal?.title}
-              </p>
+              <p className="mt-0.5 break-words text-xs font-semibold leading-snug text-app-ink">{activeGoal?.title}</p>
             </div>
 
             {/* KHU VỰC CHỈ DẪN: Bây giờ bạn cần làm gì */}

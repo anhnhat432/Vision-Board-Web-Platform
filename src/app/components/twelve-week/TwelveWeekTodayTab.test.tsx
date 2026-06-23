@@ -156,6 +156,7 @@ describe("TwelveWeekTodayTab — primary task hero", () => {
 
   it("shows the 'hôm nay đã đủ' messaging in the hero", () => {
     render(<TwelveWeekTodayTab {...makeProps()} />);
+    expect(screen.getByText(/Việc quan trọng hôm nay/i)).toBeInTheDocument();
     expect(screen.getByText(/Xong việc này là bạn đã giữ đúng tiến độ/i)).toBeInTheDocument();
   });
 

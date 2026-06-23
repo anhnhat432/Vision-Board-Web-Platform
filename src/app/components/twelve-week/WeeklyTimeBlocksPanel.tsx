@@ -49,7 +49,8 @@ const TYPE_CHIP_CLASS: Record<TimeBlockType, string> = {
 const TYPE_CARD_CLASS: Record<TimeBlockType, string> = {
   strategic: "border-app-accent/30 bg-app-accent-soft/20 dark:border-app-accent/20 dark:bg-app-accent/10",
   buffer: "border-app-status-info/30 bg-app-status-info/5 dark:border-app-status-info/20 dark:bg-app-status-info/5",
-  breakout: "border-app-status-warning/30 bg-app-status-warning/5 dark:border-app-status-warning/20 dark:bg-app-status-warning/5",
+  breakout:
+    "border-app-status-warning/30 bg-app-status-warning/5 dark:border-app-status-warning/20 dark:bg-app-status-warning/5",
 };
 
 const DAY_LABELS: Record<TimeBlockDayOfWeek, string> = {
@@ -190,7 +191,7 @@ export function WeeklyTimeBlocksPanel({ value = [], onChange, disabled = false }
                         type="button"
                         size="sm"
                         variant="ghost"
-                        className="mt-3.5 h-7 w-full px-2 text-xs border border-current/20 hover:bg-current/10 font-bold transition-all duration-200 rounded-lg"
+                        className="mt-3.5 min-h-11 w-full rounded-lg border border-current/20 px-3 text-xs font-bold transition-all duration-200 hover:bg-current/10 sm:min-h-8"
                         disabled={disabled}
                         onClick={() => {
                           setError(null);

@@ -113,6 +113,22 @@ describe("TwelveWeekProgressTab", () => {
     expect(cell).not.toHaveAttribute("title");
     expect(screen.getByText(/Chạm hoặc rê chuột lên từng ô/i)).toBeInTheDocument();
   });
+
+  it("lets journey metric progress wrap instead of clipping it", () => {
+    const longMetricProgress =
+      "Completed 14 deep work sessions, published two case studies, and kept notes for every review checkpoint";
+    const system = makeSystem();
+    system.scoreboard = system.scoreboard.map((week) =>
+      week.weekNumber === 3 ? { ...week, mainMetricProgress: longMetricProgress } : week,
+    );
+
+    render(<TwelveWeekProgressTab {...makeProps({ system })} />);
+
+    const metricProgress = screen.getByText(longMetricProgress, { selector: "p.break-words" });
+    expect(metricProgress).toHaveClass("break-words");
+    expect(metricProgress).not.toHaveClass("line-clamp-2");
+  });
+
   it.each([
     [
       "cycle review phase",
