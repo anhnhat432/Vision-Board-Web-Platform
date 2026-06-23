@@ -1268,7 +1268,7 @@ export function TwelveWeekSetupLab() {
         <CoreFlowProgress
           currentStepId="twelve_week_setup"
           onExit={() => navigate("/")}
-          className="[&_button]:min-h-10 [&_button]:px-3 [&_button]:py-2"
+          className="[&_button]:min-h-11 [&_button]:px-3 [&_button]:py-2"
           compactOnMobile
         />
 
@@ -1318,7 +1318,7 @@ export function TwelveWeekSetupLab() {
             </span>
             <div className="min-w-0">
               <p className="text-[10px] uppercase font-bold text-app-accent tracking-wider">Mục tiêu đang thiết lập</p>
-              <p className="mt-0.5 text-xs font-medium text-app-ink leading-relaxed line-clamp-2 md:line-clamp-3">
+              <p className="mt-0.5 break-words text-xs font-medium leading-relaxed text-app-ink">
                 {smartGoal.specific.trim() || "mục tiêu của bạn"}
               </p>
             </div>

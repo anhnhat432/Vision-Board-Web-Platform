@@ -158,7 +158,7 @@ export function PlanPreviewStepLab({
               <span className="text-[10px] font-bold text-app-accent uppercase tracking-wider">
                 🏆 Đích đến Tuần 12 của bạn
               </span>
-              <p className="mt-0.5 text-xs font-semibold text-app-ink leading-relaxed line-clamp-2 italic">
+              <p className="mt-0.5 break-words text-xs font-semibold italic leading-relaxed text-app-ink">
                 “{draft.week12Outcome || "Kế hoạch 12 tuần mơ ước…"}”
               </p>
             </div>
@@ -176,7 +176,7 @@ export function PlanPreviewStepLab({
                     className="w-full rounded-card border border-app-line bg-app-surface hover:bg-app-accent-subtle/30 p-3 flex items-center justify-between shadow-app-sm transition-all duration-200 text-left hover:border-app-accent/20"
                   >
                     <div className="min-w-0 pr-2">
-                      <p className="text-xs font-semibold text-app-ink leading-normal truncate">{tactic.name}</p>
+                      <p className="break-words text-xs font-semibold leading-normal text-app-ink">{tactic.name}</p>
                       <p className="text-[10px] text-app-ink-soft mt-0.5 font-medium">
                         Mục tiêu: {tactic.target} {tactic.unit}
                       </p>

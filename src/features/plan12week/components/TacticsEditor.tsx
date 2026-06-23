@@ -130,7 +130,7 @@ export function TacticsEditor({ tactics, onChange, onClose }: TacticsEditorProps
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-8 w-8 shrink-0 text-destructive"
+                      className="h-11 w-11 shrink-0 text-destructive"
                       onClick={() => removeTactic(idx)}
                       aria-label={`Xóa việc lặp lại số ${idx + 1}`}
                     >

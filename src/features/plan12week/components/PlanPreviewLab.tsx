@@ -85,7 +85,7 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
               <Award className="h-4.5 w-4.5" aria-hidden="true" />
             </div>
             <p className="mt-3 text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">Mốc chốt Tuần 12</p>
-            <p className="mt-1 line-clamp-3 text-xs font-bold leading-relaxed text-app-ink">
+            <p className="mt-1 break-words text-xs font-bold leading-relaxed text-app-ink">
               {draft.week12Outcome || "Chưa có nội dung"}
             </p>
           </div>
@@ -98,7 +98,7 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
             <p className="mt-3 text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">
               Chỉ số đo lường (Lag Metric)
             </p>
-            <p className="mt-1.5 text-xs font-extrabold text-app-accent">
+            <p className="mt-1.5 break-words text-xs font-extrabold text-app-accent">
               {lagMetricLabel || "Chưa có chỉ số kết quả"}
             </p>
           </div>
@@ -124,7 +124,7 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
                 <p className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">
                   Động lực thôi thúc chính
                 </p>
-                <p className="mt-1 line-clamp-3 text-xs font-bold leading-relaxed text-app-ink italic">
+                <p className="mt-1 break-words text-xs font-bold italic leading-relaxed text-app-ink">
                   “{draft.vision12Week || "Chưa có nội dung"}”
                 </p>
               </div>
@@ -260,9 +260,9 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
                 key={leadMetric.name}
                 className="rounded-card border border-app-line bg-app-bg-subtle/50 p-4 hover:scale-[1.01] transition-transform duration-300"
               >
-                <p className="text-xs font-bold text-app-ink flex items-center gap-1.5">
+                <p className="flex min-w-0 items-start gap-1.5 text-xs font-bold text-app-ink">
                   <CheckCircle className="h-4 w-4 text-app-accent shrink-0 mt-0.5" />
-                  <span>{leadMetric.name}</span>
+                  <span className="min-w-0 break-words">{leadMetric.name}</span>
                 </p>
                 <p className="mt-1.5 text-xs text-app-ink-muted font-medium">
                   Mục tiêu tuần: <span className="text-app-accent font-bold">{leadMetric.weeklyTarget} lần / tuần</span>
@@ -286,17 +286,17 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
         {week1 ? (
           <div className="mt-4 space-y-4 text-xs leading-relaxed text-app-ink-soft font-semibold relative z-10">
             {week1.focus ? (
-              <p className="flex items-start gap-1.5">
+              <p className="flex min-w-0 items-start gap-1.5">
                 <Target className="h-4 w-4 text-app-accent shrink-0 mt-0.5" />
-                <span>
+                <span className="min-w-0 break-words">
                   <strong className="text-app-ink font-bold">Trọng tâm tuần 1:</strong> {week1.focus}
                 </span>
               </p>
             ) : null}
             {week1.expectedOutput ? (
-              <p className="flex items-start gap-1.5 whitespace-pre-line">
+              <p className="flex min-w-0 items-start gap-1.5 whitespace-pre-line">
                 <Flag className="h-4 w-4 text-app-accent shrink-0 mt-0.5" />
-                <span>
+                <span className="min-w-0 break-words">
                   <strong className="text-app-ink font-bold">Kết quả dự kiến:</strong> {week1.expectedOutput}
                 </span>
               </p>
@@ -308,14 +308,14 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-pill bg-app-accent text-white shadow-app-sm animate-pulse">
                   <Flame className="h-5 w-5" />
                 </div>
-                <div className="text-left">
+                <div className="min-w-0 text-left">
                   <h5 className="text-xs font-bold text-app-ink uppercase tracking-wide">
                     Hành động khởi phát đầu tiên của bạn
                   </h5>
                   <p className="text-[11px] text-app-ink-soft font-medium mt-0.5">
                     Vào ngày <strong className="text-app-accent font-bold">{formatDateLabel(draft.startDate)}</strong>,
                     hãy hoàn thành:
-                    <span className="block font-bold text-app-accent mt-0.5">
+                    <span className="mt-0.5 block break-words font-bold text-app-accent">
                       👉 {weekOneTasks[0]?.title || repeatedItems[0]?.name || "Hành động lặp lại tuần 1"}
                     </span>
                   </p>
@@ -332,9 +332,9 @@ export function PlanPreviewLab({ draft, previewPlan }: PlanPreviewLabProps) {
                   key={task.id}
                   className="rounded-card border border-app-line bg-app-bg-subtle/50 px-4 py-3 hover:scale-[1.01] transition-transform duration-300"
                 >
-                  <p className="font-bold text-app-ink flex items-center gap-1.5">
+                  <p className="flex min-w-0 items-start gap-1.5 font-bold text-app-ink">
                     <CheckCircle className="h-4 w-4 text-app-accent shrink-0 mt-0.5" />
-                    <span>{task.title}</span>
+                    <span className="min-w-0 break-words">{task.title}</span>
                   </p>
                   <p className="mt-1 text-[10px] text-app-ink-muted font-semibold">
                     {formatDateLabel(task.scheduledDate)}

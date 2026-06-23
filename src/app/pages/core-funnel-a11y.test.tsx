@@ -13,6 +13,9 @@ import userEvent from "@testing-library/user-event";
 import { createRef } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { PlanPreview } from "@/features/plan12week/components/PlanPreview";
+import { PlanPreviewLab } from "@/features/plan12week/components/PlanPreviewLab";
+import { PlanPreviewStepLab } from "@/features/plan12week/components/PlanPreviewStepLab";
+import { TacticsEditor } from "@/features/plan12week/components/TacticsEditor";
 import { SetupStepShellLab } from "@/features/plan12week/pages/12WeekSetup/components/SetupStepShellLab";
 import { ReviewStep as TwelveWeekReviewStep } from "@/features/plan12week/pages/12WeekSetup/components/ReviewStep";
 import type {
@@ -445,6 +448,82 @@ describe("TwelveWeekSetup PlanPreview — accordion", () => {
     );
 
     expect(screen.getByRole("button", { name: "Tóm tắt kết quả" })).toHaveAttribute("aria-expanded", "true");
+  });
+});
+
+describe("TwelveWeekSetup preview readability", () => {
+  it("lets user-authored plan preview text wrap instead of clipping it", () => {
+    const longOutcome =
+      "Publish a detailed portfolio case study with user research, measurable results, launch notes, and hiring-ready evidence across several sections";
+    const longVision =
+      "Build a calm weekly rhythm that proves I can ship thoughtful work while keeping enough energy for interviews and family commitments";
+    const longLeadMetric = "Deep work writing sessions with research notes and revision checklist";
+    const longTask = "Deep work writing sessions with research notes and revision checklist #1";
+    const draft = {
+      ...makeFeatureSetupDraft(),
+      week12Outcome: longOutcome,
+      vision12Week: longVision,
+      lagMetricName: "Portfolio proof package with unusually long evidence label",
+      lagMetricTarget: "6",
+      lagMetricUnit: "case studies",
+      leadIndicators: [makeFeatureIndicator({ name: longLeadMetric, target: "5", unit: "sessions" })],
+    };
+    const previewPlan = makePreviewPlan(draft);
+    previewPlan.weeks[0].tasks = [{ id: "task_long", title: longTask, scheduledDate: "2026-05-10" }];
+
+    render(<PlanPreviewLab draft={draft} previewPlan={previewPlan} />);
+
+    expect(screen.getByText(longOutcome, { selector: "p.break-words" })).toHaveClass("break-words");
+    expect(screen.getByText(`“${longVision}”`, { selector: "p.break-words" })).toHaveClass("break-words");
+    expect(screen.getByText(longLeadMetric, { selector: "span.break-words" })).toHaveClass("break-words");
+    expect(screen.getByText(longTask, { selector: "span.break-words" })).toHaveClass("break-words");
+  });
+
+  it("does not truncate the phone preview outcome or tactic names", () => {
+    const longOutcome =
+      "Complete a public portfolio with case studies, launch notes, interview stories, and a weekly proof log that remains readable on mobile";
+    const longTactic = "Write one deep portfolio section with evidence, screenshots, and revision notes";
+    const draft = {
+      ...makeFeatureSetupDraft(),
+      week12Outcome: longOutcome,
+      leadIndicators: [
+        makeFeatureIndicator({ id: "long_1", name: longTactic, target: "3", unit: "sessions" }),
+        makeFeatureIndicator({ id: "long_2", name: "Review one draft with a peer", target: "1", unit: "session" }),
+      ],
+    };
+
+    render(
+      <PlanPreviewStepLab
+        draft={draft}
+        smartGoal={makePendingSmartGoal()}
+        feasibility={makeFeasibilityResult()}
+        focusArea="Career"
+        selectedTemplate={null}
+      />,
+    );
+
+    const outcome = screen.getByText(`“${longOutcome}”`, { selector: "p.break-words" });
+    expect(outcome).toHaveClass("break-words");
+    expect(outcome).not.toHaveClass("line-clamp-2");
+    const tactic = screen.getByText(longTactic, { selector: "p.break-words" });
+    expect(tactic).toHaveClass("break-words");
+    expect(tactic).not.toHaveClass("truncate");
+  });
+
+  it("keeps tactic remove controls touch-sized", () => {
+    render(
+      <TacticsEditor
+        tactics={[
+          makeFeatureIndicator({ id: "a", name: "Write" }),
+          makeFeatureIndicator({ id: "b", name: "Review" }),
+          makeFeatureIndicator({ id: "c", name: "Publish" }),
+        ]}
+        onChange={() => {}}
+        onClose={() => {}}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: /số 3/i })).toHaveClass("h-11", "w-11");
   });
 });
 
