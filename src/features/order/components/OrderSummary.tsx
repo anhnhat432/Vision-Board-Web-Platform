@@ -53,12 +53,16 @@ export function OrderSummary({
       <div className="mb-4">
         {!hasSelectedPreview ? (
           <div className="relative flex aspect-[4/3] w-full flex-col justify-end overflow-hidden rounded-[11px] border border-[var(--order-border)] bg-[var(--order-surface)]">
-            <img
-              src="/printed_vision_kit.png"
-              alt="Bộ Vision Board Kit vật lý"
-              className="absolute inset-0 h-full w-full object-cover"
-              loading="lazy"
-            />
+            <picture className="block h-full w-full">
+              <source srcSet="/printed_vision_kit.webp" type="image/webp" />
+              <img
+                src="/printed_vision_kit.png"
+                alt="Bộ Vision Board Kit vật lý"
+                className="absolute inset-0 h-full w-full object-cover"
+                loading="lazy"
+                decoding="async"
+              />
+            </picture>
             <div className="relative bg-white/90 px-4 py-3 text-left backdrop-blur">
               <p className="text-xs text-[var(--order-text-muted)]">Chọn khung và set ảnh để xem trước</p>
             </div>

@@ -330,13 +330,18 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
 
             {/* 🎨 Cozy planning corner generated image asset */}
             <div className="relative rounded-3xl border border-app-line/80 overflow-hidden shadow-3xs aspect-video w-full group select-none">
-              <img
-                src="/study_desk_hero.png"
-                alt="Góc học tập & lập kế hoạch ấm áp"
-                className="w-full h-full object-cover"
-                width={320}
-                height={180}
-              />
+              <picture>
+                <source srcSet="/study_desk_hero.webp" type="image/webp" />
+                <img
+                  src="/study_desk_hero.png"
+                  alt="Góc học tập & lập kế hoạch ấm áp"
+                  className="w-full h-full object-cover"
+                  width={320}
+                  height={180}
+                  loading="lazy"
+                  decoding="async"
+                />
+              </picture>
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent flex items-end p-4">
                 <p className="text-[10px] font-medium text-app-ink-on-accent/90 italic font-serif">
                   "Một góc nhỏ để giữ nhịp mỗi ngày."

@@ -1276,12 +1276,16 @@ export function TwelveWeekSetupLab() {
         <section aria-labelledby="twelve-week-setup-title" className="space-y-3 sm:space-y-4">
           {/* Banner visual anchor ở trên */}
           <div className="h-20 w-full overflow-hidden rounded-card border border-app-line bg-app-bg shadow-app-sm sm:h-auto sm:aspect-[16/5]">
-            <img
-              src="/twelve_week_roadmap.png"
-              alt="Lộ trình hành trình 12 tuần"
-              className="w-full h-full object-cover"
-              loading="lazy"
-            />
+            <picture className="block h-full w-full">
+              <source srcSet="/twelve_week_roadmap.webp" type="image/webp" />
+              <img
+                src="/twelve_week_roadmap.png"
+                alt="Lộ trình hành trình 12 tuần"
+                className="w-full h-full object-cover"
+                loading="lazy"
+                decoding="async"
+              />
+            </picture>
           </div>
 
           <div className="flex flex-col gap-2.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">

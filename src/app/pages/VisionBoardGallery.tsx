@@ -224,12 +224,16 @@ export function VisionBoardGallery() {
         }
         aside={
           <div className="relative overflow-hidden rounded-card-lg border border-app-line shadow-app-sm aspect-[4/3] w-full max-w-[320px] mx-auto">
-            <img
-              src="/gallery_templates.png"
-              alt="Các mẫu bảng tầm nhìn phong phú"
-              className="w-full h-full object-cover dark:brightness-[0.85] dark:contrast-[1.05]"
-              loading="lazy"
-            />
+            <picture className="block h-full w-full">
+              <source srcSet="/gallery_templates.webp" type="image/webp" />
+              <img
+                src="/gallery_templates.png"
+                alt="Các mẫu bảng tầm nhìn phong phú"
+                className="w-full h-full object-cover dark:brightness-[0.85] dark:contrast-[1.05]"
+                loading="lazy"
+                decoding="async"
+              />
+            </picture>
           </div>
         }
       />

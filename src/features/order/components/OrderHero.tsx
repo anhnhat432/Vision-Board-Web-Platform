@@ -23,12 +23,16 @@ export function OrderHero() {
       </div>
 
       <div className="relative rounded-[14px] overflow-hidden self-stretch min-h-[120px]">
-        <img
-          src="/printed_vision_kit.png"
-          alt="Vision board kit"
-          className="w-full h-full object-cover block absolute inset-0"
-          loading="lazy"
-        />
+        <picture className="block h-full w-full">
+          <source srcSet="/printed_vision_kit.webp" type="image/webp" />
+          <img
+            src="/printed_vision_kit.png"
+            alt="Vision board kit"
+            className="w-full h-full object-cover block absolute inset-0"
+            loading="lazy"
+            decoding="async"
+          />
+        </picture>
       </div>
 
       <div className="bg-[var(--order-surface)] border border-[var(--order-border)] rounded-[14px] p-4">

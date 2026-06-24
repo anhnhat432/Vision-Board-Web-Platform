@@ -363,11 +363,19 @@ export function PublicVisitorView({
                     border: "1px dashed color-mix(in srgb, var(--app-accent) 40%, transparent)",
                   }}
                 />
-                <img
-                  src="/study_desk_hero.png"
-                  alt="Góc lập kế hoạch"
-                  style={{ width: "100%", height: 300, objectFit: "cover", borderRadius: 3, display: "block" }}
-                />
+                <picture>
+                  <source srcSet="/study_desk_hero.webp" type="image/webp" />
+                  <img
+                    src="/study_desk_hero.png"
+                    alt="Góc lập kế hoạch"
+                    width={960}
+                    height={960}
+                    loading="eager"
+                    decoding="async"
+                    fetchPriority="high"
+                    style={{ width: "100%", height: 300, objectFit: "cover", borderRadius: 3, display: "block" }}
+                  />
+                </picture>
                 <p
                   className="dof-display"
                   style={{ fontSize: 15, fontWeight: 600, color: "var(--app-ink)", margin: "12px 4px 2px" }}
@@ -1066,6 +1074,7 @@ export function PublicVisitorView({
               onMouseEnter={(e) => (e.currentTarget.style.color = "var(--app-accent)")}
               onMouseLeave={(e) => (e.currentTarget.style.color = "#A8A296")}
             >
+              <span className="sr-only">TikTok</span>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M19.5 6.5a5 5 0 0 1-3.5-1.5V15a5 5 0 1 1-5-5v3a2 2 0 1 0 2 2V2h3a5 5 0 0 0 3.5 3.5z" />
               </svg>
@@ -1079,6 +1088,7 @@ export function PublicVisitorView({
               onMouseEnter={(e) => (e.currentTarget.style.color = "var(--app-accent)")}
               onMouseLeave={(e) => (e.currentTarget.style.color = "#A8A296")}
             >
+              <span className="sr-only">Instagram</span>
               <Instagram size={18} />
             </a>
             <a
@@ -1090,6 +1100,7 @@ export function PublicVisitorView({
               onMouseEnter={(e) => (e.currentTarget.style.color = "var(--app-accent)")}
               onMouseLeave={(e) => (e.currentTarget.style.color = "#A8A296")}
             >
+              <span className="sr-only">Facebook</span>
               <Facebook size={18} />
             </a>
             <span style={{ fontSize: 12.5, color: "#A8A296" }}>© 2026 Dear Our Future · local-first 12-Week Year</span>

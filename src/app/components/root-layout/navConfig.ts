@@ -50,7 +50,7 @@ const ROUTE_IMPORTS: Record<string, () => Promise<unknown>> = {
   "/12-week-system": () => import("../../pages/12WeekSystem"),
 };
 
-export const WARM_PREFETCH_ROUTE_PATHS = ["/12-week-system"] as const;
+export const WARM_PREFETCH_ROUTE_PATHS = [] as const;
 
 const prefetchedRoutes = new Set<string>();
 

@@ -1048,7 +1048,7 @@ export function RootLayout() {
                         aria-label="Về trang chủ Dear Our Future"
                       >
                         <img
-                          src="/favicon-512.png"
+                          src="/icon.svg"
                           alt=""
                           aria-hidden="true"
                           loading="eager"

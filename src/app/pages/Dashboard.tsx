@@ -10,7 +10,7 @@ import {
   WifiOff,
   X,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import {
   buildCurrentWeekExecutionSnapshot,
@@ -33,7 +33,6 @@ import { QuoteBlock } from "@/features/dashboard/v2/QuoteBlock";
 import { ReflectionPrompt } from "@/features/dashboard/v2/ReflectionPrompt";
 import { RescueAlert } from "@/features/dashboard/v2/RescueAlert";
 import { TodayMiniCard } from "@/features/dashboard/v2/TodayMiniCard";
-import { TwelveWeekTrendCard } from "@/features/dashboard/v2/TwelveWeekTrendCard";
 import { WeekRhythmCard } from "@/features/dashboard/v2/WeekRhythmCard";
 import { usePlan12Week } from "@/features/plan12week/hooks";
 import { useAuthContext } from "@/lib/auth/AuthContext";
@@ -94,6 +93,12 @@ const DASHBOARD_TOUR_STEPS: SpotlightTourStep[] = [
 
 const DASHBOARD_SECONDARY_INSIGHTS_OPEN_KEY = "visionboard_dashboard_secondary_insights_open";
 
+const TwelveWeekTrendCard = lazy(() =>
+  import("@/features/dashboard/v2/TwelveWeekTrendCard").then((module) => ({
+    default: module.TwelveWeekTrendCard,
+  })),
+);
+
 function getInitialSecondaryInsightsOpen(isDesktopViewport: boolean): boolean {
   if (typeof window === "undefined") return isDesktopViewport;
 
@@ -106,6 +111,36 @@ function getInitialSecondaryInsightsOpen(isDesktopViewport: boolean): boolean {
   }
 
   return isDesktopViewport;
+}
+
+function useNearViewport<TElement extends Element>(enabled: boolean, rootMargin = "280px") {
+  const ref = useRef<TElement>(null);
+  const [isNearViewport, setIsNearViewport] = useState(false);
+
+  useEffect(() => {
+    if (!enabled || isNearViewport) return;
+    const element = ref.current;
+    if (!element) return;
+
+    if (!("IntersectionObserver" in window)) {
+      setIsNearViewport(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return;
+        setIsNearViewport(true);
+        observer.disconnect();
+      },
+      { rootMargin },
+    );
+
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [enabled, isNearViewport, rootMargin]);
+
+  return [ref, isNearViewport] as const;
 }
 
 const LIFE_BALANCE_ROWS = [
@@ -895,6 +930,7 @@ function DashboardActiveLayout({
   const [secondaryInsightsOpen, setSecondaryInsightsOpen] = useState(() =>
     getInitialSecondaryInsightsOpen(isDesktopViewport),
   );
+  const [secondaryInsightsRef, shouldLoadTrendChart] = useNearViewport<HTMLDivElement>(secondaryInsightsOpen);
   const trendPoints =
     data.weeklyProgressPoints.length > 0
       ? data.weeklyProgressPoints
@@ -1000,7 +1036,7 @@ function DashboardActiveLayout({
           </div>
 
           <CollapsibleContent>
-            <div className="mt-5 grid items-start gap-[18px] lg:grid-cols-[1.5fr_1fr]">
+            <div ref={secondaryInsightsRef} className="mt-5 grid items-start gap-[18px] lg:grid-cols-[1.5fr_1fr]">
               <div className="space-y-[18px]">
                 <WeekRhythmCard
                   system={data.activeSystem}
@@ -1015,7 +1051,15 @@ function DashboardActiveLayout({
                   streak={data.dashboardKpiStreak}
                 />
 
-                <TwelveWeekTrendCard points={trendPoints} currentWeek={data.dashboardKpiCurrentWeek} />
+                {shouldLoadTrendChart ? (
+                  <Suspense
+                    fallback={<div className="h-[280px] rounded-[18px] border border-app-line bg-app-surface p-5 md:p-6" />}
+                  >
+                    <TwelveWeekTrendCard points={trendPoints} currentWeek={data.dashboardKpiCurrentWeek} />
+                  </Suspense>
+                ) : (
+                  <div className="h-[280px] rounded-[18px] border border-app-line bg-app-surface p-5 md:p-6" />
+                )}
               </div>
 
               <div className="space-y-[18px]">

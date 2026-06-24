@@ -280,12 +280,16 @@ export function SettingsPage() {
         description="Quản lý tài khoản, dữ liệu lưu trên thiết bị và những tuỳ chọn nhỏ để app chạy đúng nhịp của bạn."
         aside={
           <div className="relative overflow-hidden rounded-card-lg border border-app-line shadow-app-sm aspect-[4/3] w-full max-w-[320px] mx-auto">
-            <img
-              src="/settings_safe_data.png"
-              alt="Cài đặt an toàn dữ liệu"
-              className="w-full h-full object-cover dark:brightness-[0.85] dark:contrast-[1.05]"
-              loading="lazy"
-            />
+            <picture className="block h-full w-full">
+              <source srcSet="/settings_safe_data.webp" type="image/webp" />
+              <img
+                src="/settings_safe_data.png"
+                alt="Cài đặt an toàn dữ liệu"
+                className="w-full h-full object-cover dark:brightness-[0.85] dark:contrast-[1.05]"
+                loading="lazy"
+                decoding="async"
+              />
+            </picture>
           </div>
         }
       />
