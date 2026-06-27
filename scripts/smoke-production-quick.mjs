@@ -836,12 +836,15 @@ async function run() {
           await page
             .waitForFunction(() => {
               const paymentHistory = document.querySelector('[data-testid="billing-payment-history"]');
+              // Action surface tùy theo gói: upgrade (FREE), quản lý gói (đã Plus),
+              // hoặc banner khóa thanh toán. Chấp nhận bất kỳ cái nào.
               const upgradeCta = document.querySelector('[data-testid="billing-plan-upgrade-cta"]');
+              const manageCta = document.querySelector('[data-testid="billing-plan-manage-cta"]');
               const paymentLockBanner = document.querySelector('[data-testid="paid-checkout-disabled-banner"]');
               return (
                 location.pathname === "/billing/plan" &&
                 paymentHistory !== null &&
-                (upgradeCta !== null || paymentLockBanner !== null)
+                (upgradeCta !== null || manageCta !== null || paymentLockBanner !== null)
               );
             })
             .catch(async (error) => {
@@ -850,6 +853,7 @@ async function run() {
                   pathname: location.pathname,
                   hasPaymentHistory: !!document.querySelector('[data-testid="billing-payment-history"]'),
                   hasUpgradeCta: !!document.querySelector('[data-testid="billing-plan-upgrade-cta"]'),
+                  hasManageCta: !!document.querySelector('[data-testid="billing-plan-manage-cta"]'),
                   hasLockBanner: !!document.querySelector('[data-testid="paid-checkout-disabled-banner"]'),
                   paymentHistoryState: document
                     .querySelector('[data-testid="billing-payment-history"]')

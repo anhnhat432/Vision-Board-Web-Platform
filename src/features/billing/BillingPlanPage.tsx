@@ -833,7 +833,12 @@ export function BillingPlan() {
             {paidCheckoutDisabled ? "Tạm khóa thanh toán" : "Nâng cấp Plus"}
           </Button>
         ) : realMode || billingStatus.manageBillingReady ? (
-          <Button variant="outline" onClick={handleOpenPortal} disabled={isOpeningPortal || !billingStatus.manageBillingReady}>
+          <Button
+            variant="outline"
+            onClick={handleOpenPortal}
+            disabled={isOpeningPortal || !billingStatus.manageBillingReady}
+            data-testid="billing-plan-manage-cta"
+          >
             <CreditCard className="mr-2 h-4 w-4" />
             {billingStatus.manageBillingReady ? (isOpeningPortal ? "Đang mở…" : "Quản lý gói") : "Đang chuẩn bị"}
           </Button>
