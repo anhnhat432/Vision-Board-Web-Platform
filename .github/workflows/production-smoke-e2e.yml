@@ -127,7 +127,15 @@ jobs:
           exit 1
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+        shell: bash
+        run: |
+          # Runner images ship pre-configured Microsoft apt repos that
+          # intermittently return 403 / "no longer signed", which breaks
+          # `playwright install --with-deps` (apt-get update). Chromium system
+          # deps come from the main Ubuntu repos, so dropping the Microsoft
+          # repo lists is safe and avoids the flaky failure.
+          sudo rm -f /etc/apt/sources.list.d/*microsoft* /etc/apt/sources.list.d/*azure* 2>/dev/null || true
+          npx playwright install --with-deps chromium
 
       - name: Run quick production smoke warmup
         run: npm run smoke:prod:quick
