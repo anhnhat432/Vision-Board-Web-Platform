@@ -951,9 +951,8 @@ async function exerciseTwelveWeekSaveReloadAndSync(page, apiEvents) {
   await page.locator('[data-tour-id="twelve-week-tab-week"]').click();
   await page.locator('[data-testid="weekly-review-shell"]').waitFor({ timeout: DEFAULT_TIMEOUT_MS });
   await ensureWeeklyReviewFormVisible(page);
-  await page.locator('[data-testid="weekly-score-interpretation"]').waitFor({
-    timeout: DEFAULT_TIMEOUT_MS,
-  });
+  await page.locator("#weekly-insights").waitFor({ timeout: DEFAULT_TIMEOUT_MS });
+  await page.locator("#weekly-next-commitments").waitFor({ timeout: DEFAULT_TIMEOUT_MS });
   await page.locator("#weekly-insights").fill(WEEKLY_REVIEW_OUTPUT);
   await page.locator("#weekly-next-commitments").fill(WEEKLY_REVIEW_PRIORITY);
   await page.locator("#weekly-next-commitments").press("Enter");

@@ -33,7 +33,8 @@ describe("production smoke harness guards", () => {
   });
 
   it("waits for visible weekly review UI instead of a hidden score container", () => {
-    expect(smokeScript).toContain('[data-testid="weekly-score-interpretation"]');
+    expect(smokeScript).toContain('page.locator("#weekly-insights").waitFor');
+    expect(smokeScript).toContain('page.locator("#weekly-next-commitments").waitFor');
     expect(smokeScript).not.toContain(
       `await page.locator('[data-testid="wam-section-score"]').waitFor({ timeout: DEFAULT_TIMEOUT_MS });`,
     );
