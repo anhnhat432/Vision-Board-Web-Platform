@@ -19,9 +19,33 @@ function getRecordValue(record: Record<string, unknown>, key: string): unknown {
   return record[key];
 }
 
+// Parse JSON khoan dung cho action block: thử JSON.parse thường, nếu lỗi thì làm sạch an toàn
+// (bỏ fence ```json/```action sót, comment dòng //, trailing comma) rồi thử lại. Trả null nếu vẫn lỗi.
+function tryParseLenientActionJson(content: string): unknown {
+  const trimmed = content.trim();
+  try {
+    return JSON.parse(trimmed);
+  } catch {
+    // rơi xuống bước làm sạch
+  }
+
+  const cleaned = trimmed
+    .replace(/^```(?:json|action)?\s*/i, "")
+    .replace(/```$/i, "")
+    .replace(/^[ \t]*\/\/[^\n\r]*$/gm, "")
+    .replace(/,(\s*[}\]])/g, "$1")
+    .trim();
+
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    return null;
+  }
+}
+
 function parseActionBlock(content: string): AssistantAction | null {
   try {
-    const json = JSON.parse(content) as unknown;
+    const json = tryParseLenientActionJson(content);
     if (!json || typeof json !== "object" || Array.isArray(json)) return null;
     const record = json as Record<string, unknown>;
 

@@ -35,16 +35,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../../components/ui/alert-dialog";
-import { AssistantActionCard } from "./AssistantActionCard";
+import { AssistantActionCard, renderActionPreview } from "./AssistantActionCard";
 import { AssistantMessageContent } from "./AssistantMessageContent";
 import { AssistantObservabilityPanel } from "./AssistantObservabilityPanel";
+import { AssistantPetIcon } from "./AssistantPetIcon";
 import { executeAction } from "./executeAction";
-import { OwlIcon } from "./OwlIcon";
 import type { AssistantAction } from "./parseActions";
 import { filterCommands, getHelpMessage, type SlashCommand } from "./slashCommands";
 import type { FeedbackReason } from "./types";
 import { useAssistant } from "./useAssistant";
-import { useOwlIdleAnimation } from "./useOwlIdleAnimation";
 import { useSpeechToText } from "./useSpeechToText";
 
 interface AssistantPanelProps {
@@ -86,7 +85,6 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
     pendingWorkflow,
   } = useAssistant({ route });
   const [inputText, setInputText] = useState("");
-  const { blinking } = useOwlIdleAnimation({ pause: !open });
   const [activeFeedbackMessageId, setActiveFeedbackMessageId] = useState<string | null>(null);
   const [feedbackReason, setFeedbackReason] = useState<FeedbackReason>("other");
   const [feedbackCorrection, setFeedbackCorrection] = useState("");
@@ -197,7 +195,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
   const handleExecuteAction = useCallback(async (action: AssistantAction) => {
     setActionStatus((prev) => ({ ...prev, [action.id]: { status: "executing" } }));
     try {
-      const result = await executeAction(action);
+      const result = await executeAction(action, userId);
       if (result.success) {
         setActionStatus((prev) => ({
           ...prev,
@@ -214,7 +212,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
       setActionStatus((prev) => ({ ...prev, [action.id]: { status: "error", errorMessage } }));
     }
-  }, []);
+  }, [userId]);
 
   const handleRejectAction = useCallback((action: AssistantAction) => {
     setActionStatus((prev) => ({ ...prev, [action.id]: { status: "rejected" } }));
@@ -235,7 +233,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
 
       setActionStatus((prev) => ({ ...prev, [action.id]: { status: "executing" } }));
       try {
-        const result = await executeAction(action);
+        const result = await executeAction(action, userId);
         if (result.success) {
           setActionStatus((prev) => ({
             ...prev,
@@ -255,7 +253,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
         break;
       }
     }
-  }, []);
+  }, [userId]);
 
   const resizeTextarea = useCallback(() => {
     if (!textareaRef.current) return;
@@ -422,6 +420,8 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
 
   if (!open) return null;
 
+  const headerPetState = error ? "failed" : isTyping ? "running" : pendingWorkflow ? "waiting" : "idle";
+
   return (
     <>
       <div className="fixed inset-0 z-50 bg-black/40 sm:hidden" onClick={handleBackdropClick} aria-hidden="true" />
@@ -438,16 +438,16 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
         aria-label="Trợ lý AI"
       >
         <div className="flex justify-center py-2 sm:hidden">
-          <div className="h-1.5 w-12 rounded-full bg-gray-300" />
+          <div className="h-1.5 w-12 rounded-full bg-app-line-strong/70" />
         </div>
 
         <div className="flex h-15 items-center gap-3 border-b border-app-line/45 dark:border-white/10 px-4 bg-gradient-to-r from-app-bg-subtle/40 via-app-bg-subtle/10 to-transparent">
           <span className="flex size-8.5 items-center justify-center rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500 text-white shadow-[0_0_12px_rgba(16,185,129,0.3)]">
-            <OwlIcon size={18} blinking={blinking} className="text-white" />
+            <AssistantPetIcon state={headerPetState} size={34} />
           </span>
           <div className="flex flex-col">
             <span className="font-serif text-[15px] font-extrabold tracking-wide bg-gradient-to-r from-emerald-600 to-teal-700 dark:from-emerald-400 dark:to-teal-300 bg-clip-text text-transparent">
-              Trợ lý Cú AI
+              Trợ lý Seedy
             </span>
             <div className="flex items-center gap-1">
               <span className="relative flex h-1.5 w-1.5">
@@ -503,22 +503,28 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
             <div className="flex-1 overflow-y-auto p-4">
               {messages.length === 0 ? (
                 <div className="flex flex-col gap-3">
-                  <div className="rounded-xl bg-app-bg-subtle px-3.5 py-2.5 text-sm text-app-ink-soft border border-app-line/40">
-                    Bạn có thể hỏi mình về việc hôm nay, tiến độ tuần này, mục tiêu chính, hoặc reflection.
+                  <div className="rounded-xl bg-gradient-to-br from-emerald-50/70 to-teal-50/40 dark:from-emerald-950/20 dark:to-teal-950/10 px-3.5 py-3 text-sm text-app-ink-soft border border-emerald-500/15">
+                    <span className="font-semibold text-app-ink">Chào bạn 👋</span> Mình có thể giúp về việc hôm nay,
+                    tiến độ tuần này, mục tiêu chính, hoặc reflection.
                   </div>
-                  <div className="flex flex-col gap-2">
-                    {suggestions.map((suggestion) => (
-                      <button
-                        key={suggestion}
-                        type="button"
-                        onClick={() => handleSuggestionClick(suggestion)}
-                        disabled={isTyping}
-                        className="rounded-xl border border-app-line/60 bg-app-bg-subtle/50 px-3.5 py-2 text-left text-sm text-app-ink-soft transition-all duration-200 hover:bg-app-accent/15 hover:text-app-accent hover:border-app-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        {suggestion}
-                      </button>
-                    ))}
-                  </div>
+                  {suggestions.length > 0 && (
+                    <div className="flex flex-col gap-2">
+                      <span className="px-1 text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">
+                        Gợi ý nhanh
+                      </span>
+                      {suggestions.map((suggestion) => (
+                        <button
+                          key={suggestion}
+                          type="button"
+                          onClick={() => handleSuggestionClick(suggestion)}
+                          disabled={isTyping}
+                          className="rounded-xl border border-app-line/60 bg-app-bg-subtle/50 px-3.5 py-2 text-left text-sm text-app-ink-soft transition-all duration-200 hover:bg-app-accent/15 hover:text-app-accent hover:border-app-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {suggestion}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="flex flex-col gap-4">
@@ -586,10 +592,10 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                                 type="button"
                                 onClick={() => submitFeedback(message.id, "up")}
                                 aria-label="Phản hồi tốt"
-                                className={`rounded p-1 text-xs transition ${
+                                className={`rounded p-1.5 text-xs transition ${
                                   messageFeedback[message.id] === "up"
-                                    ? "bg-green-100 text-green-700"
-                                    : "text-gray-400 hover:bg-app-bg hover:text-app-ink-soft"
+                                    ? "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-300"
+                                    : "text-app-ink-muted hover:bg-app-bg hover:text-app-ink-soft"
                                 }`}
                                 disabled={messageFeedback[message.id] === "up"}
                               >
@@ -605,10 +611,10 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                                   setFeedbackCorrection("");
                                 }}
                                 aria-label="Phản hồi tệ"
-                                className={`rounded p-1 text-xs transition ${
+                                className={`rounded p-1.5 text-xs transition ${
                                   messageFeedback[message.id] === "down"
-                                    ? "bg-red-100 text-red-700"
-                                    : "text-gray-400 hover:bg-app-bg hover:text-app-ink-soft"
+                                    ? "bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300"
+                                    : "text-app-ink-muted hover:bg-app-bg hover:text-app-ink-soft"
                                 }`}
                                 disabled={messageFeedback[message.id] === "down"}
                               >
@@ -617,14 +623,14 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                             </div>
 
                             {activeFeedbackMessageId === message.id && (
-                              <div className="mt-2 rounded-lg border border-red-200 bg-red-50/50 p-2 text-xs">
+                              <div className="mt-2 rounded-lg border border-red-500/20 bg-red-500/5 p-2 text-xs">
                                 <div className="font-semibold text-app-ink mb-1">Gửi phản hồi chi tiết:</div>
-                                <label className="block text-gray-600 mb-1">
+                                <label className="block text-app-ink-soft mb-1">
                                   Lý do:
                                   <select
                                     value={feedbackReason}
                                     onChange={(e) => setFeedbackReason(normalizeFeedbackReason(e.target.value))}
-                                    className="ml-1 rounded border border-gray-300 bg-white p-1 text-xs"
+                                    className="ml-1 rounded border border-app-line bg-app-surface text-app-ink p-1 text-xs"
                                   >
                                     <option value="other">Lý do khác</option>
                                     <option value="too_long">Trả lời quá dài / rườm rà</option>
@@ -634,14 +640,14 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                                     <option value="unsafe">Nội dung không an toàn</option>
                                   </select>
                                 </label>
-                                <label className="block text-gray-600 mb-2">
+                                <label className="block text-app-ink-soft mb-2">
                                   Ý kiến sửa đổi (tối đa 300 ký tự):
                                   <textarea
                                     value={feedbackCorrection}
                                     onChange={(e) => setFeedbackCorrection(e.target.value.slice(0, 300))}
                                     placeholder="Nên trả lời như thế nào..."
                                     rows={2}
-                                    className="mt-1 w-full rounded border border-gray-300 bg-white p-1 text-xs resize-none"
+                                    className="mt-1 w-full rounded border border-app-line bg-app-surface text-app-ink p-1 text-xs resize-none placeholder:text-app-ink-muted"
                                   />
                                 </label>
                                 <div className="flex gap-2 justify-end">
@@ -654,7 +660,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                                       setFeedbackCorrection("");
                                       submitFeedback(message.id, "down");
                                     }}
-                                    className="rounded px-2 py-1 bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
+                                    className="rounded px-2 py-1 bg-app-bg-subtle text-app-ink-soft hover:bg-app-bg transition"
                                   >
                                     Hủy
                                   </button>
@@ -669,7 +675,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                                       setFeedbackReason("other");
                                       setFeedbackCorrection("");
                                     }}
-                                    className="rounded px-2 py-1 bg-red-600 text-white hover:bg-red-700 transition"
+                                    className="rounded px-2 py-1 bg-[color:var(--color-danger-fg)] text-white hover:opacity-90 transition"
                                   >
                                     Gửi
                                   </button>
@@ -709,14 +715,14 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                             <span
                               className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
                                 pendingWorkflow.status === "ready_for_confirmation"
-                                  ? "bg-amber-100 text-amber-800"
+                                  ? "bg-amber-500/15 text-amber-700 dark:text-amber-300"
                                   : pendingWorkflow.status === "executing"
-                                    ? "bg-blue-100 text-blue-800 animate-pulse"
+                                    ? "bg-blue-500/15 text-blue-700 dark:text-blue-300 animate-pulse"
                                     : pendingWorkflow.status === "completed"
-                                      ? "bg-green-100 text-green-800"
+                                      ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
                                       : pendingWorkflow.status === "failed"
-                                        ? "bg-red-100 text-red-800"
-                                        : "bg-gray-100 text-gray-800"
+                                        ? "bg-red-500/15 text-red-600 dark:text-red-300"
+                                        : "bg-app-bg-subtle text-app-ink-soft"
                               }`}
                             >
                               {pendingWorkflow.status === "ready_for_confirmation"
@@ -771,28 +777,31 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                                   return (
                                     <div
                                       key={action.id}
-                                      className="flex items-center justify-between bg-app-surface/60 dark:bg-white/5 border border-app-line/20 p-2 rounded-xl text-xs"
+                                      className="bg-app-surface/60 dark:bg-white/5 border border-app-line/20 p-2 rounded-xl text-xs"
                                     >
-                                      <span className="text-app-ink font-medium">{action.label}</span>
-                                      {execRes ? (
-                                        <span
-                                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                                            execRes.status === "success"
-                                              ? "bg-green-100 text-green-800"
+                                      <div className="flex items-center justify-between gap-2">
+                                        <span className="text-app-ink font-medium">{action.label}</span>
+                                        {execRes ? (
+                                          <span
+                                            className={`text-[10px] font-bold px-1.5 py-0.5 rounded shrink-0 ${
+                                              execRes.status === "success"
+                                                ? "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"
+                                                : execRes.status === "alreadyDone"
+                                                  ? "bg-blue-500/15 text-blue-700 dark:text-blue-300"
+                                                  : "bg-red-500/15 text-red-600 dark:text-red-300"
+                                            }`}
+                                          >
+                                            {execRes.status === "success"
+                                              ? "Đã xong"
                                               : execRes.status === "alreadyDone"
-                                                ? "bg-blue-100 text-blue-800"
-                                                : "bg-red-100 text-red-800"
-                                          }`}
-                                        >
-                                          {execRes.status === "success"
-                                            ? "Đã xong"
-                                            : execRes.status === "alreadyDone"
-                                              ? "Đã làm trước đó"
-                                              : "Thất bại"}
-                                        </span>
-                                      ) : (
-                                        <span className="text-[10px] text-app-ink-muted">Đang chờ</span>
-                                      )}
+                                                ? "Đã làm trước đó"
+                                                : "Thất bại"}
+                                          </span>
+                                        ) : (
+                                          <span className="text-[10px] text-app-ink-muted shrink-0">Đang chờ</span>
+                                        )}
+                                      </div>
+                                      {renderActionPreview(action)}
                                     </div>
                                   );
                                 })}
@@ -840,12 +849,12 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                   ) : null}
                   {error && !isTyping ? (
                     <div className="flex justify-start">
-                      <div className="max-w-[80%] rounded-2xl rounded-bl-sm bg-red-50 px-3 py-2 text-sm text-red-700">
+                      <div className="max-w-[80%] rounded-2xl rounded-bl-sm bg-red-500/10 border border-red-500/20 px-3 py-2 text-sm text-red-600 dark:text-red-300">
                         <p>{error.message}</p>
                         <button
                           type="button"
                           onClick={retry}
-                          className="mt-1 text-xs font-medium underline hover:text-red-800"
+                          className="mt-1 text-xs font-medium underline hover:opacity-80"
                         >
                           Thử lại
                         </button>
@@ -859,7 +868,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
 
             {renderSyncStatus()}
 
-            <div className="border-t border-app-line/45 dark:border-white/10 p-3 bg-gradient-to-t from-app-bg-subtle/40 via-app-bg-subtle/10 to-transparent">
+            <div className="border-t border-app-line/45 dark:border-white/10 px-3 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] bg-gradient-to-t from-app-bg-subtle/40 via-app-bg-subtle/10 to-transparent">
               <div className="relative">
                 {isShowingCommands && (
                   <div

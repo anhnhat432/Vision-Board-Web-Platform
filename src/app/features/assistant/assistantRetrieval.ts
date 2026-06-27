@@ -35,6 +35,15 @@ export function tokenize(text: string): string[] {
     .filter((token) => token.length > 1);
 }
 
+// Khớp tiền tố: bắt biến thể tiếng Việt/Anh (vd "hoc" ↔ "hoctap", "english" ↔ "englishtest").
+// Chỉ áp cho token đủ dài (>= 4) để tránh nhiễu, và không tính lại khi đã trùng khít.
+export function hasPrefixMatch(tokens: string[], query: string): boolean {
+  if (query.length < 4) return false;
+  return tokens.some(
+    (token) => token !== query && token.length >= 4 && (token.startsWith(query) || query.startsWith(token)),
+  );
+}
+
 function boundedText(value: unknown, maxLength: number): string {
   return redactSensitive(String(value ?? ""))
     .trim()
@@ -120,7 +129,9 @@ function applyTimeDecay(score: number, candidateDate: string | undefined, refere
 
   const diffTime = Math.abs(referenceDate.getTime() - parsedDate.getTime());
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return score / (1 + 0.01 * diffDays);
+  // Decay nhẹ hơn (0.005) và đặt sàn 0.4x để insight/goal cũ quan trọng không biến mất khỏi kết quả.
+  const factor = Math.max(0.4, 1 / (1 + 0.005 * diffDays));
+  return score * factor;
 }
 
 export function retrieveAssistantKnowledge(
@@ -159,6 +170,7 @@ export function retrieveAssistantKnowledge(
   const results: AssistantRetrievedMemory[] = [];
 
   const lowerQuery = trimmedQuery.toLowerCase();
+  const normalizedQuery = removeAccents(lowerQuery);
   const isCorrectionQuery =
     lowerQuery.includes("sửa") ||
     lowerQuery.includes("không phải") ||
@@ -173,8 +185,22 @@ export function retrieveAssistantKnowledge(
     let score = 0;
     for (const queryToken of queryTokens) {
       if (titleTokens.includes(queryToken)) score += 2;
+      else if (hasPrefixMatch(titleTokens, queryToken)) score += 1;
+
       if (snippetTokens.includes(queryToken)) score += 1;
+      else if (hasPrefixMatch(snippetTokens, queryToken)) score += 0.5;
+
       if (tagTokens.includes(queryToken)) score += 2;
+      else if (hasPrefixMatch(tagTokens, queryToken)) score += 1;
+    }
+
+    // Phrase bonus: cụm query xuất hiện liền trong title/snippet -> liên quan rõ ràng hơn.
+    if (normalizedQuery.length >= 3) {
+      const normalizedTitle = removeAccents(candidate.title.toLowerCase());
+      const normalizedSnippet = removeAccents(candidate.snippet.toLowerCase());
+      if (normalizedTitle.includes(normalizedQuery) || normalizedSnippet.includes(normalizedQuery)) {
+        score += 2;
+      }
     }
 
     if (score <= 0) continue;

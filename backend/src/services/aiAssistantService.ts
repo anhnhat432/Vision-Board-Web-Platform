@@ -434,6 +434,83 @@ function buildSanitizedAction(json: unknown): AssistantAction | null {
   };
 }
 
+// G3+: parse JSON khoan dung cho action block. Thử JSON.parse thường trước; nếu lỗi thì làm sạch
+// an toàn (bỏ fence ```json/```action sót, comment dòng //, trailing comma) rồi thử lại.
+// Không cố sửa quá tay — trả null nếu vẫn không parse được để giữ hành vi loại block invalid như cũ.
+function tryParseLenientActionJson(raw: string): unknown {
+  const trimmed = raw.trim();
+  try {
+    return JSON.parse(trimmed);
+  } catch {
+    // rơi xuống bước làm sạch
+  }
+
+  const cleaned = trimmed
+    .replace(/^```(?:json|action)?\s*/i, "")
+    .replace(/```$/i, "")
+    .replace(/^[ \t]*\/\/[^\n\r]*$/gm, "")
+    .replace(/,(\s*[}\]])/g, "$1")
+    .trim();
+
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    return null;
+  }
+}
+
+// G3+: chống bịa ID. Loại action thao tác lên task/goal có sẵn nếu ID không thật sự nằm trong context.
+// Chỉ áp cho action tham chiếu dữ liệu hiện có; action tạo mới (create_*, navigate_to, suggest_*) không bị đụng.
+const TASK_ID_ACTION_TYPES = new Set<AssistantActionType>([
+  "mark_task_done",
+  "update_task_status",
+  "reschedule_task",
+]);
+
+export function dropActionsWithUnknownIds(
+  actions: AssistantAction[],
+  context: AssistantContext | undefined,
+): AssistantAction[] {
+  if (!context) return actions;
+
+  const validTaskIds = new Set<string>();
+  for (const task of context.todayTasks ?? []) {
+    if (task?.id) validTaskIds.add(task.id);
+  }
+  for (const task of context.stuckSignals?.overdueTasks ?? []) {
+    if (task?.id) validTaskIds.add(task.id);
+  }
+  for (const candidate of context.pendingClarification?.candidates ?? []) {
+    if (candidate?.id) validTaskIds.add(candidate.id);
+  }
+
+  const validGoalIds = new Set<string>();
+  for (const goal of context.goals ?? []) {
+    if (goal?.id) validGoalIds.add(goal.id);
+  }
+  for (const deadline of context.upcomingDeadlines ?? []) {
+    if (deadline?.goalId) validGoalIds.add(deadline.goalId);
+  }
+
+  return actions.filter((action) => {
+    if (TASK_ID_ACTION_TYPES.has(action.type)) {
+      const taskId = typeof action.payload.taskId === "string" ? action.payload.taskId : "";
+      if (!taskId || !validTaskIds.has(taskId)) {
+        console.warn(`[ai-assistant] Loại action ${action.type}: taskId không có trong context (chống bịa ID)`);
+        return false;
+      }
+    }
+    if (action.type === "add_weekly_review") {
+      const goalId = typeof action.payload.goalId === "string" ? action.payload.goalId : "";
+      if (!goalId || !validGoalIds.has(goalId)) {
+        console.warn("[ai-assistant] Loại action add_weekly_review: goalId không có trong context (chống bịa ID)");
+        return false;
+      }
+    }
+    return true;
+  });
+}
+
 // G3: thử parse toàn bộ rawText như 1 JSON object structured ({ assistantText, actions }).
 // Chỉ áp dụng khi caller bật structured. Trả về null nếu không phải JSON structured hợp lệ
 // để parser rơi về nhánh regex action block cũ.
@@ -514,13 +591,7 @@ function parseAndValidateAIResponseWithDiagnostics(
 
   const processJson = (jsonStr: string) => {
     actionBlockCount += 1;
-    const action = buildSanitizedAction((() => {
-      try {
-        return JSON.parse(jsonStr.trim());
-      } catch {
-        return null;
-      }
-    })());
+    const action = buildSanitizedAction(tryParseLenientActionJson(jsonStr));
     if (action) {
       proposedActions.push(action);
       return true;
@@ -529,8 +600,8 @@ function parseAndValidateAIResponseWithDiagnostics(
     return false;
   };
 
-  // 2. Quét code blocks ```action
-  const actionBlockRegex = /```action\n([\s\S]*?)\n```/g;
+  // 2. Quét code blocks ```action (chấp nhận khoảng trắng/CRLF sau nhãn để parse bền hơn)
+  const actionBlockRegex = /```action[ \t]*\r?\n([\s\S]*?)\r?\n```/g;
   let match: RegExpExecArray | null;
 
   while (true) {
@@ -876,12 +947,13 @@ export async function processAIAssistantRequest(
         repairSucceeded = true;
         // Repair output là fenced block thường -> parse không structured ở dưới.
         const repairedResponse = parseAndValidateAIResponse(repairResult.message);
+        const repairedActions = dropActionsWithUnknownIds(repairedResponse.proposedActions, request.context);
         emitTurn("success", {
-          actions: repairedResponse.proposedActions,
+          actions: repairedActions,
           responseText: repairResult.message,
           structured: useStructured,
         });
-        return repairedResponse;
+        return { assistantText: repairedResponse.assistantText, proposedActions: repairedActions };
       }
     }
   }
@@ -912,12 +984,14 @@ export async function processAIAssistantRequest(
   // Khi structured bật, parser ưu tiên JSON object hợp lệ rồi fallback regex.
   const diagnostics = parseAndValidateAIResponseWithDiagnostics(result.message, { structured: useStructured });
   structuredSucceeded = diagnostics.structuredSucceeded;
+  // G3+: chống bịa — loại action tham chiếu taskId/goalId không có thật trong context.
+  const validatedActions = dropActionsWithUnknownIds(diagnostics.proposedActions, request.context);
   emitTurn("success", {
-    actions: diagnostics.proposedActions,
+    actions: validatedActions,
     responseText: result.message,
     structured: useStructured,
   });
-  return { assistantText: diagnostics.assistantText, proposedActions: diagnostics.proposedActions };
+  return { assistantText: diagnostics.assistantText, proposedActions: validatedActions };
 }
 
 export async function processAIAssistantRequestStream(
