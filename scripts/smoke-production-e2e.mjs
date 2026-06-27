@@ -365,7 +365,7 @@ function installNetworkRecorder(page) {
       url,
     };
 
-    if (event.status >= 400) {
+    if (event.status >= 400 || /\/api\/sync\/12-week\/mutations(?:\?|$)/.test(url)) {
       event.contentType = response.headers()["content-type"] ?? "";
       try {
         event.responseBody = compactApiResponseBody(await response.text());
@@ -1174,11 +1174,16 @@ async function getSyncQueueDebug(page) {
           error: item.error,
           payload: {
             taskId: item.payload?.taskId,
+            date: item.payload?.date,
+            backendPlanId: item.payload?.backendPlanId,
+            backendWeekId: item.payload?.backendWeekId,
             clientTaskId: item.payload?.clientTaskId,
             clientPlanId: item.payload?.clientPlanId,
             clientWeekId: item.payload?.clientWeekId,
             weekNumber: item.payload?.weekNumber,
             completed: item.payload?.completed,
+            checkInNote: item.payload?.checkIn?.optionalNote,
+            reviewInsights: item.payload?.review?.insights,
           },
         })),
       };
@@ -1608,6 +1613,17 @@ async function exerciseTwelveWeekSaveReloadAndSync(page, apiEvents) {
     },
   );
   await waitForSyncQueueIdle(page);
+  const mutationSyncEvents = apiEvents
+    .filter((event) => event.at >= syncStartedAt && /\/api\/sync\/12-week\/mutations(?:\?|$)/.test(event.url))
+    .map((event) => ({
+      method: event.method,
+      status: event.status,
+      responseBody: event.responseBody,
+      responseBodyError: event.responseBodyError,
+    }));
+  log(`12-week mutation sync events after manual sync: ${JSON.stringify(mutationSyncEvents)}`);
+  log(`12-week queue after manual sync: ${JSON.stringify(await getSyncQueueDebug(page))}`);
+  log(`12-week snapshots after manual sync: ${JSON.stringify(await getGoalSnapshots(page))}`);
 
   await page.goto(`${BASE_URL}/12-week-system`, { waitUntil: "domcontentloaded" });
   await page.reload({ waitUntil: "domcontentloaded" });
