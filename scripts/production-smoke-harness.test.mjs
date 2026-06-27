@@ -131,6 +131,13 @@ describe("production smoke harness guards", () => {
     expect(smokeScript).toContain('(?:plans|tasks|weeks|metrics)(?:\\/|$)');
   });
 
+  it("prints bounded API error response bodies for production smoke failures", () => {
+    expect(smokeScript).toContain("function compactApiResponseBody(text)");
+    expect(smokeScript).toContain("redactSensitiveLogText");
+    expect(smokeScript).toContain("event.responseBody = compactApiResponseBody(await response.text());");
+    expect(smokeScript).toContain("Response body:");
+  });
+
   it("uses the real 12-week account sync control before waiting for backend sync proof", () => {
     expect(smokeScript).toContain("async function triggerManualTwelveWeekAccountSync(page)");
     expect(smokeScript).toContain("async function waitForManualTwelveWeekAccountSyncReady(page)");

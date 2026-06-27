@@ -339,19 +339,42 @@ function isApiUrl(urlValue) {
   }
 }
 
+function redactSensitiveLogText(text) {
+  let redacted = String(text ?? "");
+  for (const secret of [EMAIL, PASSWORD]) {
+    if (secret) redacted = redacted.split(secret).join("[redacted]");
+  }
+  return redacted;
+}
+
+function compactApiResponseBody(text) {
+  return redactSensitiveLogText(text).replace(/\s+/g, " ").trim().slice(0, 1_500);
+}
+
 function installNetworkRecorder(page) {
   const apiEvents = [];
   const requestFailures = [];
 
-  page.on("response", (response) => {
+  page.on("response", async (response) => {
     const url = response.url();
     if (!isApiUrl(url)) return;
-    apiEvents.push({
+    const event = {
       at: Date.now(),
       method: response.request().method(),
       status: response.status(),
       url,
-    });
+    };
+
+    if (event.status >= 400) {
+      event.contentType = response.headers()["content-type"] ?? "";
+      try {
+        event.responseBody = compactApiResponseBody(await response.text());
+      } catch (error) {
+        event.responseBodyError = error instanceof Error ? error.message : String(error);
+      }
+    }
+
+    apiEvents.push(event);
   });
 
   page.on("requestfailed", (request) => {
@@ -390,7 +413,11 @@ async function waitForApiSuccess(apiEvents, pattern, label, options = {}) {
     () => {
       const failed = apiEvents.find((event) => event.at >= after && pattern.test(event.url) && event.status >= 400);
       if (failed) {
-        throw new Error(`${label} failed with HTTP ${failed.status}: ${failed.method} ${failed.url}`);
+        const body =
+          failed.responseBody || failed.responseBodyError
+            ? `\nResponse body: ${failed.responseBody || failed.responseBodyError}`
+            : "";
+        throw new Error(`${label} failed with HTTP ${failed.status}: ${failed.method} ${failed.url}${body}`);
       }
 
       return apiEvents.find(
