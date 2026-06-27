@@ -108,6 +108,7 @@ describe("production smoke harness guards", () => {
   it("uses the real 12-week account sync control before waiting for backend sync proof", () => {
     expect(smokeScript).toContain("async function triggerManualTwelveWeekAccountSync(page)");
     expect(smokeScript).toContain('[data-tour-id="twelve-week-tab-settings"]');
+    expect(smokeScript).toContain("await waitForEnabledButtonByNormalizedText(page, \"dong bo tai khoan\", 15_000);");
     expect(smokeScript).toContain('await clickButtonByNormalizedText(page, "dong bo tai khoan");');
     expect(smokeScript).toContain("visionboard_data_mutation_queue:auth:");
     expect(smokeScript).toContain("await triggerManualTwelveWeekAccountSync(page);");

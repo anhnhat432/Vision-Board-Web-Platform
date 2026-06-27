@@ -628,6 +628,28 @@ async function clickButtonByNormalizedText(page, normalizedNeedle) {
   return clicked;
 }
 
+async function waitForEnabledButtonByNormalizedText(page, normalizedNeedle, timeoutMs = DEFAULT_TIMEOUT_MS) {
+  return waitForCondition(
+    `enabled button containing normalized text: ${normalizedNeedle}`,
+    () =>
+      page.evaluate((needle) => {
+        const normalize = (value) =>
+          String(value)
+            .normalize("NFD")
+            .replace(/\p{Diacritic}/gu, "")
+            .replace(/\u0111/g, "d")
+            .replace(/\u0110/g, "d")
+            .toLowerCase();
+        const button = Array.from(document.querySelectorAll("button")).find((candidate) => {
+          const text = normalize(candidate.textContent ?? "");
+          return text.includes(needle);
+        });
+        return button && !button.disabled ? true : false;
+      }, normalizedNeedle),
+    timeoutMs,
+  );
+}
+
 async function clickFirstTodayTaskCheckbox(page) {
   await page.locator('[data-tour-id="system-today-queue"]').waitFor({ timeout: DEFAULT_TIMEOUT_MS });
   const clicked = await page.evaluate(() => {
@@ -733,6 +755,7 @@ async function waitForSyncQueueWork(page, timeoutMs = 10_000) {
 async function triggerManualTwelveWeekAccountSync(page) {
   await page.locator('[data-tour-id="twelve-week-tab-settings"]').click();
   await waitForSyncQueueWork(page).catch(() => null);
+  await waitForEnabledButtonByNormalizedText(page, "dong bo tai khoan", 15_000);
   await clickButtonByNormalizedText(page, "dong bo tai khoan");
 }
 
