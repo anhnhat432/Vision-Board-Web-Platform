@@ -595,11 +595,45 @@ async function assertLoginRecoverySurface(page) {
   assertNoVisibleFailure(text, "login recovery surface");
 }
 
+async function waitForLoginFormReadyOrRedirect(page, { mode, nextPath }) {
+  const state = await page
+    .waitForFunction(
+      ({ nextPath: expectedPath, requiresConfirmPassword }) => {
+        if (location.pathname === expectedPath) return "redirected";
+        const alert = document.querySelector('[role="alert"]');
+        if (alert?.textContent?.trim()) return "alert";
+
+        const fields = [
+          document.querySelector("#login-email"),
+          document.querySelector("#login-password"),
+          ...(requiresConfirmPassword ? [document.querySelector("#login-confirm-password")] : []),
+        ];
+        const formReady = fields.every((field) => field && !field.disabled && !field.readOnly);
+        return formReady ? "form" : false;
+      },
+      { nextPath, requiresConfirmPassword: mode === "signup" },
+      { timeout: DEFAULT_TIMEOUT_MS },
+    )
+    .then((handle) => handle.jsonValue());
+
+  return state;
+}
+
 async function submitEmailAuth(page, { mode, nextPath }) {
   const modeQuery = mode === "signup" ? "mode=signup&" : "";
   await page.goto(`${BASE_URL}/login?${modeQuery}next=${encodeURIComponent(nextPath)}`, {
     waitUntil: "domcontentloaded",
   });
+  const loginState = await waitForLoginFormReadyOrRedirect(page, { mode, nextPath });
+  if (loginState === "redirected") {
+    return { ok: true, errorText: "" };
+  }
+  if (loginState === "alert") {
+    return {
+      ok: false,
+      errorText: await page.locator('[role="alert"]').innerText().catch(() => ""),
+    };
+  }
   await page.locator("#login-email").fill(EMAIL);
   await page.locator("#login-password").fill(PASSWORD);
   if (mode === "signup") {

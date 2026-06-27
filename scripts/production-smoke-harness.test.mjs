@@ -105,6 +105,14 @@ describe("production smoke harness guards", () => {
     expect(quickSmokeScript).toContain("Backend /api/sync/12-week/* routes require verified email");
   });
 
+  it("waits for the quick smoke login form to be editable or already redirected", () => {
+    expect(quickSmokeScript).toContain("async function waitForLoginFormReadyOrRedirect(page");
+    expect(quickSmokeScript).toContain('if (location.pathname === expectedPath) return "redirected";');
+    expect(quickSmokeScript).toContain("!field.disabled && !field.readOnly");
+    expect(quickSmokeScript).toContain("const loginState = await waitForLoginFormReadyOrRedirect(page");
+    expect(quickSmokeScript).toContain('if (loginState === "redirected")');
+  });
+
   it("keeps the settings sync-trust proof after successful account sync", () => {
     expect(smokeScript).toContain("async function assertSettingsSyncTrust(page)");
     expect(smokeScript).toContain('[data-testid="settings-sync-section"]');
