@@ -70,6 +70,19 @@ describe("production smoke harness guards", () => {
     expect(checkoutSessionWaitIndex).toBeGreaterThan(submitIndex);
   });
 
+  it("retries rate-limited billing payment history before checkout creation", () => {
+    expect(smokeScript).toContain('retryAfter: response.headers()["retry-after"] ?? ""');
+    expect(smokeScript).toContain("async function waitForApiSuccessWithRateLimitRetry(page, apiEvents, pattern, label");
+    expect(smokeScript).toContain("event.status >= 400 && event.status !== 429");
+    expect(smokeScript).toContain("await page.reload({ waitUntil: \"domcontentloaded\" });");
+    expect(smokeScript).toContain("billing payment history");
+
+    const paymentHistoryIndex = smokeScript.indexOf('"billing payment history"');
+    const checkoutStartedIndex = smokeScript.indexOf("const checkoutStartedAt = Date.now();");
+    expect(paymentHistoryIndex).toBeGreaterThan(0);
+    expect(checkoutStartedIndex).toBeGreaterThan(paymentHistoryIndex);
+  });
+
   it("keeps the real-mode mock-checkout proof step", () => {
     expect(smokeScript).toContain("async function assertMockCheckoutNotExposed(page)");
     expect(smokeScript).toContain("/billing/mock-checkout?session=legacy_checkout_test");

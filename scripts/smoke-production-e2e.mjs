@@ -361,6 +361,7 @@ function installNetworkRecorder(page) {
     const event = {
       at: Date.now(),
       method: response.request().method(),
+      retryAfter: response.headers()["retry-after"] ?? "",
       status: response.status(),
       url,
     };
@@ -423,6 +424,54 @@ async function waitForApiSuccess(apiEvents, pattern, label, options = {}) {
       return apiEvents.find(
         (event) => event.at >= after && pattern.test(event.url) && event.status >= 200 && event.status < 300,
       );
+    },
+    timeoutMs,
+  );
+}
+
+function formatApiFailure(label, event) {
+  const body =
+    event.responseBody || event.responseBodyError ? `\nResponse body: ${event.responseBody || event.responseBodyError}` : "";
+  return `${label} failed with HTTP ${event.status}: ${event.method} ${event.url}${body}`;
+}
+
+function getRetryAfterMs(event, fallbackMs = 10_000) {
+  const seconds = Number(event.retryAfter);
+  if (!Number.isFinite(seconds) || seconds <= 0) return fallbackMs;
+  return Math.min(Math.ceil(seconds * 1_000) + 1_000, DEFAULT_TIMEOUT_MS);
+}
+
+async function waitForApiSuccessWithRateLimitRetry(page, apiEvents, pattern, label, options = {}) {
+  const after = options.after ?? 0;
+  const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  let cursor = after;
+
+  return waitForCondition(
+    label,
+    async () => {
+      const failed = apiEvents.find(
+        (event) => event.at >= after && pattern.test(event.url) && event.status >= 400 && event.status !== 429,
+      );
+      if (failed) {
+        throw new Error(formatApiFailure(label, failed));
+      }
+
+      const success = apiEvents.find(
+        (event) => event.at >= after && pattern.test(event.url) && event.status >= 200 && event.status < 300,
+      );
+      if (success) return success;
+
+      const rateLimited = apiEvents.find(
+        (event) => event.at >= cursor && pattern.test(event.url) && event.status === 429,
+      );
+      if (!rateLimited) return false;
+
+      cursor = rateLimited.at + 1;
+      const retryAfterMs = getRetryAfterMs(rateLimited);
+      log(`${label} hit HTTP 429; waiting ${Math.round(retryAfterMs / 1_000)}s before retry`);
+      await page.waitForTimeout(retryAfterMs);
+      await page.reload({ waitUntil: "domcontentloaded" });
+      return false;
     },
     timeoutMs,
   );
@@ -1685,10 +1734,16 @@ async function exerciseBilling(page, apiEvents) {
   await page.goto(`${BASE_URL}/billing`, { waitUntil: "domcontentloaded" });
   await waitForPath(page, "/billing/plan", "billing plan route", apiEvents, billingStartedAt);
   await waitForBodyText(page, (text) => text.includes("Plus"), "billing Plus copy", apiEvents, billingStartedAt);
-  await waitForApiSuccess(apiEvents, /\/api\/billing\/payment-history(?:\?|$)/, "billing payment history", {
-    after: billingStartedAt,
-    timeoutMs: DEFAULT_TIMEOUT_MS,
-  });
+  await waitForApiSuccessWithRateLimitRetry(
+    page,
+    apiEvents,
+    /\/api\/billing\/payment-history(?:\?|$)/,
+    "billing payment history",
+    {
+      after: billingStartedAt,
+      timeoutMs: DEFAULT_TIMEOUT_MS,
+    },
+  );
 
   const text = await getBodyText(page);
   assertNoMojibake(text, "billing plan");
