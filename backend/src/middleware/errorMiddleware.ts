@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 
+import { captureBackendException } from "../monitoring/sentry";
 import { ApiError } from "../utils/apiError";
 import { errorResponse } from "../utils/apiResponse";
 
@@ -28,7 +29,7 @@ function deriveErrorCode(statusCode: number, explicitCode?: string): string {
 
 export function errorMiddleware(
   error: unknown,
-  _req: Request,
+  req: Request,
   res: Response,
   _next: NextFunction,
 ): void {
@@ -44,6 +45,20 @@ export function errorMiddleware(
     res.status(error.statusCode).json(payload);
     return;
   }
+
+  // Log unexpected (non-ApiError) failures for observability. Privacy: never
+  // log req.body for sync endpoints (user-generated text) — only method/path.
+  const context = {
+    event: "unhandled_error",
+    method: req.method,
+    path: req.path,
+    message: error instanceof Error ? error.message : String(error),
+  };
+  console.error("[error]", context, error instanceof Error ? error.stack : "");
+  captureBackendException(error, {
+    tags: { event: "unhandled_error" },
+    extra: { method: req.method, path: req.path },
+  });
 
   const fallbackMessage = "Internal server error";
   const payload = errorResponse(
