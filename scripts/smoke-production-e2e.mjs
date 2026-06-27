@@ -752,11 +752,12 @@ async function waitForSyncQueueWork(page, timeoutMs = 10_000) {
   );
 }
 
-async function triggerManualTwelveWeekAccountSync(page) {
-  await page.locator('[data-tour-id="twelve-week-tab-settings"]').click();
+async function triggerSettingsAccountSyncCheck(page) {
   await waitForSyncQueueWork(page).catch(() => null);
-  await waitForEnabledButtonByNormalizedText(page, "dong bo tai khoan", 15_000);
-  await clickButtonByNormalizedText(page, "dong bo tai khoan");
+  await page.goto(`${BASE_URL}/settings#account-sync`, { waitUntil: "domcontentloaded" });
+  await page.locator('[data-testid="settings-sync-section"]').waitFor({ timeout: DEFAULT_TIMEOUT_MS });
+  await waitForEnabledButtonByNormalizedText(page, "kiem tra sao luu", 15_000);
+  await clickButtonByNormalizedText(page, "kiem tra sao luu");
 }
 
 async function assertSettingsSyncTrust(page) {
@@ -1019,7 +1020,7 @@ async function exerciseTwelveWeekSaveReloadAndSync(page, apiEvents) {
     );
   });
 
-  await triggerManualTwelveWeekAccountSync(page);
+  await triggerSettingsAccountSyncCheck(page);
   await waitForApiSuccess(
     apiEvents,
     /\/api\/(?:sync\/12-week\/(?:mutations|pull)(?:\?|$)|(?:plans|tasks|weeks|metrics)(?:\/|$))/,
@@ -1031,6 +1032,7 @@ async function exerciseTwelveWeekSaveReloadAndSync(page, apiEvents) {
   );
   await waitForSyncQueueIdle(page);
 
+  await page.goto(`${BASE_URL}/12-week-system`, { waitUntil: "domcontentloaded" });
   await page.reload({ waitUntil: "domcontentloaded" });
   await waitForSystemLoaded(page);
   await waitForGoalSnapshot(page, "12-week state persisted after reload", (snapshot) => {

@@ -105,12 +105,12 @@ describe("production smoke harness guards", () => {
     expect(smokeScript).toContain('(?:plans|tasks|weeks|metrics)(?:\\/|$)');
   });
 
-  it("uses the real 12-week account sync control before waiting for backend sync proof", () => {
-    expect(smokeScript).toContain("async function triggerManualTwelveWeekAccountSync(page)");
-    expect(smokeScript).toContain('[data-tour-id="twelve-week-tab-settings"]');
-    expect(smokeScript).toContain("await waitForEnabledButtonByNormalizedText(page, \"dong bo tai khoan\", 15_000);");
-    expect(smokeScript).toContain('await clickButtonByNormalizedText(page, "dong bo tai khoan");');
+  it("uses the settings account sync control before waiting for backend sync proof", () => {
+    expect(smokeScript).toContain("async function triggerSettingsAccountSyncCheck(page)");
+    expect(smokeScript).toContain('[data-testid="settings-sync-section"]');
+    expect(smokeScript).toContain("await waitForEnabledButtonByNormalizedText(page, \"kiem tra sao luu\", 15_000);");
+    expect(smokeScript).toContain('await clickButtonByNormalizedText(page, "kiem tra sao luu");');
     expect(smokeScript).toContain("visionboard_data_mutation_queue:auth:");
-    expect(smokeScript).toContain("await triggerManualTwelveWeekAccountSync(page);");
+    expect(smokeScript).toContain("await triggerSettingsAccountSyncCheck(page);");
   });
 });
