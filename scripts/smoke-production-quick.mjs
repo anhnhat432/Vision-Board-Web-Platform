@@ -10,6 +10,7 @@ const EMAIL = process.env.PROD_SMOKE_EMAIL?.trim() || GENERATED_EMAIL;
 const PASSWORD = process.env.PROD_SMOKE_PASSWORD || GENERATED_PASSWORD;
 const HAS_PROVIDED_CREDENTIALS = Boolean(process.env.PROD_SMOKE_EMAIL && process.env.PROD_SMOKE_PASSWORD);
 const ALLOW_GENERATED_ACCOUNT = process.env.PROD_SMOKE_ALLOW_GENERATED_ACCOUNT === "1";
+const REQUIRE_VERIFIED_SYNC = process.env.PROD_SMOKE_REQUIRE_VERIFIED_SYNC === "1";
 const AUTH_MODE_OVERRIDE = process.env.PROD_SMOKE_AUTH_MODE?.trim().toLowerCase();
 const AUTH_MODE = AUTH_MODE_OVERRIDE || (HAS_PROVIDED_CREDENTIALS ? "signin" : "signup");
 const GOAL_ID = `goal_quick_smoke_${TIMESTAMP}`;
@@ -446,6 +447,13 @@ async function assertSettingsSyncTrust(page) {
   const text = await getBodyText(page);
   assertNoMojibake(text, "settings account sync");
   assertNoVisibleFailure(text, "settings account sync");
+  if (REQUIRE_VERIFIED_SYNC && surface.state === "email_unverified") {
+    throw new Error(
+      `PROD_SMOKE_REQUIRE_VERIFIED_SYNC=1 but PROD_SMOKE_EMAIL is email-unverified for sync. Backend /api/sync/12-week/* routes require verified email, so full production smoke cannot pass. Verify the smoke account email or replace the secret.\nLast sync surface: ${JSON.stringify(
+        surface,
+      )}\n${await getDiagnostics(page)}`,
+    );
+  }
   log(`Settings account sync trust state: ${surface.state}`);
 }
 
