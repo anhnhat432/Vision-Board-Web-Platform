@@ -789,6 +789,54 @@ async function submitBillingConfirmCheckout(page) {
   }
 }
 
+async function waitForCheckoutDestination(page, apiEvents, after) {
+  return waitForCondition(
+    "checkout destination",
+    () => {
+      const rateLimited = getRecentRateLimit(apiEvents, after);
+      if (rateLimited) {
+        throw new Error(`checkout destination hit HTTP 429 rate limit: ${rateLimited.method} ${rateLimited.url}`);
+      }
+
+      const currentUrl = new URL(page.url());
+      if (/^\/billing\/checkout\/VB[A-Z0-9]{8,12}$/.test(currentUrl.pathname)) {
+        return { kind: "internal", url: currentUrl.toString() };
+      }
+      if (currentUrl.hostname === "pay.payos.vn" && currentUrl.pathname.startsWith("/web/")) {
+        return { kind: "hosted-payos", url: currentUrl.toString() };
+      }
+      return false;
+    },
+    DEFAULT_TIMEOUT_MS,
+  ).catch(async (error) => {
+    throw new Error(`${error.message}\n${await getDiagnostics(page)}`);
+  });
+}
+
+async function assertHostedPayosCheckout(page) {
+  await waitForCondition(
+    "hosted PayOS checkout content",
+    async () => {
+      const text = await getBodyText(page);
+      const normalized = normalizeText(text);
+      return (
+        normalized.includes("dear our future") &&
+        (normalized.includes("vietqr") || normalized.includes("ngan hang")) &&
+        normalized.includes("so tien") &&
+        normalized.includes("noi dung") &&
+        /VB[A-Z0-9]{8,12}/.test(text)
+      );
+    },
+    DEFAULT_TIMEOUT_MS,
+  ).catch(async (error) => {
+    throw new Error(`${error.message}\n${await getDiagnostics(page)}`);
+  });
+
+  const checkoutText = await getBodyText(page);
+  assertNoMojibake(checkoutText, "hosted PayOS checkout");
+  assertNoVisibleFailure(checkoutText, "hosted PayOS checkout");
+}
+
 async function hasOpenTodayTaskCheckbox(page) {
   await page.locator('[data-tour-id="system-today-queue"]').waitFor({ timeout: DEFAULT_TIMEOUT_MS });
   return page.evaluate(() => {
@@ -1770,19 +1818,13 @@ async function exerciseBilling(page, apiEvents) {
     after: checkoutStartedAt,
     timeoutMs: DEFAULT_TIMEOUT_MS,
   });
-  await waitForCondition(
-    "checkout order route",
-    () => {
-      const rateLimited = getRecentRateLimit(apiEvents, checkoutStartedAt);
-      if (rateLimited) {
-        throw new Error(`checkout order route hit HTTP 429 rate limit: ${rateLimited.method} ${rateLimited.url}`);
-      }
-      return /^\/billing\/checkout\/VB[A-Z0-9]{8,12}$/.test(new URL(page.url()).pathname);
-    },
-    DEFAULT_TIMEOUT_MS,
-  ).catch(async (error) => {
-    throw new Error(`${error.message}\n${await getDiagnostics(page)}`);
-  });
+  const checkoutDestination = await waitForCheckoutDestination(page, apiEvents, checkoutStartedAt);
+  if (checkoutDestination.kind === "hosted-payos") {
+    await assertHostedPayosCheckout(page);
+    log(`Verified hosted PayOS checkout page: ${checkoutDestination.url}`);
+    return;
+  }
+
   await waitForApiSuccess(apiEvents, /\/api\/billing\/order-status\/VB[A-Z0-9]{8,12}(?:\?|$)/, "billing order status", {
     after: checkoutStartedAt,
     timeoutMs: DEFAULT_TIMEOUT_MS,
@@ -1918,7 +1960,7 @@ async function run() {
       await exerciseTwelveWeekSaveReloadAndSync(page, apiEvents);
     });
 
-    await step("Billing management and Casso VietQR checkout", async () => {
+    await step("Billing management and VietQR checkout", async () => {
       await exerciseBilling(page, apiEvents);
     });
 

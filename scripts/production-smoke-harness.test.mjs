@@ -83,6 +83,22 @@ describe("production smoke harness guards", () => {
     expect(checkoutStartedIndex).toBeGreaterThan(paymentHistoryIndex);
   });
 
+  it("accepts hosted PayOS checkout after checkout-session creation", () => {
+    expect(smokeScript).toContain("async function waitForCheckoutDestination(page, apiEvents, after)");
+    expect(smokeScript).toContain('kind: "hosted-payos"');
+    expect(smokeScript).toContain('currentUrl.hostname === "pay.payos.vn"');
+    expect(smokeScript).toContain("async function assertHostedPayosCheckout(page)");
+    expect(smokeScript).toContain("hosted PayOS checkout content");
+    expect(smokeScript).toContain("Verified hosted PayOS checkout page");
+
+    const destinationIndex = smokeScript.indexOf("const checkoutDestination = await waitForCheckoutDestination");
+    const hostedIndex = smokeScript.indexOf('if (checkoutDestination.kind === "hosted-payos")');
+    const orderStatusIndex = smokeScript.indexOf('"billing order status"');
+    expect(destinationIndex).toBeGreaterThan(0);
+    expect(hostedIndex).toBeGreaterThan(destinationIndex);
+    expect(orderStatusIndex).toBeGreaterThan(hostedIndex);
+  });
+
   it("keeps the real-mode mock-checkout proof step", () => {
     expect(smokeScript).toContain("async function assertMockCheckoutNotExposed(page)");
     expect(smokeScript).toContain("/billing/mock-checkout?session=legacy_checkout_test");
