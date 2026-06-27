@@ -802,42 +802,72 @@ async function run() {
     });
 
     await step("Production billing management loads", async () => {
-      await page.goto(`${BASE_URL}/billing`, { waitUntil: "domcontentloaded" });
-      if (await waitForLoginRedirect(page, 2_000)) {
-        authWasRequired = true;
-        await authenticateIfRequired(page, "/billing");
-        await page.goto(`${BASE_URL}/billing`, { waitUntil: "domcontentloaded" });
-      }
+      // Bắt HTTP status thật của payment-history để chẩn đoán khi lỗi.
+      let lastPaymentHistoryStatus = null;
+      const onResponse = (response) => {
+        if (response.url().includes("/billing/payment-history")) {
+          lastPaymentHistoryStatus = response.status();
+        }
+      };
+      page.on("response", onResponse);
 
-      await page.waitForFunction(() => {
-        const paymentHistory = document.querySelector('[data-testid="billing-payment-history"]');
-        const upgradeCta = document.querySelector('[data-testid="billing-plan-upgrade-cta"]');
-        const paymentLockBanner = document.querySelector('[data-testid="paid-checkout-disabled-banner"]');
-        return (
-          location.pathname === "/billing/plan" &&
-          paymentHistory !== null &&
-          (upgradeCta !== null || paymentLockBanner !== null)
-        );
-      });
-      const paymentHistoryStateHandle = await page.waitForFunction(() => {
-        const paymentHistory = document.querySelector('[data-testid="billing-payment-history"]');
-        const state = paymentHistory?.getAttribute("data-payment-history-state");
-        if (state === "empty" || state === "ready" || state === "email-unverified" || state === "error") return state;
-        return false;
-      });
-      const paymentHistoryState = await paymentHistoryStateHandle.jsonValue();
+      try {
+        // payment-history có timeout phía client 8s và phải chờ MongoDB (updateMany + 2 query).
+        // Trên hạ tầng free-tier, lần tải đầu sau cold-start dễ vượt 8s -> state "error".
+        // Thử lại vài lần để backend/DB ấm dần; lỗi cố định (401/500) vẫn fail sau khi hết lượt.
+        const maxAttempts = 3;
+        let paymentHistoryState = null;
 
-      const text = await getBodyText(page);
-      assertNoMojibake(text, "billing management");
-      assertNoVisibleFailure(text, "billing management");
-      if (paymentHistoryState === "error") {
-        throw new Error(`Billing payment history endpoint failed on production.\n${await getDiagnostics(page)}`);
-      }
-      if (paymentHistoryState === "email-unverified" && !normalizeText(text).includes("xac thuc email")) {
-        throw new Error(`Billing payment history is email-unverified without clear verification copy.\n${await getDiagnostics(page)}`);
-      }
-      if (/Plus demo|Checkout dùng thử|mock checkout/i.test(text)) {
-        throw new Error("Production billing page still shows demo/mock billing copy");
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+          await page.goto(`${BASE_URL}/billing`, { waitUntil: "domcontentloaded" });
+          if (await waitForLoginRedirect(page, 2_000)) {
+            authWasRequired = true;
+            await authenticateIfRequired(page, "/billing");
+            await page.goto(`${BASE_URL}/billing`, { waitUntil: "domcontentloaded" });
+          }
+
+          await page.waitForFunction(() => {
+            const paymentHistory = document.querySelector('[data-testid="billing-payment-history"]');
+            const upgradeCta = document.querySelector('[data-testid="billing-plan-upgrade-cta"]');
+            const paymentLockBanner = document.querySelector('[data-testid="paid-checkout-disabled-banner"]');
+            return (
+              location.pathname === "/billing/plan" &&
+              paymentHistory !== null &&
+              (upgradeCta !== null || paymentLockBanner !== null)
+            );
+          });
+          const paymentHistoryStateHandle = await page.waitForFunction(() => {
+            const paymentHistory = document.querySelector('[data-testid="billing-payment-history"]');
+            const state = paymentHistory?.getAttribute("data-payment-history-state");
+            if (state === "empty" || state === "ready" || state === "email-unverified" || state === "error")
+              return state;
+            return false;
+          });
+          paymentHistoryState = await paymentHistoryStateHandle.jsonValue();
+
+          if (paymentHistoryState !== "error") break;
+          if (attempt < maxAttempts) {
+            log(`Billing payment history state=error (attempt ${attempt}/${maxAttempts}, last HTTP ${lastPaymentHistoryStatus ?? "unknown"}); retrying after warm-up.`);
+            await page.waitForTimeout(5_000);
+          }
+        }
+
+        const text = await getBodyText(page);
+        assertNoMojibake(text, "billing management");
+        assertNoVisibleFailure(text, "billing management");
+        if (paymentHistoryState === "error") {
+          throw new Error(
+            `Billing payment history endpoint failed on production after ${maxAttempts} attempts (last HTTP status: ${lastPaymentHistoryStatus ?? "unknown"}).\n${await getDiagnostics(page)}`,
+          );
+        }
+        if (paymentHistoryState === "email-unverified" && !normalizeText(text).includes("xac thuc email")) {
+          throw new Error(`Billing payment history is email-unverified without clear verification copy.\n${await getDiagnostics(page)}`);
+        }
+        if (/Plus demo|Checkout dùng thử|mock checkout/i.test(text)) {
+          throw new Error("Production billing page still shows demo/mock billing copy");
+        }
+      } finally {
+        page.off("response", onResponse);
       }
     });
 
