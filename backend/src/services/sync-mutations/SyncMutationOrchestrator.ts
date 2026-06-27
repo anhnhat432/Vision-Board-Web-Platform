@@ -34,9 +34,11 @@ export interface SyncMutationLogAdapter {
   createMutationLog(data: {
     userId: string;
     mutationId: string;
+    idempotencyKey?: string;
     type: string;
     payloadHash: string;
     status: SyncMutationLogStatus;
+    clientTimestamp?: Date;
     result?: unknown;
   }): Promise<unknown>;
 }
@@ -509,9 +511,11 @@ export class SyncMutationOrchestrator {
     await this.mutationLogRepo.createMutationLog({
       userId,
       mutationId: mutation.mutationId,
+      idempotencyKey: mutation.idempotencyKey,
       type: mutation.type,
       payloadHash: mutation.payloadHash,
       status,
+      clientTimestamp: mutation.clientTimestamp,
       result: resultStatus,
     });
   }
