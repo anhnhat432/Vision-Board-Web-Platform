@@ -487,16 +487,25 @@ function getRecentRateLimit(apiEvents, after) {
   return apiEvents.find((event) => event.at >= after && event.status === 429);
 }
 
+function markRateLimitHandled(event, label) {
+  if (event) event.handledByRateLimitRetry ??= label;
+}
+
 async function waitForPath(page, expectedPath, label, apiEvents, after, timeoutMs = DEFAULT_TIMEOUT_MS) {
   try {
     return await waitForCondition(
       label,
       () => {
+        if (new URL(page.url()).pathname === expectedPath) {
+          markRateLimitHandled(getRecentRateLimit(apiEvents, after), `${label} rendered despite background 429`);
+          return true;
+        }
+
         const rateLimited = getRecentRateLimit(apiEvents, after);
         if (rateLimited) {
           throw new Error(`${label} hit HTTP 429 rate limit: ${rateLimited.method} ${rateLimited.url}`);
         }
-        return new URL(page.url()).pathname === expectedPath;
+        return false;
       },
       timeoutMs,
     );
@@ -510,12 +519,17 @@ async function waitForBodyText(page, predicate, label, apiEvents, after, timeout
     return await waitForCondition(
       label,
       async () => {
+        const text = await getBodyText(page);
+        if (predicate(text)) {
+          markRateLimitHandled(getRecentRateLimit(apiEvents, after), `${label} rendered despite background 429`);
+          return text;
+        }
+
         const rateLimited = getRecentRateLimit(apiEvents, after);
         if (rateLimited) {
           throw new Error(`${label} hit HTTP 429 rate limit: ${rateLimited.method} ${rateLimited.url}`);
         }
-        const text = await getBodyText(page);
-        return predicate(text) ? text : false;
+        return false;
       },
       timeoutMs,
     );

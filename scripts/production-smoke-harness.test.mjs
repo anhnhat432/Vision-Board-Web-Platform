@@ -83,6 +83,8 @@ describe("production smoke harness guards", () => {
     expect(smokeScript).toContain("event.status >= 400 && event.status !== 429");
     expect(smokeScript).toContain("rateLimited.handledByRateLimitRetry = label;");
     expect(smokeScript).toContain("event.status === 429 && !event.handledByRateLimitRetry");
+    expect(smokeScript).toContain("function markRateLimitHandled(event, label)");
+    expect(smokeScript).toContain("rendered despite background 429");
     expect(smokeScript).toContain("await page.reload({ waitUntil: \"domcontentloaded\" });");
     expect(smokeScript).toContain("billing payment history");
 
