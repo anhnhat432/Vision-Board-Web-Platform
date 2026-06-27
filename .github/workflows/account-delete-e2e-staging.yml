@@ -30,7 +30,7 @@ jobs:
       ACCOUNT_DELETE_E2E_PASSWORD: ${{ secrets.ACCOUNT_DELETE_E2E_PASSWORD }}
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up Node
         uses: actions/setup-node@v6
