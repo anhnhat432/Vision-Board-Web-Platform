@@ -56,6 +56,10 @@ function normalizeText(text) {
     .toLowerCase();
 }
 
+function hasProductBrand(text) {
+  return normalizeText(text).includes("dear our future");
+}
+
 function createFullSmokeUserData() {
   const now = new Date();
   const today = formatDate(now);
@@ -1121,7 +1125,11 @@ async function run() {
         sessionStorage.clear();
       });
       await page.reload({ waitUntil: "domcontentloaded" });
-      await page.waitForFunction(() => document.body.innerText.includes("Dear Our Future"));
+      await page.waitForFunction(() => document.body.innerText.length > 0);
+      const text = await getBodyText(page);
+      if (!hasProductBrand(text)) {
+        throw new Error("Home did not render the product brand");
+      }
       await assertCleanPage(page, "signed-out home");
       await assertNoHorizontalOverflow(page, "signed-out home desktop");
     });

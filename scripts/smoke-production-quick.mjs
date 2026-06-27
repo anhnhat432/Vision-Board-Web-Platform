@@ -43,6 +43,10 @@ function normalizeText(text) {
     .toLowerCase();
 }
 
+function hasProductBrand(text) {
+  return normalizeText(text).includes("dear our future");
+}
+
 async function step(label, action) {
   const startedAt = Date.now();
   log(`START ${label}`);
@@ -715,7 +719,7 @@ async function run() {
       await page.waitForFunction(() => document.body.innerText.length > 0);
       const text = await getBodyText(page);
 
-      if (!text.includes("Dear Our Future")) {
+      if (!hasProductBrand(text)) {
         throw new Error("Home did not render the product brand");
       }
 

@@ -6,6 +6,10 @@ const smokeScript = readFileSync(
   path.resolve("scripts", "smoke-production-e2e.mjs"),
   "utf8",
 );
+const quickSmokeScript = readFileSync(
+  path.resolve("scripts", "smoke-production-quick.mjs"),
+  "utf8",
+);
 
 describe("production smoke harness guards", () => {
   it("fails closed without fixed credentials unless generated signup is explicitly allowed", () => {
@@ -48,6 +52,15 @@ describe("production smoke harness guards", () => {
     expect(smokeScript).toContain("/billing/mock-checkout?session=legacy_checkout_test");
     expect(smokeScript).toContain("await assertMockCheckoutNotExposed(page);");
     expect(smokeScript).toContain("Production does not expose mock checkout surface");
+  });
+
+  it("checks the home brand without being brittle to display casing", () => {
+    for (const script of [smokeScript, quickSmokeScript]) {
+      expect(script).toContain("function hasProductBrand(text)");
+      expect(script).toContain('normalizeText(text).includes("dear our future")');
+      expect(script).not.toContain('text.includes("Dear Our Future")');
+      expect(script).not.toContain('document.body.innerText.includes("Dear Our Future")');
+    }
   });
 
   it("keeps the login recovery and legal trust proof before authentication", () => {
