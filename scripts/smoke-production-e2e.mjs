@@ -531,25 +531,31 @@ async function waitForSystemLoaded(page) {
 }
 
 async function getGoalSnapshot(page) {
-  return page.evaluate(
-    ({ goalId, goalTitle }) => {
-      const keys = ["visionboard_user_data"];
-      for (let index = 0; index < localStorage.length; index += 1) {
-        const key = localStorage.key(index);
-        if (key?.startsWith("visionboard_user_data:auth:")) keys.push(key);
-      }
+  return page.evaluate(() => {
+    // Đọc plan 12 tuần đang chạy của tài khoản (cloud), không ép plan seed cụ thể.
+    const preferredGoalId =
+      localStorage.getItem("latest_12_week_system_goal_id") ||
+      localStorage.getItem("latest_12_week_goal_id") ||
+      localStorage.getItem("latest_12_week_plan_goal_id");
 
-      for (const key of Array.from(new Set(keys))) {
-        const raw = localStorage.getItem(key);
-        if (!raw) continue;
+    const keys = ["visionboard_user_data"];
+    for (let index = 0; index < localStorage.length; index += 1) {
+      const key = localStorage.key(index);
+      if (key?.startsWith("visionboard_user_data:auth:")) keys.push(key);
+    }
 
-        try {
-          const data = JSON.parse(raw);
-          const goal = Array.isArray(data.goals)
-            ? data.goals.find((item) => item?.id === goalId || item?.title?.includes(goalTitle))
-            : null;
-          const system = goal?.twelveWeekSystem;
-          if (!system) continue;
+    for (const key of Array.from(new Set(keys))) {
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+
+      try {
+        const data = JSON.parse(raw);
+        const goals = Array.isArray(data.goals) ? data.goals : [];
+        const goal =
+          goals.find((item) => item?.id === preferredGoalId && item?.twelveWeekSystem) ??
+          goals.find((item) => item?.twelveWeekSystem);
+        const system = goal?.twelveWeekSystem;
+        if (!system) continue;
 
           const taskInstances = Array.isArray(system.taskInstances) ? system.taskInstances : [];
           const dailyCheckIns = Array.isArray(system.dailyCheckIns) ? system.dailyCheckIns : [];
@@ -571,9 +577,7 @@ async function getGoalSnapshot(page) {
       }
 
       return null;
-    },
-    { goalId: GOAL_ID, goalTitle: GOAL_TITLE },
-  );
+  });
 }
 
 async function waitForGoalSnapshot(page, label, predicate, timeoutMs = DEFAULT_TIMEOUT_MS) {
