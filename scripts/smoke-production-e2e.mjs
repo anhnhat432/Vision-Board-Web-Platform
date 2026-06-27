@@ -520,18 +520,13 @@ async function seedFullSmokeData(page) {
   );
 }
 
-async function waitForSystemLoaded(page, options = {}) {
-  const requireTactic = options.requireTactic ?? true;
+async function waitForSystemLoaded(page) {
   try {
-    await page.waitForFunction(
-      ({ goalTitle, tacticTitle, requireTactic }) =>
-        document.body.innerText.includes(goalTitle) &&
-        (!requireTactic || document.body.innerText.includes(tacticTitle)),
-      { goalTitle: GOAL_TITLE, tacticTitle: TACTIC_TITLE, requireTactic },
-      { timeout: DEFAULT_TIMEOUT_MS },
-    );
+    // Tài khoản đã đăng nhập dùng dữ liệu cloud làm nguồn, nên không ép đúng plan
+    // seed cụ thể. Chỉ cần hệ 12 tuần render một plan đang chạy (hàng việc hôm nay).
+    await page.locator('[data-tour-id="system-today-queue"]').first().waitFor({ timeout: DEFAULT_TIMEOUT_MS });
   } catch (error) {
-    throw new Error(`12-week system did not render the seeded plan.\n${await getDiagnostics(page)}\n${error.message}`);
+    throw new Error(`12-week system did not render an active plan.\n${await getDiagnostics(page)}\n${error.message}`);
   }
 }
 
@@ -1083,8 +1078,8 @@ async function assertLoginRecoverySurface(page) {
 }
 
 async function exerciseTwelveWeekSaveReloadAndSync(page, apiEvents) {
-  await page.goto(`${BASE_URL}/12-week-system`, { waitUntil: "domcontentloaded" });
-  await seedFullSmokeData(page);
+  // Tài khoản smoke dùng dữ liệu cloud thật (đã đăng nhập + sync). Không seed
+  // localStorage nữa vì pull cloud sẽ ghi đè; thao tác trực tiếp trên plan cloud.
   await page.goto(`${BASE_URL}/12-week-system`, { waitUntil: "domcontentloaded" });
   await waitForSystemLoaded(page);
   await assertCleanPage(page, "12-week system");
