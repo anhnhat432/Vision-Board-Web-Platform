@@ -402,6 +402,13 @@ function classifySettingsSyncSurface(surface) {
     return "email_unverified";
   }
 
+  // Tài khoản sạch/đã đăng nhập, email đã xác thực, sao lưu sẵn sàng nhưng chưa
+  // từng đồng bộ (vd warmup chạy trước khi seed dữ liệu). Đây vẫn là trạng thái
+  // trust lành mạnh: không có blocker email và không có lỗi đồng bộ.
+  if (statusCopy.includes("sao luu san sang") && pendingCopy.includes("khong co thay doi cho dong bo")) {
+    return "ready";
+  }
+
   return false;
 }
 
