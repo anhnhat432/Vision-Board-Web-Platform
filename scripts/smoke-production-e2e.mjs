@@ -443,6 +443,7 @@ function getRetryAfterMs(event, fallbackMs = 10_000) {
 
 async function waitForApiSuccessWithRateLimitRetry(page, apiEvents, pattern, label, options = {}) {
   const after = options.after ?? 0;
+  const onRateLimitRetry = options.onRateLimitRetry;
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   let cursor = after;
 
@@ -470,7 +471,11 @@ async function waitForApiSuccessWithRateLimitRetry(page, apiEvents, pattern, lab
       const retryAfterMs = getRetryAfterMs(rateLimited);
       log(`${label} hit HTTP 429; waiting ${Math.round(retryAfterMs / 1_000)}s before retry`);
       await page.waitForTimeout(retryAfterMs);
-      await page.reload({ waitUntil: "domcontentloaded" });
+      if (onRateLimitRetry) {
+        await onRateLimitRetry(rateLimited);
+      } else {
+        await page.reload({ waitUntil: "domcontentloaded" });
+      }
       return false;
     },
     timeoutMs,
@@ -1814,10 +1819,20 @@ async function exerciseBilling(page, apiEvents) {
   await seedFullSmokeData(page);
   await page.goto(`${BASE_URL}/billing/checkout`, { waitUntil: "domcontentloaded" });
   await submitBillingConfirmCheckout(page);
-  await waitForApiSuccess(apiEvents, /\/api\/billing\/checkout-session(?:\?|$)/, "billing checkout session", {
-    after: checkoutStartedAt,
-    timeoutMs: DEFAULT_TIMEOUT_MS,
-  });
+  await waitForApiSuccessWithRateLimitRetry(
+    page,
+    apiEvents,
+    /\/api\/billing\/checkout-session(?:\?|$)/,
+    "billing checkout session",
+    {
+      after: checkoutStartedAt,
+      onRateLimitRetry: async () => {
+        await page.goto(`${BASE_URL}/billing/checkout`, { waitUntil: "domcontentloaded" });
+        await submitBillingConfirmCheckout(page);
+      },
+      timeoutMs: DEFAULT_TIMEOUT_MS,
+    },
+  );
   const checkoutDestination = await waitForCheckoutDestination(page, apiEvents, checkoutStartedAt);
   if (checkoutDestination.kind === "hosted-payos") {
     await assertHostedPayosCheckout(page);

@@ -99,6 +99,21 @@ describe("production smoke harness guards", () => {
     expect(orderStatusIndex).toBeGreaterThan(hostedIndex);
   });
 
+  it("retries rate-limited checkout-session creation by resubmitting confirm", () => {
+    expect(smokeScript).toContain("const onRateLimitRetry = options.onRateLimitRetry;");
+    expect(smokeScript).toContain("await onRateLimitRetry(rateLimited);");
+    expect(smokeScript).toContain('onRateLimitRetry: async () => {');
+    expect(smokeScript).toContain('await page.goto(`${BASE_URL}/billing/checkout`, { waitUntil: "domcontentloaded" });');
+    expect(smokeScript).toContain("await submitBillingConfirmCheckout(page);");
+
+    const checkoutSessionIndex = smokeScript.indexOf('"billing checkout session"');
+    const retryCallbackIndex = smokeScript.indexOf("onRateLimitRetry: async () => {");
+    const destinationIndex = smokeScript.indexOf("const checkoutDestination = await waitForCheckoutDestination");
+    expect(checkoutSessionIndex).toBeGreaterThan(0);
+    expect(retryCallbackIndex).toBeGreaterThan(checkoutSessionIndex);
+    expect(destinationIndex).toBeGreaterThan(retryCallbackIndex);
+  });
+
   it("keeps the real-mode mock-checkout proof step", () => {
     expect(smokeScript).toContain("async function assertMockCheckoutNotExposed(page)");
     expect(smokeScript).toContain("/billing/mock-checkout?session=legacy_checkout_test");
