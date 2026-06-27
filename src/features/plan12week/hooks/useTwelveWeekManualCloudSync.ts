@@ -106,6 +106,7 @@ const BLOCKING_MUTATION_STATUSES = new Set<DataMutationStatus>([
   "failed_validation",
   "failed_terminal",
 ]);
+const RECENT_APPLIED_MUTATION_WINDOW_MS = 5 * 60 * 1000;
 
 function normalizeOwnerUid(value: string | null | undefined): string | null {
   const normalized = value?.trim() ?? "";
@@ -197,6 +198,14 @@ function isAtOrAfterIso(value: string | undefined, lowerBound: string | undefine
   return value >= lowerBound;
 }
 
+function isRecentIso(value: string | undefined, reference: string | Date | undefined): boolean {
+  if (!value) return false;
+  const valueMs = Date.parse(value);
+  const referenceMs = reference ? Date.parse(reference instanceof Date ? reference.toISOString() : reference) : Date.now();
+  if (!Number.isFinite(valueMs) || !Number.isFinite(referenceMs)) return false;
+  return referenceMs - valueMs >= 0 && referenceMs - valueMs <= RECENT_APPLIED_MUTATION_WINDOW_MS;
+}
+
 function getClientPlanIdFromAppliedMutation(item: DataMutationItem): string {
   if (
     "clientPlanId" in item.payload &&
@@ -239,13 +248,15 @@ function getRecentlyAppliedMutationSkipEntities(
   options: Pick<RunTwelveWeekManualCloudSyncOptions, "storage" | "now">,
 ): Set<string> {
   const skipEntities = new Set<string>();
-  if (drainResult.attemptedCount <= 0 || drainResult.succeededCount + drainResult.duplicateCount <= 0) {
-    return skipEntities;
-  }
-
   const store = readMutationQueueStore(ownerUid, options);
   const lastDrainStartedAt = store.lastDrainStartedAt;
   if (!lastDrainStartedAt) return skipEntities;
+  const currentDrainApplied =
+    drainResult.attemptedCount > 0 && drainResult.succeededCount + drainResult.duplicateCount > 0;
+  const latestDrainFinishedAt = store.lastDrainFinishedAt ?? lastDrainStartedAt;
+  if (!currentDrainApplied && !isRecentIso(latestDrainFinishedAt, options.now)) {
+    return skipEntities;
+  }
 
   store.items.forEach((item) => {
     if (normalizeOwnerUid(item.ownerUid) !== ownerUid) return;

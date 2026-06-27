@@ -546,7 +546,7 @@ describe("runTwelveWeekManualCloudSync", () => {
     );
   });
 
-  it("preserves a just-drained daily check-in when the pull snapshot has not caught up yet", async () => {
+  it("preserves a recently applied daily check-in when manual drain is already idle", async () => {
     let writtenData: UserData | undefined;
     const writeUserData = vi.fn((data: UserData) => {
       writtenData = data;
@@ -593,9 +593,10 @@ describe("runTwelveWeekManualCloudSync", () => {
       );
 
       return {
-        status: "success" as const,
-        attemptedCount: 1,
-        succeededCount: 1,
+        status: "idle" as const,
+        skipReason: "empty" as const,
+        attemptedCount: 0,
+        succeededCount: 0,
         duplicateCount: 0,
         failedCount: 0,
         pendingCount: 0,
