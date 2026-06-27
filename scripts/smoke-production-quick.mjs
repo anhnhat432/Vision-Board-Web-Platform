@@ -802,14 +802,21 @@ async function run() {
     });
 
     await step("Production billing management loads", async () => {
-      // Bắt HTTP status thật của payment-history để chẩn đoán khi lỗi.
+      // Bắt HTTP status + lỗi mạng thật của payment-history để chẩn đoán khi lỗi.
       let lastPaymentHistoryStatus = null;
+      let lastPaymentHistoryFailure = null;
       const onResponse = (response) => {
         if (response.url().includes("/billing/payment-history")) {
           lastPaymentHistoryStatus = response.status();
         }
       };
+      const onRequestFailed = (request) => {
+        if (request.url().includes("/billing/payment-history")) {
+          lastPaymentHistoryFailure = request.failure()?.errorText ?? "unknown_failure";
+        }
+      };
       page.on("response", onResponse);
+      page.on("requestfailed", onRequestFailed);
 
       try {
         // payment-history có timeout phía client 8s và phải chờ MongoDB (updateMany + 2 query).
@@ -847,7 +854,7 @@ async function run() {
 
           if (paymentHistoryState !== "error") break;
           if (attempt < maxAttempts) {
-            log(`Billing payment history state=error (attempt ${attempt}/${maxAttempts}, last HTTP ${lastPaymentHistoryStatus ?? "unknown"}); retrying after warm-up.`);
+            log(`Billing payment history state=error (attempt ${attempt}/${maxAttempts}, last HTTP ${lastPaymentHistoryStatus ?? "unknown"}, net error ${lastPaymentHistoryFailure ?? "none"}); retrying after warm-up.`);
             await page.waitForTimeout(5_000);
           }
         }
@@ -857,7 +864,7 @@ async function run() {
         assertNoVisibleFailure(text, "billing management");
         if (paymentHistoryState === "error") {
           throw new Error(
-            `Billing payment history endpoint failed on production after ${maxAttempts} attempts (last HTTP status: ${lastPaymentHistoryStatus ?? "unknown"}).\n${await getDiagnostics(page)}`,
+            `Billing payment history endpoint failed on production after ${maxAttempts} attempts (last HTTP status: ${lastPaymentHistoryStatus ?? "unknown"}, net error: ${lastPaymentHistoryFailure ?? "none"}).\n${await getDiagnostics(page)}`,
           );
         }
         if (paymentHistoryState === "email-unverified" && !normalizeText(text).includes("xac thuc email")) {
@@ -868,6 +875,7 @@ async function run() {
         }
       } finally {
         page.off("response", onResponse);
+        page.off("requestfailed", onRequestFailed);
       }
     });
 
