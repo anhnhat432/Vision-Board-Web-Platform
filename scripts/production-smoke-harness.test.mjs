@@ -81,6 +81,8 @@ describe("production smoke harness guards", () => {
     expect(smokeScript).toContain('retryAfter: response.headers()["retry-after"] ?? ""');
     expect(smokeScript).toContain("async function waitForApiSuccessWithRateLimitRetry(page, apiEvents, pattern, label");
     expect(smokeScript).toContain("event.status >= 400 && event.status !== 429");
+    expect(smokeScript).toContain("rateLimited.handledByRateLimitRetry = label;");
+    expect(smokeScript).toContain("event.status === 429 && !event.handledByRateLimitRetry");
     expect(smokeScript).toContain("await page.reload({ waitUntil: \"domcontentloaded\" });");
     expect(smokeScript).toContain("billing payment history");
 
@@ -154,8 +156,11 @@ describe("production smoke harness guards", () => {
 
   it("keeps the authenticated settings account lifecycle proof", () => {
     expect(smokeScript).toContain("async function assertSettingsAccountLifecycleSurface(page)");
+    expect(smokeScript).toContain("/settings#account-sync");
+    expect(smokeScript).toContain("settings account lifecycle controls");
     expect(smokeScript).toContain('[data-testid="settings-account-export"]');
     expect(smokeScript).toContain('[data-testid="settings-delete-account-open"]');
+    expect(smokeScript).toContain("Last settings lifecycle surface");
     expect(smokeScript).toContain('const requiredLinks = ["/privacy", "/terms", "/billing/faq"];');
     expect(smokeScript).toContain("await assertSettingsAccountLifecycleSurface(page);");
   });

@@ -468,6 +468,7 @@ async function waitForApiSuccessWithRateLimitRetry(page, apiEvents, pattern, lab
       if (!rateLimited) return false;
 
       cursor = rateLimited.at + 1;
+      rateLimited.handledByRateLimitRetry = label;
       const retryAfterMs = getRetryAfterMs(rateLimited);
       log(`${label} hit HTTP 429; waiting ${Math.round(retryAfterMs / 1_000)}s before retry`);
       await page.waitForTimeout(retryAfterMs);
@@ -1587,9 +1588,56 @@ async function assertSettingsSyncTrust(page) {
 }
 
 async function assertSettingsAccountLifecycleSurface(page) {
-  await page.goto(`${BASE_URL}/settings`, { waitUntil: "domcontentloaded" });
-  await page.locator('[data-testid="settings-account-export"]').waitFor({ timeout: DEFAULT_TIMEOUT_MS });
-  await page.locator('[data-testid="settings-delete-account-open"]').waitFor({ timeout: DEFAULT_TIMEOUT_MS });
+  await page.goto(`${BASE_URL}/settings#account-sync`, { waitUntil: "domcontentloaded" });
+
+  const startedAt = Date.now();
+  let reloadedForAuthHydration = false;
+  const readLifecycleSurface = () =>
+    page.evaluate(() => {
+      const isVisible = (selector) => {
+        const element = document.querySelector(selector);
+        if (!element) return false;
+        const style = window.getComputedStyle(element);
+        const rect = element.getBoundingClientRect();
+        return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
+      };
+
+      return {
+        deleteVisible: isVisible('[data-testid="settings-delete-account-open"]'),
+        exportVisible: isVisible('[data-testid="settings-account-export"]'),
+        syncVisible: isVisible('[data-testid="settings-sync-section"]'),
+      };
+    });
+
+  let lifecycleSurface;
+  try {
+    lifecycleSurface = await waitForCondition(
+      "settings account lifecycle controls",
+      async () => {
+        const surface = await readLifecycleSurface();
+        if (surface.exportVisible && surface.deleteVisible) return surface;
+
+        if (!reloadedForAuthHydration && Date.now() - startedAt > 8_000) {
+          reloadedForAuthHydration = true;
+          await page.reload({ waitUntil: "domcontentloaded" });
+        }
+
+        return false;
+      },
+      DEFAULT_TIMEOUT_MS,
+    );
+  } catch (error) {
+    const surface = await readLifecycleSurface().catch(() => null);
+    throw new Error(
+      `${error.message}\nLast settings lifecycle surface: ${JSON.stringify(surface)}\n${await getDiagnostics(page)}`,
+    );
+  }
+
+  if (!lifecycleSurface.exportVisible || !lifecycleSurface.deleteVisible) {
+    throw new Error(
+      `Settings account lifecycle controls did not render.\n${JSON.stringify(lifecycleSurface)}\n${await getDiagnostics(page)}`,
+    );
+  }
 
   const requiredLinks = ["/privacy", "/terms", "/billing/faq"];
   const missingLinks = [];
@@ -1994,7 +2042,9 @@ async function run() {
       );
     }
 
-    const severeApiFailures = apiEvents.filter((event) => event.status === 429 || event.status >= 500);
+    const severeApiFailures = apiEvents.filter(
+      (event) => (event.status === 429 && !event.handledByRateLimitRetry) || event.status >= 500,
+    );
     if (severeApiFailures.length > 0) {
       throw new Error(`Severe API failures:\n${severeApiFailures.map((item) => JSON.stringify(item)).join("\n")}`);
     }
