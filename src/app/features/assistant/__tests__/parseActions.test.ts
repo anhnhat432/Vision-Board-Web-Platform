@@ -70,6 +70,24 @@ describe("parseAssistantReply", () => {
     expect(result.actions[0].label).toBe("Valid");
   });
 
+  it("chuẩn hóa category tiếng Việt sang enum khi tạo mục tiêu", () => {
+    const raw = `Mình tạo mục tiêu nhé:
+
+\`\`\`action
+{
+  "type": "create_goal",
+  "payload": { "title": "Ngủ sớm", "category": "sức khỏe" },
+  "label": "Tạo mục tiêu Ngủ sớm"
+}
+\`\`\``;
+
+    const result = parseAssistantReply(raw);
+
+    expect(result.actions).toHaveLength(1);
+    expect(result.actions[0].type).toBe("create_goal");
+    expect(result.actions[0].payload.category).toBe("health");
+  });
+
   it("skips unknown action types", () => {
     const raw = `\`\`\`action
 {

@@ -426,6 +426,28 @@ async function resolvePendingWorkflowTurn(
   }
 
   if (isConfirmReply(text)) {
+    // Guard: không cho "xác nhận" khi chưa đủ thông tin hoặc không có hành động nào để chạy,
+    // tránh trạng thái mâu thuẫn ("✓ Đã xác nhận" nhưng vẫn "thiếu thông tin" và goal rỗng).
+    if (workflow.proposedActions.length === 0 || (workflow.missingFields?.length ?? 0) > 0) {
+      const fieldLabels: Record<string, string> = {
+        title: "tiêu đề",
+        category: "lĩnh vực",
+        deadline: "hạn chót",
+        goal: "mục tiêu liên kết",
+      };
+      const needWhat =
+        (workflow.missingFields ?? []).map((f) => fieldLabels[f] ?? f).join(", ") || "một vài thông tin";
+      updatePendingWorkflow({
+        ...workflow,
+        status: "needs_clarification",
+        updatedAt: new Date().toISOString(),
+      });
+      return {
+        content: `Mình chưa đủ thông tin để chốt (còn thiếu: ${needWhat}). Bạn bổ sung giúp mình rồi nói "ok chốt" nhé.`,
+        actions: [],
+      };
+    }
+
     recordAssistantEvent({
       type: "assistant_workflow_confirmed",
       userId,
@@ -1068,9 +1090,14 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
             autoExecute: false,
           }));
 
+          // Gom thông tin qua nhiều lượt: nếu lượt này chỉ là hội thoại (gợi ý/hỏi thêm, không kèm
+          // action), giữ lại proposedActions đã gom từ lượt trước thay vì xóa sạch rồi báo "thiếu".
+          const effectiveActions =
+            actionsWithNoAuto.length > 0 ? actionsWithNoAuto : (existingWf?.proposedActions ?? []);
+
           const missingFields: string[] = [];
           if (workflowType === "create_goal_workflow") {
-            const goalAction = parsed.actions.find((a) => a.type === "create_goal");
+            const goalAction = effectiveActions.find((a) => a.type === "create_goal");
             if (goalAction) {
               const payload = goalAction.payload as { title?: string; category?: string; deadline?: string };
               if (!payload.title) missingFields.push("title");
@@ -1080,7 +1107,7 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
               missingFields.push("category");
             }
           } else if (workflowType === "create_task_workflow") {
-            if (parsed.actions.length === 0) {
+            if (effectiveActions.length === 0) {
               missingFields.push("goal");
             }
           }
@@ -1091,7 +1118,7 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
             summary: parsed.textContent.slice(0, 500),
             sourceUserText: trimmed,
             missingFields,
-            proposedActions: actionsWithNoAuto,
+            proposedActions: effectiveActions,
           });
 
           updatePendingWorkflow(newWorkflow);
@@ -1103,10 +1130,13 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
             metadata: { actionsCount: actionsWithNoAuto.length, missingFields },
           });
 
+          // Workflow nhiều bước được xác nhận DUY NHẤT qua panel pendingWorkflow
+          // (có nút "Xác nhận thực hiện"/"Hủy"). Không gắn action card vào message
+          // để tránh hai cơ chế xác nhận song song gây chạy trùng/treo trạng thái.
           setMessages((prev) =>
             prev.map((message) =>
               message.id === messageId
-                ? { ...message, content: parsed.textContent, actions: actionsWithNoAuto, status: "complete" }
+                ? { ...message, content: parsed.textContent, actions: [], status: "complete" }
                 : message,
             ),
           );

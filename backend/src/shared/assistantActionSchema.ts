@@ -74,6 +74,34 @@ export function isAssistantActionType(value: string): value is AssistantActionTy
   return (VALID_ACTION_TYPES as readonly string[]).includes(value);
 }
 
+// Chuẩn hóa category: chấp nhận enum tiếng Anh, đồng thời map từ khóa tiếng Việt phổ biến → enum.
+// Lớp an toàn cho model nhỏ hay trả category theo lời người dùng ("sức khỏe", "tài chính"...).
+// Không khớp → "other" (giữ hành vi cũ).
+export function normalizeGoalCategory(raw: unknown): string {
+  if (typeof raw !== "string") return "other";
+  const value = raw.trim().toLowerCase();
+  if (!value) return "other";
+
+  if ((GOAL_CATEGORIES as readonly string[]).includes(value)) return value;
+
+  // Bỏ dấu tiếng Việt để so khớp từ khóa.
+  const noAccent = value
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/Đ/gi, "d");
+
+  const has = (...keywords: string[]) => keywords.some((kw) => noAccent.includes(kw));
+
+  if (has("suc khoe", "the thao", "tap", "gym", "ngu", "an uong", "dinh duong", "the chat", "health")) return "health";
+  if (has("su nghiep", "cong viec", "nghe", "hoc", "thi", "ky nang", "career", "job", "study")) return "career";
+  if (has("tai chinh", "tien", "tiet kiem", "thu nhap", "dau tu", "mua", "finance", "money")) return "finance";
+  if (has("moi quan he", "quan he", "ban be", "yeu", "tinh cam", "nguoi yeu", "relationship")) return "relationships";
+  if (has("gia dinh", "bo me", "cha me", "con cai", "vo chong", "family")) return "family";
+  if (has("ca nhan", "ban than", "phat trien", "thoi quen", "tinh than", "personal", "self")) return "personal";
+
+  return "other";
+}
+
 function isPersonalConstraint(value: string): value is PersonalConstraint {
   return PERSONAL_CONSTRAINTS.includes(value as PersonalConstraint);
 }
@@ -134,13 +162,7 @@ export function sanitizeCreateGoalPayload(
   if (typeof payload.title !== "string" || !payload.title.trim()) return null;
   const title = payload.title.slice(0, 200).trim();
 
-  let category = "other";
-  if (
-    typeof payload.category === "string" &&
-    (GOAL_CATEGORIES as readonly string[]).includes(payload.category.toLowerCase())
-  ) {
-    category = payload.category.toLowerCase();
-  }
+  const category = normalizeGoalCategory(payload.category);
 
   const description = typeof payload.description === "string" ? payload.description.slice(0, 500).trim() : undefined;
 
@@ -173,13 +195,7 @@ export function sanitizeCreateSmartGoalFromInsightPayload(
   if (typeof payload.title !== "string" || !payload.title.trim()) return null;
   const title = payload.title.slice(0, 200).trim();
 
-  let category = "other";
-  if (
-    typeof payload.category === "string" &&
-    (GOAL_CATEGORIES as readonly string[]).includes(payload.category.toLowerCase())
-  ) {
-    category = payload.category.toLowerCase();
-  }
+  const category = normalizeGoalCategory(payload.category);
 
   const description = typeof payload.description === "string" ? payload.description.slice(0, 1000).trim() : undefined;
   const deadline =
