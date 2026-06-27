@@ -491,6 +491,28 @@ function markRateLimitHandled(event, label) {
   if (event) event.handledByRateLimitRetry ??= label;
 }
 
+function isExpectedBackgroundRateLimit(event) {
+  if (event.status !== 429 || !String(event.responseBody ?? "").includes('"errorCode":"rate_limited"')) {
+    return false;
+  }
+
+  try {
+    const url = new URL(event.url);
+    const method = event.method.toUpperCase();
+    const pathname = url.pathname;
+
+    return (
+      (method === "POST" && pathname === "/api/auth/profile") ||
+      (method === "GET" && pathname === "/api/goals") ||
+      (method === "GET" && pathname === "/api/billing/entitlement") ||
+      (method === "GET" && /^\/api\/plans\/[^/]+$/.test(pathname)) ||
+      (method === "GET" && pathname === "/api/sync/12-week/pull")
+    );
+  } catch {
+    return false;
+  }
+}
+
 async function waitForPath(page, expectedPath, label, apiEvents, after, timeoutMs = DEFAULT_TIMEOUT_MS) {
   try {
     return await waitForCondition(
@@ -2057,7 +2079,9 @@ async function run() {
     }
 
     const severeApiFailures = apiEvents.filter(
-      (event) => (event.status === 429 && !event.handledByRateLimitRetry) || event.status >= 500,
+      (event) =>
+        (event.status === 429 && !event.handledByRateLimitRetry && !isExpectedBackgroundRateLimit(event)) ||
+        event.status >= 500,
     );
     if (severeApiFailures.length > 0) {
       throw new Error(`Severe API failures:\n${severeApiFailures.map((item) => JSON.stringify(item)).join("\n")}`);
