@@ -14,6 +14,7 @@
     "check:env": "npm run build && node dist/scripts/checkProductionEnv.js",
     "cleanup:tombstones": "npm run build && node dist/scripts/cleanupTombstones.js",
     "rebuild:soft-delete-indexes": "npm run build && node dist/scripts/rebuildSoftDeleteIndexes.js",
+    "rebuild:sync-mutation-indexes": "npm run build && node dist/scripts/rebuildSyncMutationLogIndexes.js",
     "reconcile:entitlements": "npx ts-node scripts/reconcile-entitlements.ts"
   },
   "engines": {

@@ -51,7 +51,18 @@ const syncMutationLogSchema = new Schema(
 );
 
 syncMutationLogSchema.index({ userId: 1, mutationId: 1 }, { unique: true });
-syncMutationLogSchema.index({ userId: 1, idempotencyKey: 1 }, { unique: true, sparse: true });
+// Partial unique index: chỉ áp dụng khi idempotencyKey là chuỗi thực sự.
+// Một index sparse cũ vẫn coi nhiều bản ghi idempotencyKey=null là trùng nhau
+// (E11000), khiến mutation thứ 2 trở đi của cùng user thất bại. Partial loại bỏ
+// hoàn toàn null/absent khỏi index.
+syncMutationLogSchema.index(
+  { userId: 1, idempotencyKey: 1 },
+  {
+    unique: true,
+    name: "sync_mutation_idempotency_unique",
+    partialFilterExpression: { idempotencyKey: { $type: "string" } },
+  },
+);
 
 export type SyncMutationLogDocument = {
   _id: string;
