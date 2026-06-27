@@ -100,6 +100,7 @@ describe("production smoke harness guards", () => {
     expect(smokeScript).toContain('pathname === "/api/auth/profile"');
     expect(smokeScript).toContain('pathname === "/api/goals"');
     expect(smokeScript).toContain('pathname === "/api/billing/entitlement"');
+    expect(smokeScript).toContain('pathname === "/api/plans"');
     expect(smokeScript).toContain('/^\\/api\\/plans\\/[^/]+$/.test(pathname)');
     expect(smokeScript).toContain('pathname === "/api/sync/12-week/pull"');
     expect(smokeScript).toContain(

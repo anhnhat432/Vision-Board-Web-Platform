@@ -505,6 +505,7 @@ function isExpectedBackgroundRateLimit(event) {
       (method === "POST" && pathname === "/api/auth/profile") ||
       (method === "GET" && pathname === "/api/goals") ||
       (method === "GET" && pathname === "/api/billing/entitlement") ||
+      (method === "GET" && pathname === "/api/plans") ||
       (method === "GET" && /^\/api\/plans\/[^/]+$/.test(pathname)) ||
       (method === "GET" && pathname === "/api/sync/12-week/pull")
     );
