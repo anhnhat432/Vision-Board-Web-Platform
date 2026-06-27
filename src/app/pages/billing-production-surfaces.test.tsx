@@ -625,6 +625,46 @@ describe("production billing surfaces", () => {
   );
 
   it(
+    "does not request protected payment history while email is unverified",
+    async () => {
+      const apiClient = stubRealBillingEnv("casso");
+      stubAuthContext({
+        email: "billing-user@example.test",
+        emailVerified: false,
+      });
+      const { BillingPlan } = await import("./BillingPlan");
+
+      const router = createMemoryRouter(
+        [{ path: "/billing/plan", element: <BillingPlan /> }],
+        {
+          initialEntries: ["/billing/plan"],
+        },
+      );
+      render(<RouterProvider router={router} />);
+
+      await waitFor(() => {
+        expect(screen.getByTestId("billing-payment-history")).toHaveAttribute(
+          "data-payment-history-state",
+          "email-unverified",
+        );
+      });
+      expect(
+        screen.getByText(
+          /Xác thực email để xem lịch sử thanh toán/i,
+        ),
+      ).toBeInTheDocument();
+      await waitFor(() => {
+        expect(
+          apiClient.get.mock.calls.some(
+            ([path]) => path === "/billing/payment-history",
+          ),
+        ).toBe(false);
+      });
+    },
+    UI_TEST_TIMEOUT_MS,
+  );
+
+  it(
     "localizes payment history rate-limit errors",
     async () => {
       stubRealBillingEnv(

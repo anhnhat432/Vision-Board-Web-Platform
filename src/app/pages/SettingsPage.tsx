@@ -112,7 +112,15 @@ function formatSyncTime(value: string | null): string {
   if (!value) return "Chưa có lần đồng bộ tài khoản";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "Chưa có lần đồng bộ tài khoản";
-  return `Lần cuối: ${date.toLocaleString("vi-VN")}`;
+  return `Lần cuối: ${new Intl.DateTimeFormat("vi-VN", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    day: "numeric",
+    month: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).format(date)}`;
 }
 
 function getAccountInitial(label: string): string {

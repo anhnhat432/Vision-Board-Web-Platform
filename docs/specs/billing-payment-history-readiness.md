@@ -25,10 +25,11 @@
 1. WHEN a signed-in real-mode user opens `/billing/plan`, THE system SHALL load payment history through the protected backend endpoint.
 2. WHILE payment history is loading too long, THE system SHALL stop waiting, show a visible retryable error, and not imply payment or entitlement loss.
 3. WHERE the user is signed out, THE system SHALL not call protected payment-history and SHALL show an account-bound signed-out state.
-4. WHERE payment history resolves empty, THE system SHALL show a stable empty state.
-5. WHERE production smoke checks `/billing/plan`, THE smoke SHALL wait on explicit DOM/state markers instead of brittle text-only hydration.
-6. WHERE production smoke lacks `PROD_SMOKE_EMAIL` / `PROD_SMOKE_PASSWORD`, THE smoke SHALL fail before launching a browser unless `PROD_SMOKE_ALLOW_GENERATED_ACCOUNT=1` explicitly allows a generated QA signup.
-7. WHERE production smoke is run through GitHub Actions or the launch runbook, THE operator contract SHALL name only the fixed secrets the smoke scripts actually read: `PROD_SMOKE_EMAIL` and `PROD_SMOKE_PASSWORD`.
+4. WHERE the signed-in user's email is not verified, THE system SHALL not call protected payment-history and SHALL show an email-verification state instead of a network error.
+5. WHERE payment history resolves empty, THE system SHALL show a stable empty state.
+6. WHERE production smoke checks `/billing/plan`, THE smoke SHALL wait on explicit DOM/state markers instead of brittle text-only hydration.
+7. WHERE production smoke lacks `PROD_SMOKE_EMAIL` / `PROD_SMOKE_PASSWORD`, THE smoke SHALL fail before launching a browser unless `PROD_SMOKE_ALLOW_GENERATED_ACCOUNT=1` explicitly allows a generated QA signup.
+8. WHERE production smoke is run through GitHub Actions or the launch runbook, THE operator contract SHALL name only the fixed secrets the smoke scripts actually read: `PROD_SMOKE_EMAIL` and `PROD_SMOKE_PASSWORD`.
 
 ## 5. Data, Storage, and Sync Constraints
 
@@ -56,6 +57,7 @@
 - [x] payment history request times out into a retryable visible error before 30s.
 - [x] payment history section exposes stable `data-payment-history-state` values.
 - [x] signed-out real-mode billing page does not call `/billing/payment-history`.
+- [x] unverified signed-in real-mode billing page does not call `/billing/payment-history` and exposes `data-payment-history-state="email-unverified"`.
 - [x] production quick smoke waits on the stable state marker.
 - [x] production smoke scripts require explicit credentials or an explicit generated-account opt-in before touching the live app.
 - [x] production smoke workflow/runbook do not declare unused fixed-secret names outside `PROD_SMOKE_EMAIL` and `PROD_SMOKE_PASSWORD`.

@@ -188,12 +188,15 @@ export function BillingPlan() {
   const returnStatus = searchParams.get("status");
   const isCheckoutReturn = returnStatus === "success" && realMode;
   const signedInUserId = authContext?.user?.uid ?? null;
-  const canLoadPaymentHistory = realMode && signedInUserId !== null;
+  const emailNeedsVerification = authContext?.user ? !canRequestRefund(authContext.user) : false;
+  const canLoadPaymentHistory = realMode && signedInUserId !== null && !emailNeedsVerification;
 
   const { paymentHistory, setPaymentHistory, isLoadingPaymentHistory, paymentHistoryError, loadPaymentHistory } =
     usePaymentHistory(canLoadPaymentHistory);
   const paymentHistoryState = !canLoadPaymentHistory
-    ? "signed-out"
+    ? signedInUserId === null
+      ? "signed-out"
+      : "email-unverified"
     : isLoadingPaymentHistory
       ? "loading"
       : paymentHistoryError
@@ -212,7 +215,6 @@ export function BillingPlan() {
   const billingStatus = useMemo(() => getBillingProviderStatus(), []);
   const paidCheckoutDisabled = isPaidCheckoutDisabled();
   const profileEmail = authContext?.user?.email?.trim() ?? "";
-  const emailNeedsVerification = authContext?.user ? !canRequestRefund(authContext.user) : false;
   const subscription = userData.subscription;
   const expiryInfo = useMemo(() => getBillingExpiryInfo(subscription), [subscription]);
   const graceState = useMemo(() => getSubscriptionGraceState(userData), [userData]);
@@ -945,10 +947,18 @@ export function BillingPlan() {
 
           {!canLoadPaymentHistory && (
             <div className="flex flex-col gap-3 rounded-[13px] border border-app-line bg-app-bg p-4 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-sm text-app-ink-muted">Đăng nhập để xem lịch sử thanh toán gắn với tài khoản này.</p>
-              <Button variant="outline" size="sm" asChild>
-                <Link to="/login">Đăng nhập</Link>
-              </Button>
+              {signedInUserId === null ? (
+                <>
+                  <p className="text-sm text-app-ink-muted">Đăng nhập để xem lịch sử thanh toán gắn với tài khoản này.</p>
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to="/login">Đăng nhập</Link>
+                  </Button>
+                </>
+              ) : (
+                <p className="text-sm text-app-ink-muted">
+                  Xác thực email để xem lịch sử thanh toán và biên nhận gắn với tài khoản này.
+                </p>
+              )}
             </div>
           )}
           {canLoadPaymentHistory && isLoadingPaymentHistory && (

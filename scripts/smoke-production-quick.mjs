@@ -803,7 +803,7 @@ async function run() {
       const paymentHistoryStateHandle = await page.waitForFunction(() => {
         const paymentHistory = document.querySelector('[data-testid="billing-payment-history"]');
         const state = paymentHistory?.getAttribute("data-payment-history-state");
-        if (state === "empty" || state === "ready" || state === "error") return state;
+        if (state === "empty" || state === "ready" || state === "email-unverified" || state === "error") return state;
         return false;
       });
       const paymentHistoryState = await paymentHistoryStateHandle.jsonValue();
@@ -813,6 +813,9 @@ async function run() {
       assertNoVisibleFailure(text, "billing management");
       if (paymentHistoryState === "error") {
         throw new Error(`Billing payment history endpoint failed on production.\n${await getDiagnostics(page)}`);
+      }
+      if (paymentHistoryState === "email-unverified" && !normalizeText(text).includes("xac thuc email")) {
+        throw new Error(`Billing payment history is email-unverified without clear verification copy.\n${await getDiagnostics(page)}`);
       }
       if (/Plus demo|Checkout dùng thử|mock checkout/i.test(text)) {
         throw new Error("Production billing page still shows demo/mock billing copy");
