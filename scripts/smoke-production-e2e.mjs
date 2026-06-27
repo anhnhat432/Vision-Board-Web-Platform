@@ -647,7 +647,7 @@ async function clickFirstTodayTaskCheckbox(page) {
 }
 
 async function ensureWeeklyReviewFormVisible(page) {
-  const reviewFlow = page.locator('[data-testid="weekly-review-flow"]');
+  const reviewFlow = page.locator('[data-testid="weekly-review-flow"]:visible').first();
   if (await reviewFlow.isVisible().catch(() => false)) return;
 
   const startEarlyButton = page.getByRole("button", { name: /bắt đầu review sớm/i });

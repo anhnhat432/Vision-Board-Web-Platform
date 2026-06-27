@@ -23,7 +23,7 @@ describe("production smoke harness guards", () => {
 
   it("opens the real weekly review flow before filling review inputs", () => {
     expect(smokeScript).toContain("async function ensureWeeklyReviewFormVisible(page)");
-    expect(smokeScript).toContain('[data-testid="weekly-review-flow"]');
+    expect(smokeScript).toContain('[data-testid="weekly-review-flow"]:visible');
     expect(smokeScript).toContain('await ensureWeeklyReviewFormVisible(page);');
     expect(smokeScript).toContain('getByRole("button", { name: /bắt đầu review sớm/i })');
   });
