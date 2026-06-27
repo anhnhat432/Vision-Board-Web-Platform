@@ -91,6 +91,20 @@ describe("production smoke harness guards", () => {
     expect(smokeScript).toContain("await assertSettingsAccountLifecycleSurface(page);");
   });
 
+  it("fails full smoke early when the fixed sync account is email-unverified", () => {
+    expect(smokeScript).toContain("async function assertProductionSmokeAccountReadyForSync(page)");
+    expect(smokeScript).toContain("settings sync email-unverified blocker");
+    expect(smokeScript).toContain("backend /api/sync/12-week/* routes are expected to fail");
+    expect(smokeScript).toContain('await step("Production smoke account is verified for 12-week sync", async () => {');
+  });
+
+  it("can require verified sync during quick smoke warmup", () => {
+    expect(quickSmokeScript).toContain('const REQUIRE_VERIFIED_SYNC = process.env.PROD_SMOKE_REQUIRE_VERIFIED_SYNC === "1";');
+    expect(quickSmokeScript).toContain('REQUIRE_VERIFIED_SYNC && surface.state === "email_unverified"');
+    expect(quickSmokeScript).toContain("full production smoke cannot pass");
+    expect(quickSmokeScript).toContain("Backend /api/sync/12-week/* routes require verified email");
+  });
+
   it("keeps the settings sync-trust proof after successful account sync", () => {
     expect(smokeScript).toContain("async function assertSettingsSyncTrust(page)");
     expect(smokeScript).toContain('[data-testid="settings-sync-section"]');
@@ -105,12 +119,13 @@ describe("production smoke harness guards", () => {
     expect(smokeScript).toContain('(?:plans|tasks|weeks|metrics)(?:\\/|$)');
   });
 
-  it("uses the settings account sync control before waiting for backend sync proof", () => {
-    expect(smokeScript).toContain("async function triggerSettingsAccountSyncCheck(page)");
-    expect(smokeScript).toContain('[data-testid="settings-sync-section"]');
-    expect(smokeScript).toContain("await waitForEnabledButtonByNormalizedText(page, \"kiem tra sao luu\", 15_000);");
-    expect(smokeScript).toContain('await clickButtonByNormalizedText(page, "kiem tra sao luu");');
+  it("uses the real 12-week account sync control before waiting for backend sync proof", () => {
+    expect(smokeScript).toContain("async function triggerManualTwelveWeekAccountSync(page)");
+    expect(smokeScript).toContain("async function waitForManualTwelveWeekAccountSyncReady(page)");
+    expect(smokeScript).toContain('[data-tour-id="twelve-week-tab-settings"]');
+    expect(smokeScript).toContain('await clickButtonByNormalizedText(page, "dong bo tai khoan");');
+    expect(smokeScript).toContain("12-week account sync control ready");
     expect(smokeScript).toContain("visionboard_data_mutation_queue:auth:");
-    expect(smokeScript).toContain("await triggerSettingsAccountSyncCheck(page);");
+    expect(smokeScript).toContain("await triggerManualTwelveWeekAccountSync(page);");
   });
 });

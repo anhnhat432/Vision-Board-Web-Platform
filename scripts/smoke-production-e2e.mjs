@@ -752,12 +752,112 @@ async function waitForSyncQueueWork(page, timeoutMs = 10_000) {
   );
 }
 
-async function triggerSettingsAccountSyncCheck(page) {
+async function readManualTwelveWeekAccountSyncControl(page) {
+  return page.evaluate(() => {
+    const normalize = (text) =>
+      String(text ?? "")
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "")
+        .replace(/[\u0111\u0110]/g, "d")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase();
+    const buttons = Array.from(document.querySelectorAll("button"));
+    const button = buttons.find((candidate) => normalize(candidate.textContent).includes("dong bo tai khoan"));
+    const bodyText = normalize(document.body.textContent ?? "");
+
+    return {
+      buttonDisabled: button?.disabled ?? null,
+      buttonFound: Boolean(button),
+      buttonText: String(button?.textContent ?? "").replace(/\s+/g, " ").trim(),
+      profileReadyBlockerVisible: bodyText.includes("dang cho ho so tai khoan san sang"),
+      signedInBlockerVisible: bodyText.includes("can dang nhap de gui viec dang cho dong bo"),
+    };
+  });
+}
+
+async function waitForManualTwelveWeekAccountSyncReady(page) {
+  try {
+    return await waitForCondition(
+      "12-week account sync control ready",
+      async () => {
+        const control = await readManualTwelveWeekAccountSyncControl(page);
+        return control.buttonFound && control.buttonDisabled === false ? control : false;
+      },
+      75_000,
+      1_000,
+    );
+  } catch (error) {
+    throw new Error(
+      `${error.message}\nLast 12-week account sync control: ${JSON.stringify(
+        await readManualTwelveWeekAccountSyncControl(page).catch(() => null),
+      )}\nLast queue summary: ${JSON.stringify(await getSyncQueueSummary(page).catch(() => null))}\n${await getDiagnostics(page)}`,
+    );
+  }
+}
+
+async function triggerManualTwelveWeekAccountSync(page) {
   await waitForSyncQueueWork(page).catch(() => null);
+  await page.locator('[data-tour-id="twelve-week-tab-settings"]').click();
+  await waitForManualTwelveWeekAccountSyncReady(page);
+  await clickButtonByNormalizedText(page, "dong bo tai khoan");
+}
+
+async function readSettingsSyncPreflightSurface(page) {
+  return page.evaluate(() => {
+    const readText = (selector) =>
+      document.querySelector(selector)?.textContent?.trim() ?? "";
+    const syncButton = Array.from(document.querySelectorAll("button")).find((button) =>
+      String(button.textContent ?? "")
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "")
+        .replace(/[\u0111\u0110]/g, "d")
+        .toLowerCase()
+        .includes("kiem tra sao luu"),
+    );
+
+    return {
+      sectionVisible: Boolean(document.querySelector('[data-testid="settings-sync-section"]')),
+      statusCopy: readText('[data-testid="settings-sync-status-copy"]'),
+      emailUnverifiedCopy: readText('[data-testid="settings-sync-email-unverified"]'),
+      syncButtonDisabled: syncButton?.disabled ?? null,
+    };
+  });
+}
+
+function hasSettingsSyncEmailUnverifiedBlocker(surface) {
+  const statusCopy = normalizeText(surface.statusCopy);
+  const emailUnverifiedCopy = normalizeText(surface.emailUnverifiedCopy);
+  return (
+    emailUnverifiedCopy.includes("email chua xac thuc") ||
+    statusCopy.includes("chua the sao luu len tai khoan")
+  );
+}
+
+async function assertProductionSmokeAccountReadyForSync(page) {
   await page.goto(`${BASE_URL}/settings#account-sync`, { waitUntil: "domcontentloaded" });
   await page.locator('[data-testid="settings-sync-section"]').waitFor({ timeout: DEFAULT_TIMEOUT_MS });
-  await waitForEnabledButtonByNormalizedText(page, "kiem tra sao luu", 15_000);
-  await clickButtonByNormalizedText(page, "kiem tra sao luu");
+
+  await clickButtonByNormalizedText(page, "kiem tra sao luu").catch(() => false);
+  const blockerSurface = await waitForCondition(
+    "settings sync email-unverified blocker",
+    async () => {
+      const surface = await readSettingsSyncPreflightSurface(page);
+      return hasSettingsSyncEmailUnverifiedBlocker(surface) ? surface : false;
+    },
+    8_000,
+    500,
+  ).catch(() => null);
+
+  if (blockerSurface) {
+    throw new Error(
+      `PROD_SMOKE_EMAIL is email-unverified for sync, so backend /api/sync/12-week/* routes are expected to fail. Verify the smoke account email or replace the secret.\nLast sync surface: ${JSON.stringify(
+        blockerSurface,
+      )}\n${await getDiagnostics(page)}`,
+    );
+  }
+
+  log("Production smoke sync preflight found no email-unverified blocker");
 }
 
 async function assertSettingsSyncTrust(page) {
@@ -1020,7 +1120,7 @@ async function exerciseTwelveWeekSaveReloadAndSync(page, apiEvents) {
     );
   });
 
-  await triggerSettingsAccountSyncCheck(page);
+  await triggerManualTwelveWeekAccountSync(page);
   await waitForApiSuccess(
     apiEvents,
     /\/api\/(?:sync\/12-week\/(?:mutations|pull)(?:\?|$)|(?:plans|tasks|weeks|metrics)(?:\/|$))/,
@@ -1218,6 +1318,10 @@ async function run() {
     await step("Authentication", async () => {
       await authenticate(page, "/12-week-system");
       await assertCleanPage(page, "authenticated workspace");
+    });
+
+    await step("Production smoke account is verified for 12-week sync", async () => {
+      await assertProductionSmokeAccountReadyForSync(page);
     });
 
     await step("Settings account lifecycle actions are reachable", async () => {
