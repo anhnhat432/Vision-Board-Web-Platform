@@ -602,11 +602,15 @@ async function seedFullSmokeData(page) {
   );
 }
 
-async function waitForSystemLoaded(page) {
+async function waitForSystemLoaded(page, options = {}) {
+  const requireTodayQueue = options.requireTodayQueue ?? options.requireTactic !== false;
+  const loadedSelector = requireTodayQueue
+    ? '[data-tour-id="system-today-queue"]'
+    : '[data-tour-id="system-today-queue"]:visible, [data-testid="progress-trend-hero"]:visible';
   try {
     // Tài khoản đã đăng nhập dùng dữ liệu cloud làm nguồn, nên không ép đúng plan
     // seed cụ thể. Chỉ cần hệ 12 tuần render một plan đang chạy (hàng việc hôm nay).
-    await page.locator('[data-tour-id="system-today-queue"]').first().waitFor({ timeout: DEFAULT_TIMEOUT_MS });
+    await page.locator(loadedSelector).first().waitFor({ timeout: DEFAULT_TIMEOUT_MS });
   } catch (error) {
     throw new Error(`12-week system did not render an active plan.\n${await getDiagnostics(page)}\n${error.message}`);
   }

@@ -44,6 +44,13 @@ describe("production smoke harness guards", () => {
     );
   });
 
+  it("allows responsive progress QA to wait on progress UI instead of the Today queue", () => {
+    expect(smokeScript).toContain("async function waitForSystemLoaded(page, options = {})");
+    expect(smokeScript).toContain("options.requireTodayQueue ?? options.requireTactic !== false");
+    expect(smokeScript).toContain('[data-testid="progress-trend-hero"]:visible');
+    expect(smokeScript).toContain("await waitForSystemLoaded(page, { requireTactic: false });");
+  });
+
   it("does not inject window.confirm into the runtime page", () => {
     expect(smokeScript).not.toContain("window.confirm = () => true;");
   });
