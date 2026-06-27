@@ -872,17 +872,163 @@ async function clickFirstTodayTaskCheckbox(page) {
   }
 }
 
-async function ensureWeeklyReviewFormVisible(page) {
-  const reviewFlow = page.locator('[data-testid="weekly-review-flow"]:visible').first();
-  if (await reviewFlow.isVisible().catch(() => false)) return;
+async function hasVisibleWeeklyReviewForm(page) {
+  return page.locator('[data-testid="weekly-review-flow"]:visible').first().isVisible().catch(() => false);
+}
 
-  await clickButtonByNormalizedText(page, "bat dau review som");
+async function readWeeklyReviewSurface(page) {
+  return page.evaluate(() => {
+    const normalize = (value) =>
+      String(value ?? "")
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "")
+        .replace(/\u0111/g, "d")
+        .replace(/\u0110/g, "d")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase();
+    const isVisible = (element) => {
+      if (!element) return false;
+      const style = window.getComputedStyle(element);
+      const rect = element.getBoundingClientRect();
+      return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
+    };
 
-  try {
-    await reviewFlow.waitFor({ timeout: DEFAULT_TIMEOUT_MS });
-  } catch (error) {
-    throw new Error(`Could not open weekly review flow after start-early action.\n${await getDiagnostics(page)}\n${error.message}`);
+    return {
+      shellVisible: isVisible(document.querySelector('[data-testid="weekly-review-shell"]')),
+      formVisible: isVisible(document.querySelector('[data-testid="weekly-review-flow"]')),
+      summaryVisible: isVisible(document.querySelector('[data-testid="weekly-review-summary"]')),
+      buttons: Array.from(document.querySelectorAll("button"))
+        .map((button) => ({
+          text: normalize(button.textContent),
+          disabled: button.disabled,
+          visible: isVisible(button),
+        }))
+        .filter((button) => button.visible)
+        .slice(0, 30),
+    };
+  });
+}
+
+async function prepareWeeklyReviewFormData(page) {
+  const result = await page.evaluate(() => {
+    const storageKey = "visionboard_user_data";
+    const authOwnerUid = localStorage.getItem(`${storageKey}:auth_owner_uid`)?.trim() || null;
+    const authScopedKey = authOwnerUid ? `${storageKey}:auth:${encodeURIComponent(authOwnerUid)}` : null;
+    const keys = Array.from(
+      new Set(
+        [
+          storageKey,
+          authScopedKey,
+          ...Array.from({ length: localStorage.length }, (_, index) => localStorage.key(index)).filter((key) =>
+            key?.startsWith(`${storageKey}:auth:`),
+          ),
+        ].filter(Boolean),
+      ),
+    );
+    const preferredGoalId =
+      localStorage.getItem("latest_12_week_system_goal_id") ||
+      localStorage.getItem("latest_12_week_goal_id") ||
+      localStorage.getItem("latest_12_week_plan_goal_id");
+    const todayReviewDay = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][
+      new Date().getDay()
+    ];
+    const patched = [];
+
+    for (const key of keys) {
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+
+      let data;
+      try {
+        data = JSON.parse(raw);
+      } catch {
+        continue;
+      }
+
+      const goals = Array.isArray(data.goals) ? data.goals : [];
+      const goalIndex = goals.findIndex((goal) => goal?.id === preferredGoalId && goal?.twelveWeekSystem);
+      const fallbackGoalIndex = goals.findIndex((goal) => goal?.twelveWeekSystem);
+      const selectedGoalIndex = goalIndex >= 0 ? goalIndex : fallbackGoalIndex;
+      if (selectedGoalIndex < 0) continue;
+
+      const goal = goals[selectedGoalIndex];
+      const system = goal.twelveWeekSystem;
+      if (!system) continue;
+
+      const currentWeek = Math.max(Number(system.currentWeek) || 1, 1);
+      const nextSystem = {
+        ...system,
+        reviewDay: todayReviewDay,
+        weeklyReviews: Array.isArray(system.weeklyReviews)
+          ? system.weeklyReviews.filter((item) => item?.weekNumber !== currentWeek)
+          : [],
+        scoreboard: Array.isArray(system.scoreboard)
+          ? system.scoreboard.map((entry) =>
+              entry?.weekNumber === currentWeek ? { ...entry, reviewDone: false } : entry,
+            )
+          : system.scoreboard,
+      };
+
+      const nextGoal = { ...goal, twelveWeekSystem: nextSystem };
+      goals[selectedGoalIndex] = nextGoal;
+      const serialized = JSON.stringify({ ...data, goals });
+      localStorage.setItem(key, serialized);
+      if (key === storageKey && authScopedKey) {
+        localStorage.setItem(authScopedKey, serialized);
+      }
+      localStorage.setItem("latest_12_week_goal_id", nextGoal.id);
+      localStorage.setItem("latest_12_week_system_goal_id", nextGoal.id);
+      localStorage.setItem("latest_12_week_plan_goal_id", nextGoal.id);
+      patched.push({ key, goalId: nextGoal.id, weekNumber: currentWeek, reviewDay: todayReviewDay });
+    }
+
+    if (patched.length > 0) {
+      window.dispatchEvent(new StorageEvent("storage", { key: storageKey }));
+      window.dispatchEvent(new CustomEvent("visionboard:user-data-updated"));
+    }
+
+    return patched.length > 0 ? { ok: true, patched } : { ok: false, reason: "no-active-12-week-goal" };
+  });
+
+  if (!result.ok) {
+    throw new Error(`Could not prepare weekly review smoke form: ${JSON.stringify(result)}\n${await getDiagnostics(page)}`);
   }
+
+  log(`Prepared weekly review smoke form in ${result.patched.length} local data store(s)`);
+}
+
+async function ensureWeeklyReviewFormVisible(page) {
+  if (await hasVisibleWeeklyReviewForm(page)) return;
+
+  if (await tryClickButtonByNormalizedText(page, "bat dau review som")) {
+    await waitForCondition("weekly review flow after start-early action", () => hasVisibleWeeklyReviewForm(page));
+    return;
+  }
+
+  if (await tryClickButtonByNormalizedText(page, "chinh sua danh gia")) {
+    await waitForCondition("weekly review flow after edit action", () => hasVisibleWeeklyReviewForm(page));
+    return;
+  }
+
+  await prepareWeeklyReviewFormData(page);
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await waitForSystemLoaded(page);
+  await page.locator('[data-tour-id="twelve-week-tab-week"]').click();
+  await page.locator('[data-testid="weekly-review-shell"]').waitFor({ timeout: DEFAULT_TIMEOUT_MS });
+
+  if (await hasVisibleWeeklyReviewForm(page)) return;
+
+  if (await tryClickButtonByNormalizedText(page, "bat dau review som")) {
+    await waitForCondition("weekly review flow after prepared start-early action", () => hasVisibleWeeklyReviewForm(page));
+    return;
+  }
+
+  throw new Error(
+    `Could not open weekly review flow.\nSurface: ${JSON.stringify(
+      await readWeeklyReviewSurface(page).catch(() => null),
+    )}\n${await getDiagnostics(page)}`,
+  );
 }
 
 async function getSyncQueueSummary(page) {
