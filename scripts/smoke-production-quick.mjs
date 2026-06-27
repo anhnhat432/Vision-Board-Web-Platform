@@ -833,16 +833,33 @@ async function run() {
             await page.goto(`${BASE_URL}/billing`, { waitUntil: "domcontentloaded" });
           }
 
-          await page.waitForFunction(() => {
-            const paymentHistory = document.querySelector('[data-testid="billing-payment-history"]');
-            const upgradeCta = document.querySelector('[data-testid="billing-plan-upgrade-cta"]');
-            const paymentLockBanner = document.querySelector('[data-testid="paid-checkout-disabled-banner"]');
-            return (
-              location.pathname === "/billing/plan" &&
-              paymentHistory !== null &&
-              (upgradeCta !== null || paymentLockBanner !== null)
-            );
-          });
+          await page
+            .waitForFunction(() => {
+              const paymentHistory = document.querySelector('[data-testid="billing-payment-history"]');
+              const upgradeCta = document.querySelector('[data-testid="billing-plan-upgrade-cta"]');
+              const paymentLockBanner = document.querySelector('[data-testid="paid-checkout-disabled-banner"]');
+              return (
+                location.pathname === "/billing/plan" &&
+                paymentHistory !== null &&
+                (upgradeCta !== null || paymentLockBanner !== null)
+              );
+            })
+            .catch(async (error) => {
+              const surface = await page
+                .evaluate(() => ({
+                  pathname: location.pathname,
+                  hasPaymentHistory: !!document.querySelector('[data-testid="billing-payment-history"]'),
+                  hasUpgradeCta: !!document.querySelector('[data-testid="billing-plan-upgrade-cta"]'),
+                  hasLockBanner: !!document.querySelector('[data-testid="paid-checkout-disabled-banner"]'),
+                  paymentHistoryState: document
+                    .querySelector('[data-testid="billing-payment-history"]')
+                    ?.getAttribute("data-payment-history-state"),
+                }))
+                .catch(() => null);
+              throw new Error(
+                `Billing plan page did not reach expected state: ${JSON.stringify(surface)}\n${error.message}\n${await getDiagnostics(page)}`,
+              );
+            });
           const paymentHistoryStateHandle = await page.waitForFunction(() => {
             const paymentHistory = document.querySelector('[data-testid="billing-payment-history"]');
             const state = paymentHistory?.getAttribute("data-payment-history-state");
