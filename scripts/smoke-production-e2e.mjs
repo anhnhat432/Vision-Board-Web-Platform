@@ -706,6 +706,40 @@ async function waitForEnabledButtonByNormalizedText(page, normalizedNeedle, time
   );
 }
 
+async function submitBillingConfirmCheckout(page) {
+  try {
+    const receiptEmail = page.locator("#receipt-email");
+    await receiptEmail.waitFor({ timeout: DEFAULT_TIMEOUT_MS });
+
+    const emailState = await receiptEmail.evaluate((element) => ({
+      disabled: element.disabled,
+      readOnly: element.readOnly,
+      value: element.value,
+    }));
+
+    if (!emailState.value.trim()) {
+      if (emailState.disabled || emailState.readOnly) {
+        throw new Error("receipt email is empty but cannot be edited");
+      }
+      await receiptEmail.fill(EMAIL);
+    }
+
+    const agreementCheckbox = page.locator('input[type="checkbox"]').first();
+    await agreementCheckbox.waitFor({ timeout: DEFAULT_TIMEOUT_MS });
+    if (!(await agreementCheckbox.isChecked())) {
+      await agreementCheckbox.check();
+    }
+
+    await waitForEnabledButtonByNormalizedText(page, "xac nhan va tao thanh toan");
+    await clickButtonByNormalizedText(page, "xac nhan va tao thanh toan");
+    log("Submitted billing checkout confirmation form");
+  } catch (error) {
+    throw new Error(
+      `Could not submit billing checkout confirmation form: ${error.message}\n${await getDiagnostics(page)}`,
+    );
+  }
+}
+
 async function hasOpenTodayTaskCheckbox(page) {
   await page.locator('[data-tour-id="system-today-queue"]').waitFor({ timeout: DEFAULT_TIMEOUT_MS });
   return page.evaluate(() => {
@@ -1676,6 +1710,7 @@ async function exerciseBilling(page, apiEvents) {
   const checkoutStartedAt = Date.now();
   await seedFullSmokeData(page);
   await page.goto(`${BASE_URL}/billing/checkout`, { waitUntil: "domcontentloaded" });
+  await submitBillingConfirmCheckout(page);
   await waitForApiSuccess(apiEvents, /\/api\/billing\/checkout-session(?:\?|$)/, "billing checkout session", {
     after: checkoutStartedAt,
     timeoutMs: DEFAULT_TIMEOUT_MS,

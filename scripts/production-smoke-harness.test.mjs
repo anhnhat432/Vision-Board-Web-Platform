@@ -56,6 +56,20 @@ describe("production smoke harness guards", () => {
     expect(smokeScript).toContain("await assertPaidCheckoutLocked(page, apiEvents);");
   });
 
+  it("submits the billing confirm form before waiting for a checkout session", () => {
+    expect(smokeScript).toContain("async function submitBillingConfirmCheckout(page)");
+    expect(smokeScript).toContain("#receipt-email");
+    expect(smokeScript).toContain('input[type="checkbox"]');
+    expect(smokeScript).toContain('await waitForEnabledButtonByNormalizedText(page, "xac nhan va tao thanh toan");');
+    expect(smokeScript).toContain('await clickButtonByNormalizedText(page, "xac nhan va tao thanh toan");');
+    expect(smokeScript).toContain("Submitted billing checkout confirmation form");
+
+    const submitIndex = smokeScript.indexOf("await submitBillingConfirmCheckout(page);");
+    const checkoutSessionWaitIndex = smokeScript.indexOf('"billing checkout session"');
+    expect(submitIndex).toBeGreaterThan(0);
+    expect(checkoutSessionWaitIndex).toBeGreaterThan(submitIndex);
+  });
+
   it("keeps the real-mode mock-checkout proof step", () => {
     expect(smokeScript).toContain("async function assertMockCheckoutNotExposed(page)");
     expect(smokeScript).toContain("/billing/mock-checkout?session=legacy_checkout_test");
