@@ -128,4 +128,15 @@ describe("production smoke harness guards", () => {
     expect(smokeScript).toContain("visionboard_data_mutation_queue:auth:");
     expect(smokeScript).toContain("await triggerManualTwelveWeekAccountSync(page);");
   });
+
+  it("prepares an open Today task before mutating the real production smoke plan", () => {
+    expect(smokeScript).toContain("const SMOKE_TASK_ID = `task_full_today_${TIMESTAMP}`;");
+    expect(smokeScript).toContain("async function hasOpenTodayTaskCheckbox(page)");
+    expect(smokeScript).toContain("async function ensureOpenTodayTaskAvailable(page)");
+    expect(smokeScript).toContain("Prepared open Today smoke task");
+    expect(smokeScript).toContain("dailyCheckIns.filter((item) => item?.date !== todayKey)");
+    expect(smokeScript).toContain("weeklyReviews.filter((item) => item?.weekNumber !== currentWeek)");
+    expect(smokeScript).toContain('window.dispatchEvent(new CustomEvent("visionboard:user-data-updated"));');
+    expect(smokeScript).toContain("await ensureOpenTodayTaskAvailable(page);");
+  });
 });

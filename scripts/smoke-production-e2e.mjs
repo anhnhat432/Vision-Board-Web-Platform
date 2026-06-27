@@ -18,6 +18,7 @@ const SKIP_CHECKOUT = process.env.PROD_SMOKE_SKIP_CHECKOUT === "1";
 const GOAL_ID = `goal_full_smoke_${TIMESTAMP}`;
 const GOAL_TITLE = `Full production smoke ${TIMESTAMP}`;
 const TACTIC_TITLE = "Review execution rhythm";
+const SMOKE_TASK_ID = `task_full_today_${TIMESTAMP}`;
 const TODAY_TASK_TITLE = `Full smoke today task ${TIMESTAMP}`;
 const CHECKIN_NOTE = `Full smoke check-in ${TIMESTAMP}`;
 const WEEKLY_REVIEW_OUTPUT = `Full smoke weekly review ${TIMESTAMP}`;
@@ -147,7 +148,7 @@ function createFullSmokeUserData() {
           weeklyPlans,
           taskInstances: [
             {
-              id: "task_full_today",
+              id: SMOKE_TASK_ID,
               weekNumber: 1,
               scheduledDate: today,
               title: TODAY_TASK_TITLE,
@@ -649,6 +650,206 @@ async function waitForEnabledButtonByNormalizedText(page, normalizedNeedle, time
   );
 }
 
+async function hasOpenTodayTaskCheckbox(page) {
+  await page.locator('[data-tour-id="system-today-queue"]').waitFor({ timeout: DEFAULT_TIMEOUT_MS });
+  return page.evaluate(() => {
+    const queue = document.querySelector('[data-tour-id="system-today-queue"]');
+    if (!queue) return false;
+    return Array.from(queue.querySelectorAll('[role="checkbox"], input[type="checkbox"]')).some((item) => {
+      if (item.disabled) return false;
+      if (item.matches?.('input[type="checkbox"]')) return !item.checked;
+      return item.getAttribute("aria-checked") !== "true";
+    });
+  });
+}
+
+async function ensureOpenTodayTaskAvailable(page) {
+  if (await hasOpenTodayTaskCheckbox(page)) return;
+
+  const result = await page.evaluate(
+    ({ taskId, taskTitle, tacticTitle }) => {
+      const storageKey = "visionboard_user_data";
+      const authOwnerUid = localStorage.getItem(`${storageKey}:auth_owner_uid`)?.trim() || null;
+      const authScopedKey = authOwnerUid ? `${storageKey}:auth:${encodeURIComponent(authOwnerUid)}` : null;
+      const keys = Array.from(
+        new Set(
+          [
+            storageKey,
+            authScopedKey,
+            ...Array.from({ length: localStorage.length }, (_, index) => localStorage.key(index)).filter((key) =>
+              key?.startsWith(`${storageKey}:auth:`),
+            ),
+          ].filter(Boolean),
+        ),
+      );
+      const preferredGoalId =
+        localStorage.getItem("latest_12_week_system_goal_id") ||
+        localStorage.getItem("latest_12_week_goal_id") ||
+        localStorage.getItem("latest_12_week_plan_goal_id");
+
+      const formatDateKey = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      };
+      const parseDateKey = (value) => {
+        const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value ?? ""));
+        if (!match) return null;
+        return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+      };
+      const getStartOfWeek = (date, weekStartsOn) => {
+        const start = new Date(date);
+        start.setHours(0, 0, 0, 0);
+        const offset = weekStartsOn === "Sunday" ? 0 : 1;
+        const delta = (start.getDay() - offset + 7) % 7;
+        start.setDate(start.getDate() - delta);
+        return start;
+      };
+      const getCalendarDayIndex = (date) =>
+        Math.floor(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86_400_000);
+      const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+      const getCurrentWeek = (system, referenceDate) => {
+        const totalWeeks = Math.max(Number(system.totalWeeks) || 12, 1);
+        if (system.status === "completed") return totalWeeks;
+        const weekStartsOn = system.weekStartsOn ?? "Monday";
+        const parsedStart = parseDateKey(system.startDate);
+        const startDate = parsedStart
+          ? getStartOfWeek(parsedStart, weekStartsOn)
+          : getStartOfWeek(referenceDate, weekStartsOn);
+        const calculatedWeek = Math.floor((getCalendarDayIndex(referenceDate) - getCalendarDayIndex(startDate)) / 7) + 1;
+        return clamp(Math.max(Number(system.currentWeek) || 1, calculatedWeek, 1), 1, totalWeeks);
+      };
+
+      const todayKey = formatDateKey(new Date());
+      const now = Date.now();
+      const patched = [];
+
+      for (const key of keys) {
+        const raw = localStorage.getItem(key);
+        if (!raw) continue;
+
+        let data;
+        try {
+          data = JSON.parse(raw);
+        } catch {
+          continue;
+        }
+
+        const goals = Array.isArray(data.goals) ? data.goals : [];
+        const goalIndex = goals.findIndex((goal) => goal?.id === preferredGoalId && goal?.twelveWeekSystem);
+        const fallbackGoalIndex = goals.findIndex((goal) => goal?.twelveWeekSystem);
+        const selectedGoalIndex = goalIndex >= 0 ? goalIndex : fallbackGoalIndex;
+        if (selectedGoalIndex < 0) continue;
+
+        const goal = goals[selectedGoalIndex];
+        const system = goal.twelveWeekSystem;
+        if (!system) continue;
+
+        const currentWeek = getCurrentWeek(system, new Date());
+        const leadIndicators = Array.isArray(system.leadIndicators) ? [...system.leadIndicators] : [];
+        const primaryIndicator = leadIndicators[0] ?? {
+          id: "tactic_full_review",
+          name: tacticTitle,
+          target: "1",
+          unit: "review/day",
+          type: "core",
+          priority: 1,
+          schedule: [0, 1, 2, 3, 4, 5, 6],
+        };
+        if (leadIndicators.length === 0) leadIndicators.push(primaryIndicator);
+
+        const task = {
+          id: taskId,
+          weekNumber: currentWeek,
+          scheduledDate: todayKey,
+          title: taskTitle,
+          leadIndicatorName: primaryIndicator.name ?? tacticTitle,
+          isCore: primaryIndicator.type !== "optional",
+          completed: false,
+          completedAt: undefined,
+          lastModifiedAt: now,
+          tacticId: primaryIndicator.id ?? primaryIndicator.name ?? "tactic_full_review",
+          skipped: false,
+        };
+        const taskInstances = Array.isArray(system.taskInstances) ? system.taskInstances : [];
+        const nextTaskInstances = taskInstances.some((item) => item?.id === taskId)
+          ? taskInstances.map((item) => (item?.id === taskId ? { ...item, ...task } : item))
+          : [...taskInstances, task];
+        const nextDailyCheckIns = Array.isArray(system.dailyCheckIns)
+          ? system.dailyCheckIns.filter((item) => item?.date !== todayKey)
+          : [];
+        const nextWeeklyReviews = Array.isArray(system.weeklyReviews)
+          ? system.weeklyReviews.filter((item) => item?.weekNumber !== currentWeek)
+          : [];
+        const nextScoreboard = Array.isArray(system.scoreboard)
+          ? system.scoreboard.map((entry) =>
+              entry?.weekNumber === currentWeek ? { ...entry, reviewDone: false } : entry,
+            )
+          : system.scoreboard;
+
+        const nextSystem = {
+          ...system,
+          currentWeek,
+          leadIndicators,
+          taskInstances: nextTaskInstances,
+          dailyCheckIns: nextDailyCheckIns,
+          weeklyReviews: nextWeeklyReviews,
+          scoreboard: nextScoreboard,
+        };
+        const goalTasks = Array.isArray(goal.tasks) ? goal.tasks : [];
+        const nextGoal = {
+          ...goal,
+          tasks: goalTasks.some((item) => item?.id === taskId)
+            ? goalTasks.map((item) => (item?.id === taskId ? { ...item, title: taskTitle, completed: false } : item))
+            : [...goalTasks, { id: taskId, title: taskTitle, completed: false }],
+          twelveWeekSystem: nextSystem,
+        };
+
+        goals[selectedGoalIndex] = nextGoal;
+        const serialized = JSON.stringify({ ...data, goals });
+        localStorage.setItem(key, serialized);
+        if (key === storageKey && authScopedKey) {
+          localStorage.setItem(authScopedKey, serialized);
+        }
+        localStorage.setItem("latest_12_week_goal_id", nextGoal.id);
+        localStorage.setItem("latest_12_week_system_goal_id", nextGoal.id);
+        localStorage.setItem("latest_12_week_plan_goal_id", nextGoal.id);
+        patched.push({ key, goalId: nextGoal.id, weekNumber: currentWeek, taskId });
+      }
+
+      if (patched.length > 0) {
+        window.dispatchEvent(new StorageEvent("storage", { key: storageKey }));
+        window.dispatchEvent(new CustomEvent("visionboard:user-data-updated"));
+      }
+
+      return patched.length > 0 ? { ok: true, patched } : { ok: false, reason: "no-active-12-week-goal" };
+    },
+    {
+      taskId: SMOKE_TASK_ID,
+      taskTitle: TODAY_TASK_TITLE,
+      tacticTitle: TACTIC_TITLE,
+    },
+  );
+
+  if (!result.ok) {
+    throw new Error(`Could not prepare an open Today smoke task: ${JSON.stringify(result)}\n${await getDiagnostics(page)}`);
+  }
+
+  log(`Prepared open Today smoke task ${SMOKE_TASK_ID} in ${result.patched.length} local data store(s)`);
+  const becameVisible = await waitForCondition(
+    "prepared open Today task checkbox",
+    () => hasOpenTodayTaskCheckbox(page),
+    5_000,
+  ).catch(() => false);
+
+  if (becameVisible) return;
+
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await waitForSystemLoaded(page);
+  await waitForCondition("prepared open Today task checkbox after reload", () => hasOpenTodayTaskCheckbox(page));
+}
+
 async function clickFirstTodayTaskCheckbox(page) {
   await page.locator('[data-tour-id="system-today-queue"]').waitFor({ timeout: DEFAULT_TIMEOUT_MS });
   const clicked = await page.evaluate(() => {
@@ -1087,6 +1288,7 @@ async function exerciseTwelveWeekSaveReloadAndSync(page, apiEvents) {
   await page.goto(`${BASE_URL}/12-week-system`, { waitUntil: "domcontentloaded" });
   await waitForSystemLoaded(page);
   await assertCleanPage(page, "12-week system");
+  await ensureOpenTodayTaskAvailable(page);
 
   const syncStartedAt = Date.now();
 
