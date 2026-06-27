@@ -22,10 +22,12 @@ describe("production smoke harness guards", () => {
   });
 
   it("opens the real weekly review flow before filling review inputs", () => {
+    expect(smokeScript).toContain("async function tryClickButtonByNormalizedText(page, normalizedNeedle)");
     expect(smokeScript).toContain("async function ensureWeeklyReviewFormVisible(page)");
     expect(smokeScript).toContain('[data-testid="weekly-review-flow"]:visible');
     expect(smokeScript).toContain('await ensureWeeklyReviewFormVisible(page);');
-    expect(smokeScript).toContain('getByRole("button", { name: /bắt đầu review sớm/i })');
+    expect(smokeScript).toContain('await clickButtonByNormalizedText(page, "bat dau review som");');
+    expect(smokeScript).toContain('await tryClickButtonByNormalizedText(page, "van luu som");');
   });
 
   it("waits for visible weekly review UI instead of a hidden score container", () => {

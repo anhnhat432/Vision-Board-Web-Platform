@@ -598,8 +598,8 @@ async function waitForGoalSnapshot(page, label, predicate, timeoutMs = DEFAULT_T
   );
 }
 
-async function clickButtonByNormalizedText(page, normalizedNeedle) {
-  const clicked = await page.evaluate((needle) => {
+async function tryClickButtonByNormalizedText(page, normalizedNeedle) {
+  return page.evaluate((needle) => {
     const normalize = (value) =>
       String(value)
         .normalize("NFD")
@@ -616,6 +616,10 @@ async function clickButtonByNormalizedText(page, normalizedNeedle) {
     button.click();
     return true;
   }, normalizedNeedle);
+}
+
+async function clickButtonByNormalizedText(page, normalizedNeedle) {
+  const clicked = await tryClickButtonByNormalizedText(page, normalizedNeedle);
 
   if (!clicked) {
     throw new Error(`Could not find enabled button containing normalized text: ${normalizedNeedle}`);
@@ -650,12 +654,13 @@ async function ensureWeeklyReviewFormVisible(page) {
   const reviewFlow = page.locator('[data-testid="weekly-review-flow"]:visible').first();
   if (await reviewFlow.isVisible().catch(() => false)) return;
 
-  const startEarlyButton = page.getByRole("button", { name: /bắt đầu review sớm/i });
-  if (await startEarlyButton.isVisible().catch(() => false)) {
-    await startEarlyButton.click();
-  }
+  await clickButtonByNormalizedText(page, "bat dau review som");
 
-  await reviewFlow.waitFor({ timeout: DEFAULT_TIMEOUT_MS });
+  try {
+    await reviewFlow.waitFor({ timeout: DEFAULT_TIMEOUT_MS });
+  } catch (error) {
+    throw new Error(`Could not open weekly review flow after start-early action.\n${await getDiagnostics(page)}\n${error.message}`);
+  }
 }
 
 async function getSyncQueueSummary(page) {
@@ -952,6 +957,7 @@ async function exerciseTwelveWeekSaveReloadAndSync(page, apiEvents) {
   await page.locator("#weekly-next-commitments").fill(WEEKLY_REVIEW_PRIORITY);
   await page.locator("#weekly-next-commitments").press("Enter");
   await clickButtonByNormalizedText(page, "chot review tuan nay");
+  await tryClickButtonByNormalizedText(page, "van luu som");
   await waitForGoalSnapshot(page, "weekly review in local storage", (snapshot) => {
     return (
       snapshot.weeklyReviewCount >= 1 &&
