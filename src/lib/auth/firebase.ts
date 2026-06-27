@@ -111,8 +111,24 @@ async function persistCurrentUserToken(user: User): Promise<string> {
 
 export async function getFirebaseToken(forceRefresh = false): Promise<string | null> {
   const auth = getFirebaseAuth();
-  if (!auth?.currentUser) {
-    clearStoredFirebaseToken();
+  if (!auth) {
+    return getStoredFirebaseToken();
+  }
+
+  // Ngay sau khi tải trang, Firebase khôi phục phiên bất đồng bộ và currentUser
+  // tạm thời null. Chờ khôi phục xong để tránh gửi request thiếu token (401 oan)
+  // và tránh đăng xuất nhầm khi người dùng thực ra vẫn đăng nhập.
+  if (typeof auth.authStateReady === "function") {
+    try {
+      await auth.authStateReady();
+    } catch {
+      // Bỏ qua nếu không khả dụng; tiếp tục với trạng thái hiện tại.
+    }
+  }
+
+  if (!auth.currentUser) {
+    // Không xóa token đã lưu ở đây: việc dọn token thuộc luồng đăng xuất
+    // (subscribeAuthState). Trả token đã lưu làm fallback nếu còn.
     return getStoredFirebaseToken();
   }
 
