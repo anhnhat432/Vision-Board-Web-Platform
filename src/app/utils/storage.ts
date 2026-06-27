@@ -118,6 +118,8 @@ import type {
   Task,
   TwelveWeekSystem,
   TwelveWeekTaskInstance,
+  UniversalDailyCheckIn,
+  UniversalWeeklyReview,
   UserData,
   VisionBoard,
 } from "./storage-types";
@@ -400,6 +402,62 @@ function getComparableLastModifiedAt(value: { lastModifiedAt?: number }): number
   return Number.isFinite(value.lastModifiedAt) ? (value.lastModifiedAt ?? 0) : 0;
 }
 
+function isSameTwelveWeekCycle(localSystem: TwelveWeekSystem, incomingSystem: TwelveWeekSystem): boolean {
+  return (
+    localSystem.startDate === incomingSystem.startDate &&
+    localSystem.endDate === incomingSystem.endDate &&
+    localSystem.totalWeeks === incomingSystem.totalWeeks &&
+    (localSystem.cycleNumber ?? 1) === (incomingSystem.cycleNumber ?? 1)
+  );
+}
+
+function getDailyCheckInMergeKey(checkIn: UniversalDailyCheckIn): string {
+  const dateKey = getCalendarDateKeyFromModule(checkIn.date) ?? checkIn.date;
+  return [
+    dateKey,
+    String(checkIn.updatedCount ?? 1),
+    String(checkIn.didWorkToday),
+    checkIn.mood ?? "",
+    checkIn.optionalNote,
+    checkIn.amountDone,
+    checkIn.outputCreated,
+  ].join("\u0001");
+}
+
+function getDailyCheckInSortDate(checkIn: UniversalDailyCheckIn): string {
+  return getCalendarDateKeyFromModule(checkIn.date) ?? checkIn.date;
+}
+
+function mergeDailyCheckIns(
+  localCheckIns: UniversalDailyCheckIn[],
+  incomingCheckIns: UniversalDailyCheckIn[],
+): UniversalDailyCheckIn[] {
+  const incomingKeys = new Set(incomingCheckIns.map(getDailyCheckInMergeKey));
+  const mergedCheckIns = [
+    ...incomingCheckIns,
+    ...localCheckIns.filter((checkIn) => !incomingKeys.has(getDailyCheckInMergeKey(checkIn))),
+  ];
+
+  return mergedCheckIns
+    .sort((left, right) => {
+      const dateDelta = getDailyCheckInSortDate(right).localeCompare(getDailyCheckInSortDate(left));
+      if (dateDelta !== 0) return dateDelta;
+      return (right.updatedCount ?? 1) - (left.updatedCount ?? 1);
+    })
+    .slice(0, 120);
+}
+
+function mergeWeeklyReviews(
+  localReviews: UniversalWeeklyReview[],
+  incomingReviews: UniversalWeeklyReview[],
+): UniversalWeeklyReview[] {
+  const incomingWeeks = new Set(incomingReviews.map((review) => review.weekNumber));
+  return [
+    ...incomingReviews,
+    ...localReviews.filter((review) => !incomingWeeks.has(review.weekNumber)),
+  ].sort((left, right) => left.weekNumber - right.weekNumber);
+}
+
 function mergeGoalTaskMutations(localGoal: Goal, incomingGoal: Goal): Goal {
   const localTasksById = new Map(localGoal.tasks.map((task) => [task.id, task]));
   const mergedTasks = incomingGoal.tasks.map((incomingTask) => {
@@ -421,6 +479,10 @@ function mergeGoalTaskMutations(localGoal: Goal, incomingGoal: Goal): Goal {
       ? incomingTask
       : localTask;
   });
+  const localSystem = localGoal.twelveWeekSystem;
+  const shouldMergeExecutionRecords = Boolean(
+    localSystem && incomingSystem && isSameTwelveWeekCycle(localSystem, incomingSystem),
+  );
 
   return {
     ...incomingGoal,
@@ -430,6 +492,14 @@ function mergeGoalTaskMutations(localGoal: Goal, incomingGoal: Goal): Goal {
         ? {
             ...incomingSystem,
             taskInstances: mergedTaskInstances,
+            dailyCheckIns:
+              shouldMergeExecutionRecords && localSystem
+                ? mergeDailyCheckIns(localSystem.dailyCheckIns, incomingSystem.dailyCheckIns)
+                : incomingSystem.dailyCheckIns,
+            weeklyReviews:
+              shouldMergeExecutionRecords && localSystem
+                ? mergeWeeklyReviews(localSystem.weeklyReviews, incomingSystem.weeklyReviews)
+                : incomingSystem.weeklyReviews,
           }
         : incomingSystem,
   };
