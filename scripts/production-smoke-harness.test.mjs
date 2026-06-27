@@ -101,7 +101,15 @@ describe("production smoke harness guards", () => {
   });
 
   it("accepts the deployed 12-week mutation endpoint as backend sync proof", () => {
-    expect(smokeScript).toContain('sync\\/12-week\\/mutations(?:\\?|$)');
+    expect(smokeScript).toContain('sync\\/12-week\\/(?:mutations|pull)(?:\\?|$)');
     expect(smokeScript).toContain('(?:plans|tasks|weeks|metrics)(?:\\/|$)');
+  });
+
+  it("uses the real 12-week account sync control before waiting for backend sync proof", () => {
+    expect(smokeScript).toContain("async function triggerManualTwelveWeekAccountSync(page)");
+    expect(smokeScript).toContain('[data-tour-id="twelve-week-tab-settings"]');
+    expect(smokeScript).toContain('await clickButtonByNormalizedText(page, "dong bo tai khoan");');
+    expect(smokeScript).toContain("visionboard_data_mutation_queue:auth:");
+    expect(smokeScript).toContain("await triggerManualTwelveWeekAccountSync(page);");
   });
 });

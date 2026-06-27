@@ -664,8 +664,15 @@ async function ensureWeeklyReviewFormVisible(page) {
 }
 
 async function getSyncQueueSummary(page) {
-  return page.evaluate((goalId) => {
-    const raw = localStorage.getItem(`twelve_week_sync_queue:${goalId}`);
+  return page.evaluate(() => {
+    const ownerUid = localStorage.getItem("visionboard_user_data:auth_owner_uid")?.trim() || null;
+    const keysToRead = [
+      ownerUid ? `visionboard_data_mutation_queue:auth:${encodeURIComponent(ownerUid)}` : null,
+      "visionboard_data_mutation_queue:anonymous",
+      "visionboard_data_mutation_queue",
+    ].filter(Boolean);
+    const raw = keysToRead.map((key) => localStorage.getItem(key)).find(Boolean);
+
     if (!raw) {
       return { totalCount: 0, pendingCount: 0, inFlightCount: 0, failedOrRetryableCount: 0, succeededCount: 0 };
     }
@@ -673,19 +680,25 @@ async function getSyncQueueSummary(page) {
     try {
       const parsed = JSON.parse(raw);
       const items = Array.isArray(parsed.items) ? parsed.items : [];
+      const failedOrRetryableStatuses = new Set([
+        "retry_scheduled",
+        "blocked_auth",
+        "blocked_config",
+        "blocked_conflict",
+        "failed_validation",
+        "failed_terminal",
+      ]);
       return {
         totalCount: items.length,
         pendingCount: items.filter((item) => item.status === "pending").length,
         inFlightCount: items.filter((item) => item.status === "in_flight").length,
-        failedOrRetryableCount: items.filter(
-          (item) => item.status === "retry_scheduled" || item.status === "failed_terminal",
-        ).length,
-        succeededCount: items.filter((item) => item.status === "succeeded").length,
+        failedOrRetryableCount: items.filter((item) => failedOrRetryableStatuses.has(item.status)).length,
+        succeededCount: items.filter((item) => item.status === "applied" || item.status === "succeeded").length,
       };
     } catch {
       return { totalCount: 0, pendingCount: 0, inFlightCount: 0, failedOrRetryableCount: 0, succeededCount: 0 };
     }
-  }, GOAL_ID);
+  });
 }
 
 async function waitForSyncQueueIdle(page) {
@@ -704,6 +717,23 @@ async function waitForSyncQueueIdle(page) {
     },
     60_000,
   );
+}
+
+async function waitForSyncQueueWork(page, timeoutMs = 10_000) {
+  return waitForCondition(
+    "12-week mutation queue work",
+    async () => {
+      const summary = await getSyncQueueSummary(page);
+      return summary.totalCount > 0 ? summary : false;
+    },
+    timeoutMs,
+  );
+}
+
+async function triggerManualTwelveWeekAccountSync(page) {
+  await page.locator('[data-tour-id="twelve-week-tab-settings"]').click();
+  await waitForSyncQueueWork(page).catch(() => null);
+  await clickButtonByNormalizedText(page, "dong bo tai khoan");
 }
 
 async function assertSettingsSyncTrust(page) {
@@ -966,9 +996,10 @@ async function exerciseTwelveWeekSaveReloadAndSync(page, apiEvents) {
     );
   });
 
+  await triggerManualTwelveWeekAccountSync(page);
   await waitForApiSuccess(
     apiEvents,
-    /\/api\/(?:sync\/12-week\/mutations(?:\?|$)|(?:plans|tasks|weeks|metrics)(?:\/|$))/,
+    /\/api\/(?:sync\/12-week\/(?:mutations|pull)(?:\?|$)|(?:plans|tasks|weeks|metrics)(?:\/|$))/,
     "12-week backend sync",
     {
       after: syncStartedAt,
