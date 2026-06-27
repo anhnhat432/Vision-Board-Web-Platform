@@ -966,10 +966,15 @@ async function exerciseTwelveWeekSaveReloadAndSync(page, apiEvents) {
     );
   });
 
-  await waitForApiSuccess(apiEvents, /\/api\/(plans|tasks|weeks|metrics)(?:\/|$)/, "12-week backend sync", {
-    after: syncStartedAt,
-    timeoutMs: DEFAULT_TIMEOUT_MS,
-  });
+  await waitForApiSuccess(
+    apiEvents,
+    /\/api\/(?:sync\/12-week\/mutations(?:\?|$)|(?:plans|tasks|weeks|metrics)(?:\/|$))/,
+    "12-week backend sync",
+    {
+      after: syncStartedAt,
+      timeoutMs: DEFAULT_TIMEOUT_MS,
+    },
+  );
   await waitForSyncQueueIdle(page);
 
   await page.reload({ waitUntil: "domcontentloaded" });

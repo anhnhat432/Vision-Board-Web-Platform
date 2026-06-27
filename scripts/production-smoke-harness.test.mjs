@@ -99,4 +99,9 @@ describe("production smoke harness guards", () => {
     expect(smokeScript).toContain('[data-testid="settings-sync-status-copy"]');
     expect(smokeScript).toContain("await assertSettingsSyncTrust(page);");
   });
+
+  it("accepts the deployed 12-week mutation endpoint as backend sync proof", () => {
+    expect(smokeScript).toContain('sync\\/12-week\\/mutations(?:\\?|$)');
+    expect(smokeScript).toContain('(?:plans|tasks|weeks|metrics)(?:\\/|$)');
+  });
 });
