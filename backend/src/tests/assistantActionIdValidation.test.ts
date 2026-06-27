@@ -13,6 +13,10 @@ import {
   dropActionsWithUnknownIds,
   parseAndValidateAIResponse,
 } from "../services/aiAssistantService";
+import {
+  normalizeGoalCategory,
+  sanitizeCreateGoalPayload,
+} from "../shared/assistantActionSchema";
 import type { AssistantContext } from "../services/assistantService";
 
 const baseContext: AssistantContext = {
@@ -111,5 +115,29 @@ describe("parse JSON khoan dung + regex fence", () => {
     const raw = "```action\n{ khong phai json }\n```";
     const result = parseAndValidateAIResponse(raw);
     assert.equal(result.proposedActions.length, 0);
+  });
+});
+
+describe("normalizeGoalCategory (hiểu category tiếng Việt)", () => {
+  it("map từ khóa tiếng Việt sang enum", () => {
+    assert.equal(normalizeGoalCategory("sức khỏe"), "health");
+    assert.equal(normalizeGoalCategory("Sức Khoẻ"), "health");
+    assert.equal(normalizeGoalCategory("tài chính"), "finance");
+    assert.equal(normalizeGoalCategory("sự nghiệp"), "career");
+    assert.equal(normalizeGoalCategory("gia đình"), "family");
+    assert.equal(normalizeGoalCategory("mối quan hệ"), "relationships");
+    assert.equal(normalizeGoalCategory("phát triển bản thân"), "personal");
+  });
+
+  it("giữ nguyên enum tiếng Anh và fallback other", () => {
+    assert.equal(normalizeGoalCategory("health"), "health");
+    assert.equal(normalizeGoalCategory("Career"), "career");
+    assert.equal(normalizeGoalCategory("xyz không rõ"), "other");
+    assert.equal(normalizeGoalCategory(undefined), "other");
+  });
+
+  it("sanitizeCreateGoalPayload nhận category tiếng Việt (không còn coi là other)", () => {
+    const result = sanitizeCreateGoalPayload({ title: "Ngủ sớm", category: "sức khỏe" });
+    assert.equal(result?.category, "health");
   });
 });

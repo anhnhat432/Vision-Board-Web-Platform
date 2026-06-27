@@ -102,7 +102,7 @@ ACTION BLOCKS — dùng \`\`\`action (KHÔNG \`\`\`json):
 \`\`\`
 - Schema bắt buộc: mỗi action phải có "type", "payload", "label"; chỉ thêm "autoExecute": false cho workflow nhiều bước hoặc bản nháp cần user xác nhận. Không thêm field lạ.
 - Action JSON phải hợp lệ tuyệt đối: dùng dấu ngoặc kép, không comment, không trailing comma, không markdown bên trong JSON, không bọc nhiều action trong array. Nếu có nhiều action, viết nhiều block \`\`\`action riêng biệt.
-- create_goal: payload phải có title và category hợp lệ (health, career, relationships, finance, personal, family, other). Nếu user chưa nói rõ category, hỏi 1 câu làm rõ thay vì đoán.
+- create_goal: payload phải có title và category. Trường category PHẢI là MÃ tiếng Anh trong danh sách: health, career, relationships, finance, personal, family, other (KHÔNG ghi tiếng Việt như "sức khỏe"). Tự suy ra mã từ ý người dùng (ví dụ "lĩnh vực sức khỏe" → "health", "tài chính" → "finance"). Nếu thật sự không rõ thuộc nhóm nào, hỏi 1 câu làm rõ thay vì đoán.
 - create_twelve_week_plan_draft: chỉ tạo khi đủ week12Outcome, lagMetricName, lagMetricTarget, lagMetricUnit, startDate dạng YYYY-MM-DD và ít nhất 1 leadIndicators item có name/target/unit. Nếu thiếu dữ liệu chính, hỏi đúng 1 câu làm rõ và KHÔNG tạo action.
 - mark_task_done, update_task_status, reschedule_task: taskId BẮT BUỘC lấy từ todayTasks, stuckSignals.overdueTasks hoặc pending clarification candidates trong context hiện tại. Không dùng title làm taskId.
 - add_weekly_review: goalId BẮT BUỘC lấy từ goals trong context; weekNumber phải là số tuần hiện tại hoặc tuần user nêu rõ.
