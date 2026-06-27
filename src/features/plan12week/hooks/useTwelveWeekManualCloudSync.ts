@@ -34,6 +34,7 @@ import {
   createPulledWorkspaceMergeReport,
   type PulledWorkspaceMergeReport,
 } from "../persistence/pulledWorkspaceMergeReport";
+import { getTwelveWeekClientPlanId } from "../persistence/twelveWeekImportPayload";
 
 export type TwelveWeekManualCloudSyncSkipReason =
   | "demo_mode"
@@ -180,6 +181,88 @@ function shouldFallbackToFullPull(pullResponse: TwelveWeekPullResponse, hadStore
   return pullResponse.mode === "delta" && pullResponse.warnings.length > 0;
 }
 
+function normalizeDateKey(value: string | undefined): string {
+  const trimmed = value?.trim() ?? "";
+  const match = trimmed.match(/^(\d{4}-\d{2}-\d{2})(?:$|T)/);
+  return match?.[1] ?? trimmed;
+}
+
+function isAtOrAfterIso(value: string | undefined, lowerBound: string | undefined): boolean {
+  if (!value || !lowerBound) return false;
+  const valueMs = Date.parse(value);
+  const lowerBoundMs = Date.parse(lowerBound);
+  if (Number.isFinite(valueMs) && Number.isFinite(lowerBoundMs)) {
+    return valueMs >= lowerBoundMs;
+  }
+  return value >= lowerBound;
+}
+
+function getClientPlanIdFromAppliedMutation(item: DataMutationItem): string {
+  if (
+    "clientPlanId" in item.payload &&
+    typeof item.payload.clientPlanId === "string" &&
+    item.payload.clientPlanId.trim()
+  ) {
+    return item.payload.clientPlanId.trim();
+  }
+
+  return getTwelveWeekClientPlanId(item.goalId);
+}
+
+function getAppliedMutationSkipEntityKey(item: DataMutationItem): string | null {
+  switch (item.kind) {
+    case "task_completed_changed": {
+      const clientTaskId = (item.payload.clientTaskId ?? item.payload.taskId).trim();
+      return clientTaskId ? `task:${clientTaskId}` : null;
+    }
+    case "daily_check_in_upserted": {
+      const date = normalizeDateKey(item.payload.date);
+      if (!date) return null;
+      return `dailyCheckIn:${getClientPlanIdFromAppliedMutation(item)}:checkin:${date}`;
+    }
+    case "weekly_review_upserted":
+      return `weeklyReview:${getClientPlanIdFromAppliedMutation(item)}:review:${item.payload.weekNumber}`;
+    case "lead_metric_upserted": {
+      const clientMetricId = item.payload.clientMetricId.trim();
+      return clientMetricId ? `leadMetric:${clientMetricId}` : null;
+    }
+    case "plan_snapshot_updated":
+    case "goal_deleted":
+    case "plan_deleted":
+      return null;
+  }
+}
+
+function getRecentlyAppliedMutationSkipEntities(
+  ownerUid: string,
+  drainResult: MutationQueueSyncResult,
+  options: Pick<RunTwelveWeekManualCloudSyncOptions, "storage" | "now">,
+): Set<string> {
+  const skipEntities = new Set<string>();
+  if (drainResult.attemptedCount <= 0 || drainResult.succeededCount + drainResult.duplicateCount <= 0) {
+    return skipEntities;
+  }
+
+  const store = readMutationQueueStore(ownerUid, options);
+  const lastDrainStartedAt = store.lastDrainStartedAt;
+  if (!lastDrainStartedAt) return skipEntities;
+
+  store.items.forEach((item) => {
+    if (normalizeOwnerUid(item.ownerUid) !== ownerUid) return;
+    if (item.status !== "applied") return;
+    if (!isAtOrAfterIso(item.updatedAt, lastDrainStartedAt)) return;
+
+    const key = getAppliedMutationSkipEntityKey(item);
+    if (key) skipEntities.add(key);
+  });
+
+  return skipEntities;
+}
+
+function mergeSkipEntities(...sets: ReadonlySet<string>[]): Set<string> {
+  return new Set(sets.flatMap((set) => [...set]));
+}
+
 export async function runTwelveWeekManualCloudSync(
   options: RunTwelveWeekManualCloudSyncOptions = {},
 ): Promise<TwelveWeekManualCloudSyncResult> {
@@ -273,6 +356,10 @@ export async function runTwelveWeekManualCloudSync(
       storage: options.storage,
       now: options.now,
     });
+    const recentlyAppliedMutationSkipEntities = getRecentlyAppliedMutationSkipEntities(ownerUid, drainResult, {
+      storage: options.storage,
+      now: options.now,
+    });
     const mergeReport = createPulledWorkspaceMergeReport(localData, pullResponse, {
       pendingMutations: unresolvedLocalMutations,
     });
@@ -284,7 +371,10 @@ export async function runTwelveWeekManualCloudSync(
     // snapshot directly so the user does not see the "Cần chọn bản dữ liệu"
     // banner on a fresh login.
     if (!mergeReport.safeToApply && unresolvedLocalMutations.length === 0 && isLocalDataUntouchedSeed(localData)) {
-      const nextData = applyPulledWorkspaceToUserData(localData, pullResponse, { now: options.now });
+      const nextData = applyPulledWorkspaceToUserData(localData, pullResponse, {
+        now: options.now,
+        skipEntities: recentlyAppliedMutationSkipEntities,
+      });
       const didWrite = (options.writeUserData ?? saveUserData)(nextData);
       if (!didWrite) {
         const recordErrorFn =
@@ -340,7 +430,10 @@ export async function runTwelveWeekManualCloudSync(
       unresolvedLocalMutations.length === 0 &&
       mergeReport.localOnlyChanges.length > 0
     ) {
-      const nextData = applyPulledWorkspaceToUserData(localData, pullResponse, { now: options.now });
+      const nextData = applyPulledWorkspaceToUserData(localData, pullResponse, {
+        now: options.now,
+        skipEntities: recentlyAppliedMutationSkipEntities,
+      });
       const didWrite = (options.writeUserData ?? saveUserData)(nextData);
       if (!didWrite) {
         const recordErrorFn =
@@ -398,10 +491,11 @@ export async function runTwelveWeekManualCloudSync(
         const localWinsKeys = new Set(
           mergeReport.conflicts.filter((c) => c.winner === "local").map((c) => `${c.kind}:${c.clientId}`),
         );
+        const skipEntities = mergeSkipEntities(recentlyAppliedMutationSkipEntities, localWinsKeys);
 
         const nextData = applyPulledWorkspaceToUserData(localData, pullResponse, {
           now: options.now,
-          skipEntities: localWinsKeys,
+          skipEntities,
         });
 
         const didWrite = (options.writeUserData ?? saveUserData)(nextData);
@@ -479,7 +573,10 @@ export async function runTwelveWeekManualCloudSync(
     // No conflicts: check if safe to apply
     if (!mergeReport.safeToApply) {
       if (autoResolveAllConflicts) {
-        const nextData = applyPulledWorkspaceToUserData(localData, pullResponse, { now: options.now });
+        const nextData = applyPulledWorkspaceToUserData(localData, pullResponse, {
+          now: options.now,
+          skipEntities: recentlyAppliedMutationSkipEntities,
+        });
         const didWrite = (options.writeUserData ?? saveUserData)(nextData);
         if (didWrite) {
           const writeCursorFn =
@@ -514,7 +611,10 @@ export async function runTwelveWeekManualCloudSync(
       };
     }
 
-    const nextData = applyPulledWorkspaceToUserData(localData, pullResponse, { now: options.now });
+    const nextData = applyPulledWorkspaceToUserData(localData, pullResponse, {
+      now: options.now,
+      skipEntities: recentlyAppliedMutationSkipEntities,
+    });
     const didWrite = (options.writeUserData ?? saveUserData)(nextData);
     if (!didWrite) {
       const recordErrorFn =

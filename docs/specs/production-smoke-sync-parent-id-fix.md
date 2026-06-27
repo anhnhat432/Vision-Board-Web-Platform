@@ -14,11 +14,13 @@ Production smoke can prepare local/cloud 12-week data whose local goal id is a b
 - WHEN the backend receives backend plan/week/task identifiers, THE system SHALL verify they belong to the authenticated user before applying the mutation.
 - WHEN backend identifiers are missing, THE system SHALL continue using the existing `clientPlanId` / `clientWeekId` / `clientTaskId` lookup path.
 - WHEN client identifiers are stale but backend parent identifiers are valid and owned, THE system SHALL apply the mutation using the stored backend parent and preserve the stored client identifiers on server records.
+- WHEN a manual sync drains local execution mutations successfully and the immediate pull response does not yet include those just-applied entities, THE system SHALL preserve the local execution records while still applying the cloud snapshot.
 - WHERE identifiers point to another user's plan, week, or task, THE system SHALL return the same ownership-denied not-found result and not leak entity existence.
 
 ## Verification Checklist
 
 - Add focused frontend coverage for backend id fallback in mutation request payloads.
 - Add focused backend route coverage for stale client ids plus valid owned backend ids.
+- Add focused manual-sync coverage for preserving a just-drained daily check-in when the pull snapshot lags behind the mutation response.
 - Run focused frontend and backend tests.
 - Re-run the production smoke workflow after pushing.

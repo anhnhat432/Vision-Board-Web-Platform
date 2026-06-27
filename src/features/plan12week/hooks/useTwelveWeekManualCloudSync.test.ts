@@ -2,7 +2,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { UserData } from "@/app/utils/storage-types";
 import type { TwelveWeekPulledWorkspace, TwelveWeekPullResponse } from "@/services/syncService";
-import { enqueueStoredMutation } from "../persistence/mutationQueue";
+import {
+  enqueueStoredMutation,
+  markMutationSucceeded,
+  readMutationQueueStore,
+  writeMutationQueueStore,
+} from "../persistence/mutationQueue";
 import { runTwelveWeekManualCloudSync } from "./useTwelveWeekManualCloudSync";
 
 const baseNow = "2026-04-30T00:00:00.000Z";
@@ -227,6 +232,35 @@ function createLocalDataWithDifferentTask(): UserData {
       },
     },
   ]);
+}
+
+function createLocalDailyCheckIn() {
+  return {
+    date: "2026-04-30",
+    didWorkToday: true,
+    whichLeadIndicatorWorkedOn: "Write",
+    amountDone: "1 draft",
+    outputCreated: "Draft",
+    obstacleOrIssue: "",
+    dailySelfRating: 4,
+    optionalNote: "Local smoke check-in",
+    mood: "steady" as const,
+  };
+}
+
+function createLocalDataWithDailyCheckIn(): UserData {
+  const data = createLocalDataWithDifferentTask();
+  const system = data.goals[0].twelveWeekSystem;
+  if (!system) return data;
+
+  system.taskInstances = system.taskInstances.map((task) => ({
+    ...task,
+    completed: true,
+    completedAt: at(2),
+  }));
+  system.dailyCheckIns = [createLocalDailyCheckIn()];
+
+  return data;
 }
 
 function createCloudWorkspaceWithMissingClientIds(): TwelveWeekPulledWorkspace {
@@ -510,6 +544,84 @@ describe("runTwelveWeekManualCloudSync", () => {
         }),
       ]),
     );
+  });
+
+  it("preserves a just-drained daily check-in when the pull snapshot has not caught up yet", async () => {
+    let writtenData: UserData | undefined;
+    const writeUserData = vi.fn((data: UserData) => {
+      writtenData = data;
+      return true;
+    });
+
+    const drainMutations = vi.fn(async () => {
+      enqueueStoredMutation(
+        {
+          kind: "daily_check_in_upserted",
+          goalId: "goal_1",
+          payload: {
+            date: "2026-04-30",
+            clientPlanId: "goal_1:12-week-system",
+            clientWeekId: "goal_1:week:1",
+            weekNumber: 1,
+            checkIn: createLocalDailyCheckIn(),
+          },
+        },
+        {
+          ownerUid: "user_1",
+          storage: localStorage,
+          deviceId: "device_1",
+          now: at(4),
+          createId: () => "mutation_daily_check_in",
+        },
+      );
+
+      const store = readMutationQueueStore("user_1", { storage: localStorage, now: at(5) });
+      const appliedStore = markMutationSucceeded(
+        {
+          ...store,
+          lastDrainStartedAt: at(5),
+        },
+        "mutation_daily_check_in",
+        { now: at(5) },
+      );
+      writeMutationQueueStore(
+        {
+          ...appliedStore,
+          lastDrainFinishedAt: at(5),
+        },
+        { storage: localStorage, now: at(5) },
+      );
+
+      return {
+        status: "success" as const,
+        attemptedCount: 1,
+        succeededCount: 1,
+        duplicateCount: 0,
+        failedCount: 0,
+        pendingCount: 0,
+      };
+    });
+
+    const result = await runTwelveWeekManualCloudSync({
+      ...baseOptions(),
+      drainMutations,
+      pullWorkspace: vi.fn(async () => createPullResponse(createSafeCloudWorkspace())),
+      readUserData: () => createLocalDataWithDailyCheckIn(),
+      writeUserData,
+      readCursor: () => null,
+      writeCursor: vi.fn(),
+    });
+
+    expect(result.status).toBe("applied");
+    expect(result.mergeReport?.localOnlyChanges).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "dailyCheckIn",
+          clientId: "goal_1:12-week-system:checkin:2026-04-30",
+        }),
+      ]),
+    );
+    expect(writtenData?.goals[0].twelveWeekSystem?.dailyCheckIns).toEqual([createLocalDailyCheckIn()]);
   });
 
   it("auto-resolves local-winning pending mutation without overwriting local task state", async () => {
