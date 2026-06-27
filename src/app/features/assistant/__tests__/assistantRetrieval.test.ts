@@ -206,6 +206,81 @@ describe("Assistant Retrieval Suite", () => {
     expect(results[0].score).toBeGreaterThan(results[1].score);
   });
 
+  it("matches token prefixes for vi/en variants (3A)", () => {
+    vi.mocked(storage.getUserData).mockReturnValue(
+      createMockUserData({
+        reflections: [
+          createMockReflection({
+            title: "Ghi chu",
+            content: "Toi dang study moi ngay",
+            date: "2026-06-04T00:00:00.000Z",
+          }),
+        ],
+      }),
+    );
+
+    // "studying" khong khop khit token "study", nhung khop tien to -> van tra ket qua
+    const results = retrieveAssistantKnowledge("studying", {
+      referenceDate: new Date("2026-06-04T00:00:00.000Z"),
+    });
+    expect(results.length).toBeGreaterThan(0);
+  });
+
+  it("boosts items where the query phrase appears contiguously (3B)", () => {
+    vi.mocked(storage.getUserData).mockReturnValue(
+      createMockUserData({
+        reflections: [
+          createMockReflection({
+            id: "phrase",
+            title: "A",
+            content: "hoc tieng anh moi ngay",
+            date: "2026-06-04T00:00:00.000Z",
+          }),
+          createMockReflection({
+            id: "scattered",
+            title: "B",
+            content: "anh em cung tieng long va hoc hoi",
+            date: "2026-06-04T00:00:00.000Z",
+          }),
+        ],
+      }),
+    );
+
+    const results = retrieveAssistantKnowledge("hoc tieng anh", {
+      referenceDate: new Date("2026-06-04T00:00:00.000Z"),
+    });
+    expect(results).toHaveLength(2);
+    // Item co cum lien tiep phai duoc xep tren nho phrase bonus
+    expect(results[0].snippet).toContain("hoc tieng anh");
+  });
+
+  it("keeps old-but-relevant items above the decay floor (3C)", () => {
+    vi.mocked(storage.getUserData).mockReturnValue(
+      createMockUserData({
+        reflections: [
+          createMockReflection({
+            title: "Nhin lai moi",
+            content: "Hoc ngoai ngu rat vui",
+            date: "2026-06-04T00:00:00.000Z",
+          }),
+          createMockReflection({
+            title: "Nhin lai cu",
+            content: "Hoc ngoai ngu rat vui",
+            date: "2023-09-09T00:00:00.000Z",
+          }),
+        ],
+      }),
+    );
+
+    const results = retrieveAssistantKnowledge("ngoai ngu", {
+      referenceDate: new Date("2026-06-04T00:00:00.000Z"),
+    });
+    expect(results).toHaveLength(2);
+    // Item cu (~1000 ngay) van giu it nhat 0.4x diem so voi item moi nho san decay
+    const [recent, old] = results;
+    expect(old.score).toBeGreaterThanOrEqual(recent.score * 0.39);
+  });
+
   it("respects the limit option", () => {
     vi.mocked(storage.getUserData).mockReturnValue(
       createMockUserData({
