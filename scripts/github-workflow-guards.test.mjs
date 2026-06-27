@@ -68,6 +68,15 @@ describe("GitHub workflow safety guards", () => {
     expect(currentStatus).toContain("runs `npm run smoke:prod:quick` before `npm run smoke:prod`");
   });
 
+  it("keeps CI frontend production-core scoped away from backend dependency install", () => {
+    const workflow = readWorkflow("ci.yml");
+
+    expect(workflow).toContain("npm run test:production-core:frontend");
+    expect(workflow).not.toContain("- run: npm run test:production-core\n");
+    expect(workflow).toContain("npm --prefix backend ci");
+    expect(workflow).toContain("npm --prefix backend test");
+  });
+
   it("keeps deployed core-funnel proof workflow aligned with runbook and checklist", () => {
     const workflow = readWorkflow("core-funnel-quality-staging.yml");
     const runbook = readFileSync(path.resolve("docs", "ops", "staging-proof-runbook.md"), "utf8");

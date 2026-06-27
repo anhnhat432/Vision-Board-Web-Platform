@@ -28,6 +28,7 @@
 4. WHILE demo mode is active, THE system SHALL avoid protected backend sync and real payment assumptions.
 5. WHEN real mode is active, THE system SHALL avoid mock checkout, mock unlock, and demo-only debug UIs unless explicitly gated by safe env flags.
 6. WHERE app routes are registered, THE system SHALL prove by recursive route-table test that demo-only billing/debug/seeder paths are statically omitted from production routes.
+7. WHEN a production user opens a legacy demo-only billing URL directly, THE system SHALL route to a production-safe real-mode surface without rendering mock/demo checkout copy or the app error boundary.
 
 ## 5. Data, Storage, and Sync Constraints
 
@@ -59,6 +60,7 @@
 - [x] sync guards prevent demo protected backend calls.
 - [x] deployment checklist names VITE_APP_MODE=real as required for production.
 - [x] runtime env checker treats missing/malformed VITE_APP_MODE as production-safe real fallback and flags malformed values in full-stack checks.
+- [x] direct legacy demo-only billing URLs redirect to a safe real-mode surface without registering the demo route.
 
 ## 9. Verification Plan
 
@@ -85,10 +87,10 @@ npm run smoke:prod
 - App mode fallback verified by `src/app/utils/app-mode.test.ts`: malformed or missing `VITE_APP_MODE` resolves to `real`, not `demo`.
 - Real/demo billing and copy boundary verified by `src/app/utils/production/billingCore.test.ts` and `src/test/ux-ui-upgrade/property-8-demo-copy.test.ts`: demo keeps mock-provider-safe behavior, real-mode copy avoids browser-only trial wording, and production billing path stays aligned with `api_contract`.
 - Recursive route exclusion verified by `src/app/routes.test.tsx`: route table resolves expected real-mode routes and rejects demo-only billing/debug/seeder patterns from production registration.
-- Deployed smoke now probes the direct mock-checkout URL in real mode: `scripts/smoke-production-quick.mjs` and `scripts/smoke-production-e2e.mjs` open `/billing/mock-checkout?session=legacy_checkout_test` and fail if any mock/demo checkout copy renders on the production target.
+- Deployed smoke now probes the direct mock-checkout URL in real mode: `scripts/smoke-production-quick.mjs` and `scripts/smoke-production-e2e.mjs` open `/billing/mock-checkout?session=legacy_checkout_test` and fail if any mock/demo checkout copy, app error boundary, or visible failure state renders on the production target.
 - Real-mode destructive gating verified by `src/test/ux-ui-upgrade/destructive-dialog-realmode-gating.test.tsx`: irreversible actions require in-app two-step confirmation instead of unsafe production shortcuts.
 - Demo protected-sync guard verified by `src/features/plan12week/persistence/mutationQueueOffline.test.ts`, `src/features/plan12week/persistence/mutationQueueSender.test.ts`, and `src/features/plan12week/hooks/useAutoCloudSync.test.ts`: demo or auth-unready flows do not call protected backend sync paths.
-- Production-core CI guard now includes `src/test/ux-ui-upgrade/destructive-dialog-realmode-gating.test.tsx` through `package.json` `test:production-core:ui`, and `.github/workflows/ci.yml` runs `npm run test:production-core` so PR/main CI fails on real-mode demo-route or `window.confirm` regressions.
+- Production-core CI guard now includes `src/test/ux-ui-upgrade/destructive-dialog-realmode-gating.test.tsx` through `package.json` `test:production-core:ui`; `.github/workflows/ci.yml` runs the frontend production-core subset in the frontend job while the backend job owns backend install, typecheck, build, and tests.
 - Verification passed:
   - `npm.cmd run test:run -- src/app/utils/app-mode.test.ts src/app/utils/production/billingCore.test.ts src/test/ux-ui-upgrade/property-8-demo-copy.test.ts` (15 tests passed)
   - `npm.cmd run test:ui -- src/app/routes.test.tsx src/test/ux-ui-upgrade/destructive-dialog-realmode-gating.test.tsx` (20 tests passed)

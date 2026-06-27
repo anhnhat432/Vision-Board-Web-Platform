@@ -287,6 +287,24 @@ describe("app routes", () => {
     await route.dispose();
   });
 
+  it("redirects legacy mock checkout URLs to a safe real-mode surface", async () => {
+    const route = renderRoute("/billing/mock-checkout?session=legacy_checkout_test");
+    await route.waitForIdle();
+
+    const { pathname, search } = route.router.state.location;
+    expect(["/billing/plan", "/login"]).toContain(pathname);
+    if (pathname === "/login") {
+      expect(search).toContain(
+        encodeURIComponent("/billing/mock-checkout?session=legacy_checkout_test"),
+      );
+    } else {
+      expect(search).toBe("");
+    }
+    expect(screen.queryByText(/Trang này vừa gặp lỗi/i)).not.toBeInTheDocument();
+    expectNoDemoOnlyCopy();
+    await route.dispose();
+  });
+
   it("redirects /today to /12-week-system?tab=today", async () => {
     authContextMock.useAuthContext.mockReturnValue({
       user: {
