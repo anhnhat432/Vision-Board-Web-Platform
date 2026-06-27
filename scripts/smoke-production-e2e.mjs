@@ -948,7 +948,8 @@ async function exerciseTwelveWeekSaveReloadAndSync(page, apiEvents) {
     return snapshot.dailyCheckInCount >= 1;
   });
 
-  await page.goto(`${BASE_URL}/12-week-system?tab=week`, { waitUntil: "domcontentloaded" });
+  await page.locator('[data-tour-id="twelve-week-tab-week"]').click();
+  await page.locator('[data-testid="weekly-review-shell"]').waitFor({ timeout: DEFAULT_TIMEOUT_MS });
   await ensureWeeklyReviewFormVisible(page);
   await page.locator('[data-testid="weekly-score-interpretation"]').waitFor({
     timeout: DEFAULT_TIMEOUT_MS,

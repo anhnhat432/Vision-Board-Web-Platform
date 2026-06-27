@@ -25,6 +25,8 @@ describe("production smoke harness guards", () => {
     expect(smokeScript).toContain("async function tryClickButtonByNormalizedText(page, normalizedNeedle)");
     expect(smokeScript).toContain("async function ensureWeeklyReviewFormVisible(page)");
     expect(smokeScript).toContain('[data-testid="weekly-review-flow"]:visible');
+    expect(smokeScript).toContain('[data-tour-id="twelve-week-tab-week"]');
+    expect(smokeScript).toContain('[data-testid="weekly-review-shell"]');
     expect(smokeScript).toContain('await ensureWeeklyReviewFormVisible(page);');
     expect(smokeScript).toContain('await clickButtonByNormalizedText(page, "bat dau review som");');
     expect(smokeScript).toContain('await tryClickButtonByNormalizedText(page, "van luu som");');
