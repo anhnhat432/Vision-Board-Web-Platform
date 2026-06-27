@@ -66,6 +66,10 @@ describe("production smoke harness guards", () => {
   it("keeps the login recovery and legal trust proof before authentication", () => {
     expect(smokeScript).toContain("async function readLoginRecoverySurface(page)");
     expect(smokeScript).toContain("async function assertLoginRecoverySurface(page)");
+    expect(smokeScript).toContain("const resetCardAlreadyVisible =");
+    expect(smokeScript).toContain('if (!resetCardAlreadyVisible) {');
+    expect(smokeScript).toContain("return clicked;");
+    expect(quickSmokeScript).toContain("const resetCardAlreadyVisible =");
     expect(smokeScript).toContain("#login-email");
     expect(smokeScript).toContain("#reset-email");
     expect(smokeScript).toContain("#login-confirm-password");

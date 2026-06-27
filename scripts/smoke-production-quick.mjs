@@ -533,9 +533,13 @@ async function assertLoginRecoverySurface(page) {
     );
   }
 
-  const openedResetCard = await clickButtonByNormalizedText(page, "quen mat khau");
-  if (!openedResetCard) {
-    throw new Error(`Could not open login reset-password card.\n${await getDiagnostics(page)}`);
+  const resetCardAlreadyVisible =
+    signInSurface.resetEmailVisible && signInSurface.sendLinkVisible && signInSurface.closeResetVisible;
+  if (!resetCardAlreadyVisible) {
+    const openedResetCard = await clickButtonByNormalizedText(page, "quen mat khau");
+    if (!openedResetCard) {
+      throw new Error(`Could not open login reset-password card.\n${await getDiagnostics(page)}`);
+    }
   }
 
   await waitForCondition("login reset-password surface", async () => {

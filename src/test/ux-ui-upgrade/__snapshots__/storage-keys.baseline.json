@@ -1,6 +1,6 @@
 {
   "generatedFrom": "production sources under src + src/app/utils/storage-constants.ts",
-  "keyCount": 88,
+  "keyCount": 89,
   "keys": [
     "assistant.action_audit_log",
     "assistant.chat.history",
@@ -81,6 +81,7 @@
     "visionboard_local_data_migration_prompt_state",
     "visionboard_mock_billing_account",
     "visionboard_mock_billing_session_",
+    "visionboard_mam_pet_preferences_v1",
     "visionboard_new_user_guide_dismissed",
     "visionboard_new_user_guide_seen_at",
     "visionboard_orders_v1",
