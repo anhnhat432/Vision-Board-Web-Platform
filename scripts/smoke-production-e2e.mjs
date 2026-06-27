@@ -786,22 +786,28 @@ async function ensureOpenTodayTaskAvailable(page) {
         };
         if (leadIndicators.length === 0) leadIndicators.push(primaryIndicator);
 
+        const taskInstances = Array.isArray(system.taskInstances) ? system.taskInstances : [];
+        const existingTask =
+          taskInstances.find((item) => item?.id && item.weekNumber === currentWeek) ??
+          taskInstances.find((item) => item?.id);
+        const selectedTaskId = existingTask?.id ?? taskId;
+        const selectedTaskTitle = existingTask?.title ?? taskTitle;
         const task = {
-          id: taskId,
+          ...(existingTask ?? {}),
+          id: selectedTaskId,
           weekNumber: currentWeek,
           scheduledDate: todayKey,
-          title: taskTitle,
-          leadIndicatorName: primaryIndicator.name ?? tacticTitle,
-          isCore: primaryIndicator.type !== "optional",
+          title: selectedTaskTitle,
+          leadIndicatorName: existingTask?.leadIndicatorName ?? primaryIndicator.name ?? tacticTitle,
+          isCore: existingTask?.isCore ?? primaryIndicator.type !== "optional",
           completed: false,
           completedAt: undefined,
           lastModifiedAt: now,
-          tacticId: primaryIndicator.id ?? primaryIndicator.name ?? "tactic_full_review",
+          tacticId: existingTask?.tacticId ?? primaryIndicator.id ?? primaryIndicator.name ?? "tactic_full_review",
           skipped: false,
         };
-        const taskInstances = Array.isArray(system.taskInstances) ? system.taskInstances : [];
-        const nextTaskInstances = taskInstances.some((item) => item?.id === taskId)
-          ? taskInstances.map((item) => (item?.id === taskId ? { ...item, ...task } : item))
+        const nextTaskInstances = taskInstances.some((item) => item?.id === selectedTaskId)
+          ? taskInstances.map((item) => (item?.id === selectedTaskId ? { ...item, ...task } : item))
           : [...taskInstances, task];
         const nextDailyCheckIns = Array.isArray(system.dailyCheckIns)
           ? system.dailyCheckIns.filter((item) => item?.date !== todayKey)
@@ -827,9 +833,11 @@ async function ensureOpenTodayTaskAvailable(page) {
         const goalTasks = Array.isArray(goal.tasks) ? goal.tasks : [];
         const nextGoal = {
           ...goal,
-          tasks: goalTasks.some((item) => item?.id === taskId)
-            ? goalTasks.map((item) => (item?.id === taskId ? { ...item, title: taskTitle, completed: false } : item))
-            : [...goalTasks, { id: taskId, title: taskTitle, completed: false }],
+          tasks: goalTasks.some((item) => item?.id === selectedTaskId)
+            ? goalTasks.map((item) =>
+                item?.id === selectedTaskId ? { ...item, title: selectedTaskTitle, completed: false } : item,
+              )
+            : [...goalTasks, { id: selectedTaskId, title: selectedTaskTitle, completed: false }],
           twelveWeekSystem: nextSystem,
         };
 
@@ -842,7 +850,13 @@ async function ensureOpenTodayTaskAvailable(page) {
         localStorage.setItem("latest_12_week_goal_id", nextGoal.id);
         localStorage.setItem("latest_12_week_system_goal_id", nextGoal.id);
         localStorage.setItem("latest_12_week_plan_goal_id", nextGoal.id);
-        patched.push({ key, goalId: nextGoal.id, weekNumber: currentWeek, taskId });
+        patched.push({
+          key,
+          goalId: nextGoal.id,
+          weekNumber: currentWeek,
+          taskId: selectedTaskId,
+          reusedExistingTask: Boolean(existingTask),
+        });
       }
 
       if (patched.length > 0) {
@@ -863,7 +877,11 @@ async function ensureOpenTodayTaskAvailable(page) {
     throw new Error(`Could not prepare an open Today smoke task: ${JSON.stringify(result)}\n${await getDiagnostics(page)}`);
   }
 
-  log(`Prepared open Today smoke task ${SMOKE_TASK_ID} in ${result.patched.length} local data store(s)`);
+  const preparedTaskIds = Array.from(new Set(result.patched.map((item) => item.taskId))).join(", ");
+  const reusedCount = result.patched.filter((item) => item.reusedExistingTask).length;
+  log(
+    `Prepared open Today smoke task ${preparedTaskIds || SMOKE_TASK_ID} in ${result.patched.length} local data store(s); reused existing task in ${reusedCount} store(s)`,
+  );
   const becameVisible = await waitForCondition(
     "prepared open Today task checkbox",
     () => hasOpenTodayTaskCheckbox(page),
@@ -1096,22 +1114,78 @@ async function getSyncQueueSummary(page) {
   });
 }
 
+async function getSyncQueueDebug(page) {
+  return page.evaluate(() => {
+    const ownerUid = localStorage.getItem("visionboard_user_data:auth_owner_uid")?.trim() || null;
+    const keysToRead = [
+      ownerUid ? `visionboard_data_mutation_queue:auth:${encodeURIComponent(ownerUid)}` : null,
+      "visionboard_data_mutation_queue:anonymous",
+      "visionboard_data_mutation_queue",
+    ].filter(Boolean);
+    const queueKey = keysToRead.find((key) => localStorage.getItem(key));
+    const raw = queueKey ? localStorage.getItem(queueKey) : null;
+
+    if (!raw) return { queueKey: null, items: [] };
+
+    try {
+      const parsed = JSON.parse(raw);
+      const items = Array.isArray(parsed.items) ? parsed.items : [];
+      return {
+        queueKey,
+        ownerUid,
+        totalCount: items.length,
+        items: items.slice(0, 10).map((item) => ({
+          id: item.id,
+          kind: item.kind,
+          status: item.status,
+          attemptCount: item.attemptCount,
+          nextRetryAt: item.nextRetryAt,
+          goalId: item.goalId,
+          planId: item.planId,
+          error: item.error,
+          payload: {
+            taskId: item.payload?.taskId,
+            clientTaskId: item.payload?.clientTaskId,
+            clientPlanId: item.payload?.clientPlanId,
+            clientWeekId: item.payload?.clientWeekId,
+            weekNumber: item.payload?.weekNumber,
+            completed: item.payload?.completed,
+          },
+        })),
+      };
+    } catch (error) {
+      return {
+        queueKey,
+        parseError: error instanceof Error ? error.message : String(error),
+      };
+    }
+  });
+}
+
 async function waitForSyncQueueIdle(page) {
-  return waitForCondition(
-    "12-week sync queue idle",
-    async () => {
-      const summary = await getSyncQueueSummary(page);
-      if (
-        summary.pendingCount === 0 &&
-        summary.inFlightCount === 0 &&
-        summary.failedOrRetryableCount === 0
-      ) {
-        return summary;
-      }
-      return false;
-    },
-    60_000,
-  );
+  try {
+    return await waitForCondition(
+      "12-week sync queue idle",
+      async () => {
+        const summary = await getSyncQueueSummary(page);
+        if (
+          summary.pendingCount === 0 &&
+          summary.inFlightCount === 0 &&
+          summary.failedOrRetryableCount === 0
+        ) {
+          return summary;
+        }
+        return false;
+      },
+      60_000,
+    );
+  } catch (error) {
+    throw new Error(
+      `${error.message}\nLast queue debug: ${JSON.stringify(
+        await getSyncQueueDebug(page).catch(() => null),
+      )}\n${await getDiagnostics(page)}`,
+    );
+  }
 }
 
 async function waitForSyncQueueWork(page, timeoutMs = 10_000) {

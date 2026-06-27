@@ -152,10 +152,19 @@ describe("production smoke harness guards", () => {
     expect(smokeScript).toContain("const SMOKE_TASK_ID = `task_full_today_${TIMESTAMP}`;");
     expect(smokeScript).toContain("async function hasOpenTodayTaskCheckbox(page)");
     expect(smokeScript).toContain("async function ensureOpenTodayTaskAvailable(page)");
+    expect(smokeScript).toContain("const existingTask =");
+    expect(smokeScript).toContain("reusedExistingTask: Boolean(existingTask)");
+    expect(smokeScript).toContain("reused existing task in");
     expect(smokeScript).toContain("Prepared open Today smoke task");
     expect(smokeScript).toContain("dailyCheckIns.filter((item) => item?.date !== todayKey)");
     expect(smokeScript).toContain("weeklyReviews.filter((item) => item?.weekNumber !== currentWeek)");
     expect(smokeScript).toContain('window.dispatchEvent(new CustomEvent("visionboard:user-data-updated"));');
     expect(smokeScript).toContain("await ensureOpenTodayTaskAvailable(page);");
+  });
+
+  it("prints queue item diagnostics when production smoke sync does not drain", () => {
+    expect(smokeScript).toContain("async function getSyncQueueDebug(page)");
+    expect(smokeScript).toContain("Last queue debug:");
+    expect(smokeScript).toContain("clientTaskId: item.payload?.clientTaskId");
   });
 });
