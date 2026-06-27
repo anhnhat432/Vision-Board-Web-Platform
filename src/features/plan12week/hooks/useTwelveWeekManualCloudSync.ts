@@ -261,7 +261,7 @@ function getRecentlyAppliedMutationSkipEntities(
   store.items.forEach((item) => {
     if (normalizeOwnerUid(item.ownerUid) !== ownerUid) return;
     if (item.status !== "applied") return;
-    if (!isAtOrAfterIso(item.updatedAt, lastDrainStartedAt)) return;
+    if (!isAtOrAfterIso(item.updatedAt, lastDrainStartedAt) && !isRecentIso(item.updatedAt, options.now)) return;
 
     const key = getAppliedMutationSkipEntityKey(item);
     if (key) skipEntities.add(key);
