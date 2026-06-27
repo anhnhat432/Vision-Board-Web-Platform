@@ -113,6 +113,8 @@ interface TestTaskRecord extends AppliedTaskMutationEntity {
   weekId?: string;
   clientPlanId?: string;
   clientWeekId?: string;
+  title?: string;
+  scheduledDate?: Date;
 }
 
 function createSyncTaskMutationRepository() {
@@ -127,11 +129,13 @@ function createSyncTaskMutationRepository() {
     return task ? { ...task } : undefined;
   }
 
+  function getDateKey(value: Date | undefined): string | undefined {
+    return value?.toISOString().slice(0, 10);
+  }
+
   function findTask(userId: string, input: TaskCompletedChangedApplyInput): TestTaskRecord | undefined {
-    const candidates = [...tasks.values()].filter((task) => {
+    const parentCandidates = [...tasks.values()].filter((task) => {
       if (task.userId !== userId) return false;
-      if (input.backendTaskId && task.id !== input.backendTaskId) return false;
-      if (!input.backendTaskId && input.clientTaskId && task.clientTaskId !== input.clientTaskId) return false;
       if (input.backendPlanId && task.planId !== input.backendPlanId) return false;
       if (!input.backendPlanId && input.clientPlanId && task.clientPlanId !== input.clientPlanId) return false;
       if (input.backendWeekId && task.weekId !== input.backendWeekId) return false;
@@ -141,7 +145,24 @@ function createSyncTaskMutationRepository() {
       return true;
     });
 
-    return candidates.length === 1 ? candidates[0] : undefined;
+    const exactCandidates = parentCandidates.filter((task) => {
+      if (input.backendTaskId) return task.id === input.backendTaskId;
+      return Boolean(input.clientTaskId && task.clientTaskId === input.clientTaskId);
+    });
+    if (exactCandidates.length === 1) return exactCandidates[0];
+
+    if (!input.backendPlanId && !input.backendWeekId) return undefined;
+    const title = input.title?.trim();
+    if (!title) return undefined;
+
+    const titleCandidates = parentCandidates.filter((task) => task.title === title);
+    const scheduledDateKey = getDateKey(input.scheduledDate);
+    if (scheduledDateKey) {
+      const dateCandidates = titleCandidates.filter((task) => getDateKey(task.scheduledDate) === scheduledDateKey);
+      if (dateCandidates.length === 1) return dateCandidates[0];
+    }
+
+    return titleCandidates.length === 1 ? titleCandidates[0] : undefined;
   }
 
   const repository: SyncTaskMutationRepository = {
@@ -180,6 +201,8 @@ function createSyncTaskMutationRepository() {
     clientPlanId: "goal_local_1:12-week-system",
     clientWeekId: "goal_local_1:week:1",
     clientTaskId: "task_local_1",
+    title: "Ship the public demo",
+    scheduledDate: new Date("2026-04-30T00:00:00.000Z"),
     status: "todo",
     revision: 1,
   });
@@ -894,6 +917,8 @@ function createValidMutation(
     clientWeekId?: string;
     clientTaskId?: string;
     weekNumber?: number;
+    title?: string;
+    scheduledDate?: string;
   } = {},
 ): TestMutationRequestBody {
   const clientPlanId = input.clientPlanId ?? "goal_local_1:12-week-system";
@@ -922,6 +947,8 @@ function createValidMutation(
           weekNumber: input.weekNumber,
           completed: true,
           completedAt: "2026-04-30T00:00:02.000Z",
+          title: input.title,
+          scheduledDate: input.scheduledDate,
         },
       },
     ],
@@ -1678,6 +1705,25 @@ describe("12-week sync mutation route", () => {
       )?.currentValue,
       2,
     );
+  });
+
+  it("applies task completion with a stale client task id when the owned backend week has one matching task", async () => {
+    const response = await requestJson(createRouteTestApp(), "POST", "/api/sync/12-week/mutations", {
+      body: createValidMutation("dmq_backend_parent_task_title_1", {
+        backendPlanId: "plan_owner_1",
+        backendWeekId: "week_owner_1",
+        clientPlanId: "64f000000000000000000099:12-week-system",
+        clientWeekId: "64f000000000000000000099:week:1",
+        clientTaskId: "stale_local_task_id",
+        title: "Ship the public demo",
+        scheduledDate: "2026-04-30",
+      }),
+    });
+    const data = getBatchResult(response);
+
+    assert.equal(response.status, 200);
+    assert.equal(data.appliedCount, 1);
+    assert.equal(syncTaskFixture?.getTask("64f000000000000000000001")?.status, "done");
   });
 
   it("blocks execution mutations with backend parents owned by another user", async () => {

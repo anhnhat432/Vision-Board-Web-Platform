@@ -9,6 +9,8 @@ export interface TaskCompletedChangedApplyInput {
   clientWeekId?: string;
   clientPlanId?: string;
   weekNumber?: number;
+  title?: string;
+  scheduledDate?: Date;
   completed: boolean;
   completedAt?: Date;
   syncUpdatedAt: Date;

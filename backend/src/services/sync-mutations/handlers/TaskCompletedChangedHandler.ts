@@ -83,6 +83,14 @@ export class TaskCompletedChangedHandler implements MutationHandlerStrategy {
       typeof payload.weekNumber === "number" && Number.isInteger(payload.weekNumber)
         ? payload.weekNumber
         : undefined;
+    const title =
+      typeof payload.title === "string" && payload.title.trim().length > 0
+        ? payload.title.trim()
+        : undefined;
+    const scheduledDate =
+      typeof payload.scheduledDate === "string" && payload.scheduledDate.length > 0
+        ? new Date(payload.scheduledDate)
+        : undefined;
 
     const applied = await taskRepo.applyTaskCompletedChanged(userId, {
       mutationId,
@@ -93,6 +101,8 @@ export class TaskCompletedChangedHandler implements MutationHandlerStrategy {
       clientWeekId,
       clientPlanId,
       weekNumber,
+      title,
+      scheduledDate: scheduledDate && Number.isFinite(scheduledDate.valueOf()) ? scheduledDate : undefined,
       completed: payload.completed,
       completedAt,
       syncUpdatedAt: processedAt,
