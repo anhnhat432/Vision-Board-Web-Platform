@@ -419,6 +419,85 @@ describe("mutation queue sender", () => {
     expect(readItem("user_1", "daily_success").status).toBe("applied");
   });
 
+  it("adds backend parent ids to execution mutation requests when queue links are available", async () => {
+    const checkIn: UniversalDailyCheckIn = {
+      date: "2026-04-30",
+      didWorkToday: true,
+      whichLeadIndicatorWorkedOn: "Write",
+      amountDone: "1/3 tasks",
+      outputCreated: "Draft",
+      obstacleOrIssue: "",
+      dailySelfRating: 4,
+      optionalNote: "Daily check-in note",
+    };
+
+    enqueueStoredMutation(
+      {
+        kind: "daily_check_in_upserted",
+        goalId: "backend_goal_1",
+        planId: "backend_plan_1",
+        payload: {
+          date: checkIn.date,
+          backendWeekId: "backend_week_1",
+          clientPlanId: "backend_goal_1:12-week-system",
+          clientWeekId: "backend_goal_1:week:1",
+          weekNumber: 1,
+          checkIn,
+        },
+      },
+      {
+        ownerUid: "user_1",
+        storage: localStorage,
+        deviceId: "device_1",
+        now: at(1),
+        createId: () => "daily_backend_parent",
+      },
+    );
+    const postMutations = vi.fn(
+      async (request: TwelveWeekMutationBatchRequest): Promise<TwelveWeekMutationBatchResponse> => {
+        expect(request.mutations[0]).toEqual(
+          expect.objectContaining({
+            mutationId: "daily_backend_parent",
+            entity: expect.objectContaining({
+              backendPlanId: "backend_plan_1",
+              backendWeekId: "backend_week_1",
+              clientPlanId: "backend_goal_1:12-week-system",
+            }),
+            payload: expect.objectContaining({
+              backendPlanId: "backend_plan_1",
+              backendWeekId: "backend_week_1",
+              clientPlanId: "backend_goal_1:12-week-system",
+            }),
+          }),
+        );
+
+        return {
+          accepted: [
+            {
+              mutationId: "daily_backend_parent",
+              type: "daily_check_in_upserted",
+              status: "accepted",
+            },
+          ],
+        };
+      },
+    );
+
+    const result = await sendPending12WeekMutations({
+      ownerUid: "user_1",
+      authenticated: true,
+      featureEnabled: true,
+      realMode: true,
+      apiConfigured: true,
+      storage: localStorage,
+      now: at(2),
+      postMutations,
+    });
+
+    expect(result.status).toBe("success");
+    expect(readItem("user_1", "daily_backend_parent").status).toBe("applied");
+  });
+
   it("sends weekly review entity client ids with the queued payload", async () => {
     seedWeeklyReviewMutation({ mutationId: "weekly_success" });
     const postMutations = vi.fn(

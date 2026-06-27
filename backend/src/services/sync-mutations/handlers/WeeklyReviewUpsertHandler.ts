@@ -95,6 +95,18 @@ export class WeeklyReviewUpsertHandler implements MutationHandlerStrategy {
         : typeof review.clientWeekId === "string" && review.clientWeekId.length > 0
           ? review.clientWeekId
           : undefined;
+    const backendPlanId =
+      typeof payload.backendPlanId === "string" && payload.backendPlanId.length > 0
+        ? payload.backendPlanId
+        : typeof review.backendPlanId === "string" && review.backendPlanId.length > 0
+          ? review.backendPlanId
+          : undefined;
+    const backendWeekId =
+      typeof payload.backendWeekId === "string" && payload.backendWeekId.length > 0
+        ? payload.backendWeekId
+        : typeof review.backendWeekId === "string" && review.backendWeekId.length > 0
+          ? review.backendWeekId
+          : undefined;
 
     const clientReviewId =
       typeof payload.clientReviewId === "string" && payload.clientReviewId.length > 0
@@ -129,6 +141,8 @@ export class WeeklyReviewUpsertHandler implements MutationHandlerStrategy {
     // ─── Apply ────────────────────────────────────────────────
     const applied = await workspaceRepo.applyWeeklyReviewUpserted(userId, {
       mutationId,
+      backendPlanId,
+      backendWeekId,
       clientPlanId: payload.clientPlanId,
       clientWeekId,
       clientReviewId,

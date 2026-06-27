@@ -119,11 +119,17 @@ export function enqueueLeadMetricUpsertedMutations(
 
   for (const payload of buildLeadMetricUpsertedPayloads(goalId, system, reason, filter)) {
     try {
+      const backendPlanId = planLink?.planId ?? null;
+      const backendWeekId = planLink?.weekIdByNumber[payload.weekNumber] ?? null;
       const result = enqueueStoredMutation({
         kind: "lead_metric_upserted",
         goalId,
-        planId: planLink?.planId ?? null,
-        payload,
+        planId: backendPlanId,
+        payload: {
+          ...payload,
+          backendPlanId,
+          backendWeekId,
+        },
       });
       if (result.ok) enqueuedCount += 1;
     } catch {

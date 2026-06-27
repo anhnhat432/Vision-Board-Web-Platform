@@ -109,6 +109,8 @@ function createSyncMutationLogRepository() {
 
 interface TestTaskRecord extends AppliedTaskMutationEntity {
   userId: string;
+  planId?: string;
+  weekId?: string;
   clientPlanId?: string;
   clientWeekId?: string;
 }
@@ -130,8 +132,12 @@ function createSyncTaskMutationRepository() {
       if (task.userId !== userId) return false;
       if (input.backendTaskId && task.id !== input.backendTaskId) return false;
       if (!input.backendTaskId && input.clientTaskId && task.clientTaskId !== input.clientTaskId) return false;
-      if (input.clientPlanId && task.clientPlanId !== input.clientPlanId) return false;
-      if (input.clientWeekId && task.clientWeekId !== input.clientWeekId) return false;
+      if (input.backendPlanId && task.planId !== input.backendPlanId) return false;
+      if (!input.backendPlanId && input.clientPlanId && task.clientPlanId !== input.clientPlanId) return false;
+      if (input.backendWeekId && task.weekId !== input.backendWeekId) return false;
+      if (!input.backendWeekId && !input.backendPlanId && input.clientWeekId && task.clientWeekId !== input.clientWeekId) {
+        return false;
+      }
       return true;
     });
 
@@ -169,6 +175,8 @@ function createSyncTaskMutationRepository() {
   seedTask({
     id: "64f000000000000000000001",
     userId: ownerUserId,
+    planId: "plan_owner_1",
+    weekId: "week_owner_1",
     clientPlanId: "goal_local_1:12-week-system",
     clientWeekId: "goal_local_1:week:1",
     clientTaskId: "task_local_1",
@@ -178,6 +186,8 @@ function createSyncTaskMutationRepository() {
   seedTask({
     id: "64f000000000000000000002",
     userId: otherUserId,
+    planId: "plan_other_1",
+    weekId: "week_other_1",
     clientPlanId: "goal_local_1:12-week-system",
     clientWeekId: "goal_local_1:week:1",
     clientTaskId: "task_local_1",
@@ -187,6 +197,8 @@ function createSyncTaskMutationRepository() {
   seedTask({
     id: "64f000000000000000000003",
     userId: otherUserId,
+    planId: "plan_other_2",
+    weekId: "week_other_2",
     clientPlanId: "other_goal:12-week-system",
     clientWeekId: "other_goal:week:1",
     clientTaskId: "other_task_local_1",
@@ -306,12 +318,24 @@ function createSyncWorkspaceMutationRepository() {
 
   function findWeek(
     userId: string,
-    input: { clientPlanId: string; clientWeekId?: string; weekNumber: number },
+    input: {
+      backendPlanId?: string;
+      backendWeekId?: string;
+      clientPlanId: string;
+      clientWeekId?: string;
+      weekNumber: number;
+    },
   ): TestWeekRef | undefined {
-    const week = weeks.get(weekKey(userId, input.clientPlanId, input.weekNumber));
-    if (!week) return undefined;
-    if (input.clientWeekId && week.clientWeekId !== input.clientWeekId) return undefined;
-    return week;
+    return [...weeks.values()].find((week) => {
+      if (week.userId !== userId) return false;
+      if (input.backendPlanId && week.planId !== input.backendPlanId) return false;
+      if (!input.backendPlanId && week.clientPlanId !== input.clientPlanId) return false;
+      if (input.backendWeekId && week.weekId !== input.backendWeekId) return false;
+      if (!input.backendWeekId && !input.backendPlanId && input.clientWeekId && week.clientWeekId !== input.clientWeekId) {
+        return false;
+      }
+      return week.weekNumber === input.weekNumber;
+    });
   }
 
   function getDailyCheckIn(userId: string, clientPlanId: string, localDate: string): TestDailyCheckInRecord | undefined {
@@ -384,13 +408,13 @@ function createSyncWorkspaceMutationRepository() {
       const week = findWeek(userId, input);
       if (!week) return null;
 
-      const key = metricKey(userId, input.clientPlanId, input.clientMetricId);
+      const key = metricKey(userId, week.clientPlanId, input.clientMetricId);
       const existing = leadMetrics.get(key);
       const nextRecord: TestLeadMetricRecord = {
         id: existing?.id ?? nextId("leadMetric"),
         userId,
         clientId: input.clientMetricId,
-        clientPlanId: input.clientPlanId,
+        clientPlanId: week.clientPlanId,
         clientWeekId: week.clientWeekId,
         clientMetricId: input.clientMetricId,
         leadIndicatorId: input.leadIndicatorId,
@@ -423,13 +447,13 @@ function createSyncWorkspaceMutationRepository() {
       const week = findWeek(userId, input);
       if (!week) return null;
 
-      const key = dailyKey(userId, input.clientPlanId, input.localDate);
+      const key = dailyKey(userId, week.clientPlanId, input.localDate);
       const existing = dailyCheckIns.get(key);
       const nextRecord: TestDailyCheckInRecord = {
         id: existing?.id ?? nextId("checkin"),
         userId,
-        clientId: input.clientCheckInId ?? `${input.clientPlanId}:checkin:${input.localDate}`,
-        clientPlanId: input.clientPlanId,
+        clientId: input.clientCheckInId ?? `${week.clientPlanId}:checkin:${input.localDate}`,
+        clientPlanId: week.clientPlanId,
         clientWeekId: week.clientWeekId,
         localDate: input.localDate,
         weekNumber: input.weekNumber,
@@ -457,13 +481,13 @@ function createSyncWorkspaceMutationRepository() {
       const week = findWeek(userId, input);
       if (!week) return null;
 
-      const key = reviewKey(userId, input.clientPlanId, input.weekNumber);
+      const key = reviewKey(userId, week.clientPlanId, input.weekNumber);
       const existing = weeklyReviews.get(key);
       const nextRecord: TestWeeklyReviewRecord = {
         id: existing?.id ?? nextId("review"),
         userId,
-        clientId: input.clientReviewId ?? `${input.clientPlanId}:review:${input.weekNumber}`,
-        clientPlanId: input.clientPlanId,
+        clientId: input.clientReviewId ?? `${week.clientPlanId}:review:${input.weekNumber}`,
+        clientPlanId: week.clientPlanId,
         clientWeekId: week.clientWeekId,
         weekNumber: input.weekNumber,
         executionScore: input.executionScore,
@@ -861,7 +885,21 @@ interface TestMutationRequestBody {
   }>;
 }
 
-function createValidMutation(mutationId = "dmq_test_1"): TestMutationRequestBody {
+function createValidMutation(
+  mutationId = "dmq_test_1",
+  input: {
+    backendPlanId?: string;
+    backendWeekId?: string;
+    clientPlanId?: string;
+    clientWeekId?: string;
+    clientTaskId?: string;
+    weekNumber?: number;
+  } = {},
+): TestMutationRequestBody {
+  const clientPlanId = input.clientPlanId ?? "goal_local_1:12-week-system";
+  const clientWeekId = input.clientWeekId ?? "goal_local_1:week:1";
+  const clientTaskId = input.clientTaskId ?? "task_local_1";
+
   return {
     batchId: "batch_test_1",
     clientGeneratedAt: "2026-04-30T00:00:00.000Z",
@@ -871,14 +909,17 @@ function createValidMutation(mutationId = "dmq_test_1"): TestMutationRequestBody
         type: "task_completed_changed",
         clientTimestamp: "2026-04-30T00:00:01.000Z",
         entity: {
-          clientPlanId: "goal_local_1:12-week-system",
-          clientWeekId: "goal_local_1:week:1",
-          clientTaskId: "task_local_1",
+          clientPlanId,
+          clientWeekId,
+          clientTaskId,
         },
         payload: {
-          clientTaskId: "task_local_1",
-          clientPlanId: "goal_local_1:12-week-system",
-          clientWeekId: "goal_local_1:week:1",
+          backendPlanId: input.backendPlanId,
+          backendWeekId: input.backendWeekId,
+          clientTaskId,
+          clientPlanId,
+          clientWeekId,
+          weekNumber: input.weekNumber,
           completed: true,
           completedAt: "2026-04-30T00:00:02.000Z",
         },
@@ -889,7 +930,15 @@ function createValidMutation(mutationId = "dmq_test_1"): TestMutationRequestBody
 
 function createDailyCheckInMutation(
   mutationId = "dmq_daily_1",
-  input: { date?: string; amountDone?: string; clientPlanId?: string; clientWeekId?: string; weekNumber?: number } = {},
+  input: {
+    date?: string;
+    amountDone?: string;
+    backendPlanId?: string;
+    backendWeekId?: string;
+    clientPlanId?: string;
+    clientWeekId?: string;
+    weekNumber?: number;
+  } = {},
 ): TestMutationRequestBody {
   const clientPlanId = input.clientPlanId ?? "goal_local_1:12-week-system";
   const clientWeekId = input.clientWeekId ?? "goal_local_1:week:1";
@@ -911,6 +960,8 @@ function createDailyCheckInMutation(
         },
         payload: {
           date,
+          backendPlanId: input.backendPlanId,
+          backendWeekId: input.backendWeekId,
           clientPlanId,
           clientWeekId,
           weekNumber,
@@ -933,7 +984,14 @@ function createDailyCheckInMutation(
 
 function createWeeklyReviewMutation(
   mutationId = "dmq_review_1",
-  input: { nextWeekPriority?: string; clientPlanId?: string; clientWeekId?: string; weekNumber?: number } = {},
+  input: {
+    nextWeekPriority?: string;
+    backendPlanId?: string;
+    backendWeekId?: string;
+    clientPlanId?: string;
+    clientWeekId?: string;
+    weekNumber?: number;
+  } = {},
 ): TestMutationRequestBody {
   const clientPlanId = input.clientPlanId ?? "goal_local_1:12-week-system";
   const clientWeekId = input.clientWeekId ?? "goal_local_1:week:1";
@@ -953,6 +1011,8 @@ function createWeeklyReviewMutation(
           clientWeekId,
         },
         payload: {
+          backendPlanId: input.backendPlanId,
+          backendWeekId: input.backendWeekId,
           clientPlanId,
           clientWeekId,
           weekNumber,
@@ -982,6 +1042,8 @@ function createWeeklyReviewMutation(
 function createLeadMetricMutation(
   mutationId = "dmq_metric_1",
   input: {
+    backendPlanId?: string;
+    backendWeekId?: string;
     clientPlanId?: string;
     clientWeekId?: string;
     clientMetricId?: string;
@@ -1013,6 +1075,8 @@ function createLeadMetricMutation(
         },
         payload: {
           reason: "manual_update",
+          backendPlanId: input.backendPlanId,
+          backendWeekId: input.backendWeekId,
           clientPlanId,
           clientWeekId,
           clientMetricId,
@@ -1562,6 +1626,77 @@ describe("12-week sync mutation route", () => {
     assert.equal(metric?.type, "core");
     assert.deepEqual(metric?.schedule, [1, 3, 5]);
     assert.equal(metric?.revision, 2);
+  });
+
+  it("applies execution mutations with stale client parents when owned backend parents are present", async () => {
+    const app = createRouteTestApp();
+    const staleClientPlanId = "64f000000000000000000099:12-week-system";
+    const staleClientWeekId = "64f000000000000000000099:week:1";
+    const backendParents = {
+      backendPlanId: "plan_owner_1",
+      backendWeekId: "week_owner_1",
+      clientPlanId: staleClientPlanId,
+      clientWeekId: staleClientWeekId,
+      weekNumber: 1,
+    };
+
+    const task = await requestJson(app, "POST", "/api/sync/12-week/mutations", {
+      body: createValidMutation("dmq_backend_parent_task_1", backendParents),
+    });
+    const daily = await requestJson(app, "POST", "/api/sync/12-week/mutations", {
+      body: createDailyCheckInMutation("dmq_backend_parent_daily_1", backendParents),
+    });
+    const weekly = await requestJson(app, "POST", "/api/sync/12-week/mutations", {
+      body: createWeeklyReviewMutation("dmq_backend_parent_review_1", backendParents),
+    });
+    const metric = await requestJson(app, "POST", "/api/sync/12-week/mutations", {
+      body: createLeadMetricMutation("dmq_backend_parent_metric_1", backendParents),
+    });
+
+    assert.equal(task.status, 200);
+    assert.equal(daily.status, 200);
+    assert.equal(weekly.status, 200);
+    assert.equal(metric.status, 200);
+    assert.equal(getBatchResult(task).appliedCount, 1);
+    assert.equal(getBatchResult(daily).appliedCount, 1);
+    assert.equal(getBatchResult(weekly).appliedCount, 1);
+    assert.equal(getBatchResult(metric).appliedCount, 1);
+    assert.equal(syncTaskFixture?.getTask("64f000000000000000000001")?.status, "done");
+    assert.equal(
+      syncWorkspaceFixture?.getDailyCheckIn(ownerUserId, "goal_local_1:12-week-system", "2026-04-30")?.amountDone,
+      "One user test",
+    );
+    assert.equal(
+      syncWorkspaceFixture?.getWeeklyReview(ownerUserId, "goal_local_1:12-week-system", 1)?.nextWeekPriority,
+      "Shorten the setup copy",
+    );
+    assert.equal(
+      syncWorkspaceFixture?.getLeadMetric(
+        ownerUserId,
+        "goal_local_1:12-week-system",
+        "goal_local_1:week:1:metric:lead_demo_feedback",
+      )?.currentValue,
+      2,
+    );
+  });
+
+  it("blocks execution mutations with backend parents owned by another user", async () => {
+    const response = await requestJson(createRouteTestApp(), "POST", "/api/sync/12-week/mutations", {
+      body: createDailyCheckInMutation("dmq_backend_parent_cross_user_1", {
+        backendPlanId: "plan_other_2",
+        backendWeekId: "week_other_2",
+        clientPlanId: "64f000000000000000000099:12-week-system",
+        clientWeekId: "64f000000000000000000099:week:1",
+      }),
+      token: "owner-token",
+    });
+    const data = getBatchResult(response);
+
+    assert.equal(response.status, 200);
+    assert.equal(data.status, "failed");
+    assert.equal(data.failed[0].status, "failed_not_found");
+    assert.equal(data.failed[0].reason, "week_not_found_or_not_owned");
+    assert.equal(data.failed[0].syncErrorCode, "ownership_denied");
   });
 
   it("returns duplicate for repeated lead_metric_upserted without applying twice", async () => {

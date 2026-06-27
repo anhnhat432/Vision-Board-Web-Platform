@@ -3,6 +3,8 @@
 export interface DailyCheckInUpsertApplyInput {
   mutationId: string;
   clientGoalId?: string;
+  backendPlanId?: string;
+  backendWeekId?: string;
   clientPlanId: string;
   clientWeekId?: string;
   clientCheckInId?: string;
@@ -21,6 +23,8 @@ export interface DailyCheckInUpsertApplyInput {
 
 export interface WeeklyReviewUpsertApplyInput {
   mutationId: string;
+  backendPlanId?: string;
+  backendWeekId?: string;
   clientPlanId: string;
   clientWeekId?: string;
   clientReviewId?: string;
@@ -61,6 +65,8 @@ export interface PlanSnapshotUpdatedApplyInput {
 
 export interface LeadMetricUpsertApplyInput {
   mutationId: string;
+  backendPlanId?: string;
+  backendWeekId?: string;
   clientPlanId: string;
   clientWeekId?: string;
   clientMetricId: string;

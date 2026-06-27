@@ -62,6 +62,9 @@ export interface DataMutationError {
 
 export interface TaskCompletedChangedMutationPayload {
   taskId: string;
+  backendTaskId?: string | null;
+  backendPlanId?: string | null;
+  backendWeekId?: string | null;
   clientTaskId?: string;
   clientPlanId?: string | null;
   clientWeekId?: string | null;
@@ -76,6 +79,8 @@ export interface TaskCompletedChangedMutationPayload {
 
 export interface DailyCheckInUpsertedMutationPayload {
   date: string;
+  backendPlanId?: string | null;
+  backendWeekId?: string | null;
   clientPlanId?: string | null;
   clientWeekId?: string | null;
   weekNumber: number;
@@ -83,6 +88,8 @@ export interface DailyCheckInUpsertedMutationPayload {
 }
 
 export interface WeeklyReviewUpsertedMutationPayload {
+  backendPlanId?: string | null;
+  backendWeekId?: string | null;
   clientPlanId?: string | null;
   clientWeekId?: string | null;
   weekNumber: number;
@@ -129,6 +136,8 @@ export type LeadMetricMutationReason = "setup" | "manual_update" | "task_progres
 
 export interface LeadMetricUpsertedMutationPayload {
   reason: LeadMetricMutationReason;
+  backendPlanId?: string | null;
+  backendWeekId?: string | null;
   clientPlanId: string;
   clientWeekId: string;
   clientMetricId: string;

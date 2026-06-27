@@ -3,9 +3,12 @@
 export interface TaskCompletedChangedApplyInput {
   mutationId: string;
   backendTaskId?: string;
+  backendPlanId?: string;
+  backendWeekId?: string;
   clientTaskId?: string;
   clientWeekId?: string;
   clientPlanId?: string;
+  weekNumber?: number;
   completed: boolean;
   completedAt?: Date;
   syncUpdatedAt: Date;

@@ -25,6 +25,9 @@ export interface TwelveWeekMutationRequestItem {
   clientTimestamp: string;
   entity: {
     clientGoalId: string;
+    backendPlanId?: string | null;
+    backendWeekId?: string | null;
+    backendTaskId?: string | null;
     clientPlanId?: string | null;
     clientWeekId?: string | null;
     clientTaskId?: string | null;
@@ -324,7 +327,52 @@ function getClientMetricId(item: DataMutationItem): string | null | undefined {
   return undefined;
 }
 
+function getBackendPlanId(item: DataMutationItem): string | null | undefined {
+  if (item.kind === "task_completed_changed") return item.payload.backendPlanId ?? item.planId;
+  if (item.kind === "daily_check_in_upserted") return item.payload.backendPlanId ?? item.planId;
+  if (item.kind === "weekly_review_upserted") return item.payload.backendPlanId ?? item.planId;
+  if (item.kind === "lead_metric_upserted") return item.payload.backendPlanId ?? item.planId;
+  if (item.kind === "goal_deleted") return item.payload.backendPlanId ?? item.planId;
+  if (item.kind === "plan_deleted") return item.payload.backendPlanId ?? item.planId;
+  return undefined;
+}
+
+function getBackendWeekId(item: DataMutationItem): string | null | undefined {
+  if (item.kind === "task_completed_changed") return item.payload.backendWeekId;
+  if (item.kind === "daily_check_in_upserted") return item.payload.backendWeekId;
+  if (item.kind === "weekly_review_upserted") return item.payload.backendWeekId;
+  if (item.kind === "lead_metric_upserted") return item.payload.backendWeekId;
+  return undefined;
+}
+
+function getBackendTaskId(item: DataMutationItem): string | null | undefined {
+  if (item.kind === "task_completed_changed") return item.payload.backendTaskId;
+  return undefined;
+}
+
+function withBackendPlanId<TPayload extends { backendPlanId?: string | null }>(
+  payload: TPayload,
+  backendPlanId: string | null | undefined,
+): TPayload {
+  if (payload.backendPlanId || !backendPlanId) return payload;
+  return { ...payload, backendPlanId } as TPayload;
+}
+
+function getPayloadWithBackendIds(item: DataMutationItem): DataMutationPayload {
+  switch (item.kind) {
+    case "task_completed_changed":
+    case "daily_check_in_upserted":
+    case "weekly_review_upserted":
+    case "lead_metric_upserted":
+      return withBackendPlanId(item.payload, getBackendPlanId(item));
+    default:
+      return item.payload;
+  }
+}
+
 export function toTwelveWeekMutationRequestItem(item: DataMutationItem): TwelveWeekMutationRequestItem {
+  const payload = getPayloadWithBackendIds(item);
+
   return {
     mutationId: item.id,
     idempotencyKey: item.idempotencyKey,
@@ -332,13 +380,16 @@ export function toTwelveWeekMutationRequestItem(item: DataMutationItem): TwelveW
     clientTimestamp: item.createdAt,
     entity: {
       clientGoalId: item.goalId,
+      backendPlanId: getBackendPlanId(item),
+      backendWeekId: getBackendWeekId(item),
+      backendTaskId: getBackendTaskId(item),
       clientPlanId: getClientPlanId(item),
       clientWeekId: getClientWeekId(item),
       clientTaskId: getClientTaskId(item),
       clientMetricId: getClientMetricId(item),
     },
     baseRevision: item.localRevision,
-    payload: item.payload,
+    payload,
   };
 }
 

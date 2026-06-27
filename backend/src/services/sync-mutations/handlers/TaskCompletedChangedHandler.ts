@@ -42,6 +42,14 @@ export class TaskCompletedChangedHandler implements MutationHandlerStrategy {
       typeof payload.backendTaskId === "string" && payload.backendTaskId.length > 0
         ? payload.backendTaskId
         : undefined;
+    const backendPlanId =
+      typeof payload.backendPlanId === "string" && payload.backendPlanId.length > 0
+        ? payload.backendPlanId
+        : undefined;
+    const backendWeekId =
+      typeof payload.backendWeekId === "string" && payload.backendWeekId.length > 0
+        ? payload.backendWeekId
+        : undefined;
 
     // Phải có ít nhất 1 identifier
     if (!clientTaskId && !backendTaskId) {
@@ -71,13 +79,20 @@ export class TaskCompletedChangedHandler implements MutationHandlerStrategy {
       typeof payload.clientPlanId === "string" && payload.clientPlanId.length > 0
         ? payload.clientPlanId
         : undefined;
+    const weekNumber =
+      typeof payload.weekNumber === "number" && Number.isInteger(payload.weekNumber)
+        ? payload.weekNumber
+        : undefined;
 
     const applied = await taskRepo.applyTaskCompletedChanged(userId, {
       mutationId,
       backendTaskId,
+      backendPlanId,
+      backendWeekId,
       clientTaskId,
       clientWeekId,
       clientPlanId,
+      weekNumber,
       completed: payload.completed,
       completedAt,
       syncUpdatedAt: processedAt,

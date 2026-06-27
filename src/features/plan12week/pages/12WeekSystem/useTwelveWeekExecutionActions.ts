@@ -41,7 +41,7 @@ import {
 } from "@/app/utils/twelve-week-system-ui";
 import { enqueueLeadMetricUpsertedMutations } from "@/features/plan12week/persistence/leadMetricMutation";
 import { enqueueStoredMutation } from "@/features/plan12week/persistence/mutationQueue";
-import { getPlanLink } from "@/features/plan12week/persistence/planLinkStore";
+import { getPlanLink, getRemoteTaskIdForGoal } from "@/features/plan12week/persistence/planLinkStore";
 import { enqueuePlanSnapshotUpdatedMutation } from "@/features/plan12week/persistence/planSnapshotMutation";
 import { getUniversalWeeklyReviewExecutionScore } from "@/features/plan12week/persistence/reviewExecutionScore";
 import { celebrateMedium, celebrateSmall } from "@/lib/effects/celebrate";
@@ -90,12 +90,17 @@ function getClientWeekId(goalId: string, weekNumber: number): string {
 function enqueueTaskCompletionChangedMutation(goalId: string, task: TwelveWeekTaskInstance): void {
   try {
     const planLink = getPlanLink(goalId);
+    const backendPlanId = planLink?.planId ?? null;
+    const backendWeekId = planLink?.weekIdByNumber[task.weekNumber] ?? null;
     enqueueStoredMutation({
       kind: "task_completed_changed",
       goalId,
-      planId: planLink?.planId ?? null,
+      planId: backendPlanId,
       payload: {
         taskId: task.id,
+        backendTaskId: getRemoteTaskIdForGoal(goalId, task.id),
+        backendPlanId,
+        backendWeekId,
         clientTaskId: task.id,
         clientPlanId: getClientPlanId(goalId),
         clientWeekId: getClientWeekId(goalId, task.weekNumber),
@@ -116,12 +121,16 @@ function enqueueTaskCompletionChangedMutation(goalId: string, task: TwelveWeekTa
 function enqueueDailyCheckInUpsertedMutation(goalId: string, weekNumber: number, checkIn: UniversalDailyCheckIn): void {
   try {
     const planLink = getPlanLink(goalId);
+    const backendPlanId = planLink?.planId ?? null;
+    const backendWeekId = planLink?.weekIdByNumber[weekNumber] ?? null;
     enqueueStoredMutation({
       kind: "daily_check_in_upserted",
       goalId,
-      planId: planLink?.planId ?? null,
+      planId: backendPlanId,
       payload: {
         date: checkIn.date,
+        backendPlanId,
+        backendWeekId,
         clientPlanId: getClientPlanId(goalId),
         clientWeekId: getClientWeekId(goalId, weekNumber),
         weekNumber,
@@ -141,11 +150,15 @@ function enqueueWeeklyReviewUpsertedMutation(
 ): void {
   try {
     const planLink = getPlanLink(goalId);
+    const backendPlanId = planLink?.planId ?? null;
+    const backendWeekId = planLink?.weekIdByNumber[weekNumber] ?? null;
     enqueueStoredMutation({
       kind: "weekly_review_upserted",
       goalId,
-      planId: planLink?.planId ?? null,
+      planId: backendPlanId,
       payload: {
+        backendPlanId,
+        backendWeekId,
         clientPlanId: getClientPlanId(goalId),
         clientWeekId: getClientWeekId(goalId, weekNumber),
         weekNumber,

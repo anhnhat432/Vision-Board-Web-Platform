@@ -91,6 +91,8 @@ export class DailyCheckInUpsertHandler implements MutationHandlerStrategy {
     }
 
     const clientGoalId = getString("clientGoalId");
+    const backendPlanId = getString("backendPlanId");
+    const backendWeekId = getString("backendWeekId");
     const clientWeekId = getString("clientWeekId");
     const clientCheckInId = getString("clientCheckInId");
     const whichLeadIndicatorWorkedOn = getString("whichLeadIndicatorWorkedOn");
@@ -106,6 +108,8 @@ export class DailyCheckInUpsertHandler implements MutationHandlerStrategy {
     const applied = await workspaceRepo.applyDailyCheckInUpserted(userId, {
       mutationId,
       clientGoalId,
+      backendPlanId,
+      backendWeekId,
       clientPlanId,
       clientWeekId,
       clientCheckInId,

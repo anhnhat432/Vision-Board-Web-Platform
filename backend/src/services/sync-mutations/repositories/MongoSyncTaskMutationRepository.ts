@@ -55,7 +55,7 @@ function mapTaskDoc(doc: MongoTaskDoc): AppliedTaskMutationEntity {
   };
 }
 
-function getTaskIdCandidate(value: unknown): string | undefined {
+function getObjectIdCandidate(value: unknown): string | undefined {
   const text = typeof value === "string" ? value.trim() : "";
   return text && isValidObjectId(text) ? text : undefined;
 }
@@ -110,6 +110,9 @@ export class MongoSyncTaskMutationRepository implements SyncTaskMutationReposito
 
     if (!input.clientTaskId) return null;
 
+    const taskByBackendParent = await this.findOwnedTaskByBackendParent(userId, input);
+    if (taskByBackendParent) return taskByBackendParent;
+
     if (input.clientPlanId && input.clientWeekId) {
       const plan = await PlanModel.findOne(withoutTombstones({ userId, clientPlanId: input.clientPlanId })).lean();
       if (!plan) return null;
@@ -139,6 +142,38 @@ export class MongoSyncTaskMutationRepository implements SyncTaskMutationReposito
     }
 
     return ownedTasks.length === 1 ? ownedTasks[0] : null;
+  }
+
+  private async findOwnedTaskByBackendParent(
+    userId: string,
+    input: TaskCompletedChangedApplyInput,
+  ): Promise<AppliedTaskMutationEntity | null> {
+    const backendPlanId = getObjectIdCandidate(input.backendPlanId);
+    if (!backendPlanId || !input.clientTaskId) return null;
+
+    const plan = await PlanModel.findOne(withoutTombstones({ _id: backendPlanId, userId })).lean();
+    if (!plan) return null;
+
+    const weekQuery: Record<string, unknown> = { planId: getDocId(plan as unknown as MongoPlanDoc) };
+    const backendWeekId = getObjectIdCandidate(input.backendWeekId);
+    if (backendWeekId) weekQuery._id = backendWeekId;
+    else if (input.weekNumber) weekQuery.weekNumber = input.weekNumber;
+    else return null;
+
+    const week = await WeekModel.findOne(withoutTombstones(weekQuery)).lean();
+    if (!week) return null;
+
+    const mappedWeek = week as unknown as MongoWeekDoc;
+    if (input.weekNumber && mappedWeek.weekNumber !== input.weekNumber) return null;
+
+    const task = await TaskModel.findOne(
+      withoutTombstones({
+        weekId: getDocId(mappedWeek),
+        clientTaskId: input.clientTaskId,
+      }),
+    ).lean();
+
+    return task ? mapTaskDoc(task as unknown as MongoTaskDoc) : null;
   }
 
   private async toOwnedTask(

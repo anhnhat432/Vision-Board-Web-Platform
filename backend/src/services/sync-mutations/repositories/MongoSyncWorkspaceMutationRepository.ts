@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { isValidObjectId } from "mongoose";
 
 import { DailyCheckInModel } from "../../../models/DailyCheckInModel";
 import { LeadMetricModel } from "../../../models/LeadMetricModel";
@@ -76,6 +76,11 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function isDuplicateKeyError(error: unknown): boolean {
   return isRecord(error) && error.code === 11000;
+}
+
+function getObjectIdCandidate(value: unknown): string | undefined {
+  const text = typeof value === "string" ? value.trim() : "";
+  return text && isValidObjectId(text) ? text : undefined;
 }
 
 function mapDailyCheckInDoc(doc: MongoDailyCheckInDoc): AppliedWorkspaceMutationEntity {
@@ -382,16 +387,30 @@ export class MongoSyncWorkspaceMutationRepository implements SyncWorkspaceMutati
 
   private async findOwnedWeek(
     userId: string,
-    input: { clientPlanId: string; clientWeekId?: string; weekNumber: number },
+    input: {
+      backendPlanId?: string;
+      backendWeekId?: string;
+      clientPlanId: string;
+      clientWeekId?: string;
+      weekNumber: number;
+    },
   ): Promise<OwnedWeekRef | null> {
-    const plan = await PlanModel.findOne(withoutTombstones({ userId, clientPlanId: input.clientPlanId })).lean();
+    const backendPlanId = getObjectIdCandidate(input.backendPlanId);
+    const plan = backendPlanId
+      ? await PlanModel.findOne(withoutTombstones({ _id: backendPlanId, userId })).lean()
+      : await PlanModel.findOne(withoutTombstones({ userId, clientPlanId: input.clientPlanId })).lean();
     if (!plan) return null;
 
     const mappedPlan = plan as unknown as MongoPlanDoc;
+    const ownedClientPlanId = mappedPlan.clientPlanId ?? input.clientPlanId;
+    if (!ownedClientPlanId) return null;
+
     const weekQuery: Record<string, unknown> = {
       planId: getDocId(mappedPlan),
     };
-    if (input.clientWeekId) weekQuery.clientWeekId = input.clientWeekId;
+    const backendWeekId = getObjectIdCandidate(input.backendWeekId);
+    if (backendWeekId) weekQuery._id = backendWeekId;
+    else if (!backendPlanId && input.clientWeekId) weekQuery.clientWeekId = input.clientWeekId;
     else weekQuery.weekNumber = input.weekNumber;
 
     const week = await WeekModel.findOne(withoutTombstones(weekQuery)).lean();
@@ -399,12 +418,14 @@ export class MongoSyncWorkspaceMutationRepository implements SyncWorkspaceMutati
 
     const mappedWeek = week as unknown as MongoWeekDoc;
     if (mappedWeek.weekNumber !== input.weekNumber) return null;
-    if (input.clientWeekId && mappedWeek.clientWeekId !== input.clientWeekId) return null;
+    if (!backendWeekId && !backendPlanId && input.clientWeekId && mappedWeek.clientWeekId !== input.clientWeekId) {
+      return null;
+    }
 
     return {
       planId: getDocId(mappedPlan),
       weekId: getDocId(mappedWeek),
-      clientPlanId: input.clientPlanId,
+      clientPlanId: ownedClientPlanId,
       clientWeekId: mappedWeek.clientWeekId ?? input.clientWeekId,
       weekNumber: mappedWeek.weekNumber,
     };

@@ -79,6 +79,14 @@ export class LeadMetricUpsertHandler implements MutationHandlerStrategy {
       typeof payload.clientWeekId === "string" && payload.clientWeekId.length > 0
         ? payload.clientWeekId
         : undefined;
+    const backendPlanId =
+      typeof payload.backendPlanId === "string" && payload.backendPlanId.length > 0
+        ? payload.backendPlanId
+        : undefined;
+    const backendWeekId =
+      typeof payload.backendWeekId === "string" && payload.backendWeekId.length > 0
+        ? payload.backendWeekId
+        : undefined;
 
     const leadIndicatorId =
       typeof payload.leadIndicatorId === "string" && payload.leadIndicatorId.length > 0
@@ -112,6 +120,8 @@ export class LeadMetricUpsertHandler implements MutationHandlerStrategy {
     // ─── Apply ────────────────────────────────────────────────
     const applied = await workspaceRepo.applyLeadMetricUpserted(userId, {
       mutationId,
+      backendPlanId,
+      backendWeekId,
       clientPlanId: payload.clientPlanId,
       clientWeekId,
       clientMetricId: payload.clientMetricId,
