@@ -20,9 +20,8 @@ import {
   User2,
   X,
 } from "lucide-react";
-import { startTransition, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { lazy, Suspense, startTransition, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useOutlet } from "react-router";
-import { AIAssistant } from "@/app/features/assistant/AIAssistant";
 import { AssistantPageContextProvider } from "@/app/features/assistant/AssistantPageContextProvider";
 import { AutoCloudSyncProvider } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
 import {
@@ -62,9 +61,6 @@ import {
 } from "../../utils/storage";
 import { GracePeriodBanner } from "../billing/GracePeriodBanner";
 import { AppPublicFooter } from "../layout/AppPublicFooter";
-import { MotivationalReminder } from "../MotivationalReminder";
-import { MotionPageTransition } from "../motion";
-import { NewUserGuideDialog } from "../NewUserGuide";
 import { startScreenGuide, ScreenGuideContext } from "../ScreenGuide";
 import { OfflineBanner } from "../states/OfflineBanner";
 import { Badge } from "../ui/badge";
@@ -81,7 +77,7 @@ import { MindfulPlayer } from "../ui/mindful-player";
 import { Toaster } from "../ui/sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { AppSidebar } from "./AppSidebar";
-import { CommandPalette, type CommandPaletteGoal } from "./CommandPalette";
+import type { CommandPaletteGoal } from "./CommandPalette";
 import { EmailVerificationBanner } from "./EmailVerificationBanner";
 import { FirstLoginRestoreToast } from "./FirstLoginRestoreToast";
 import {
@@ -95,11 +91,7 @@ import {
 import { useEntitlementsAutoSync } from "./hooks/useEntitlementsAutoSync";
 import { usePageViewAnalytics } from "./hooks/usePageViewAnalytics";
 import { useCommandPaletteHotkey, useWarmPrefetch } from "./hooks/useUiBootstrap";
-import {
-  type CloudImportDryRunResult,
-  type CloudImportResult,
-  LocalDataMigrationPrompt,
-} from "./LocalDataMigrationPrompt";
+import type { CloudImportDryRunResult, CloudImportResult } from "./LocalDataMigrationPrompt";
 import {
   buildAuthPath,
   getNavItemsForState,
@@ -111,6 +103,42 @@ import {
 import { GUIDED_PATHS, getBreadcrumbTrail, getRouteMeta } from "./routeMeta";
 import { SyncStatusPill } from "./SyncStatusPill";
 import { buildLoginRedirect, isAuthProtectedPath, isPublicCheckoutPath, useWorkspaceGate } from "./useWorkspaceGate";
+
+const AIAssistant = lazy(() =>
+  import("@/app/features/assistant/AIAssistant").then((module) => ({
+    default: module.AIAssistant,
+  })),
+);
+
+const CommandPalette = lazy(() =>
+  import("./CommandPalette").then((module) => ({
+    default: module.CommandPalette,
+  })),
+);
+
+const LocalDataMigrationPrompt = lazy(() =>
+  import("./LocalDataMigrationPrompt").then((module) => ({
+    default: module.LocalDataMigrationPrompt,
+  })),
+);
+
+const MotionPageTransition = lazy(() =>
+  import("../motion/MotionPageTransition").then((module) => ({
+    default: module.MotionPageTransition,
+  })),
+);
+
+const MotivationalReminder = lazy(() =>
+  import("../MotivationalReminder").then((module) => ({
+    default: module.MotivationalReminder,
+  })),
+);
+
+const NewUserGuideDialog = lazy(() =>
+  import("../NewUserGuide").then((module) => ({
+    default: module.NewUserGuideDialog,
+  })),
+);
 
 type ContextualGuide = { kind: "spotlight"; tourName: string } | { kind: "screen"; screenId: string };
 
@@ -485,6 +513,7 @@ export function RootLayout() {
   const accountPlanLabel = currentAccountPlanCode === "PLUS" ? "Plus" : "Miễn phí";
   const accountAvatarLabel = (accountLabel || accountEmail || "A").trim().slice(0, 1).toUpperCase();
   const accountStatus = userProfileError ? "Lỗi hồ sơ" : accountEmail || "Tài khoản đã đăng nhập";
+  const isPublicLanding = !user && normalizePathname(location.pathname) === "/";
   const commandPaletteGoals: CommandPaletteGoal[] = (guideUserData.goals ?? []).slice(0, 12).map((goal) => ({
     id: goal.id,
     title: goal.title || "Mục tiêu chưa đặt tên",
@@ -527,6 +556,8 @@ export function RootLayout() {
   useEffect(() => {
     if (
       typeof window === "undefined" ||
+      isPublicLanding ||
+      isSignedOutVisitor ||
       shouldShowWorkspaceGate ||
       shouldWaitForWorkspace ||
       hasSeenNewUserGuide() ||
@@ -539,7 +570,7 @@ export function RootLayout() {
     setGuideUserData(getUserData());
     setIsGuideOpen(true);
     markNewUserGuideSeen();
-  }, [shouldShowWorkspaceGate, shouldWaitForWorkspace]);
+  }, [isPublicLanding, isSignedOutVisitor, shouldShowWorkspaceGate, shouldWaitForWorkspace]);
 
   useEffect(() => {
     if (
@@ -901,24 +932,33 @@ export function RootLayout() {
     }
   }, []);
 
-  const localDataMigrationPrompt = (
-    <LocalDataMigrationPrompt
-      candidate={localDataMigrationCandidate}
-      open={Boolean(localDataMigrationCandidate && isLocalDataMigrationPromptOpen)}
-      onImport={handleImportLocalDataMigration}
-      onValidateCloudImport={handleValidateCloudImport}
-      onCloudImport={handleCloudImport}
-      cloudImportDryRunEnabled={cloudImportDryRunEnabled}
-      cloudImportEnabled={cloudImportEnabled}
-      cloudImportUnavailableReason={cloudImportUnavailableReason}
-      cloudImportDryRunUnavailableReason={cloudImportDryRunUnavailableReason}
-      cloudImportAlreadyCompleted={cloudImportAlreadyCompleted}
-      onExportBackup={handleExportBackup}
-      onSkip={handleSkipLocalDataMigration}
-    />
-  );
+  const shouldShowLocalDataMigrationPrompt = Boolean(localDataMigrationCandidate && isLocalDataMigrationPromptOpen);
+  const localDataMigrationPrompt = shouldShowLocalDataMigrationPrompt ? (
+    <Suspense fallback={null}>
+      <LocalDataMigrationPrompt
+        candidate={localDataMigrationCandidate}
+        open={shouldShowLocalDataMigrationPrompt}
+        onImport={handleImportLocalDataMigration}
+        onValidateCloudImport={handleValidateCloudImport}
+        onCloudImport={handleCloudImport}
+        cloudImportDryRunEnabled={cloudImportDryRunEnabled}
+        cloudImportEnabled={cloudImportEnabled}
+        cloudImportUnavailableReason={cloudImportUnavailableReason}
+        cloudImportDryRunUnavailableReason={cloudImportDryRunUnavailableReason}
+        cloudImportAlreadyCompleted={cloudImportAlreadyCompleted}
+        onExportBackup={handleExportBackup}
+        onSkip={handleSkipLocalDataMigration}
+      />
+    </Suspense>
+  ) : null;
 
-  const pageTransitionContent = <MotionPageTransition pageKey={location.pathname}>{outlet}</MotionPageTransition>;
+  const pageTransitionContent = user ? (
+    <Suspense fallback={outlet}>
+      <MotionPageTransition pageKey={location.pathname}>{outlet}</MotionPageTransition>
+    </Suspense>
+  ) : (
+    outlet
+  );
 
   if (GUIDED_PATHS.has(location.pathname)) {
     return (
@@ -973,7 +1013,11 @@ export function RootLayout() {
 
               <Toaster />
             </main>
-            {showAssistant && user && <AIAssistant />}
+            {showAssistant && user ? (
+              <Suspense fallback={null}>
+                <AIAssistant />
+              </Suspense>
+            ) : null}
           </div>
           </ScreenGuideContext.Provider>
         </AssistantPageContextProvider>
@@ -985,7 +1029,6 @@ export function RootLayout() {
   // Đăng ký/âm thanh tập trung), nên ẩn chrome mặc định của shell ở route "/".
   // Dùng !user (không phụ thuộc isConfigured) để khớp điều kiện Dashboard hiển thị
   // PublicVisitorView — tránh trùng header khi demo chưa cấu hình Firebase.
-  const isPublicLanding = !user && normalizePathname(location.pathname) === "/";
   const isAdminRoute = location.pathname.startsWith("/admin/");
   const showSidebar = !isSignedOutVisitor && !isPublicLanding && !isAdminRoute;
 
@@ -1048,7 +1091,7 @@ export function RootLayout() {
                         aria-label="Về trang chủ Dear Our Future"
                       >
                         <img
-                          src="/icon.svg"
+                          src="/favicon-192.png"
                           alt=""
                           aria-hidden="true"
                           loading="eager"
@@ -1684,31 +1727,45 @@ export function RootLayout() {
             </nav>
           ) : null}
 
-          {demoMode || user ? <MotivationalReminder /> : null}
-          {showSidebar ? (
-            <CommandPalette
-              open={commandPaletteOpen}
-              onOpenChange={setCommandPaletteOpen}
-              navItems={NAV_ITEMS}
-              goals={commandPaletteGoals}
-              onNavigate={navigateAppRoute}
-              onOpenGoal={(goalId) => navigateAppRoute(`/goals?goal=${goalId}`)}
-              onOpenTwelveWeek={(goalId) => {
-                try {
-                  localStorage.setItem("latest_12_week_goal_id", goalId);
-                  localStorage.setItem("latest_12_week_system_goal_id", goalId);
-                } catch {
-                  /* ignore storage errors */
-                }
-                navigateAppRoute("/12-week-system");
-              }}
-            />
+          {(demoMode || user) && !isPublicLanding ? (
+            <Suspense fallback={null}>
+              <MotivationalReminder />
+            </Suspense>
           ) : null}
-          <NewUserGuideDialog open={isGuideOpen} onOpenChange={setIsGuideOpen} userData={guideUserData} />
+          {showSidebar && commandPaletteOpen ? (
+            <Suspense fallback={null}>
+              <CommandPalette
+                open={commandPaletteOpen}
+                onOpenChange={setCommandPaletteOpen}
+                navItems={NAV_ITEMS}
+                goals={commandPaletteGoals}
+                onNavigate={navigateAppRoute}
+                onOpenGoal={(goalId) => navigateAppRoute(`/goals?goal=${goalId}`)}
+                onOpenTwelveWeek={(goalId) => {
+                  try {
+                    localStorage.setItem("latest_12_week_goal_id", goalId);
+                    localStorage.setItem("latest_12_week_system_goal_id", goalId);
+                  } catch {
+                    /* ignore storage errors */
+                  }
+                  navigateAppRoute("/12-week-system");
+                }}
+              />
+            </Suspense>
+          ) : null}
+          {isGuideOpen ? (
+            <Suspense fallback={null}>
+              <NewUserGuideDialog open={isGuideOpen} onOpenChange={setIsGuideOpen} userData={guideUserData} />
+            </Suspense>
+          ) : null}
           {localDataMigrationPrompt}
 
           <Toaster />
-          {showAssistant && user && <AIAssistant />}
+          {showAssistant && user ? (
+            <Suspense fallback={null}>
+              <AIAssistant />
+            </Suspense>
+          ) : null}
         </div>
       </AssistantPageContextProvider>
       {!demoMode && user ? <FirstLoginRestoreToast /> : null}

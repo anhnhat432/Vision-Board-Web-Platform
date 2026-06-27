@@ -9,6 +9,7 @@ import {
   SectionHeader,
   StatBadge,
 } from "@/app/components/ui/editorial";
+import { MamCompanion } from "@/app/features/pet/MamCompanion";
 import { MindfulPlayer } from "@/app/components/ui/mindful-player";
 import { trackAnalyticsEvent } from "@/app/utils/analytics";
 
@@ -184,9 +185,9 @@ export function PublicVisitorView({
           position: "sticky",
           top: 0,
           zIndex: 50,
-          background: "color-mix(in srgb, var(--app-bg) 82%, transparent)",
-          backdropFilter: "blur(14px)",
-          WebkitBackdropFilter: "blur(14px)",
+          background: "color-mix(in srgb, var(--app-bg) 92%, transparent)",
+          backdropFilter: "blur(8px)",
+          WebkitBackdropFilter: "blur(8px)",
           borderBottom: "1px solid var(--app-line)",
         }}
       >
@@ -342,6 +343,9 @@ export function PublicVisitorView({
             </div>
 
             <div className="dof-up dof-hero-art" style={{ animationDelay: ".14s", position: "relative" }}>
+              <div style={{ position: "absolute", top: 16, right: 16, zIndex: 3 }}>
+                <MamCompanion initialEvent="welcomeBack" className="dof-landing-mascot" compact animated={false} />
+              </div>
               <div
                 className="dof-float"
                 style={{
@@ -642,17 +646,20 @@ export function PublicVisitorView({
               </div>
             </div>
             <div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-                <div
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 700,
-                    letterSpacing: "0.12em",
-                    textTransform: "uppercase",
-                    color: "var(--app-ink-soft)",
-                  }}
-                >
-                  Việc hôm nay
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 14 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <MamCompanion initialEvent="welcomeBack" className="dof-landing-mascot" compact animated={false} />
+                  <div
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 700,
+                      letterSpacing: "0.12em",
+                      textTransform: "uppercase",
+                      color: "var(--app-ink-soft)",
+                    }}
+                  >
+                    Việc hôm nay
+                  </div>
                 </div>
                 <StatBadge>{goal.week}</StatBadge>
               </div>

@@ -53,7 +53,7 @@
 }
 
 .dof-landing .dof-float {
-  animation: dof-float 6s ease-in-out infinite;
+  animation: none;
 }
 
 /* Tôn trọng người dùng giảm chuyển động: tắt float + reveal động. */

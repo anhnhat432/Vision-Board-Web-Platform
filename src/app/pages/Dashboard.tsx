@@ -36,13 +36,12 @@ import { TodayMiniCard } from "@/features/dashboard/v2/TodayMiniCard";
 import { WeekRhythmCard } from "@/features/dashboard/v2/WeekRhythmCard";
 import { usePlan12Week } from "@/features/plan12week/hooks";
 import { useAuthContext } from "@/lib/auth/AuthContext";
-import { FeedbackDialog } from "../components/FeedbackDialog";
-import { NewUserGuideBanner } from "../components/NewUserGuide";
-import { SpotlightTour, type SpotlightTourStep } from "../components/SpotlightTour";
-import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
+import type { SpotlightTourStep } from "../components/SpotlightTour";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../components/ui/collapsible";
 import { Skeleton } from "../components/ui/skeleton";
 import { useSetAssistantPageContext } from "../features/assistant/AssistantPageContextProvider";
+import { MamCompanion } from "../features/pet/MamCompanion";
+import { emitPetEvent } from "../features/pet/petEvents";
 import { useBackendProgressOverlay } from "../hooks/useBackendProgressOverlay";
 import { useBreakpoint } from "../hooks/useBreakpoint";
 import { usePageTour } from "../hooks/usePageTour";
@@ -93,9 +92,33 @@ const DASHBOARD_TOUR_STEPS: SpotlightTourStep[] = [
 
 const DASHBOARD_SECONDARY_INSIGHTS_OPEN_KEY = "visionboard_dashboard_secondary_insights_open";
 
+const FeedbackDialog = lazy(() =>
+  import("../components/FeedbackDialog").then((module) => ({
+    default: module.FeedbackDialog,
+  })),
+);
+
+const NewUserGuideBanner = lazy(() =>
+  import("../components/NewUserGuide").then((module) => ({
+    default: module.NewUserGuideBanner,
+  })),
+);
+
+const SpotlightTour = lazy(() =>
+  import("../components/SpotlightTour").then((module) => ({
+    default: module.SpotlightTour,
+  })),
+);
+
 const TwelveWeekTrendCard = lazy(() =>
   import("@/features/dashboard/v2/TwelveWeekTrendCard").then((module) => ({
     default: module.TwelveWeekTrendCard,
+  })),
+);
+
+const UpgradePaywallDialog = lazy(() =>
+  import("../components/UpgradePaywallDialog").then((module) => ({
+    default: module.UpgradePaywallDialog,
   })),
 );
 
@@ -691,6 +714,7 @@ function DashboardContent({
             userData={userData}
             displayName={dashboardDisplayName}
             onContinue={(href) => navigate(href)}
+            companion={<MamCompanion initialEvent="welcomeBack" />}
           />
         ) : (
           <DashboardActiveLayout
@@ -732,22 +756,26 @@ function DashboardContent({
 
         {/* Desktop feedback button - inline */}
         <div className="hidden md:block mt-5 flex justify-end">
-          <FeedbackDialog
-            source="dashboard"
-            context="dashboard"
-            triggerLabel="Góp ý"
-            triggerClassName="border-app-line bg-app-surface text-app-ink-muted hover:bg-app-bg"
-          />
+          <Suspense fallback={null}>
+            <FeedbackDialog
+              source="dashboard"
+              context="dashboard"
+              triggerLabel="Góp ý"
+              triggerClassName="border-app-line bg-app-surface text-app-ink-muted hover:bg-app-bg"
+            />
+          </Suspense>
         </div>
 
         {/* Mobile floating feedback button */}
         <div className="fixed bottom-4 right-4 z-30 md:hidden">
-          <FeedbackDialog
-            source="dashboard"
-            context="dashboard"
-            triggerLabel=""
-            triggerClassName="flex size-10 items-center justify-center rounded-full border border-app-line bg-app-surface/90 text-app-ink-soft shadow-sm transition-all duration-200 hover:bg-app-surface hover:text-app-ink hover:shadow-md backdrop-blur focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
-          />
+          <Suspense fallback={null}>
+            <FeedbackDialog
+              source="dashboard"
+              context="dashboard"
+              triggerLabel=""
+              triggerClassName="flex size-10 items-center justify-center rounded-full border border-app-line bg-app-surface/90 text-app-ink-soft shadow-sm transition-all duration-200 hover:bg-app-surface hover:text-app-ink hover:shadow-md backdrop-blur focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+            />
+          </Suspense>
         </div>
       </div>
 
@@ -763,23 +791,31 @@ function DashboardContent({
         </div>
       ) : null}
 
-      <UpgradePaywallDialog
-        open={isUpgradeDialogOpen}
-        onOpenChange={setIsUpgradeDialogOpen}
-        context={upgradeContext}
-        currentPlan={currentPlanCode}
-        goalId={visibleActiveTwelveWeekGoal?.id}
-        recommendedPlan={recommendedPlan}
-        source="dashboard"
-        onCheckoutComplete={onReload}
-      />
-      <SpotlightTour
-        open={isTourOpen}
-        onOpenChange={setIsTourOpen}
-        title="Tour Trang chính"
-        description="Ba điểm chính để người mới mở vào là biết nên bắt đầu từ đâu."
-        steps={dashboardTourSteps}
-      />
+      {isUpgradeDialogOpen ? (
+        <Suspense fallback={null}>
+          <UpgradePaywallDialog
+            open={isUpgradeDialogOpen}
+            onOpenChange={setIsUpgradeDialogOpen}
+            context={upgradeContext}
+            currentPlan={currentPlanCode}
+            goalId={visibleActiveTwelveWeekGoal?.id}
+            recommendedPlan={recommendedPlan}
+            source="dashboard"
+            onCheckoutComplete={onReload}
+          />
+        </Suspense>
+      ) : null}
+      {isTourOpen ? (
+        <Suspense fallback={null}>
+          <SpotlightTour
+            open={isTourOpen}
+            onOpenChange={setIsTourOpen}
+            title="Tour Trang chính"
+            description="Ba điểm chính để người mới mở vào là biết nên bắt đầu từ đâu."
+            steps={dashboardTourSteps}
+          />
+        </Suspense>
+      ) : null}
     </div>
   );
 }
@@ -931,6 +967,7 @@ function DashboardActiveLayout({
     getInitialSecondaryInsightsOpen(isDesktopViewport),
   );
   const [secondaryInsightsRef, shouldLoadTrendChart] = useNearViewport<HTMLDivElement>(secondaryInsightsOpen);
+  const lastPetNudgeKeyRef = useRef<string | null>(null);
   const trendPoints =
     data.weeklyProgressPoints.length > 0
       ? data.weeklyProgressPoints
@@ -944,6 +981,22 @@ function DashboardActiveLayout({
       // Ignore storage failures; the dashboard remains usable without persistence.
     }
   };
+
+  useEffect(() => {
+    const nudgeKey = `${data.dashboardGoalTitle}:${data.dashboardOpenTaskCount}`;
+    if (data.dashboardOpenTaskCount <= 0 || lastPetNudgeKeyRef.current === nudgeKey) return;
+
+    lastPetNudgeKeyRef.current = nudgeKey;
+    const timer = window.setTimeout(() => {
+      emitPetEvent({
+        event: "gentleNudge",
+        source: "dashboard",
+        message: "Không sao nếu lệch nhịp. Bắt đầu lại từ một việc nhỏ.",
+      });
+    }, 900);
+
+    return () => window.clearTimeout(timer);
+  }, [data.dashboardGoalTitle, data.dashboardOpenTaskCount]);
 
   return (
     <div className="space-y-6">
@@ -960,7 +1013,9 @@ function DashboardActiveLayout({
       </div>
 
       <div className="appear-fade-up animate-delay-100" style={{ animationDelay: "75ms" }}>
-        <NewUserGuideBanner userData={userData} variant="compact" />
+        <Suspense fallback={null}>
+          <NewUserGuideBanner userData={userData} variant="compact" />
+        </Suspense>
       </div>
 
       {/* Next Best Action Banner */}
@@ -988,6 +1043,7 @@ function DashboardActiveLayout({
           tasks={data.activeSystemTaskPreview}
           completedCount={data.todayPreviewCompleted}
           totalCount={data.todayPreviewTotal}
+          companion={<MamCompanion initialEvent={data.dashboardOpenTaskCount > 0 ? "gentleNudge" : "welcomeBack"} />}
         />
       </div>
 

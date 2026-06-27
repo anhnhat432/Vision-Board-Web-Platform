@@ -3342,6 +3342,200 @@
   animation: fadeInUp 0.5s ease-out forwards;
 }
 
+.mam-pet {
+  width: 62px;
+  height: 72px;
+  flex: 0 0 auto;
+  transform-origin: 50% 88%;
+  filter: drop-shadow(0 14px 24px rgba(15, 106, 66, 0.14));
+}
+
+.mam-pet--compact {
+  width: 62px;
+  height: 72px;
+}
+
+.dof-landing .dof-landing-mascot .mam-pet {
+  filter: none;
+}
+
+@media (min-width: 768px) {
+  .mam-pet {
+    width: 82px;
+    height: 96px;
+  }
+
+  .mam-pet--compact {
+    width: 62px;
+    height: 72px;
+  }
+}
+
+.mam-body,
+.mam-stem,
+.mam-leaf,
+.mam-arm,
+.mam-foot,
+.mam-shadow {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.mam-pet--idle {
+  animation: mam-breathe 4.8s ease-in-out infinite;
+}
+
+.mam-pet--idle .mam-leaf {
+  animation: mam-leaf-sway 5.6s ease-in-out infinite;
+}
+
+.mam-pet--welcome .mam-arm-right {
+  animation: mam-wave 0.86s ease-in-out 2;
+  transform-origin: 0% 50%;
+}
+
+.mam-pet--happy {
+  animation: mam-small-hop 0.72s cubic-bezier(0.2, 0.85, 0.25, 1.1) 1;
+}
+
+.mam-pet--celebrate {
+  animation: mam-celebrate 1.6s cubic-bezier(0.2, 0.85, 0.25, 1.1) 1;
+}
+
+.mam-pet--glow {
+  animation: mam-glow 1.4s ease-out 1;
+}
+
+.mam-pet--proud {
+  animation: mam-proud 1.35s ease-in-out 1;
+}
+
+.mam-pet--nudge .mam-body {
+  animation: mam-look-aside 1.2s ease-in-out 1;
+}
+
+.mam-pet--nudge .mam-eye {
+  animation: mam-eyes-aside 1.2s ease-in-out 1;
+}
+
+.mam-pet--static,
+.mam-pet--static * {
+  animation: none !important;
+}
+
+.mam-eye {
+  animation: mam-blink 7s ease-in-out infinite;
+  transform-origin: center;
+}
+
+@keyframes mam-breathe {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-1px) scale(1.015);
+  }
+}
+
+@keyframes mam-leaf-sway {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+@keyframes mam-blink {
+  0%,
+  94%,
+  100% {
+    transform: scaleY(1);
+  }
+  96% {
+    transform: scaleY(0.12);
+  }
+}
+
+@keyframes mam-wave {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(-18deg);
+  }
+}
+
+@keyframes mam-small-hop {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  45% {
+    transform: translateY(-5px) scale(1.025);
+  }
+}
+
+@keyframes mam-celebrate {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+    filter: drop-shadow(0 14px 24px rgba(15, 106, 66, 0.14));
+  }
+  35% {
+    transform: translateY(-8px) scale(1.04);
+    filter: drop-shadow(0 18px 30px rgba(198, 242, 78, 0.28));
+  }
+  70% {
+    transform: translateY(-2px) scale(1.01);
+  }
+}
+
+@keyframes mam-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 14px 24px rgba(15, 106, 66, 0.14));
+  }
+  50% {
+    filter: drop-shadow(0 16px 30px rgba(198, 242, 78, 0.36));
+  }
+}
+
+@keyframes mam-proud {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  45% {
+    transform: translateY(1px) rotate(-1.5deg);
+  }
+}
+
+@keyframes mam-look-aside {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  45%,
+  70% {
+    transform: translateX(-2px);
+  }
+}
+
+@keyframes mam-eyes-aside {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  45%,
+  70% {
+    transform: translateX(-1.5px);
+  }
+}
+
 /* ── AI assistant mascot animations ──────────────────────────
  * Breath: badge scale 1 → 1.03 → 1 in 4s, gentle "alive" feel.
  * Twinkle: sparkle icon rotates 0° → 12° → 0° + opacity 1 → 0.75
@@ -3383,6 +3577,29 @@
   transform-origin: center;
 }
 
+.assistant-pet-sprite {
+  display: inline-block;
+  background-image: url("/assistant/seedy-spritesheet.webp");
+  background-repeat: no-repeat;
+  background-size: var(--pet-bg-width) var(--pet-bg-height);
+  background-position: 0 var(--pet-y);
+  image-rendering: auto;
+  animation: assistant-pet-play var(--pet-duration) steps(var(--pet-frames)) infinite;
+}
+
+.assistant-pet-sprite--still {
+  animation: none;
+}
+
+@keyframes assistant-pet-play {
+  from {
+    background-position: 0 var(--pet-y);
+  }
+  to {
+    background-position: var(--pet-end-x) var(--pet-y);
+  }
+}
+
 /* Pause animations on hover so the user can aim at the badge */
 @media (hover: hover) {
   .assistant-mascot-shell:hover .animate-mascot-breath,
@@ -3394,7 +3611,10 @@
 /* Respect reduced motion preferences */
 @media (prefers-reduced-motion: reduce) {
   .animate-mascot-breath,
-  .animate-sparkle-twinkle {
+  .animate-sparkle-twinkle,
+  .assistant-pet-sprite,
+  .mam-pet,
+  .mam-pet * {
     animation: none;
   }
 }
