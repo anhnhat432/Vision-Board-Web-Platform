@@ -1,4 +1,4 @@
-import { Check, X } from "lucide-react";
+import { X } from "lucide-react";
 import { type Dispatch, type SetStateAction, useState } from "react";
 import { cn } from "@/app/components/ui/utils";
 

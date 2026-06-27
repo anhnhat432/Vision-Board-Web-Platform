@@ -1,7 +1,43 @@
 # Billing `/billing/plan` Smoke Timeout — Follow-up
 
-Status: **OPEN — under investigation**
+Status: **PARTIALLY MITIGATED — local readiness shipped, live smoke rerun pending**
 Scope: billing surface only. Not attributed to release `d8b35b71` (12-week setup route replacement).
+
+## Latest deployed evidence (2026-06-26)
+
+- Latest default-branch production smoke workflow run: [run 28218523067](https://github.com/anhnhat432/Vision-Board-Web-Platform/actions/runs/28218523067)
+- Result: failed before reaching `/billing/plan`.
+- Failing step moved earlier than the billing surface:
+  - stage: `12-week save, reload, and backend sync`
+  - symptom: production smoke waited 90s for `[data-testid="wam-section-score"]` to become visible on `/12-week-system?tab=week`
+  - observed DOM state: the locator resolved repeatedly, but the section stayed hidden because the weekly review form had not been opened yet
+- Impact on this follow-up:
+  - the older `/billing/plan` hydration timeout is still worth tracking as a warm/cold billing concern
+  - but the newest deployed production-smoke blocker is currently the weekly-review flow, not billing hydration
+
+Local repo mitigation prepared in this worktree:
+
+- `scripts/smoke-production-e2e.mjs` now opens the real weekly-review flow first by clicking `Bắt đầu review sớm` when needed.
+- The smoke then waits for visible `weekly-score-interpretation` review UI instead of requiring hidden `wam-section-score` to become visible.
+- The script no longer injects `window.confirm` into the page for this step; it follows the in-app review flow directly.
+
+- The full smoke now also accepts the production paid-checkout kill-switch as a valid billing state: if `/billing/plan` shows `paid-checkout-disabled-banner`, the harness verifies `/billing/confirm` is also locked and fails if any checkout-session POST leaks before skipping QR creation.
+
+This mitigation is local repo state only until it is committed, pushed, and picked up by the production smoke workflow on `main`.
+
+Local verification for the harness patch:
+
+- `node --check scripts/smoke-production-e2e.mjs`
+- `node --check scripts/production-smoke-harness.test.mjs`
+- `npm.cmd run test:ops` (15 tests passed)
+
+## Local hardening update (2026-06-25)
+
+- `/billing/plan` now exposes a stable `data-testid="billing-payment-history"` section with `data-payment-history-state`.
+- Signed-out real-mode users see an account-bound sign-in prompt and do not call protected `/billing/payment-history`.
+- Signed-in payment-history requests time out into a visible retryable error before the smoke's 30s ceiling.
+- `npm run smoke:prod:quick` now waits on the stable state marker and accepts the paid-checkout kill-switch banner instead of requiring upgrade CTA text.
+- Live production/staging smoke is still pending because this local batch did not run against deployed credentials or Render/Vercel state.
 
 ## 1. Observed failure
 

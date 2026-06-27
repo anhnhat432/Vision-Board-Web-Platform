@@ -231,6 +231,26 @@ function simulateBackendEcho(importPayload: TwelveWeekImportPayload): TwelveWeek
     clientPlanId: plan.clientPlanId,
     vision: plan.vision,
     startDate: plan.startDate,
+    endDate: plan.endDate,
+    timezone: plan.timezone,
+    weekStartsOn: plan.weekStartsOn,
+    totalWeeks: plan.totalWeeks,
+    status: plan.status,
+    goalType: plan.goalType,
+    templateId: plan.templateId,
+    templateName: plan.templateName,
+    lagMetric: plan.lagMetric,
+    milestones: plan.milestones,
+    successEvidence: plan.successEvidence,
+    reviewDay: plan.reviewDay,
+    week12Outcome: plan.week12Outcome,
+    weeklyActions: plan.weeklyActions,
+    successMetric: plan.successMetric,
+    dailyReminderTime: plan.dailyReminderTime,
+    tacticLoadPreference: plan.tacticLoadPreference,
+    preferredDays: plan.preferredDays,
+    personalConstraint: plan.personalConstraint,
+    reentryCount: plan.reentryCount,
     createdAt: NOW,
   };
 
@@ -382,115 +402,12 @@ interface FieldGap {
 }
 
 const KNOWN_FIELD_GAPS: FieldGap[] = [
-  // Plan-level metadata: pull v1 does not return these from the plan model
-  {
-    field: "templateId",
-    category: "plan_metadata",
-    severity: "low",
-    reason: "Pull v1 does not return template identity.",
-  },
-  {
-    field: "templateName",
-    category: "plan_metadata",
-    severity: "low",
-    reason: "Pull v1 does not return template identity.",
-  },
-  {
-    field: "lagMetric",
-    category: "plan_metadata",
-    severity: "medium",
-    reason: "Pull v1 does not return plan-level lag metric metadata. Defaults to lead indicator name.",
-  },
   {
     field: "leadIndicators",
     category: "plan_metadata",
     severity: "medium",
     reason:
       "Pull v1 returns week-level metrics, not the original lead indicator setup. Reconstructed from metrics or tasks.",
-  },
-  {
-    field: "milestones",
-    category: "plan_metadata",
-    severity: "medium",
-    reason: "Pull v1 returns weekly expectedOutput, not the original milestones object.",
-  },
-  {
-    field: "successEvidence",
-    category: "setup",
-    severity: "low",
-    reason: "Pull v1 does not return setup evidence text.",
-  },
-  {
-    field: "reviewDay",
-    category: "setup",
-    severity: "low",
-    reason: "Pull v1 does not return review day preference. Defaults to Sunday.",
-  },
-  {
-    field: "week12Outcome",
-    category: "setup",
-    severity: "low",
-    reason: "Pull v1 derives from last week milestone or goal title.",
-  },
-  {
-    field: "weeklyActions",
-    category: "setup",
-    severity: "low",
-    reason: "Pull v1 does not return legacy setup action list.",
-  },
-  {
-    field: "successMetric",
-    category: "setup",
-    severity: "low",
-    reason: "Pull v1 does not return setup success metric.",
-  },
-  {
-    field: "endDate",
-    category: "plan_metadata",
-    severity: "medium",
-    reason: "Pull v1 does not return endDate. Defaults to empty.",
-  },
-  {
-    field: "timezone",
-    category: "setup",
-    severity: "low",
-    reason: "Pull v1 does not return timezone. Defaults to Asia/Ho_Chi_Minh.",
-  },
-  {
-    field: "weekStartsOn",
-    category: "setup",
-    severity: "low",
-    reason: "Pull v1 does not return weekStartsOn. Defaults to Monday.",
-  },
-  {
-    field: "dailyReminderTime",
-    category: "setup",
-    severity: "low",
-    reason: "Pull v1 does not return local reminder preference.",
-  },
-  {
-    field: "tacticLoadPreference",
-    category: "setup",
-    severity: "low",
-    reason: "Pull v1 does not return tactic load preference.",
-  },
-  {
-    field: "preferredDays",
-    category: "setup",
-    severity: "low",
-    reason: "Pull v1 does not return preferred execution days.",
-  },
-  {
-    field: "personalConstraint",
-    category: "setup",
-    severity: "low",
-    reason: "Pull v1 does not return personal constraint.",
-  },
-  {
-    field: "reentryCount",
-    category: "setup",
-    severity: "low",
-    reason: "Pull v1 does not return reentry metadata. Defaults to 0.",
   },
   {
     field: "scoreboard",
@@ -505,10 +422,10 @@ const KNOWN_FIELD_GAPS: FieldGap[] = [
     reason: "Pull v1 re-derives phase names from week number.",
   },
   {
-    field: "goalType",
-    category: "plan_metadata",
-    severity: "low",
-    reason: "Pull v1 infers from goal focusArea/category, not original setup.",
+    field: "leadMetricLogs",
+    category: "derived",
+    severity: "medium",
+    reason: "Cloud metric logs have no local TwelveWeekSystem entity shape yet.",
   },
 ];
 
@@ -678,6 +595,33 @@ describe("round-trip sync: import → backend echo → pull → apply", () => {
       expect(reconstructedSystem.startDate).toBe(originalSystem.startDate);
     });
 
+    it("preserves supported plan setup metadata", () => {
+      const { originalSystem, reconstructedSystem } = performRoundTrip();
+
+      expect(reconstructedSystem).toEqual(
+        expect.objectContaining({
+          goalType: originalSystem.goalType,
+          templateId: originalSystem.templateId,
+          templateName: originalSystem.templateName,
+          lagMetric: originalSystem.lagMetric,
+          milestones: originalSystem.milestones,
+          successEvidence: originalSystem.successEvidence,
+          reviewDay: originalSystem.reviewDay,
+          week12Outcome: originalSystem.week12Outcome,
+          weeklyActions: originalSystem.weeklyActions,
+          successMetric: originalSystem.successMetric,
+          endDate: originalSystem.endDate,
+          timezone: originalSystem.timezone,
+          weekStartsOn: originalSystem.weekStartsOn,
+          dailyReminderTime: originalSystem.dailyReminderTime,
+          tacticLoadPreference: originalSystem.tacticLoadPreference,
+          preferredDays: originalSystem.preferredDays,
+          personalConstraint: originalSystem.personalConstraint,
+          reentryCount: originalSystem.reentryCount,
+        }),
+      );
+    });
+
     it("preserves week focus (getTotalWeeks clamps to min 12)", () => {
       const { originalSystem, reconstructedSystem } = performRoundTrip();
       // getTotalWeeks in pulledWorkspaceApply.ts clamps to Math.min(Math.max(maxWeek, 12), 12) = 12.
@@ -737,15 +681,15 @@ describe("round-trip sync: import → backend echo → pull → apply", () => {
     it("merge report detects unsupported fields on full pull", () => {
       const { original, pulledWorkspace } = performRoundTrip();
       const report = createPulledWorkspaceMergeReport(original, pulledWorkspace);
-      // unsupportedFields should include plan metadata that can't round-trip
       expect(report.unsupportedFields.length).toBeGreaterThan(0);
       const unsupportedFieldNames = report.unsupportedFields.map((f) => f.field);
-      // These are the highest-risk gaps from the hydration audit
-      expect(unsupportedFieldNames).toContain("templateId");
-      expect(unsupportedFieldNames).toContain("lagMetric");
+
       expect(unsupportedFieldNames).toContain("leadIndicators");
-      expect(unsupportedFieldNames).toContain("milestones");
-      expect(unsupportedFieldNames).toContain("successEvidence");
+      expect(unsupportedFieldNames).toContain("scoreboard");
+      expect(unsupportedFieldNames).not.toContain("templateId");
+      expect(unsupportedFieldNames).not.toContain("lagMetric");
+      expect(unsupportedFieldNames).not.toContain("milestones");
+      expect(unsupportedFieldNames).not.toContain("successEvidence");
     });
 
     it("known gap list covers all unsupported fields from the merge report", () => {
@@ -763,7 +707,7 @@ describe("round-trip sync: import → backend echo → pull → apply", () => {
     it("documents the full known gap list with severity", () => {
       // This test exists purely to make the gap inventory visible in test output.
       // It will fail if someone removes a gap entry without resolving it.
-      expect(KNOWN_FIELD_GAPS.length).toBeGreaterThanOrEqual(20);
+      expect(KNOWN_FIELD_GAPS.length).toBeGreaterThanOrEqual(4);
       const highSeverity = KNOWN_FIELD_GAPS.filter((g) => g.severity === "high");
       const mediumSeverity = KNOWN_FIELD_GAPS.filter((g) => g.severity === "medium");
       // Current state: no high-severity gaps (task metadata is now round-tripped).

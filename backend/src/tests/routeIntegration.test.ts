@@ -15,9 +15,11 @@ import { MetricService, metricService } from "../services/metricService";
 import { PlanService, planService } from "../services/planService";
 import { TaskService, taskService } from "../services/taskService";
 import { WeekService, weekService } from "../services/weekService";
+import { ConflictError } from "../utils/conflictError";
 import { ids, otherUserId, ownerUserId } from "./testHelpers";
 
 const now = new Date("2026-01-01T00:00:00.000Z");
+const tomorrow = new Date("2026-01-02T00:00:00.000Z");
 
 interface JsonResponse {
   status: number;
@@ -364,6 +366,7 @@ function installServiceMocks(): Restorer {
     fixture.weekRepository as never,
     fixture.taskRepository as never,
     fixture.metricRepository as never,
+    async () => true,
   );
   const routedWeekService = new WeekService(fixture.planRepository as never, fixture.weekRepository as never);
   const routedTaskService = new TaskService(
@@ -473,6 +476,13 @@ function assertErrorResponse(response: JsonResponse, status: number, messagePatt
   assert.match(response.body.message ?? "", messagePattern);
 }
 
+function assertSuccessResponse(response: JsonResponse, status: number): unknown {
+  assert.equal(response.status, status);
+  assert.equal(response.body.success, true);
+  assert.notEqual(response.body.data, undefined);
+  return response.body.data;
+}
+
 let restoreServices: Restorer | null = null;
 
 beforeEach(() => {
@@ -571,6 +581,181 @@ describe("backend route integration", () => {
     });
     assertErrorResponse(crossUser, 403, /access/i);
     assert.doesNotMatch(JSON.stringify(crossUser.body), /Private other task/);
+  });
+
+  it("returns structured 409 conflict metadata for plan, weekly review, and task sync conflicts", async () => {
+    const app = createRouteTestApp();
+    const conflictAt = new Date("2026-02-14T09:30:00.000Z");
+
+    const restorePlanUpdate = replaceMethod(
+      planService,
+      "updatePlan",
+      (async () => {
+        throw new ConflictError(7, conflictAt);
+      }) as typeof planService.updatePlan,
+    );
+    const restoreWeekReview = replaceMethod(
+      weekService,
+      "submitWeeklyReview",
+      (async () => {
+        throw new ConflictError(11, conflictAt);
+      }) as typeof weekService.submitWeeklyReview,
+    );
+    const restoreTaskUpdate = replaceMethod(
+      taskService,
+      "updateTask",
+      (async () => {
+        throw new ConflictError(19, conflictAt);
+      }) as typeof taskService.updateTask,
+    );
+
+    try {
+      const planConflict = await requestJson(app, "PATCH", `/api/plans/${ids.plan}`, {
+        body: { vision: "Conflict", baseRevision: 2 },
+      });
+      assert.equal(planConflict.status, 409);
+      assert.equal(planConflict.body.success, false);
+      assert.equal((planConflict.body as Record<string, unknown>).conflict, true);
+      assert.equal((planConflict.body as Record<string, unknown>).currentRevision, 7);
+      assert.equal((planConflict.body as Record<string, unknown>).serverUpdatedAt, conflictAt.toISOString());
+      assert.match(planConflict.body.message ?? "", /another device/i);
+
+      const weekConflict = await requestJson(app, "POST", `/api/weeks/${ids.week}/review`, {
+        body: { executionScore: 80, reflection: "Ship", adjustments: "Trim", baseRevision: 4 },
+      });
+      assert.equal(weekConflict.status, 409);
+      assert.equal(weekConflict.body.success, false);
+      assert.equal((weekConflict.body as Record<string, unknown>).conflict, true);
+      assert.equal((weekConflict.body as Record<string, unknown>).currentRevision, 11);
+      assert.equal((weekConflict.body as Record<string, unknown>).serverUpdatedAt, conflictAt.toISOString());
+      assert.match(weekConflict.body.message ?? "", /another device/i);
+
+      const taskConflict = await requestJson(app, "PATCH", `/api/tasks/${ids.task}`, {
+        body: { status: "done", baseRevision: 6 },
+      });
+      assert.equal(taskConflict.status, 409);
+      assert.equal(taskConflict.body.success, false);
+      assert.equal((taskConflict.body as Record<string, unknown>).conflict, true);
+      assert.equal((taskConflict.body as Record<string, unknown>).currentRevision, 19);
+      assert.equal((taskConflict.body as Record<string, unknown>).serverUpdatedAt, conflictAt.toISOString());
+      assert.match(taskConflict.body.message ?? "", /another device/i);
+    } finally {
+      restoreTaskUpdate();
+      restoreWeekReview();
+      restorePlanUpdate();
+    }
+  });
+
+  it("routes owner 12-week planning happy paths without leaking other-user data", async () => {
+    const app = createRouteTestApp();
+
+    const planList = await requestJson(app, "GET", "/api/plans");
+    const plans = assertSuccessResponse(planList, 200) as Array<Record<string, unknown>>;
+    assert.equal(plans.length, 1);
+    assert.equal(plans[0]?.id, ids.plan);
+    assert.doesNotMatch(JSON.stringify(planList.body), /Private other plan/);
+    assert.doesNotMatch(JSON.stringify(planList.body), new RegExp(ids.otherPlan));
+
+    const planDetails = await requestJson(app, "GET", `/api/plans/${ids.plan}`);
+    const details = assertSuccessResponse(planDetails, 200) as {
+      plan: Record<string, unknown>;
+      weeks: Array<Record<string, unknown>>;
+    };
+    assert.equal(details.plan.id, ids.plan);
+    assert.equal(details.weeks.length, 1);
+    assert.equal(details.weeks[0]?.id, ids.week);
+    assert.equal((details.weeks[0]?.tasks as Array<Record<string, unknown>> | undefined)?.[0]?.id, ids.task);
+    assert.equal((details.weeks[0]?.metrics as Array<Record<string, unknown>> | undefined)?.[0]?.id, ids.metric);
+    assert.doesNotMatch(JSON.stringify(planDetails.body), /Private other/);
+    assert.doesNotMatch(JSON.stringify(planDetails.body), new RegExp(ids.otherTask));
+
+    const updatedPlan = assertSuccessResponse(
+      await requestJson(app, "PATCH", `/api/plans/${ids.plan}`, {
+        body: { vision: "Updated owner plan", baseRevision: 0 },
+      }),
+      200,
+    ) as Record<string, unknown>;
+    assert.equal(updatedPlan.id, ids.plan);
+    assert.equal(updatedPlan.vision, "Updated owner plan");
+
+    const weeks = assertSuccessResponse(
+      await requestJson(app, "GET", `/api/plans/${ids.plan}/weeks`),
+      200,
+    ) as Array<Record<string, unknown>>;
+    assert.equal(weeks.length, 1);
+    assert.equal(weeks[0]?.id, ids.week);
+
+    const updatedWeek = assertSuccessResponse(
+      await requestJson(app, "PATCH", `/api/weeks/${ids.week}`, {
+        body: { focus: "Updated owner week", expectedOutput: "Updated owner output" },
+      }),
+      200,
+    ) as Record<string, unknown>;
+    assert.equal(updatedWeek.id, ids.week);
+    assert.equal(updatedWeek.focus, "Updated owner week");
+    assert.equal(updatedWeek.expectedOutput, "Updated owner output");
+
+    const reviewedWeek = assertSuccessResponse(
+      await requestJson(app, "POST", `/api/weeks/${ids.week}/review`, {
+        body: { executionScore: 88, reflection: "Kept cadence", adjustments: "Trim scope", baseRevision: 0 },
+      }),
+      200,
+    ) as { review?: Record<string, unknown> };
+    assert.equal(reviewedWeek.review?.executionScore, 88);
+    assert.equal(reviewedWeek.review?.reflection, "Kept cadence");
+
+    const createdTask = assertSuccessResponse(
+      await requestJson(app, "POST", `/api/weeks/${ids.week}/tasks`, {
+        body: { title: "New owner task", status: "todo", scheduledDate: tomorrow.toISOString() },
+      }),
+      201,
+    ) as Record<string, unknown>;
+    assert.equal(createdTask.weekId, ids.week);
+    assert.equal(createdTask.title, "New owner task");
+
+    const updatedTask = assertSuccessResponse(
+      await requestJson(app, "PATCH", `/api/tasks/${ids.task}`, {
+        body: { title: "Updated owner task", status: "done", scheduledDate: tomorrow.toISOString(), baseRevision: 0 },
+      }),
+      200,
+    ) as Record<string, unknown>;
+    assert.equal(updatedTask.id, ids.task);
+    assert.equal(updatedTask.title, "Updated owner task");
+    assert.equal(updatedTask.status, "done");
+
+    const metrics = assertSuccessResponse(
+      await requestJson(app, "GET", `/api/weeks/${ids.week}/metrics`),
+      200,
+    ) as Array<Record<string, unknown>>;
+    assert.equal(metrics.length, 1);
+    assert.equal(metrics[0]?.id, ids.metric);
+
+    const loggedMetric = assertSuccessResponse(
+      await requestJson(app, "POST", `/api/metrics/${ids.metric}/logs`, {
+        body: { date: tomorrow.toISOString(), value: 2, completed: true },
+      }),
+      200,
+    ) as { logs?: Array<Record<string, unknown>> };
+    assert.equal(loggedMetric.logs?.length, 2);
+    assert.equal(loggedMetric.logs?.[1]?.value, 2);
+
+    const responseBodies = [
+      planList.body,
+      planDetails.body,
+      updatedPlan,
+      weeks,
+      updatedWeek,
+      reviewedWeek,
+      createdTask,
+      updatedTask,
+      metrics,
+      loggedMetric,
+    ];
+    const serializedResponses = JSON.stringify(responseBodies);
+    assert.doesNotMatch(serializedResponses, /Private other/);
+    assert.doesNotMatch(serializedResponses, new RegExp(ids.otherPlan));
+    assert.doesNotMatch(serializedResponses, new RegExp(ids.otherTask));
+    assert.doesNotMatch(serializedResponses, new RegExp(ids.otherMetric));
   });
 
   it("routes metric requests through route-level validation and ownership handling", async () => {

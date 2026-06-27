@@ -10,7 +10,7 @@ import {
   getEmailVerificationRequiredMessage,
   rememberEmailVerificationReturnPath,
 } from "../email-verification-guard";
-import { getCurrentEntitlementKeys, getCurrentPlan, restorePlanAccessLocally, upgradePlanLocally } from "../storage";
+import { getCurrentEntitlementKeys, getCurrentPlan, getUserData, restorePlanAccessLocally, upgradePlanLocally } from "../storage";
 import type { EntitlementKey, PricingPlanCode, SubscriptionStatus } from "../storage-types";
 import {
   applyBillingAccessPayload,
@@ -29,6 +29,42 @@ import {
   BILLING_RESTORE_ENDPOINT,
 } from "./env";
 import { mockBillingProvider } from "./mockBillingProvider";
+
+interface CurrentEntitlementSnapshot {
+  planCode: string;
+  status: string;
+  entitlements: string[];
+  currentPeriodEnd: string | null;
+  cancelAtPeriodEnd: boolean;
+}
+
+function applyCurrentEntitlementSnapshot(snapshot: CurrentEntitlementSnapshot): {
+  planCode: PricingPlanCode;
+  entitlementKeys: EntitlementKey[];
+} {
+  const remotePlanCode = snapshot.planCode as PricingPlanCode;
+  const remoteStatus = normalizeServerSubscriptionStatus(snapshot.status);
+  const remoteEntitlementKeys = snapshot.entitlements.filter((key): key is EntitlementKey =>
+    isEntitlementKey(key),
+  );
+
+  return applyBillingAccessPayload(
+    {
+      planCode: remotePlanCode,
+      subscription:
+        snapshot.planCode === "FREE" || snapshot.status === "none"
+          ? null
+          : {
+              planCode: remotePlanCode,
+              status: remoteStatus,
+              renewsAt: snapshot.currentPeriodEnd,
+              cancelAtPeriodEnd: snapshot.cancelAtPeriodEnd,
+            },
+      entitlements: remoteEntitlementKeys,
+    },
+    "api_contract",
+  );
+}
 
 const localBillingProvider: BillingProvider = {
   getStatus: () => ({
@@ -259,44 +295,21 @@ const apiContractBillingProvider: BillingProvider = {
       }
 
       try {
-        const response = await apiClient.get<{
-          planCode: string;
-          status: string;
-          entitlements: string[];
-          currentPeriodEnd: string | null;
-          cancelAtPeriodEnd: boolean;
-        }>("/billing/entitlement");
+        const response = await apiClient.get<CurrentEntitlementSnapshot>("/billing/entitlement");
         const currentPlan = getCurrentPlan();
         const currentEntitlementKeys = getCurrentEntitlementKeys();
-        const remotePlanCode = response.planCode as PricingPlanCode;
-        const remoteStatus = normalizeServerSubscriptionStatus(response.status);
-        const remoteEntitlementKeys = response.entitlements.filter((key): key is EntitlementKey =>
-          isEntitlementKey(key),
-        );
-        const { planCode, entitlementKeys } = applyBillingAccessPayload(
-          {
-            planCode: remotePlanCode,
-            subscription:
-              response.planCode === "FREE" || response.status === "none"
-                ? null
-                : {
-                    planCode: remotePlanCode,
-                    status: remoteStatus,
-                    renewsAt: response.currentPeriodEnd,
-                  },
-            entitlements: remoteEntitlementKeys,
-          },
-          "api_contract",
-        );
+        const currentCancelAtPeriodEnd = Boolean(getUserData().subscription?.cancelAtPeriodEnd);
+        const { planCode, entitlementKeys } = applyCurrentEntitlementSnapshot(response);
 
         const isSamePlan = planCode === currentPlan;
         const isSameEntitlements =
           entitlementKeys.length === currentEntitlementKeys.length &&
           entitlementKeys.every((key) => currentEntitlementKeys.includes(key));
+        const isSameCancelState = currentCancelAtPeriodEnd === Boolean(response.cancelAtPeriodEnd);
 
         return {
           ok: true,
-          status: isSamePlan && isSameEntitlements ? "already_current" : "synced",
+          status: isSamePlan && isSameEntitlements && isSameCancelState ? "already_current" : "synced",
           providerMode: "api_contract",
           planCode,
           entitlementKeys,
@@ -621,13 +634,7 @@ export interface CancelSubscriptionResult {
   ok: boolean;
   status: "pending_cancel" | "already_canceled" | "already_pending_cancel" | "error" | "offline" | "local_only";
   message: string;
-  currentEntitlement?: {
-    planCode: string;
-    status: string;
-    entitlements: string[];
-    currentPeriodEnd: string | null;
-    cancelAtPeriodEnd: boolean;
-  };
+  currentEntitlement?: CurrentEntitlementSnapshot;
 }
 
 /**
@@ -660,14 +667,10 @@ export async function cancelSubscriptionOnServer(): Promise<CancelSubscriptionRe
     const result = await apiClient.post<{
       status: "pending_cancel" | "already_canceled" | "already_pending_cancel";
       message: string;
-      currentEntitlement: {
-        planCode: string;
-        status: string;
-        entitlements: string[];
-        currentPeriodEnd: string | null;
-        cancelAtPeriodEnd: boolean;
-      };
+      currentEntitlement: CurrentEntitlementSnapshot;
     }>("/billing/subscription/cancel", {});
+
+    applyCurrentEntitlementSnapshot(result.currentEntitlement);
 
     return {
       ok: true,

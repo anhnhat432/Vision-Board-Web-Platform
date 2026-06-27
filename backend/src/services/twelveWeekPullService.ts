@@ -41,6 +41,26 @@ export interface PullPlanSource extends SyncEntityBase {
   vision?: string | null;
   smartGoalId?: string | null;
   startDate?: NullableDate;
+  endDate?: NullableDate;
+  timezone?: string | null;
+  weekStartsOn?: string | null;
+  totalWeeks?: number | null;
+  status?: string | null;
+  goalType?: string | null;
+  templateId?: string | null;
+  templateName?: string | null;
+  lagMetric?: Record<string, unknown> | null;
+  milestones?: Record<string, unknown> | null;
+  successEvidence?: string | null;
+  reviewDay?: string | null;
+  week12Outcome?: string | null;
+  weeklyActions?: string[] | null;
+  successMetric?: string | null;
+  dailyReminderTime?: string | null;
+  tacticLoadPreference?: string | null;
+  preferredDays?: number[] | null;
+  personalConstraint?: string | null;
+  reentryCount?: number | null;
   clientPlanId?: string | null;
   clientGoalId?: string | null;
 }
@@ -199,6 +219,26 @@ export interface TwelveWeekPullWorkspace {
       vision?: string;
       smartGoalId?: string;
       startDate?: string;
+      endDate?: string;
+      timezone?: string;
+      weekStartsOn?: string;
+      totalWeeks?: number;
+      status?: string;
+      goalType?: string;
+      templateId?: string;
+      templateName?: string;
+      lagMetric?: Record<string, unknown>;
+      milestones?: Record<string, unknown>;
+      successEvidence?: string;
+      reviewDay?: string;
+      week12Outcome?: string;
+      weeklyActions?: string[];
+      successMetric?: string;
+      dailyReminderTime?: string;
+      tacticLoadPreference?: string;
+      preferredDays?: number[];
+      personalConstraint?: string;
+      reentryCount?: number;
     }
   >;
   weeks: Array<
@@ -495,6 +535,23 @@ function optionalBoolean(value: unknown): boolean | undefined {
   return typeof value === "boolean" ? value : undefined;
 }
 
+function optionalRecord(value: unknown): Record<string, unknown> | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  return { ...(value as Record<string, unknown>) };
+}
+
+function optionalStringArray(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const items = value.map(optionalString).filter(isString);
+  return items.length > 0 ? items : undefined;
+}
+
+function optionalNumberArray(value: unknown): number[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const items = value.filter((item): item is number => Number.isInteger(item));
+  return items.length > 0 ? items : undefined;
+}
+
 function toIsoString(value: NullableDate): string | undefined {
   if (!value) return undefined;
   const date = value instanceof Date ? value : new Date(value);
@@ -546,6 +603,26 @@ function mapPlan(doc: PullPlanSource): TwelveWeekPullWorkspace["plans"][number] 
     vision: optionalString(doc.vision),
     smartGoalId: optionalString(doc.smartGoalId),
     startDate: toDateKey(doc.startDate),
+    endDate: toDateKey(doc.endDate),
+    timezone: optionalString(doc.timezone),
+    weekStartsOn: optionalString(doc.weekStartsOn),
+    totalWeeks: optionalNumber(doc.totalWeeks),
+    status: optionalString(doc.status),
+    goalType: optionalString(doc.goalType),
+    templateId: optionalString(doc.templateId),
+    templateName: optionalString(doc.templateName),
+    lagMetric: optionalRecord(doc.lagMetric),
+    milestones: optionalRecord(doc.milestones),
+    successEvidence: optionalString(doc.successEvidence),
+    reviewDay: optionalString(doc.reviewDay),
+    week12Outcome: optionalString(doc.week12Outcome),
+    weeklyActions: optionalStringArray(doc.weeklyActions),
+    successMetric: optionalString(doc.successMetric),
+    dailyReminderTime: optionalString(doc.dailyReminderTime),
+    tacticLoadPreference: optionalString(doc.tacticLoadPreference),
+    preferredDays: optionalNumberArray(doc.preferredDays),
+    personalConstraint: optionalString(doc.personalConstraint),
+    reentryCount: optionalNumber(doc.reentryCount),
   };
 }
 

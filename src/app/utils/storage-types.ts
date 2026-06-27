@@ -355,6 +355,7 @@ export interface Subscription {
   startedAt: string;
   renewsAt?: string | null;
   canceledAt?: string | null;
+  cancelAtPeriodEnd?: boolean;
   isLocalTestMode?: boolean;
   providerMode?: BillingProviderMode;
   externalCustomerId?: string | null;

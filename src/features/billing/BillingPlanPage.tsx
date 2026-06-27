@@ -12,7 +12,7 @@ import {
   Sparkles,
   TicketPercent,
 } from "lucide-react";
-import { useMemo, useState, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState, type MouseEvent } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { apiClient, toAppError } from "@/lib/api/apiClient";
@@ -59,6 +59,7 @@ import {
   getBillingProviderStatus,
   getLastEntitlementSyncSnapshot,
   getLastRestoreAccessSnapshot,
+  cancelSubscriptionOnServer,
   openBillingCustomerPortal,
   resolveAppReturnPath,
   restorePlanAccess,
@@ -141,6 +142,8 @@ export function BillingPlan() {
   const [isSyncing, setIsSyncing] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
   const [isOpeningPortal, setIsOpeningPortal] = useState(false);
+  const [isCancelingSubscription, setIsCancelingSubscription] = useState(false);
+  const [cancelSubscriptionMessage, setCancelSubscriptionMessage] = useState<string | null>(null);
   const [showStopUsingConfirm, setShowStopUsingConfirm] = useState(false);
   const [resendingReceiptOrderId, setResendingReceiptOrderId] = useState<string | null>(null);
   const [refundDialogOrder, setRefundDialogOrder] = useState<PaymentHistoryOrder | null>(null);
@@ -163,6 +166,16 @@ export function BillingPlan() {
   } = useCouponValidation({ planCode: "PLUS", purpose: "plus_subscription", originalAmount: PLUS_MONTHLY_PRICE_VND });
   const [couponCode, setCouponCode] = useState(sessionStorage.getItem("billing:couponCode") ?? "");
 
+  const handleCouponChange = useCallback((discount: DiscountInfo | null) => {
+    try {
+      if (discount?.discountCode) {
+        sessionStorage.setItem("billing:couponCode", discount.discountCode);
+      } else {
+        sessionStorage.removeItem("billing:couponCode");
+      }
+    } catch { /* non-critical */ }
+  }, []);
+
   // Sync coupon validation state with sessionStorage
   useEffect(() => {
     if (couponStatus === "valid" && couponDiscount) {
@@ -170,8 +183,7 @@ export function BillingPlan() {
     } else if (couponStatus === "invalid" || couponStatus === "idle") {
       handleCouponChange(null);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [couponStatus, couponDiscount]);
+  }, [couponStatus, couponDiscount, handleCouponChange]);
 
   const returnStatus = searchParams.get("status");
   const isCheckoutReturn = returnStatus === "success" && realMode;
@@ -180,6 +192,15 @@ export function BillingPlan() {
 
   const { paymentHistory, setPaymentHistory, isLoadingPaymentHistory, paymentHistoryError, loadPaymentHistory } =
     usePaymentHistory(canLoadPaymentHistory);
+  const paymentHistoryState = !canLoadPaymentHistory
+    ? "signed-out"
+    : isLoadingPaymentHistory
+      ? "loading"
+      : paymentHistoryError
+        ? "error"
+        : paymentHistory.length === 0
+          ? "empty"
+          : "ready";
 
   const { checkoutReturnStatus, retry: retryCheckoutEntitlement } = useCheckoutReturn({
     isCheckoutReturn,
@@ -195,16 +216,6 @@ export function BillingPlan() {
   const subscription = userData.subscription;
   const expiryInfo = useMemo(() => getBillingExpiryInfo(subscription), [subscription]);
   const graceState = useMemo(() => getSubscriptionGraceState(userData), [userData]);
-
-  const handleCouponChange = (discount: DiscountInfo | null) => {
-    try {
-      if (discount?.discountCode) {
-        sessionStorage.setItem("billing:couponCode", discount.discountCode);
-      } else {
-        sessionStorage.removeItem("billing:couponCode");
-      }
-    } catch { /* non-critical */ }
-  };
 
   const [saleEvent, setSaleEvent] = useState<SaleEventInfo | null>(null);
 
@@ -348,27 +359,49 @@ export function BillingPlan() {
   const currentPlanName = currentPlanDefinition?.name ?? getPlanLabel(currentPlanCode);
   const providerLabel = billingStatus.providerLabel || getBillingProviderModeLabel(billingStatus.mode);
   const isPaidPlan = currentPlanCode !== "FREE";
+  const isPendingCancellation = Boolean(subscription?.cancelAtPeriodEnd && subscription?.status !== "canceled");
+  const scheduleLabel = isPendingCancellation ? "Kết thúc" : "Gia hạn";
   const renewalLabel =
     isPaidPlan && subscription?.renewsAt
-      ? `Gia hạn ngày ${formatDate(subscription.renewsAt)}`
+      ? `${isPendingCancellation ? "Kết thúc" : "Gia hạn"} ngày ${formatDate(subscription.renewsAt)}`
       : isPaidPlan
-        ? "Gia hạn ngày Đang chuẩn bị"
+        ? `${isPendingCancellation ? "Kết thúc" : "Gia hạn"} ngày Đang chuẩn bị`
         : null;
   const cancelEffectiveDate =
     subscription?.renewsAt && formatDate(subscription.renewsAt) !== "—"
       ? formatDate(subscription.renewsAt)
       : "ngày kết thúc chu kỳ hiện tại";
+  const persistentCancelMessage = isPendingCancellation
+    ? `Plus sẽ kết thúc vào ${cancelEffectiveDate}. Bạn vẫn dùng gói đến hết chu kỳ hiện tại.`
+    : null;
+  const cancelBannerMessage = cancelSubscriptionMessage ?? persistentCancelMessage;
 
   const isInRenewalPriority = graceState.inGracePeriod;
   const isExpired = expiryInfo.isExpired && !graceState.active;
   const shouldShowExpiryNotice =
     realMode && subscription?.planCode === "PLUS" && (isInRenewalPriority || expiryInfo.isExpiringSoon || isExpired);
 
-  const handleConfirmStopUsing = () => {
-    setShowStopUsingConfirm(false);
-    toast.info(
-      "Plus hiện không tự động gia hạn. Bạn có thể tiếp tục dùng đến hết chu kỳ hoặc gửi yêu cầu hoàn tiền nếu còn đủ điều kiện.",
-    );
+  const handleConfirmStopUsing = async (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    setIsCancelingSubscription(true);
+    try {
+      const result = await cancelSubscriptionOnServer();
+      if (result.ok) {
+        setCancelSubscriptionMessage(result.message);
+        setShowStopUsingConfirm(false);
+        toast.success(result.message);
+        reloadUserData();
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error: unknown) {
+      if (!toastBillingNetworkError(error, { surface: "BillingPlan", action: "cancel_subscription" })) {
+        logBillingUiError(error, { surface: "BillingPlan", action: "cancel_subscription" });
+        toast.error("Không thể hủy gói lúc này. Vui lòng thử lại.");
+      }
+    } finally {
+      setIsCancelingSubscription(false);
+    }
   };
 
   const openRefundDialog = (order: PaymentHistoryOrder, reason = "") => {
@@ -619,7 +652,7 @@ export function BillingPlan() {
       <div className="flex justify-end">
         <button type="button" className="relative inline-flex items-center gap-2 rounded-full border border-app-line bg-white px-[15px] py-[9px] text-[12.5px] font-semibold text-app-ink-soft">
           <span className="absolute -right-[3px] -top-[3px] h-[9px] w-[9px] rounded-full bg-app-accent" />
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+          <LifeBuoy className="h-[15px] w-[15px]" aria-hidden="true" />
           Cách dùng màn này
         </button>
       </div>
@@ -641,10 +674,7 @@ export function BillingPlan() {
         <div className="relative flex min-h-[180px] items-center justify-center self-stretch rounded-[18px] border border-[rgba(12,94,58,0.12)] bg-gradient-to-br from-app-accent-subtle to-[#F4ECDD]">
           <span className="absolute h-[120px] w-[120px] animate-[dof-ring_3s_ease-out_infinite] rounded-full border-2 border-app-accent/30" />
           <span className="relative flex h-24 w-24 items-center justify-center text-app-accent">
-            <svg width="96" height="96" viewBox="0 0 24 24" fill="rgba(12,94,58,0.12)" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
-              <path d="M12 8v8"/><path d="M8 12h8"/>
-            </svg>
+            <Shield className="h-24 w-24" strokeWidth={1.4} aria-hidden="true" />
           </span>
         </div>
       </section>
@@ -664,25 +694,25 @@ export function BillingPlan() {
         <div className="grid grid-cols-1 gap-[13px] sm:grid-cols-2">
           <div className="flex items-start gap-3 rounded-[13px] border border-app-line bg-[#FAF8F3] p-[15px_17px]">
             <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg bg-app-accent-subtle text-app-accent">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+              <CreditCard className="h-4 w-4" aria-hidden="true" />
             </span>
             <span className="text-[13px] leading-[1.45] text-app-ink-soft">Thanh toán tự động được xác nhận qua nhà cung cấp thanh toán.</span>
           </div>
           <div className="flex items-start gap-3 rounded-[13px] border border-app-line bg-[#FAF8F3] p-[15px_17px]">
             <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg bg-app-accent-subtle text-app-accent">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+              <ReceiptText className="h-4 w-4" aria-hidden="true" />
             </span>
             <span className="text-[13px] leading-[1.45] text-app-ink-soft">Biên nhận điện tử gửi qua email trong 1–2 phút.</span>
           </div>
           <div className="flex items-start gap-3 rounded-[13px] border border-app-line bg-[#FAF8F3] p-[15px_17px]">
             <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg bg-app-accent-subtle text-app-accent">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+              <Shield className="h-4 w-4" aria-hidden="true" />
             </span>
             <span className="text-[13px] leading-[1.45] text-app-ink-soft">Hoàn tiền linh hoạt theo{" "}<strong className="font-semibold text-app-ink">chính sách hoàn tiền</strong>.</span>
           </div>
           <div className="flex items-start gap-3 rounded-[13px] border border-app-line bg-[#FAF8F3] p-[15px_17px]">
             <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg bg-app-accent-subtle text-app-accent">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/></svg>
+              <LifeBuoy className="h-4 w-4" aria-hidden="true" />
             </span>
             <span className="text-[13px] leading-[1.45] text-app-ink-soft">
               Liên hệ hỗ trợ:{" "}
@@ -809,9 +839,20 @@ export function BillingPlan() {
 
         {isPaidPlan && (
           <>
+            {cancelBannerMessage ? (
+              <div
+                className="mt-5 rounded-card border border-app-line bg-app-warm-soft p-4 text-sm leading-6 text-app-ink"
+                data-testid="billing-cancel-at-period-end-result"
+              >
+                <p className="font-semibold text-app-warm">
+                  {isPendingCancellation ? "Plus sẽ kết thúc vào cuối chu kỳ hiện tại." : "Đã ghi nhận yêu cầu hủy cuối kỳ."}
+                </p>
+                <p className="mt-1">{cancelBannerMessage}</p>
+              </div>
+            ) : null}
             <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               <div className="rounded-card border border-app-line bg-app-bg p-4">
-                <p className="text-xs text-app-ink-muted">Gia hạn</p><p className="mt-1 text-sm font-medium text-app-ink">{renewalLabel}</p>
+                <p className="text-xs text-app-ink-muted">{scheduleLabel}</p><p className="mt-1 text-sm font-medium text-app-ink">{renewalLabel}</p>
               </div>
               <div className="rounded-card border border-app-line bg-app-bg p-4">
                 <p className="text-xs text-app-ink-muted">Đơn vị thanh toán</p><p className="mt-1 flex items-center gap-2 text-sm font-medium text-app-ink"><CreditCard className="h-4 w-4 text-app-ink-muted" />Thanh toán qua {providerLabel}</p>
@@ -819,7 +860,19 @@ export function BillingPlan() {
               <div className="rounded-card border border-app-line bg-app-bg p-4">
                 <p className="text-xs text-app-ink-muted">Trạng thái</p>
                 <p className="mt-1 text-sm font-medium text-app-ink">
-                  {isInRenewalPriority ? "Đang chờ gia hạn ưu tiên" : subscription?.status === "active" ? "Đang hoạt động" : subscription?.status === "trialing" ? "Đang trong thời gian ưu đãi" : subscription?.status === "canceled" ? "Đã hủy" : subscription ? "Không hoạt động" : "Đang chuẩn bị"}
+                  {isPendingCancellation
+                    ? "Sẽ kết thúc cuối kỳ"
+                    : isInRenewalPriority
+                      ? "Đang chờ gia hạn ưu tiên"
+                      : subscription?.status === "active"
+                        ? "Đang hoạt động"
+                        : subscription?.status === "trialing"
+                          ? "Đang trong thời gian ưu đãi"
+                          : subscription?.status === "canceled"
+                            ? "Đã hủy"
+                            : subscription
+                              ? "Không hoạt động"
+                              : "Đang chuẩn bị"}
                 </p>
               </div>
               <div className="rounded-card border border-app-line bg-app-bg p-4">
@@ -836,7 +889,7 @@ export function BillingPlan() {
                   {paidCheckoutDisabled ? "Tạm khóa thanh toán" : isInRenewalPriority ? "Gia hạn ngay" : "Gia hạn Plus"}
                 </Button>
               )}
-              {realMode && (
+              {realMode && !isPendingCancellation && (
                 <Button variant="outline" className="border-app-line text-app-ink hover:bg-app-bg" onClick={() => setShowStopUsingConfirm(true)}>Tôi không muốn dùng nữa</Button>
               )}
               {realMode && (
@@ -846,17 +899,32 @@ export function BillingPlan() {
           </>
         )}
 
-        <AlertDialog open={showStopUsingConfirm} onOpenChange={setShowStopUsingConfirm}>
+        <AlertDialog
+          open={showStopUsingConfirm}
+          onOpenChange={(open) => {
+            if (!isCancelingSubscription) setShowStopUsingConfirm(open);
+          }}
+        >
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Ghi nhận bạn không muốn dùng nữa?</AlertDialogTitle>
+              <AlertDialogTitle>Hủy Plus vào cuối chu kỳ hiện tại?</AlertDialogTitle>
               <AlertDialogDescription>
-                Plus hiện không tự động gia hạn, nên không có auto-renewal cần hủy. Quyền Plus vẫn hoạt động đến{" "}{cancelEffectiveDate}. Nếu muốn hoàn tiền cho phần chu kỳ chưa dùng và đơn còn đủ điều kiện, hãy gửi yêu cầu hoàn tiền riêng.
+                Gói Plus sẽ được đánh dấu hủy vào cuối chu kỳ hiện tại, dự kiến{" "}
+                {cancelEffectiveDate}. Bạn vẫn dùng Plus đến thời điểm đó. Hoàn
+                tiền cho phần chu kỳ chưa dùng là yêu cầu riêng và vẫn đi qua
+                luồng hỗ trợ/hoàn tiền.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Tiếp tục dùng Plus</AlertDialogCancel>
-              <AlertDialogAction onClick={handleConfirmStopUsing}>Tôi đã hiểu</AlertDialogAction>
+              <AlertDialogCancel disabled={isCancelingSubscription}>
+                Tiếp tục dùng Plus
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleConfirmStopUsing}
+                disabled={isCancelingSubscription}
+              >
+                {isCancelingSubscription ? "Đang hủy..." : "Hủy gói cuối kỳ"}
+              </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
@@ -864,31 +932,43 @@ export function BillingPlan() {
 
       {/* ===== PAYMENT HISTORY ===== */}
       {realMode && (
-        <section className="rounded-[18px] border border-app-line bg-white px-[26px] py-6">
+        <section
+          className="rounded-[18px] border border-app-line bg-white px-[26px] py-6"
+          data-payment-history-state={paymentHistoryState}
+          data-testid="billing-payment-history"
+        >
           <div className="mb-[7px] flex items-center gap-[9px]">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-app-ink-soft"><path d="M15 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/></svg>
+            <ReceiptText className="h-[17px] w-[17px] text-app-ink-soft" aria-hidden="true" />
             <h2 className="font-serif text-[17px] font-bold tracking-[-0.01em] text-app-ink">Lịch sử thanh toán</h2>
           </div>
           <p className="mb-4 text-[13px] text-[#8C887C]">Các giao dịch gần đây của tài khoản này qua đơn vị thanh toán đang cấu hình.</p>
 
-          {isLoadingPaymentHistory && (
+          {!canLoadPaymentHistory && (
+            <div className="flex flex-col gap-3 rounded-[13px] border border-app-line bg-app-bg p-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-app-ink-muted">Đăng nhập để xem lịch sử thanh toán gắn với tài khoản này.</p>
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/login">Đăng nhập</Link>
+              </Button>
+            </div>
+          )}
+          {canLoadPaymentHistory && isLoadingPaymentHistory && (
             <div className="flex items-center gap-3 rounded-[13px] border border-app-line bg-app-bg p-4 text-sm text-app-ink-muted">
               <Loader2 className="h-4 w-4 animate-spin" />Đang tải lịch sử thanh toán...
             </div>
           )}
-          {!isLoadingPaymentHistory && paymentHistoryError && (
+          {canLoadPaymentHistory && !isLoadingPaymentHistory && paymentHistoryError && (
             <div className="flex flex-col gap-3 rounded-[13px] border border-app-line bg-app-bg p-4 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-app-status-error">{paymentHistoryError}</p>
               <Button variant="outline" size="sm" onClick={loadPaymentHistory}>Thử lại</Button>
             </div>
           )}
-          {!isLoadingPaymentHistory && !paymentHistoryError && paymentHistory.length === 0 && (
+          {canLoadPaymentHistory && !isLoadingPaymentHistory && !paymentHistoryError && paymentHistory.length === 0 && (
             <div className="rounded-[13px] border border-app-line bg-[#FAF8F3] px-5 py-[18px]">
               <p className="mb-1 text-[13.5px] font-bold text-app-ink">Chưa có giao dịch nào.</p>
               <p className="text-[12.5px] leading-[1.5] text-[#8C887C]">Khi đơn vị thanh toán gửi lịch sử thanh toán, giao dịch và hóa đơn sẽ xuất hiện tại đây.</p>
             </div>
           )}
-          {!isLoadingPaymentHistory && !paymentHistoryError && paymentHistory.length > 0 && (
+          {canLoadPaymentHistory && !isLoadingPaymentHistory && !paymentHistoryError && paymentHistory.length > 0 && (
             <div className="divide-y divide-app-line overflow-hidden rounded-lg border border-app-line bg-app-surface">
               {paymentHistory.map((order) => (
                 <div key={order.orderId} className="grid gap-3 p-4 sm:grid-cols-[1fr_auto] sm:items-center">
@@ -938,7 +1018,7 @@ export function BillingPlan() {
       {realMode && (
         <section className="rounded-[18px] border border-app-line bg-white px-[26px] py-6">
           <div className="mb-[7px] flex items-center gap-[9px]">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-app-accent"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            <LifeBuoy className="h-[17px] w-[17px] text-app-accent" aria-hidden="true" />
             <h2 className="font-serif text-[17px] font-bold tracking-[-0.01em] text-app-ink">Hỗ trợ thanh toán</h2>
           </div>
           <p className="mb-4 text-[13px] text-[#8C887C]">Nếu đơn vị thanh toán đã xác nhận nhưng Plus chưa mở sau vài phút, gửi mã đơn để kiểm tra thủ công.</p>
@@ -974,7 +1054,7 @@ export function BillingPlan() {
       {/* ===== PERMISSIONS / ENTITLEMENTS ===== */}
       <section className="rounded-[18px] border border-app-line bg-white px-[26px] py-6">
         <div className="mb-[7px] flex items-center gap-[9px]">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-app-accent"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+          <Shield className="h-[17px] w-[17px] text-app-accent" aria-hidden="true" />
           <h2 className="font-serif text-[17px] font-bold tracking-[-0.01em] text-app-ink">Quyền truy cập</h2>
         </div>
         <p className="mb-4 text-[13px] text-[#8C887C]">{realMode ? "Quyền nâng cao được quản lý qua tài khoản của bạn." : "Các quyền Plus đang mở trên trình duyệt này."}</p>
@@ -1149,7 +1229,7 @@ export function BillingPlan() {
                 <div className="mb-[22px] flex flex-col gap-[10px]">
                   {plan.highlights.map((item) => (
                     <div key={item} className="flex items-center gap-[9px] text-[12.5px] text-app-ink-soft">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-app-accent"><polyline points="20 6 9 17 4 12"/></svg>
+                      <Check className="h-3.5 w-3.5 shrink-0 text-app-accent" strokeWidth={2.4} aria-hidden="true" />
                       {item}
                     </div>
                   ))}

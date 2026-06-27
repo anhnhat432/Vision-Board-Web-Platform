@@ -5,6 +5,8 @@ import { logBillingUiError, toastBillingNetworkError } from "../../app/utils/bil
 import { getPaymentHistoryErrorMessage } from "./helpers";
 import type { PaymentHistoryOrder, PaymentHistoryResponse } from "./types";
 
+export const PAYMENT_HISTORY_REQUEST_TIMEOUT_MS = 8_000;
+
 export interface UsePaymentHistoryResult {
   paymentHistory: PaymentHistoryOrder[];
   setPaymentHistory: React.Dispatch<React.SetStateAction<PaymentHistoryOrder[]>>;
@@ -22,11 +24,27 @@ export function usePaymentHistory(canLoad: boolean): UsePaymentHistoryResult {
     if (!canLoad) return;
     setIsLoadingPaymentHistory(true);
     setPaymentHistoryError(null);
+    let timedOut = false;
+    const controller = new AbortController();
+    const timeoutId = globalThis.setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, PAYMENT_HISTORY_REQUEST_TIMEOUT_MS);
 
     try {
-      const response = await apiClient.get<PaymentHistoryResponse>("/billing/payment-history");
+      const response = await apiClient.get<PaymentHistoryResponse>("/billing/payment-history", {
+        signal: controller.signal,
+      });
       setPaymentHistory(response.orders);
     } catch (error: unknown) {
+      if (timedOut) {
+        logBillingUiError(error, { surface: "BillingPlan", action: "load_payment_history_timeout" });
+        setPaymentHistoryError(
+          "Không thể tải lịch sử thanh toán sau vài giây. Dữ liệu thanh toán trên tài khoản vẫn an toàn; hãy thử lại.",
+        );
+        return;
+      }
+
       if (toastBillingNetworkError(error, { surface: "BillingPlan", action: "load_payment_history" })) {
         setPaymentHistoryError("Mạng có vấn đề, vui lòng thử lại");
       } else {
@@ -34,6 +52,7 @@ export function usePaymentHistory(canLoad: boolean): UsePaymentHistoryResult {
         setPaymentHistoryError(getPaymentHistoryErrorMessage(error));
       }
     } finally {
+      globalThis.clearTimeout(timeoutId);
       setIsLoadingPaymentHistory(false);
     }
   }, [canLoad]);

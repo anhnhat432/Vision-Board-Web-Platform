@@ -1,0 +1,68 @@
+name: Email verification e2e staging
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: Staging/preview URL to test
+        required: true
+      allow_create:
+        description: Type CREATE_TEST_ACCOUNT to create the disposable account
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  email-verification:
+    name: Run email verification e2e against staging
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      EMAIL_VERIFICATION_E2E_URL: ${{ github.event.inputs.target_url }}
+      EMAIL_VERIFICATION_E2E_ALLOW: ${{ github.event.inputs.allow_create }}
+      EMAIL_VERIFICATION_E2E_EMAIL: ${{ secrets.EMAIL_VERIFICATION_E2E_EMAIL }}
+      EMAIL_VERIFICATION_E2E_PASSWORD: ${{ secrets.EMAIL_VERIFICATION_E2E_PASSWORD }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate disposable signup inputs
+        shell: bash
+        run: |
+          if [ -z "${EMAIL_VERIFICATION_E2E_URL}" ]; then
+            echo "::error::target_url is required."
+            exit 1
+          fi
+          normalized_url="$(printf '%s' "${EMAIL_VERIFICATION_E2E_URL}" | tr '[:upper:]' '[:lower:]')"
+          if [[ "${normalized_url}" == *"localhost"* ]] || [[ "${normalized_url}" == *"127.0.0.1"* ]]; then
+            echo "::error::Use a staging or production-like URL for email-verification proof, not localhost."
+            exit 1
+          fi
+          if [ "${EMAIL_VERIFICATION_E2E_ALLOW}" != "CREATE_TEST_ACCOUNT" ]; then
+            echo "::error::Set allow_create input to CREATE_TEST_ACCOUNT."
+            exit 1
+          fi
+          if { [ -n "${EMAIL_VERIFICATION_E2E_EMAIL}" ] && [ -z "${EMAIL_VERIFICATION_E2E_PASSWORD}" ]; } || { [ -z "${EMAIL_VERIFICATION_E2E_EMAIL}" ] && [ -n "${EMAIL_VERIFICATION_E2E_PASSWORD}" ]; }; then
+            echo "::error::Configure both EMAIL_VERIFICATION_E2E_EMAIL and EMAIL_VERIFICATION_E2E_PASSWORD, or leave both unset for generated credentials."
+            exit 1
+          fi
+          if [ -n "${EMAIL_VERIFICATION_E2E_EMAIL}" ] && [[ ! "${EMAIL_VERIFICATION_E2E_EMAIL}" =~ (^|[+._-])verify([+._-]|@) ]]; then
+            echo "::error::EMAIL_VERIFICATION_E2E_EMAIL must be disposable and contain +verify, .verify, _verify, or -verify."
+            exit 1
+          fi
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run email verification e2e
+        run: npm run test:e2e:email-verification

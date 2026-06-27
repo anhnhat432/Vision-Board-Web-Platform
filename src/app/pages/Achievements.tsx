@@ -275,6 +275,13 @@ function AchievementsContent() {
                 <article
                   key={achievement.key}
                   onClick={() => isUnlocked && setSelectedAchievement(achievement)}
+                  onKeyDown={(event) => {
+                    if (!isUnlocked || (event.key !== "Enter" && event.key !== " ")) return;
+                    event.preventDefault();
+                    setSelectedAchievement(achievement);
+                  }}
+                  tabIndex={isUnlocked ? 0 : undefined}
+                  role={isUnlocked ? "button" : undefined}
                   className={`achievements-badge relative rounded-card px-[22px] pb-5 pt-[22px] ${
                     isUnlocked
                       ? "unlocked cursor-pointer border border-app-line bg-app-surface"

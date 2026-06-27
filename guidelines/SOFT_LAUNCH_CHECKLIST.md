@@ -1,6 +1,16 @@
 # Soft Launch Checklist — Vision Board Web Platform
 
-Last updated: 2026-05-10
+Last updated: 2026-06-27
+
+Status note 2026-06-27:
+
+- Treat this checklist as a gate review, not as proof that old checkmarks are still current.
+- Authoritative current blockers are the D-2 proof ledger below plus `guidelines/CURRENT_PROJECT_STATUS.md`.
+- Known blockers right now:
+  - Production smoke still failing on default branch run `28218523067`.
+  - Newly added staging proof workflows are present in the current staged worktree but are not yet available on default branch for `gh workflow run`.
+  - Deployed core-funnel proof still pending.
+- Treat historical tags such as `v1.0-production-ready` as historical markers only, not launch proof for current `main`.
 
 Purpose: hướng dẫn soft-launch cho ~200 user thật (sinh viên Việt Nam) sau khi Phase 1, 2, 4 đã ✅ và Phase 3 bảo mật fin được đóng.
 
@@ -60,7 +70,21 @@ Nếu bất kỳ điều kiện nào chưa đạt, dừng và xử lý trước.
 
 ## 2. D-2 — Pre-launch dry run
 
+Runbook: `docs/ops/staging-proof-runbook.md` lists the exact workflow inputs, repository secrets, `gh workflow run` commands, safety markers, and evidence to record.
+
+- [ ] Run `npm run proof:readiness` first; it checks required GitHub secret names, default-branch workflow availability, and the latest production-smoke run status without reading secret values or dispatching workflows.
+- [ ] Run `npm run proof:secrets` and resolve any missing required proof secrets before triggering staging proof workflows.
+- [ ] Run `npm run proof:workflows` and confirm required proof workflows are available on default branch before triggering `gh workflow run`.
+- [ ] Run local core-funnel preflight first:
+  - `npm run dev -- --host 127.0.0.1 --port 4173`
+  - `$env:CORE_QUALITY_URL="http://127.0.0.1:4173"; npm run smoke:core-quality`
+  - Treat this as local preflight only; D-2 still needs staging/production-like evidence in the ledger.
+- [ ] Run GitHub Actions workflow `.github/workflows/core-funnel-quality-staging.yml` against staging/preview with a non-local `target_url` to prove the main core funnel on a deployed target.
+
 - [ ] Chạy production smoke `npm run smoke:prod` từ máy local với credentials thật. Kỳ vọng pass.
+- [ ] Không chạy `npm run smoke:prod` với generated account mặc định. Chỉ set `PROD_SMOKE_ALLOW_GENERATED_ACCOUNT=1` nếu cố ý tạo 1 QA account mới cho run này.
+- [ ] Run GitHub Actions workflow `.github/workflows/email-verification-e2e-staging.yml` against staging/preview with `allow_create=CREATE_TEST_ACCOUNT` to prove signup, unverified-email banner, resend cooldown, and paid-checkout guard.
+- [ ] Run GitHub Actions workflow `.github/workflows/account-delete-e2e-staging.yml` against staging/preview with `allow_delete=DELETE_TEST_ACCOUNT` and a disposable `ACCOUNT_DELETE_E2E_EMAIL` containing `+delete` so the destructive check cannot delete a shared account.
 - [ ] Manual smoke 30 phút với 1 tài khoản test thật:
   - Đăng ký mới qua Firebase Google Sign-in.
   - Hoàn thành onboarding → SMART goal → feasibility → 12-week setup.
@@ -69,8 +93,20 @@ Nếu bất kỳ điều kiện nào chưa đạt, dừng và xử lý trước.
   - Verify webhook fire, entitlement up, Plus active.
   - Đăng nhập trên thiết bị thứ 2 (mobile) → verify auto-restore + sync indicator.
   - Tắt wifi, check-in 2 task, bật wifi → verify auto-drain queue.
+- [ ] Chạy `npm run test:e2e:lww` với `LWW_E2E_URL`, `LWW_E2E_ALLOW=OVERWRITE_TEST_WORKSPACE`, `LWW_E2E_EMAIL`, `LWW_E2E_PASSWORD` trên staging/preview để chứng minh Last-Write-Wins cross-device trước soft launch.
+- [ ] Or run GitHub Actions workflow `.github/workflows/lww-e2e-staging.yml` with `allow_overwrite=OVERWRITE_TEST_WORKSPACE` and repository secrets `LWW_E2E_EMAIL` / `LWW_E2E_PASSWORD`. `LWW_E2E_EMAIL` must be a dedicated overwrite-safe address containing `+lww`, `.lww`, `_lww`, or `-lww`.
 - [ ] Stress test nhẹ: 10 request/giây vào `/api/health` trong 1 phút từ 1 IP → verify rate limit không kill server.
 - [ ] Confirm Casso bank account số dư đủ để hoàn tiền nếu user yêu cầu refund.
+
+Blocking rule: do not enter D-1 go/no-go while any required proof row below is still `pending`, missing a target URL, missing a commit SHA, or missing an evidence URL / command.
+
+| Gate | Required evidence before D-1 | Status | Target URL | Commit SHA | Evidence URL / command | Notes |
+| --- | --- | --- | --- | --- | --- | --- |
+| Production smoke | `npm run smoke:prod` or `.github/workflows/production-smoke-e2e.yml` passes with fixed QA credentials | blocked-failing-smoke | `https://vision-board-web-platform.vercel.app` | `4fbdb3b6088e5c944554af90857b58c7205cf30d` | https://github.com/anhnhat432/Vision-Board-Web-Platform/actions/runs/28218523067 | Latest run on 2026-06-26 failed before billing at `12-week save, reload, and backend sync`: hidden `wam-section-score` wait on `/12-week-system?tab=week`. Local harness mitigation is staged but not proven on `main`. |
+| Email verification staging | `.github/workflows/email-verification-e2e-staging.yml` passes with `allow_create=CREATE_TEST_ACCOUNT` | blocked-workflow-unpublished | | | | Fixed secrets remain optional on 2026-06-27 because the generated disposable signup path is available if staging Firebase allows signup. Workflow file is staged locally but not yet available on default branch. If fixed secrets are added, `EMAIL_VERIFICATION_E2E_EMAIL` and `EMAIL_VERIFICATION_E2E_PASSWORD` must be configured as a complete pair. |
+| Account deletion staging | `.github/workflows/account-delete-e2e-staging.yml` passes with `allow_delete=DELETE_TEST_ACCOUNT` and delete-marked disposable email | blocked-workflow-unpublished | | | | `ACCOUNT_DELETE_E2E_EMAIL` and `ACCOUNT_DELETE_E2E_PASSWORD` are configured as of 2026-06-27. Workflow file is staged locally but not yet available on default branch. |
+| LWW sync staging | `.github/workflows/lww-e2e-staging.yml` or equivalent local command passes with dedicated QA credentials | blocked-workflow-unpublished | | | | `LWW_E2E_EMAIL` and `LWW_E2E_PASSWORD` are configured as of 2026-06-27. Workflow file is staged locally but not yet available on default branch. |
+| Manual core-flow smoke | `.github/workflows/core-funnel-quality-staging.yml` or equivalent deployed run proves Onboarding -> Life Balance -> Life Insight -> SMART Goal -> Feasibility -> 12-week setup -> Today action -> weekly review on staging/production-like target | blocked-workflow-unpublished | | | | Local preflight `npm run smoke:core-quality` passed on 2026-06-26 and was re-verified on 2026-06-27; deployed evidence still required. Workflow file is staged locally but not yet available on default branch. |
 
 ## 3. D-1 — Final go/no-go
 
@@ -80,7 +116,12 @@ Bảng ra quyết định launch. Tất cả phải ✅ trước khi mở đăng
 | --- | --- | --- |
 | Code freeze active | | |
 | Production deploy stable 24h | | Vercel + Render |
-| Smoke test pass | | `npm run smoke:prod` |
+| D-2 proof ledger complete | | All required D-2 rows have status `pass`, target URL, commit SHA, and evidence URL / command |
+| Production smoke pass | | Evidence row points to `npm run smoke:prod` or `.github/workflows/production-smoke-e2e.yml` |
+| Email verification staging pass | | Evidence row points to `.github/workflows/email-verification-e2e-staging.yml` |
+| Account deletion staging pass | | Evidence row points to `.github/workflows/account-delete-e2e-staging.yml` |
+| LWW staging e2e pass | | Evidence row points to `.github/workflows/lww-e2e-staging.yml` |
+| Manual core-flow smoke pass | | Evidence row points to `.github/workflows/core-funnel-quality-staging.yml` or equivalent deployed run |
 | Mongo backup snapshot mới nhất | | Tag `pre-soft-launch-2026-MM-DD` |
 | Sentry FE + BE active | | Capture test pass |
 | Rate limiter live | | 429 response confirmed |

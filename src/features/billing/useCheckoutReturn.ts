@@ -86,6 +86,11 @@ export function useCheckoutReturn({
       // Exhausted retries.
       attemptRef.current = 0;
       setCheckoutReturnStatus("pending");
+      logBillingUiError(new Error("Checkout return entitlement still unconfirmed."), {
+        surface: "BillingPlan",
+        action: "checkout_return_unconfirmed",
+        status: result.status,
+      });
       toast.info("Thanh toán đang được xử lý. Quyền sẽ được cập nhật khi hệ thống xác nhận.");
     } catch (error: unknown) {
       if (!isMountedRef.current) return;

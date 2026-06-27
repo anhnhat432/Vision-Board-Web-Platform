@@ -123,8 +123,8 @@ export function AdminSubscriptionsPage() {
             </thead>
             <tbody>
               {loading && items.length === 0 ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i}>
+                Array.from({ length: 5 }, (_, i) => `subscription-skeleton-${i}`).map((skeletonKey) => (
+                  <tr key={skeletonKey}>
                     <td className="px-4 py-3"><div className="h-4 w-32 animate-pulse rounded bg-app-accent-soft" /></td>
                     <td className="px-4 py-3"><div className="h-4 w-12 animate-pulse rounded bg-app-accent-soft" /></td>
                     <td className="px-4 py-3"><div className="h-5 w-20 animate-pulse rounded-full bg-app-accent-soft" /></td>

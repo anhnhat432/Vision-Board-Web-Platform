@@ -1,10 +1,16 @@
-import { test, expect, type Page, type BrowserContext } from "@playwright/test";
+import { test, expect, type Locator, type Page } from "@playwright/test";
 
 const BASE_URL = process.env.LWW_E2E_URL?.replace(/\/$/, "");
+const ALLOW_OVERWRITE =
+  process.env.LWW_E2E_ALLOW === "OVERWRITE_TEST_WORKSPACE";
 const EMAIL = process.env.LWW_E2E_EMAIL;
 const PASSWORD = process.env.LWW_E2E_PASSWORD;
 const TIMESTAMP = Date.now();
 const TEST_PREFIX = `[LWW-E2E-${TIMESTAMP}]`;
+
+function isSafeLwwEmail(email: string) {
+  return /(^|[+._-])lww([+._-]|@)/i.test(email);
+}
 
 // ── Helpers ───────────────────────────────────────────────────────
 
@@ -50,7 +56,67 @@ async function createGoalWithTask(page: Page, title: string) {
   return goalTitle;
 }
 
+async function waitForPageText(page: Page, text: string, timeoutMs: number = 30_000) {
+  await expect
+    .poll(
+      async () => {
+        const bodyText = (await page.textContent("body")) || "";
+        return bodyText.includes(text);
+      },
+      { timeout: timeoutMs, intervals: [500, 1000, 2000] },
+    )
+    .toBe(true);
+}
+
+async function openSystemTab(page: Page, tab: "today" | "settings") {
+  await page.goto(`/12-week-system?tab=${tab}`);
+  await page.waitForLoadState("networkidle");
+
+  const tabByTourId = page.locator(`[data-tour-id="twelve-week-tab-${tab}"]`);
+  if ((await tabByTourId.count()) > 0) {
+    await tabByTourId.first().click();
+    return;
+  }
+
+  const tabName = tab === "today" ? /today|h.m nay/i : /settings|c.i . .t/i;
+  const tabByRole = page.getByRole("tab", { name: tabName });
+  if ((await tabByRole.count()) > 0) {
+    await tabByRole.first().click();
+  }
+}
+
+async function getTodayTaskCheckbox(page: Page): Promise<Locator | null> {
+  await openSystemTab(page, "today");
+
+  const todayShell = page.locator("[data-twelve-week-today-shell]");
+  const scopedCheckbox = todayShell.getByRole("checkbox").first();
+  if ((await scopedCheckbox.count()) > 0) return scopedCheckbox;
+
+  const fallback = page
+    .locator('[data-testid="today-main-work-grid"] [role="checkbox"], [data-testid="today-main-work-grid"] input[type="checkbox"]')
+    .first();
+  if ((await fallback.count()) > 0) return fallback;
+
+  return null;
+}
+
+async function readCheckboxState(checkbox: Locator): Promise<boolean> {
+  return checkbox.isChecked();
+}
+
 async function toggleTask(page: Page, completed: boolean) {
+  const stableCheckbox = await getTodayTaskCheckbox(page);
+  if (stableCheckbox) {
+    const isCurrentlyCompleted = await readCheckboxState(stableCheckbox);
+    if (completed !== isCurrentlyCompleted) {
+      await stableCheckbox.click();
+      await expect
+        .poll(async () => readCheckboxState(stableCheckbox), { timeout: 10_000, intervals: [250, 500, 1000] })
+        .toBe(completed);
+    }
+    return;
+  }
+
   await page.click('[role="tab"][name*="Hôm nay"]')
     .catch(() => page.goto("/12-week-system?tab=today"));
 
@@ -73,6 +139,41 @@ async function toggleTask(page: Page, completed: boolean) {
 }
 
 async function deleteGoal(page: Page) {
+  let acceptedBrowserDialog = false;
+  page.once("dialog", async (dialog) => {
+    acceptedBrowserDialog = true;
+    await dialog.accept();
+  });
+
+  await openSystemTab(page, "settings");
+
+  const deleteCloudBtn = page.getByRole("button", {
+    name: /x.a d. li.u t.i kho.n|delete cloud|delete workspace/i,
+  });
+  if (await deleteCloudBtn.count()) {
+    await deleteCloudBtn.first().click();
+    if (!acceptedBrowserDialog) {
+      const dialog = page.locator('[role="alertdialog"], [role="dialog"]').last();
+      await expect(dialog).toBeVisible({ timeout: 10_000 });
+
+      const confirmationCheckbox = page.locator("#cloud-delete-confirm-checkbox, #delete-cloud-confirm-checkbox").first();
+      if ((await confirmationCheckbox.count()) > 0 && !(await confirmationCheckbox.isChecked())) {
+        await confirmationCheckbox.click();
+      }
+
+      const confirmationInput = page.locator("#cloud-delete-text-input, input[placeholder='XOACLOUD']").first();
+      if ((await confirmationInput.count()) > 0) {
+        await confirmationInput.fill("XOACLOUD");
+      }
+
+      const confirmButton = dialog.getByRole("button", { name: /x.a d. li.u|delete/i }).last();
+      await expect(confirmButton).toBeEnabled({ timeout: 10_000 });
+      await confirmButton.click();
+      await expect(dialog).toBeHidden({ timeout: 15_000 });
+    }
+    return;
+  }
+
   await page.goto("/12-week-system");
   await page.waitForLoadState("networkidle");
 
@@ -95,7 +196,31 @@ async function waitSyncIdle(page: Page, timeoutMs: number = 30_000) {
   await expect
     .poll(
       async () => {
-        const queueKey = "visionboard_data_mutation_queue:auth:user";
+        const pendingQueueCount = await page.evaluate((prefix) => {
+          const pendingStatuses = new Set(["pending", "in_flight", "retry_scheduled"]);
+          let pendingCount = 0;
+
+          for (let index = 0; index < localStorage.length; index += 1) {
+            const key = localStorage.key(index);
+            if (!key?.startsWith(prefix)) continue;
+
+            const raw = localStorage.getItem(key);
+            if (!raw) continue;
+
+            try {
+              const parsed = JSON.parse(raw);
+              const items = Array.isArray(parsed?.items) ? parsed.items : [];
+              pendingCount += items.filter((item: { status?: string }) => pendingStatuses.has(item.status ?? "")).length;
+            } catch (_error) {
+              pendingCount += 1;
+            }
+          }
+
+          return pendingCount;
+        }, "visionboard_data_mutation_queue");
+
+        if (pendingQueueCount > 0) return false;
+
         const queueRaw = await page.evaluate((key) => {
           const raw = localStorage.getItem(key);
           return raw ? JSON.parse(raw) : null;
@@ -162,6 +287,11 @@ async function waitForGoalToDisappear(page: Page, timeoutMs: number = 30_000) {
 }
 
 async function getTaskCompletedState(page: Page): Promise<boolean | null> {
+  const stableCheckbox = await getTodayTaskCheckbox(page);
+  if (stableCheckbox) {
+    return readCheckboxState(stableCheckbox);
+  }
+
   const checkbox = page
     .locator('[role="checkbox"], input[type="checkbox"]')
     .filter({ hasText: /task|việc|action|tactic/i })
@@ -187,10 +317,18 @@ async function captureConsoleLogs(page: Page): Promise<string[]> {
 
 test.describe("LWW auto-resolve sync", () => {
   test.skip(
-    !BASE_URL || !EMAIL || !PASSWORD,
-    "Missing LWW_E2E_* env vars"
+    !BASE_URL || !ALLOW_OVERWRITE || !EMAIL || !PASSWORD,
+    "Set LWW_E2E_URL, LWW_E2E_ALLOW=OVERWRITE_TEST_WORKSPACE, LWW_E2E_EMAIL, and LWW_E2E_PASSWORD to run",
   );
-  test.setTimeout(90_000);
+  test.setTimeout(120_000);
+
+  test.beforeAll(() => {
+    if (!EMAIL || !isSafeLwwEmail(EMAIL)) {
+      throw new Error(
+        `Refusing to run LWW overwrite proof for ${EMAIL ?? "(missing email)"}. Use a dedicated QA email containing "+lww".`,
+      );
+    }
+  });
 
   test("local wins when local mutation is newer", async ({ browser }) => {
     const contextA = await browser.newContext();
@@ -198,13 +336,7 @@ test.describe("LWW auto-resolve sync", () => {
     const pageA = await contextA.newPage();
     const pageB = await contextB.newPage();
 
-    const consoleLogsA: string[] = [];
-    pageA.on("console", (msg) => {
-      const text = msg.text();
-      if (text.includes("[auto-sync-lww]")) {
-        consoleLogsA.push(text);
-      }
-    });
+    const consoleLogsA = await captureConsoleLogs(pageA);
 
     try {
       await loginPage(pageA, EMAIL, PASSWORD);
@@ -214,11 +346,7 @@ test.describe("LWW auto-resolve sync", () => {
       await waitSyncIdle(pageA);
 
       await pageB.goto("/12-week-system");
-      await waitFor(() =>
-        Promise.resolve(
-          pageB.textContent("body")?.includes(TEST_PREFIX) ?? false
-        )
-      );
+      await waitForPageText(pageB, TEST_PREFIX);
 
       await toggleTask(pageA, true);
       await contextA.setOffline(true);

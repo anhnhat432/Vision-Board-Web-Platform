@@ -1,6 +1,15 @@
 # CLAUDE.md
 
-This file is the Claude Code quick-start for this repo. `AGENTS.md` remains the broader source of truth. Follow this file first for day-to-day Claude Code work, then read `AGENTS.md` and relevant `guidelines/*` docs when the task touches product scope, storage, sync, billing, deployment, or MVP claims.
+This file is the Claude Code quick-start for this repo. `AGENTS.md` remains the broader source of truth.
+
+Source-of-truth order for AI work in this repo:
+
+1. `AGENTS.md`
+2. `guidelines/PRODUCTION_ROADMAP.md`
+3. `guidelines/CURRENT_PROJECT_STATUS.md`
+4. this file
+
+If these documents conflict, follow the higher item and fix the lower one in the same task when safe.
 
 ## Project Focus
 
@@ -10,7 +19,7 @@ Vision Board Web Platform is a local-first React/Vite app with an optional backe
 Onboarding -> Life Balance -> Life Insight -> SMART Goal -> Feasibility Check -> 12-Week Plan -> Weekly Execution -> Reflection/Review
 ```
 
-For MVP 1, treat the app as a public demo for the 12-week execution system. The demo must work without required login, Firebase, backend sync, or real billing.
+Current launch posture is production-first for the core loop. Demo mode still matters for previews and marketing, but must stay secondary to real-mode safety, auth, billing correctness, sync reliability, and account lifecycle readiness.
 
 ## Default Working Rules
 
@@ -39,11 +48,25 @@ For MVP 1, treat the app as a public demo for the 12-week execution system. The 
 
 ## Product Scope Guardrails
 
-- Prioritize demo-mode stability, 12-week setup, Today tasks, weekly review, progress, and mock upgrade.
+- Prioritize real-mode safety for auth, billing, sync, settings, export/delete-account, and the 12-week execution loop.
+- Keep demo mode runnable without Firebase/backend, but never let demo-only copy, routes, or mock payment behavior leak into production.
 - Do not turn the product into a generic planner, social app, AI coach, or payment platform unless explicitly asked.
-- Keep vision board, achievements, admin orders, real billing, and perfect cloud sync secondary unless requested.
+- Keep vision board, achievements, and admin orders secondary unless the task explicitly targets them.
 - For current capability claims, check `guidelines/CURRENT_PROJECT_STATUS.md`.
-- For MVP decisions, check `guidelines/MVP_1_SCOPE.md`.
+- For roadmap and release-readiness priorities, check `guidelines/PRODUCTION_ROADMAP.md`.
+
+## Hybrid SDD/ADD Default
+
+Before changing code, classify touched surface:
+
+- `Core`: auth, billing, entitlements, localStorage shape, sync, destructive settings flows, shared contracts, security-sensitive copy/routes.
+- `Shell`: UI polish, page composition, helper CRUD, docs, tests, analytics presentation, low-risk boilerplate.
+
+Default behavior:
+
+- `Core` work needs an explicit spec or checklist, clear acceptance criteria, and verification plan before broad edits.
+- `Shell` work can be agent-first, but must still respect existing helpers, storage compatibility, and route/mode boundaries.
+- If a task crosses both, lock `Core` contract first, then let agent iterate inside `Shell`.
 
 ## LocalStorage And Sync
 
@@ -57,11 +80,14 @@ LocalStorage is the primary UX source of truth for most frontend flows.
 
 ## Billing, Firebase, And Env
 
-- Billing is mock/provider-contract oriented. Do not present mock billing as a real payment flow.
-- Keep paywall checks behind existing billing/entitlement helpers.
-- Mock upgrade must remain public-demo safe: no real charge, clear copy, local entitlement unlock.
+- Real-mode production billing uses the backend API contract path. Do not present mock billing as a real payment flow.
+- Keep paywall checks behind existing billing/entitlement helpers and wait for entitlement sync/webhook confirmation before treating checkout as paid.
+- Mock upgrade must remain demo-only and public-preview safe.
 - Firebase client config is optional. Guard auth/backend behavior when env or auth is not ready.
 - Do not commit `.env`, `.env.local`, `backend/.env`, service account JSON, or downloaded secret files.
+- In real-mode work, missing required env should be treated as a loud deployment/config bug, not silent downgrade behavior.
+
+See `docs/specs/FEATURE_TEMPLATE.md` when drafting new feature specs or high-risk bug-fix scopes.
 
 ## Frontend Workflow
 

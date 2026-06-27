@@ -159,6 +159,15 @@ function hasValue(values, key) {
   return typeof values[key] === "string" && values[key].trim().length > 0;
 }
 
+function normalizeFrontendAppMode(value) {
+  const trimmed = value?.trim().toLowerCase();
+  if (trimmed === "demo" || trimmed === "real") {
+    return { mode: trimmed, invalidValue: "" };
+  }
+
+  return { mode: "real", invalidValue: trimmed ? String(value) : "" };
+}
+
 function printKeyStatus(label, keys, values) {
   console.log(label);
   for (const key of keys) {
@@ -193,8 +202,8 @@ async function checkApiHealth(baseUrl) {
 
 const frontendEnv = mergeEnvFiles(frontendEnvFiles);
 const backendEnv = parseEnvFile(backendEnvFile);
-const frontendAppMode =
-  frontendEnv.values.VITE_APP_MODE?.trim().toLowerCase() === "real" ? "real" : "demo";
+const frontendAppModeResult = normalizeFrontendAppMode(frontendEnv.values.VITE_APP_MODE);
+const frontendAppMode = frontendAppModeResult.mode;
 const shouldRequireBackendSyncEnv = fullStack || frontendAppMode === "real";
 const frontendMissing = shouldRequireBackendSyncEnv
   ? collectMissing(requiredFrontendForBackendSync, frontendEnv.values)
@@ -207,6 +216,7 @@ console.log(`Vite env mode: ${mode}`);
 console.log(`Billing check: ${requireCassoBilling ? "casso" : "auto"}`);
 console.log(`Frontend env files: ${frontendEnv.loaded.length > 0 ? frontendEnv.loaded.join(", ") : "none"}`);
 console.log(`Backend env file: ${backendEnv.exists ? backendEnvFile : "missing"}`);
+console.log(`Resolved VITE_APP_MODE: ${frontendAppMode}`);
 console.log("");
 
 printKeyStatus("Frontend backend-sync requirements", requiredFrontendForBackendSync, frontendEnv.values);
@@ -230,6 +240,12 @@ if (fullStack && !hasValue(frontendEnv.values, "VITE_SENTRY_DSN")) {
 
 if (fullStack && !hasValue(backendEnv.values, "SENTRY_DSN")) {
   console.log("WARN    SENTRY_DSN is missing. Backend errors will not be captured in Sentry.");
+}
+
+if (frontendAppModeResult.invalidValue) {
+  console.log(
+    `WARN    VITE_APP_MODE is invalid ("${frontendAppModeResult.invalidValue}"). Falling back to "real" for safety.`,
+  );
 }
 
 if (frontendAppMode !== "real") {
@@ -301,6 +317,10 @@ if (shouldRequireBackendSyncEnv) {
 
 if (fullStack && frontendAppMode !== "real") {
   fullStackFailures.push("frontend:VITE_APP_MODE(real-required)");
+}
+
+if (fullStack && frontendAppModeResult.invalidValue) {
+  fullStackFailures.push(`frontend:VITE_APP_MODE(invalid:${frontendAppModeResult.invalidValue})`);
 }
 
 if (!skipHealth && healthResult.status === "failed") {

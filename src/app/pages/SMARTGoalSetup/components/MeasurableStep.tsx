@@ -1,4 +1,4 @@
-import { Check, Lightbulb, X } from "lucide-react";
+import { Lightbulb, X } from "lucide-react";
 import { motion } from "motion/react";
 import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
 import { cn } from "@/app/components/ui/utils";

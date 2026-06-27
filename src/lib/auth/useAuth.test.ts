@@ -34,6 +34,19 @@ describe("resolveAuthErrorMessage", () => {
     );
   });
 
+  it("distinguishes missing-account errors", () => {
+    expect(resolveAuthErrorMessage({ code: "auth/user-not-found" })).toContain("Không tìm thấy tài khoản");
+  });
+
+  it("distinguishes wrong-password errors", () => {
+    expect(resolveAuthErrorMessage({ code: "auth/wrong-password" })).toContain("Mật khẩu không đúng");
+    expect(resolveAuthErrorMessage({ code: "auth/wrong-password" })).toContain("Quên mật khẩu");
+  });
+
+  it("keeps invalid-credential generic", () => {
+    expect(resolveAuthErrorMessage({ code: "auth/invalid-credential" })).toBe("Email hoặc mật khẩu không đúng.");
+  });
+
   it("keeps useful unknown error messages", () => {
     expect(resolveAuthErrorMessage(new Error("Custom auth failure"))).toBe("Custom auth failure");
   });

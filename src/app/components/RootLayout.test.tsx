@@ -67,6 +67,7 @@ const autoCloudSyncMock = vi.hoisted(() => {
   };
 });
 const productionMock = vi.hoisted(() => ({
+  getLastOutboxSyncSnapshot: vi.fn(() => null),
   maybeShowBrowserReminderNotification: vi.fn(),
   syncEntitlementsWithProvider: vi.fn(),
   syncPendingOutbox: vi.fn(),
@@ -111,6 +112,7 @@ vi.mock("@/services/syncService", () => ({
 }));
 
 vi.mock("../utils/production", () => ({
+  getLastOutboxSyncSnapshot: productionMock.getLastOutboxSyncSnapshot,
   maybeShowBrowserReminderNotification: productionMock.maybeShowBrowserReminderNotification,
   syncEntitlementsWithProvider: productionMock.syncEntitlementsWithProvider,
   syncPendingOutbox: productionMock.syncPendingOutbox,

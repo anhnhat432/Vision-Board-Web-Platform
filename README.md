@@ -364,7 +364,7 @@ Production smoke e2e:
 npm run smoke:prod
 ```
 
-By default this opens the live Vercel site, creates a generated QA email account, and runs the signed-out home check plus the authenticated onboarding -> 12-week system flow. To reuse a fixed QA account instead of creating a new one each run:
+By default this opens the live Vercel site and requires a fixed QA account. It fails before launching a browser if `PROD_SMOKE_EMAIL` or `PROD_SMOKE_PASSWORD` is missing, so local and CI smoke runs do not create production users by accident.
 
 ```powershell
 $env:PROD_SMOKE_EMAIL="codex.qa@example.com"
@@ -380,6 +380,14 @@ npm run smoke:prod
 Remove-Item Env:\PROD_SMOKE_AUTH_MODE
 ```
 
+To intentionally create a generated disposable QA account instead, opt in explicitly:
+
+```powershell
+$env:PROD_SMOKE_ALLOW_GENERATED_ACCOUNT="1"
+npm run smoke:prod
+Remove-Item Env:\PROD_SMOKE_ALLOW_GENERATED_ACCOUNT
+```
+
 Optional target override:
 
 ```powershell
@@ -393,7 +401,69 @@ The workflow `.github/workflows/production-smoke-e2e.yml` runs the same producti
 - `PROD_SMOKE_EMAIL`
 - `PROD_SMOKE_PASSWORD`
 
+Do not set `PROD_SMOKE_ALLOW_GENERATED_ACCOUNT` in the scheduled workflow. Generated signup is for one-off operator runs only.
+
 To run it manually, open GitHub Actions -> Production smoke e2e -> Run workflow. The workflow intentionally fails if those secrets are missing so CI does not create a new QA user every run.
+
+Account deletion staging smoke:
+
+```powershell
+$env:ACCOUNT_DELETE_E2E_URL="https://your-staging-url.example"
+$env:ACCOUNT_DELETE_E2E_ALLOW="DELETE_TEST_ACCOUNT"
+npm run test:e2e:account-delete
+```
+
+By default this creates a generated disposable `codex.qa+delete-...@example.com` account, deletes it through Settings, verifies the backend delete response, and checks local data cleanup. To use a fixed disposable account, the email must clearly contain `+delete`:
+
+```powershell
+$env:ACCOUNT_DELETE_E2E_EMAIL="codex.qa+delete@example.com"
+$env:ACCOUNT_DELETE_E2E_PASSWORD="replace-with-disposable-password"
+$env:ACCOUNT_DELETE_E2E_AUTH_MODE="signin"
+npm run test:e2e:account-delete
+```
+
+GitHub Actions workflow `.github/workflows/account-delete-e2e-staging.yml` runs the same destructive staging check manually. It requires the `allow_delete` input to be exactly `DELETE_TEST_ACCOUNT` and repository secrets:
+
+- `ACCOUNT_DELETE_E2E_EMAIL`
+- `ACCOUNT_DELETE_E2E_PASSWORD`
+
+The email secret must be a disposable account containing `+delete`, `.delete`, `_delete`, or `-delete`.
+
+Email verification staging smoke:
+
+```powershell
+$env:EMAIL_VERIFICATION_E2E_URL="https://your-staging-url.example"
+$env:EMAIL_VERIFICATION_E2E_ALLOW="CREATE_TEST_ACCOUNT"
+npm run test:e2e:email-verification
+```
+
+By default this creates a generated disposable `codex.qa+verify-...@example.com` account, confirms the unverified-email banner is visible on `/billing/plan`, checks the resend cooldown, and verifies the paid checkout guard when checkout is otherwise enabled. To use a fixed disposable account, the email must clearly contain `+verify`:
+
+```powershell
+$env:EMAIL_VERIFICATION_E2E_EMAIL="codex.qa+verify@example.com"
+$env:EMAIL_VERIFICATION_E2E_PASSWORD="replace-with-disposable-password"
+npm run test:e2e:email-verification
+```
+
+GitHub Actions workflow `.github/workflows/email-verification-e2e-staging.yml` runs the same staging check manually. It requires the `allow_create` input to be exactly `CREATE_TEST_ACCOUNT`. Optional repository secrets:
+
+- `EMAIL_VERIFICATION_E2E_EMAIL`
+- `EMAIL_VERIFICATION_E2E_PASSWORD`
+
+If `EMAIL_VERIFICATION_E2E_EMAIL` is set, it must be a disposable account containing `+verify`, `.verify`, `_verify`, or `-verify`.
+
+Operator run order and evidence checklist live in `docs/ops/staging-proof-runbook.md`.
+
+LWW cross-device staging smoke:
+
+```powershell
+$env:LWW_E2E_URL="https://your-staging-url.example"
+$env:LWW_E2E_EMAIL="codex.qa+lww@example.com"
+$env:LWW_E2E_PASSWORD="replace-with-disposable-password"
+npm run test:e2e:lww
+```
+
+This verifies the three 12-week sync conflict paths that must be proven before launch: local-newer wins, cloud-newer wins, and tombstone beats a pending local mutation. The GitHub Actions workflow `.github/workflows/lww-e2e-staging.yml` runs the same check manually against a staging/preview URL and intentionally fails if `LWW_E2E_EMAIL` or `LWW_E2E_PASSWORD` repository secrets are missing.
 
 Environment report:
 

@@ -1,14 +1,16 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ProtectedRoute } from "../components/ProtectedRoute";
 import { RootLayout } from "../components/RootLayout";
+import { markFirstRunGuidanceCompleted, markNewUserGuideSeen } from "../utils/new-user-guide";
 import { APP_STORAGE_KEYS, activateAuthenticatedUserData, getUserData, saveUserData } from "../utils/storage";
 import { TwelveWeekSetup } from "./12WeekSetup";
 import { TwelveWeekSystem } from "./12WeekSystem";
 import { FeasibilityCheck } from "./FeasibilityCheck";
+import { LifeBalance } from "./LifeBalance";
 import { LifeInsight } from "./LifeInsight";
 import { Onboarding } from "./Onboarding";
 import { SMARTGoalSetup } from "./SMARTGoalSetup";
@@ -56,6 +58,8 @@ const planHookMock = vi.hoisted(() => ({
   syncWeeklyReview: vi.fn(),
   syncDailyCheckIn: vi.fn(),
 }));
+
+const originalWindowAddEventListener = window.addEventListener.bind(window);
 
 vi.mock("@/lib/auth/AuthContext", () => ({
   useAuthContext: authContextMock.useAuthContext,
@@ -162,7 +166,7 @@ function renderAuthenticatedCoreFlow(initialEntry = "/") {
         children: [
           { index: true, element: <div data-testid="home-page">Home page</div> },
           { path: "onboarding", element: <Onboarding /> },
-          { path: "life-balance", element: <div data-testid="life-balance-page">Life Balance</div> },
+          { path: "life-balance", element: <LifeBalance /> },
           { path: "life-insight", element: <LifeInsight /> },
           { path: "smart-goal-setup", element: <SMARTGoalSetup /> },
           { path: "feasibility", element: <FeasibilityCheck /> },
@@ -203,12 +207,38 @@ function _seedAnonymousStaleGoal() {
   saveUserData(data);
 }
 
+function getEnabledButton(name: string | RegExp) {
+  const button = screen.getAllByRole("button", { name }).find((item) => !item.hasAttribute("disabled"));
+  expect(button).toBeInTheDocument();
+  return button as HTMLElement;
+}
+
+async function findEnabledButton(name: string | RegExp, timeout = 5000) {
+  let button: HTMLElement | undefined;
+
+  await waitFor(
+    () => {
+      button = getEnabledButton(name);
+      expect(button).toBeEnabled();
+    },
+    { timeout },
+  );
+
+  return button as HTMLElement;
+}
+
+async function clickSetupNext(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(
+    await findEnabledButton(/Sắp xếp hành động cam kết|Thiết lập lịch trình|Xem trước kế hoạch Hôm nay/i),
+  );
+}
+
 async function fillSmartGoal(user: ReturnType<typeof userEvent.setup>) {
   await user.type(
     await screen.findByLabelText(/Mục tiêu cụ thể của bạn/i, {}, { timeout: 5000 }),
     "Ra mắt hệ thống review cá nhân giúp tôi giữ nhịp thực thi mỗi tuần.",
   );
-  await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
+  await user.click(getEnabledButton(/Lưu mục tiêu cụ thể/i));
 
   await user.type(
     await screen.findByLabelText(/Tên chỉ số đo lường/i, {}, { timeout: 5000 }),
@@ -217,53 +247,45 @@ async function fillSmartGoal(user: ReturnType<typeof userEvent.setup>) {
   await user.type(screen.getByLabelText(/Đơn vị đo lường/i), "tuần");
   await user.type(screen.getByLabelText(/Mức xuất phát/i), "0");
   await user.type(screen.getByLabelText(/Mức đích cần đạt/i), "12");
-  await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
+  await user.click(getEnabledButton(/Xác nhận chỉ số đo/i));
 
   // Đối với AchievableStep, nhãn là "Thời gian bạn dành cho mục tiêu mỗi tuần"
   const slider = await screen.findByLabelText(/Thời gian bạn dành cho mục tiêu/i, {}, { timeout: 5000 });
   fireEvent.change(slider, { target: { value: "6" } });
   await user.type(screen.getByLabelText(/Kỹ năng bạn muốn tập trung rèn luyện/i), "Lập kế hoạch\nReview tuần");
   await user.type(screen.getByLabelText(/Nguồn lực và công cụ hỗ trợ bạn/i), "Lịch cá nhân và dashboard 12 tuần");
-  await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
+  await user.click(getEnabledButton(/Thiết lập thời gian cam kết/i));
 
   await user.type(
     await screen.findByLabelText(/Vì sao mục tiêu này thực sự quan trọng/i, {}, { timeout: 5000 }),
     "Tôi cần một nhịp review đủ rõ để không bỏ dở mục tiêu dài hạn.",
   );
   await user.type(screen.getByLabelText(/Khía cạnh cuộc sống bạn muốn liên kết/i), "Sự nghiệp");
-  await user.click(screen.getByRole("button", { name: "Tiếp tục" }));
+  await user.click(getEnabledButton(/Xác nhận động lực này/i));
 
   await screen.findByLabelText(/Số tuần bạn cam kết/i, {}, { timeout: 5000 });
-  await user.click(screen.getByRole("button", { name: "Kiểm tra độ khả thi" }));
+  await user.click(getEnabledButton(/Kiểm tra khả thi nâng cao/i));
 }
 
 async function completeFeasibility(user: ReturnType<typeof userEvent.setup>) {
   const steps = [
     { question: /Mỗi tuần bạn có mấy giờ/i, answer: /Trên 5/i },
     { question: /Năng lượng còn lại/i, answer: /Dồi dào/i },
-    { question: /Bạn đã có đủ kỹ năng/i, answer: /Hoàn toàn sẵn sàng/i },
-    { question: /Mục tiêu này có thực sự rõ ràng/i, answer: /Thực tế/i },
-    { question: /Trở ngại lớn nhất/i, answer: /Chưa thấy/i },
-    { question: /Bạn đã xếp lịch cố định/i, answer: /Có vài/i },
     { question: /Độ tự tin hoàn thành/i, answer: /chiến đấu/i },
   ];
 
   for (const [index, step] of steps.entries()) {
     await screen.findByRole("heading", { name: step.question }, { timeout: 5000 });
     await user.click(await screen.findByLabelText(step.answer, {}, { timeout: 5000 }));
-    await user.click(
-      screen.getByRole("button", {
-        name: index === steps.length - 1 ? "Xem phân tích khả thi" : "Tiếp theo",
-      }),
-    );
+    await user.click(getEnabledButton(index === steps.length - 1 ? /Xem phân tích khả thi/i : /Tiếp theo/i));
   }
 
-  await user.click(await screen.findByRole("button", { name: /Bắt đầu lập Kế hoạch/i }, { timeout: 5000 }));
+  await user.click(await findEnabledButton(/Bắt đầu lập Kế hoạch 12 tuần ngay/i));
 }
 
 async function completeTwelveWeekSetup(user: ReturnType<typeof userEvent.setup>) {
-  await screen.findByRole("heading", { name: "Tạo kế hoạch 12 tuần" }, { timeout: 5000 });
-  await user.click(await screen.findByRole("button", { name: "Sắp xếp lịch thực hiện 📅" }, { timeout: 5000 }));
+  await screen.findByRole("heading", { name: /Tạo kế hoạch 12 tuần/i, level: 1 }, { timeout: 5000 });
+  await clickSetupNext(user);
 
   const tacticInputs = await screen.findAllByLabelText("Tên việc");
   await user.clear(tacticInputs[0]);
@@ -271,13 +293,40 @@ async function completeTwelveWeekSetup(user: ReturnType<typeof userEvent.setup>)
   await user.clear(tacticInputs[1]);
   await user.type(tacticInputs[1], "Hoàn thành việc trọng tâm");
 
-  await user.click(await screen.findByRole("button", { name: "Xem trước kế hoạch Hôm nay 👀" }, { timeout: 5000 }));
-  await user.click(await screen.findByRole("button", { name: "Lưu kế hoạch" }, { timeout: 5000 }));
+  await clickSetupNext(user);
+  await clickSetupNext(user);
+  await user.click(await findEnabledButton(/Lưu kế hoạch/i));
+}
+
+async function dismissScreenGuideIfOpen(user: ReturnType<typeof userEvent.setup>) {
+  const gotItButton = await screen
+    .findByRole("button", { name: /Tôi đã hiểu/i }, { timeout: 1200 })
+    .catch(() => null);
+
+  if (gotItButton) {
+    await user.click(gotItButton);
+  }
 }
 
 describe("authenticated new user core flow", () => {
   beforeEach(() => {
+    window.addEventListener = ((
+      type: string,
+      listener: EventListenerOrEventListenerObject,
+      options?: boolean | AddEventListenerOptions,
+    ) => {
+      if (typeof options === "object" && options !== null && "signal" in options) {
+        const sanitizedOptions = { ...(options as AddEventListenerOptions & { signal?: unknown }) };
+        delete sanitizedOptions.signal;
+        return originalWindowAddEventListener(type, listener, sanitizedOptions);
+      }
+
+      return originalWindowAddEventListener(type, listener, options);
+    }) as typeof window.addEventListener;
+
     localStorage.clear();
+    markNewUserGuideSeen();
+    markFirstRunGuidanceCompleted();
     setSignedInAuthContext();
     backendHydrationMock.value = {
       loading: false,
@@ -344,6 +393,10 @@ describe("authenticated new user core flow", () => {
     planHookMock.syncDailyCheckIn.mockResolvedValue(true);
   });
 
+  afterEach(() => {
+    window.addEventListener = originalWindowAddEventListener;
+  });
+
   it("starts clean after login, completes the core flow, and restores the 12-week system after reload", async () => {
     activateAuthenticatedUserData("firebase_uid_new_user");
     expect(getUserData().goals).toEqual([]);
@@ -351,17 +404,13 @@ describe("authenticated new user core flow", () => {
     const user = userEvent.setup();
     const { router, ui } = renderAuthenticatedCoreFlow("/");
 
-    expect(
-      await screen.findByText(
-        (_content, element) =>
-          element?.tagName === "H1" && /Thiết kế cuộc sống 12 tuần của bạn/i.test(element.textContent ?? ""),
-      ),
-    ).toBeInTheDocument();
     await waitFor(() => {
       expect(router.state.location.pathname).toBe("/onboarding");
     });
+    expect(await screen.findByRole("button", { name: /Mở bản đồ cuộc sống/i })).toBeInTheDocument();
+    expect(screen.getByTestId("email-verification-banner")).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: /Bắt đầu rà 8 lĩnh vực/i }));
+    await user.click(screen.getByRole("button", { name: /Mở bản đồ cuộc sống/i }));
     for (let i = 0; i < 8; i++) {
       const slider = await screen.findByRole("slider");
       slider.focus();
@@ -369,19 +418,28 @@ describe("authenticated new user core flow", () => {
       if (i < 7) {
         await user.click(screen.getByRole("button", { name: /tiếp theo/i }));
       } else {
-        await user.click(screen.getAllByRole("button", { name: /Xem insight của tôi/i })[0]);
+        await user.click(screen.getByRole("button", { name: /Chọn trọng tâm.*Dùng điểm mặc định/i }));
       }
     }
 
-    expect(
-      await screen.findByText(
-        (_content, element) => element?.tagName === "H1" && /Nhìn lại để bước tiếp/i.test(element.textContent ?? ""),
-      ),
-    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe("/life-balance");
+    });
+    await dismissScreenGuideIfOpen(user);
+    expect(await screen.findByRole("heading", { name: /Bức tranh hiện tại của bạn/i })).toBeInTheDocument();
+
+    await user.click(screen.getByRole("tab", { name: /Trọng tâm/i }));
+    await user.click(await screen.findByRole("link", { name: /Xem bản đầy đủ trang Góc nhìn/i }, { timeout: 5000 }));
+
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe("/life-insight");
+    });
+    await dismissScreenGuideIfOpen(user);
+    expect(await screen.findByRole("heading", { name: /Chọn một điểm tựa cho 12 tuần tới/i })).toBeInTheDocument();
     expect(getUserData().onboardingCompleted).toBe(true);
     expect(getUserData().goals).toEqual([]);
 
-    await user.click(screen.getByRole("button", { name: /Tiếp → Viết mục tiêu/i }));
+    await user.click(screen.getAllByRole("button", { name: /Tiếp → Viết mục tiêu/i })[0]);
     await fillSmartGoal(user);
     await completeFeasibility(user);
     await completeTwelveWeekSetup(user);

@@ -59,6 +59,26 @@ function getPrimaryButton(name: string | RegExp) {
   return button;
 }
 
+function getEnabledButton(name: string | RegExp) {
+  const button = screen.getAllByRole("button", { name }).find((item) => !item.hasAttribute("disabled"));
+  expect(button).toBeInTheDocument();
+  return button as HTMLElement;
+}
+
+async function clickSetupNext(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(
+    getEnabledButton(/Sắp xếp hành động cam kết|Thiết lập lịch trình|Xem trước kế hoạch Hôm nay/i),
+  );
+}
+
+async function clickSetupSubmit(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(getEnabledButton(/Lưu kế hoạch/i));
+}
+
+function getDailyNoteInput() {
+  return screen.getByLabelText(/Ghi chú nhanh/i);
+}
+
 async function openWeeklyReviewDetails(_user: ReturnType<typeof userEvent.setup>) {
   await screen.findByTestId("wam-section-next-commitments");
 }
@@ -104,9 +124,9 @@ describe("12-week core flows", () => {
       const { router } = renderAppRoute("/12-week-setup");
       const user = userEvent.setup();
 
-      await screen.findByRole("heading", { name: "Chốt kết quả 12 tuần" });
+      await screen.findByRole("heading", { name: "Thiết kế Đích đến & Khung mẫu" });
       expect(screen.getByText(/Kế hoạch 12 tuần này phục vụ tầm nhìn 3 năm:/)).toBeInTheDocument();
-      await user.click(screen.getByRole("button", { name: "Tiếp →" }));
+      await clickSetupNext(user);
 
       const tacticInputs = await screen.findAllByLabelText("Tên việc");
       await user.clear(tacticInputs[0]);
@@ -114,9 +134,9 @@ describe("12-week core flows", () => {
       await user.clear(tacticInputs[1]);
       await user.type(tacticInputs[1], "Review cuối ngày");
 
-      await user.click(screen.getByRole("button", { name: "Tiếp →" }));
-      await user.click(screen.getByRole("button", { name: "Tiếp →" }));
-      await user.click(screen.getByRole("button", { name: "Lưu kế hoạch" }));
+      await clickSetupNext(user);
+      await clickSetupNext(user);
+      await clickSetupSubmit(user);
 
       await waitFor(() => {
         expect(router.state.location.pathname).toBe("/12-week-system");
@@ -170,13 +190,9 @@ describe("12-week core flows", () => {
 
     renderAppRoute("/12-week-setup");
 
-    await screen.findByRole("heading", { name: "Chốt kết quả 12 tuần" });
-    expect(
-      screen.getByText("Đặt mục tiêu 12 tuần. Phương pháp gốc khuyên gắn với tầm nhìn 3 năm."),
-    ).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Điền 2 phút →" })).toHaveAttribute("href", "/vision");
-    expect(screen.getByRole("button", { name: "Bỏ qua" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Tiếp →" })).toBeEnabled();
+    await screen.findByRole("heading", { name: "Thiết kế Đích đến & Khung mẫu" });
+    expect(screen.getByText(/Dựa trên mục tiêu SMART của bạn/)).toBeInTheDocument();
+    expect(getEnabledButton(/Sắp xếp hành động cam kết/i)).toBeEnabled();
   }, 10_000);
 
   it("sends corrupt saved feasibility results back to feasibility with a clear toast", async () => {
@@ -222,9 +238,19 @@ describe("12-week core flows", () => {
       }),
     );
 
-    renderAppRoute("/12-week-setup");
+    const { router } = renderAppRoute("/12-week-setup");
+    const user = userEvent.setup();
 
-    expect(await screen.findByText("Push-ups (reps)")).toBeInTheDocument();
+    await clickSetupNext(user);
+    await clickSetupNext(user);
+    await clickSetupNext(user);
+    await clickSetupSubmit(user);
+
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe("/12-week-system");
+    });
+    expect(getUserData().goals[0]?.twelveWeekSystem?.lagMetric.name).toBe("Push-ups");
+    expect(getUserData().goals[0]?.twelveWeekSystem?.lagMetric.unit).toBe("reps");
   }, 10_000);
 
   it("shows a clear next action when no 12-week plan exists", async () => {
@@ -249,9 +275,10 @@ describe("12-week core flows", () => {
 
     renderAppRoute("/12-week-system");
 
-    await screen.findByText("Chu kỳ này chưa có việc hoặc chỉ số đủ rõ");
+    await screen.findByText("Chưa có việc nào trong chu kỳ này");
     expect(screen.getByText("Chưa có việc nào trong chu kỳ này")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Tạo lại chu kỳ" })).toBeInTheDocument();
+    expect(screen.getByText("Chu kỳ chưa có việc lặp lại. Vào Setup để thêm 2-4 việc lặp lại trước.")).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Đi tới Setup" })[0]).toBeInTheDocument();
   });
 
   it("persists task completion from the today queue", async () => {
@@ -448,7 +475,7 @@ describe("12-week core flows", () => {
     expect(taskListCard).not.toBeNull();
 
     await user.click(within(taskListCard as HTMLElement).getAllByRole("checkbox")[0]);
-    await user.type(screen.getByLabelText(/Nhật ký ngày/i), "Mai bắt đầu từ việc này trước.");
+    await user.type(getDailyNoteInput(), "Mai bắt đầu từ việc này trước.");
     await user.click(getPrimaryButton("Lưu check-in hôm nay"));
 
     await waitFor(() => {
@@ -504,7 +531,11 @@ describe("12-week core flows", () => {
       renderAppRoute("/12-week-system");
       const user = userEvent.setup();
 
-      expect(await screen.findAllByText("« Tôi muốn ship đều vì đây là lời hứa với chính mình. »")).not.toHaveLength(0);
+      expect(
+        await screen.findAllByText((_, element) =>
+          element?.textContent?.includes("Tôi muốn ship đều vì đây là lời hứa với chính mình.") ?? false,
+        ),
+      ).not.toHaveLength(0);
 
       await user.click(screen.getByRole("tab", { name: "Mở tab Tuần" }));
 
@@ -521,7 +552,7 @@ describe("12-week core flows", () => {
       renderAppRoute("/12-week-system");
       const user = userEvent.setup();
 
-      const noteInput = await screen.findByRole("textbox", { name: /Nhật ký ngày/i });
+      const noteInput = await screen.findByRole("textbox", { name: /Ghi chú nhanh/i });
       await user.type(noteInput, "First local check-in.");
       await user.click(getPrimaryButton(/check-in/i));
 
@@ -581,7 +612,7 @@ describe("12-week core flows", () => {
       renderAppRoute("/12-week-system");
       const user = userEvent.setup();
 
-      const noteInput = await screen.findByRole("textbox", { name: /Nhật ký ngày/i });
+      const noteInput = await screen.findByRole("textbox", { name: /Ghi chú nhanh/i });
       await user.clear(noteInput);
       await user.type(noteInput, "Local check-in 7");
       await user.click(getPrimaryButton(/check-in/i));
@@ -615,7 +646,7 @@ describe("12-week core flows", () => {
       expect(taskListCard).not.toBeNull();
 
       await user.click(within(taskListCard as HTMLElement).getAllByRole("checkbox")[0]);
-      await user.type(screen.getByLabelText(/Nhật ký ngày/i), "Giữ task đã tick khi review tuần.");
+      await user.type(getDailyNoteInput(), "Giữ task đã tick khi review tuần.");
       await user.click(getPrimaryButton("Lưu check-in hôm nay"));
       await user.click(screen.getByRole("tab", { name: "Mở tab Tuần" }));
       await typeWamReview(user, {

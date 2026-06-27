@@ -48,7 +48,7 @@ export function AppPublicFooter() {
           {/* Brand block */}
           <div>
             <Link to="/" className="inline-flex items-center gap-2">
-              <img src="/icon.svg" alt="" width={32} height={32} className="size-8 rounded-md" />
+              <img src="/favicon-192.png" alt="" width={32} height={32} className="size-8 rounded-md" />
               <span className="font-serif text-lg font-medium text-app-ink">Dear Our Future</span>
             </Link>
             <p className="mt-3 max-w-xs text-sm leading-6 text-app-ink-soft">

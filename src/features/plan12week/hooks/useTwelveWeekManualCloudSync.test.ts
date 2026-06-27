@@ -79,6 +79,15 @@ function createPullResponse(workspace: TwelveWeekPulledWorkspace): TwelveWeekPul
   };
 }
 
+function createDeltaPullResponse(workspace: TwelveWeekPulledWorkspace): TwelveWeekPullResponse {
+  return {
+    ...createPullResponse(workspace),
+    mode: "delta",
+    cursor: "cursor_before",
+    cursorStatus: "applied",
+  };
+}
+
 function createSafeCloudWorkspace(): TwelveWeekPulledWorkspace {
   return createEmptyWorkspace({
     goals: [
@@ -288,6 +297,24 @@ describe("runTwelveWeekManualCloudSync", () => {
     expect(pullWorkspace).not.toHaveBeenCalled();
   });
 
+  it("does not call API dependencies when signed out", async () => {
+    const drainMutations = vi.fn();
+    const pullWorkspace = vi.fn();
+
+    const result = await runTwelveWeekManualCloudSync({
+      ...baseOptions(),
+      ownerUid: null,
+      authenticated: false,
+      drainMutations,
+      pullWorkspace,
+    });
+
+    expect(result.status).toBe("skipped");
+    expect(result.skipReason).toBe("unauthenticated");
+    expect(drainMutations).not.toHaveBeenCalled();
+    expect(pullWorkspace).not.toHaveBeenCalled();
+  });
+
   it("does not call API dependencies when mutation sync flag is off", async () => {
     const drainMutations = vi.fn();
     const pullWorkspace = vi.fn();
@@ -485,7 +512,7 @@ describe("runTwelveWeekManualCloudSync", () => {
     );
   });
 
-  it("applies cloud safely when local mutation does not conflict with cloud", async () => {
+  it("auto-resolves local-winning pending mutation without overwriting local task state", async () => {
     enqueueStoredMutation(
       {
         kind: "task_completed_changed",
@@ -509,7 +536,11 @@ describe("runTwelveWeekManualCloudSync", () => {
         createId: () => "mutation_pending",
       },
     );
-    const writeUserData = vi.fn(() => true);
+    let writtenData: UserData | undefined;
+    const writeUserData = vi.fn((data: UserData) => {
+      writtenData = data;
+      return true;
+    });
 
     const result = await runTwelveWeekManualCloudSync({
       ...baseOptions(),
@@ -522,14 +553,37 @@ describe("runTwelveWeekManualCloudSync", () => {
         failedCount: 0,
         pendingCount: 0,
       })),
-      pullWorkspace: vi.fn(async () => createPullResponse(createSafeCloudWorkspace())),
-      readUserData: () => createUserData(),
+      pullWorkspace: vi.fn(async () => {
+        const workspace = createSafeCloudWorkspace();
+        workspace.tasks[0].syncUpdatedAt = at(0);
+        workspace.tasks[0].status = "todo";
+        workspace.tasks[0].completedAt = undefined;
+        return createDeltaPullResponse(workspace);
+      }),
+      readUserData: () => createLocalDataWithDifferentTask(),
       writeUserData,
     });
 
-    // No conflict: cloud is not newer than local mutation, so auto-resolve applies safely
     expect(result.status).toBe("applied");
-    expect(result.autoResolved).toBeUndefined(); // no actual conflicts to resolve
+    expect(result.autoResolved).toEqual({
+      cloudWinsCount: 0,
+      localWinsCount: 1,
+    });
+    expect(result.mergeReport?.conflicts).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "task",
+          clientId: "tw_task_1_tactic_write_0",
+          winner: "local",
+        }),
+      ]),
+    );
+    expect(writtenData?.goals[0].twelveWeekSystem?.taskInstances[0]).toEqual(
+      expect.objectContaining({
+        id: "tw_task_1_tactic_write_0",
+        completed: false,
+      }),
+    );
     expect(writeUserData).toHaveBeenCalled();
   });
 

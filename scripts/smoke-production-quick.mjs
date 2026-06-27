@@ -9,6 +9,7 @@ const GENERATED_PASSWORD = `CodexQuickSmoke${TIMESTAMP}!`;
 const EMAIL = process.env.PROD_SMOKE_EMAIL?.trim() || GENERATED_EMAIL;
 const PASSWORD = process.env.PROD_SMOKE_PASSWORD || GENERATED_PASSWORD;
 const HAS_PROVIDED_CREDENTIALS = Boolean(process.env.PROD_SMOKE_EMAIL && process.env.PROD_SMOKE_PASSWORD);
+const ALLOW_GENERATED_ACCOUNT = process.env.PROD_SMOKE_ALLOW_GENERATED_ACCOUNT === "1";
 const AUTH_MODE_OVERRIDE = process.env.PROD_SMOKE_AUTH_MODE?.trim().toLowerCase();
 const AUTH_MODE = AUTH_MODE_OVERRIDE || (HAS_PROVIDED_CREDENTIALS ? "signin" : "signup");
 const GOAL_ID = `goal_quick_smoke_${TIMESTAMP}`;
@@ -32,6 +33,14 @@ function addDays(date, days) {
   const next = new Date(date);
   next.setDate(next.getDate() + days);
   return next;
+}
+
+function normalizeText(text) {
+  return String(text)
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/[\u0111\u0110]/g, "d")
+    .toLowerCase();
 }
 
 async function step(label, action) {
@@ -257,6 +266,40 @@ async function getDiagnostics(page) {
   return `URL: ${page.url()}\nText: ${text.slice(0, 1_200)}`;
 }
 
+function assertNoRealBillingDemoCopy(text) {
+  const normalized = normalizeText(text);
+  const forbidden = [
+    "plus demo",
+    "mock checkout",
+    "checkout dung thu",
+    "mo plus demo",
+    "chi dung cho ban demo",
+    "khong xu ly khoan thu that",
+  ];
+  const marker = forbidden.find((item) => normalized.includes(item));
+
+  if (marker) {
+    throw new Error(`Production surface still shows demo/mock billing copy: ${marker}`);
+  }
+}
+
+async function waitForCondition(label, predicate, timeoutMs = DEFAULT_TIMEOUT_MS, intervalMs = 500) {
+  const startedAt = Date.now();
+  let lastValue;
+
+  while (Date.now() - startedAt < timeoutMs) {
+    lastValue = await predicate();
+    if (lastValue) return lastValue;
+    await pageWait(intervalMs);
+  }
+
+  throw new Error(`Timed out waiting for ${label}. Last value: ${JSON.stringify(lastValue)}`);
+}
+
+async function pageWait(ms) {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function seedQuickSmokeData(page) {
   const userData = createQuickSmokeUserData();
   await page.evaluate(
@@ -288,6 +331,247 @@ async function seedQuickSmokeData(page) {
   );
 }
 
+async function clickButtonByNormalizedText(page, normalizedNeedle) {
+  return page.evaluate((needle) => {
+    const normalizeButtonText = (text) =>
+      String(text)
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "")
+        .replace(/[\u0111\u0110]/g, "d")
+        .toLowerCase();
+    const button = Array.from(document.querySelectorAll("button")).find((candidate) => {
+      if (candidate.disabled) return false;
+      return normalizeButtonText(candidate.textContent ?? "").includes(needle);
+    });
+    if (!button) return false;
+    button.scrollIntoView({ block: "center" });
+    button.click();
+    return true;
+  }, normalizedNeedle);
+}
+
+async function readSettingsSyncSurface(page) {
+  return page.evaluate(() => {
+    const readText = (selector) =>
+      document.querySelector(selector)?.textContent?.trim() ?? "";
+    const syncButton = Array.from(document.querySelectorAll("button")).find((button) =>
+      String(button.textContent ?? "")
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "")
+        .replace(/[\u0111\u0110]/g, "d")
+        .toLowerCase()
+        .includes("kiem tra sao luu"),
+    );
+
+    return {
+      sectionVisible: Boolean(document.querySelector('[data-testid="settings-sync-section"]')),
+      lastSynced: readText('[data-testid="settings-sync-last-synced"]'),
+      pendingCopy: readText('[data-testid="settings-sync-pending-count"]'),
+      statusCopy: readText('[data-testid="settings-sync-status-copy"]'),
+      emailUnverifiedCopy: readText('[data-testid="settings-sync-email-unverified"]'),
+      syncButtonDisabled: syncButton?.disabled ?? null,
+    };
+  });
+}
+
+function classifySettingsSyncSurface(surface) {
+  const lastSynced = normalizeText(surface.lastSynced);
+  const pendingCopy = normalizeText(surface.pendingCopy);
+  const statusCopy = normalizeText(surface.statusCopy);
+  const emailUnverifiedCopy = normalizeText(surface.emailUnverifiedCopy);
+  const hasLocalSafeCopy = statusCopy.includes("du lieu van") && statusCopy.includes("thiet bi");
+
+  if (!surface.sectionVisible || !hasLocalSafeCopy) return false;
+
+  if (
+    !lastSynced.includes("chua co lan dong bo tai khoan") &&
+    pendingCopy.includes("khong co thay doi cho dong bo")
+  ) {
+    return "synced";
+  }
+
+  if (
+    emailUnverifiedCopy.includes("email chua xac thuc") ||
+    statusCopy.includes("chua the sao luu len tai khoan")
+  ) {
+    return "email_unverified";
+  }
+
+  return false;
+}
+
+async function assertSettingsSyncTrust(page) {
+  await page.goto(`${BASE_URL}/settings#account-sync`, { waitUntil: "domcontentloaded" });
+  if (await waitForLoginRedirect(page, 2_000)) {
+    await authenticateIfRequired(page, "/settings");
+    await page.goto(`${BASE_URL}/settings#account-sync`, { waitUntil: "domcontentloaded" });
+  }
+
+  await page.locator('[data-testid="settings-sync-section"]').waitFor();
+  let clickedSyncButton = await clickButtonByNormalizedText(page, "kiem tra sao luu");
+  if (!clickedSyncButton) {
+    const surface = await readSettingsSyncSurface(page);
+    if (surface.syncButtonDisabled === true) {
+      await authenticateWithSmokeAccount(page, "/settings");
+      await page.goto(`${BASE_URL}/settings#account-sync`, { waitUntil: "domcontentloaded" });
+      await page.locator('[data-testid="settings-sync-section"]').waitFor();
+      clickedSyncButton = await clickButtonByNormalizedText(page, "kiem tra sao luu");
+    }
+  }
+
+  if (!clickedSyncButton) {
+    throw new Error(
+      `Could not click account sync check button.\nLast sync surface: ${JSON.stringify(await readSettingsSyncSurface(page).catch(() => null))}\n${await getDiagnostics(page)}`,
+    );
+  }
+
+  const surface = await waitForCondition(
+    "settings account sync trust state",
+    async () => {
+      const nextSurface = await readSettingsSyncSurface(page);
+      const state = classifySettingsSyncSurface(nextSurface);
+      return state ? { state, ...nextSurface } : false;
+    },
+    DEFAULT_TIMEOUT_MS,
+  ).catch(async (error) => {
+    throw new Error(
+      `${error.message}\nLast sync surface: ${JSON.stringify(await readSettingsSyncSurface(page).catch(() => null))}\n${await getDiagnostics(page)}`,
+    );
+  });
+
+  const text = await getBodyText(page);
+  assertNoMojibake(text, "settings account sync");
+  assertNoVisibleFailure(text, "settings account sync");
+  log(`Settings account sync trust state: ${surface.state}`);
+}
+
+async function ensureSettingsSignedIn(page) {
+  await page.goto(`${BASE_URL}/settings`, { waitUntil: "domcontentloaded" });
+  if (await waitForLoginRedirect(page, 2_000)) {
+    await authenticateIfRequired(page, "/settings");
+    await page.goto(`${BASE_URL}/settings`, { waitUntil: "domcontentloaded" });
+  }
+
+  if ((await page.locator('[data-testid="settings-account-export"]').count()) === 0) {
+    await authenticateWithSmokeAccount(page, "/settings");
+    await page.goto(`${BASE_URL}/settings`, { waitUntil: "domcontentloaded" });
+  }
+}
+
+async function assertSettingsAccountLifecycleSurface(page) {
+  await ensureSettingsSignedIn(page);
+  await page.locator('[data-testid="settings-account-export"]').waitFor();
+  await page.locator('[data-testid="settings-delete-account-open"]').waitFor();
+
+  const requiredLinks = ["/privacy", "/terms", "/billing/faq"];
+  const missingLinks = [];
+  for (const href of requiredLinks) {
+    const count = await page.locator(`a[href="${href}"]`).count();
+    if (count === 0) missingLinks.push(href);
+  }
+
+  if (missingLinks.length > 0) {
+    throw new Error(`Settings account lifecycle surface missing legal/support links: ${missingLinks.join(", ")}`);
+  }
+
+  const text = await getBodyText(page);
+  assertNoMojibake(text, "settings account lifecycle");
+  assertNoVisibleFailure(text, "settings account lifecycle");
+}
+
+async function assertMockCheckoutNotExposed(page) {
+  await page.goto(`${BASE_URL}/billing/mock-checkout?session=legacy_checkout_test`, {
+    waitUntil: "domcontentloaded",
+  });
+  await page.waitForFunction(() => document.body.innerText.length > 0);
+
+  const text = await getBodyText(page);
+  assertNoMojibake(text, "mock checkout direct route");
+  assertNoVisibleFailure(text, "mock checkout direct route");
+  assertNoRealBillingDemoCopy(text);
+}
+
+async function readLoginRecoverySurface(page) {
+  return page.evaluate(() => {
+    const normalize = (text) =>
+      String(text)
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "")
+        .replace(/[\u0111\u0110]/g, "d")
+        .toLowerCase();
+    const findButton = (needle) =>
+      Array.from(document.querySelectorAll("button")).find((button) =>
+        normalize(button.textContent ?? "").includes(needle),
+      );
+
+    return {
+      emailFieldVisible: Boolean(document.querySelector("#login-email")),
+      passwordFieldVisible: Boolean(document.querySelector("#login-password")),
+      forgotPasswordVisible: Boolean(findButton("quen mat khau")),
+      resetEmailVisible: Boolean(document.querySelector("#reset-email")),
+      sendLinkVisible: Boolean(findButton("gui link")),
+      closeResetVisible: Boolean(findButton("dong")),
+      confirmPasswordVisible: Boolean(document.querySelector("#login-confirm-password")),
+      termsLinkVisible: Boolean(document.querySelector('a[href="/terms"]')),
+      privacyLinkVisible: Boolean(document.querySelector('a[href="/privacy"]')),
+    };
+  });
+}
+
+async function assertLoginRecoverySurface(page) {
+  await page.goto(`${BASE_URL}/login`, { waitUntil: "domcontentloaded" });
+  await page.locator("#login-email").waitFor();
+
+  const signInSurface = await readLoginRecoverySurface(page);
+  if (!signInSurface.emailFieldVisible || !signInSurface.passwordFieldVisible || !signInSurface.forgotPasswordVisible) {
+    throw new Error(
+      `Login sign-in recovery surface is incomplete: ${JSON.stringify(signInSurface)}\n${await getDiagnostics(page)}`,
+    );
+  }
+
+  const openedResetCard = await clickButtonByNormalizedText(page, "quen mat khau");
+  if (!openedResetCard) {
+    throw new Error(`Could not open login reset-password card.\n${await getDiagnostics(page)}`);
+  }
+
+  await waitForCondition("login reset-password surface", async () => {
+    const surface = await readLoginRecoverySurface(page);
+    return surface.resetEmailVisible && surface.sendLinkVisible && surface.closeResetVisible ? surface : false;
+  }).catch(async (error) => {
+    throw new Error(`${error.message}\n${await getDiagnostics(page)}`);
+  });
+
+  const closedResetCard = await clickButtonByNormalizedText(page, "dong");
+  if (!closedResetCard) {
+    throw new Error(`Could not close login reset-password card.\n${await getDiagnostics(page)}`);
+  }
+
+  await waitForCondition("login reset-password surface close", async () => {
+    const surface = await readLoginRecoverySurface(page);
+    return surface.resetEmailVisible ? false : surface;
+  }).catch(async (error) => {
+    throw new Error(`${error.message}\n${await getDiagnostics(page)}`);
+  });
+
+  await page.goto(`${BASE_URL}/login?mode=signup`, { waitUntil: "domcontentloaded" });
+  await page.locator("#login-confirm-password").waitFor();
+
+  const signUpSurface = await readLoginRecoverySurface(page);
+  if (
+    !signUpSurface.emailFieldVisible ||
+    !signUpSurface.passwordFieldVisible ||
+    !signUpSurface.confirmPasswordVisible ||
+    !signUpSurface.termsLinkVisible ||
+    !signUpSurface.privacyLinkVisible
+  ) {
+    throw new Error(`Login sign-up trust surface is incomplete: ${JSON.stringify(signUpSurface)}\n${await getDiagnostics(page)}`);
+  }
+
+  const text = await getBodyText(page);
+  assertNoMojibake(text, "login recovery surface");
+  assertNoVisibleFailure(text, "login recovery surface");
+}
+
 async function submitEmailAuth(page, { mode, nextPath }) {
   const modeQuery = mode === "signup" ? "mode=signup&" : "";
   await page.goto(`${BASE_URL}/login?${modeQuery}next=${encodeURIComponent(nextPath)}`, {
@@ -315,9 +599,7 @@ async function submitEmailAuth(page, { mode, nextPath }) {
   };
 }
 
-async function authenticateIfRequired(page, nextPath) {
-  if (new URL(page.url()).pathname !== "/login") return;
-
+async function authenticateWithSmokeAccount(page, nextPath) {
   if (!["signin", "signup"].includes(AUTH_MODE)) {
     throw new Error(`Invalid PROD_SMOKE_AUTH_MODE=${AUTH_MODE}`);
   }
@@ -333,6 +615,11 @@ async function authenticateIfRequired(page, nextPath) {
   if (!outcome.ok) {
     throw new Error(`Email auth failed for quick smoke account: ${outcome.errorText || "unknown error"}`);
   }
+}
+
+async function authenticateIfRequired(page, nextPath) {
+  if (new URL(page.url()).pathname !== "/login") return;
+  await authenticateWithSmokeAccount(page, nextPath);
 }
 
 async function waitForLoginRedirect(page, timeoutMs = 4_000) {
@@ -381,6 +668,13 @@ async function run() {
   const unexpectedBackendRequests = [];
   const pageErrors = [];
   let authWasRequired = false;
+
+  if (!HAS_PROVIDED_CREDENTIALS && !ALLOW_GENERATED_ACCOUNT) {
+    throw new Error(
+      "PROD_SMOKE_EMAIL and PROD_SMOKE_PASSWORD are required. Set PROD_SMOKE_ALLOW_GENERATED_ACCOUNT=1 to explicitly create a generated production QA account.",
+    );
+  }
+
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
     locale: "vi-VN",
@@ -429,6 +723,14 @@ async function run() {
       assertNoVisibleFailure(text, "signed-out home");
     });
 
+    await step("Production does not expose mock checkout surface", async () => {
+      await assertMockCheckoutNotExposed(page);
+    });
+
+    await step("Login recovery and legal trust surface is reachable", async () => {
+      await assertLoginRecoverySurface(page);
+    });
+
     await step("Seeded 12-week system loads from localStorage", async () => {
       await page.goto(`${BASE_URL}/12-week-system`, { waitUntil: "domcontentloaded" });
       if (await waitForLoginRedirect(page)) {
@@ -468,6 +770,14 @@ async function run() {
       assertNoVisibleFailure(text, "progress tab");
     });
 
+    await step("Settings account sync trust surface is visible", async () => {
+      await assertSettingsSyncTrust(page);
+    });
+
+    await step("Settings account lifecycle actions are reachable", async () => {
+      await assertSettingsAccountLifecycleSurface(page);
+    });
+
     await step("Production billing management loads", async () => {
       await page.goto(`${BASE_URL}/billing`, { waitUntil: "domcontentloaded" });
       if (await waitForLoginRedirect(page, 2_000)) {
@@ -477,30 +787,28 @@ async function run() {
       }
 
       await page.waitForFunction(() => {
-        const text = document.body.innerText;
+        const paymentHistory = document.querySelector('[data-testid="billing-payment-history"]');
+        const upgradeCta = document.querySelector('[data-testid="billing-plan-upgrade-cta"]');
+        const paymentLockBanner = document.querySelector('[data-testid="paid-checkout-disabled-banner"]');
         return (
           location.pathname === "/billing/plan" &&
-          text.includes("Gói hiện tại") &&
-          text.includes("Lịch sử thanh toán") &&
-          text.includes("Hỗ trợ thanh toán") &&
-          (text.includes("Nâng cấp Plus") || text.includes("Gia hạn Plus"))
+          paymentHistory !== null &&
+          (upgradeCta !== null || paymentLockBanner !== null)
         );
       });
-      await page.waitForFunction(() => {
-        const text = document.body.innerText;
-        return (
-          text.includes("Chưa có giao dịch") ||
-          text.includes("Đang chờ") ||
-          text.includes("Đã thanh toán") ||
-          text.includes("Không thể tải lịch sử thanh toán")
-        );
+      const paymentHistoryStateHandle = await page.waitForFunction(() => {
+        const paymentHistory = document.querySelector('[data-testid="billing-payment-history"]');
+        const state = paymentHistory?.getAttribute("data-payment-history-state");
+        if (state === "empty" || state === "ready" || state === "error") return state;
+        return false;
       });
+      const paymentHistoryState = await paymentHistoryStateHandle.jsonValue();
 
       const text = await getBodyText(page);
       assertNoMojibake(text, "billing management");
       assertNoVisibleFailure(text, "billing management");
-      if (text.includes("Không thể tải lịch sử thanh toán")) {
-        throw new Error("Billing payment history endpoint failed on production");
+      if (paymentHistoryState === "error") {
+        throw new Error(`Billing payment history endpoint failed on production.\n${await getDiagnostics(page)}`);
       }
       if (/Plus demo|Checkout dùng thử|mock checkout/i.test(text)) {
         throw new Error("Production billing page still shows demo/mock billing copy");

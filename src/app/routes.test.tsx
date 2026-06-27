@@ -36,7 +36,8 @@ vi.mock("@/features/plan12week/hooks/useAutoCloudSync", () => ({
     triggerDrainOnly: autoCloudSyncMock.triggerDrainOnly,
     resolveConflictKeepLocal: autoCloudSyncMock.resolveConflictKeepLocal,
     resolveConflictUseCloud: autoCloudSyncMock.resolveConflictUseCloud,
-    clearFirstLoginRestoreSummary: autoCloudSyncMock.clearFirstLoginRestoreSummary,
+    clearFirstLoginRestoreSummary:
+      autoCloudSyncMock.clearFirstLoginRestoreSummary,
   }),
 }));
 
@@ -52,11 +53,16 @@ vi.mock("@/features/plan12week/hooks/AutoCloudSyncProvider", () => ({
     syncing: false,
     triggerSyncNow: autoCloudSyncMock.triggerSyncNow,
   }),
+  useOptionalAutoCloudSyncContext: () => null,
 }));
 
 vi.mock("./hooks/useBackendPlanHydration", () => ({
   BACKEND_PLAN_HYDRATION_EVENT_NAME: "visionboard:backend-hydrated",
-  useBackendPlanHydration: () => ({ loading: false, result: null, error: null }),
+  useBackendPlanHydration: () => ({
+    loading: false,
+    result: null,
+    error: null,
+  }),
 }));
 
 vi.mock("./utils/app-mode", () => ({
@@ -95,12 +101,19 @@ vi.mock("./utils/production", () => ({
     manageBillingReady: true,
   }),
   getLastEntitlementSyncSnapshot: () => null,
+  getLastOutboxSyncSnapshot: () => null,
   getLastRestoreAccessSnapshot: () => null,
   maybeShowBrowserReminderNotification: vi.fn(),
-  openBillingCustomerPortal: vi.fn().mockResolvedValue({ ok: true, message: "Opened" }),
+  openBillingCustomerPortal: vi
+    .fn()
+    .mockResolvedValue({ ok: true, message: "Opened" }),
   resolveAppReturnPath: (path: string) => path,
-  restorePlanAccess: vi.fn().mockResolvedValue({ ok: true, message: "Restored" }),
-  syncEntitlementsWithProvider: vi.fn().mockResolvedValue({ ok: true, planCode: "FREE", message: "Synced" }),
+  restorePlanAccess: vi
+    .fn()
+    .mockResolvedValue({ ok: true, message: "Restored" }),
+  syncEntitlementsWithProvider: vi
+    .fn()
+    .mockResolvedValue({ ok: true, planCode: "FREE", message: "Synced" }),
   syncPendingOutbox: vi.fn(),
 }));
 
@@ -123,6 +136,35 @@ function renderRoute(pathname: string) {
       result.unmount();
     },
   };
+}
+
+function collectRoutePaths(routes: readonly unknown[]): string[] {
+  const paths: string[] = [];
+
+  const walk = (entries: readonly unknown[]) => {
+    entries.forEach((entry) => {
+      if (!entry || typeof entry !== "object") return;
+
+      const route = entry as { path?: unknown; children?: unknown };
+      if (typeof route.path === "string") {
+        paths.push(route.path);
+      }
+      if (Array.isArray(route.children)) {
+        walk(route.children);
+      }
+    });
+  };
+
+  walk(routes);
+  return paths;
+}
+
+function expectNoDemoOnlyCopy() {
+  expect(
+    screen.queryByText(
+      /bản dùng thử|dùng thử|trên trình duyệt này|không thu tiền thật|không cần đăng nhập|mock|demo/i,
+    ),
+  ).not.toBeInTheDocument();
 }
 
 describe("app routes", () => {
@@ -150,43 +192,81 @@ describe("app routes", () => {
   it("resolves /terms through the app route table", async () => {
     const route = renderRoute("/terms");
 
-    expect(await screen.findByRole("heading", { level: 1, name: /Điều khoản dịch vụ/i })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", {
+        level: 1,
+        name: /Điều khoản dịch vụ/i,
+      }),
+    ).toBeInTheDocument();
+    expectNoDemoOnlyCopy();
     await route.dispose();
   });
 
   it("resolves /help through the app route table", async () => {
     const route = renderRoute("/help");
 
-    expect(await screen.findByRole("heading", { level: 1, name: /Trung tâm trợ giúp/i })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", {
+        level: 1,
+        name: /Trung tâm trợ giúp/i,
+      }),
+    ).toBeInTheDocument();
+    expectNoDemoOnlyCopy();
     await route.dispose();
   });
 
   it("resolves /privacy through the app route table", async () => {
     const route = renderRoute("/privacy");
 
-    expect(await screen.findByRole("heading", { name: /Chính sách bảo mật/i })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: /Chính sách bảo mật/i }),
+    ).toBeInTheDocument();
+    expectNoDemoOnlyCopy();
     await route.dispose();
   });
 
   it("resolves /billing/faq through the app route table", async () => {
     const route = renderRoute("/billing/faq");
 
-    expect(await screen.findByRole("heading", { name: /Câu hỏi thường gặp/i })).toBeInTheDocument();
-    expect(screen.getByText("Làm sao tôi biết đã thanh toán thành công?")).toBeInTheDocument();
-    expect(screen.getByText(/Bạn nhận biên nhận qua email/)).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: /Câu hỏi thường gặp/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Làm sao tôi biết đã thanh toán thành công?"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Bạn nhận biên nhận qua email/),
+    ).toBeInTheDocument();
+    expectNoDemoOnlyCopy();
     await route.dispose();
   });
 
-  it("does not register the mock checkout route", () => {
-    const rootRoute = appRoutes.find((route) => route.path === "/");
-    const childPaths = rootRoute && "children" in rootRoute ? rootRoute.children?.map((route) => route.path) : [];
+  it("does not register demo-only routes in the production route table", () => {
+    const paths = collectRoutePaths(appRoutes);
+    const bannedPatterns: ReadonlyArray<RegExp> = [
+      /(?:^|\/)mock-/i,
+      /(?:^|\/)demo-/i,
+      /(?:^|\/)seeder?(?:[\W_]|$)/i,
+      /(?:^|\/)__debug/i,
+      /\/billing\/mock/i,
+    ];
+    const offenders = paths.filter((path) =>
+      bannedPatterns.some((pattern) => pattern.test(path)),
+    );
 
-    expect(childPaths).not.toContain("billing/mock-checkout");
+    expect(
+      offenders,
+      `Production route table contains demo-only routes: ${offenders.join(", ")}`,
+    ).toEqual([]);
   });
 
   it("redirects /billing to the billing plan page", async () => {
     authContextMock.useAuthContext.mockReturnValue({
-      user: { displayName: "Test User", email: "test@example.com", emailVerified: true },
+      user: {
+        displayName: "Test User",
+        email: "test@example.com",
+        emailVerified: true,
+      },
       userProfile: { email: "test@example.com", id: "test-user", role: "user" },
       userProfileLoading: false,
       userProfileError: null,
@@ -203,12 +283,17 @@ describe("app routes", () => {
     const route = renderRoute("/billing");
 
     expect(await screen.findByText("Đi nhanh")).toBeInTheDocument();
+    expectNoDemoOnlyCopy();
     await route.dispose();
   });
 
   it("redirects /today to /12-week-system?tab=today", async () => {
     authContextMock.useAuthContext.mockReturnValue({
-      user: { displayName: "Test User", email: "test@example.com", emailVerified: true },
+      user: {
+        displayName: "Test User",
+        email: "test@example.com",
+        emailVerified: true,
+      },
       userProfile: { email: "test@example.com", id: "test-user", role: "user" },
       userProfileLoading: false,
       userProfileError: null,
@@ -232,7 +317,11 @@ describe("app routes", () => {
 
   it("resolves /settings through the app route table", async () => {
     authContextMock.useAuthContext.mockReturnValue({
-      user: { displayName: "Test User", email: "test@example.com", emailVerified: true },
+      user: {
+        displayName: "Test User",
+        email: "test@example.com",
+        emailVerified: true,
+      },
       userProfile: { email: "test@example.com", id: "test-user", role: "user" },
       userProfileLoading: false,
       userProfileError: null,
@@ -247,13 +336,23 @@ describe("app routes", () => {
     saveUserData({ ...userData, onboardingCompleted: true });
     const route = renderRoute("/settings");
 
-    expect(await screen.findByRole("heading", { level: 1, name: /Tu. ch.nh t.i kho.n/i })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", {
+        level: 1,
+        name: /Tu. ch.nh t.i kho.n/i,
+      }),
+    ).toBeInTheDocument();
+    expectNoDemoOnlyCopy();
     await route.dispose();
   });
 
   it("resolves /vision through the app route table", async () => {
     authContextMock.useAuthContext.mockReturnValue({
-      user: { displayName: "Test User", email: "test@example.com", emailVerified: true },
+      user: {
+        displayName: "Test User",
+        email: "test@example.com",
+        emailVerified: true,
+      },
       userProfile: { email: "test@example.com", id: "test-user", role: "user" },
       userProfileLoading: false,
       userProfileError: null,
@@ -269,7 +368,13 @@ describe("app routes", () => {
 
     const route = renderRoute("/vision");
 
-    expect(await screen.findByRole("heading", { level: 1, name: /Tầm nhìn 3 năm của bạn/i })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", {
+        level: 1,
+        name: /Tầm nhìn 3 năm của bạn/i,
+      }),
+    ).toBeInTheDocument();
+    expectNoDemoOnlyCopy();
     await route.dispose();
   });
 });

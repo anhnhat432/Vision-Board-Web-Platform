@@ -519,13 +519,6 @@ function getPendingMutationKind(item: DataMutationItem): PulledWorkspaceMergeEnt
   }
 }
 
-function isCloudNewerThanMutation(cloudUpdatedAt: string | undefined, mutationUpdatedAt: string): boolean {
-  if (!cloudUpdatedAt) return false;
-  const cloudTime = Date.parse(cloudUpdatedAt);
-  const localTime = Date.parse(mutationUpdatedAt);
-  return Number.isFinite(cloudTime) && Number.isFinite(localTime) && cloudTime > localTime;
-}
-
 function classifyConflictWinner(input: {
   reason: PulledWorkspaceConflict["reason"];
   localUpdatedAt?: string;
@@ -586,17 +579,15 @@ function buildPendingMutationConflicts(
       const clientId = getPendingMutationClientId(item);
       if (!clientId) return [];
 
-      const cloudEntity = cloudIndex.get(`${kind}:${clientId}`);
-      if (!cloudEntity || !isCloudNewerThanMutation(cloudEntity.syncUpdatedAt, item.updatedAt)) return [];
-
-      // Check if cloud has tombstone for this entity
       const key = `${kind}:${clientId}`;
+      const cloudEntity = cloudIndex.get(key);
       const cloudHasTombstone = tombstoneKeys.has(key);
+      if (!cloudEntity && !cloudHasTombstone) return [];
 
       const classification = classifyConflictWinner({
         reason: "pending_local_mutation_cloud_newer",
         localUpdatedAt: item.updatedAt,
-        cloudSyncUpdatedAt: cloudEntity.syncUpdatedAt,
+        cloudSyncUpdatedAt: cloudEntity?.syncUpdatedAt,
         cloudHasTombstone,
       });
 
@@ -605,13 +596,13 @@ function buildPendingMutationConflicts(
           kind,
           source: "local" as const,
           clientId,
-          cloudId: cloudEntity.cloudId,
-          path: cloudEntity.path,
+          cloudId: cloudEntity?.cloudId,
+          path: cloudEntity?.path ?? `cloud.tombstones.${kind}.${clientId}`,
           message: "Bản trên máy chủ đã đổi trong khi bạn chưa đồng bộ thay đổi cục bộ.",
           mutationId: item.id,
           reason: "pending_local_mutation_cloud_newer" as const,
           localUpdatedAt: item.updatedAt,
-          cloudSyncUpdatedAt: cloudEntity.syncUpdatedAt,
+          cloudSyncUpdatedAt: cloudEntity?.syncUpdatedAt,
           winner: classification.winner,
           winnerSource: classification.winnerSource,
           clockSkewMs: classification.clockSkewMs,
@@ -787,9 +778,16 @@ function addUnsupportedField(
   fields.push({ goalId, clientPlanId, field, reason });
 }
 
+function getGoalIdFromClientPlanId(clientPlanId: string): string {
+  return clientPlanId.endsWith(":12-week-system")
+    ? clientPlanId.slice(0, -":12-week-system".length)
+    : clientPlanId;
+}
+
 function collectUnsupportedFields(
   goals: Goal[],
   cloudIndex: ReadonlyMap<string, ComparableEntity>,
+  workspace: TwelveWeekPulledWorkspace,
 ): PulledWorkspaceUnsupportedField[] {
   const fields: PulledWorkspaceUnsupportedField[] = [];
 
@@ -804,22 +802,19 @@ function collectUnsupportedFields(
       if (isMeaningful(system[field])) addUnsupportedField(fields, goal.id, clientPlanId, field, reason);
     };
 
-    check("templateId", "Pull v1 does not return template identity.");
-    check("templateName", "Pull v1 does not return template identity.");
-    check("lagMetric", "Pull v1 does not return plan-level lag metric metadata.");
     check("leadIndicators", "Pull v1 returns week metrics, not the original lead indicator setup.");
-    check("milestones", "Pull v1 returns weekly outputs, not the original milestone object.");
-    check("successEvidence", "Pull v1 does not return setup success evidence.");
-    check("reviewDay", "Pull v1 does not return review day preference.");
-    check("week12Outcome", "Pull v1 does not return original week 12 outcome metadata.");
-    check("weeklyActions", "Pull v1 does not return legacy weekly action setup copy.");
-    check("successMetric", "Pull v1 does not return setup success metric copy.");
-    check("dailyReminderTime", "Pull v1 does not return local reminder preference.");
-    check("tacticLoadPreference", "Pull v1 does not return tactic load preference.");
-    check("preferredDays", "Pull v1 does not return preferred execution days.");
-    check("personalConstraint", "Pull v1 does not return personal constraint setup choice.");
-    check("reentryCount", "Pull v1 does not return local reentry metadata.");
     check("scoreboard", "Pull v1 returns source records; local scoreboard remains derived/local.");
+  });
+
+  workspace.leadMetrics.forEach((metric) => {
+    if (!metric.clientPlanId || !Array.isArray(metric.logs) || metric.logs.length === 0) return;
+    addUnsupportedField(
+      fields,
+      getGoalIdFromClientPlanId(metric.clientPlanId),
+      metric.clientPlanId,
+      "leadMetricLogs",
+      "Cloud lead metric logs have no local TwelveWeekSystem entity shape yet; daily check-ins and weekly reviews remain the local history source.",
+    );
   });
 
   return fields;
@@ -850,7 +845,7 @@ export function createPulledWorkspaceMergeReport(
   const localOnlyChanges = isDelta
     ? []
     : buildLocalOnlyChanges(localIndex, cloudIndex, pendingDeleteKeys, tombstoneKeys);
-  const unsupportedFields = isDelta ? [] : collectUnsupportedFields(localGoals, cloudIndex);
+  const unsupportedFields = isDelta ? [] : collectUnsupportedFields(localGoals, cloudIndex, workspace);
 
   // Determine auto-resolvability:
   // - OK if all conflicts have a clear winner (even if missing_timestamp but local wins)
@@ -863,10 +858,16 @@ export function createPulledWorkspaceMergeReport(
       // If there is a pending local mutation and the cloud wins, we cannot auto-resolve safely
       if (c.reason === "pending_local_mutation_cloud_newer" && c.winner === "cloud") return false;
       return true;
-    }) && missingClientIds.length === 0;
+    }) &&
+    missingClientIds.length === 0 &&
+    unsupportedFields.length === 0;
 
   return {
-    safeToApply: conflicts.length === 0 && localOnlyChanges.length === 0 && missingClientIds.length === 0,
+    safeToApply:
+      conflicts.length === 0 &&
+      localOnlyChanges.length === 0 &&
+      missingClientIds.length === 0 &&
+      unsupportedFields.length === 0,
     localOnlyChanges,
     cloudOnlyChanges,
     conflicts,

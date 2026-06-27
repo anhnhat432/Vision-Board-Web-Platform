@@ -33,6 +33,7 @@ const authContextMock = vi.hoisted(() => ({
 }));
 
 const appModeMock = vi.hoisted(() => ({
+  getAppMode: vi.fn(() => "real"),
   isRealMode: vi.fn(() => true),
   isDemoMode: vi.fn(() => false),
   shouldSeedDemoData: vi.fn(() => false),
@@ -65,6 +66,7 @@ vi.mock("@/lib/auth/AuthContext", () => ({
 }));
 
 vi.mock("@/app/utils/app-mode", () => ({
+  getAppMode: appModeMock.getAppMode,
   isRealMode: appModeMock.isRealMode,
   isDemoMode: appModeMock.isDemoMode,
   shouldSeedDemoData: appModeMock.shouldSeedDemoData,
@@ -167,6 +169,7 @@ describe("two-device 12-week auto-sync integration", () => {
       refreshUserProfile: vi.fn(),
       isConfigured: true,
     }));
+    appModeMock.getAppMode.mockReturnValue("real");
     appModeMock.isRealMode.mockReturnValue(true);
     appModeMock.isDemoMode.mockReturnValue(false);
     appModeMock.shouldSeedDemoData.mockReturnValue(false);

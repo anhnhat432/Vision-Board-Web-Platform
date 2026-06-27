@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowUpCircle, Calendar, CreditCard, Loader2, Mail, MapPin, Package, Shield, Target, User as UserIcon } from "lucide-react";
+import { ArrowLeft, ArrowUpCircle, CreditCard, Loader2, Package, Shield, Target, User as UserIcon } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useParams, Link } from "react-router";
 import { toast } from "sonner";
@@ -38,6 +38,8 @@ export function AdminUserDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [roleUpdating, setRoleUpdating] = useState(false);
+  const [roleConfirmOpen, setRoleConfirmOpen] = useState(false);
+  const [pendingRole, setPendingRole] = useState<"user" | "admin" | null>(null);
   const [subUpdating, setSubUpdating] = useState(false);
   const [subConfirmOpen, setSubConfirmOpen] = useState(false);
   const [pendingPlanCode, setPendingPlanCode] = useState<"PLUS" | "FREE" | null>(null);
@@ -64,20 +66,28 @@ export function AdminUserDetailPage() {
     void load();
   }, [load]);
 
-  const handleToggleRole = async () => {
-    if (!data || !uid) return;
-    const newRole = data.user.role === "admin" ? "user" : "admin";
-    const confirmMsg =
-      newRole === "admin"
-        ? `Cấp quyền admin cho ${data.user.email}?`
-        : `Gỡ quyền admin của ${data.user.email}?`;
-    if (!window.confirm(confirmMsg)) return;
+  const handleToggleRole = () => {
+    if (!data) return;
+    setPendingRole(data.user.role === "admin" ? "user" : "admin");
+    setRoleConfirmOpen(true);
+  };
+
+  const handleRoleDialogChange = (open: boolean) => {
+    if (roleUpdating) return;
+    setRoleConfirmOpen(open);
+    if (!open) setPendingRole(null);
+  };
+
+  const handleRoleChange = async () => {
+    if (!data || !uid || !pendingRole) return;
 
     setRoleUpdating(true);
     try {
-      const res = await adminUpdateUserRole(uid, newRole);
+      const res = await adminUpdateUserRole(uid, pendingRole);
       setData((prev) => (prev ? { ...prev, user: { ...prev.user, role: res.role } } : prev));
-      toast.success(`Đã cập nhật vai trò thành ${newRole === "admin" ? "Admin" : "User"}.`);
+      toast.success(`Đã cập nhật vai trò thành ${pendingRole === "admin" ? "Admin" : "User"}.`);
+      setRoleConfirmOpen(false);
+      setPendingRole(null);
     } catch (err) {
       toast.error(getErrorMessage(err, "Không thể cập nhật vai trò."));
     } finally {
@@ -156,13 +166,46 @@ export function AdminUserDetailPage() {
             size="sm"
             className="gap-1 border-app-line"
             disabled={roleUpdating}
-            onClick={() => void handleToggleRole()}
+            onClick={handleToggleRole}
           >
             {roleUpdating ? <Loader2 className="h-3 w-3 animate-spin" /> : <Shield className="h-3 w-3" />}
             {user.role === "admin" ? "Gỡ quyền Admin" : "Cấp quyền Admin"}
           </Button>
         }
       />
+
+      <AlertDialog open={roleConfirmOpen} onOpenChange={handleRoleDialogChange}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {pendingRole === "admin" ? "Cấp quyền Admin?" : "Gỡ quyền Admin?"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {pendingRole === "admin"
+                ? `Xác nhận cấp quyền Admin cho ${user.email}. Người này sẽ truy cập được các trang quản trị.`
+                : `Xác nhận gỡ quyền Admin của ${user.email}. Người này sẽ mất quyền truy cập quản trị.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={roleUpdating}>Hủy</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={roleUpdating}
+              className={
+                pendingRole === "user"
+                  ? "bg-rose-600 hover:bg-rose-700 text-white"
+                  : "bg-app-accent hover:bg-app-accent-hover text-white"
+              }
+              onClick={(event) => {
+                event.preventDefault();
+                void handleRoleChange();
+              }}
+            >
+              {roleUpdating ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : null}
+              {pendingRole === "admin" ? "Cấp quyền Admin" : "Gỡ quyền Admin"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* User Info Card */}

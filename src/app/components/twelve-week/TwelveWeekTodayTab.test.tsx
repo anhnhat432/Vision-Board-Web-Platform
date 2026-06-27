@@ -2,8 +2,15 @@ import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ComponentProps } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { emitPetEvent } from "@/app/features/pet/petEvents";
 import type { TwelveWeekSystem, TwelveWeekTaskInstance, UniversalDailyCheckIn } from "@/app/utils/storage-types";
 import { TwelveWeekTodayTab } from "./TwelveWeekTodayTab";
+
+vi.mock("@/app/features/pet/petEvents", () => ({
+  emitPetEvent: vi.fn(),
+}));
+
+const emitPetEventMock = vi.mocked(emitPetEvent);
 
 type TodayTabProps = ComponentProps<typeof TwelveWeekTodayTab>;
 
@@ -108,6 +115,10 @@ function makeProps(overrides: Partial<TodayTabProps> = {}): TodayTabProps {
     firstPriorityTask,
   };
 }
+
+afterEach(() => {
+  emitPetEventMock.mockClear();
+});
 
 describe("TwelveWeekTodayTab — primary task hero", () => {
   it("renders the compact mobile status strip before the hero and work grid", () => {
@@ -462,6 +473,54 @@ describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
     const checkbox = screen.getAllByRole("checkbox")[0];
     await userEvent.click(checkbox);
     expect(onToggleTask).toHaveBeenCalled();
+  });
+
+  it("emits taskCompleted after a normal task completion succeeds", async () => {
+    const onToggleTask = vi.fn().mockResolvedValue(undefined);
+    render(
+      <TwelveWeekTodayTab
+        {...makeProps({
+          onToggleTask,
+          todayQueue: [makeTask({ id: "task_1" }), makeTask({ id: "task_2", title: "Review outline" })],
+        })}
+      />,
+    );
+
+    const checkbox = screen.getAllByRole("checkbox")[0];
+    await userEvent.click(checkbox);
+
+    await waitFor(() => {
+      expect(emitPetEventMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: "taskCompleted",
+          source: "today",
+        }),
+      );
+    });
+  });
+
+  it("emits dailyFocusCompleted after the last open task succeeds", async () => {
+    const onToggleTask = vi.fn().mockResolvedValue(undefined);
+    render(
+      <TwelveWeekTodayTab
+        {...makeProps({
+          onToggleTask,
+          todayQueue: [makeTask({ id: "task_final" })],
+        })}
+      />,
+    );
+
+    const checkbox = screen.getAllByRole("checkbox")[0];
+    await userEvent.click(checkbox);
+
+    await waitFor(() => {
+      expect(emitPetEventMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: "dailyFocusCompleted",
+          source: "today",
+        }),
+      );
+    });
   });
 
   it("calls onSaveCheckIn when 'Lưu check-in hôm nay' button is clicked", async () => {

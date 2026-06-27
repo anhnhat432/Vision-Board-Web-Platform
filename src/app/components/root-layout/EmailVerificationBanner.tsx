@@ -2,30 +2,33 @@ import { HardDrive, Loader2, Pencil } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { isDemoMode } from "@/app/utils/app-mode";
+import {
+  readStoredEmailVerificationLastSentAt,
+  storeEmailVerificationLastSentAt,
+} from "@/app/utils/email-verification-cooldown";
+import { getEmailVerificationRequiredMessage } from "@/app/utils/email-verification-guard";
 import { useAuthContext } from "@/lib/auth/AuthContext";
-import { changeEmailWithPassword, sendVerificationEmail } from "@/lib/auth/firebase";
+import {
+  changeEmailWithPassword,
+  sendVerificationEmail,
+} from "@/lib/auth/firebase";
 import { Button } from "../ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
 import { Input } from "../ui/input";
 
 const RESEND_COOLDOWN_MS = 60_000;
-const LAST_SENT_STORAGE_PREFIX = "emailVerificationLastSentAt:";
-
-function getLastSentStorageKey(user: { uid?: string | null; email?: string | null } | null | undefined): string | null {
-  const scope = user?.uid || user?.email?.trim();
-  return scope ? `${LAST_SENT_STORAGE_PREFIX}${scope}` : null;
-}
-
-function readStoredLastSentAt(storageKey: string | null): number | null {
-  if (!storageKey || typeof window === "undefined") return null;
-  const parsed = Number(window.localStorage.getItem(storageKey));
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
-}
-
-function storeLastSentAt(storageKey: string | null, timestamp: number): void {
-  if (!storageKey || typeof window === "undefined") return;
-  window.localStorage.setItem(storageKey, String(timestamp));
-}
+type EmailVerificationRequiredAction =
+  | "upgrade"
+  | "sync"
+  | "refund"
+  | "critical";
 
 function formatSentAt(timestamp: number | null): string | null {
   if (!timestamp) return null;
@@ -37,8 +40,12 @@ function formatSentAt(timestamp: number | null): string | null {
   }).format(new Date(timestamp));
 }
 
-function isEmailPasswordUser(user: { providerData?: Array<{ providerId?: string | null } | null> }): boolean {
-  return (user.providerData ?? []).some((provider) => provider?.providerId === "password");
+function isEmailPasswordUser(user: {
+  providerData?: Array<{ providerId?: string | null } | null>;
+}): boolean {
+  return (user.providerData ?? []).some(
+    (provider) => provider?.providerId === "password",
+  );
 }
 
 export function EmailVerificationBanner() {
@@ -51,14 +58,31 @@ export function EmailVerificationBanner() {
   const [password, setPassword] = useState("");
   const [changingEmail, setChangingEmail] = useState(false);
   const [changeEmailError, setChangeEmailError] = useState<string | null>(null);
+  const [requiredAction, setRequiredAction] =
+    useState<EmailVerificationRequiredAction | null>(null);
 
   const pendingEmail = user?.email?.trim() ?? "";
-  const lastSentStorageKey = useMemo(() => getLastSentStorageKey(user), [user]);
   const lastSentLabel = useMemo(() => formatSentAt(lastSentAt), [lastSentAt]);
 
   useEffect(() => {
-    setLastSentAt(readStoredLastSentAt(lastSentStorageKey));
-  }, [lastSentStorageKey]);
+    setLastSentAt(readStoredEmailVerificationLastSentAt(user));
+    setRequiredAction(null);
+  }, [user]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handleRequired = (event: Event) => {
+      const action =
+        (event as CustomEvent<{ action?: EmailVerificationRequiredAction }>)
+          .detail?.action ?? "critical";
+      setRequiredAction(action);
+    };
+
+    window.addEventListener("email-verification:required", handleRequired);
+    return () =>
+      window.removeEventListener("email-verification:required", handleRequired);
+  }, []);
 
   useEffect(() => {
     if (lastSentAt === null) {
@@ -66,7 +90,10 @@ export function EmailVerificationBanner() {
       return;
     }
     const tick = () => {
-      const remaining = Math.max(0, Math.ceil((lastSentAt + RESEND_COOLDOWN_MS - Date.now()) / 1000));
+      const remaining = Math.max(
+        0,
+        Math.ceil((lastSentAt + RESEND_COOLDOWN_MS - Date.now()) / 1000),
+      );
       setCooldownSeconds(remaining);
     };
     tick();
@@ -92,7 +119,7 @@ export function EmailVerificationBanner() {
       await sendVerificationEmail();
       const sentAt = Date.now();
       setLastSentAt(sentAt);
-      storeLastSentAt(lastSentStorageKey, sentAt);
+      storeEmailVerificationLastSentAt(user, sentAt);
       toast.success("Đã gửi lại email xác thực", {
         description: "Kiểm tra hộp thư và thư mục spam.",
       });
@@ -116,14 +143,17 @@ export function EmailVerificationBanner() {
       await changeEmailWithPassword(trimmedEmail, password);
       const sentAt = Date.now();
       setLastSentAt(sentAt);
-      storeLastSentAt(lastSentStorageKey, sentAt);
+      storeEmailVerificationLastSentAt(user, sentAt);
       toast.success("Đã gửi email xác thực tới địa chỉ mới", {
         description: "Email tài khoản sẽ đổi sau khi bạn bấm link xác thực.",
       });
       setEmailDialogOpen(false);
       setPassword("");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Không đổi được email. Kiểm tra mật khẩu rồi thử lại.";
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Không đổi được email. Kiểm tra mật khẩu rồi thử lại.";
       setChangeEmailError(message);
     } finally {
       setChangingEmail(false);
@@ -134,19 +164,31 @@ export function EmailVerificationBanner() {
     <>
       <div
         role="alert"
+        data-testid="email-verification-banner"
         className="relative z-50 border-b border-app-warm-border bg-app-warm-soft px-4 py-2 text-sm text-app-warm-strong sm:px-6"
       >
         <div className="mx-auto flex max-w-5xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             <p className="inline-flex items-center gap-2 font-semibold">
               <HardDrive className="h-4 w-4 flex-none" />
-              Email chưa xác thực: <span className="break-all">{pendingEmail || "chưa có email"}</span>
+              Email chưa xác thực:{" "}
+              <span className="break-all">
+                {pendingEmail || "chưa có email"}
+              </span>
             </p>
             <p className="mt-0.5 text-xs leading-4 text-app-warm-strong">
-              Xác thực giúp chúng tôi gửi biên nhận, hỗ trợ hoàn tiền và bảo vệ tài khoản khi dùng tính năng trả phí
-              hoặc đồng bộ cloud.
+              Xác thực giúp chúng tôi gửi biên nhận, hỗ trợ hoàn tiền và bảo vệ
+              tài khoản khi dùng tính năng trả phí hoặc đồng bộ cloud.
               {lastSentLabel ? ` Gần nhất đã gửi: ${lastSentLabel}.` : ""}
             </p>
+            {requiredAction ? (
+              <p
+                data-testid="email-verification-required-reason"
+                className="mt-1 text-xs font-semibold leading-4"
+              >
+                {getEmailVerificationRequiredMessage(requiredAction)}
+              </p>
+            ) : null}
           </div>
           <div className="flex shrink-0 flex-wrap gap-2">
             <Button
@@ -155,6 +197,7 @@ export function EmailVerificationBanner() {
               className="border-app-warm-border bg-app-surface text-app-warm-strong hover:bg-app-warm-soft"
               onClick={handleResend}
               disabled={sending || cooldownSeconds > 0}
+              data-testid="email-verification-resend"
             >
               {sending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -185,13 +228,16 @@ export function EmailVerificationBanner() {
           <DialogHeader>
             <DialogTitle>Đổi email tài khoản</DialogTitle>
             <DialogDescription>
-              Nhập email đúng và mật khẩu hiện tại. Chúng tôi sẽ gửi link xác thực tới email mới trước khi cập nhật tài
-              khoản.
+              Nhập email đúng và mật khẩu hiện tại. Chúng tôi sẽ gửi link xác
+              thực tới email mới trước khi cập nhật tài khoản.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <label htmlFor="verification-new-email" className="text-sm font-medium text-app-ink-soft">
+              <label
+                htmlFor="verification-new-email"
+                className="text-sm font-medium text-app-ink-soft"
+              >
                 Email mới
               </label>
               <Input
@@ -203,7 +249,10 @@ export function EmailVerificationBanner() {
               />
             </div>
             <div>
-              <label htmlFor="verification-current-password" className="text-sm font-medium text-app-ink-soft">
+              <label
+                htmlFor="verification-current-password"
+                className="text-sm font-medium text-app-ink-soft"
+              >
                 Mật khẩu hiện tại
               </label>
               <Input
@@ -214,10 +263,16 @@ export function EmailVerificationBanner() {
                 autoComplete="current-password"
               />
             </div>
-            {changeEmailError ? <p className="text-sm text-red-600">{changeEmailError}</p> : null}
+            {changeEmailError ? (
+              <p className="text-sm text-red-600">{changeEmailError}</p>
+            ) : null}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setEmailDialogOpen(false)} disabled={changingEmail}>
+            <Button
+              variant="outline"
+              onClick={() => setEmailDialogOpen(false)}
+              disabled={changingEmail}
+            >
               Huỷ
             </Button>
             <Button onClick={handleChangeEmail} disabled={changingEmail}>

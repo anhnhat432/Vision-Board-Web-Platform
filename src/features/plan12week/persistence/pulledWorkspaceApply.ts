@@ -27,7 +27,7 @@ import type {
   TwelveWeekPullResponse,
   TwelveWeekPullTombstone,
 } from "@/services/syncService";
-import { getTwelveWeekClientPlanId } from "./twelveWeekImportPayload";
+import { getTwelveWeekClientPlanId, getTwelveWeekClientWeekId } from "./twelveWeekImportPayload";
 
 type PulledWorkspaceInput = TwelveWeekPulledWorkspace | TwelveWeekPullResponse;
 
@@ -71,6 +71,55 @@ function slugify(value: string, fallback: string): string {
     .replace(/[^a-z0-9]+/g, "_")
     .replace(/^_+|_+$/g, "");
   return slug || fallback;
+}
+
+function normalizeWeekStartsOn(value: string | undefined): TwelveWeekSystem["weekStartsOn"] | undefined {
+  if (value === "Monday" || value === "Sunday") return value;
+  return undefined;
+}
+
+function normalizeLagMetric(value: unknown): TwelveWeekSystem["lagMetric"] | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const metric = value as Record<string, unknown>;
+  if (typeof metric.name !== "string" || typeof metric.unit !== "string" || typeof metric.target !== "string") {
+    return undefined;
+  }
+
+  return {
+    name: metric.name.trim(),
+    unit: metric.unit.trim(),
+    target: metric.target.trim(),
+    currentValue: typeof metric.currentValue === "string" ? metric.currentValue.trim() : "",
+  };
+}
+
+function normalizeMilestones(value: unknown): TwelveWeekSystem["milestones"] | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const milestones = value as Record<string, unknown>;
+  if (
+    typeof milestones.week4 !== "string" ||
+    typeof milestones.week8 !== "string" ||
+    typeof milestones.week12 !== "string"
+  ) {
+    return undefined;
+  }
+
+  return {
+    week4: milestones.week4.trim(),
+    week8: milestones.week8.trim(),
+    week12: milestones.week12.trim(),
+  };
+}
+
+function normalizePreferredDays(value: unknown): number[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const days = value.filter((item): item is number => Number.isInteger(item));
+  return days.length > 0 ? days : undefined;
+}
+
+function normalizeSystemStatus(value: string | undefined): TwelveWeekSystem["status"] | undefined {
+  if (value === "active" || value === "paused" || value === "completed") return value;
+  return undefined;
 }
 
 function getTotalWeeks(weeks: TwelveWeekPulledWeek[], tasks: TwelveWeekPulledTask[]): number {
@@ -217,6 +266,92 @@ function withDerivedExecutionState(system: TwelveWeekSystem): TwelveWeekSystem {
   };
 }
 
+function getLeadIndicatorIdFromMetricClientId(clientMetricId: string): string | null {
+  const marker = ":metric:";
+  const markerIndex = clientMetricId.lastIndexOf(marker);
+  if (markerIndex < 0) return null;
+  const leadIndicatorId = clientMetricId.slice(markerIndex + marker.length).trim();
+  return leadIndicatorId || null;
+}
+
+function restoreSkippedLocalEntities(input: {
+  goalId: string;
+  existingSystem: TwelveWeekSystem | undefined;
+  nextSystem: TwelveWeekSystem;
+  skipEntities: ReadonlySet<string>;
+}): TwelveWeekSystem {
+  const { goalId, existingSystem, skipEntities } = input;
+  if (!existingSystem || skipEntities.size === 0) return input.nextSystem;
+
+  let restoredSystem = input.nextSystem;
+  const clientPlanId = getTwelveWeekClientPlanId(goalId);
+
+  existingSystem.weeklyPlans.forEach((week) => {
+    const clientWeekId = getTwelveWeekClientWeekId(goalId, week.weekNumber);
+    if (!skipEntities.has(`week:${clientWeekId}`)) return;
+
+    restoredSystem = {
+      ...restoredSystem,
+      weeklyPlans: [...restoredSystem.weeklyPlans.filter((item) => item.weekNumber !== week.weekNumber), week].sort(
+        (left, right) => left.weekNumber - right.weekNumber,
+      ),
+    };
+  });
+
+  existingSystem.taskInstances.forEach((task) => {
+    if (!skipEntities.has(`task:${task.id}`)) return;
+
+    restoredSystem = {
+      ...restoredSystem,
+      taskInstances: mergeTaskInstances(restoredSystem.taskInstances, [task]),
+    };
+  });
+
+  existingSystem.dailyCheckIns.forEach((checkIn) => {
+    const date = normalizeDateKey(checkIn.date);
+    const clientCheckInId = `${clientPlanId}:checkin:${date}`;
+    if (!skipEntities.has(`dailyCheckIn:${clientCheckInId}`)) return;
+
+    restoredSystem = {
+      ...restoredSystem,
+      dailyCheckIns: [
+        ...restoredSystem.dailyCheckIns.filter((item) => normalizeDateKey(item.date) !== date),
+        checkIn,
+      ].sort((left, right) => left.date.localeCompare(right.date)),
+    };
+  });
+
+  existingSystem.weeklyReviews.forEach((review) => {
+    const clientReviewId = `${clientPlanId}:review:${review.weekNumber}`;
+    if (!skipEntities.has(`weeklyReview:${clientReviewId}`)) return;
+
+    restoredSystem = {
+      ...restoredSystem,
+      weeklyReviews: [
+        ...restoredSystem.weeklyReviews.filter((item) => item.weekNumber !== review.weekNumber),
+        review,
+      ].sort((left, right) => left.weekNumber - right.weekNumber),
+    };
+  });
+
+  existingSystem.leadIndicators.forEach((indicator) => {
+    const shouldRestore = [...skipEntities].some((key) => {
+      if (!key.startsWith("leadMetric:")) return false;
+      return getLeadIndicatorIdFromMetricClientId(key.slice("leadMetric:".length)) === indicator.id;
+    });
+    if (!shouldRestore) return;
+
+    restoredSystem = {
+      ...restoredSystem,
+      leadIndicators: [...restoredSystem.leadIndicators.filter((item) => item.id !== indicator.id), indicator].sort(
+        (left, right) => (left.priority ?? 999) - (right.priority ?? 999),
+      ),
+    };
+  });
+
+  return withDerivedExecutionState(restoredSystem);
+}
+
 function applySystemDelta(
   goals: Goal[],
   clientPlanId: string | undefined,
@@ -233,6 +368,95 @@ function applySystemDelta(
   });
 }
 
+function updateGoalFromPulledGoal(goals: Goal[], pulledGoal: TwelveWeekPulledGoal): Goal[] {
+  const clientGoalId = pulledGoal.clientGoalId?.trim();
+  if (!clientGoalId) return goals;
+
+  return goals.map((goal) => {
+    if (goal.id !== clientGoalId) return goal;
+
+    return {
+      ...goal,
+      category: pulledGoal.category?.trim() || goal.category,
+      title: pulledGoal.title?.trim() || goal.title,
+      description: pulledGoal.description?.trim() ?? goal.description,
+      deadline: normalizeDateKey(pulledGoal.deadline) || goal.deadline,
+      focusArea: pulledGoal.focusArea ?? goal.focusArea,
+      readinessScore: pulledGoal.readinessScore ?? goal.readinessScore,
+      tasks: pulledGoal.tasks ? buildGoalTaskSummary(pulledGoal.tasks) : goal.tasks,
+    };
+  });
+}
+
+function updateSystemFromPulledPlan(system: TwelveWeekSystem, pulledPlan: TwelveWeekPulledPlan): TwelveWeekSystem {
+  const nextSystem: TwelveWeekSystem = {
+    ...system,
+    goalType: pulledPlan.goalType?.trim() || system.goalType,
+    vision12Week: pulledPlan.vision?.trim() || system.vision12Week,
+    templateId: pulledPlan.templateId?.trim() || system.templateId,
+    templateName: pulledPlan.templateName?.trim() || system.templateName,
+    lagMetric: normalizeLagMetric(pulledPlan.lagMetric) ?? system.lagMetric,
+    milestones: normalizeMilestones(pulledPlan.milestones) ?? system.milestones,
+    successEvidence: pulledPlan.successEvidence?.trim() ?? system.successEvidence,
+    reviewDay: pulledPlan.reviewDay?.trim() ?? system.reviewDay,
+    week12Outcome: pulledPlan.week12Outcome?.trim() || system.week12Outcome,
+    weeklyActions: pulledPlan.weeklyActions ?? system.weeklyActions,
+    successMetric: pulledPlan.successMetric?.trim() ?? system.successMetric,
+    startDate: normalizeDateKey(pulledPlan.startDate) || system.startDate,
+    endDate: normalizeDateKey(pulledPlan.endDate) || system.endDate,
+    timezone: pulledPlan.timezone?.trim() || system.timezone,
+    weekStartsOn: normalizeWeekStartsOn(pulledPlan.weekStartsOn) ?? system.weekStartsOn,
+    status: normalizeSystemStatus(pulledPlan.status) ?? system.status,
+    dailyReminderTime: pulledPlan.dailyReminderTime?.trim() ?? system.dailyReminderTime,
+    tacticLoadPreference: pulledPlan.tacticLoadPreference ?? system.tacticLoadPreference,
+    preferredDays: normalizePreferredDays(pulledPlan.preferredDays) ?? system.preferredDays,
+    personalConstraint: pulledPlan.personalConstraint ?? system.personalConstraint,
+    reentryCount: pulledPlan.reentryCount ?? system.reentryCount,
+    totalWeeks: Number.isFinite(pulledPlan.totalWeeks)
+      ? Math.min(Math.max(Number(pulledPlan.totalWeeks), 1), 12)
+      : system.totalWeeks,
+  };
+
+  return withDerivedExecutionState(nextSystem);
+}
+
+function updateSystemFromPulledWeek(system: TwelveWeekSystem, pulledWeek: TwelveWeekPulledWeek): TwelveWeekSystem {
+  if (!Number.isFinite(pulledWeek.weekNumber)) return system;
+  const weekNumber = clampWeekNumber(pulledWeek.weekNumber, system.totalWeeks);
+  const existingWeek = system.weeklyPlans.find((week) => week.weekNumber === weekNumber);
+  const nextWeek: WeeklyPlanEntry = {
+    weekNumber,
+    phaseName: existingWeek?.phaseName ?? getLegacyPhaseName(weekNumber),
+    focus:
+      pulledWeek.focus?.trim() || existingWeek?.focus || "Giá»¯ nhá»‹p hÃ nh Ä‘á»™ng cá»‘t lÃµi trong tuáº§n nÃ y.",
+    milestone: pulledWeek.expectedOutput?.trim() || existingWeek?.milestone || "",
+    completed: Boolean(pulledWeek.review ?? existingWeek?.completed),
+  };
+
+  return withDerivedExecutionState({
+    ...system,
+    weeklyPlans: [...system.weeklyPlans.filter((week) => week.weekNumber !== weekNumber), nextWeek].sort(
+      (left, right) => left.weekNumber - right.weekNumber,
+    ),
+  });
+}
+
+function updateSystemFromPulledLeadMetric(
+  system: TwelveWeekSystem,
+  pulledMetric: TwelveWeekPulledLeadMetric,
+): TwelveWeekSystem {
+  const pulledIndicator = buildLeadIndicators({ leadMetrics: [pulledMetric], tasks: [] })[0];
+  if (!pulledIndicator) return system;
+
+  return withDerivedExecutionState({
+    ...system,
+    leadIndicators: [
+      ...system.leadIndicators.filter((indicator) => indicator.id !== pulledIndicator.id),
+      pulledIndicator,
+    ].sort((left, right) => (left.priority ?? 999) - (right.priority ?? 999)),
+  });
+}
+
 function getTombstoneClientId(tombstone: TwelveWeekPullTombstone): string | undefined {
   return tombstone.clientId?.trim();
 }
@@ -240,6 +464,20 @@ function getTombstoneClientId(tombstone: TwelveWeekPullTombstone): string | unde
 function getDateFromCheckInClientId(clientId: string): string | null {
   const match = clientId.match(/:checkin:(\d{4}-\d{2}-\d{2})$/);
   return match?.[1] ?? null;
+}
+
+function getWeekNumberFromWeekClientId(clientId: string): number | null {
+  const match = clientId.match(/:week:(\d+)$/);
+  if (!match?.[1]) return null;
+  const value = Number(match[1]);
+  return Number.isInteger(value) ? value : null;
+}
+
+function getPlanIdFromWeekClientId(clientId: string): string | null {
+  const markerIndex = clientId.lastIndexOf(":week:");
+  if (markerIndex <= 0) return null;
+  const goalId = clientId.slice(0, markerIndex);
+  return goalId.endsWith(":12-week-system") ? goalId : getTwelveWeekClientPlanId(goalId);
 }
 
 function getPlanIdFromCheckInClientId(clientId: string): string | null {
@@ -266,6 +504,35 @@ function applyPulledDeltaToUserData(
 ): UserData {
   let nextGoals = userData.goals;
   const skipSet = skipEntities ?? new Set<string>();
+
+  pullResponse.workspace.goals.forEach((goal) => {
+    const clientGoalId = goal.clientGoalId?.trim();
+    if (!clientGoalId || skipSet.has(`goal:${clientGoalId}`)) return;
+    nextGoals = updateGoalFromPulledGoal(nextGoals, goal);
+  });
+
+  pullResponse.workspace.plans.forEach((plan) => {
+    const clientPlanId = plan.clientPlanId?.trim();
+    if (!clientPlanId || skipSet.has(`plan:${clientPlanId}`)) return;
+    nextGoals = applySystemDelta(nextGoals, clientPlanId, (system) => updateSystemFromPulledPlan(system, plan));
+  });
+
+  pullResponse.workspace.weeks.forEach((week) => {
+    const clientWeekId = week.clientWeekId?.trim();
+    const clientPlanId = week.clientPlanId?.trim() || (clientWeekId ? getPlanIdFromWeekClientId(clientWeekId) : null);
+    if (!clientPlanId) return;
+    if (clientWeekId && skipSet.has(`week:${clientWeekId}`)) return;
+    nextGoals = applySystemDelta(nextGoals, clientPlanId, (system) => updateSystemFromPulledWeek(system, week));
+  });
+
+  pullResponse.workspace.leadMetrics.forEach((metric) => {
+    const clientMetricId = metric.clientMetricId?.trim();
+    if (!metric.clientPlanId || !clientMetricId) return;
+    if (skipSet.has(`leadMetric:${clientMetricId}`)) return;
+    nextGoals = applySystemDelta(nextGoals, metric.clientPlanId, (system) =>
+      updateSystemFromPulledLeadMetric(system, metric),
+    );
+  });
 
   pullResponse.workspace.tasks.forEach((task) => {
     if (!task.clientPlanId || !task.clientTaskId) return;
@@ -342,6 +609,22 @@ function applyPulledDeltaToUserData(
           taskInstances: goal.twelveWeekSystem.taskInstances.filter((task) => task.id !== clientTaskId),
         }),
       };
+    });
+  });
+
+  pullResponse.tombstones.weeks.forEach((tombstone) => {
+    const clientWeekId = getTombstoneClientId(tombstone);
+    if (!clientWeekId) return;
+    const weekNumber = getWeekNumberFromWeekClientId(clientWeekId);
+    const clientPlanId = getPlanIdFromWeekClientId(clientWeekId);
+    if (!weekNumber || !clientPlanId) return;
+    nextGoals = applySystemDelta(nextGoals, clientPlanId, (system) => {
+      return withDerivedExecutionState({
+        ...system,
+        weeklyPlans: system.weeklyPlans.filter((week) => week.weekNumber !== weekNumber),
+        taskInstances: system.taskInstances.filter((task) => task.weekNumber !== weekNumber),
+        weeklyReviews: system.weeklyReviews.filter((review) => review.weekNumber !== weekNumber),
+      });
     });
   });
 
@@ -442,11 +725,13 @@ function buildPulledGoal(input: {
   pulledDailyCheckIns: TwelveWeekPulledDailyCheckIn[];
   pulledWeeklyReviews: TwelveWeekPulledWeeklyReview[];
   now: string;
+  skipEntities?: ReadonlySet<string>;
 }): Goal | null {
   const clientGoalId = input.pulledGoal?.clientGoalId ?? input.pulledPlan.clientGoalId ?? input.existingGoal?.id;
   if (!clientGoalId) return null;
 
-  const totalWeeks = getTotalWeeks(input.pulledWeeks, input.pulledTasks);
+  const derivedTotalWeeks = getTotalWeeks(input.pulledWeeks, input.pulledTasks);
+  const totalWeeks = Math.min(Math.max(input.pulledPlan.totalWeeks ?? derivedTotalWeeks, derivedTotalWeeks, 1), 12);
   const leadIndicators = buildLeadIndicators({
     leadMetrics: input.pulledLeadMetrics,
     tasks: input.pulledTasks,
@@ -454,6 +739,7 @@ function buildPulledGoal(input: {
   const weeklyPlans = buildWeeklyPlans(input.pulledWeeks, totalWeeks);
   const baseSystem: TwelveWeekSystem = {
     goalType:
+      input.pulledPlan.goalType?.trim() ||
       input.pulledGoal?.focusArea ||
       input.pulledGoal?.category ||
       input.existingGoal?.twelveWeekSystem?.goalType ||
@@ -464,38 +750,52 @@ function buildPulledGoal(input: {
       input.pulledGoal?.title?.trim() ||
       input.existingGoal?.twelveWeekSystem?.vision12Week ||
       "Bản trên máy chủ",
-    lagMetric: input.existingGoal?.twelveWeekSystem?.lagMetric ?? {
-      name: leadIndicators[0]?.name ?? "Tiến độ chính",
-      unit: "",
-      target: "",
-      currentValue: "",
-    },
+    templateId: input.pulledPlan.templateId?.trim() || input.existingGoal?.twelveWeekSystem?.templateId,
+    templateName: input.pulledPlan.templateName?.trim() || input.existingGoal?.twelveWeekSystem?.templateName,
+    lagMetric: normalizeLagMetric(input.pulledPlan.lagMetric) ??
+      input.existingGoal?.twelveWeekSystem?.lagMetric ?? {
+        name: leadIndicators[0]?.name ?? "Tiến độ chính",
+        unit: "",
+        target: "",
+        currentValue: "",
+      },
     leadIndicators,
-    milestones: input.existingGoal?.twelveWeekSystem?.milestones ?? {
-      week4: "",
-      week8: "",
-      week12: weeklyPlans[weeklyPlans.length - 1]?.milestone ?? "",
-    },
-    successEvidence: input.existingGoal?.twelveWeekSystem?.successEvidence ?? "",
-    reviewDay: input.existingGoal?.twelveWeekSystem?.reviewDay ?? "Sunday",
+    milestones: normalizeMilestones(input.pulledPlan.milestones) ??
+      input.existingGoal?.twelveWeekSystem?.milestones ?? {
+        week4: "",
+        week8: "",
+        week12: weeklyPlans[weeklyPlans.length - 1]?.milestone ?? "",
+      },
+    successEvidence:
+      input.pulledPlan.successEvidence?.trim() ?? input.existingGoal?.twelveWeekSystem?.successEvidence ?? "",
+    reviewDay: input.pulledPlan.reviewDay?.trim() ?? input.existingGoal?.twelveWeekSystem?.reviewDay ?? "Sunday",
     week12Outcome:
+      input.pulledPlan.week12Outcome?.trim() ||
       input.existingGoal?.twelveWeekSystem?.week12Outcome ||
       weeklyPlans[weeklyPlans.length - 1]?.milestone ||
       input.pulledGoal?.title ||
       "",
+    weeklyActions: input.pulledPlan.weeklyActions ?? input.existingGoal?.twelveWeekSystem?.weeklyActions,
+    successMetric: input.pulledPlan.successMetric?.trim() ?? input.existingGoal?.twelveWeekSystem?.successMetric,
     startDate: normalizeDateKey(input.pulledPlan.startDate),
-    endDate: input.existingGoal?.twelveWeekSystem?.endDate ?? "",
-    timezone: input.existingGoal?.twelveWeekSystem?.timezone ?? "Asia/Ho_Chi_Minh",
-    weekStartsOn: input.existingGoal?.twelveWeekSystem?.weekStartsOn ?? "Monday",
+    endDate: normalizeDateKey(input.pulledPlan.endDate) || input.existingGoal?.twelveWeekSystem?.endDate || "",
+    timezone: input.pulledPlan.timezone?.trim() || input.existingGoal?.twelveWeekSystem?.timezone || "Asia/Ho_Chi_Minh",
+    weekStartsOn:
+      normalizeWeekStartsOn(input.pulledPlan.weekStartsOn) ??
+      input.existingGoal?.twelveWeekSystem?.weekStartsOn ??
+      "Monday",
     status:
-      input.pulledGoal?.status === "completed"
+      normalizeSystemStatus(input.pulledPlan.status) === "completed" || input.pulledGoal?.status === "completed"
         ? "completed"
-        : (input.existingGoal?.twelveWeekSystem?.status ?? "active"),
-    dailyReminderTime: input.existingGoal?.twelveWeekSystem?.dailyReminderTime,
-    tacticLoadPreference: input.existingGoal?.twelveWeekSystem?.tacticLoadPreference,
-    preferredDays: input.existingGoal?.twelveWeekSystem?.preferredDays,
-    personalConstraint: input.existingGoal?.twelveWeekSystem?.personalConstraint,
-    reentryCount: input.existingGoal?.twelveWeekSystem?.reentryCount ?? 0,
+        : (normalizeSystemStatus(input.pulledPlan.status) ?? input.existingGoal?.twelveWeekSystem?.status ?? "active"),
+    dailyReminderTime:
+      input.pulledPlan.dailyReminderTime?.trim() ?? input.existingGoal?.twelveWeekSystem?.dailyReminderTime,
+    tacticLoadPreference:
+      input.pulledPlan.tacticLoadPreference ?? input.existingGoal?.twelveWeekSystem?.tacticLoadPreference,
+    preferredDays:
+      normalizePreferredDays(input.pulledPlan.preferredDays) ?? input.existingGoal?.twelveWeekSystem?.preferredDays,
+    personalConstraint: input.pulledPlan.personalConstraint ?? input.existingGoal?.twelveWeekSystem?.personalConstraint,
+    reentryCount: input.pulledPlan.reentryCount ?? input.existingGoal?.twelveWeekSystem?.reentryCount ?? 0,
     currentWeek: input.existingGoal?.twelveWeekSystem?.currentWeek ?? 1,
     totalWeeks,
     weeklyPlans,
@@ -520,7 +820,13 @@ function buildPulledGoal(input: {
   };
 
   const normalizedGoal = normalizeGoal(baseGoal);
-  const normalizedSystem = normalizedGoal.twelveWeekSystem ?? baseSystem;
+  const normalizedSystem = {
+    ...(normalizedGoal.twelveWeekSystem ?? baseSystem),
+    endDate:
+      normalizeDateKey(input.pulledPlan.endDate) || normalizedGoal.twelveWeekSystem?.endDate || baseSystem.endDate,
+    weeklyActions: input.pulledPlan.weeklyActions ?? normalizedGoal.twelveWeekSystem?.weeklyActions,
+    successMetric: input.pulledPlan.successMetric?.trim() ?? normalizedGoal.twelveWeekSystem?.successMetric,
+  };
   const pulledTaskInstances = buildTaskInstances(input.pulledTasks, normalizedSystem.totalWeeks);
   const systemWithPulledRecords: TwelveWeekSystem = {
     ...normalizedSystem,
@@ -541,7 +847,12 @@ function buildPulledGoal(input: {
   return {
     ...normalizedGoal,
     tasks: normalizedGoal.tasks.length > 0 ? normalizedGoal.tasks : (input.existingGoal?.tasks ?? []),
-    twelveWeekSystem: systemWithDerivedState,
+    twelveWeekSystem: restoreSkippedLocalEntities({
+      goalId: clientGoalId,
+      existingSystem: input.existingGoal?.twelveWeekSystem,
+      nextSystem: systemWithDerivedState,
+      skipEntities: input.skipEntities ?? new Set<string>(),
+    }),
   };
 }
 
@@ -581,12 +892,31 @@ export function applyPulledWorkspaceToUserData(
       existingGoal: goalsById.get(clientGoalId),
       pulledGoal,
       pulledPlan: plan,
-      pulledWeeks: workspace.weeks.filter((week) => week.clientPlanId === clientPlanId),
-      pulledTasks: workspace.tasks.filter((task) => task.clientPlanId === clientPlanId),
-      pulledLeadMetrics: workspace.leadMetrics.filter((metric) => metric.clientPlanId === clientPlanId),
-      pulledDailyCheckIns: workspace.dailyCheckIns.filter((checkIn) => checkIn.clientPlanId === clientPlanId),
-      pulledWeeklyReviews: workspace.weeklyReviews.filter((review) => review.clientPlanId === clientPlanId),
+      pulledWeeks: workspace.weeks.filter(
+        (week) =>
+          week.clientPlanId === clientPlanId && (!week.clientWeekId || !skipEntities.has(`week:${week.clientWeekId}`)),
+      ),
+      pulledTasks: workspace.tasks.filter(
+        (task) =>
+          task.clientPlanId === clientPlanId && (!task.clientTaskId || !skipEntities.has(`task:${task.clientTaskId}`)),
+      ),
+      pulledLeadMetrics: workspace.leadMetrics.filter(
+        (metric) =>
+          metric.clientPlanId === clientPlanId &&
+          (!metric.clientMetricId || !skipEntities.has(`leadMetric:${metric.clientMetricId}`)),
+      ),
+      pulledDailyCheckIns: workspace.dailyCheckIns.filter(
+        (checkIn) =>
+          checkIn.clientPlanId === clientPlanId &&
+          (!checkIn.clientCheckInId || !skipEntities.has(`dailyCheckIn:${checkIn.clientCheckInId}`)),
+      ),
+      pulledWeeklyReviews: workspace.weeklyReviews.filter(
+        (review) =>
+          review.clientPlanId === clientPlanId &&
+          (!review.clientReviewId || !skipEntities.has(`weeklyReview:${review.clientReviewId}`)),
+      ),
       now,
+      skipEntities,
     });
 
     if (nextGoal) nextGoalsById.set(nextGoal.id, nextGoal);
@@ -617,6 +947,7 @@ export function applyPulledWorkspaceToUserData(
       pulledDailyCheckIns: [],
       pulledWeeklyReviews: [],
       now,
+      skipEntities,
     });
     if (nextGoal) nextGoalsById.set(nextGoal.id, nextGoal);
   });

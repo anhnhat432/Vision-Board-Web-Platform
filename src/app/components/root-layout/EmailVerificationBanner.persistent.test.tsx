@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -11,6 +11,9 @@ const firebaseMock = vi.hoisted(() => ({
   changeEmailWithPassword: vi.fn(),
   sendVerificationEmail: vi.fn(),
 }));
+const appModeMock = vi.hoisted(() => ({
+  isDemoMode: vi.fn(() => false),
+}));
 
 vi.mock("@/lib/auth/AuthContext", () => ({
   useAuthContext: authContextMock.useAuthContext,
@@ -22,7 +25,7 @@ vi.mock("@/lib/auth/firebase", () => ({
 }));
 
 vi.mock("@/app/utils/app-mode", () => ({
-  isDemoMode: () => false,
+  isDemoMode: appModeMock.isDemoMode,
 }));
 
 describe("EmailVerificationBanner persistent behavior", () => {
@@ -30,6 +33,7 @@ describe("EmailVerificationBanner persistent behavior", () => {
     window.localStorage.clear();
     firebaseMock.sendVerificationEmail.mockReset();
     firebaseMock.changeEmailWithPassword.mockReset();
+    appModeMock.isDemoMode.mockReturnValue(false);
     authContextMock.useAuthContext.mockReturnValue({
       user: {
         uid: "user_unverified",
@@ -45,14 +49,34 @@ describe("EmailVerificationBanner persistent behavior", () => {
     const user = userEvent.setup();
 
     const { unmount } = render(<EmailVerificationBanner />);
-    await user.click(screen.getByRole("button", { name: "Gửi lại email xác thực" }));
+    await user.click(
+      screen.getByRole("button", { name: "Gửi lại email xác thực" }),
+    );
 
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: /Gửi lại sau/ })).toBeDisabled();
+      expect(
+        screen.getByRole("button", { name: /Gửi lại sau/ }),
+      ).toBeDisabled();
     });
-    expect(window.localStorage.getItem("emailVerificationLastSentAt:user_unverified")).toBeTruthy();
+    expect(
+      window.localStorage.getItem(
+        "emailVerificationLastSentAt:user_unverified",
+      ),
+    ).toBeTruthy();
 
     unmount();
+    render(<EmailVerificationBanner />);
+
+    expect(screen.getByRole("button", { name: /Gửi lại sau/ })).toBeDisabled();
+    expect(screen.getByText(/Gần nhất đã gửi:/)).toBeInTheDocument();
+  });
+
+  it("restores cooldown written by initial signup verification send", () => {
+    window.localStorage.setItem(
+      "emailVerificationLastSentAt:user_unverified",
+      String(Date.now()),
+    );
+
     render(<EmailVerificationBanner />);
 
     expect(screen.getByRole("button", { name: /Gửi lại sau/ })).toBeDisabled();
@@ -64,11 +88,41 @@ describe("EmailVerificationBanner persistent behavior", () => {
 
     expect(screen.getByRole("alert")).toHaveTextContent("Email chưa xác thực");
     expect(screen.getByText(/buyer@example\.test/)).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Gửi lại email xác thực" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Đổi email" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Gửi lại email xác thực" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Đổi email" }),
+    ).toBeInTheDocument();
     expect(screen.queryByLabelText(/Ẩn thông báo/i)).not.toBeInTheDocument();
 
     rerender(<EmailVerificationBanner />);
     expect(screen.getByRole("alert")).toBeInTheDocument();
+  });
+
+  it("shows a sync-specific reason after cloud sync requires email verification", async () => {
+    render(<EmailVerificationBanner />);
+
+    act(() => {
+      window.dispatchEvent(
+        new CustomEvent("email-verification:required", {
+          detail: { action: "sync" },
+        }),
+      );
+    });
+
+    expect(
+      await screen.findByTestId("email-verification-required-reason"),
+    ).toHaveTextContent("cloud");
+  });
+
+  it("stays hidden in demo mode", () => {
+    appModeMock.isDemoMode.mockReturnValue(true);
+
+    render(<EmailVerificationBanner />);
+
+    expect(
+      screen.queryByTestId("email-verification-banner"),
+    ).not.toBeInTheDocument();
   });
 });

@@ -59,6 +59,10 @@ const networkStatusMock = vi.hoisted(() => ({
   }),
 }));
 
+const monitoringMock = vi.hoisted(() => ({
+  captureFrontendException: vi.fn(),
+}));
+
 const queueMock = vi.hoisted(() => ({
   pendingCount: 0,
   store: {
@@ -105,6 +109,10 @@ vi.mock("@/app/utils/storage", () => ({
 
 vi.mock("@/app/hooks/useNetworkStatus", () => ({
   useNetworkStatus: networkStatusMock.useNetworkStatus,
+}));
+
+vi.mock("@/lib/monitoring/sentry", () => ({
+  captureFrontendException: monitoringMock.captureFrontendException,
 }));
 
 vi.mock("./useTwelveWeekManualCloudSync", () => ({
@@ -555,6 +563,82 @@ describe("useAutoCloudSync", () => {
     await waitFor(() => {
       expect(result.current.pendingCount).toBe(1);
     });
+  });
+
+  it("captures drain-only partial failures with safe monitoring metadata", async () => {
+    queueMock.pendingCount = 2;
+    setSignedIn("firebase_uid_drain_monitor");
+    mutationSenderMock.sendPending12WeekMutations.mockResolvedValue({
+      status: "partial",
+      attemptedCount: 2,
+      succeededCount: 1,
+      duplicateCount: 0,
+      failedCount: 1,
+      pendingCount: 1,
+    });
+
+    const { result } = renderHook(() => useAutoCloudSync());
+    await flushMicrotasks();
+    monitoringMock.captureFrontendException.mockClear();
+
+    await act(async () => {
+      await result.current.triggerDrainOnly();
+    });
+
+    expect(monitoringMock.captureFrontendException).toHaveBeenCalledTimes(1);
+    expect(monitoringMock.captureFrontendException).toHaveBeenCalledWith(
+      expect.any(Error),
+      expect.objectContaining({
+        tags: {
+          area: "sync",
+          operation: "auto_cloud_sync",
+          phase: "drain_only",
+        },
+        extra: expect.objectContaining({
+          attemptedCount: 2,
+          failedCount: 1,
+          pendingCount: 1,
+          realMode: true,
+          status: "partial",
+        }),
+      }),
+    );
+    expect(JSON.stringify(monitoringMock.captureFrontendException.mock.calls[0]?.[1])).not.toContain(
+      "firebase_uid_drain_monitor",
+    );
+  });
+
+  it("captures full-sync failures with safe monitoring metadata", async () => {
+    setSignedIn("firebase_uid_full_monitor");
+    manualSyncMock.syncNow.mockResolvedValue({
+      status: "error",
+      message: "Cloud workspace pull failed.",
+      error: new Error("pull_failed"),
+      unresolvedLocalMutationCount: 2,
+    });
+
+    renderHook(() => useAutoCloudSync());
+
+    await waitFor(() => expect(monitoringMock.captureFrontendException).toHaveBeenCalledTimes(1));
+    expect(monitoringMock.captureFrontendException).toHaveBeenCalledWith(
+      expect.any(Error),
+      expect.objectContaining({
+        tags: {
+          area: "sync",
+          operation: "auto_cloud_sync",
+          phase: "full_sync",
+        },
+        extra: expect.objectContaining({
+          message: "Cloud workspace pull failed.",
+          realMode: true,
+          status: "error",
+          unresolvedLocalMutationCount: 2,
+        }),
+      }),
+    );
+    expect(JSON.stringify(monitoringMock.captureFrontendException.mock.calls[0]?.[1])).not.toContain(
+      "firebase_uid_full_monitor",
+    );
   });
 
   it("sets a first-login restore summary when empty local data receives applied cloud goals", async () => {

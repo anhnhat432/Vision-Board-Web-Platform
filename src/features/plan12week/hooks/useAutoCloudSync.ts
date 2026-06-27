@@ -7,6 +7,7 @@ import { USER_DATA_UPDATED_EVENT_NAME } from "@/app/utils/storage-constants";
 import type { UserData } from "@/app/utils/storage-types";
 import { isApiBaseUrlConfigured } from "@/lib/api/apiClient";
 import { useAuthContext } from "@/lib/auth/AuthContext";
+import { captureFrontendException } from "@/lib/monitoring/sentry";
 import {
   type DataMutationItem,
   readMutationQueueStore,
@@ -84,6 +85,29 @@ function hasElapsedSince(timestamp: number | null, minimumMs: number): boolean {
 
 function shouldWarnForDrainResult(result: MutationQueueSyncResult | null): boolean {
   return result?.status === "partial" || result?.status === "error";
+}
+
+function shouldCaptureDrainFailure(result: MutationQueueSyncResult | null): boolean {
+  return result?.status === "partial" || result?.status === "error";
+}
+
+function shouldCaptureFullSyncFailure(result: TwelveWeekManualCloudSyncResult | null): boolean {
+  return result?.status === "drain_failed" || result?.status === "error";
+}
+
+function captureAutoSyncFailure(
+  phase: "drain_only" | "full_sync",
+  error: unknown,
+  extra: Record<string, unknown>,
+): void {
+  captureFrontendException(error ?? new Error(`12-week ${phase} failed.`), {
+    tags: {
+      area: "sync",
+      operation: "auto_cloud_sync",
+      phase,
+    },
+    extra,
+  });
 }
 
 function isLocalDataEmptyForFirstLoginRestore(data: Pick<UserData, "goals"> | null | undefined): boolean {
@@ -338,6 +362,18 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
             });
           }
 
+          if (shouldCaptureDrainFailure(result)) {
+            captureAutoSyncFailure("drain_only", result.error ?? new Error("12-week drain sync failed."), {
+              attemptedCount: result.attemptedCount,
+              failedCount: result.failedCount,
+              online: networkStatusInfo.isOnline,
+              pendingCount: result.pendingCount,
+              realMode,
+              skipReason: result.skipReason ?? null,
+              status: result.status,
+            });
+          }
+
           return result;
         })
         .finally(() => {
@@ -408,6 +444,18 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
           });
         }
 
+        if (shouldCaptureFullSyncFailure(result)) {
+          captureAutoSyncFailure("full_sync", result.error ?? new Error(result.message), {
+            message: result.message,
+            online: networkStatusInfo.isOnline,
+            pendingCount: getQueuePendingCount(ownerUid),
+            realMode,
+            skipReason: result.skipReason ?? null,
+            status: result.status,
+            unresolvedLocalMutationCount: result.unresolvedLocalMutationCount ?? null,
+          });
+        }
+
         return result;
       })
       .finally(() => {
@@ -423,6 +471,7 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
     minSyncIntervalMs,
     networkStatusInfo.isOnline,
     ownerUid,
+    realMode,
     refreshPendingCount,
     runManualSyncNow,
     userProfileReady,

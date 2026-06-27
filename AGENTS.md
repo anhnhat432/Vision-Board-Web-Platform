@@ -89,6 +89,7 @@ Docs:
 - `guidelines/MVP_1_SCOPE.md`: historical MVP 1 scope (kept for reference; **superseded** by the production launch — verify against current status doc before relying on it).
 - `guidelines/PRODUCTION_ROADMAP.md`: active production roadmap and release-readiness items.
 - `guidelines/VercelDeploymentChecklist.md`: deployment mode notes.
+- `docs/specs/FEATURE_TEMPLATE.md`: feature spec template for Core/Mixed SDD work.
 
 ## Product Scope Rules
 
@@ -98,6 +99,24 @@ Docs:
 - **Production priorities**: real-mode safety, real billing flow correctness, auth flows (signup / signin / password reset / email verification), data export and account deletion, sync reliability, accessibility, and the 12-week execution surface (setup, Today, weekly review, progress).
 - Demo-mode polish is now secondary unless the task explicitly targets preview/marketing deployments.
 - Vision board, achievements, and admin orders remain side surfaces — keep them out of the main flow unless the task explicitly asks.
+
+## Hybrid SDD/ADD Workflow Rules
+
+Apply the book `Spec-Driven & Agent-Driven Development` as a working method for this repo.
+
+Before implementation, classify the touched surface:
+
+- `Core`: auth, billing, entitlement authority, app mode boundaries, localStorage schemas, sync/outbox/conflict handling, destructive settings flows, backend API contracts, shared ids, security-sensitive copy/routes.
+- `Shell`: UI polish, layout cleanup, docs, low-risk tests, helper CRUD, admin convenience surfaces, analytics presentation, and isolated boilerplate.
+- `Mixed`: anything that looks like UI but changes saved data, entitlement behavior, sync semantics, auth state, or route availability.
+
+Rules:
+
+- For `Core` work, write or update a spec/checklist first. Use EARS-style acceptance where helpful: `WHEN ... THE system SHALL ...`, `WHILE ... THE system SHALL ...`, `WHERE ... THE system SHALL ...`.
+- For `Shell` work, agent-first execution is acceptable, but keep scope small and verify the affected UI/route.
+- For `Mixed` work, freeze the `Core` contract first, then iterate on the `Shell` surface.
+- If project docs disagree, resolve in this order: `AGENTS.md` -> `guidelines/PRODUCTION_ROADMAP.md` -> `guidelines/CURRENT_PROJECT_STATUS.md` -> task spec -> assistant-local notes.
+- Use `docs/specs/FEATURE_TEMPLATE.md` for high-risk features and bug fixes.
 
 ## Engineering Rules
 

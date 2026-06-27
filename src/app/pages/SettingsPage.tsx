@@ -23,9 +23,14 @@ import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { clearMemory } from "@/app/features/assistant/assistantMemory";
+import { usePetPreferences } from "@/app/features/pet/usePetPreferences";
 import { useAutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
 import { useAuthContext } from "@/lib/auth/AuthContext";
-import { deleteCloudWorkspace, exportAccountData } from "@/services/syncService";
+import {
+  deleteAccount,
+  deleteCloudWorkspace,
+  exportAccountData,
+} from "@/services/syncService";
 import { PageHero } from "../components/layout/PageHero";
 import { ScreenGuide } from "../components/ScreenGuide";
 import { SCREEN_GUIDES } from "../components/screen-guides";
@@ -43,8 +48,15 @@ import { Button } from "../components/ui/button";
 import { Switch } from "../components/ui/switch";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { useTheme } from "../hooks/useTheme";
-import { formatBillingExpiryDate, getBillingExpiryInfo } from "../utils/billing-expiry";
+import {
+  formatBillingExpiryDate,
+  getBillingExpiryInfo,
+} from "../utils/billing-expiry";
 import { downloadLocalUserDataBackup } from "../utils/local-data-backup";
+import {
+  getLastOutboxSyncSnapshot,
+  type OutboxSyncSnapshot,
+} from "../utils/production";
 import {
   getMigrationBackupSnapshots,
   type MigrationBackupSnapshot,
@@ -61,15 +73,22 @@ import {
 import { inputClass } from "./SMARTGoalSetup/components/formStyles";
 
 const themeOptions = [
-  { value: "system", label: "Theo thiết bị", description: "Dùng cài đặt hệ thống." },
+  {
+    value: "system",
+    label: "Theo thiết bị",
+    description: "Dùng cài đặt hệ thống.",
+  },
   { value: "light", label: "Sáng", description: "Nền sáng, dễ đọc ban ngày." },
   { value: "dark", label: "Tối", description: "Giảm sáng khi dùng buổi tối." },
 ] as const;
 
 type ClearDataConfirmStep = "review" | "final";
+type DeleteAccountConfirmStep = "review" | "final";
 
 function downloadJsonFile(payload: unknown, filename: string): void {
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {
+    type: "application/json",
+  });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement("a");
   anchor.href = url;
@@ -104,23 +123,39 @@ export function SettingsPage() {
   const navigate = useNavigate();
   const importFileRef = useRef<HTMLInputElement>(null);
   const [isExportingAccount, setIsExportingAccount] = useState(false);
-  const [taskSoundEnabled, setTaskSoundEnabled] = useState(() => isSoundEnabled());
-  const [migrationBackups, setMigrationBackups] = useState<MigrationBackupSnapshot[]>(() =>
-    getMigrationBackupSnapshots(),
+  const [taskSoundEnabled, setTaskSoundEnabled] = useState(() =>
+    isSoundEnabled(),
   );
-  const [recoverySnapshotKey, setRecoverySnapshotKey] = useState<string | null>(null);
+  const [migrationBackups, setMigrationBackups] = useState<
+    MigrationBackupSnapshot[]
+  >(() => getMigrationBackupSnapshots());
+  const [recoverySnapshotKey, setRecoverySnapshotKey] = useState<string | null>(
+    null,
+  );
   const [isClearDataDialogOpen, setIsClearDataDialogOpen] = useState(false);
-  const [clearDataConfirmStep, setClearDataConfirmStep] = useState<ClearDataConfirmStep>("review");
+  const [clearDataConfirmStep, setClearDataConfirmStep] =
+    useState<ClearDataConfirmStep>("review");
+  const [isDeleteAccountDialogOpen, setIsDeleteAccountDialogOpen] =
+    useState(false);
+  const [deleteAccountConfirmStep, setDeleteAccountConfirmStep] =
+    useState<DeleteAccountConfirmStep>("review");
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const { theme, resolvedTheme, setTheme } = useTheme();
-  const { isConfigured, user, userProfile } = useAuthContext();
+  const { preferences: petPreferences, updatePreferences } =
+    usePetPreferences();
+  const { isConfigured, user, userProfile, logout } = useAuthContext();
   const autoSyncState = useAutoCloudSyncContext();
+  const [lastOutboxSyncSnapshot, setLastOutboxSyncSnapshot] =
+    useState<OutboxSyncSnapshot | null>(() => getLastOutboxSyncSnapshot());
   const { userData: syncedUserData, reloadUserData } = useSyncedUserData();
   const userData = syncedUserData ?? getUserData();
   const appPreferences = userData.appPreferences;
   const expiryInfo = getBillingExpiryInfo(userData.subscription);
   const shouldShowExpiryNotice =
-    userData.subscription?.planCode === "PLUS" && (expiryInfo.isExpiringSoon || expiryInfo.isExpired);
-  const accountLabel = userProfile?.displayName || user?.displayName || user?.email || "Khách";
+    userData.subscription?.planCode === "PLUS" &&
+    (expiryInfo.isExpiringSoon || expiryInfo.isExpired);
+  const accountLabel =
+    userProfile?.displayName || user?.displayName || user?.email || "Khách";
   const accountEmail = userProfile?.email || user?.email || "Chưa đăng nhập";
   const accountStatus = !isConfigured
     ? "Đang dùng dữ liệu trên thiết bị"
@@ -138,8 +173,32 @@ export function SettingsPage() {
     setMigrationBackups(getMigrationBackupSnapshots());
   }, []);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const refreshOutboxSyncSnapshot = () => {
+      setLastOutboxSyncSnapshot(getLastOutboxSyncSnapshot());
+    };
+
+    window.addEventListener(
+      "email-verification:required",
+      refreshOutboxSyncSnapshot,
+    );
+    window.addEventListener("storage", refreshOutboxSyncSnapshot);
+    return () => {
+      window.removeEventListener(
+        "email-verification:required",
+        refreshOutboxSyncSnapshot,
+      );
+      window.removeEventListener("storage", refreshOutboxSyncSnapshot);
+    };
+  }, []);
+
   const handleExport = () => {
-    downloadLocalUserDataBackup({ data: userData, filenamePrefix: "dear-our-future-backup" });
+    downloadLocalUserDataBackup({
+      data: userData,
+      filenamePrefix: "dear-our-future-backup",
+    });
     toast.success("Đã tải bản sao lưu dữ liệu.");
   };
 
@@ -152,11 +211,18 @@ export function SettingsPage() {
     setIsExportingAccount(true);
     try {
       const exported = await exportAccountData();
-      const dateSlug = exported.generatedAt.slice(0, 10) || new Date().toISOString().slice(0, 10);
-      downloadJsonFile(exported, `dear-our-future-account-export-${dateSlug}.json`);
+      const dateSlug =
+        exported.generatedAt.slice(0, 10) ||
+        new Date().toISOString().slice(0, 10);
+      downloadJsonFile(
+        exported,
+        `dear-our-future-account-export-${dateSlug}.json`,
+      );
       toast.success("Đã tải bản xuất dữ liệu tài khoản.");
     } catch (error) {
-      toast.error(getErrorMessage(error, "Không thể xuất dữ liệu tài khoản lúc này."));
+      toast.error(
+        getErrorMessage(error, "Không thể xuất dữ liệu tài khoản lúc này."),
+      );
     } finally {
       setIsExportingAccount(false);
     }
@@ -194,10 +260,21 @@ export function SettingsPage() {
     setSoundEnabled(enabled);
   };
 
+  const handlePetAnimationChange = (enabled: boolean) => {
+    updatePreferences({ ...petPreferences, animationEnabled: enabled });
+    toast.success(
+      enabled
+        ? "Đã bật chuyển động của Mầm."
+        : "Mầm sẽ đứng yên để giảm chuyển động.",
+    );
+  };
+
   const handleInAppRemindersChange = (enabled: boolean) => {
     updateAppPreferences({ enableInAppReminders: enabled });
     reloadUserData();
-    toast.success(enabled ? "Đã bật nhắc việc trong app." : "Đã tắt nhắc việc trong app.");
+    toast.success(
+      enabled ? "Đã bật nhắc việc trong app." : "Đã tắt nhắc việc trong app.",
+    );
   };
 
   const handleRestoreMigrationBackup = () => {
@@ -215,18 +292,25 @@ export function SettingsPage() {
       setRecoverySnapshotKey(null);
       toast.success("Đã khôi phục dữ liệu cũ.");
     } catch (error) {
-      toast.error(getErrorMessage(error, "Không thể khôi phục dữ liệu cũ lúc này."));
+      toast.error(
+        getErrorMessage(error, "Không thể khôi phục dữ liệu cũ lúc này."),
+      );
     }
   };
 
   const handleRetrySync = async () => {
     const result = await autoSyncState.triggerSyncNow();
     if (result?.status === "conflict" || result?.status === "unsafe") {
-      toast.warning("Có khác biệt giữa thiết bị và tài khoản. Mở thông báo đồng bộ để chọn phiên bản an toàn.");
+      toast.warning(
+        "Có khác biệt giữa thiết bị và tài khoản. Mở thông báo đồng bộ để chọn phiên bản an toàn.",
+      );
       return;
     }
     if (result?.status === "error" || result?.status === "drain_failed") {
-      toast.error(result.message || "Chưa sao lưu được vào tài khoản. Dữ liệu vẫn được giữ trên thiết bị này.");
+      toast.error(
+        result.message ||
+          "Chưa sao lưu được vào tài khoản. Dữ liệu vẫn được giữ trên thiết bị này.",
+      );
       return;
     }
     toast.success("Đã kiểm tra sao lưu tài khoản.");
@@ -237,6 +321,48 @@ export function SettingsPage() {
     if (!open) setClearDataConfirmStep("review");
   };
 
+  const handleDeleteAccountDialogChange = (open: boolean) => {
+    if (isDeletingAccount) return;
+    setIsDeleteAccountDialogOpen(open);
+    if (!open) setDeleteAccountConfirmStep("review");
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!isConfigured || !user) {
+      toast.error("Bạn cần đăng nhập để xóa tài khoản.");
+      return;
+    }
+
+    setIsDeletingAccount(true);
+    const toastId = toast.loading("Đang xóa tài khoản...");
+    try {
+      await deleteAccount();
+      try {
+        await logout();
+      } catch (logoutError) {
+        console.error(
+          "Không thể đăng xuất sau khi xóa tài khoản:",
+          logoutError,
+        );
+      }
+      deleteAllUserData();
+      reloadUserData();
+      setIsDeleteAccountDialogOpen(false);
+      setDeleteAccountConfirmStep("review");
+      toast.success(
+        "Đã gửi yêu cầu xóa tài khoản và xóa dữ liệu local trên thiết bị này.",
+        { id: toastId },
+      );
+      navigate("/");
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Không thể xóa tài khoản lúc này."), {
+        id: toastId,
+      });
+    } finally {
+      setIsDeletingAccount(false);
+    }
+  };
+
   const handleClearAllData = async () => {
     setIsClearDataDialogOpen(false);
     setClearDataConfirmStep("review");
@@ -245,12 +371,17 @@ export function SettingsPage() {
       const toastId = toast.loading("Đang xóa dữ liệu trên đám mây...");
       try {
         await deleteCloudWorkspace();
-        toast.success("Đã xóa dữ liệu trên tài khoản đám mây.", { id: toastId });
-      } catch (error) {
-        console.error("Lỗi khi xóa dữ liệu cloud:", error);
-        toast.error("Không thể xóa dữ liệu trên tài khoản đám mây. Vui lòng kiểm tra kết nối mạng và thử lại.", {
+        toast.success("Đã xóa dữ liệu trên tài khoản đám mây.", {
           id: toastId,
         });
+      } catch (error) {
+        console.error("Lỗi khi xóa dữ liệu cloud:", error);
+        toast.error(
+          "Không thể xóa dữ liệu trên tài khoản đám mây. Vui lòng kiểm tra kết nối mạng và thử lại.",
+          {
+            id: toastId,
+          },
+        );
         return;
       }
     }
@@ -261,14 +392,25 @@ export function SettingsPage() {
     navigate("/");
   };
 
-  const syncIcon = autoSyncState.syncing
-    ? Loader2
-    : !autoSyncState.online
-      ? WifiOff
-      : autoSyncState.pendingCount > 0
-        ? Upload
-        : CheckCircle2;
+  const syncBlockedByEmailVerification =
+    lastOutboxSyncSnapshot?.status === "email_unverified";
+  const syncIcon = syncBlockedByEmailVerification
+    ? ShieldAlert
+    : autoSyncState.syncing
+      ? Loader2
+      : !autoSyncState.online
+        ? WifiOff
+        : autoSyncState.pendingCount > 0
+          ? Upload
+          : CheckCircle2;
   const SyncIcon = syncIcon;
+  const syncStatusMessage = syncBlockedByEmailVerification
+    ? "Dữ liệu vẫn được lưu trên thiết bị này, nhưng chưa thể sao lưu lên tài khoản cho tới khi email được xác thực."
+    : !autoSyncState.online
+      ? "Bạn đang mất kết nối. Dữ liệu vẫn được lưu trên thiết bị và sẽ gửi lên tài khoản khi có mạng."
+      : autoSyncState.syncing
+        ? "Đang sao lưu lên tài khoản. Bạn có thể tiếp tục dùng app."
+        : "Sao lưu sẵn sàng. Hệ thống tự đồng bộ và xử lý chênh lệch; nếu có lỗi, dữ liệu vẫn được giữ trên thiết bị này để thử lại.";
 
   return (
     <div className="mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
@@ -306,13 +448,21 @@ export function SettingsPage() {
                   <RotateCcw className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-base font-semibold text-app-ink">Có 1 bản sao dữ liệu cũ chưa được phục hồi</p>
+                  <p className="text-base font-semibold text-app-ink">
+                    Có 1 bản sao dữ liệu cũ chưa được phục hồi
+                  </p>
                   <p className="mt-1 text-sm leading-6 text-app-ink-soft">
-                    Bấm để khôi phục dữ liệu cũ. Thao tác này sẽ ghi đè dữ liệu hiện tại trên thiết bị này.
+                    Bấm để khôi phục dữ liệu cũ. Thao tác này sẽ ghi đè dữ liệu
+                    hiện tại trên thiết bị này.
                   </p>
                 </div>
               </div>
-              <Button type="button" onClick={() => setRecoverySnapshotKey(firstRecoverySnapshot.key)}>
+              <Button
+                type="button"
+                onClick={() =>
+                  setRecoverySnapshotKey(firstRecoverySnapshot.key)
+                }
+              >
                 <RotateCcw className="h-4 w-4" />
                 Khôi phục dữ liệu cũ
               </Button>
@@ -332,7 +482,9 @@ export function SettingsPage() {
                 </div>
                 <div>
                   <p className="text-base font-semibold text-app-ink">
-                    {expiryInfo.isExpired ? "Gói Plus đã hết hạn" : `Gói Plus còn ${expiryInfo.daysLeft ?? 0} ngày`}
+                    {expiryInfo.isExpired
+                      ? "Gói Plus đã hết hạn"
+                      : `Gói Plus còn ${expiryInfo.daysLeft ?? 0} ngày`}
                   </p>
                   <p className="mt-1 text-sm leading-6 text-app-ink-soft">
                     {expiryInfo.isExpired
@@ -358,7 +510,9 @@ export function SettingsPage() {
               <User2 className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="font-serif text-xl font-medium text-app-ink">Tài khoản</h2>
+              <h2 className="font-serif text-xl font-medium text-app-ink">
+                Tài khoản
+              </h2>
               <p className="mt-1 text-sm leading-6 text-app-ink-soft">
                 Thông tin đăng nhập hiện tại của không gian làm việc này.
               </p>
@@ -369,14 +523,22 @@ export function SettingsPage() {
             <div className="flex items-center gap-3 md:block">
               <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-app-line bg-app-bg font-serif text-2xl font-semibold text-app-accent">
                 {avatarUrl ? (
-                  <img src={avatarUrl} alt="Ảnh đại diện" className="h-full w-full object-cover" />
+                  <img
+                    src={avatarUrl}
+                    alt="Ảnh đại diện"
+                    className="h-full w-full object-cover"
+                  />
                 ) : (
                   accountInitial
                 )}
               </div>
               <div className="md:mt-3">
-                <p className="text-xs font-medium text-app-ink-muted">Ảnh đại diện</p>
-                <p className="mt-1 text-xs leading-5 text-app-ink-muted">Đồng bộ từ tài khoản đăng nhập nếu có.</p>
+                <p className="text-xs font-medium text-app-ink-muted">
+                  Ảnh đại diện
+                </p>
+                <p className="mt-1 text-xs leading-5 text-app-ink-muted">
+                  Đồng bộ từ tài khoản đăng nhập nếu có.
+                </p>
               </div>
             </div>
 
@@ -397,7 +559,10 @@ export function SettingsPage() {
                 />
               </div>
               <div>
-                <label htmlFor="settings-email" className="mb-1.5 block text-sm font-medium leading-5 text-app-ink">
+                <label
+                  htmlFor="settings-email"
+                  className="mb-1.5 block text-sm font-medium leading-5 text-app-ink"
+                >
                   Email
                 </label>
                 <input
@@ -425,19 +590,6 @@ export function SettingsPage() {
                   Gói hiện tại: {userData.subscription?.planCode ?? "FREE"}
                 </p>
               </div>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleAccountExport}
-                disabled={!isConfigured || !user || isExportingAccount}
-              >
-                {isExportingAccount ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <CloudDownload className="h-4 w-4" />
-                )}
-                Xuất dữ liệu tài khoản
-              </Button>
             </div>
           </div>
         </section>
@@ -451,7 +603,9 @@ export function SettingsPage() {
               <Palette className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="font-serif text-xl font-medium text-app-ink">Tuỳ chọn trải nghiệm</h2>
+              <h2 className="font-serif text-xl font-medium text-app-ink">
+                Tuỳ chọn trải nghiệm
+              </h2>
               <p className="mt-1 text-sm leading-6 text-app-ink-soft">
                 Giao diện, ngôn ngữ và nhắc việc nhẹ trong hệ 12 tuần.
               </p>
@@ -463,7 +617,9 @@ export function SettingsPage() {
               <div className="flex items-start gap-3">
                 <Palette className="mt-0.5 h-4 w-4 text-app-ink-muted" />
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-app-ink">Giao diện</p>
+                  <p className="text-sm font-semibold text-app-ink">
+                    Giao diện
+                  </p>
                   <p className="mt-1 text-xs text-app-ink-muted">
                     Đang dùng: {resolvedTheme === "dark" ? "Tối" : "Sáng"}
                   </p>
@@ -488,8 +644,12 @@ export function SettingsPage() {
                             onChange={() => setTheme(option.value)}
                             className="sr-only"
                           />
-                          <span className="block text-sm font-medium">{option.label}</span>
-                          <span className="mt-1 block text-xs leading-5 text-app-ink-muted">{option.description}</span>
+                          <span className="block text-sm font-medium">
+                            {option.label}
+                          </span>
+                          <span className="mt-1 block text-xs leading-5 text-app-ink-muted">
+                            {option.description}
+                          </span>
                         </label>
                       );
                     })}
@@ -506,8 +666,16 @@ export function SettingsPage() {
                   <fieldset className="mt-3">
                     <legend className="sr-only">Ngôn ngữ</legend>
                     <label className="block rounded-lg border border-app-accent bg-app-accent-soft p-3 text-app-accent">
-                      <input type="radio" name="settings-language" checked readOnly className="sr-only" />
-                      <span className="block text-sm font-medium">{localeLabel}</span>
+                      <input
+                        type="radio"
+                        name="settings-language"
+                        checked
+                        readOnly
+                        className="sr-only"
+                      />
+                      <span className="block text-sm font-medium">
+                        {localeLabel}
+                      </span>
                       <span className="mt-1 block text-xs leading-5 text-app-ink-muted">
                         Tiếng Việt tự nhiên cho toàn bộ flow hiện tại.
                       </span>
@@ -523,7 +691,9 @@ export function SettingsPage() {
                 <div className="min-w-0 flex-1 space-y-3">
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <p className="text-sm font-semibold text-app-ink">Nhắc việc trong app</p>
+                      <p className="text-sm font-semibold text-app-ink">
+                        Nhắc việc trong app
+                      </p>
                       <p className="mt-1 text-xs leading-5 text-app-ink-muted">
                         Hiện gợi ý nhẹ khi có việc hoặc review cần quay lại.
                       </p>
@@ -553,6 +723,23 @@ export function SettingsPage() {
                       className="border border-app-line data-[state=checked]:bg-app-accent data-[state=unchecked]:bg-app-bg"
                     />
                   </div>
+                  <div className="flex items-center justify-between gap-4 border-t border-app-line pt-3">
+                    <div>
+                      <p className="text-sm font-semibold text-app-ink">
+                        Animation của Mầm
+                      </p>
+                      <p className="mt-1 text-xs leading-5 text-app-ink-muted">
+                        Giữ Mầm chuyển động nhẹ trên Dashboard, hoặc đứng yên
+                        khi bạn muốn yên tĩnh hơn.
+                      </p>
+                    </div>
+                    <Switch
+                      checked={petPreferences.animationEnabled}
+                      onCheckedChange={handlePetAnimationChange}
+                      aria-label="Animation của Mầm"
+                      className="border border-app-line data-[state=checked]:bg-app-accent data-[state=unchecked]:bg-app-bg"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -568,28 +755,45 @@ export function SettingsPage() {
               <CloudDownload className="h-5 w-5" />
             </div>
             <div>
-              <h2 className="font-serif text-xl font-medium text-app-ink">Dữ liệu</h2>
+              <h2 className="font-serif text-xl font-medium text-app-ink">
+                Dữ liệu
+              </h2>
               <p className="mt-1 text-sm leading-6 text-app-ink-soft">
-                Local-first: dữ liệu lưu trên thiết bị trước, rồi sao lưu vào tài khoản khi đủ điều kiện.
+                Local-first: dữ liệu lưu trên thiết bị trước, rồi sao lưu vào
+                tài khoản khi đủ điều kiện.
               </p>
             </div>
           </div>
 
-          <div id="account-sync" className="mt-5 scroll-mt-24 space-y-4">
+          <div
+            id="account-sync"
+            data-testid="settings-sync-section"
+            className="mt-5 scroll-mt-24 space-y-4"
+          >
             <div className="grid gap-3 sm:grid-cols-3">
               <div className="rounded-lg border border-app-line bg-app-bg p-3">
                 <p className="text-sm font-semibold text-app-ink">Thiết bị</p>
-                <p className="mt-1 text-xs leading-5 text-app-ink-muted">Thay đổi được giữ ngay trên thiết bị này.</p>
+                <p className="mt-1 text-xs leading-5 text-app-ink-muted">
+                  Thay đổi được giữ ngay trên thiết bị này.
+                </p>
               </div>
               <div className="rounded-lg border border-app-line bg-app-bg p-3">
                 <p className="text-sm font-semibold text-app-ink">Tài khoản</p>
-                <p className="mt-1 text-xs leading-5 text-app-ink-muted">
+                <p
+                  data-testid="settings-sync-last-synced"
+                  className="mt-1 text-xs leading-5 text-app-ink-muted"
+                >
                   {formatSyncTime(autoSyncState.lastSyncedAt)}
                 </p>
               </div>
               <div className="rounded-lg border border-app-line bg-app-bg p-3">
-                <p className="text-sm font-semibold text-app-ink">Đang chờ đồng bộ</p>
-                <p className="mt-1 text-xs leading-5 text-app-ink-muted">
+                <p className="text-sm font-semibold text-app-ink">
+                  Đang chờ đồng bộ
+                </p>
+                <p
+                  data-testid="settings-sync-pending-count"
+                  className="mt-1 text-xs leading-5 text-app-ink-muted"
+                >
                   {autoSyncState.pendingCount > 0
                     ? `${autoSyncState.pendingCount} thay đổi chờ đồng bộ`
                     : "Không có thay đổi chờ đồng bộ"}
@@ -597,23 +801,45 @@ export function SettingsPage() {
               </div>
             </div>
 
-            <div className="rounded-lg border border-app-line bg-app-bg p-3 text-sm leading-6 text-app-ink-soft">
+            <div
+              data-testid="settings-sync-status-copy"
+              className="rounded-lg border border-app-line bg-app-bg p-3 text-sm leading-6 text-app-ink-soft"
+            >
               <div className="flex gap-2">
                 <SyncIcon
                   className={`mt-0.5 h-4 w-4 shrink-0 ${autoSyncState.syncing ? "animate-spin text-app-accent" : "text-app-ink-muted"}`}
                 />
-                <p>
-                  {!autoSyncState.online
-                    ? "Bạn đang mất kết nối. Dữ liệu vẫn được lưu trên thiết bị và sẽ gửi lên tài khoản khi có mạng."
-                    : autoSyncState.syncing
-                      ? "Đang sao lưu lên tài khoản. Bạn có thể tiếp tục dùng app."
-                      : "Sao lưu sẵn sàng. Hệ thống tự đồng bộ và xử lý chênh lệch; nếu có lỗi, dữ liệu vẫn được giữ trên thiết bị này để thử lại."}
-                </p>
+                {syncBlockedByEmailVerification ? (
+                  <p>{syncStatusMessage}</p>
+                ) : (
+                  <p>
+                    {!autoSyncState.online
+                      ? "Bạn đang mất kết nối. Dữ liệu vẫn được lưu trên thiết bị và sẽ gửi lên tài khoản khi có mạng."
+                      : autoSyncState.syncing
+                        ? "Đang sao lưu lên tài khoản. Bạn có thể tiếp tục dùng app."
+                        : "Sao lưu sẵn sàng. Hệ thống tự đồng bộ và xử lý chênh lệch; nếu có lỗi, dữ liệu vẫn được giữ trên thiết bị này để thử lại."}
+                  </p>
+                )}
               </div>
             </div>
 
+            {syncBlockedByEmailVerification ? (
+              <div
+                data-testid="settings-sync-email-unverified"
+                className="rounded-lg border border-app-warm-border bg-app-warm-soft p-3 text-sm leading-6 text-app-warm-strong"
+              >
+                <p className="font-semibold">
+                  Email chưa xác thực, cloud sync đang tạm dừng
+                </p>
+                <p className="mt-1">{lastOutboxSyncSnapshot.message}</p>
+              </div>
+            ) : null}
+
             {autoSyncState.lastResult?.message ? (
-              <div className="rounded-lg border border-app-line bg-app-surface p-3 text-sm leading-6 text-app-ink-soft">
+              <div
+                data-testid="settings-sync-last-result"
+                className="rounded-lg border border-app-line bg-app-surface p-3 text-sm leading-6 text-app-ink-soft"
+              >
                 <p className="font-semibold text-app-ink">Kết quả gần nhất</p>
                 <p className="mt-1">{autoSyncState.lastResult.message}</p>
               </div>
@@ -624,7 +850,27 @@ export function SettingsPage() {
                 <Download className="h-4 w-4" />
                 Xuất dữ liệu thiết bị
               </Button>
-              <Button type="button" variant="outline" onClick={() => importFileRef.current?.click()}>
+              {isConfigured && user ? (
+                <Button
+                  type="button"
+                  variant="outline"
+                  data-testid="settings-account-export"
+                  onClick={() => void handleAccountExport()}
+                  disabled={isExportingAccount}
+                >
+                  {isExportingAccount ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <CloudDownload className="h-4 w-4" />
+                  )}
+                  Xuất dữ liệu tài khoản
+                </Button>
+              ) : null}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => importFileRef.current?.click()}
+              >
                 <Upload className="h-4 w-4" />
                 Nhập dữ liệu
               </Button>
@@ -641,23 +887,40 @@ export function SettingsPage() {
                 )}
                 Kiểm tra sao lưu
               </Button>
-              <Button type="button" variant="outline" onClick={() => navigate("/12-week-system?tab=settings")}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate("/12-week-system?tab=settings")}
+              >
                 <CalendarDays className="h-4 w-4" />
                 Cài đặt chu kỳ
               </Button>
-              <Button type="button" variant="outline" onClick={() => navigate("/billing/plan")}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate("/billing/plan")}
+              >
                 <CreditCard className="h-4 w-4" />
                 Gói & thanh toán
               </Button>
-              <input ref={importFileRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
+              <input
+                ref={importFileRef}
+                type="file"
+                accept=".json"
+                className="hidden"
+                onChange={handleImport}
+              />
             </div>
 
             <div className="rounded-lg border border-app-line bg-app-bg p-4">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-app-ink">Bộ nhớ Trợ lý AI</p>
+                  <p className="text-sm font-semibold text-app-ink">
+                    Bộ nhớ Trợ lý AI
+                  </p>
                   <p className="mt-1 text-xs leading-5 text-app-ink-muted">
-                    Xóa sạch các thông tin trợ lý tự động ghi nhớ về bạn (sở thích học tập, thói quen làm việc).
+                    Xóa sạch các thông tin trợ lý tự động ghi nhớ về bạn (sở
+                    thích học tập, thói quen làm việc).
                   </p>
                 </div>
                 <Button
@@ -680,20 +943,37 @@ export function SettingsPage() {
                 <div className="flex gap-3">
                   <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-[color:var(--color-danger-fg)]" />
                   <div>
-                    <p className="text-base font-semibold text-[color:var(--color-danger-fg)]">Vùng nguy hiểm</p>
+                    <p className="text-base font-semibold text-[color:var(--color-danger-fg)]">
+                      Vùng nguy hiểm
+                    </p>
                     <p className="mt-1 text-sm leading-6 text-[color:var(--color-danger-fg)]">
-                      Xóa dữ liệu trên thiết bị này chỉ nên làm sau khi bạn đã tải bản dự phòng.
+                      Xóa dữ liệu trên thiết bị này chỉ nên làm sau khi bạn đã
+                      tải bản dự phòng.
                     </p>
                   </div>
                 </div>
-                <Button
-                  type="button"
-                  className="bg-[color:var(--color-danger-fg)] text-white hover:bg-[color:var(--color-danger-fg)]/90 focus-visible:ring-[color:var(--color-danger-border)]"
-                  onClick={() => setIsClearDataDialogOpen(true)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Xóa tất cả dữ liệu
-                </Button>
+                <div className="flex flex-col gap-2 sm:items-end">
+                  <Button
+                    type="button"
+                    className="bg-[color:var(--color-danger-fg)] text-white hover:bg-[color:var(--color-danger-fg)]/90 focus-visible:ring-[color:var(--color-danger-border)]"
+                    onClick={() => setIsClearDataDialogOpen(true)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Xóa tất cả dữ liệu
+                  </Button>
+                  {isConfigured && user ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="border-[color:var(--color-danger-border)] text-[color:var(--color-danger-fg)] hover:bg-[color:var(--color-danger-bg)] hover:text-[color:var(--color-danger-fg)]"
+                      data-testid="settings-delete-account-open"
+                      onClick={() => setIsDeleteAccountDialogOpen(true)}
+                    >
+                      <ShieldAlert className="h-4 w-4" />
+                      Xóa tài khoản
+                    </Button>
+                  ) : null}
+                </div>
               </div>
             </div>
           </div>
@@ -703,9 +983,12 @@ export function SettingsPage() {
           className="surface-raised rounded-card-lg border border-app-line bg-app-surface p-5 sm:p-6"
           aria-label="Thông tin ứng dụng"
         >
-          <h2 className="font-serif text-xl font-medium text-app-ink">Thông tin</h2>
+          <h2 className="font-serif text-xl font-medium text-app-ink">
+            Thông tin
+          </h2>
           <p className="mt-2 text-xs leading-5 text-app-ink-muted">
-            Phiên bản v0.4 · Vision Board Web Platform · local-first 12-Week Year.
+            Phiên bản v0.4 · Vision Board Web Platform · local-first 12-Week
+            Year.
           </p>
           <div className="mt-4 flex flex-wrap gap-3 text-xs font-medium text-app-ink-soft">
             <Link
@@ -730,27 +1013,90 @@ export function SettingsPage() {
         </section>
       </div>
 
-      <AlertDialog open={Boolean(recoverySnapshotKey)} onOpenChange={(open) => !open && setRecoverySnapshotKey(null)}>
+      <AlertDialog
+        open={Boolean(recoverySnapshotKey)}
+        onOpenChange={(open) => !open && setRecoverySnapshotKey(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Khôi phục dữ liệu cũ?</AlertDialogTitle>
             <AlertDialogDescription>
-              Dữ liệu hiện tại trên thiết bị này sẽ được thay bằng bản sao dữ liệu cũ. Hãy tải backup thiết bị trước nếu
-              bạn muốn giữ cả hai phiên bản.
+              Dữ liệu hiện tại trên thiết bị này sẽ được thay bằng bản sao dữ
+              liệu cũ. Hãy tải backup thiết bị trước nếu bạn muốn giữ cả hai
+              phiên bản.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Quay lại</AlertDialogCancel>
-            <AlertDialogAction onClick={handleRestoreMigrationBackup}>Khôi phục dữ liệu cũ</AlertDialogAction>
+            <AlertDialogAction onClick={handleRestoreMigrationBackup}>
+              Khôi phục dữ liệu cũ
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={isClearDataDialogOpen} onOpenChange={handleClearDataDialogChange}>
+      <AlertDialog
+        open={isDeleteAccountDialogOpen}
+        onOpenChange={handleDeleteAccountDialogChange}
+      >
+        <AlertDialogContent data-testid="settings-delete-account-dialog">
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {deleteAccountConfirmStep === "review"
+                ? "Xóa tài khoản và dữ liệu?"
+                : "Xác nhận xóa tài khoản lần cuối"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteAccountConfirmStep === "review"
+                ? "Hành động này xóa dữ liệu tài khoản trên hệ thống, dữ liệu local trên thiết bị này, mục tiêu, kế hoạch, thanh toán liên quan và không thể hoàn tác từ trong app. Hãy xuất dữ liệu trước nếu cần giữ lại bản sao."
+                : "Sau bước này, tài khoản sẽ bị xóa hoặc vô hiệu hóa theo khả năng của backend/Firebase. Bạn sẽ được đăng xuất và app quay về trạng thái mới."}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeletingAccount}>
+              Quay lại
+            </AlertDialogCancel>
+            {deleteAccountConfirmStep === "review" ? (
+              <AlertDialogAction
+                disabled={isDeletingAccount}
+                data-testid="settings-delete-account-continue"
+                onClick={(event) => {
+                  event.preventDefault();
+                  setDeleteAccountConfirmStep("final");
+                }}
+              >
+                Tôi hiểu, tiếp tục
+              </AlertDialogAction>
+            ) : (
+              <AlertDialogAction
+                disabled={isDeletingAccount}
+                data-testid="settings-delete-account-confirm"
+                onClick={(event) => {
+                  event.preventDefault();
+                  void handleDeleteAccount();
+                }}
+                className="bg-[color:var(--color-danger-fg)] text-white hover:bg-[color:var(--color-danger-fg)]/90"
+              >
+                {isDeletingAccount ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : null}
+                Xóa tài khoản
+              </AlertDialogAction>
+            )}
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={isClearDataDialogOpen}
+        onOpenChange={handleClearDataDialogChange}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {clearDataConfirmStep === "review" ? "Xóa tất cả dữ liệu trên thiết bị?" : "Xác nhận lần cuối"}
+              {clearDataConfirmStep === "review"
+                ? "Xóa tất cả dữ liệu trên thiết bị?"
+                : "Xác nhận lần cuối"}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {clearDataConfirmStep === "review"

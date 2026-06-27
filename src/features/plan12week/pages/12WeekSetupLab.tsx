@@ -351,6 +351,7 @@ export function TwelveWeekSetupLab() {
       prerequisites.smartGoalMetricName,
       prerequisites.smartGoalMetricUnit,
     );
+    const hasSmartMetric = Boolean(prerequisites.smartGoalMetricName || prerequisites.smartGoalMetricUnit);
 
     setDraft((previousDraft) => {
       const baseDraft = {
@@ -370,10 +371,21 @@ export function TwelveWeekSetupLab() {
           previousDraft.week4Milestone || recommendedTpl?.week4Milestone || smartMilestones.week4Milestone,
         week8Milestone:
           previousDraft.week8Milestone || recommendedTpl?.week8Milestone || smartMilestones.week8Milestone,
-        lagMetricName: previousDraft.lagMetricName || recommendedTpl?.lagMetricName || smartMilestones.lagMetricName,
+        lagMetricName:
+          previousDraft.lagMetricName ||
+          (hasSmartMetric ? smartMilestones.lagMetricName : "") ||
+          recommendedTpl?.lagMetricName ||
+          smartMilestones.lagMetricName,
         lagMetricTarget:
-          previousDraft.lagMetricTarget || recommendedTpl?.lagMetricTarget || smartMilestones.lagMetricTarget,
-        lagMetricUnit: previousDraft.lagMetricUnit || recommendedTpl?.lagMetricUnit || smartMilestones.lagMetricUnit,
+          previousDraft.lagMetricTarget ||
+          (hasSmartMetric ? smartMilestones.lagMetricTarget : "") ||
+          recommendedTpl?.lagMetricTarget ||
+          smartMilestones.lagMetricTarget,
+        lagMetricUnit:
+          previousDraft.lagMetricUnit ||
+          (hasSmartMetric ? smartMilestones.lagMetricUnit : "") ||
+          recommendedTpl?.lagMetricUnit ||
+          smartMilestones.lagMetricUnit,
         tacticLoadPreference:
           previousDraft.tacticLoadPreference === "balanced"
             ? prerequisites.feasibilityDefaults.tacticLoadPreference || "balanced"

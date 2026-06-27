@@ -9,6 +9,7 @@ const GENERATED_PASSWORD = `CodexFullSmoke${TIMESTAMP}!`;
 const EMAIL = process.env.PROD_SMOKE_EMAIL?.trim() || GENERATED_EMAIL;
 const PASSWORD = process.env.PROD_SMOKE_PASSWORD || GENERATED_PASSWORD;
 const HAS_PROVIDED_CREDENTIALS = Boolean(process.env.PROD_SMOKE_EMAIL && process.env.PROD_SMOKE_PASSWORD);
+const ALLOW_GENERATED_ACCOUNT = process.env.PROD_SMOKE_ALLOW_GENERATED_ACCOUNT === "1";
 const AUTH_MODE_OVERRIDE = process.env.PROD_SMOKE_AUTH_MODE?.trim().toLowerCase();
 const AUTH_MODE = AUTH_MODE_OVERRIDE || (HAS_PROVIDED_CREDENTIALS ? "signin" : "signup");
 const DEFAULT_TIMEOUT_MS = Number(process.env.PROD_SMOKE_TIMEOUT_MS ?? 90_000);
@@ -279,7 +280,16 @@ function assertNoVisibleFailure(text, label) {
 
 function assertNoRealBillingDemoCopy(text) {
   const normalized = normalizeText(text);
-  const forbidden = ["plus demo", "mock checkout", "checkout dung thu", "mo phong", "quyen local"];
+  const forbidden = [
+    "plus demo",
+    "mock checkout",
+    "checkout dung thu",
+    "mo plus demo",
+    "chi dung cho ban demo",
+    "khong xu ly khoan thu that",
+    "mo phong",
+    "quyen local",
+  ];
   const marker = forbidden.find((item) => normalized.includes(item));
   if (marker) {
     throw new Error(`Production billing still shows demo/mock copy: ${marker}`);
@@ -630,6 +640,18 @@ async function clickFirstTodayTaskCheckbox(page) {
   }
 }
 
+async function ensureWeeklyReviewFormVisible(page) {
+  const reviewFlow = page.locator('[data-testid="weekly-review-flow"]');
+  if (await reviewFlow.isVisible().catch(() => false)) return;
+
+  const startEarlyButton = page.getByRole("button", { name: /bắt đầu review sớm/i });
+  if (await startEarlyButton.isVisible().catch(() => false)) {
+    await startEarlyButton.click();
+  }
+
+  await reviewFlow.waitFor({ timeout: DEFAULT_TIMEOUT_MS });
+}
+
 async function getSyncQueueSummary(page) {
   return page.evaluate((goalId) => {
     const raw = localStorage.getItem(`twelve_week_sync_queue:${goalId}`);
@@ -673,6 +695,224 @@ async function waitForSyncQueueIdle(page) {
   );
 }
 
+async function assertSettingsSyncTrust(page) {
+  await page.goto(`${BASE_URL}/settings#account-sync`, { waitUntil: "domcontentloaded" });
+
+  const readSyncSurface = () =>
+    page.evaluate(() => {
+      const readText = (selector) =>
+        document.querySelector(selector)?.textContent?.trim() ?? "";
+
+      return {
+        sectionVisible: Boolean(document.querySelector('[data-testid="settings-sync-section"]')),
+        lastSynced: readText('[data-testid="settings-sync-last-synced"]'),
+        pendingCopy: readText('[data-testid="settings-sync-pending-count"]'),
+        statusCopy: readText('[data-testid="settings-sync-status-copy"]'),
+        lastResult: readText('[data-testid="settings-sync-last-result"]'),
+        emailUnverifiedVisible: Boolean(
+          document.querySelector('[data-testid="settings-sync-email-unverified"]'),
+        ),
+      };
+    });
+
+  let syncSurface;
+  try {
+    syncSurface = await waitForCondition(
+      "settings account-sync trust surface",
+      async () => {
+        const surface = await readSyncSurface();
+        const normalizedLastSynced = normalizeText(surface.lastSynced);
+        const normalizedPendingCopy = normalizeText(surface.pendingCopy);
+        const normalizedStatusCopy = normalizeText(surface.statusCopy);
+
+        if (!surface.sectionVisible || surface.emailUnverifiedVisible) return false;
+        if (
+          !normalizedLastSynced ||
+          normalizedLastSynced.includes(normalizeText("Chưa có lần đồng bộ tài khoản"))
+        ) {
+          return false;
+        }
+        if (!normalizedPendingCopy.includes(normalizeText("Không có thay đổi chờ đồng bộ"))) {
+          return false;
+        }
+        if (
+          !normalizedStatusCopy.includes(normalizeText("dữ liệu vẫn được giữ trên thiết bị này")) ||
+          !normalizedStatusCopy.includes(normalizeText("sao lưu sẵn sàng"))
+        ) {
+          return false;
+        }
+        return surface;
+      },
+      DEFAULT_TIMEOUT_MS,
+    );
+  } catch (error) {
+    const surface = await readSyncSurface().catch(() => null);
+    throw new Error(
+      `${error.message}\nLast sync surface: ${JSON.stringify(surface)}\n${await getDiagnostics(page)}`,
+    );
+  }
+
+  const normalizedLastSynced = normalizeText(syncSurface.lastSynced);
+  const normalizedPendingCopy = normalizeText(syncSurface.pendingCopy);
+  const normalizedStatusCopy = normalizeText(syncSurface.statusCopy);
+
+  if (!syncSurface.sectionVisible) {
+    throw new Error(`Settings sync section did not render.\n${await getDiagnostics(page)}`);
+  }
+
+  if (
+    !normalizedLastSynced ||
+    normalizedLastSynced.includes(normalizeText("Chưa có lần đồng bộ tài khoản"))
+  ) {
+    throw new Error(
+      `Settings sync surface never showed a synced account timestamp.\n${JSON.stringify(syncSurface)}\n${await getDiagnostics(page)}`,
+    );
+  }
+
+  if (!normalizedPendingCopy.includes(normalizeText("Không có thay đổi chờ đồng bộ"))) {
+    throw new Error(
+      `Settings sync surface still shows pending account changes after queue drained.\n${JSON.stringify(syncSurface)}\n${await getDiagnostics(page)}`,
+    );
+  }
+
+  if (
+    !normalizedStatusCopy.includes(normalizeText("dữ liệu vẫn được giữ trên thiết bị này")) ||
+    !normalizedStatusCopy.includes(normalizeText("sao lưu sẵn sàng"))
+  ) {
+    throw new Error(
+      `Settings sync trust copy missing local-safe synced message.\n${JSON.stringify(syncSurface)}\n${await getDiagnostics(page)}`,
+    );
+  }
+
+  if (syncSurface.emailUnverifiedVisible) {
+    throw new Error(
+      `Settings sync surface unexpectedly shows email-unverified blocker after successful backend sync.\n${JSON.stringify(syncSurface)}\n${await getDiagnostics(page)}`,
+    );
+  }
+
+  if (syncSurface.lastResult && !normalizeText(syncSurface.lastResult).includes(normalizeText("Kết quả gần nhất"))) {
+    throw new Error(
+      `Settings sync last-result card rendered unexpected copy.\n${JSON.stringify(syncSurface)}\n${await getDiagnostics(page)}`,
+    );
+  }
+
+  await assertCleanPage(page, "settings account sync");
+  await assertNoHorizontalOverflow(page, "settings account sync desktop");
+}
+
+async function assertSettingsAccountLifecycleSurface(page) {
+  await page.goto(`${BASE_URL}/settings`, { waitUntil: "domcontentloaded" });
+  await page.locator('[data-testid="settings-account-export"]').waitFor({ timeout: DEFAULT_TIMEOUT_MS });
+  await page.locator('[data-testid="settings-delete-account-open"]').waitFor({ timeout: DEFAULT_TIMEOUT_MS });
+
+  const requiredLinks = ["/privacy", "/terms", "/billing/faq"];
+  const missingLinks = [];
+  for (const href of requiredLinks) {
+    const count = await page.locator(`a[href="${href}"]`).count();
+    if (count === 0) missingLinks.push(href);
+  }
+
+  if (missingLinks.length > 0) {
+    throw new Error(`Settings account lifecycle surface missing legal/support links: ${missingLinks.join(", ")}`);
+  }
+
+  await assertCleanPage(page, "settings account lifecycle");
+  await assertNoHorizontalOverflow(page, "settings account lifecycle desktop");
+}
+
+async function assertMockCheckoutNotExposed(page) {
+  await page.goto(`${BASE_URL}/billing/mock-checkout?session=legacy_checkout_test`, {
+    waitUntil: "domcontentloaded",
+  });
+  await page.waitForFunction(() => document.body.innerText.length > 0, { timeout: DEFAULT_TIMEOUT_MS });
+
+  const text = await getBodyText(page);
+  assertNoMojibake(text, "mock checkout direct route");
+  assertNoVisibleFailure(text, "mock checkout direct route");
+  assertNoRealBillingDemoCopy(text);
+  await assertNoHorizontalOverflow(page, "mock checkout direct route desktop");
+}
+
+async function readLoginRecoverySurface(page) {
+  return page.evaluate(() => {
+    const normalize = (text) =>
+      String(text)
+        .normalize("NFD")
+        .replace(/\p{Diacritic}/gu, "")
+        .replace(/[\u0111\u0110]/g, "d")
+        .toLowerCase();
+    const findButton = (needle) =>
+      Array.from(document.querySelectorAll("button")).find((button) =>
+        normalize(button.textContent ?? "").includes(needle),
+      );
+
+    return {
+      emailFieldVisible: Boolean(document.querySelector("#login-email")),
+      passwordFieldVisible: Boolean(document.querySelector("#login-password")),
+      forgotPasswordVisible: Boolean(findButton("quen mat khau")),
+      resetEmailVisible: Boolean(document.querySelector("#reset-email")),
+      sendLinkVisible: Boolean(findButton("gui link")),
+      closeResetVisible: Boolean(findButton("dong")),
+      confirmPasswordVisible: Boolean(document.querySelector("#login-confirm-password")),
+      termsLinkVisible: Boolean(document.querySelector('a[href="/terms"]')),
+      privacyLinkVisible: Boolean(document.querySelector('a[href="/privacy"]')),
+    };
+  });
+}
+
+async function assertLoginRecoverySurface(page) {
+  await page.goto(`${BASE_URL}/login`, { waitUntil: "domcontentloaded" });
+  await page.locator("#login-email").waitFor({ timeout: DEFAULT_TIMEOUT_MS });
+
+  const signInSurface = await readLoginRecoverySurface(page);
+  if (!signInSurface.emailFieldVisible || !signInSurface.passwordFieldVisible || !signInSurface.forgotPasswordVisible) {
+    throw new Error(
+      `Login sign-in recovery surface is incomplete: ${JSON.stringify(signInSurface)}\n${await getDiagnostics(page)}`,
+    );
+  }
+
+  const openedResetCard = await clickButtonByNormalizedText(page, "quen mat khau");
+  if (!openedResetCard) {
+    throw new Error(`Could not open login reset-password card.\n${await getDiagnostics(page)}`);
+  }
+
+  await waitForCondition("login reset-password surface", async () => {
+    const surface = await readLoginRecoverySurface(page);
+    return surface.resetEmailVisible && surface.sendLinkVisible && surface.closeResetVisible ? surface : false;
+  }).catch(async (error) => {
+    throw new Error(`${error.message}\n${await getDiagnostics(page)}`);
+  });
+
+  const closedResetCard = await clickButtonByNormalizedText(page, "dong");
+  if (!closedResetCard) {
+    throw new Error(`Could not close login reset-password card.\n${await getDiagnostics(page)}`);
+  }
+
+  await waitForCondition("login reset-password surface close", async () => {
+    const surface = await readLoginRecoverySurface(page);
+    return surface.resetEmailVisible ? false : surface;
+  }).catch(async (error) => {
+    throw new Error(`${error.message}\n${await getDiagnostics(page)}`);
+  });
+
+  await page.goto(`${BASE_URL}/login?mode=signup`, { waitUntil: "domcontentloaded" });
+  await page.locator("#login-confirm-password").waitFor({ timeout: DEFAULT_TIMEOUT_MS });
+
+  const signUpSurface = await readLoginRecoverySurface(page);
+  if (
+    !signUpSurface.emailFieldVisible ||
+    !signUpSurface.passwordFieldVisible ||
+    !signUpSurface.confirmPasswordVisible ||
+    !signUpSurface.termsLinkVisible ||
+    !signUpSurface.privacyLinkVisible
+  ) {
+    throw new Error(`Login sign-up trust surface is incomplete: ${JSON.stringify(signUpSurface)}\n${await getDiagnostics(page)}`);
+  }
+
+  await assertCleanPage(page, "login recovery surface");
+  await assertNoHorizontalOverflow(page, "login recovery surface desktop");
+}
+
 async function exerciseTwelveWeekSaveReloadAndSync(page, apiEvents) {
   await page.goto(`${BASE_URL}/12-week-system`, { waitUntil: "domcontentloaded" });
   await seedFullSmokeData(page);
@@ -694,13 +934,13 @@ async function exerciseTwelveWeekSaveReloadAndSync(page, apiEvents) {
   });
 
   await page.goto(`${BASE_URL}/12-week-system?tab=week`, { waitUntil: "domcontentloaded" });
-  await page.locator('[data-testid="wam-section-score"]').waitFor({ timeout: DEFAULT_TIMEOUT_MS });
+  await ensureWeeklyReviewFormVisible(page);
+  await page.locator('[data-testid="weekly-score-interpretation"]').waitFor({
+    timeout: DEFAULT_TIMEOUT_MS,
+  });
   await page.locator("#weekly-insights").fill(WEEKLY_REVIEW_OUTPUT);
   await page.locator("#weekly-next-commitments").fill(WEEKLY_REVIEW_PRIORITY);
   await page.locator("#weekly-next-commitments").press("Enter");
-  await page.evaluate(() => {
-    window.confirm = () => true;
-  });
   await clickButtonByNormalizedText(page, "chot review tuan nay");
   await waitForGoalSnapshot(page, "weekly review in local storage", (snapshot) => {
     return (
@@ -729,6 +969,7 @@ async function exerciseTwelveWeekSaveReloadAndSync(page, apiEvents) {
     );
   });
   await assertNoHorizontalOverflow(page, "12-week desktop");
+  await assertSettingsSyncTrust(page);
 }
 
 async function exerciseBilling(page, apiEvents) {
@@ -747,6 +988,12 @@ async function exerciseBilling(page, apiEvents) {
   assertNoVisibleFailure(text, "billing plan");
   assertNoRealBillingDemoCopy(text);
   await assertNoHorizontalOverflow(page, "billing desktop");
+
+  if ((await page.locator('[data-testid="paid-checkout-disabled-banner"]').count()) > 0) {
+    await assertPaidCheckoutLocked(page, apiEvents);
+    log("Paid checkout kill-switch is active; verified locked billing confirm flow instead of creating a checkout QR");
+    return;
+  }
 
   if (SKIP_CHECKOUT) {
     log("Skipping checkout QR creation because PROD_SMOKE_SKIP_CHECKOUT=1");
@@ -802,6 +1049,25 @@ async function exerciseBilling(page, apiEvents) {
   await assertNoHorizontalOverflow(page, "checkout desktop");
 }
 
+async function assertPaidCheckoutLocked(page, apiEvents) {
+  const startedAt = Date.now();
+  await page.goto(`${BASE_URL}/billing/confirm`, { waitUntil: "domcontentloaded" });
+  await page.locator('[data-testid="paid-checkout-disabled-banner"]').waitFor({ timeout: DEFAULT_TIMEOUT_MS });
+  await assertCleanPage(page, "billing confirm locked checkout");
+
+  await page.waitForTimeout(1_000);
+  const checkoutPosts = apiEvents.filter((event) => {
+    if (event.at < startedAt || event.method !== "POST") return false;
+    return /\/api\/billing\/(?:public-)?checkout-session(?:\?|$)/.test(event.url);
+  });
+
+  if (checkoutPosts.length > 0) {
+    throw new Error(
+      `Paid checkout lock leaked checkout-session POSTs:\n${checkoutPosts.map((item) => JSON.stringify(item)).join("\n")}`,
+    );
+  }
+}
+
 async function exerciseResponsiveQa(page) {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(`${BASE_URL}/12-week-system?tab=progress`, { waitUntil: "domcontentloaded" });
@@ -817,6 +1083,16 @@ async function exerciseResponsiveQa(page) {
 }
 
 async function run() {
+  log(`Target: ${BASE_URL}`);
+  if (!HAS_PROVIDED_CREDENTIALS) {
+    if (!ALLOW_GENERATED_ACCOUNT) {
+      throw new Error(
+        "PROD_SMOKE_EMAIL and PROD_SMOKE_PASSWORD are required. Set PROD_SMOKE_ALLOW_GENERATED_ACCOUNT=1 to explicitly create a generated production QA account.",
+      );
+    }
+    log(`No PROD_SMOKE_EMAIL/PROD_SMOKE_PASSWORD provided; using generated QA account ${EMAIL}`);
+  }
+
   const browser = await chromium.launch({ headless: true });
   const context = await browser.newContext({
     locale: "vi-VN",
@@ -830,11 +1106,6 @@ async function run() {
   page.setDefaultTimeout(DEFAULT_TIMEOUT_MS);
   page.setDefaultNavigationTimeout(DEFAULT_TIMEOUT_MS);
   page.on("pageerror", (error) => pageErrors.push(error.message));
-
-  log(`Target: ${BASE_URL}`);
-  if (!HAS_PROVIDED_CREDENTIALS) {
-    log(`No PROD_SMOKE_EMAIL/PROD_SMOKE_PASSWORD provided; using generated QA account ${EMAIL}`);
-  }
 
   try {
     await step("SPA shell and protected-route rewrite", async () => {
@@ -855,9 +1126,21 @@ async function run() {
       await assertNoHorizontalOverflow(page, "signed-out home desktop");
     });
 
+    await step("Production does not expose mock checkout surface", async () => {
+      await assertMockCheckoutNotExposed(page);
+    });
+
+    await step("Login recovery and legal trust surface is reachable", async () => {
+      await assertLoginRecoverySurface(page);
+    });
+
     await step("Authentication", async () => {
       await authenticate(page, "/12-week-system");
       await assertCleanPage(page, "authenticated workspace");
+    });
+
+    await step("Settings account lifecycle actions are reachable", async () => {
+      await assertSettingsAccountLifecycleSurface(page);
     });
 
     await step("12-week save, reload, and backend sync", async () => {

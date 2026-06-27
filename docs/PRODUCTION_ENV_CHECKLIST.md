@@ -273,6 +273,8 @@ the report once at startup so on-call sees it without paging.
 
 ## Final pre-deploy checklist
 
+Use `docs/ops/staging-proof-runbook.md` for the exact staging workflow inputs, repository secrets, safety markers, and evidence fields.
+
 1. `npm --prefix backend run check:env` against the production env (errors = 0).
 2. `npm run env:check:full` from the workstation pointing at the host config
    you exported (no localhost, no `*`, no missing keys).
@@ -283,3 +285,7 @@ the report once at startup so on-call sees it without paging.
 6. MongoDB: `/api/health` reports `mongo: "connected"`.
 7. Real billing: confirm `BILLING_PAID_DISABLED` is `0`, `VITE_BILLING_PAID_CHECKOUT_DISABLED` is `0`, and a small controlled provider transaction flows end to end.
 8. Sentry: confirm a test error reaches the dashboard from both backend and frontend with the expected `environment` tag.
+9. Production smoke: set `PROD_SMOKE_EMAIL` and `PROD_SMOKE_PASSWORD` before running `npm run smoke:prod`. Leave `PROD_SMOKE_ALLOW_GENERATED_ACCOUNT` unset/`0` for normal operator and CI runs; use `=1` only for an explicit one-off generated QA signup.
+10. Email verification staging smoke: run `.github/workflows/email-verification-e2e-staging.yml` with `allow_create=CREATE_TEST_ACCOUNT`; if `EMAIL_VERIFICATION_E2E_EMAIL` is configured, it must be disposable and include a `verify` marker.
+11. Account delete staging smoke: run `.github/workflows/account-delete-e2e-staging.yml` with `allow_delete=DELETE_TEST_ACCOUNT`, disposable `ACCOUNT_DELETE_E2E_EMAIL`, and `ACCOUNT_DELETE_E2E_PASSWORD`.
+12. Cross-device sync smoke: set `LWW_E2E_URL`, `LWW_E2E_EMAIL`, and `LWW_E2E_PASSWORD` before running `npm run test:e2e:lww` against staging/preview. For GitHub Actions, use `.github/workflows/lww-e2e-staging.yml` with repository secrets `LWW_E2E_EMAIL` and `LWW_E2E_PASSWORD`.

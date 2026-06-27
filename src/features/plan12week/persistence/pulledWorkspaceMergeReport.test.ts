@@ -264,6 +264,33 @@ function createPendingTaskMutation(): DataMutationItem {
   };
 }
 
+function createPendingPlanSnapshotMutation(): DataMutationItem {
+  return {
+    id: "mutation_plan_1",
+    idempotencyKey: "user_1:device_1:mutation_plan_1",
+    collapseKey: "plan:goal_1:goal_1:12-week-system",
+    kind: "plan_snapshot_updated",
+    status: "pending",
+    createdAt: at(1),
+    updatedAt: at(1),
+    attemptCount: 0,
+    maxAttempts: 7,
+    ownerUid: "user_1",
+    goalId: "goal_1",
+    planId: "goal_1:12-week-system",
+    payload: {
+      reason: "manual_update",
+      clientPlanId: "goal_1:12-week-system",
+      clientGoalId: "goal_1",
+      changedAt: at(1),
+      clientUpdatedAt: at(1),
+      system: createTwelveWeekSystem({
+        vision12Week: "Local newer vision",
+      }),
+    },
+  };
+}
+
 describe("pulled workspace merge report", () => {
   it("marks empty local data plus a cloud workspace as safe to apply", () => {
     const report = createPulledWorkspaceMergeReport(createUserData([]), createCloudWorkspace());
@@ -309,6 +336,106 @@ describe("pulled workspace merge report", () => {
     );
   });
 
+  it("reports local-winning pending mutation conflict when the cloud entity is older", () => {
+    const localGoal = createGoal(
+      {},
+      {
+        taskInstances: [
+          {
+            id: "task_1",
+            weekNumber: 1,
+            scheduledDate: "2026-04-30",
+            title: "Run one test",
+            leadIndicatorName: "",
+            isCore: true,
+            completed: false,
+          },
+        ],
+      },
+    );
+    const report = createPulledWorkspaceMergeReport(
+      localGoal,
+      createCloudWorkspace({
+        tasks: [
+          {
+            id: "backend_task_1",
+            weekId: "backend_week_1",
+            clientTaskId: "task_1",
+            clientWeekId: "goal_1:week:1",
+            clientPlanId: "goal_1:12-week-system",
+            weekNumber: 1,
+            title: "Run one test",
+            status: "done",
+            scheduledDate: "2026-04-30",
+            completedAt: at(0),
+            isCore: true,
+            syncUpdatedAt: at(0),
+          },
+        ],
+      }),
+      {
+        pendingMutations: [createPendingTaskMutation()],
+      },
+    );
+
+    expect(report.safeToApply).toBe(false);
+    expect(report.autoResolvable).toBe(true);
+    expect(report.conflicts).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "task",
+          clientId: "task_1",
+          mutationId: "mutation_task_1",
+          reason: "pending_local_mutation_cloud_newer",
+          winner: "local",
+          winnerSource: "timestamp",
+        }),
+      ]),
+    );
+  });
+
+  it("reports local-winning plan snapshot conflict when cloud plan metadata is older", () => {
+    const localGoal = createGoal(
+      {},
+      {
+        vision12Week: "Local newer vision",
+      },
+    );
+    const report = createPulledWorkspaceMergeReport(
+      localGoal,
+      createCloudWorkspace({
+        plans: [
+          {
+            id: "backend_plan_1",
+            clientPlanId: "goal_1:12-week-system",
+            clientGoalId: "goal_1",
+            vision: "Cloud older vision",
+            startDate: "2026-04-30",
+            syncUpdatedAt: at(0),
+          },
+        ],
+      }),
+      {
+        pendingMutations: [createPendingPlanSnapshotMutation()],
+      },
+    );
+
+    expect(report.safeToApply).toBe(false);
+    expect(report.autoResolvable).toBe(true);
+    expect(report.conflicts).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "plan",
+          clientId: "goal_1:12-week-system",
+          mutationId: "mutation_plan_1",
+          reason: "pending_local_mutation_cloud_newer",
+          winner: "local",
+          winnerSource: "timestamp",
+        }),
+      ]),
+    );
+  });
+
   it("warns when pulled entities are missing client ids", () => {
     const report = createPulledWorkspaceMergeReport(
       createUserData([]),
@@ -330,6 +457,49 @@ describe("pulled workspace merge report", () => {
         expect.objectContaining({
           kind: "task",
           cloudId: "backend_task_missing_client_id",
+        }),
+      ]),
+    );
+  });
+
+  it("marks cloud lead metric logs as unsupported so they are not silently dropped", () => {
+    const report = createPulledWorkspaceMergeReport(
+      createUserData([]),
+      createCloudWorkspace({
+        leadMetrics: [
+          {
+            id: "backend_metric_1",
+            weekId: "backend_week_1",
+            clientMetricId: "goal_1:week:1:metric:tactic_write",
+            clientWeekId: "goal_1:week:1",
+            clientPlanId: "goal_1:12-week-system",
+            leadIndicatorId: "tactic_write",
+            name: "Write",
+            weeklyTarget: 2,
+            unit: "sessions/week",
+            type: "core",
+            priority: 1,
+            logs: [
+              {
+                id: "backend_metric_log_1",
+                date: "2026-04-30",
+                value: 1,
+                completed: true,
+              },
+            ],
+          },
+        ],
+      }),
+    );
+
+    expect(report.safeToApply).toBe(false);
+    expect(report.autoResolvable).toBe(false);
+    expect(report.unsupportedFields).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          goalId: "goal_1",
+          clientPlanId: "goal_1:12-week-system",
+          field: "leadMetricLogs",
         }),
       ]),
     );

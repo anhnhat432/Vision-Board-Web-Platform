@@ -1,0 +1,53 @@
+name: Core funnel quality staging proof
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: Staging/preview URL to test
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    name: Run core funnel quality staging proof
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CORE_QUALITY_URL: ${{ github.event.inputs.target_url }}
+      CORE_QUALITY_SESSION: gha-core-quality-${{ github.run_id }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate target URL
+        shell: bash
+        run: |
+          if [ -z "${CORE_QUALITY_URL}" ]; then
+            echo "::error::CORE_QUALITY_URL is required."
+            exit 1
+          fi
+
+          normalized="$(printf '%s' "${CORE_QUALITY_URL}" | tr '[:upper:]' '[:lower:]')"
+
+          if [[ "${normalized}" == *"localhost"* ]] || [[ "${normalized}" == *"127.0.0.1"* ]]; then
+            echo "::error::Use a staging or production-like URL for deployed core-funnel proof, not localhost."
+            exit 1
+          fi
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run core funnel quality smoke
+        run: npm run smoke:core-quality

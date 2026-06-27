@@ -101,7 +101,7 @@ export function collectSemanticAndComponentTokenNames(set: TokenSet): Set<string
  * (Thực tế tên token đồng nhất giữa hai mode — dark chỉ override giá trị — nhưng
  * union giúp snapshot bền vững trước thay đổi cấu trúc sau này.)
  */
-export function captureTokenNames(repoRoot: string = DEFAULT_REPO_ROOT): Set<string> {
+export function captureTokenNames(_repoRoot: string = DEFAULT_REPO_ROOT): Set<string> {
   const lightSet = loadTokenSet({ mode: "light" });
   const darkSet = loadTokenSet({ mode: "dark" });
   const names = new Set<string>([

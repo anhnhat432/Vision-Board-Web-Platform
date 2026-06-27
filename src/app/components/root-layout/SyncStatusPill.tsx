@@ -1,16 +1,35 @@
-import { CheckCircle2, Clock3, Loader2, Upload, WifiOff } from "lucide-react";
+import {
+  CheckCircle2,
+  Clock3,
+  Loader2,
+  ShieldAlert,
+  Upload,
+  WifiOff,
+} from "lucide-react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 
-import { SyncIdleDot, SyncOkDot, SyncSyncingDot } from "@/app/components/illustrations";
+import {
+  SyncIdleDot,
+  SyncOkDot,
+  SyncSyncingDot,
+} from "@/app/components/illustrations";
+import { getLastOutboxSyncSnapshot } from "@/app/utils/production";
 import { useAutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
 
 // Chỉ dùng cho test/harness (twoDeviceSync.e2e, AutoCloudConflictDialog.test).
 // App production tự đồng bộ + auto-resolve LWW, không còn render dialog chọn bản
 // nên không có đường dẫn nào dispatch event này trong runtime thực.
-export const AUTO_CLOUD_CONFLICT_DIALOG_OPEN_EVENT_NAME = "visionboard:auto-cloud-conflict-dialog-open";
+export const AUTO_CLOUD_CONFLICT_DIALOG_OPEN_EVENT_NAME =
+  "visionboard:auto-cloud-conflict-dialog-open";
 
-type SyncPillState = "syncing" | "offline" | "pending" | "ok" | "idle";
+type SyncPillState =
+  | "syncing"
+  | "email_unverified"
+  | "offline"
+  | "pending"
+  | "ok"
+  | "idle";
 
 interface SyncStatusPillProps {
   compact?: boolean;
@@ -45,10 +64,24 @@ function getSyncState(input: {
 }
 
 function getPendingCopy(count: number): string {
-  return count > 0 ? `${count} thay đổi chưa sao lưu` : "không có thay đổi chờ đồng bộ";
+  return count > 0
+    ? `${count} thay đổi chưa sao lưu`
+    : "không có thay đổi chờ đồng bộ";
 }
 
-function getTooltip(state: SyncPillState, relativeTime: string | null, pendingCount: number): string {
+function getTooltip(
+  state: SyncPillState,
+  relativeTime: string | null,
+  pendingCount: number,
+  emailUnverifiedMessage?: string,
+): string {
+  if (state === "email_unverified") {
+    return emailUnverifiedMessage
+      ? `${emailUnverifiedMessage} ${getPendingCopy(pendingCount)}.`
+      : `Đã lưu trên thiết bị này. Chưa sao lưu vào tài khoản vì email chưa xác thực; ${getPendingCopy(
+          pendingCount,
+        )}.`;
+  }
   if (state === "syncing")
     return `Đã lưu trên thiết bị này. Đang sao lưu vào tài khoản; ${getPendingCopy(pendingCount)}.`;
   if (state === "offline")
@@ -58,21 +91,54 @@ function getTooltip(state: SyncPillState, relativeTime: string | null, pendingCo
   if (state === "pending")
     return `Đã lưu trên thiết bị này. Chưa sao lưu. Bấm để sao lưu ngay; ${getPendingCopy(pendingCount)}.`;
 
-  const timeCopy = relativeTime ? `Đã sao lưu ${relativeTime}` : "Chưa có lần sao lưu";
+  const timeCopy = relativeTime
+    ? `Đã sao lưu ${relativeTime}`
+    : "Chưa có lần sao lưu";
   return `${timeCopy}; ${getPendingCopy(pendingCount)}.`;
 }
 
 export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
   const syncState = useAutoCloudSyncContext();
   const navigate = useNavigate();
+  const [lastOutboxSyncSnapshot, setLastOutboxSyncSnapshot] = useState(() =>
+    getLastOutboxSyncSnapshot(),
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const refreshOutboxSyncSnapshot = () => {
+      setLastOutboxSyncSnapshot(getLastOutboxSyncSnapshot());
+    };
+
+    window.addEventListener(
+      "email-verification:required",
+      refreshOutboxSyncSnapshot,
+    );
+    window.addEventListener("storage", refreshOutboxSyncSnapshot);
+    return () => {
+      window.removeEventListener(
+        "email-verification:required",
+        refreshOutboxSyncSnapshot,
+      );
+      window.removeEventListener("storage", refreshOutboxSyncSnapshot);
+    };
+  }, []);
 
   const relativeTime = formatRelativeSyncTime(syncState.lastSyncedAt);
-  const state = getSyncState({
-    syncing: syncState.syncing,
-    online: syncState.online,
-    pendingCount: syncState.pendingCount,
-    lastSyncedAt: syncState.lastSyncedAt,
-  });
+  const syncBlockedByEmailVerification =
+    lastOutboxSyncSnapshot?.status === "email_unverified";
+  const pendingCountForCopy = syncBlockedByEmailVerification
+    ? lastOutboxSyncSnapshot.pendingCount
+    : syncState.pendingCount;
+  const state = syncBlockedByEmailVerification
+    ? "email_unverified"
+    : getSyncState({
+        syncing: syncState.syncing,
+        online: syncState.online,
+        pendingCount: syncState.pendingCount,
+        lastSyncedAt: syncState.lastSyncedAt,
+      });
 
   const [showSuccess, setShowSuccess] = useState(false);
   const prevSyncStateRef = useRef<SyncPillState | null>(null);
@@ -80,7 +146,10 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
 
   useEffect(() => {
     const prevState = prevSyncStateRef.current;
-    if ((prevState === "syncing" || prevState === "pending") && state === "ok") {
+    if (
+      (prevState === "syncing" || prevState === "pending") &&
+      state === "ok"
+    ) {
       setShowSuccess(true);
       if (successTimeoutRef.current !== null) {
         window.clearTimeout(successTimeoutRef.current);
@@ -100,7 +169,8 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
     };
   }, []);
 
-  const effectiveState = (state === "ok" || state === "idle") && showSuccess ? "ok" : state;
+  const effectiveState =
+    (state === "ok" || state === "idle") && showSuccess ? "ok" : state;
 
   if (effectiveState === "ok" || effectiveState === "idle") {
     if (effectiveState === "ok" && showSuccess) {
@@ -110,7 +180,12 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
     }
   }
 
-  const tooltip = getTooltip(effectiveState, relativeTime, syncState.pendingCount);
+  const tooltip = getTooltip(
+    effectiveState,
+    relativeTime,
+    pendingCountForCopy,
+    lastOutboxSyncSnapshot?.message,
+  );
   const baseClass =
     "inline-flex max-w-full items-center gap-1.5 rounded-full border px-2 py-1 text-xs font-medium leading-none transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 animate-in fade-in zoom-in-95 duration-200";
   const sizeClass = compact ? "" : "mt-2";
@@ -121,6 +196,12 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
       icon: <Loader2 className="h-3 w-3 animate-spin" />,
       label: "Đang sao lưu",
       tone: "border-app-line bg-app-accent-soft text-app-accent",
+    },
+    email_unverified: {
+      dot: <SyncIdleDot className="h-4 w-4" />,
+      icon: <ShieldAlert className="h-3 w-3" />,
+      label: "Email chưa xác thực. Chưa sao lưu",
+      tone: "border-app-warm-border bg-app-warm-soft text-app-warm",
     },
     offline: {
       dot: <SyncIdleDot className="h-4 w-4" />,
@@ -146,7 +227,10 @@ export function SyncStatusPill({ compact = false }: SyncStatusPillProps) {
       label: "Chưa sao lưu",
       tone: "border-app-line bg-app-surface text-app-ink-soft",
     },
-  } satisfies Record<SyncPillState, { dot: ReactNode; icon: ReactNode; label: string; tone: string }>;
+  } satisfies Record<
+    SyncPillState,
+    { dot: ReactNode; icon: ReactNode; label: string; tone: string }
+  >;
 
   const handleClick = () => {
     if (effectiveState === "pending" && syncState.online) {

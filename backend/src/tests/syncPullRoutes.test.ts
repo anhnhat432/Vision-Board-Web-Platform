@@ -103,6 +103,35 @@ function createPullRepository(): TwelveWeekPullRepository {
       clientPlanId: ownerPlanClientId,
       vision: "A clear public demo loop.",
       startDate: new Date("2026-04-30T00:00:00.000Z"),
+      endDate: new Date("2026-07-23T00:00:00.000Z"),
+      timezone: "Asia/Saigon",
+      weekStartsOn: "Sunday",
+      totalWeeks: 12,
+      status: "paused",
+      goalType: "Product",
+      templateId: "template_launch",
+      templateName: "Launch Sprint",
+      lagMetric: {
+        name: "Launch readiness",
+        unit: "%",
+        target: "100",
+        currentValue: "25",
+      },
+      milestones: {
+        week4: "Prototype validated",
+        week8: "Beta cohort active",
+        week12: "Public launch ready",
+      },
+      successEvidence: "Three users finish one cycle.",
+      reviewDay: "Friday",
+      week12Outcome: "Launch with restored cross-device plan metadata.",
+      weeklyActions: ["Write", "Interview", "Ship"],
+      successMetric: "5 active testers",
+      dailyReminderTime: "20:30",
+      tacticLoadPreference: "lighter",
+      preferredDays: [2, 4, 6],
+      personalConstraint: "time",
+      reentryCount: 2,
       revision: 1,
       syncUpdatedAt: baseSyncTime,
     },
@@ -414,6 +443,25 @@ describe("12-week pull route", () => {
 
     assert.equal(data.workspace.goals[0].clientGoalId, "goal_local_1");
     assert.equal(data.workspace.plans[0].clientPlanId, ownerPlanClientId);
+    assert.equal(data.workspace.plans[0].endDate, "2026-07-23");
+    assert.equal(data.workspace.plans[0].timezone, "Asia/Saigon");
+    assert.equal(data.workspace.plans[0].weekStartsOn, "Sunday");
+    assert.equal(data.workspace.plans[0].status, "paused");
+    assert.equal(data.workspace.plans[0].templateId, "template_launch");
+    assert.deepEqual(data.workspace.plans[0].lagMetric, {
+      name: "Launch readiness",
+      unit: "%",
+      target: "100",
+      currentValue: "25",
+    });
+    assert.deepEqual(data.workspace.plans[0].milestones, {
+      week4: "Prototype validated",
+      week8: "Beta cohort active",
+      week12: "Public launch ready",
+    });
+    assert.deepEqual(data.workspace.plans[0].weeklyActions, ["Write", "Interview", "Ship"]);
+    assert.deepEqual(data.workspace.plans[0].preferredDays, [2, 4, 6]);
+    assert.equal(data.workspace.plans[0].personalConstraint, "time");
     assert.equal(data.workspace.weeks[0].clientWeekId, ownerWeekClientId);
     assert.equal(data.workspace.tasks[0].clientTaskId, "task_local_1");
     assert.equal(data.workspace.tasks[0].completedAt, "2026-04-30T02:00:00.000Z");

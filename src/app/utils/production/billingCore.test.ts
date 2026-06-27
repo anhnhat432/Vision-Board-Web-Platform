@@ -18,6 +18,7 @@ async function importBillingCoreWithEnv(env: Record<string, string | undefined>)
 describe("billing provider mode resolution", () => {
   afterEach(() => {
     vi.unstubAllEnvs();
+    localStorage.clear();
   });
 
   it("keeps mock provider available in demo mode", async () => {
@@ -48,5 +49,35 @@ describe("billing provider mode resolution", () => {
     });
 
     expect(getBillingProviderMode()).toBe("api_contract");
+  });
+
+  it("persists cancel-at-period-end state from a server entitlement payload", async () => {
+    const { applyBillingAccessPayload } = await importBillingCoreWithEnv({
+      VITE_APP_MODE: "real",
+      VITE_BILLING_PROVIDER_MODE: "api_contract",
+      VITE_API_BASE_URL: "https://api.example.test",
+    });
+    const { getUserData } = await import("../storage");
+
+    applyBillingAccessPayload(
+      {
+        planCode: "PLUS",
+        subscription: {
+          planCode: "PLUS",
+          status: "active",
+          renewsAt: "2099-06-01T00:00:00.000Z",
+          cancelAtPeriodEnd: true,
+        },
+        entitlements: ["premium_templates", "premium_review_insights"],
+      },
+      "api_contract",
+    );
+
+    expect(getUserData().subscription).toMatchObject({
+      planCode: "PLUS",
+      status: "active",
+      renewsAt: "2099-06-01T00:00:00.000Z",
+      cancelAtPeriodEnd: true,
+    });
   });
 });

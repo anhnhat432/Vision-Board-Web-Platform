@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { SecondaryPanel } from "@/app/components/layout/SecondaryPanel";
+import { emitPetEvent } from "@/app/features/pet/petEvents";
 
 import { MotionStaggerItem, MotionStaggerList } from "@/app/components/motion";
 import type { RescueModeStatus } from "@/features/plan12week/logic";
@@ -270,6 +271,18 @@ export function TwelveWeekTodayTab({
       return;
     }
 
+    const toggledTask = todayQueue.find((task) => task.id === taskId);
+    const shouldEmitCompletion = Boolean(completed && toggledTask && !toggledTask.completed);
+    const completesDailyFocus = shouldEmitCompletion && todayQueue.filter((task) => !task.completed).length <= 1;
+    const emitCompletionEvent = () => {
+      if (!shouldEmitCompletion) return;
+
+      emitPetEvent({
+        event: completesDailyFocus ? "dailyFocusCompleted" : "taskCompleted",
+        source: "today",
+      });
+    };
+
     hapticLight();
     setOptimisticTaskCompletionById((current) => ({ ...current, [taskId]: completed }));
 
@@ -285,24 +298,9 @@ export function TwelveWeekTodayTab({
 
     if (isTest) {
       // Gọi đồng bộ trực tiếp trong môi trường unit test để các test case pass ngay lập tức
-      Promise.resolve(onToggleTask(taskId, completed)).catch((error) => {
-        setOptimisticTaskCompletionById((current) => {
-          if (!(taskId in current)) return current;
-          const next = { ...current };
-          delete next[taskId];
-          return next;
-        });
-        console.error("Failed to toggle task:", error);
-      });
-    } else {
-      if (toggleTimerRef.current) {
-        window.clearTimeout(toggleTimerRef.current);
-      }
-
-      // Hoãn tác vụ re-render cha nặng nề đi 180ms trên production để trình duyệt vẽ checkbox checked mượt mà 60/120fps lập tức
-      toggleTimerRef.current = window.setTimeout(() => {
-        Promise.resolve(onToggleTask(taskId, completed)).catch((error) => {
-          // Chỉ hoàn tác trạng thái optimistic khi xảy ra lỗi thực tế
+      Promise.resolve(onToggleTask(taskId, completed))
+        .then(emitCompletionEvent)
+        .catch((error) => {
           setOptimisticTaskCompletionById((current) => {
             if (!(taskId in current)) return current;
             const next = { ...current };
@@ -311,6 +309,25 @@ export function TwelveWeekTodayTab({
           });
           console.error("Failed to toggle task:", error);
         });
+    } else {
+      if (toggleTimerRef.current) {
+        window.clearTimeout(toggleTimerRef.current);
+      }
+
+      // Hoãn tác vụ re-render cha nặng nề đi 180ms trên production để trình duyệt vẽ checkbox checked mượt mà 60/120fps lập tức
+      toggleTimerRef.current = window.setTimeout(() => {
+        Promise.resolve(onToggleTask(taskId, completed))
+          .then(emitCompletionEvent)
+          .catch((error) => {
+            // Chỉ hoàn tác trạng thái optimistic khi xảy ra lỗi thực tế
+            setOptimisticTaskCompletionById((current) => {
+              if (!(taskId in current)) return current;
+              const next = { ...current };
+              delete next[taskId];
+              return next;
+            });
+            console.error("Failed to toggle task:", error);
+          });
       }, 180);
     }
   };
@@ -1044,9 +1061,12 @@ export function TwelveWeekTodayTab({
                 </div>
               </div>
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#A8A296] dark:text-app-ink-muted mb-2.5">
+                <label
+                  htmlFor="daily-note"
+                  className="block text-[10px] font-bold uppercase tracking-[0.12em] text-[#A8A296] dark:text-app-ink-muted mb-2.5"
+                >
                   Ghi chú nhanh
-                </div>
+                </label>
                 <Textarea
                   id="daily-note"
                   rows={2}

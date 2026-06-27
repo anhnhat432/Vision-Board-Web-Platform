@@ -1,0 +1,67 @@
+name: LWW e2e staging
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: Staging/preview URL to test
+        required: true
+      allow_overwrite:
+        description: Type OVERWRITE_TEST_WORKSPACE to allow LWW overwrite scenarios
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  lww:
+    name: Run LWW e2e against staging
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      LWW_E2E_URL: ${{ github.event.inputs.target_url }}
+      LWW_E2E_ALLOW: ${{ github.event.inputs.allow_overwrite }}
+      LWW_E2E_EMAIL: ${{ secrets.LWW_E2E_EMAIL }}
+      LWW_E2E_PASSWORD: ${{ secrets.LWW_E2E_PASSWORD }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate LWW staging credentials
+        shell: bash
+        run: |
+          if [ -z "${LWW_E2E_URL}" ]; then
+            echo "::error::target_url is required."
+            exit 1
+          fi
+          if [[ "${LWW_E2E_URL}" =~ ^https?://(localhost|127\.0\.0\.1)(:|/|$) ]]; then
+            echo "::error::Use a staging or production-like URL for LWW proof, not localhost."
+            exit 1
+          fi
+          if [ "${LWW_E2E_ALLOW}" != "OVERWRITE_TEST_WORKSPACE" ]; then
+            echo "::error::Set allow_overwrite input to OVERWRITE_TEST_WORKSPACE."
+            exit 1
+          fi
+          if [ -z "${LWW_E2E_EMAIL}" ] || [ -z "${LWW_E2E_PASSWORD}" ]; then
+            echo "::error::Set repository secrets LWW_E2E_EMAIL and LWW_E2E_PASSWORD before running LWW e2e staging."
+            exit 1
+          fi
+          if [[ ! "${LWW_E2E_EMAIL}" =~ (^|[+._-])lww([+._-]|@) ]]; then
+            echo "::error::LWW_E2E_EMAIL must be a dedicated overwrite-safe address containing +lww, .lww, _lww, or -lww."
+            exit 1
+          fi
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run LWW e2e
+        run: npm run test:e2e:lww

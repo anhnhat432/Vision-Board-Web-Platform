@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
 import { toast } from "sonner";
 
 import { post } from "@/lib/api/apiClient";
+import { captureFrontendException } from "@/lib/monitoring/sentry";
 import type { UserProfile } from "@/types/api";
 import { type LoginOptions, useAuth } from "./useAuth";
 import { clearCachedUserProfile, readCachedUserProfile, writeCachedUserProfile } from "./userProfileCache";
@@ -228,6 +229,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // không có cache hoặc lỗi nặng (5xx liên tục).
       const cachedFallback = readCachedUserProfile(bootstrapUid);
       const errorIsRecoverable = isRateLimitError(lastError) || isNetworkError(lastError) || lastTimedOut;
+      captureFrontendException(lastError ?? new Error("Profile bootstrap failed."), {
+        tags: {
+          area: "auth",
+          operation: "profile_bootstrap",
+        },
+        extra: {
+          attempts: PROFILE_BOOTSTRAP_MAX_ATTEMPTS,
+          cacheFallbackAvailable: Boolean(cachedFallback),
+          recoverable: errorIsRecoverable,
+          status: getErrorStatus(lastError),
+          timedOut: lastTimedOut,
+        },
+      });
       if (cachedFallback && errorIsRecoverable) {
         setUserProfile(cachedFallback);
         setIsProfileFromCache(true);

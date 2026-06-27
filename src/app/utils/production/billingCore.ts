@@ -122,6 +122,7 @@ export function applyBillingAccessPayload(
   }
 
   const previousSubscription = data.subscription ?? null;
+  const cancelAtPeriodEnd = payload.subscription?.cancelAtPeriodEnd ?? previousSubscription?.cancelAtPeriodEnd;
   const subscription: Subscription = {
     planCode: resolvedPlanCode,
     status: payload.subscription?.status ?? "active",
@@ -132,6 +133,7 @@ export function applyBillingAccessPayload(
     startedAt: payload.subscription?.startedAt ?? previousSubscription?.startedAt ?? syncedAt,
     renewsAt: payload.subscription?.renewsAt ?? previousSubscription?.renewsAt ?? null,
     canceledAt: payload.subscription?.canceledAt ?? null,
+    ...(cancelAtPeriodEnd === undefined ? {} : { cancelAtPeriodEnd }),
     isLocalTestMode: providerMode === "local_test",
     providerMode,
     externalCustomerId: payload.subscription?.externalCustomerId ?? previousSubscription?.externalCustomerId ?? null,

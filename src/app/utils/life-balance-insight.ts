@@ -46,7 +46,6 @@ function buildHeadline(
       return `${label} ${score}/10 — đang là lĩnh vực thấp nhất của bạn (trung bình ${avgStr}). Cải thiện ở đây tạo chuyển biến rõ nhất.`;
     case "highest":
       return `${label} ${score}/10 — đang là thế mạnh lớn nhất của bạn. Chọn làm trọng tâm để bứt phá lên tầm cao mới.`;
-    case "other":
     default:
       if (score < average) {
         return `${label} ${score}/10 — dưới mức trung bình ${avgStr} của bạn, còn nhiều dư địa để nâng lên.`;

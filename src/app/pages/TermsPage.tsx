@@ -40,7 +40,7 @@ export function TermsPage() {
         <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-app-ink-soft">
           <li>Bạn chịu trách nhiệm bảo mật thông tin đăng nhập tài khoản của mình.</li>
           <li>Không sử dụng dịch vụ cho mục đích bất hợp pháp hoặc gây hại cho người khác.</li>
-          <li>Không tạo nhiều tài khoản để lạm dụng các ưu đãi hoặc bản dùng thử.</li>
+          <li>Không tạo nhiều tài khoản để lạm dụng các ưu đãi hoặc khuyến mại.</li>
           <li>Nội dung bạn tạo trong ứng dụng (mục tiêu, nhật ký) thuộc quyền sở hữu của bạn.</li>
         </ul>
       </section>

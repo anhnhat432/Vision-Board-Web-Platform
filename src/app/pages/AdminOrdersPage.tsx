@@ -1,9 +1,9 @@
-﻿import { CheckSquare, ClipboardList, Download, Loader2, Pencil, RefreshCw } from "lucide-react";
+﻿import { ClipboardList, Download, Loader2, Pencil, RefreshCw } from "lucide-react";
 import { Link } from "react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { useAuthContext } from "@/lib/auth/AuthContext";
-import { type ApiOrder, type ApiOrderStatus, type ApiShippingAddress, type AdminUpdateOrderPayload, adminGetOrders, adminUpdateOrder, adminUpdateOrderStatus } from "@/services/orderService";
+import { type AdminUpdateOrderPayload, type ApiOrder, type ApiOrderStatus, adminGetOrders, adminUpdateOrder, adminUpdateOrderStatus } from "@/services/orderService";
 import { AdminEmptyState } from "../components/admin/AdminEmptyState";
 import { AdminPageHeader } from "../components/admin/AdminPageHeader";
 import { useAdminPendingCounts } from "../components/admin/AdminPendingCountsContext";
@@ -222,7 +222,7 @@ export function AdminOrdersPage() {
   const filteredOrders = useMemo(() => {
     const normalisedQuery = query.trim().toLowerCase();
     const fromMs = dateFrom ? new Date(dateFrom).getTime() : null;
-    const toMs = dateTo ? new Date(dateTo + "T23:59:59").getTime() : null;
+    const toMs = dateTo ? new Date(`${dateTo}T23:59:59`).getTime() : null;
 
     return orders.filter((order) => {
       if (statusFilter !== "all" && order.status !== statusFilter) return false;

@@ -1,18 +1,6 @@
-import {
-  ArrowLeft,
-  Calendar,
-  Loader2,
-  Mail,
-  MapPin,
-  Package,
-  Phone,
-  Receipt,
-  Tag,
-  User,
-} from "lucide-react";
+import { ArrowLeft, Calendar, Loader2, MapPin, Package, Receipt, Tag, User } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useParams, Link } from "react-router";
-import { toast } from "sonner";
 import { type ApiOrder, adminGetOrder } from "@/services/orderService";
 import { AdminPageHeader } from "../components/admin/AdminPageHeader";
 import { AdminStatusBadge } from "../components/admin/AdminStatusBadge";

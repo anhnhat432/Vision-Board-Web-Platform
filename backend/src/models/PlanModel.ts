@@ -24,6 +24,103 @@ const planSchema = new Schema(
       required: true,
       default: Date.now,
     },
+    endDate: {
+      type: Date,
+      required: false,
+    },
+    timezone: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    weekStartsOn: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    totalWeeks: {
+      type: Number,
+      required: false,
+      min: 1,
+    },
+    status: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    goalType: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    templateId: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    templateName: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    lagMetric: {
+      type: Schema.Types.Mixed,
+      required: false,
+    },
+    milestones: {
+      type: Schema.Types.Mixed,
+      required: false,
+    },
+    successEvidence: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    reviewDay: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    week12Outcome: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    weeklyActions: {
+      type: [String],
+      required: false,
+      default: undefined,
+    },
+    successMetric: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    dailyReminderTime: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    tacticLoadPreference: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    preferredDays: {
+      type: [Number],
+      required: false,
+      default: undefined,
+    },
+    personalConstraint: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    reentryCount: {
+      type: Number,
+      required: false,
+      min: 0,
+    },
     clientPlanId: {
       type: String,
       required: false,
@@ -84,6 +181,26 @@ export type PlanDocument = {
   vision: string;
   smartGoalId?: string;
   startDate: Date;
+  endDate?: Date;
+  timezone?: string;
+  weekStartsOn?: string;
+  totalWeeks?: number;
+  status?: string;
+  goalType?: string;
+  templateId?: string;
+  templateName?: string;
+  lagMetric?: unknown;
+  milestones?: unknown;
+  successEvidence?: string;
+  reviewDay?: string;
+  week12Outcome?: string;
+  weeklyActions?: string[];
+  successMetric?: string;
+  dailyReminderTime?: string;
+  tacticLoadPreference?: string;
+  preferredDays?: number[];
+  personalConstraint?: string;
+  reentryCount?: number;
   clientPlanId?: string;
   clientGoalId?: string;
   revision?: number;

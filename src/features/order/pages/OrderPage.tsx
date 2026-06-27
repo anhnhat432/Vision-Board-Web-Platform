@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import { MapPin } from "lucide-react";
+import { CalendarCheck, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/app/components/ui/button";
 import {
@@ -778,9 +778,7 @@ export function OrderPage() {
                   opacity: submitting ? 0.7 : 1,
                 }}
               >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                  <path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/><path d="m9 16 2 2 4-4"/>
-                </svg>
+                <CalendarCheck style={{ width: 15, height: 15, flexShrink: 0 }} strokeWidth={2.2} aria-hidden="true" />
                 Xác nhận đặt đơn
               </button>
             </div>

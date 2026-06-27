@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import { DailyCheckInModel } from "../models/DailyCheckInModel";
+import { DiscountModel } from "../models/DiscountModel";
 import { GoalModel } from "../models/GoalModel";
 import { LeadMetricModel } from "../models/LeadMetricModel";
 import { PlanModel } from "../models/PlanModel";
@@ -172,5 +173,17 @@ describe("sync-ready schema metadata", () => {
     );
     assertIndex(asModelLike(WeekReviewModel), { userId: 1, deletedAt: 1 });
     assertIndex(asModelLike(WeekReviewModel), { userId: 1, syncUpdatedAt: 1, _id: 1 });
+  });
+
+  it("keeps discount code unique through one schema source", () => {
+    const discountModel = asModelLike(DiscountModel);
+    assert.equal(getPathOptions(discountModel, "code").unique, true);
+
+    const codeIndexes = discountModel.schema
+      .indexes()
+      .filter(([keys]) => hasMatchingKeys(keys, { code: 1 }));
+
+    assert.equal(codeIndexes.length, 1);
+    assert.equal(codeIndexes[0]?.[1].unique, true);
   });
 });

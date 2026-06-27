@@ -1,12 +1,14 @@
 import { fireEvent, render, screen } from "@testing-library/react";
-import { MemoryRouter } from "react-router";
+import { MemoryRouter, useLocation } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { AutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
 import type { AutoCloudSyncState } from "@/features/plan12week/hooks/useAutoCloudSync";
 import { SyncStatusPill } from "./SyncStatusPill";
 
-function createSyncState(overrides: Partial<AutoCloudSyncState> = {}): AutoCloudSyncState {
+function createSyncState(
+  overrides: Partial<AutoCloudSyncState> = {},
+): AutoCloudSyncState {
   return {
     loading: false,
     syncing: false,
@@ -26,10 +28,21 @@ function createSyncState(overrides: Partial<AutoCloudSyncState> = {}): AutoCloud
 }
 
 function renderPill(state: AutoCloudSyncState | null, compact = false) {
+  function LocationProbe() {
+    const location = useLocation();
+
+    return (
+      <output data-testid="sync-pill-location">
+        {`${location.pathname}${location.hash}`}
+      </output>
+    );
+  }
+
   return render(
     <MemoryRouter>
       <AutoCloudSyncContext.Provider value={state}>
         <SyncStatusPill compact={compact} />
+        <LocationProbe />
       </AutoCloudSyncContext.Provider>
     </MemoryRouter>,
   );
@@ -39,16 +52,30 @@ describe("SyncStatusPill", () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-05-10T10:00:00.000Z"));
+    localStorage.clear();
   });
 
   afterEach(() => {
+    localStorage.clear();
     vi.useRealTimers();
   });
 
   it.each([
-    ["syncing", createSyncState({ syncing: true, loading: true }), "Đang sao lưu"],
-    ["offline", createSyncState({ online: false }), "Đã lưu trên thiết bị này. Chưa sao lưu"],
-    ["pending", createSyncState({ pendingCount: 3 }), "Đã lưu trên thiết bị này. Chưa sao lưu"],
+    [
+      "syncing",
+      createSyncState({ syncing: true, loading: true }),
+      "Đang sao lưu",
+    ],
+    [
+      "offline",
+      createSyncState({ online: false }),
+      "Đã lưu trên thiết bị này. Chưa sao lưu",
+    ],
+    [
+      "pending",
+      createSyncState({ pendingCount: 3 }),
+      "Đã lưu trên thiết bị này. Chưa sao lưu",
+    ],
   ])("renders the %s state", (_stateName, state, text) => {
     renderPill(state);
 
@@ -68,9 +95,16 @@ describe("SyncStatusPill", () => {
   });
 
   it("uses a compact tooltip without promising multi-device sync", () => {
-    renderPill(createSyncState({ lastSyncedAt: "2026-05-10T09:00:00.000Z", pendingCount: 2 }));
+    renderPill(
+      createSyncState({
+        lastSyncedAt: "2026-05-10T09:00:00.000Z",
+        pendingCount: 2,
+      }),
+    );
 
-    const pill = screen.getByRole("button", { name: "Đã lưu trên thiết bị này. Chưa sao lưu" });
+    const pill = screen.getByRole("button", {
+      name: "Đã lưu trên thiết bị này. Chưa sao lưu",
+    });
 
     expect(pill).toHaveAttribute(
       "title",
@@ -80,11 +114,50 @@ describe("SyncStatusPill", () => {
     expect(pill.getAttribute("title")).not.toMatch(/đa thiết bị|tự đồng bộ/i);
   });
 
+  it("surfaces email-unverified outbox blocker as local-only cloud sync state", () => {
+    const triggerSyncNow = vi.fn();
+    localStorage.setItem(
+      "visionboard_last_outbox_sync",
+      JSON.stringify({
+        at: "2026-05-10T09:59:00.000Z",
+        status: "email_unverified",
+        syncedCount: 0,
+        pendingCount: 2,
+        message: "Email chưa xác thực nên chưa thể sao lưu lên tài khoản.",
+      }),
+    );
+
+    renderPill(createSyncState({ pendingCount: 0, triggerSyncNow }));
+
+    const pill = screen.getByRole("button", {
+      name: "Email chưa xác thực. Chưa sao lưu",
+    });
+
+    expect(pill).toHaveAttribute(
+      "title",
+      "Email chưa xác thực nên chưa thể sao lưu lên tài khoản. 2 thay đổi chưa sao lưu.",
+    );
+    expect(
+      screen.getByText("Email chưa xác thực. Chưa sao lưu"),
+    ).toBeInTheDocument();
+
+    fireEvent.click(pill);
+
+    expect(triggerSyncNow).not.toHaveBeenCalled();
+    expect(screen.getByTestId("sync-pill-location")).toHaveTextContent(
+      "/settings#account-sync",
+    );
+  });
+
   it("runs manual backup when pending changes are online", () => {
     const triggerSyncNow = vi.fn();
     renderPill(createSyncState({ pendingCount: 1, triggerSyncNow }));
 
-    fireEvent.click(screen.getByRole("button", { name: "Đã lưu trên thiết bị này. Chưa sao lưu" }));
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "Đã lưu trên thiết bị này. Chưa sao lưu",
+      }),
+    );
 
     expect(triggerSyncNow).toHaveBeenCalledTimes(1);
   });

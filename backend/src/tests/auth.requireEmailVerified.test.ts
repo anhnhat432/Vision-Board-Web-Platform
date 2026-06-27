@@ -85,6 +85,23 @@ describe("auth requireEmailVerified", () => {
     assert.equal(response.body.errorCode, "EMAIL_NOT_VERIFIED");
   });
 
+  it("returns 403 for unverified email on billing refund request", async () => {
+    const response = await requestJson(
+      createTestApp(),
+      "unverified-token",
+      "/api/billing/orders/VBABCDEFGH/refund-request",
+      {
+        contactEmail: "buyer@example.test",
+        reason: "Need refund",
+        refundAccount: "VCB - 0123456789 - Nguyen Van A",
+      },
+    );
+
+    assert.equal(response.status, 403);
+    assert.equal(response.body.success, false);
+    assert.equal(response.body.errorCode, "EMAIL_NOT_VERIFIED");
+  });
+
   it("returns 403 for unverified email on physical order creation", async () => {
     const response = await requestJson(createTestApp(), "unverified-token", "/api/orders", {
       kitType: "starter",

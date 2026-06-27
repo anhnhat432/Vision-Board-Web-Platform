@@ -27,14 +27,26 @@ export function isBillingNetworkError(error: unknown): boolean {
   return message.includes("network") || message.includes("fetch") || message.includes("kết nối");
 }
 
-function sanitizeBillingUiContext(context: BillingUiErrorContext): Record<string, string | number> {
-  const sanitized: Record<string, string | number> = {
+function getAmountBand(amount: number): string | null {
+  if (!Number.isFinite(amount) || amount < 0) return null;
+  if (amount === 0) return "zero";
+  if (amount < 100_000) return "under_100k";
+  if (amount < 500_000) return "100k_to_499k";
+  if (amount < 1_000_000) return "500k_to_999k";
+  return "1m_plus";
+}
+
+function sanitizeBillingUiContext(context: BillingUiErrorContext): Record<string, boolean | string> {
+  const sanitized: Record<string, boolean | string> = {
     surface: context.surface,
     action: context.action,
   };
 
-  if (context.orderId) sanitized.orderId = context.orderId;
-  if (typeof context.amount === "number" && Number.isFinite(context.amount)) sanitized.amount = context.amount;
+  if (context.orderId) sanitized.hasOrderId = true;
+  if (typeof context.amount === "number") {
+    const amountBand = getAmountBand(context.amount);
+    if (amountBand) sanitized.amountBand = amountBand;
+  }
   if (context.status) sanitized.status = context.status;
 
   return sanitized;

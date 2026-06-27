@@ -46,7 +46,6 @@ export function TwelveWeekSystemNotices({
   activePlanCode,
 
   shouldShowWeeklyReviewBanner,
-  markWeeklyReviewCompleted,
   handleSnoozeWeeklyReview,
 
   hasIncompletePlanStructure,

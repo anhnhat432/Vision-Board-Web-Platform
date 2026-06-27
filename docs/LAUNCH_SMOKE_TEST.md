@@ -170,10 +170,13 @@ recommendation: GO for safe automated subset. Complete skipped manual/flagged ch
 
 For final production go, expected state:
 
+- Staging proof runbook `docs/ops/staging-proof-runbook.md` is followed and evidence is recorded.
 - `failed: 0`.
 - No blocking skips.
 - Authenticated account export and 12-week sync pull pass using a production test user.
+- Email verification staging smoke passes through `.github/workflows/email-verification-e2e-staging.yml` or an equivalent disposable staging run.
 - Destructive account delete either passes against a disposable account or is documented as manually verified in staging.
+- Account-delete staging smoke passes through `.github/workflows/account-delete-e2e-staging.yml` or an equivalent disposable staging run.
 - Valid Casso webhook simulation either passes in staging or is covered by provider dashboard test plan.
 - Manual frontend/billing/sync checklist passes.
 

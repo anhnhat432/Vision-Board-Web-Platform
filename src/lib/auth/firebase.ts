@@ -1,3 +1,4 @@
+import { storeEmailVerificationLastSentAt } from "@/app/utils/email-verification-cooldown";
 import { type FirebaseApp, getApp, getApps, initializeApp } from "firebase/app";
 import {
   type Auth,
@@ -150,6 +151,14 @@ export async function registerWithEmail(email: string, password: string): Promis
 
   const credential = await createUserWithEmailAndPassword(auth, email, password);
   await persistCurrentUserToken(credential.user);
+  if (!credential.user.emailVerified) {
+    try {
+      await firebaseSendEmailVerification(credential.user);
+      storeEmailVerificationLastSentAt(credential.user, Date.now());
+    } catch (error) {
+      console.error("Failed to send initial verification email.", error);
+    }
+  }
   return credential;
 }
 

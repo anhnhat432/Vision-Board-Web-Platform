@@ -4,6 +4,7 @@ import type {
   DataMutationPayload,
 } from "@/features/plan12week/persistence/mutationQueue";
 import type { TwelveWeekImportPayload } from "@/features/plan12week/persistence/twelveWeekImportPayload";
+import type { LagMetric, Milestones, TwelveWeekSystem } from "@/app/utils/storage-types";
 import { delete as deleteRequest, get, post } from "@/lib/api/apiClient";
 
 export type TwelveWeekMutationResultStatus =
@@ -142,6 +143,26 @@ export interface TwelveWeekPulledPlan extends TwelveWeekPullEntityBase {
   vision?: string;
   smartGoalId?: string;
   startDate?: string;
+  endDate?: string;
+  timezone?: string;
+  weekStartsOn?: TwelveWeekSystem["weekStartsOn"];
+  totalWeeks?: number;
+  status?: TwelveWeekSystem["status"];
+  goalType?: string;
+  templateId?: string;
+  templateName?: string;
+  lagMetric?: LagMetric;
+  milestones?: Milestones;
+  successEvidence?: string;
+  reviewDay?: string;
+  week12Outcome?: string;
+  weeklyActions?: string[];
+  successMetric?: string;
+  dailyReminderTime?: string;
+  tacticLoadPreference?: TwelveWeekSystem["tacticLoadPreference"];
+  preferredDays?: number[];
+  personalConstraint?: TwelveWeekSystem["personalConstraint"];
+  reentryCount?: number;
 }
 
 export interface TwelveWeekPulledWeek extends TwelveWeekPullEntityBase {

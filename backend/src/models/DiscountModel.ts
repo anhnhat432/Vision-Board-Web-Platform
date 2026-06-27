@@ -101,7 +101,6 @@ const discountSchema = new Schema(
 );
 
 discountSchema.index({ type: 1, active: 1 });
-discountSchema.index({ code: 1 }, { unique: true });
 discountSchema.index({ startsAt: 1, endsAt: 1 });
 discountSchema.index({ type: 1, startsAt: 1, endsAt: 1, active: 1 });
 

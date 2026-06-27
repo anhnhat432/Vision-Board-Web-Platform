@@ -124,6 +124,26 @@ export interface ImportPlanData {
   smartGoalId: string;
   vision: string;
   startDate: Date;
+  endDate?: Date;
+  timezone?: string;
+  weekStartsOn?: string;
+  totalWeeks?: number;
+  status?: string;
+  goalType?: string;
+  templateId?: string;
+  templateName?: string;
+  lagMetric?: unknown;
+  milestones?: unknown;
+  successEvidence?: string;
+  reviewDay?: string;
+  week12Outcome?: string;
+  weeklyActions?: string[];
+  successMetric?: string;
+  dailyReminderTime?: string;
+  tacticLoadPreference?: string;
+  preferredDays?: number[];
+  personalConstraint?: string;
+  reentryCount?: number;
   importId: string;
   syncUpdatedAt: Date;
 }

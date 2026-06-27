@@ -11,6 +11,7 @@ import {
   Plus,
   Save,
   Sparkles,
+  Map as MapIcon,
   Sticker,
   Star,
   Sun,
@@ -593,7 +594,6 @@ export function VisionBoardEditor() {
   const handleAddSticker = () => {
     if (!board) return;
 
-    const stickerDef = STICKER_DEFS.find((s) => s.id === selectedStickerId);
     const iconWidth = SIZE_PRESETS[selectedIconSize].width;
     const newItem: VisionBoardItem = {
       id: `item_${Date.now()}`,
@@ -890,7 +890,7 @@ export function VisionBoardEditor() {
           <div className="relative z-10 grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_312px]">
             <div className="flex flex-col gap-5">
               <span className="inline-flex items-center gap-[8px] self-start rounded-full bg-app-accent-subtle px-[13px] py-[6px] text-[10px] font-extrabold uppercase tracking-[0.14em] text-app-accent whitespace-nowrap" style={{ marginBottom: 18 }}>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/></svg>
+                <Sparkles className="h-[13px] w-[13px]" aria-hidden="true" />
                 Dear Our Future Studio
               </span>
 
@@ -1486,7 +1486,7 @@ export function VisionBoardEditor() {
                   <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8">
                     <div className="relative z-10 w-full max-w-[380px] rounded-[18px] dark:border-app-line bg-white dark:bg-app-surface px-9 py-10 text-center shadow-[0_30px_60px_-30px_rgba(0,0,0,0.5)] dark:shadow-[0_30px_60px_-30px_rgba(0,0,0,0.8)]">
                       <div className="mx-auto mb-5 flex h-[78px] w-[78px] items-center justify-center rounded-[20px] bg-app-accent-subtle text-app-accent animate-[dof-float_5s_ease-in-out_infinite]">
-                        <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z" /><path d="M15 5.764v15" /><path d="M9 3.236v15" /></svg>
+                        <MapIcon className="h-[38px] w-[38px]" strokeWidth={1.6} aria-hidden="true" />
                       </div>
                       <h2 className="font-serif text-[21px] font-bold leading-tight text-app-ink">
                         Bảng của bạn đang chờ câu chuyện đầu tiên

@@ -1,0 +1,76 @@
+name: Account delete e2e staging
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: Staging/preview URL to test
+        required: true
+      allow_delete:
+        description: Type DELETE_TEST_ACCOUNT to delete the disposable account
+        required: true
+      auth_mode:
+        description: signup or signin
+        required: false
+        default: signin
+
+permissions:
+  contents: read
+
+jobs:
+  account-delete:
+    name: Run account delete e2e against staging
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      ACCOUNT_DELETE_E2E_URL: ${{ github.event.inputs.target_url }}
+      ACCOUNT_DELETE_E2E_ALLOW: ${{ github.event.inputs.allow_delete }}
+      ACCOUNT_DELETE_E2E_AUTH_MODE: ${{ github.event.inputs.auth_mode }}
+      ACCOUNT_DELETE_E2E_EMAIL: ${{ secrets.ACCOUNT_DELETE_E2E_EMAIL }}
+      ACCOUNT_DELETE_E2E_PASSWORD: ${{ secrets.ACCOUNT_DELETE_E2E_PASSWORD }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: ".nvmrc"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate destructive smoke inputs
+        shell: bash
+        run: |
+          if [ -z "${ACCOUNT_DELETE_E2E_URL}" ]; then
+            echo "::error::target_url is required."
+            exit 1
+          fi
+          if [[ "${ACCOUNT_DELETE_E2E_URL}" =~ ^https?://(localhost|127\.0\.0\.1)(:|/|$) ]]; then
+            echo "::error::Use a staging or production-like URL for account-delete proof, not localhost."
+            exit 1
+          fi
+          if [ "${ACCOUNT_DELETE_E2E_ALLOW}" != "DELETE_TEST_ACCOUNT" ]; then
+            echo "::error::Set allow_delete input to DELETE_TEST_ACCOUNT."
+            exit 1
+          fi
+          if [ "${ACCOUNT_DELETE_E2E_AUTH_MODE}" != "signin" ] && [ "${ACCOUNT_DELETE_E2E_AUTH_MODE}" != "signup" ]; then
+            echo "::error::auth_mode must be signin or signup."
+            exit 1
+          fi
+          if [ -z "${ACCOUNT_DELETE_E2E_EMAIL}" ] || [ -z "${ACCOUNT_DELETE_E2E_PASSWORD}" ]; then
+            echo "::error::Set repository secrets ACCOUNT_DELETE_E2E_EMAIL and ACCOUNT_DELETE_E2E_PASSWORD."
+            exit 1
+          fi
+          if [[ ! "${ACCOUNT_DELETE_E2E_EMAIL}" =~ (^|[+._-])delete([+._-]|@) ]]; then
+            echo "::error::ACCOUNT_DELETE_E2E_EMAIL must be a disposable address containing +delete, .delete, _delete, or -delete."
+            exit 1
+          fi
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run account delete e2e
+        run: npm run test:e2e:account-delete

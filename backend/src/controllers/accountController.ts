@@ -17,6 +17,7 @@ import { VisionBoardModel } from "../models/VisionBoardModel";
 import { WeekModel } from "../models/WeekModel";
 import { WeekReviewModel } from "../models/WeekReviewModel";
 import { successResponse } from "../utils/apiResponse";
+import { ApiError } from "../utils/apiError";
 import { withoutTombstones } from "../utils/tombstone";
 
 interface AccountDeleteCounts {
@@ -121,17 +122,22 @@ async function deleteUserCollections(userId: string): Promise<AccountDeleteCount
   };
 }
 
-async function deleteFirebaseAccount(uid: string): Promise<boolean> {
+async function deleteFirebaseAccount(uid: string): Promise<void> {
   try {
     await adminAuth.deleteUser(uid);
-    return true;
+    return;
   } catch (error) {
     if (error && typeof error === "object" && "code" in error && error.code === "auth/user-not-found") {
-      return true;
+      return;
     }
 
-    console.error(`[accountController] Failed to delete Firebase user ${uid}:`, error);
-    return false;
+    console.error("[accountController] Failed to delete Firebase user during account deletion:", error);
+    throw new ApiError(
+      502,
+      "Account data was deleted, but Firebase account removal failed. Local data was kept so the user can retry account deletion.",
+      undefined,
+      "firebase_account_delete_failed",
+    );
   }
 }
 
@@ -230,7 +236,7 @@ export async function deleteAccount(
     const user = requireAuthUser(req);
     const deletedAt = new Date().toISOString();
     const counts = await deleteUserCollections(user.uid);
-    const firebaseAccountDeleted = await deleteFirebaseAccount(user.uid);
+    await deleteFirebaseAccount(user.uid);
 
     res.status(200).json(
       successResponse(
@@ -238,11 +244,9 @@ export async function deleteAccount(
           deleted: true,
           deletedAt,
           counts,
-          firebaseAccountDeleted,
+          firebaseAccountDeleted: true,
         },
-        firebaseAccountDeleted
-          ? "Account and all associated data have been deleted."
-          : "Account data was deleted, but Firebase account removal needs manual retry.",
+        "Account and all associated data have been deleted.",
       ),
     );
   } catch (error) {

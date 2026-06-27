@@ -39,9 +39,10 @@ Mode này:
 - không cần backend billing
 - paywall vẫn hiện được ở dạng mock/demo
 
-### Mode B: Real login + backend sync
+### Mode B: Real login + backend sync staging
 
-Phù hợp khi bạn muốn dùng Firebase login và sync 12-week plan về backend thật.
+Phù hợp khi bạn muốn kiểm tra Firebase login và sync 12-week plan về backend thật trong staging/internal.
+Mode này không dành cho production paid traffic nếu billing backend chưa sẵn sàng.
 
 Thiết lập env:
 
@@ -51,12 +52,13 @@ Thiết lập env:
 - `VITE_FIREBASE_AUTH_DOMAIN=...`
 - `VITE_FIREBASE_PROJECT_ID=...`
 - `VITE_FIREBASE_APP_ID=...`
-- `VITE_BILLING_PROVIDER_MODE=mock_provider`
-- `VITE_BILLING_PROVIDER_LABEL=Mock provider`
+- `VITE_BILLING_PROVIDER_MODE=api_contract`
+- `VITE_BILLING_PROVIDER_LABEL=Internal billing contract`
 
 Mode này:
 
-- app vẫn dùng mock checkout
+- app không dùng mock checkout; mock checkout chỉ thuộc `Mode A` demo/preview
+- nếu billing backend chưa sẵn sàng, checkout phải được xem là unavailable thay vì unlock entitlement giả
 - backend sync chỉ chạy sau khi Firebase configured, user đã đăng nhập và backend profile đã sẵn sàng
 - nếu thiếu Firebase env, Login page sẽ hiện notice cấu hình và backend sync sẽ bị bỏ qua
 
@@ -132,18 +134,18 @@ Sau khi Vercel build xong, kiểm tra nhanh:
 4. Kiểm tra [`12WeekSetup.tsx`](../src/app/pages/12WeekSetup.tsx) có hiện `khung gợi ý`
 5. Kiểm tra [`12WeekSystem.tsx`](../src/app/pages/12WeekSystem.tsx) mở được tab `Hôm nay / Tuần / Tiến độ / Cài đặt`
 6. Mở paywall để chắc [`UpgradePaywallDialog.tsx`](../src/app/components/UpgradePaywallDialog.tsx) không vỡ layout
-7. Nếu đang để `mock_provider`, thử flow mock checkout ở [`MockBillingCheckout.tsx`](../src/app/pages/MockBillingCheckout.tsx)
+7. Nếu đang deploy `Mode A` demo với `mock_provider`, thử flow mock checkout ở [`MockBillingCheckout.tsx`](../src/app/pages/MockBillingCheckout.tsx). Không chạy bước này cho real-mode production.
 
 ## 6. Khuyến nghị cho bản hiện tại
 
-Với tình trạng dự án bây giờ, cách an toàn nhất là deploy theo `Mode A` trước:
+Với preview/marketing demo, cách nhanh nhất là deploy theo `Mode A`:
 
 - app lên nhanh
 - không phụ thuộc backend
 - vẫn demo được `Free` và `Plus`
 
-Khi cần login và backend sync thật thì chuyển sang `Mode B` sau khi Firebase/Vercel env đã đầy đủ.
-Khi có backend billing thật thì mới chuyển sang `Mode C`.
+Khi cần staging có login và backend sync thật thì chuyển sang `Mode B` sau khi Firebase/Vercel env đã đầy đủ.
+Khi cho người dùng thật hoặc soft launch production, dùng `Mode C`/mục 7 với `VITE_APP_MODE=real` và `VITE_BILLING_PROVIDER_MODE=api_contract`.
 
 ## 7. Required production env vars before soft launch
 

@@ -22,6 +22,7 @@
 import { spawn } from "node:child_process";
 
 const BASE_URL = (process.env.CORE_QUALITY_URL ?? process.env.MVP1_SMOKE_URL ?? "http://localhost:5173").replace(/\/$/, "");
+const IS_GITHUB_ACTIONS = process.env.GITHUB_ACTIONS === "true";
 const TIMESTAMP = new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
 const SESSION = process.env.CORE_QUALITY_SESSION ?? `core-quality-${TIMESTAMP}`;
 const GOAL_TITLE = `Core quality smoke ${TIMESTAMP}`;
@@ -33,6 +34,19 @@ const WEEKLY_REVIEW_PRIORITY = `Smoke priority next week ${TIMESTAMP}`;
 
 function log(message) {
   console.log(`[core-quality] ${message}`);
+}
+
+function assertTargetSafeForEnvironment() {
+  if (!IS_GITHUB_ACTIONS) return;
+
+  if (!process.env.CORE_QUALITY_URL?.trim()) {
+    throw new Error("CORE_QUALITY_URL is required in GitHub Actions so deployed core-funnel proof cannot fall back to localhost.");
+  }
+
+  const normalizedUrl = BASE_URL.toLowerCase();
+  if (normalizedUrl.includes("localhost") || normalizedUrl.includes("127.0.0.1")) {
+    throw new Error("Refusing to run deployed core-funnel proof against localhost. Use a staging or production-like target URL.");
+  }
 }
 
 function sleep(ms) {
@@ -712,6 +726,7 @@ async function runStep(label, task) {
 }
 
 async function main() {
+  assertTargetSafeForEnvironment();
   log(`Target: ${BASE_URL}`);
   log(`Browser session: ${SESSION}`);
 

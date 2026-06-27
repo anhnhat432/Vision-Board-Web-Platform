@@ -75,9 +75,11 @@ export function resolveAuthErrorMessage(error: unknown): string {
       return "Email này đã có tài khoản. Hãy chuyển sang đăng nhập.";
     case "auth/invalid-email":
       return "Email không hợp lệ.";
-    case "auth/invalid-credential":
     case "auth/user-not-found":
+      return "Không tìm thấy tài khoản với email này. Hãy kiểm tra lại email hoặc tạo tài khoản mới.";
     case "auth/wrong-password":
+      return "Mật khẩu không đúng. Hãy thử lại hoặc dùng Quên mật khẩu để đặt lại.";
+    case "auth/invalid-credential":
       return "Email hoặc mật khẩu không đúng.";
     case "auth/weak-password":
       return "Mật khẩu quá yếu. Hãy dùng ít nhất 6 ký tự.";

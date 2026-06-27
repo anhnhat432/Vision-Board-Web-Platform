@@ -9,8 +9,26 @@ const authContextMock = vi.hoisted(() => ({
   useAuthContext: vi.fn(),
 }));
 
+const firebaseAuthMock = vi.hoisted(() => ({
+  loginWithGoogle: vi.fn(),
+  resetPassword: vi.fn(),
+}));
+
+const appModeMock = vi.hoisted(() => ({
+  isDemoMode: vi.fn(() => false),
+}));
+
 vi.mock("@/lib/auth/AuthContext", () => ({
   useAuthContext: authContextMock.useAuthContext,
+}));
+
+vi.mock("@/lib/auth/firebase", () => ({
+  loginWithGoogle: firebaseAuthMock.loginWithGoogle,
+  resetPassword: firebaseAuthMock.resetPassword,
+}));
+
+vi.mock("@/app/utils/app-mode", () => ({
+  isDemoMode: appModeMock.isDemoMode,
 }));
 
 function setAuthContext(overrides: Record<string, unknown> = {}) {
@@ -35,9 +53,24 @@ function DestinationProbe() {
   return <div data-testid="destination">{`${location.pathname}${location.search}${location.hash}`}</div>;
 }
 
+function normalizeText(text: string) {
+  return text
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .replace(/[\u0111\u0110]/g, "d")
+    .toLowerCase();
+}
+
+function findByNormalizedText(elements: HTMLElement[], needle: string) {
+  return elements.find((element) => normalizeText(element.textContent ?? "").includes(needle));
+}
+
 describe("LoginPage", () => {
   beforeEach(() => {
     setAuthContext();
+    firebaseAuthMock.loginWithGoogle.mockReset();
+    firebaseAuthMock.resetPassword.mockReset();
+    appModeMock.isDemoMode.mockReturnValue(false);
   });
 
   it("keeps authentication setup errors visible in the form", () => {
@@ -51,6 +84,20 @@ describe("LoginPage", () => {
     );
 
     expect(screen.getByRole("alert")).toHaveTextContent(message);
+  });
+
+  it("keeps specific email auth errors visible in the form", () => {
+    const message = "Không tìm thấy tài khoản với email này. Hãy kiểm tra lại email hoặc tạo tài khoản mới.";
+    setAuthContext({ error: message });
+
+    render(
+      <MemoryRouter initialEntries={["/login"]}>
+        <LoginPage />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole("alert")).toHaveTextContent("Không tìm thấy tài khoản");
+    expect(screen.getByRole("alert")).toHaveTextContent("tạo tài khoản mới");
   });
 
   it("redirects an authenticated user back to the requested route", async () => {
@@ -194,6 +241,122 @@ describe("LoginPage", () => {
     expect(screen.getAllByPlaceholderText("••••••••")).toHaveLength(1);
     expect(screen.queryByLabelText("Xác nhận mật khẩu")).not.toBeInTheDocument();
     expect(screen.queryByText("Ít nhất 8 ký tự")).not.toBeInTheDocument();
+  });
+
+  it("opens and closes reset-password card from sign-in mode", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter initialEntries={["/login"]}>
+        <LoginPage />
+      </MemoryRouter>,
+    );
+
+    const forgotPasswordButton = findByNormalizedText(screen.getAllByRole("button"), "quen mat khau");
+    expect(forgotPasswordButton).toBeDefined();
+
+    await user.click(forgotPasswordButton!);
+
+    expect(document.querySelector("#reset-email")).toBeInTheDocument();
+    expect(findByNormalizedText(screen.getAllByRole("button"), "gui link")).toBeDefined();
+
+    const closeButton = findByNormalizedText(screen.getAllByRole("button"), "dong");
+    expect(closeButton).toBeDefined();
+
+    await user.click(closeButton!);
+
+    expect(document.querySelector("#reset-email")).not.toBeInTheDocument();
+  });
+
+  it("submits reset-password request and shows success state", async () => {
+    firebaseAuthMock.resetPassword.mockResolvedValue(undefined);
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter initialEntries={["/login"]}>
+        <LoginPage />
+      </MemoryRouter>,
+    );
+
+    const forgotPasswordButton = findByNormalizedText(screen.getAllByRole("button"), "quen mat khau");
+    expect(forgotPasswordButton).toBeDefined();
+    await user.click(forgotPasswordButton!);
+
+    const resetEmailInput = document.querySelector("#reset-email") as HTMLInputElement | null;
+    expect(resetEmailInput).not.toBeNull();
+    await user.type(resetEmailInput!, "reset@example.test");
+
+    const sendButton = findByNormalizedText(screen.getAllByRole("button"), "gui link");
+    expect(sendButton).toBeDefined();
+    await user.click(sendButton!);
+
+    expect(firebaseAuthMock.resetPassword).toHaveBeenCalledWith("reset@example.test");
+    expect(await screen.findByText("Đã gửi email đặt lại mật khẩu")).toBeInTheDocument();
+    expect(screen.getByText(/reset@example\.test/i)).toBeInTheDocument();
+  });
+
+  it("shows actionable missing-account feedback in reset-password card", async () => {
+    firebaseAuthMock.resetPassword.mockRejectedValue({ code: "auth/user-not-found" });
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter initialEntries={["/login"]}>
+        <LoginPage />
+      </MemoryRouter>,
+    );
+
+    const forgotPasswordButton = findByNormalizedText(screen.getAllByRole("button"), "quen mat khau");
+    expect(forgotPasswordButton).toBeDefined();
+    await user.click(forgotPasswordButton!);
+
+    const resetEmailInput = document.querySelector("#reset-email") as HTMLInputElement | null;
+    expect(resetEmailInput).not.toBeNull();
+    await user.type(resetEmailInput!, "missing@example.test");
+
+    const sendButton = findByNormalizedText(screen.getAllByRole("button"), "gui link");
+    expect(sendButton).toBeDefined();
+    await user.click(sendButton!);
+
+    expect(firebaseAuthMock.resetPassword).toHaveBeenCalledWith("missing@example.test");
+    expect(await screen.findByRole("alert")).toHaveTextContent("Không tìm thấy tài khoản với email này.");
+  });
+
+  it("shows throttling feedback in reset-password card", async () => {
+    firebaseAuthMock.resetPassword.mockRejectedValue({ code: "auth/too-many-requests" });
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter initialEntries={["/login"]}>
+        <LoginPage />
+      </MemoryRouter>,
+    );
+
+    const forgotPasswordButton = findByNormalizedText(screen.getAllByRole("button"), "quen mat khau");
+    expect(forgotPasswordButton).toBeDefined();
+    await user.click(forgotPasswordButton!);
+
+    const resetEmailInput = document.querySelector("#reset-email") as HTMLInputElement | null;
+    expect(resetEmailInput).not.toBeNull();
+    await user.type(resetEmailInput!, "busy@example.test");
+
+    const sendButton = findByNormalizedText(screen.getAllByRole("button"), "gui link");
+    expect(sendButton).toBeDefined();
+    await user.click(sendButton!);
+
+    expect(firebaseAuthMock.resetPassword).toHaveBeenCalledWith("busy@example.test");
+    expect(await screen.findByRole("alert")).toHaveTextContent("Quá nhiều yêu cầu. Vui lòng thử lại sau.");
+  });
+
+  it("shows terms and privacy links in sign-up mode", () => {
+    render(
+      <MemoryRouter initialEntries={["/login?mode=signup"]}>
+        <LoginPage />
+      </MemoryRouter>,
+    );
+
+    const links = screen.getAllByRole("link");
+    expect(links.some((link) => link.getAttribute("href") === "/terms")).toBe(true);
+    expect(links.some((link) => link.getAttribute("href") === "/privacy")).toBe(true);
   });
 
   it("ignores unsafe login next redirects", async () => {

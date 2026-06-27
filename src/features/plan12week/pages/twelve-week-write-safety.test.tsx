@@ -173,7 +173,7 @@ describe("12-week write-path safety", () => {
 
     renderAppRoute("/12-week-system");
     const user = userEvent.setup();
-    const noteInput = await screen.findByRole("textbox", { name: /note/i });
+    const noteInput = await screen.findByRole("textbox", { name: /Ghi chú nhanh/i });
     const originalSetItem = Storage.prototype.setItem;
     const setItemSpy = vi.spyOn(Storage.prototype, "setItem").mockImplementation(function (
       this: Storage,
