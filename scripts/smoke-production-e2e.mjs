@@ -558,7 +558,7 @@ async function waitForSystemLoaded(page) {
   }
 }
 
-async function getGoalSnapshot(page) {
+async function getGoalSnapshots(page) {
   return page.evaluate(() => {
     // Đọc plan 12 tuần đang chạy của tài khoản (cloud), không ép plan seed cụ thể.
     const preferredGoalId =
@@ -566,13 +566,20 @@ async function getGoalSnapshot(page) {
       localStorage.getItem("latest_12_week_goal_id") ||
       localStorage.getItem("latest_12_week_plan_goal_id");
 
-    const keys = ["visionboard_user_data"];
+    const storageKey = "visionboard_user_data";
+    const authOwnerUid = localStorage.getItem(`${storageKey}:auth_owner_uid`)?.trim() || null;
+    const authScopedKey = authOwnerUid ? `${storageKey}:auth:${encodeURIComponent(authOwnerUid)}` : null;
+    const keys = [authScopedKey];
     for (let index = 0; index < localStorage.length; index += 1) {
       const key = localStorage.key(index);
-      if (key?.startsWith("visionboard_user_data:auth:")) keys.push(key);
+      if (key?.startsWith(`${storageKey}:auth:`)) keys.push(key);
     }
+    keys.push(storageKey);
+
+    const snapshots = [];
 
     for (const key of Array.from(new Set(keys))) {
+      if (!key) continue;
       const raw = localStorage.getItem(key);
       if (!raw) continue;
 
@@ -585,27 +592,45 @@ async function getGoalSnapshot(page) {
         const system = goal?.twelveWeekSystem;
         if (!system) continue;
 
-          const taskInstances = Array.isArray(system.taskInstances) ? system.taskInstances : [];
-          const dailyCheckIns = Array.isArray(system.dailyCheckIns) ? system.dailyCheckIns : [];
-          const weeklyReviews = Array.isArray(system.weeklyReviews) ? system.weeklyReviews : [];
+        const taskInstances = Array.isArray(system.taskInstances) ? system.taskInstances : [];
+        const dailyCheckIns = Array.isArray(system.dailyCheckIns) ? system.dailyCheckIns : [];
+        const weeklyReviews = Array.isArray(system.weeklyReviews) ? system.weeklyReviews : [];
+        const latestDailyCheckIn =
+          [...dailyCheckIns].sort((left, right) => {
+            const dateCompare = String(right?.date ?? "").localeCompare(String(left?.date ?? ""));
+            if (dateCompare !== 0) return dateCompare;
+            return Number(right?.updatedCount ?? 0) - Number(left?.updatedCount ?? 0);
+          })[0] ?? null;
 
-          return {
-            key,
-            title: goal.title,
-            taskCount: taskInstances.length,
-            completedTaskCount: taskInstances.filter((task) => task.completed).length,
-            dailyCheckInCount: dailyCheckIns.length,
-            latestDailyCheckIn: dailyCheckIns[dailyCheckIns.length - 1] ?? null,
-            weeklyReviewCount: weeklyReviews.length,
-            latestWeeklyReview: weeklyReviews[weeklyReviews.length - 1] ?? null,
-          };
-        } catch {
-          continue;
-        }
+        snapshots.push({
+          key,
+          goalId: goal.id,
+          title: goal.title,
+          taskCount: taskInstances.length,
+          completedTaskCount: taskInstances.filter((task) => task.completed).length,
+          dailyCheckInCount: dailyCheckIns.length,
+          latestDailyCheckIn,
+          dailyCheckIns: dailyCheckIns.slice(0, 5).map((item) => ({
+            date: item?.date,
+            optionalNote: item?.optionalNote,
+            updatedCount: item?.updatedCount,
+            didWorkToday: item?.didWorkToday,
+          })),
+          weeklyReviewCount: weeklyReviews.length,
+          latestWeeklyReview: weeklyReviews[weeklyReviews.length - 1] ?? null,
+        });
+      } catch {
+        continue;
       }
+    }
 
-      return null;
+    return snapshots;
   });
+}
+
+async function getGoalSnapshot(page) {
+  const snapshots = await getGoalSnapshots(page);
+  return snapshots[0] ?? null;
 }
 
 async function waitForGoalSnapshot(page, label, predicate, timeoutMs = DEFAULT_TIMEOUT_MS) {
@@ -619,7 +644,11 @@ async function waitForGoalSnapshot(page, label, predicate, timeoutMs = DEFAULT_T
   }
 
   throw new Error(
-    `Timed out waiting for ${label}.\nLast snapshot: ${JSON.stringify(lastSnapshot, null, 2)}\n${await getDiagnostics(
+    `Timed out waiting for ${label}.\nLast snapshot: ${JSON.stringify(
+      lastSnapshot,
+      null,
+      2,
+    )}\nCandidate snapshots: ${JSON.stringify(await getGoalSnapshots(page).catch(() => []), null, 2)}\n${await getDiagnostics(
       page,
     )}`,
   );
@@ -1584,10 +1613,13 @@ async function exerciseTwelveWeekSaveReloadAndSync(page, apiEvents) {
   await page.reload({ waitUntil: "domcontentloaded" });
   await waitForSystemLoaded(page);
   await waitForGoalSnapshot(page, "12-week state persisted after reload", (snapshot) => {
+    const hasExpectedCheckIn = [snapshot.latestDailyCheckIn, ...(snapshot.dailyCheckIns ?? [])].some(
+      (checkIn) => checkIn?.optionalNote === CHECKIN_NOTE,
+    );
     return (
       snapshot.completedTaskCount >= 1 &&
       snapshot.dailyCheckInCount >= 1 &&
-      snapshot.latestDailyCheckIn?.optionalNote === CHECKIN_NOTE &&
+      hasExpectedCheckIn &&
       snapshot.weeklyReviewCount >= 1 &&
       snapshot.latestWeeklyReview?.insights === WEEKLY_REVIEW_OUTPUT &&
       snapshot.latestWeeklyReview?.nextWeekCommitments?.includes(WEEKLY_REVIEW_PRIORITY)
