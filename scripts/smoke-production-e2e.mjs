@@ -780,6 +780,16 @@ async function clickButtonByNormalizedText(page, normalizedNeedle) {
   return clicked;
 }
 
+async function clickButtonByAnyNormalizedText(page, normalizedNeedles) {
+  for (const normalizedNeedle of normalizedNeedles) {
+    if (await tryClickButtonByNormalizedText(page, normalizedNeedle)) {
+      return normalizedNeedle;
+    }
+  }
+
+  throw new Error(`Could not find enabled button containing normalized text: ${normalizedNeedles.join(" | ")}`);
+}
+
 async function waitForEnabledButtonByNormalizedText(page, normalizedNeedle, timeoutMs = DEFAULT_TIMEOUT_MS) {
   return waitForCondition(
     `enabled button containing normalized text: ${normalizedNeedle}`,
@@ -1804,7 +1814,7 @@ async function exerciseTwelveWeekSaveReloadAndSync(page, apiEvents) {
   });
 
   await page.locator("#daily-note").fill(CHECKIN_NOTE);
-  await clickButtonByNormalizedText(page, "luu check-in hom nay");
+  await clickButtonByAnyNormalizedText(page, ["luu check-in hom nay", "cap nhat check-in hom nay"]);
   await waitForGoalSnapshot(page, "daily check-in in local storage", (snapshot) => {
     return snapshot.dailyCheckInCount >= 1;
   });

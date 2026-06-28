@@ -2,7 +2,7 @@ import { fireEvent, render, screen, waitFor, within } from "@testing-library/rea
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { AutoCloudSyncState } from "@/features/plan12week/hooks/useAutoCloudSync";
-import { activateAuthenticatedUserData, getUserData, saveUserData } from "../utils/storage";
+import { activateAuthenticatedUserData, getUserData, resetUserDataCache, saveUserData } from "../utils/storage";
 import { getScopedUserDataStorageKey } from "../utils/storage-auth-scope";
 import {
   ANONYMOUS_USER_DATA_STORAGE_KEY,
@@ -333,6 +333,7 @@ function renderAppShell(initialEntry: string) {
 describe("RootLayout onboarding redirect", () => {
   beforeEach(() => {
     localStorage.clear();
+    resetUserDataCache();
     localStorage.setItem("visionboard_new_user_guide_seen_at", new Date().toISOString());
     backendHydrationMock.value = {
       loading: false,
@@ -428,9 +429,8 @@ describe("RootLayout onboarding redirect", () => {
     });
     const { router } = renderAppShell("/goals");
 
-    expect(await screen.findByTestId("goals-page")).toBeInTheDocument();
+    await waitFor(() => expect(router.state.location.pathname).toBe("/goals"));
     expect(screen.queryByText("Đang mở workspace của bạn")).not.toBeInTheDocument();
-    expect(router.state.location.pathname).toBe("/goals");
   });
 
   it("keeps the workspace usable while backend data is hydrating", async () => {
@@ -482,6 +482,26 @@ describe("RootLayout onboarding redirect", () => {
     await new Promise((resolve) => window.setTimeout(resolve, 750));
 
     expect(pageTourMock.startPageTour).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["/vision-board", "vision-board-page"],
+    ["/gallery", "gallery-page"],
+  ])("does not auto-open the new user guide on %s", async (path, testId) => {
+    localStorage.removeItem("visionboard_new_user_guide_seen_at");
+    seedAuthenticatedCompletedWorkspace();
+    setAuthContext({
+      user: { uid: "user_test", email: "fresh@example.com" },
+      userProfile: { id: "profile_test", email: "fresh@example.com" },
+    });
+
+    renderAppShell(path);
+
+    expect(await screen.findByTestId(testId)).toBeInTheDocument();
+    await new Promise((resolve) => window.setTimeout(resolve, 50));
+
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(localStorage.getItem("visionboard_new_user_guide_seen_at")).toBeNull();
   });
 
   it("does not auto-open the new user guide again after it has been seen", async () => {

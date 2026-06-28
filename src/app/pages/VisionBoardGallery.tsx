@@ -175,7 +175,7 @@ export function VisionBoardGallery() {
 
   return (
     <div className="stack-section mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8 bg-grad-vision rounded-[var(--r-soft)]">
-      <ScreenGuide {...SCREEN_GUIDES.visionBoardGallery} autoOpen className="mb-4" />
+      <ScreenGuide {...SCREEN_GUIDES.visionBoardGallery} className="mb-4" />
       <AlertDialog
         open={Boolean(boardToDelete)}
         onOpenChange={(open) => {

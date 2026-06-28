@@ -1,4 +1,5 @@
 import { BookOpen, Check, ChevronDown, ChevronUp, Sparkles, Target } from "lucide-react";
+import type { ReactNode } from "react";
 import { useState } from "react";
 import { VisionMapIllustration } from "@/app/components/illustrations";
 import { hasScoredLifeBalance } from "@/app/utils/core-flow-guard";
@@ -10,6 +11,7 @@ interface NewUserSetupViewProps {
   userData: UserData;
   displayName: string;
   onContinue: (href: string) => void;
+  companion?: ReactNode;
 }
 
 interface SetupStep {
@@ -88,7 +90,7 @@ const getStepTheme = (index: number): CardStepTheme => {
   };
 };
 
-export function NewUserSetupView({ userData, displayName, onContinue }: NewUserSetupViewProps) {
+export function NewUserSetupView({ userData, displayName, onContinue, companion }: NewUserSetupViewProps) {
   const [showSamplePlan, setShowSamplePlan] = useState(false);
   const steps = buildSetupSteps(userData);
   const nextStep = steps.find((step) => !step.completed) ?? steps[steps.length - 1];
@@ -120,36 +122,40 @@ export function NewUserSetupView({ userData, displayName, onContinue }: NewUserS
           <VisionMapIllustration className="w-full h-full object-contain" />
         </div>
 
-        <div className="relative z-10 space-y-4 max-w-3xl">
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-app-status-warning/30 bg-app-status-warning/5 px-3 py-0.5 text-[9px] font-bold uppercase tracking-wide text-app-status-warning shadow-sm">
-            Studio Ước Mơ & Thực Thi
-          </span>
+        <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+          <div className="space-y-4 max-w-3xl">
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-app-status-warning/30 bg-app-status-warning/5 px-3 py-0.5 text-[9px] font-bold uppercase tracking-wide text-app-status-warning shadow-sm">
+              Studio Ước Mơ & Thực Thi
+            </span>
 
-          <h1 className="font-serif text-3xl font-semibold leading-[1.25] tracking-tight text-app-ink sm:text-[2.5rem]">
-            Chào {capitalizeVietnameseName(displayName)}, hãy thiết lập <br className="hidden sm:inline" />{" "}
-            <span className="underline decoration-app-accent/55 underline-offset-4">
-              chu kỳ 12 tuần
-            </span>{" "}
-            đầu tiên
-          </h1>
+            <h1 className="font-serif text-3xl font-semibold leading-[1.25] tracking-tight text-app-ink sm:text-[2.5rem]">
+              Chào {capitalizeVietnameseName(displayName)}, hãy thiết lập <br className="hidden sm:inline" />{" "}
+              <span className="underline decoration-app-accent/55 underline-offset-4">
+                chu kỳ 12 tuần
+              </span>{" "}
+              đầu tiên
+            </h1>
 
-          <p className="text-xs sm:text-sm font-medium leading-relaxed text-app-ink-soft font-serif italic max-w-2xl">
-            Biến mục tiêu lớn thành kế hoạch 12 tuần và việc cần làm mỗi ngày, để bạn biết bắt đầu từ đâu.
-          </p>
+            <p className="text-xs sm:text-sm font-medium leading-relaxed text-app-ink-soft font-serif italic max-w-2xl">
+              Biến mục tiêu lớn thành kế hoạch 12 tuần và việc cần làm mỗi ngày, để bạn biết bắt đầu từ đâu.
+            </p>
 
-          <div className="pt-2 flex items-center">
-            <div className="inline-flex items-center gap-2 rounded-full border border-app-line bg-app-surface/90 px-3.5 py-1 text-[11px] font-semibold text-app-ink-soft shadow-sm">
-              <Sparkles className="h-3.5 w-3.5 text-app-accent" />
-              <span>Cần xem hướng dẫn nhanh?</span>
-              <button
-                type="button"
-                onClick={() => window.dispatchEvent(new Event("visionboard:open-guide"))}
-                className="ml-1 font-bold text-app-accent hover:text-app-accent-hover underline underline-offset-2 transition-colors cursor-pointer"
-              >
-                Mở cẩm nang →
-              </button>
+            <div className="pt-2 flex items-center">
+              <div className="inline-flex items-center gap-2 rounded-full border border-app-line bg-app-surface/90 px-3.5 py-1 text-[11px] font-semibold text-app-ink-soft shadow-sm">
+                <Sparkles className="h-3.5 w-3.5 text-app-accent" />
+                <span>Cần xem hướng dẫn nhanh?</span>
+                <button
+                  type="button"
+                  onClick={() => window.dispatchEvent(new Event("visionboard:open-guide"))}
+                  className="ml-1 font-bold text-app-accent hover:text-app-accent-hover underline underline-offset-2 transition-colors cursor-pointer"
+                >
+                  Mở cẩm nang →
+                </button>
+              </div>
             </div>
           </div>
+
+          {companion ? <div className="flex justify-end lg:pt-1">{companion}</div> : null}
         </div>
       </section>
 

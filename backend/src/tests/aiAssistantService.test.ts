@@ -212,7 +212,7 @@ Hôm nay bạn đã hoàn thành nhiệm vụ học thuộc 10 phút. Hãy tiế
     const rawText = `Mình sẽ thêm task này.
 
 \`\`\`action
-{"type":"create_task","payload":{"title":"Đọc 5 trang","scheduledDate":"today",},"label":"Thêm task"}
+{"type":"create_task","payload":{"title":"Đọc 5 trang","scheduledDate":today},"label":"Thêm task"}
 \`\`\``;
 
     const result = parseAndValidateAIResponse(rawText);
@@ -545,7 +545,7 @@ describe("aiAssistantService processAIAssistantRequest", () => {
           return new Response(JSON.stringify({
             choices: [{
               message: {
-                content: `Mình sẽ thêm task này.\n\n\`\`\`action\n{"type":"create_task","payload":{"title":"Đọc 5 trang","scheduledDate":"today",},"label":"Thêm task"}\n\`\`\``,
+                content: `Mình sẽ thêm task này.\n\n\`\`\`action\n{"type":"create_task","payload":{"title":"Đọc 5 trang","scheduledDate":today},"label":"Thêm task"}\n\`\`\``,
               },
             }],
           }), { status: 200, headers: { "Content-Type": "application/json" } });

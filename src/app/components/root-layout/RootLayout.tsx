@@ -513,7 +513,10 @@ export function RootLayout() {
   const accountPlanLabel = currentAccountPlanCode === "PLUS" ? "Plus" : "Miễn phí";
   const accountAvatarLabel = (accountLabel || accountEmail || "A").trim().slice(0, 1).toUpperCase();
   const accountStatus = userProfileError ? "Lỗi hồ sơ" : accountEmail || "Tài khoản đã đăng nhập";
-  const isPublicLanding = !user && normalizePathname(location.pathname) === "/";
+  const normalizedPathname = normalizePathname(location.pathname);
+  const isPublicLanding = !user && normalizedPathname === "/";
+  const suppressAutoWelcomeGuide =
+    normalizedPathname.startsWith("/vision-board") || normalizedPathname.startsWith("/gallery");
   const commandPaletteGoals: CommandPaletteGoal[] = (guideUserData.goals ?? []).slice(0, 12).map((goal) => ({
     id: goal.id,
     title: goal.title || "Mục tiêu chưa đặt tên",
@@ -557,6 +560,7 @@ export function RootLayout() {
     if (
       typeof window === "undefined" ||
       isPublicLanding ||
+      suppressAutoWelcomeGuide ||
       isSignedOutVisitor ||
       shouldShowWorkspaceGate ||
       shouldWaitForWorkspace ||
@@ -570,7 +574,7 @@ export function RootLayout() {
     setGuideUserData(getUserData());
     setIsGuideOpen(true);
     markNewUserGuideSeen();
-  }, [isPublicLanding, isSignedOutVisitor, shouldShowWorkspaceGate, shouldWaitForWorkspace]);
+  }, [isPublicLanding, isSignedOutVisitor, shouldShowWorkspaceGate, shouldWaitForWorkspace, suppressAutoWelcomeGuide]);
 
   useEffect(() => {
     if (

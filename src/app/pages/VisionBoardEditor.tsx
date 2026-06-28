@@ -314,7 +314,6 @@ export function VisionBoardEditor() {
     });
     setThemeId("aurora");
     setIsResolvingBoard(false);
-    setIsInitDialogOpen(true);
   }, [id, navigate]);
 
   const boardStats = useMemo(() => {
@@ -707,7 +706,7 @@ export function VisionBoardEditor() {
 
   return (
     <div className="stack-section mx-auto max-w-7xl px-4 pb-12 pt-6 sm:px-6 lg:px-8" style={{ background: "var(--app-bg-subtle)" }}>
-      <ScreenGuide {...SCREEN_GUIDES.visionBoardEditor} autoOpen className="mb-4" />
+      <ScreenGuide {...SCREEN_GUIDES.visionBoardEditor} className="mb-4" />
       <UpgradePaywallDialog
         open={isVisionBoardLimitPaywallOpen}
         onOpenChange={setIsVisionBoardLimitPaywallOpen}

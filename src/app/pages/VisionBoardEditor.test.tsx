@@ -168,10 +168,7 @@ function renderEditor(initialEntry = "/vision-board") {
 }
 
 async function openAddDialog(user: ReturnType<typeof userEvent.setup>) {
-  // Đóng dialog khởi tạo tự động bằng cách click "Tạo bảng trống"
-  const blankBoardBtn = await screen.findByRole("button", { name: "Tạo bảng trống" });
-  await user.click(blankBoardBtn);
-  await user.click(await screen.findByRole("button", { name: "Hoặc tự thêm phần tử" }));
+  await user.click(await screen.findByRole("button", { name: "Thêm phần tử" }));
 }
 
 function getCanvasItems(): VisionBoardItem[] {
@@ -189,14 +186,22 @@ describe("VisionBoardEditor add dialog", () => {
     setUserData({ goals: [createGoal({ id: "goal_1" }), createGoal({ id: "goal_2", title: "Ngủ sâu hơn" })] });
   });
 
-  it("renders four add tabs", async () => {
+  it("does not auto-open the initial setup popup for a new board", async () => {
+    renderEditor();
+
+    expect(await screen.findByRole("button", { name: "Thêm phần tử" })).toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("renders add tabs", async () => {
     const user = userEvent.setup();
     renderEditor();
 
     await openAddDialog(user);
 
-    expect(screen.getAllByRole("tab")).toHaveLength(4);
+    expect(screen.getAllByRole("tab")).toHaveLength(5);
     expect(screen.getByRole("tab", { name: /Mục tiêu/ })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Sticker" })).toBeInTheDocument();
   });
 
   it("renders goals in the goal card tab", async () => {
@@ -269,6 +274,7 @@ describe("VisionBoardEditor add dialog", () => {
     renderEditor();
 
     await openAddDialog(user);
+    await user.click(screen.getByRole("button", { name: /Life area/ }));
     await user.click(screen.getByRole("button", { name: "Sức khỏe" }));
     await user.click(screen.getByRole("button", { name: "Polaroid" }));
     await user.type(screen.getByPlaceholderText("https://example.com/my-image.jpg"), "https://example.com/a.jpg");
@@ -300,7 +306,7 @@ describe("VisionBoardEditor add dialog", () => {
       expect.objectContaining({
         type: "quote",
         content: "Tự do là chọn lựa",
-        style: { sizePreset: "L", quoteFont: "handwriting" },
+        style: expect.objectContaining({ sizePreset: "L", quoteFont: "handwriting" }),
       }),
     );
   });

@@ -1,4 +1,5 @@
 import { ArrowRight, ListChecks, ListTodo } from "lucide-react";
+import type { ReactNode } from "react";
 import { Link } from "react-router";
 
 import type { TwelveWeekTaskInstance } from "@/app/utils/storage";
@@ -8,9 +9,11 @@ interface TodayMiniCardProps {
   tasks: TwelveWeekTaskInstance[];
   completedCount: number;
   totalCount: number;
+  companion?: ReactNode;
 }
 
-export function TodayMiniCard({ title = "Việc hôm nay", tasks, completedCount, totalCount }: TodayMiniCardProps) {
+export function TodayMiniCard(props: TodayMiniCardProps) {
+  const { title = "Việc hôm nay", tasks, completedCount, totalCount, companion } = props;
   const visibleTasks = tasks.slice(0, 3);
   const allDone = totalCount > 0 && completedCount >= totalCount;
   const hint = allDone
@@ -23,19 +26,24 @@ export function TodayMiniCard({ title = "Việc hôm nay", tasks, completedCount
       aria-labelledby="dashboard-today-mini-title"
     >
       <div className="border-b border-app-line bg-gradient-to-b from-app-accent-subtle to-app-surface px-5 py-4">
-        <div className="mb-1.5 flex items-center justify-between">
-          <h2
-            id="dashboard-today-mini-title"
-            className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.14em] text-app-accent"
-          >
-            <ListChecks className="h-[15px] w-[15px]" />
-            {title}
-          </h2>
-          <span className="rounded-full bg-app-accent px-3 py-1 font-mono text-xs font-extrabold text-app-highlight">
-            {completedCount}/{totalCount} việc
-          </span>
+        <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between md:gap-4">
+          <div className="min-w-0 flex-1">
+            <div className="mb-1.5 flex items-center justify-between gap-3">
+              <h2
+                id="dashboard-today-mini-title"
+                className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.14em] text-app-accent"
+              >
+                <ListChecks className="h-[15px] w-[15px]" />
+                {title}
+              </h2>
+              <span className="rounded-full bg-app-accent px-3 py-1 font-mono text-xs font-extrabold text-app-highlight">
+                {completedCount}/{totalCount} việc
+              </span>
+            </div>
+            <p className="font-serif text-[12.5px] italic text-app-ink-soft">{hint}</p>
+          </div>
+          {companion ? <div className="flex shrink-0 justify-end md:block md:self-start">{companion}</div> : null}
         </div>
-        <p className="font-serif text-[12.5px] italic text-app-ink-soft">{hint}</p>
       </div>
 
       <div className="flex flex-col gap-2.5 px-5 py-4">
