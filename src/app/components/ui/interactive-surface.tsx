@@ -20,9 +20,11 @@ export function InteractiveSurface({
   shine = true,
   onPointerMove,
   onPointerLeave,
+  onPointerEnter,
   ...props
 }: InteractiveSurfaceProps) {
   const surfaceRef = React.useRef<HTMLDivElement | null>(null);
+  const boundsRef = React.useRef<DOMRect | null>(null);
   const prefersReducedMotion = useReducedMotion();
 
   const resetSurface = React.useCallback(() => {
@@ -34,13 +36,23 @@ export function InteractiveSurface({
     surfaceRef.current.dataset.hovering = "false";
   }, []);
 
+  const handlePointerEnter = (event: React.PointerEvent<HTMLDivElement>) => {
+    onPointerEnter?.(event);
+    if (prefersReducedMotion || event.pointerType === "touch" || !surfaceRef.current) return;
+    boundsRef.current = surfaceRef.current.getBoundingClientRect();
+  };
+
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
     onPointerMove?.(event);
     if (event.defaultPrevented || prefersReducedMotion || event.pointerType === "touch" || !surfaceRef.current) {
       return;
     }
 
-    const bounds = surfaceRef.current.getBoundingClientRect();
+    let bounds = boundsRef.current;
+    if (!bounds) {
+      bounds = surfaceRef.current.getBoundingClientRect();
+      boundsRef.current = bounds;
+    }
     if (bounds.width === 0 || bounds.height === 0) return;
 
     const pointerX = Math.min(Math.max((event.clientX - bounds.left) / bounds.width, 0), 1);
@@ -57,6 +69,7 @@ export function InteractiveSurface({
 
   const handlePointerLeave = (event: React.PointerEvent<HTMLDivElement>) => {
     onPointerLeave?.(event);
+    boundsRef.current = null;
     resetSurface();
   };
 
@@ -70,6 +83,7 @@ export function InteractiveSurface({
         prefersReducedMotion && "interactive-surface--reduced",
         className,
       )}
+      onPointerEnter={handlePointerEnter}
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
       {...props}

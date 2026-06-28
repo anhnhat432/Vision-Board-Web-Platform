@@ -862,7 +862,10 @@ export function VisionBoardEditor() {
                     type="button"
                     onClick={() => {
                       setIsInitDialogOpen(false);
-                      setIsWizardOpen(true);
+                      // Defer opening the wizard to let the initial dialog close smoothly and prevent layout/reflow clash
+                      setTimeout(() => {
+                        setIsWizardOpen(true);
+                      }, 180);
                     }}
                     className="w-full mt-1.5"
                   >

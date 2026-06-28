@@ -148,12 +148,17 @@ interface DraggableItemProps {
 function DraggableItem({ item, goalsById, isSelected, onUpdate, onDelete, onSelect }: DraggableItemProps): JSX.Element {
   const [isDragging, setIsDragging] = useState(false);
   const dragStateRef = useRef<DragState | null>(null);
+  const containerRectRef = useRef<DOMRect | null>(null);
 
   const updatePosition = (clientX: number, clientY: number, container: HTMLElement) => {
     const dragState = dragStateRef.current;
     if (!dragState) return;
 
-    const rect = container.getBoundingClientRect();
+    let rect = containerRectRef.current;
+    if (!rect) {
+      rect = container.getBoundingClientRect();
+      containerRectRef.current = rect;
+    }
     const x = ((clientX - rect.left - dragState.offsetX) / rect.width) * 100;
     const y = ((clientY - rect.top - dragState.offsetY) / rect.height) * 100;
 
@@ -168,6 +173,7 @@ function DraggableItem({ item, goalsById, isSelected, onUpdate, onDelete, onSele
     if (!container) return;
 
     const rect = container.getBoundingClientRect();
+    containerRectRef.current = rect;
     const offsetX = event.clientX - rect.left - (rect.width * item.x) / 100;
     const offsetY = event.clientY - rect.top - (rect.height * item.y) / 100;
 
@@ -196,6 +202,7 @@ function DraggableItem({ item, goalsById, isSelected, onUpdate, onDelete, onSele
     if (!dragStateRef.current || dragStateRef.current.pointerId !== event.pointerId) return;
 
     dragStateRef.current = null;
+    containerRectRef.current = null;
     setIsDragging(false);
 
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {

@@ -16,9 +16,10 @@ const DEFAULT_CARD_STYLE = {
   "--card-shift-y": "0px",
 } as React.CSSProperties;
 
-function Card({ className, interactive = false, style, onPointerMove, onPointerLeave, ...props }: CardProps) {
+function Card({ className, interactive = false, style, onPointerMove, onPointerLeave, onPointerEnter, ...props }: CardProps) {
   const prefersReducedMotion = useReducedMotion();
   const cardRef = React.useRef<HTMLDivElement | null>(null);
+  const boundsRef = React.useRef<DOMRect | null>(null);
   const frameRef = React.useRef<number | null>(null);
   const isPointerInteractive = interactive && !prefersReducedMotion;
 
@@ -47,6 +48,12 @@ function Card({ className, interactive = false, style, onPointerMove, onPointerL
     cardRef.current.dataset.cardHovering = hovering ? "true" : "false";
   }, []);
 
+  const handlePointerEnter = (event: React.PointerEvent<HTMLDivElement>) => {
+    onPointerEnter?.(event);
+    if (!isPointerInteractive || event.pointerType === "touch" || !cardRef.current) return;
+    boundsRef.current = cardRef.current.getBoundingClientRect();
+  };
+
   const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
     onPointerMove?.(event);
 
@@ -54,7 +61,11 @@ function Card({ className, interactive = false, style, onPointerMove, onPointerL
       return;
     }
 
-    const bounds = cardRef.current.getBoundingClientRect();
+    let bounds = boundsRef.current;
+    if (!bounds) {
+      bounds = cardRef.current.getBoundingClientRect();
+      boundsRef.current = bounds;
+    }
     if (bounds.width === 0 || bounds.height === 0) return;
 
     const pointerX = Math.min(Math.max((event.clientX - bounds.left) / bounds.width, 0), 1);
@@ -74,6 +85,7 @@ function Card({ className, interactive = false, style, onPointerMove, onPointerL
     onPointerLeave?.(event);
 
     if (!isPointerInteractive) return;
+    boundsRef.current = null;
     setCardPointer(0.5, 0.5, false);
   };
 
@@ -88,6 +100,7 @@ function Card({ className, interactive = false, style, onPointerMove, onPointerL
         className,
       )}
       style={{ ...DEFAULT_CARD_STYLE, ...style }}
+      onPointerEnter={handlePointerEnter}
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
       {...props}
