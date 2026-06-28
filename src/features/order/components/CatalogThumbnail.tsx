@@ -13,17 +13,25 @@ export interface CatalogThumbnailProps {
   item: Pick<CatalogItem, "label" | "thumbnail" | "type">;
   className?: string;
   compact?: boolean;
+  loading?: "eager" | "lazy";
   showLabel?: boolean;
 }
 
-export function CatalogThumbnail({ item, className, compact = false, showLabel = false }: CatalogThumbnailProps) {
+export function CatalogThumbnail({
+  item,
+  className,
+  compact = false,
+  loading = "lazy",
+  showLabel = false,
+}: CatalogThumbnailProps) {
   if (item.thumbnail) {
     return (
       <img
         src={item.thumbnail}
         alt={item.label}
         className={cn("rounded-[var(--r-card-sm)] bg-[var(--order-bg)] object-cover", className)}
-        loading="lazy"
+        loading={loading}
+        decoding="async"
       />
     );
   }

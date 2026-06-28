@@ -21,6 +21,30 @@ const THEME_SLUGS = [
   "travel",
 ];
 
+const FRAME_THUMBNAIL = "/printed_vision_kit.webp";
+const STICKER_THUMBNAIL = "/assistant/seedy.png";
+
+const THEME_THUMBNAILS: Record<string, string> = {
+  "text-1": "/curated/vision-board/binh-minh.webp",
+  "text-2": "/curated/vision-board/thanh-pho.webp",
+  "text-3": "/curated/vision-board/vuon.webp",
+  "text-4": "/curated/vision-board/bien.webp",
+  "text-5": "/curated/vision-board/khong-gian.webp",
+  "text-6": "/curated/vision-board/nghe-thuat.webp",
+  books: "/curated/vision-board/education-doc-sach.webp",
+  body: "/curated/vision-board/health-van-dong.webp",
+  money: "/curated/vision-board/finance-du-day.webp",
+  study: "/curated/vision-board/education-ban-hoc.webp",
+  followers: "/curated/vision-board/relationships-cong-dong.webp",
+  cloth: "/curated/vision-board/nha.webp",
+  friends: "/curated/vision-board/relationships-tro-chuyen.webp",
+  "desk-corner": "/study_desk_corner.png",
+  coffee: "/curated/vision-board/am-thuc.webp",
+  cars: "/curated/vision-board/thanh-pho.webp",
+  "lose-weight": "/curated/vision-board/health-dinh-duong.webp",
+  travel: "/curated/vision-board/du-lich.webp",
+};
+
 export const DEFAULT_CATALOG: CatalogItem[] = [
   {
     itemId: "frame:20x30",
@@ -28,6 +52,7 @@ export const DEFAULT_CATALOG: CatalogItem[] = [
     label: "Khung 20×30 cm",
     description: "Để bàn, nhỏ gọn",
     priceVnd: 79000,
+    thumbnail: FRAME_THUMBNAIL,
     sortOrder: 1,
     isActive: true,
   },
@@ -37,6 +62,7 @@ export const DEFAULT_CATALOG: CatalogItem[] = [
     label: "Khung 30×40 cm",
     description: "Phổ biến nhất",
     priceVnd: 119000,
+    thumbnail: FRAME_THUMBNAIL,
     sortOrder: 2,
     isActive: true,
   },
@@ -46,6 +72,7 @@ export const DEFAULT_CATALOG: CatalogItem[] = [
     label: "Khung 40×60 cm",
     description: "Treo tường ấn tượng",
     priceVnd: 189000,
+    thumbnail: FRAME_THUMBNAIL,
     sortOrder: 3,
     isActive: true,
   },
@@ -55,6 +82,7 @@ export const DEFAULT_CATALOG: CatalogItem[] = [
       type: "theme",
       label: slug.replace(/-/g, " ").toUpperCase(),
       priceVnd: 18000,
+      thumbnail: THEME_THUMBNAILS[slug],
       sortOrder: 10 + i,
       isActive: true,
     }),
@@ -65,6 +93,7 @@ export const DEFAULT_CATALOG: CatalogItem[] = [
     label: "Sticker tròn HynBee",
     description: "Phụ kiện trang trí postcard",
     priceVnd: 15000,
+    thumbnail: STICKER_THUMBNAIL,
     sortOrder: 50,
     isActive: true,
     maxQty: 10,

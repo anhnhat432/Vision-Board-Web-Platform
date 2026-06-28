@@ -81,6 +81,18 @@ beforeEach(() => {
 });
 
 describe("OrderPage", () => {
+  it("renders fallback product thumbnails immediately while catalog refresh is pending", () => {
+    vi.stubGlobal("fetch", vi.fn(() => new Promise(() => {})));
+
+    renderOrderPage();
+
+    expect(screen.getByRole("img", { name: "MONEY" })).toHaveAttribute(
+      "src",
+      "/curated/vision-board/finance-du-day.webp",
+    );
+    expect(screen.getByRole("img", { name: /Khung 30/ })).toHaveAttribute("src", "/printed_vision_kit.webp");
+  });
+
   it("submits via confirm dialog, saves localStorage, and navigates to order-status", async () => {
     renderOrderPage();
     await selectFrameAndTheme();

@@ -167,7 +167,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
       return (
         <div className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-indigo-600 bg-indigo-50 border-t border-indigo-100/60 transition-all duration-300">
           <Loader2 size={12} className="shrink-0 animate-spin" />
-          <span>Đang đồng bộ thay đổi lên đám mây...</span>
+          <span>Dữ liệu đã lưu trên máy. Đang sao lưu nền lên tài khoản...</span>
         </div>
       );
     }
@@ -176,7 +176,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
       return (
         <div className="flex items-center gap-1.5 px-3 py-1.5 text-xs text-green-600 bg-green-50 border-t border-green-100/60 transition-all duration-300 animate-in fade-in slide-in-from-bottom-1 duration-200">
           <CheckCircle2 size={12} className="shrink-0" />
-          <span>Đã lưu và đồng bộ thành công lên tài khoản!</span>
+          <span>Đã sao lưu nền lên tài khoản.</span>
         </div>
       );
     }

@@ -42,7 +42,7 @@ export function ThemePicker({ themes, selected, onChange }: ThemePickerProps) {
         />
       </div>
       <div className="grid grid-cols-2 gap-[14px] sm:grid-cols-3">
-        {filtered.map((theme) => {
+        {filtered.map((theme, index) => {
           const isOn = selected.includes(theme.itemId);
           return (
             <button
@@ -62,7 +62,12 @@ export function ThemePicker({ themes, selected, onChange }: ThemePickerProps) {
                   <Check className="h-3 w-3" />
                 </span>
               )}
-              <CatalogThumbnail item={theme} className="mb-[10px] aspect-square w-full rounded-[9px]" compact />
+              <CatalogThumbnail
+                item={theme}
+                className="mb-[10px] aspect-square w-full rounded-[9px]"
+                compact
+                loading={index < 6 ? "eager" : "lazy"}
+              />
               <div className="text-left flex items-center justify-between gap-[6px]">
                 <span className="text-xs font-bold text-[var(--order-text)]">{theme.label}</span>
               </div>

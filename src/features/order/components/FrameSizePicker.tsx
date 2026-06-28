@@ -54,7 +54,7 @@ export function FrameSizePicker({ frames, selected, onChange }: FrameSizePickerP
               </span>
             )}
             {frame.thumbnail ? (
-              <CatalogThumbnail item={frame} className="mb-[13px] aspect-[4/3] w-full rounded-[9px]" />
+              <CatalogThumbnail item={frame} className="mb-[13px] aspect-[4/3] w-full rounded-[9px]" loading="eager" />
             ) : (
               <div className="relative aspect-[4/3] rounded-[9px] bg-[#C9A87E] border-4 border-white shadow-[inset_0_0_0_1px_rgba(23,21,15,0.1),0_4px_12px_-6px_rgba(23,21,15,0.3)] overflow-hidden mb-[13px]">
                 <div className="absolute inset-[7px] rounded-[4px] opacity-85"

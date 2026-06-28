@@ -59,7 +59,7 @@ export function OrderSummary({
                 src="/printed_vision_kit.png"
                 alt="Bộ Vision Board Kit vật lý"
                 className="absolute inset-0 h-full w-full object-cover"
-                loading="lazy"
+                loading="eager"
                 decoding="async"
               />
             </picture>
@@ -71,7 +71,12 @@ export function OrderSummary({
           <div className="space-y-3">
             {selectedFrame && (
               <div className="flex items-center gap-3">
-                <CatalogThumbnail item={selectedFrame} className="h-16 w-16 rounded-lg shrink-0" showLabel />
+                <CatalogThumbnail
+                  item={selectedFrame}
+                  className="h-16 w-16 rounded-lg shrink-0"
+                  showLabel
+                  loading="eager"
+                />
                 <div>
                   <div className="text-sm font-bold text-[var(--order-text)]">{selectedFrame.label}</div>
                   <div className="font-mono text-xs text-[var(--order-accent)]">{formatVnd(selectedFrame.priceVnd)}</div>
@@ -87,13 +92,20 @@ export function OrderSummary({
                     className="aspect-square w-full rounded-lg"
                     compact
                     showLabel
+                    loading="eager"
                   />
                 ))}
               </div>
             )}
             {selectedSticker && (
               <div className="flex items-center gap-3">
-                <CatalogThumbnail item={selectedSticker} className="h-12 w-12 rounded-lg shrink-0" compact showLabel />
+                <CatalogThumbnail
+                  item={selectedSticker}
+                  className="h-12 w-12 rounded-lg shrink-0"
+                  compact
+                  showLabel
+                  loading="eager"
+                />
                 <div>
                   <div className="text-sm font-bold text-[var(--order-text)]">{selectedSticker.label}</div>
                   <div className="font-mono text-xs text-[var(--order-accent)]">{formatVnd(selectedSticker.priceVnd)}</div>

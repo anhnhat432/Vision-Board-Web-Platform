@@ -29,7 +29,7 @@ export function OrderHero() {
             src="/printed_vision_kit.png"
             alt="Vision board kit"
             className="w-full h-full object-cover block absolute inset-0"
-            loading="lazy"
+            loading="eager"
             decoding="async"
           />
         </picture>

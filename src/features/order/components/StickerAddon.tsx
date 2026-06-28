@@ -25,7 +25,12 @@ export function StickerAddon({ sticker, value, onChange }: StickerAddonProps) {
   return (
     <div className="flex items-center gap-[15px] bg-[var(--order-surface)] border border-[var(--order-border)] rounded-[13px] p-[14px_16px]">
       {sticker.thumbnail ? (
-        <CatalogThumbnail item={sticker} className="w-[52px] h-[52px] rounded-[10px] shrink-0" compact />
+        <CatalogThumbnail
+          item={sticker}
+          className="w-[52px] h-[52px] rounded-[10px] shrink-0"
+          compact
+          loading="eager"
+        />
       ) : (
         <div
           className="w-[52px] h-[52px] rounded-[10px] flex items-center justify-center shrink-0 text-[22px]"

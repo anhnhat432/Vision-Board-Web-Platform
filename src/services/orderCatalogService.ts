@@ -5,6 +5,9 @@ import { getApiBaseUrl } from "@/lib/api/apiClient";
 const ENDPOINT = "/order-catalog";
 const CACHE_KEY = "vb:order-catalog";
 const CACHE_MAX_AGE_MS = 10 * 60 * 1000; // 10 minutes
+const DEFAULT_THUMBNAIL_BY_ITEM_ID = new Map(
+  DEFAULT_CATALOG.flatMap((item) => (item.thumbnail ? [[item.itemId, item.thumbnail] as const] : [])),
+);
 
 interface CachedCatalog {
   data: CatalogItem[];
@@ -19,7 +22,7 @@ function readCache(): CatalogItem[] | null {
     const parsed = JSON.parse(raw) as CachedCatalog;
     if (!Array.isArray(parsed.data) || parsed.data.length === 0) return null;
     if (Date.now() - parsed.cachedAt > CACHE_MAX_AGE_MS) return null;
-    return parsed.data;
+    return withDefaultThumbnails(parsed.data);
   } catch {
     return null;
   }
@@ -33,6 +36,19 @@ function writeCache(data: CatalogItem[]): void {
   } catch {
     // Storage full or unavailable — ignore silently.
   }
+}
+
+function withDefaultThumbnails(items: CatalogItem[]): CatalogItem[] {
+  let changed = false;
+  const hydrated = items.map((item) => {
+    if (item.thumbnail?.trim()) return item;
+    const thumbnail = DEFAULT_THUMBNAIL_BY_ITEM_ID.get(item.itemId);
+    if (!thumbnail) return item;
+    changed = true;
+    return { ...item, thumbnail };
+  });
+
+  return changed ? hydrated : items;
 }
 
 /**
@@ -54,7 +70,7 @@ export async function fetchOrderCatalog(): Promise<CatalogItem[]> {
   const res = await fetch(`${getApiBaseUrl()}${ENDPOINT}`);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const json = (await res.json()) as { data: CatalogItem[] };
-  const items = json.data;
+  const items = withDefaultThumbnails(json.data);
   writeCache(items);
   return items;
 }
