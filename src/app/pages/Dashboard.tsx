@@ -725,6 +725,8 @@ function DashboardContent({
           style={{
             background:
               "radial-gradient(circle, color-mix(in srgb, var(--app-accent) 8%, transparent) 0%, transparent 68%)",
+            willChange: "transform",
+            transform: "translate3d(0, 0, 0)",
           }}
         />
 
@@ -734,6 +736,8 @@ function DashboardContent({
           style={{
             background:
               "radial-gradient(circle, color-mix(in srgb, var(--app-energy) 6%, transparent) 0%, transparent 70%)",
+            willChange: "transform",
+            transform: "translate3d(0, 0, 0)",
           }}
         />
       </div>

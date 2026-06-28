@@ -1081,7 +1081,7 @@ export function RootLayout() {
           <div className={showSidebar ? "flex-1 lg:pl-[248px]" : "flex-1"}>
             {isPublicLanding ? null : (
               <header
-                className={`sticky top-0 z-40 border-b border-app-line/80 bg-app-bg/85 backdrop-blur-md transition-all duration-200 ${
+                className={`sticky top-0 z-40 border-b border-app-line/80 bg-app-bg transition-[border-color] duration-150 ${
                   showSidebar ? "lg:hidden" : ""
                 }`}
               >
@@ -1091,7 +1091,7 @@ export function RootLayout() {
                       <button
                         type="button"
                         onClick={() => navigateAppRoute("/")}
-                        className="-mx-1.5 flex shrink-0 items-center gap-2.5 rounded-xl px-1.5 py-1 text-left transition-all duration-200 hover:bg-app-ink/5 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg"
+                        className="-mx-1.5 flex shrink-0 items-center gap-2.5 rounded-xl px-1.5 py-1 text-left transition-colors duration-150 hover:bg-app-ink/5 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg"
                         aria-label="Về trang chủ Dear Our Future"
                       >
                         <img
@@ -1671,7 +1671,7 @@ export function RootLayout() {
               aria-label="Điều hướng dưới"
               style={{ animation: "bottom-nav-rise 0.38s cubic-bezier(0.22,1,0.36,1) both" }}
             >
-              <div className="bottom-nav-inner bg-app-surface/85 backdrop-blur-lg border-t border-app-line/75 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] rounded-t-2xl p-2 pb-[calc(0.4rem+env(safe-area-inset-bottom,0))]">
+              <div className="bottom-nav-inner bg-app-surface border-t border-app-line/75 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] rounded-t-2xl p-2 pb-[calc(0.4rem+env(safe-area-inset-bottom,0))]">
                 {bottomNavItems.map((item) => {
                   const Icon = item.icon;
                   const active = isActive(item.path);
@@ -1679,7 +1679,7 @@ export function RootLayout() {
                     <button
                       key={item.path}
                       type="button"
-                      className="bottom-nav-item rounded-xl transition-all duration-200 active:scale-95"
+                      className="bottom-nav-item rounded-xl transition-transform duration-100 active:scale-95"
                       aria-current={active ? "page" : undefined}
                       onClick={() => {
                         setMobileMenuOpen(false);
@@ -1689,7 +1689,7 @@ export function RootLayout() {
                       title={item.label}
                     >
                       <div
-                        className={`bottom-nav-icon transition-all duration-200 ${active ? "bg-app-accent shadow-xs scale-105 text-white" : "text-app-ink-muted/80"}`}
+                        className={`bottom-nav-icon transition-[color,background-color,transform] duration-150 ${active ? "bg-app-accent shadow-xs scale-105 text-white" : "text-app-ink-muted/80"}`}
                       >
                         <Icon
                           className={`h-4.5 w-4.5 ${active ? "text-white" : "text-app-ink-soft group-hover:text-app-ink"}`}
@@ -1706,7 +1706,7 @@ export function RootLayout() {
                 })}
                 <button
                   type="button"
-                  className="bottom-nav-item rounded-xl transition-all duration-200 active:scale-95"
+                  className="bottom-nav-item rounded-xl transition-transform duration-100 active:scale-95"
                   onClick={() => setMobileMenuOpen((open) => !open)}
                   aria-label="Khác"
                   aria-current={isMoreNavActive ? "page" : undefined}
@@ -1714,7 +1714,7 @@ export function RootLayout() {
                   aria-controls="mobile-nav-menu"
                 >
                   <div
-                    className={`bottom-nav-icon transition-all duration-200 ${isMoreNavActive ? "bg-app-accent shadow-xs scale-105 text-white" : "text-app-ink-muted/80"}`}
+                    className={`bottom-nav-icon transition-[color,background-color,transform] duration-150 ${isMoreNavActive ? "bg-app-accent shadow-xs scale-105 text-white" : "text-app-ink-muted/80"}`}
                   >
                     <Menu
                       className={`h-4.5 w-4.5 ${isMoreNavActive ? "text-white" : "text-app-ink-soft"}`}

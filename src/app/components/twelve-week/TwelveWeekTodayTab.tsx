@@ -1152,7 +1152,7 @@ export function TwelveWeekTodayTab({
       {showMobileStickyCheckIn ? (
         <div
           data-twelve-week-today-mobile-checkin-bar
-          className="above-mobile-nav fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] left-0 right-0 z-40 border-t border-app-line/80 bg-app-surface/95 px-4 pb-4 pt-3 shadow-[0_-18px_40px_-30px_rgba(23,21,15,0.45)] backdrop-blur-md sm:hidden"
+          className="above-mobile-nav fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] left-0 right-0 z-40 border-t border-app-line/80 bg-app-surface px-4 pb-4 pt-3 shadow-[0_-18px_40px_-30px_rgba(23,21,15,0.45)] sm:hidden"
         >
           <div className="mx-auto flex w-full max-w-[42rem] flex-col gap-2.5">
             <p className="flex items-center justify-between gap-3 text-[11px] font-semibold text-app-ink-muted">

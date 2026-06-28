@@ -1362,7 +1362,7 @@ export function TwelveWeekWeekTab({
       {showForm && canShowFormReview && (
         <div
           data-testid="weekly-review-mobile-sticky-cta"
-          className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] left-0 right-0 z-40 border-t border-app-line/80 bg-app-surface/95 px-4 pb-4 pt-3 shadow-[0_-18px_40px_-30px_rgba(23,21,15,0.45)] backdrop-blur-md md:hidden"
+          className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] left-0 right-0 z-40 border-t border-app-line/80 bg-app-surface px-4 pb-4 pt-3 shadow-[0_-18px_40px_-30px_rgba(23,21,15,0.45)] md:hidden"
         >
           <div className="mx-auto flex w-full max-w-[42rem] flex-col gap-2.5 md:max-w-none">
             <div className="flex items-start justify-between gap-3 text-[11px] font-semibold text-app-ink-muted">
