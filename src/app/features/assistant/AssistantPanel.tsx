@@ -431,30 +431,30 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 50 }}
         transition={{ duration: 0.2 }}
-        className="fixed inset-x-0 bottom-0 z-[60] flex flex-col border border-app-line/45 dark:border-white/10 rounded-t-3xl bg-app-surface/85 backdrop-blur-2xl shadow-[0_24px_60px_rgba(0,0,0,0.18)] dark:shadow-[0_24px_60px_rgba(0,0,0,0.38)] sm:bottom-6 sm:left-auto sm:right-6 sm:inset-x-auto sm:w-[420px] sm:max-w-[calc(100vw-3rem)] sm:rounded-3xl transition-all duration-300"
+        className="fixed inset-x-0 bottom-0 z-[60] flex flex-col overflow-hidden border border-emerald-200/70 dark:border-emerald-400/15 rounded-t-[28px] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(247,255,251,0.86))] dark:bg-[linear-gradient(180deg,rgba(15,23,20,0.94),rgba(7,20,18,0.9))] backdrop-blur-2xl shadow-[0_24px_80px_rgba(15,118,110,0.22),0_3px_18px_rgba(15,23,42,0.08)] dark:shadow-[0_24px_80px_rgba(0,0,0,0.52)] sm:bottom-6 sm:left-auto sm:right-6 sm:inset-x-auto sm:w-[420px] sm:max-w-[calc(100vw-3rem)] sm:rounded-[28px] transition-all duration-300"
         style={{ height: "min(80vh, 720px)" }}
         role="dialog"
         aria-modal="true"
         aria-label="Trợ lý AI"
       >
         <div className="flex justify-center py-2 sm:hidden">
-          <div className="h-1.5 w-12 rounded-full bg-app-line-strong/70" />
+          <div className="h-1.5 w-12 rounded-full bg-emerald-700/20 shadow-inner" />
         </div>
 
-        <div className="flex h-15 items-center gap-3 border-b border-app-line/45 dark:border-white/10 px-4 bg-gradient-to-r from-app-bg-subtle/40 via-app-bg-subtle/10 to-transparent">
-          <span className="flex size-8.5 items-center justify-center rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500 text-white shadow-[0_0_12px_rgba(16,185,129,0.3)]">
+        <div className="flex h-16 items-center gap-3 border-b border-emerald-100/70 dark:border-white/10 px-4 bg-white/72 dark:bg-white/[0.03] shadow-[0_1px_0_rgba(255,255,255,0.75)_inset]">
+          <span className="flex size-10 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-300 via-teal-400 to-emerald-700 text-white shadow-[0_10px_28px_rgba(16,185,129,0.26)] ring-1 ring-white/65">
             <AssistantPetIcon state={headerPetState} size={34} />
           </span>
           <div className="flex flex-col">
-            <span className="font-serif text-[15px] font-extrabold tracking-wide bg-gradient-to-r from-emerald-600 to-teal-700 dark:from-emerald-400 dark:to-teal-300 bg-clip-text text-transparent">
-              Trợ lý Seedy
+            <span className="font-serif text-[15px] font-extrabold tracking-wide bg-gradient-to-r from-emerald-700 via-teal-700 to-emerald-500 dark:from-emerald-300 dark:via-teal-300 dark:to-emerald-100 bg-clip-text text-transparent">
+              Cú AI
             </span>
-            <div className="flex items-center gap-1">
+            <div className="mt-0.5 flex w-fit items-center gap-1 rounded-full border border-emerald-200/70 bg-emerald-50/70 px-1.5 py-0.5 dark:border-emerald-400/20 dark:bg-emerald-400/10">
               <span className="relative flex h-1.5 w-1.5">
                 <span className="animate-[ping_1.8s_ease-in-out_infinite] absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.8)]"></span>
               </span>
-              <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+              <span className="text-[9px] font-bold text-emerald-700 dark:text-emerald-300 uppercase tracking-wider">
                 Trực tuyến
               </span>
             </div>
@@ -468,7 +468,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
               className={`rounded-lg p-1.5 transition-all hover:scale-105 active:scale-95 ${
                 showDebugPanel
                   ? "bg-indigo-500/20 text-indigo-500"
-                  : "text-app-ink-soft hover:bg-app-bg hover:text-app-ink"
+                  : "text-app-ink-soft hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-white/10 dark:hover:text-emerald-200"
               }`}
             >
               <BarChart3 size={16} />
@@ -479,7 +479,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
               type="button"
               onClick={handleClearHistory}
               aria-label="Xóa lịch sử chat"
-              className="rounded-lg p-1.5 text-app-ink-soft transition-all hover:bg-app-bg hover:text-app-ink hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              className="rounded-xl p-1.5 text-app-ink-soft transition-all hover:bg-emerald-50 hover:text-emerald-700 hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 dark:hover:bg-white/10 dark:hover:text-emerald-200"
             >
               <Trash2 size={16} />
             </button>
@@ -488,7 +488,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
             type="button"
             onClick={onClose}
             aria-label="Đóng"
-            className="rounded-lg p-1.5 text-app-ink-soft transition-all hover:bg-app-bg hover:text-app-ink hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+            className="rounded-xl p-1.5 text-app-ink-soft transition-all hover:bg-emerald-50 hover:text-emerald-700 hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 dark:hover:bg-white/10 dark:hover:text-emerald-200"
           >
             <X size={18} />
           </button>
@@ -500,10 +500,10 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
           </div>
         ) : (
           <>
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto bg-gradient-to-b from-emerald-50/45 via-white/55 to-app-bg-subtle/70 px-4 py-4 dark:from-emerald-950/10 dark:via-black/10 dark:to-black/20">
               {messages.length === 0 ? (
                 <div className="flex flex-col gap-3">
-                  <div className="rounded-xl bg-gradient-to-br from-emerald-50/70 to-teal-50/40 dark:from-emerald-950/20 dark:to-teal-950/10 px-3.5 py-3 text-sm text-app-ink-soft border border-emerald-500/15">
+                  <div className="rounded-[22px] bg-white/82 px-4 py-3 text-sm text-app-ink-soft border border-emerald-100/90 shadow-[0_14px_36px_rgba(15,118,110,0.08)] dark:border-emerald-400/10 dark:bg-white/[0.04]">
                     <span className="font-semibold text-app-ink">Chào bạn 👋</span> Mình có thể giúp về việc hôm nay,
                     tiến độ tuần này, mục tiêu chính, hoặc reflection.
                   </div>
@@ -518,7 +518,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                           type="button"
                           onClick={() => handleSuggestionClick(suggestion)}
                           disabled={isTyping}
-                          className="rounded-xl border border-app-line/60 bg-app-bg-subtle/50 px-3.5 py-2 text-left text-sm text-app-ink-soft transition-all duration-200 hover:bg-app-accent/15 hover:text-app-accent hover:border-app-accent/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="rounded-2xl border border-emerald-100/85 bg-white/72 px-3.5 py-2.5 text-left text-sm text-app-ink-soft shadow-[0_8px_22px_rgba(15,118,110,0.05)] transition-all duration-200 hover:border-emerald-300/80 hover:bg-emerald-50/85 hover:text-emerald-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 disabled:cursor-not-allowed disabled:opacity-60 dark:border-white/10 dark:bg-white/[0.04] dark:hover:bg-emerald-400/10 dark:hover:text-emerald-200"
                         >
                           {suggestion}
                         </button>
@@ -538,10 +538,10 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                         className={`flex flex-col ${message.role === "user" ? "items-end" : "items-start"}`}
                       >
                         <div
-                          className={`min-w-[8rem] max-w-[88%] rounded-2xl px-4 py-2.5 text-[14.5px] leading-relaxed shadow-sm transition-all duration-300 hover:translate-y-[-1px] ${
+                          className={`min-w-[8rem] max-w-[86%] rounded-[22px] px-4 py-2.5 text-[14.5px] leading-relaxed shadow-sm transition-[border-color,box-shadow,transform] duration-200 ${
                             message.role === "user"
-                              ? "rounded-tr-none bg-gradient-to-tr from-emerald-600 via-emerald-700 to-teal-600 text-white font-medium shadow-[0_4px_16px_rgba(16,185,129,0.15)]"
-                              : "rounded-tl-none bg-gradient-to-br from-emerald-50/70 via-emerald-50/55 to-teal-50/40 dark:from-emerald-950/25 dark:via-emerald-950/15 dark:to-teal-950/15 backdrop-blur-xl border border-emerald-500/10 border-l-3 border-l-emerald-600/80 dark:border-emerald-500/5 dark:border-l-emerald-400/80 text-app-ink shadow-[0_4px_20px_rgba(16,185,129,0.03)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.15)] px-4.5 py-3"
+                              ? "rounded-br-[7px] bg-gradient-to-br from-emerald-500 via-teal-600 to-emerald-800 text-white font-semibold shadow-[0_10px_26px_rgba(0,137,102,0.22)] ring-1 ring-white/20"
+                              : "rounded-bl-[7px] bg-[linear-gradient(135deg,rgba(255,255,255,0.92),rgba(239,253,247,0.9))] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.07),rgba(16,185,129,0.06))] backdrop-blur-xl border border-emerald-100/90 dark:border-emerald-400/15 text-app-ink shadow-[inset_3px_0_0_rgba(16,185,129,0.42),0_14px_34px_rgba(15,118,110,0.08)] dark:shadow-[inset_3px_0_0_rgba(52,211,153,0.55),0_14px_34px_rgba(0,0,0,0.22)] px-4.5 py-3"
                           }`}
                         >
                           {message.role === "user" ? (
@@ -587,15 +587,15 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                                 ))}
                               </div>
                             )}
-                            <div className="mt-1 flex gap-1 pl-1">
+                            <div className="mt-1.5 flex w-fit gap-0.5 rounded-full border border-transparent bg-white/45 px-1 py-0.5 shadow-[0_4px_14px_rgba(15,23,42,0.04)] dark:bg-white/[0.04]">
                               <button
                                 type="button"
                                 onClick={() => submitFeedback(message.id, "up")}
                                 aria-label="Phản hồi tốt"
-                                className={`rounded p-1.5 text-xs transition ${
+                                className={`rounded-full p-1.5 text-xs transition ${
                                   messageFeedback[message.id] === "up"
                                     ? "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-300"
-                                    : "text-app-ink-muted hover:bg-app-bg hover:text-app-ink-soft"
+                                    : "text-app-ink-muted hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-white/10 dark:hover:text-emerald-200"
                                 }`}
                                 disabled={messageFeedback[message.id] === "up"}
                               >
@@ -611,10 +611,10 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                                   setFeedbackCorrection("");
                                 }}
                                 aria-label="Phản hồi tệ"
-                                className={`rounded p-1.5 text-xs transition ${
+                                className={`rounded-full p-1.5 text-xs transition ${
                                   messageFeedback[message.id] === "down"
                                     ? "bg-red-100 text-red-700 dark:bg-red-500/15 dark:text-red-300"
-                                    : "text-app-ink-muted hover:bg-app-bg hover:text-app-ink-soft"
+                                    : "text-app-ink-muted hover:bg-red-50 hover:text-red-700 dark:hover:bg-white/10 dark:hover:text-red-300"
                                 }`}
                                 disabled={messageFeedback[message.id] === "down"}
                               >
@@ -694,7 +694,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                       pendingWorkflow.status === "failed" ||
                       pendingWorkflow.status === "completed") && (
                       <div className="flex justify-start">
-                        <div className="w-full max-w-[90%] rounded-2xl rounded-bl-none bg-app-bg-subtle/80 dark:bg-white/5 backdrop-blur-md border border-app-line/55 p-4 space-y-3 shadow-md">
+                        <div className="w-full max-w-[90%] rounded-[22px] rounded-bl-[7px] bg-white/82 dark:bg-white/[0.05] backdrop-blur-md border border-emerald-100/80 dark:border-emerald-400/15 p-4 space-y-3 shadow-[0_14px_34px_rgba(15,118,110,0.08)]">
                           <div className="flex items-center justify-between border-b border-app-line/30 pb-2">
                             <div className="flex items-center gap-2">
                               <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full uppercase tracking-wider">
@@ -832,7 +832,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                     )}
                   {isTyping ? (
                     <div className="flex justify-start" role="status" aria-label="Trợ lý đang trả lời">
-                      <div className="max-w-[80%] rounded-2xl rounded-bl-none bg-app-bg-subtle/55 dark:bg-white/5 backdrop-blur-md border border-app-line/35 dark:border-white/5 px-4 py-3">
+                      <div className="max-w-[80%] rounded-[22px] rounded-bl-[7px] bg-white/78 dark:bg-white/[0.05] backdrop-blur-md border border-emerald-100/80 dark:border-white/10 px-4 py-3 shadow-[0_12px_28px_rgba(15,118,110,0.07)]">
                         <div className="flex items-center gap-1.5">
                           <span
                             className="h-2 w-2 animate-[bounce_1.4s_infinite_ease-in-out] rounded-full bg-gradient-to-tr from-emerald-500 to-teal-500"
@@ -868,12 +868,12 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
 
             {renderSyncStatus()}
 
-            <div className="border-t border-app-line/45 dark:border-white/10 px-3 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] bg-gradient-to-t from-app-bg-subtle/40 via-app-bg-subtle/10 to-transparent">
+            <div className="border-t border-emerald-100/70 dark:border-white/10 px-3 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] bg-white/72 dark:bg-white/[0.03] shadow-[0_-16px_36px_rgba(15,118,110,0.07)]">
               <div className="relative">
                 {isShowingCommands && (
                   <div
                     ref={dropdownRef}
-                    className="absolute bottom-full left-0 right-0 mb-2 max-h-60 overflow-y-auto rounded-xl border border-app-line/80 bg-app-surface/95 backdrop-blur-xl shadow-app-xl z-10"
+                    className="absolute bottom-full left-0 right-0 mb-2 max-h-60 overflow-y-auto rounded-2xl border border-emerald-100/90 bg-white/95 backdrop-blur-xl shadow-[0_18px_48px_rgba(15,118,110,0.18)] z-10 dark:border-white/10 dark:bg-app-surface/95"
                   >
                     {filteredCommands.map((cmd, idx) => (
                       <button
@@ -901,7 +901,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                   </div>
                 )}
                 {speechError && <div className="px-1 py-1 text-xs text-red-500 font-medium">{speechError}</div>}
-                <div className="flex items-end gap-2 p-1.5 bg-app-bg-subtle/45 dark:bg-black/20 border border-app-line/50 dark:border-white/10 rounded-xl focus-within:ring-2 focus-within:ring-emerald-500/20 focus-within:border-emerald-500/40 focus-within:shadow-[0_0_20px_rgba(16,185,129,0.08)] transition-all duration-300">
+                <div className="flex items-end gap-2 rounded-[22px] border border-emerald-100/90 bg-white/90 p-1.5 shadow-[0_10px_30px_rgba(15,118,110,0.12)] transition-all duration-300 focus-within:border-emerald-300/80 focus-within:ring-4 focus-within:ring-emerald-500/10 dark:border-white/10 dark:bg-black/20">
                   <textarea
                     ref={textareaRef}
                     value={inputText}
@@ -910,7 +910,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                     placeholder={isTyping ? "Đợi trợ lý xong rồi gõ nhé..." : "Nhập tin nhắn..."}
                     rows={1}
                     disabled={isTyping}
-                    className="flex-1 resize-none bg-transparent border-0 px-2 py-1 text-sm focus:outline-none focus:ring-0 text-app-ink placeholder:text-app-ink-muted disabled:cursor-not-allowed"
+                    className="flex-1 resize-none bg-transparent border-0 px-3 py-2 text-sm focus:outline-none focus:ring-0 text-app-ink placeholder:text-app-ink-muted disabled:cursor-not-allowed"
                     style={{ maxHeight: "72px", minHeight: "36px" }}
                   />
                   {!isTyping && (
@@ -921,7 +921,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                       className={`rounded-lg p-2 transition-all hover:scale-110 active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/30 disabled:cursor-not-allowed disabled:opacity-40 ${
                         isSpeechListening
                           ? "bg-red-100 text-red-700 animate-pulse hover:bg-red-200"
-                          : "bg-app-bg-subtle text-app-ink-soft hover:bg-app-bg hover:text-app-ink"
+                          : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 hover:text-emerald-900 dark:bg-white/10 dark:text-emerald-200 dark:hover:bg-white/15"
                       }`}
                       title={
                         !isSpeechSupported
@@ -945,7 +945,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                     <button
                       type="button"
                       onClick={stopGeneration}
-                      className="rounded-lg bg-red-50 dark:bg-red-950/30 p-2 text-red-700 dark:text-red-400 shadow-sm transition-all hover:scale-110 active:scale-90 hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+                      className="rounded-full bg-red-50 dark:bg-red-950/30 p-2.5 text-red-700 dark:text-red-400 shadow-sm transition-all hover:scale-105 active:scale-95 hover:bg-red-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                       aria-label="Dừng"
                     >
                       <Square size={18} />
@@ -955,7 +955,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                       type="button"
                       onClick={handleSubmit}
                       disabled={!inputText.trim()}
-                      className="rounded-lg bg-gradient-to-tr from-emerald-500 to-teal-600 p-2 text-white shadow-sm transition-all hover:scale-110 active:scale-90 hover:shadow-[0_0_12px_rgba(16,185,129,0.3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="rounded-full bg-gradient-to-br from-emerald-400 via-teal-500 to-emerald-700 p-2.5 text-white shadow-[0_10px_22px_rgba(16,185,129,0.28)] transition-all hover:scale-105 active:scale-95 hover:shadow-[0_12px_28px_rgba(16,185,129,0.36)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 disabled:cursor-not-allowed disabled:opacity-40"
                       aria-label="Gửi"
                     >
                       <Send size={18} />
