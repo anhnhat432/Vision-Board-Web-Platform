@@ -11,7 +11,6 @@ import {
 } from "@/app/components/ui/editorial";
 import { LazyMindfulPlayer } from "@/app/components/ui/lazy-mindful-player";
 import { LazyMamCompanion } from "@/app/features/pet/LazyMamCompanion";
-import { trackAnalyticsEvent } from "@/app/utils/analytics";
 
 import "./PublicVisitorView.css";
 
@@ -159,7 +158,7 @@ const SECTION: CSSProperties = { maxWidth: 1200, margin: "0 auto" };
 const scrollAnchor: CSSProperties = { scrollMarginTop: 84 };
 
 function scrollToId(id: string) {
-  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+  document.getElementById(id)?.scrollIntoView({ behavior: "auto", block: "start" });
 }
 
 export function PublicVisitorView({
@@ -174,7 +173,9 @@ export function PublicVisitorView({
 
   const handleSelect = (id: string) => {
     setSelectedId(id);
-    trackAnalyticsEvent("landing_goal_preview_selected", { preview_id: id, source: "dashboard" });
+    void import("@/app/utils/analytics").then(({ trackAnalyticsEvent }) => {
+      trackAnalyticsEvent("landing_goal_preview_selected", { preview_id: id, source: "dashboard" });
+    });
   };
 
   return (
@@ -347,7 +348,7 @@ export function PublicVisitorView({
                   className="dof-landing-mascot"
                   compact
                   animated={false}
-                  deferMs={3800}
+                  deferMs={6200}
                 />
               </div>
               <div
@@ -657,7 +658,7 @@ export function PublicVisitorView({
                     className="dof-landing-mascot"
                     compact
                     animated={false}
-                    deferMs={3800}
+                    deferMs={6200}
                   />
                   <div
                     style={{

@@ -4,8 +4,6 @@ import { isRouteErrorResponse, useNavigate, useRouteError } from "react-router";
 
 import { captureFrontendException } from "@/lib/monitoring/sentry";
 import { CelebrationBurst } from "./illustrations";
-import { Button } from "./ui/button";
-import { Card, CardContent } from "./ui/card";
 
 function getErrorMessage(error: unknown): string {
   if (isRouteErrorResponse(error)) {
@@ -44,8 +42,8 @@ export function AppErrorBoundary() {
   return (
     <div className="min-h-screen bg-app-bg">
       <main className="relative mx-auto flex min-h-screen max-w-5xl items-center px-4 py-12 sm:px-6 lg:px-8">
-        <Card className="w-full overflow-hidden rounded-card border border-app-line bg-app-surface shadow-app-sm">
-          <CardContent className="relative p-8 lg:p-10">
+        <section className="w-full overflow-hidden rounded-card border border-app-line bg-app-surface shadow-app-sm">
+          <div className="relative p-8 lg:p-10">
             <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_320px]">
               <div className="space-y-6">
                 <div className="inline-flex items-center gap-2 rounded-full border border-app-line bg-app-accent-soft px-4 py-1.5 text-sm text-app-accent">
@@ -65,18 +63,22 @@ export function AppErrorBoundary() {
                 </div>
 
                 <div className="flex flex-wrap gap-3">
-                  <Button className="bg-app-accent text-white hover:bg-app-accent" onClick={() => navigate("/")}>
+                  <button
+                    type="button"
+                    className="inline-flex items-center justify-center gap-2 rounded-[var(--r-control)] bg-app-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40"
+                    onClick={() => navigate("/")}
+                  >
                     <Home className="h-4 w-4" />
                     Về Trang chính
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="border-app-line text-app-ink hover:bg-app-bg"
+                  </button>
+                  <button
+                    type="button"
+                    className="inline-flex items-center justify-center gap-2 rounded-[var(--r-control)] border border-app-line bg-transparent px-4 py-2 text-sm font-semibold text-app-ink transition-colors hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40"
                     onClick={() => window.location.reload()}
                   >
                     <RefreshCw className="h-4 w-4" />
                     Tải lại trang
-                  </Button>
+                  </button>
                 </div>
               </div>
 
@@ -111,8 +113,8 @@ export function AppErrorBoundary() {
                 ) : null}
               </div>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </section>
       </main>
     </div>
   );

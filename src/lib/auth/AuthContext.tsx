@@ -1,7 +1,6 @@
 import type { User, UserCredential } from "firebase/auth";
 import type { ReactNode } from "react";
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
 
 import { post } from "@/lib/api/apiClient";
 import { captureFrontendException } from "@/lib/monitoring/sentry";
@@ -291,7 +290,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const wasVerified = previousEmailVerified.current;
     previousEmailVerified.current = user.emailVerified === true;
     if (wasVerified === false && user.emailVerified === true) {
-      toast.success("Email đã xác thực, bạn có thể tiếp tục");
+      void import("sonner").then(({ toast }) => {
+        toast.success("Email đã xác thực, bạn có thể tiếp tục");
+      });
       const redirectPath =
         typeof window !== "undefined" ? window.sessionStorage.getItem("emailVerification:returnTo") : null;
       if (redirectPath && typeof window !== "undefined") {

@@ -6,7 +6,7 @@ const MindfulPlayer = lazy(() =>
   })),
 );
 
-const DEFER_LOAD_MS = 1800;
+const DEFER_LOAD_MS = 5200;
 
 function MindfulPlayerFallback({ onWarmLoad }: { onWarmLoad?: () => void }) {
   return (

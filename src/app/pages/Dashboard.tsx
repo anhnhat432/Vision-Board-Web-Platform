@@ -41,7 +41,6 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../componen
 import { Skeleton } from "../components/ui/skeleton";
 import { useSetAssistantPageContext } from "../features/assistant/AssistantPageContextProvider";
 import { LazyMamCompanion } from "../features/pet/LazyMamCompanion";
-import { emitPetEvent } from "../features/pet/petEvents";
 import { useBackendProgressOverlay } from "../hooks/useBackendProgressOverlay";
 import { useBreakpoint } from "../hooks/useBreakpoint";
 import { usePageTour } from "../hooks/usePageTour";
@@ -1000,10 +999,12 @@ function DashboardActiveLayout({
 
     lastPetNudgeKeyRef.current = nudgeKey;
     const timer = window.setTimeout(() => {
-      emitPetEvent({
-        event: "gentleNudge",
-        source: "dashboard",
-        message: "Không sao nếu lệch nhịp. Bắt đầu lại từ một việc nhỏ.",
+      void import("../features/pet/petEvents").then(({ emitPetEvent }) => {
+        emitPetEvent({
+          event: "gentleNudge",
+          source: "dashboard",
+          message: "Không sao nếu lệch nhịp. Bắt đầu lại từ một việc nhỏ.",
+        });
       });
     }, 900);
 

@@ -1,8 +1,6 @@
 ﻿import { type ComponentType, lazy, Suspense } from "react";
 import { createBrowserRouter, Navigate } from "react-router";
 import { AppErrorBoundary } from "./components/AppErrorBoundary";
-import { AdminLayout } from "./components/admin/AdminLayout";
-import { ProtectedRoute } from "./components/ProtectedRoute";
 import { RootLayout } from "./components/RootLayout";
 import { loadWithChunkReload } from "./utils/chunkLoad";
 
@@ -76,7 +74,7 @@ export const appRoutes = [
     children: [
       {
         index: true,
-        ...lazyRoute(() => import("./pages/Dashboard"), "Dashboard"),
+        ...lazyRoute(() => import("./pages/DashboardEntry"), "DashboardEntry"),
       },
       {
         path: "terms",
@@ -169,7 +167,7 @@ export const appRoutes = [
       },
       {
         // Protected routes â€” require authentication
-        Component: ProtectedRoute,
+        ...lazyRoute(() => import("./components/ProtectedRoute"), "ProtectedRoute"),
         children: [
           {
             path: "order",
@@ -187,7 +185,7 @@ export const appRoutes = [
       },
       {
         path: "admin",
-        Component: AdminLayout,
+        ...lazyRoute(() => import("./components/admin/AdminLayout"), "AdminLayout"),
         children: [
           {
             index: true,

@@ -49,7 +49,7 @@
 }
 
 .dof-landing .dof-up {
-  animation: dof-up 0.48s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation: none;
 }
 
 .dof-landing .dof-float {
