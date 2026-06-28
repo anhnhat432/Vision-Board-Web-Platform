@@ -4,7 +4,6 @@ import { Link, Navigate, useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { isDemoMode } from "@/app/utils/app-mode";
 import { useAuthContext } from "@/lib/auth/AuthContext";
-import { loginWithGoogle, resetPassword } from "@/lib/auth/firebase";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -120,7 +119,7 @@ export function LoginPage() {
     setLocalError(null);
 
     try {
-      const credential = await loginWithGoogle();
+      const credential = await login({ provider: "google" });
       if (!credential) {
         setLocalError("Đăng nhập Google chưa sẵn sàng. Kiểm tra lại cấu hình.");
         return;
@@ -138,7 +137,7 @@ export function LoginPage() {
     } finally {
       setGoogleSubmitting(false);
     }
-  }, [authLoading, googleSubmitting]);
+  }, [authLoading, googleSubmitting, login]);
 
   // If already signed in, route based on profile state.
   // Admin users with a fully loaded profile go to the admin console.
@@ -208,6 +207,7 @@ export function LoginPage() {
       return;
     }
     try {
+      const { resetPassword } = await import("@/lib/auth/firebase");
       await resetPassword(resetEmail.trim());
       setResetSent(true);
     } catch (err: unknown) {

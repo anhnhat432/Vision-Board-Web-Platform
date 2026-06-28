@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { buildLoginPath } from "@/features/dashboard/helpers/dashboardNavigation";
 import { PublicVisitorView } from "@/features/dashboard/v2/PublicVisitorView";
@@ -11,6 +11,25 @@ const SignedInDashboard = lazy(() =>
     default: module.Dashboard,
   })),
 );
+
+let loginRouteWarmPromise: Promise<unknown> | null = null;
+let onboardingRouteWarmPromise: Promise<unknown> | null = null;
+
+function warmLoginRoute(): void {
+  loginRouteWarmPromise ??= import("./LoginPage").catch((error) => {
+    loginRouteWarmPromise = null;
+    throw error;
+  });
+  void loginRouteWarmPromise.catch(() => {});
+}
+
+function warmOnboardingRoute(): void {
+  onboardingRouteWarmPromise ??= import("./Onboarding").catch((error) => {
+    onboardingRouteWarmPromise = null;
+    throw error;
+  });
+  void onboardingRouteWarmPromise.catch(() => {});
+}
 
 function DashboardRouteFallback() {
   return (
@@ -40,6 +59,32 @@ export function DashboardEntry() {
   const authDestination = `${location.pathname}${location.search}${location.hash}`;
   const isSignedOut = !user;
   const hasSignedOutRealLocalData = !demoMode && isSignedOut && hasLocalWorkspaceData(initialUserData);
+  const warmStartRoute = demoMode ? warmOnboardingRoute : warmLoginRoute;
+
+  useEffect(() => {
+    if (!isSignedOut || typeof window === "undefined") return undefined;
+
+    let idleHandle: number | null = null;
+    const timerId = window.setTimeout(() => {
+      const warmRoutes = () => {
+        warmLoginRoute();
+        if (demoMode) warmOnboardingRoute();
+      };
+
+      if ("requestIdleCallback" in window) {
+        idleHandle = window.requestIdleCallback(warmRoutes, { timeout: 3_000 });
+      } else {
+        warmRoutes();
+      }
+    }, 1_800);
+
+    return () => {
+      window.clearTimeout(timerId);
+      if (idleHandle !== null && "cancelIdleCallback" in window) {
+        window.cancelIdleCallback(idleHandle);
+      }
+    };
+  }, [demoMode, isSignedOut]);
 
   const handleAuthNavigate = (mode: "signin" | "signup") => {
     navigate(buildLoginPath(mode, authDestination));
@@ -69,6 +114,8 @@ export function DashboardEntry() {
         isDemo={demoMode}
         hasLocalData={hasSignedOutRealLocalData}
         onStart={handlePublicVisitorStart}
+        onStartIntent={warmStartRoute}
+        onAuthIntent={warmLoginRoute}
         onSignIn={() => handleAuthNavigate("signin")}
         onSignUp={() => handleAuthNavigate("signup")}
       />

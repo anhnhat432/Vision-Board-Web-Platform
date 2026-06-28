@@ -5,20 +5,10 @@ import { activateAuthenticatedUserData, persistActiveAuthenticatedUserData } fro
 import { clearAuthScopedSensitiveData } from "@/app/utils/storage-auth-scope";
 import { patch, post } from "@/lib/api/apiClient";
 import type { UserProfile } from "@/types/api";
-import {
-  getFirebaseAuth,
-  getFirebaseToken,
-  isFirebaseAuthEnabled,
-  loginWithEmail,
-  loginWithGoogle,
-  logoutFirebase,
-  registerWithEmail,
-  reloadCurrentUser,
-  subscribeIdToken,
-} from "./firebase";
 
 type LoginProvider = "google" | "email";
 type EmailLoginMode = "signin" | "signup";
+type FirebaseAuthModule = typeof import("./firebase");
 
 export interface LoginOptions {
   provider?: LoginProvider;
@@ -42,6 +32,36 @@ const DEFAULT_LOGIN_OPTIONS: Required<Pick<LoginOptions, "provider" | "mode">> =
   provider: "google",
   mode: "signin",
 };
+const FIREBASE_TOKEN_STORAGE_KEY = "firebase_id_token";
+
+let firebaseAuthModulePromise: Promise<FirebaseAuthModule> | null = null;
+
+function loadFirebaseAuthModule(): Promise<FirebaseAuthModule> {
+  firebaseAuthModulePromise ??= import("./firebase");
+  return firebaseAuthModulePromise;
+}
+
+function isFirebaseAuthConfiguredFromEnv(): boolean {
+  return (
+    (import.meta.env.VITE_FIREBASE_API_KEY?.trim() ?? "").length > 0 &&
+    (import.meta.env.VITE_FIREBASE_AUTH_DOMAIN?.trim() ?? "").length > 0 &&
+    (import.meta.env.VITE_FIREBASE_PROJECT_ID?.trim() ?? "").length > 0 &&
+    (import.meta.env.VITE_FIREBASE_APP_ID?.trim() ?? "").length > 0
+  );
+}
+
+function readStoredFirebaseToken(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    return localStorage.getItem(FIREBASE_TOKEN_STORAGE_KEY);
+  } catch {
+    return null;
+  }
+}
+
+function hasStoredFirebaseToken(): boolean {
+  return Boolean(readStoredFirebaseToken());
+}
 
 export async function recordSignupTermsAcceptance(now: Date = new Date()): Promise<UserProfile> {
   await post<UserProfile>("/auth/profile");
@@ -96,24 +116,46 @@ export function resolveAuthErrorMessage(error: unknown): string {
 
 export function useAuth(): UseAuthResult {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() => hasStoredFirebaseToken());
   const [error, setError] = useState<string | null>(null);
+  const [shouldSubscribeAuth, setShouldSubscribeAuth] = useState(() => hasStoredFirebaseToken());
 
-  const isConfigured = isFirebaseAuthEnabled();
+  const isConfigured = isFirebaseAuthConfiguredFromEnv();
 
   useEffect(() => {
-    const unsubscribe = subscribeIdToken((nextUser) => {
-      if (nextUser) {
-        activateAuthenticatedUserData(nextUser.uid);
-      } else {
-        persistActiveAuthenticatedUserData();
-      }
-      setUser(nextUser);
+    if (!isConfigured || !shouldSubscribeAuth) {
       setLoading(false);
-    });
+      return undefined;
+    }
 
-    return unsubscribe;
-  }, []);
+    let cancelled = false;
+    let unsubscribe: (() => void) | null = null;
+    setLoading(true);
+
+    void loadFirebaseAuthModule()
+      .then(({ subscribeIdToken }) => {
+        if (cancelled) return;
+        unsubscribe = subscribeIdToken((nextUser) => {
+          if (nextUser) {
+            activateAuthenticatedUserData(nextUser.uid);
+          } else {
+            persistActiveAuthenticatedUserData();
+          }
+          setUser(nextUser);
+          setLoading(false);
+        });
+      })
+      .catch((nextError) => {
+        if (cancelled) return;
+        setError(resolveAuthErrorMessage(nextError));
+        setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+      unsubscribe?.();
+    };
+  }, [isConfigured, shouldSubscribeAuth]);
 
   const login = useCallback(
     async (options?: LoginOptions): Promise<UserCredential | null> => {
@@ -129,8 +171,13 @@ export function useAuth(): UseAuthResult {
         }
 
         if (resolvedProvider === "google") {
+          const { loginWithGoogle } = await loadFirebaseAuthModule();
           const credential = await loginWithGoogle();
-          if (credential) activateAuthenticatedUserData(credential.user.uid);
+          if (credential) {
+            activateAuthenticatedUserData(credential.user.uid);
+            setUser(credential.user);
+            setShouldSubscribeAuth(true);
+          }
           return credential;
         }
 
@@ -142,16 +189,24 @@ export function useAuth(): UseAuthResult {
         }
 
         if (resolvedMode === "signup") {
+          const { registerWithEmail } = await loadFirebaseAuthModule();
           const credential = await registerWithEmail(email, password);
           if (credential) {
             activateAuthenticatedUserData(credential.user.uid);
+            setUser(credential.user);
+            setShouldSubscribeAuth(true);
             await recordSignupTermsAcceptance();
           }
           return credential;
         }
 
+        const { loginWithEmail } = await loadFirebaseAuthModule();
         const credential = await loginWithEmail(email, password);
-        if (credential) activateAuthenticatedUserData(credential.user.uid);
+        if (credential) {
+          activateAuthenticatedUserData(credential.user.uid);
+          setUser(credential.user);
+          setShouldSubscribeAuth(true);
+        }
         return credential;
       } catch (nextError) {
         const message = resolveAuthErrorMessage(nextError);
@@ -170,14 +225,17 @@ export function useAuth(): UseAuthResult {
     setLoading(true);
 
     try {
-      const currentAuthUid = getFirebaseAuth()?.currentUser?.uid ?? null;
+      const firebase = isConfigured ? await loadFirebaseAuthModule() : null;
+      const currentAuthUid = firebase?.getFirebaseAuth()?.currentUser?.uid ?? user?.uid ?? null;
 
       if (currentAuthUid) {
         clearAuthScopedSensitiveData(currentAuthUid);
       }
 
       persistActiveAuthenticatedUserData();
-      await logoutFirebase();
+      await firebase?.logoutFirebase();
+      setShouldSubscribeAuth(false);
+      setUser(null);
     } catch (nextError) {
       const message = resolveAuthErrorMessage(nextError);
       setError(message);
@@ -185,25 +243,32 @@ export function useAuth(): UseAuthResult {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isConfigured, user?.uid]);
 
-  const getToken = useCallback(async (forceRefresh = false) => {
-    setError(null);
+  const getToken = useCallback(
+    async (forceRefresh = false) => {
+      setError(null);
 
-    try {
-      return await getFirebaseToken(forceRefresh);
-    } catch (nextError) {
-      const message = resolveAuthErrorMessage(nextError);
-      setError(message);
-      console.error("Get token failed.", nextError);
-      return null;
-    }
-  }, []);
+      try {
+        if (!isConfigured) return readStoredFirebaseToken();
+        const { getFirebaseToken } = await loadFirebaseAuthModule();
+        return await getFirebaseToken(forceRefresh);
+      } catch (nextError) {
+        const message = resolveAuthErrorMessage(nextError);
+        setError(message);
+        console.error("Get token failed.", nextError);
+        return null;
+      }
+    },
+    [isConfigured],
+  );
 
   const refreshUser = useCallback(async () => {
     setError(null);
 
     try {
+      if (!isConfigured) return null;
+      const { reloadCurrentUser } = await loadFirebaseAuthModule();
       const refreshedUser = await reloadCurrentUser();
       if (refreshedUser) setUser(refreshedUser);
       return refreshedUser;
@@ -213,7 +278,7 @@ export function useAuth(): UseAuthResult {
       console.error("Refresh user failed.", nextError);
       return null;
     }
-  }, []);
+  }, [isConfigured]);
 
   return {
     user,

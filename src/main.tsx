@@ -1,19 +1,10 @@
 import { createRoot } from "react-dom/client";
-import "@fontsource-variable/source-serif-4/wght.css";
-import "@fontsource-variable/source-serif-4/wght-italic.css";
 import { cleanupLegacyAssistantHistory } from "./app/features/assistant/cleanupLegacyHistory";
 import { getAppMode } from "./app/utils/app-mode";
 import { installChunkLoadRecovery } from "./app/utils/chunkLoad";
 import "./lib/monitoring/sentry";
 import App from "./app/App.tsx";
 import "./styles/index.css";
-import "@fontsource/be-vietnam-pro/300.css";
-import "@fontsource/be-vietnam-pro/400.css";
-import "@fontsource/be-vietnam-pro/500.css";
-import "@fontsource/be-vietnam-pro/600.css";
-import "@fontsource/be-vietnam-pro/700.css";
-import "@fontsource/be-vietnam-pro/400-italic.css";
-import "@fontsource/be-vietnam-pro/500-italic.css";
 
 cleanupLegacyAssistantHistory();
 installChunkLoadRecovery();

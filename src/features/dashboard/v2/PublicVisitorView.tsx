@@ -18,6 +18,8 @@ interface PublicVisitorViewProps {
   isDemo: boolean;
   hasLocalData: boolean;
   onStart: () => void;
+  onStartIntent?: () => void;
+  onAuthIntent?: () => void;
   onSignIn: () => void;
   onSignUp: () => void;
 }
@@ -165,6 +167,8 @@ export function PublicVisitorView({
   isDemo: _isDemo,
   hasLocalData,
   onStart,
+  onStartIntent,
+  onAuthIntent,
   onSignIn,
   onSignUp,
 }: PublicVisitorViewProps) {
@@ -249,10 +253,27 @@ export function PublicVisitorView({
             <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
               {/* Âm thanh tập trung — tính năng sẵn có của app, giữ trên landing */}
               <LazyMindfulPlayer />
-              <button type="button" onClick={onSignIn} style={navLinkStyle} className="dof-navlink">
+              <button
+                type="button"
+                onClick={onSignIn}
+                onFocus={onAuthIntent}
+                onPointerDown={onAuthIntent}
+                onPointerEnter={onAuthIntent}
+                onTouchStart={onAuthIntent}
+                style={navLinkStyle}
+                className="dof-navlink"
+              >
                 Đăng nhập
               </button>
-              <button type="button" onClick={onSignUp} style={signupPillStyle}>
+              <button
+                type="button"
+                onClick={onSignUp}
+                onFocus={onAuthIntent}
+                onPointerDown={onAuthIntent}
+                onPointerEnter={onAuthIntent}
+                onTouchStart={onAuthIntent}
+                style={signupPillStyle}
+              >
                 Đăng ký
               </button>
             </span>
@@ -299,8 +320,7 @@ export function PublicVisitorView({
               >
                 Biến ước mơ
                 <br />
-                thành{" "}
-                <HighlightMark>kế hoạch</HighlightMark>
+                thành <HighlightMark>kế hoạch</HighlightMark>
                 <br />
                 <span style={{ color: "var(--app-accent)" }}>12 tuần bền bỉ.</span>
               </h1>
@@ -318,7 +338,14 @@ export function PublicVisitorView({
                 mong muốn mơ hồ thành việc làm cụ thể mỗi ngày — theo lộ trình 12 tuần có cơ sở khoa học.
               </p>
               <div style={{ display: "flex", flexWrap: "wrap", gap: 14, alignItems: "center", marginBottom: 26 }}>
-                <PillButton size="lg" onClick={onStart}>
+                <PillButton
+                  size="lg"
+                  onClick={onStart}
+                  onFocus={onStartIntent}
+                  onPointerDown={onStartIntent}
+                  onPointerEnter={onStartIntent}
+                  onTouchStart={onStartIntent}
+                >
                   Thiết lập chu kỳ 12 tuần ngay →
                 </PillButton>
                 <PillButton variant="outline" size="lg" onClick={() => scrollToId("how")}>
@@ -408,21 +435,14 @@ export function PublicVisitorView({
                 <div style={{ fontSize: 11, fontWeight: 600, opacity: 0.9, letterSpacing: "0.04em" }}>TUẦN</div>
                 <div className="dof-display" style={{ fontSize: 24, fontWeight: 800, lineHeight: 1 }}>
                   04 / 12
-              </div>
+                </div>
               </div>
             </div>
           </div>
 
           {/* JOURNEY STRIP */}
-          <EditorialCard
-            tone="ink"
-            className="dof-up mt-[52px]"
-            style={{ animationDelay: ".2s" }}
-          >
-            <Eyebrow
-              tone="muted"
-              style={{ color: "var(--app-highlight)", marginBottom: 18 }}
-            >
+          <EditorialCard tone="ink" className="dof-up mt-[52px]" style={{ animationDelay: ".2s" }}>
+            <Eyebrow tone="muted" style={{ color: "var(--app-highlight)", marginBottom: 18 }}>
               Hành trình 4 bước gặt hái kết quả
             </Eyebrow>
             <div className="dof-journey-grid">
@@ -444,7 +464,9 @@ export function PublicVisitorView({
                         width: 24,
                         height: 24,
                         borderRadius: 7,
-                        background: step.active ? "var(--app-highlight)" : "color-mix(in srgb, var(--app-highlight) 18%, transparent)",
+                        background: step.active
+                          ? "var(--app-highlight)"
+                          : "color-mix(in srgb, var(--app-highlight) 18%, transparent)",
                         color: step.active ? "var(--app-ink)" : "var(--app-highlight)",
                         display: "flex",
                         alignItems: "center",
@@ -651,7 +673,15 @@ export function PublicVisitorView({
               </div>
             </div>
             <div>
-              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 14 }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "flex-start",
+                  justifyContent: "space-between",
+                  gap: 12,
+                  marginBottom: 14,
+                }}
+              >
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                   <LazyMamCompanion
                     initialEvent="welcomeBack"
@@ -757,10 +787,7 @@ export function PublicVisitorView({
                 ))}
               </div>
             </EditorialCard>
-            <EditorialCard
-              tone="accent"
-              style={{ boxShadow: "0 24px 50px -28px rgba(12,94,58,0.6)" }}
-            >
+            <EditorialCard tone="accent" style={{ boxShadow: "0 24px 50px -28px rgba(12,94,58,0.6)" }}>
               <Eyebrow
                 tone="muted"
                 className="mb-0"
@@ -789,7 +816,13 @@ export function PublicVisitorView({
                 {AFTER_ITEMS.map((item) => (
                   <div
                     key={item}
-                    style={{ display: "flex", gap: 12, fontSize: 14.5, lineHeight: 1.5, color: "var(--app-accent-soft)" }}
+                    style={{
+                      display: "flex",
+                      gap: 12,
+                      fontSize: 14.5,
+                      lineHeight: 1.5,
+                      color: "var(--app-accent-soft)",
+                    }}
                   >
                     <span style={{ color: "var(--app-highlight)", fontWeight: 700 }}>✓</span>
                     <span>{item}</span>
@@ -802,11 +835,7 @@ export function PublicVisitorView({
 
         {/* ROADMAP */}
         <section id="how" className="dof-defer-section" style={{ ...SECTION, padding: "48px 24px", ...scrollAnchor }}>
-          <SectionHeader
-            eyebrow="Lộ trình của bạn"
-            title="Bốn bước chuyển mình rõ nét"
-            className="mb-[34px]"
-          />
+          <SectionHeader eyebrow="Lộ trình của bạn" title="Bốn bước chuyển mình rõ nét" className="mb-[34px]" />
           <div className="dof-quad-grid">
             {ROADMAP_STEPS.map((step) => {
               const dark = step.tone === "dark";
@@ -978,12 +1007,7 @@ export function PublicVisitorView({
           className="dof-defer-section"
           style={{ ...SECTION, padding: "48px 24px 72px", ...scrollAnchor }}
         >
-          <EditorialCard
-            tone="accent"
-            padding="lg"
-            className="!p-14 overflow-hidden"
-            style={{ borderRadius: 28 }}
-          >
+          <EditorialCard tone="accent" padding="lg" className="!p-14 overflow-hidden" style={{ borderRadius: 28 }}>
             <div
               style={{
                 position: "absolute",
@@ -1032,7 +1056,15 @@ export function PublicVisitorView({
                 </p>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                <PillButton variant="highlight" size="lg" onClick={onStart}>
+                <PillButton
+                  variant="highlight"
+                  size="lg"
+                  onClick={onStart}
+                  onFocus={onStartIntent}
+                  onPointerDown={onStartIntent}
+                  onPointerEnter={onStartIntent}
+                  onTouchStart={onStartIntent}
+                >
                   Thiết lập chu kỳ 12 tuần ngay →
                 </PillButton>
                 <p
@@ -1158,4 +1190,3 @@ const signupPillStyle: CSSProperties = {
   padding: "10px 18px",
   borderRadius: 999,
 };
-

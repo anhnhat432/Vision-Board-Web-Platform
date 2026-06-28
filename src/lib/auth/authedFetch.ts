@@ -1,7 +1,14 @@
-import { getFirebaseToken } from "./firebase";
+type FirebaseAuthModule = typeof import("./firebase");
 
 const AUTH_FORCE_LOGOUT_EVENT = "auth:force-logout";
 const AUTHED_FETCH_TIMEOUT_MS = 10_000;
+
+let firebaseAuthModulePromise: Promise<FirebaseAuthModule> | null = null;
+
+function loadFirebaseAuthModule(): Promise<FirebaseAuthModule> {
+  firebaseAuthModulePromise ??= import("./firebase");
+  return firebaseAuthModulePromise;
+}
 
 export class AuthError extends Error {
   public readonly status = 401;
@@ -70,6 +77,7 @@ async function fetchWithToken(
 }
 
 export async function authedFetch(input: RequestInfo, init?: RequestInit): Promise<Response> {
+  const { getFirebaseToken } = await loadFirebaseAuthModule();
   const token = await getFirebaseToken(false);
   const response = await fetchWithToken(input, init, token);
 
