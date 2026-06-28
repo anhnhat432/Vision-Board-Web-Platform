@@ -215,7 +215,10 @@ function compressImageFile(file: File): Promise<string> {
         ctx.fillStyle = "#ffffff";
         ctx.fillRect(0, 0, w, h);
         ctx.drawImage(img, 0, 0, w, h);
-        const compressed = canvas.toDataURL("image/jpeg", 0.82);
+        let compressed = canvas.toDataURL("image/webp", 0.80);
+        if (compressed.startsWith("data:image/png")) {
+          compressed = canvas.toDataURL("image/jpeg", 0.82);
+        }
         if (compressed.length > MAX_COMPRESSED_CHARS) {
           reject(new Error("too_large_after_compress"));
           return;

@@ -1,6 +1,7 @@
 import { BarChart3, CalendarDays, ListTodo, type LucideIcon, Settings2 } from "lucide-react";
 import { Suspense } from "react";
 import type { NavigateFunction } from "react-router";
+import { motion } from "motion/react";
 import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
 import { CycleReviewPanel } from "@/app/components/twelve-week/CycleReviewPanel";
 import { ProgressSummaryCard } from "@/app/components/twelve-week/ProgressSummaryCard";
@@ -344,6 +345,7 @@ export function TwelveWeekSystemTabs({
           >
             {TWELVE_WEEK_SECTION_TABS.map(({ value, label, icon: Icon }) => {
               const hasDot = (value === "today" && showTodayDot) || (value === "week" && showWeekDot);
+              const isActive = activeTab === value;
               return (
                 <TabsTrigger
                   key={value}
@@ -352,7 +354,7 @@ export function TwelveWeekSystemTabs({
                   value={value}
                   aria-controls={tabPanelId}
                   aria-label={`Mở tab ${label}`}
-                  className={`relative flex min-h-11 flex-none cursor-pointer items-center justify-center gap-1.5 rounded-[10px] px-3 py-2 text-[12px] font-semibold leading-tight transition-all duration-150 data-[state=active]:bg-[#0C5E3A] data-[state=active]:text-white data-[state=inactive]:text-app-ink-soft hover:data-[state=inactive]:text-app-ink dark:data-[state=active]:bg-[#1A3A2A] sm:min-h-11 sm:gap-2 sm:px-[18px] sm:py-[10px] sm:text-[13px]`}
+                  className={`relative flex min-h-11 flex-none cursor-pointer items-center justify-center gap-1.5 rounded-[10px] px-3 py-2 text-[12px] font-semibold leading-tight transition-all duration-150 data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=inactive]:text-app-ink-soft hover:data-[state=inactive]:text-app-ink z-10 sm:min-h-11 sm:gap-2 sm:px-[18px] sm:py-[10px] sm:text-[13px]`}
                 >
                   <Icon
                     className="h-[15px] w-[15px] shrink-0 transition-transform duration-150 group-hover:scale-110"
@@ -360,10 +362,17 @@ export function TwelveWeekSystemTabs({
                   />
                   <span>{label}</span>
                   {hasDot && (
-                    <span className="absolute top-1 right-1 flex h-2 w-2">
+                    <span className="absolute top-1 right-1 flex h-2 w-2 z-20">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-app-status-warning opacity-75" />
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-app-status-warning" />
                     </span>
+                  )}
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeTwelveWeekTabIndicator"
+                      className="absolute inset-0 rounded-[10px] bg-[#0C5E3A] dark:bg-[#1A3A2A] -z-10 shadow-sm"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
                   )}
                 </TabsTrigger>
               );
@@ -380,63 +389,75 @@ export function TwelveWeekSystemTabs({
         aria-labelledby={`${tabPanelId}-${activeTab}-tab`}
       >
         {isCycleReviewMode && activeTab !== "settings" && (
-          <CycleReviewPanel
-            goal={activeGoal}
-            system={system}
-            onSaveCycleReview={handleSaveCycleReview}
-            onStartNewCycle={handleStartNewCycle}
-            onOpenSettings={() => handleTabChange("settings")}
-            aspirationalVisionSummary={aspirationalVisionSummary ?? undefined}
-          />
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+          >
+            <CycleReviewPanel
+              goal={activeGoal}
+              system={system}
+              onSaveCycleReview={handleSaveCycleReview}
+              onStartNewCycle={handleStartNewCycle}
+              onOpenSettings={() => handleTabChange("settings")}
+              aspirationalVisionSummary={aspirationalVisionSummary ?? undefined}
+            />
+          </motion.div>
         )}
 
         {/* TODAY SECTION */}
         {!isCycleReviewMode && activeTab === "today" && (
           <TabErrorBoundary fallbackTitle="Tab Hôm nay gặp lỗi">
-            <TaskBoard
-              system={system}
-              currentWeek={currentWeek}
-              currentWeekRange={currentWeekRange}
-              currentPlanFocus={currentPlanFocus ?? ""}
-              reviewDueToday={reviewDueToday}
-              reviewStatusLabel={reviewStatusLabel}
-              currentWeekScoreValue={currentWeekScoreValue}
-              weekCompletion={weekCompletion}
-              coreTacticCount={coreTacticCount}
-              optionalTacticCount={optionalTacticCount}
-              missedTasks={missedTasks}
-              todayQueue={todayQueue}
-              currentWeekTasksCount={currentWeekOpenTasks.length}
-              todayDateKey={todayDateKey}
-              todayCompletedCount={todayCompletedCount}
-              todayRemainingCount={todayRemainingCount}
-              overdueOpenCount={overdueOpenCount}
-              optionalOpenThisWeekCount={optionalOpenThisWeekCount}
-              hasPlanTasks={!planHasNoTasks}
-              hasLeadMetrics={!planHasNoLeadMetrics}
-              firstPriorityTask={firstPriorityTask}
-              secondaryTodayTasks={secondaryTodayTasks}
-              hasSmartRescue={hasSmartRescue}
-              rescuePlanSummary={rescuePlanSummary}
-              dailyMood={dailyMood}
-              dailyNote={dailyNote}
-              latestCheckIn={latestCheckIn}
-              onReentry={onReentry}
-              onApplyRecommendedReentry={onApplyRecommendedReentry}
-              onOpenSmartRescue={onOpenSmartRescue}
-              onToggleTask={onToggleTask}
-              onDailyMoodChange={onDailyMoodChange}
-              onDailyNoteChange={onDailyNoteChange}
-              onSaveCheckIn={onSaveCheckIn}
-              onOpenWeekTab={onOpenWeekTab}
-              onNavigateToSetup={onNavigateToSetup}
-              rescueStatus={rescueStatus}
-              onPickTinyTask={onPickTinyTask}
-              onReviewPlan={onReviewPlan}
-              onRescheduleTaskWithinWeek={onRescheduleTaskWithinWeek}
-              onRescheduleTaskToNextWeek={onRescheduleTaskToNextWeek}
-              onSkipNonCoreTask={onSkipNonCoreTask}
-            />
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
+            >
+              <TaskBoard
+                system={system}
+                currentWeek={currentWeek}
+                currentWeekRange={currentWeekRange}
+                currentPlanFocus={currentPlanFocus ?? ""}
+                reviewDueToday={reviewDueToday}
+                reviewStatusLabel={reviewStatusLabel}
+                currentWeekScoreValue={currentWeekScoreValue}
+                weekCompletion={weekCompletion}
+                coreTacticCount={coreTacticCount}
+                optionalTacticCount={optionalTacticCount}
+                missedTasks={missedTasks}
+                todayQueue={todayQueue}
+                currentWeekTasksCount={currentWeekOpenTasks.length}
+                todayDateKey={todayDateKey}
+                todayCompletedCount={todayCompletedCount}
+                todayRemainingCount={todayRemainingCount}
+                overdueOpenCount={overdueOpenCount}
+                optionalOpenThisWeekCount={optionalOpenThisWeekCount}
+                hasPlanTasks={!planHasNoTasks}
+                hasLeadMetrics={!planHasNoLeadMetrics}
+                firstPriorityTask={firstPriorityTask}
+                secondaryTodayTasks={secondaryTodayTasks}
+                hasSmartRescue={hasSmartRescue}
+                rescuePlanSummary={rescuePlanSummary}
+                dailyMood={dailyMood}
+                dailyNote={dailyNote}
+                latestCheckIn={latestCheckIn}
+                onReentry={onReentry}
+                onApplyRecommendedReentry={onApplyRecommendedReentry}
+                onOpenSmartRescue={onOpenSmartRescue}
+                onToggleTask={onToggleTask}
+                onDailyMoodChange={onDailyMoodChange}
+                onDailyNoteChange={onDailyNoteChange}
+                onSaveCheckIn={onSaveCheckIn}
+                onOpenWeekTab={onOpenWeekTab}
+                onNavigateToSetup={onNavigateToSetup}
+                rescueStatus={rescueStatus}
+                onPickTinyTask={onPickTinyTask}
+                onReviewPlan={onReviewPlan}
+                onRescheduleTaskWithinWeek={onRescheduleTaskWithinWeek}
+                onRescheduleTaskToNextWeek={onRescheduleTaskToNextWeek}
+                onSkipNonCoreTask={onSkipNonCoreTask}
+              />
+            </motion.div>
           </TabErrorBoundary>
         )}
 
@@ -451,37 +472,43 @@ export function TwelveWeekSystemTabs({
                 />
               }
             >
-              <WeeklyReview
-                system={system}
-                currentWeekNumber={currentWeek}
-                currentWeekRange={currentWeekRange}
-                currentPlanFocus={currentPlanFocus ?? ""}
-                currentPlanMilestone={currentPlanMilestone ?? ""}
-                reviewDueToday={reviewDueToday}
-                reviewStatusLabel={reviewStatusLabel}
-                currentScoreValue={currentWeekScoreValue}
-                weekCompletion={weekCompletion}
-                currentLagMetricValue={currentLagMetricValue}
-                coreIndicators={coreIndicators}
-                optionalIndicators={optionalIndicators}
-                currentPlanCode={activePlanCode}
-                hasPremiumInsights={hasPremiumReviewInsights}
-                premiumInsight={premiumReviewInsight}
-                suggestedNextWeekPlan={suggestedNextWeekPlan}
-                weeklyForm={weeklyForm}
-                currentReview={currentReview}
-                onWeeklyFormChange={onWeeklyFormChange}
-                onApplySuggestedPlan={onApplySuggestedPlan}
-                onOpenPremiumInsights={onOpenPremiumInsights}
-                onSaveWeeklyReview={onSaveWeeklyReview}
-                onOpenTodayTab={onOpenTodayTab}
-                rescueStatus={rescueStatus}
-                onPickTinyTask={onPickTinyTask}
-                onReducePlan={onApplySuggestedPlan}
-                nextWeekRecommendation={nextWeekRecommendation}
-                onAcceptNextWeekRecommendation={onAcceptNextWeekRecommendation ?? onApplySuggestedPlan}
-                weeklyReflectionInsights={weeklyReflectionInsights}
-              />
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.18, ease: "easeOut" }}
+              >
+                <WeeklyReview
+                  system={system}
+                  currentWeekNumber={currentWeek}
+                  currentWeekRange={currentWeekRange}
+                  currentPlanFocus={currentPlanFocus ?? ""}
+                  currentPlanMilestone={currentPlanMilestone ?? ""}
+                  reviewDueToday={reviewDueToday}
+                  reviewStatusLabel={reviewStatusLabel}
+                  currentScoreValue={currentWeekScoreValue}
+                  weekCompletion={weekCompletion}
+                  currentLagMetricValue={currentLagMetricValue}
+                  coreIndicators={coreIndicators}
+                  optionalIndicators={optionalIndicators}
+                  currentPlanCode={activePlanCode}
+                  hasPremiumInsights={hasPremiumReviewInsights}
+                  premiumInsight={premiumReviewInsight}
+                  suggestedNextWeekPlan={suggestedNextWeekPlan}
+                  weeklyForm={weeklyForm}
+                  currentReview={currentReview}
+                  onWeeklyFormChange={onWeeklyFormChange}
+                  onApplySuggestedPlan={onApplySuggestedPlan}
+                  onOpenPremiumInsights={onOpenPremiumInsights}
+                  onSaveWeeklyReview={onSaveWeeklyReview}
+                  onOpenTodayTab={onOpenTodayTab}
+                  rescueStatus={rescueStatus}
+                  onPickTinyTask={onPickTinyTask}
+                  onReducePlan={onApplySuggestedPlan}
+                  nextWeekRecommendation={nextWeekRecommendation}
+                  onAcceptNextWeekRecommendation={onAcceptNextWeekRecommendation ?? onApplySuggestedPlan}
+                  weeklyReflectionInsights={weeklyReflectionInsights}
+                />
+              </motion.div>
             </Suspense>
           </TabErrorBoundary>
         )}
@@ -497,59 +524,65 @@ export function TwelveWeekSystemTabs({
                 />
               }
             >
-              {!showFullProgress ? (
-                <ProgressSummaryCard
-                  system={system}
-                  currentWeek={currentWeek}
-                  currentWeekRange={currentWeekRange}
-                  currentWeekScoreValue={currentWeekScoreValue}
-                  averageScore={averageScore}
-                  reviewDoneCount={reviewDoneCount}
-                  weekCompletion={weekCompletion}
-                  reviewDueToday={reviewDueToday}
-                  onOpenTodayTab={() => setActiveTab("today")}
-                  onOpenWeekTab={() => setActiveTab("week")}
-                  onOpenSettingsTab={() => setActiveTab("settings")}
-                  onOpenCycleReview={() => setActiveTab("progress")}
-                  onNavigateToSetup={onNavigateToSetup}
-                  onViewFull={() => setShowFullProgress(true)}
-                />
-              ) : (
-                <>
-                  <div className="mb-4 flex justify-end">
-                    <button
-                      type="button"
-                      className="inline-flex min-h-11 items-center justify-center rounded-xl border border-app-line bg-app-surface px-4 py-2 text-sm font-semibold text-app-ink transition-colors duration-150 hover:bg-app-bg"
-                      onClick={() => setShowFullProgress(false)}
-                    >
-                      Quay lại tóm tắt
-                    </button>
-                  </div>
-                  <PlanOverview
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.18, ease: "easeOut" }}
+              >
+                {!showFullProgress ? (
+                  <ProgressSummaryCard
                     system={system}
-                    goalTitle={activeGoal.title}
                     currentWeek={currentWeek}
                     currentWeekRange={currentWeekRange}
                     currentWeekScoreValue={currentWeekScoreValue}
                     averageScore={averageScore}
                     reviewDoneCount={reviewDoneCount}
                     weekCompletion={weekCompletion}
-                    milestoneItems={milestoneItems}
-                    hasAdvancedAnalytics={hasAdvancedAnalytics}
-                    executionHeatmap={executionHeatmap}
-                    weeklyTrend={weeklyTrend}
-                    tacticBreakdown={tacticBreakdown}
                     reviewDueToday={reviewDueToday}
-                    onRenameGoal={handleRenameActiveGoal}
                     onOpenTodayTab={() => setActiveTab("today")}
                     onOpenWeekTab={() => setActiveTab("week")}
                     onOpenSettingsTab={() => setActiveTab("settings")}
                     onOpenCycleReview={() => setActiveTab("progress")}
                     onNavigateToSetup={onNavigateToSetup}
-                    executionInsights={executionInsights}
+                    onViewFull={() => setShowFullProgress(true)}
                   />
-                </>
-              )}
+                ) : (
+                  <>
+                    <div className="mb-4 flex justify-end">
+                      <button
+                        type="button"
+                        className="inline-flex min-h-11 items-center justify-center rounded-xl border border-app-line bg-app-surface px-4 py-2 text-sm font-semibold text-app-ink transition-colors duration-150 hover:bg-app-bg"
+                        onClick={() => setShowFullProgress(false)}
+                      >
+                        Quay lại tóm tắt
+                      </button>
+                    </div>
+                    <PlanOverview
+                      system={system}
+                      goalTitle={activeGoal.title}
+                      currentWeek={currentWeek}
+                      currentWeekRange={currentWeekRange}
+                      currentWeekScoreValue={currentWeekScoreValue}
+                      averageScore={averageScore}
+                      reviewDoneCount={reviewDoneCount}
+                      weekCompletion={weekCompletion}
+                      milestoneItems={milestoneItems}
+                      hasAdvancedAnalytics={hasAdvancedAnalytics}
+                      executionHeatmap={executionHeatmap}
+                      weeklyTrend={weeklyTrend}
+                      tacticBreakdown={tacticBreakdown}
+                      reviewDueToday={reviewDueToday}
+                      onRenameGoal={handleRenameActiveGoal}
+                      onOpenTodayTab={() => setActiveTab("today")}
+                      onOpenWeekTab={() => setActiveTab("week")}
+                      onOpenSettingsTab={() => setActiveTab("settings")}
+                      onOpenCycleReview={() => setActiveTab("progress")}
+                      onNavigateToSetup={onNavigateToSetup}
+                      executionInsights={executionInsights}
+                    />
+                  </>
+                )}
+              </motion.div>
             </Suspense>
           </TabErrorBoundary>
         )}
@@ -565,67 +598,73 @@ export function TwelveWeekSystemTabs({
                 />
               }
             >
-              <WeekEditor
-                system={system}
-                activeGoalId={activeGoal.id}
-                backendConnectionStatus={backendConnectionStatus}
-                currentPlanCode={activePlanCode}
-                entitlementKeys={activeEntitlementKeys}
-                billingProviderStatus={billingProviderStatus}
-                lastEntitlementSyncSnapshot={lastEntitlementSyncSnapshot}
-                lastRestoreAccessSnapshot={lastRestoreAccessSnapshot}
-                lastBackendHydrationResult={lastBackendHydrationResult}
-                appPreferences={appPreferences}
-                funnelSteps={funnelSteps}
-                monetizationSteps={monetizationSteps}
-                browserNotificationStatus={browserNotificationStatus}
-                lastSyncSnapshot={lastSyncSnapshot}
-                pendingOutboxCount={pendingOutboxCount}
-                archivedOutboxCount={archivedOutboxCount}
-                eventCount={eventCount}
-                activeReminders={activeReminders}
-                recentOutboxItems={recentOutboxItems}
-                isSyncingEntitlements={isSyncingEntitlements}
-                isRestoringPlanAccess={isRestoringPlanAccess}
-                isHydratingBackendPlans={isHydratingBackendPlans}
-                isResolvingBackendPlanConflicts={isResolvingBackendPlanConflicts}
-                mutationQueueSyncStatus={mutationQueueSyncStatus}
-                onReviewDayChange={handleReviewDayChange}
-                onReminderTimeChange={handleReminderTimeChange}
-                onLoadPreferenceChange={handleLoadPreferenceChange}
-                onStatusChange={handleStatusChange}
-                onTacticPriorityChange={handleTacticPriorityChange}
-                onTacticTypeChange={handleTacticTypeChange}
-                onTimeBlocksChange={handleTimeBlocksChange}
-                onPreferenceToggle={handlePreferenceToggle}
-                onArchivePendingOutbox={handleArchivePendingOutbox}
-                onRestoreArchivedOutbox={handleRestoreArchivedOutbox}
-                onOpenReminder={handleOpenReminder}
-                onExportLocalData={handleExportLocalData}
-                onExportCloudWorkspace={handleExportCloudWorkspace}
-                onDeleteCloudWorkspace={handleDeleteCloudWorkspace}
-                onBrowserNotificationToggle={handleBrowserNotificationToggle}
-                onRunOutboxSync={handleRunOutboxSync}
-                onOutboxItemToggle={handleOutboxItemToggle}
-                onClearEventLog={handleClearEventLog}
-                onClearArchivedOutbox={handleClearArchivedOutbox}
-                onOpenClearLocalDialog={() => setIsClearLocalDialogOpen(true)}
-                onDeleteAllData={handleDeleteAllData}
-                onOpenDeleteDataDialog={() => setIsDeleteDataDialogOpen(true)}
-                onOpenResetDialog={() => setIsResetDialogOpen(true)}
-                onOpenUpgradePlan={(planCode) => handleOpenUpgradeDialog("plan", planCode)}
-                onSyncEntitlements={handleSyncEntitlements}
-                onRestorePlanAccess={handleRestorePlanAccess}
-                onHydrateBackendPlans={handleHydrateBackendPlans}
-                onRunMutationQueueSync={handleRunMutationQueueSync}
-                onKeepLocalPlanForConflicts={handleKeepLocalPlanForConflicts}
-                onUseBackendPlanForConflicts={handleUseBackendPlanForConflicts}
-                onUseCloudVersion={handleUseCloudVersion}
-                onOpenBillingPortal={handleOpenBillingPortal}
-                onNavigateGoals={() => navigate("/goals")}
-                onNavigateJournal={() => navigate("/journal")}
-                onNavigateSetup={() => navigate("/life-insight")}
-              />
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.18, ease: "easeOut" }}
+              >
+                <WeekEditor
+                  system={system}
+                  activeGoalId={activeGoal.id}
+                  backendConnectionStatus={backendConnectionStatus}
+                  currentPlanCode={activePlanCode}
+                  entitlementKeys={activeEntitlementKeys}
+                  billingProviderStatus={billingProviderStatus}
+                  lastEntitlementSyncSnapshot={lastEntitlementSyncSnapshot}
+                  lastRestoreAccessSnapshot={lastRestoreAccessSnapshot}
+                  lastBackendHydrationResult={lastBackendHydrationResult}
+                  appPreferences={appPreferences}
+                  funnelSteps={funnelSteps}
+                  monetizationSteps={monetizationSteps}
+                  browserNotificationStatus={browserNotificationStatus}
+                  lastSyncSnapshot={lastSyncSnapshot}
+                  pendingOutboxCount={pendingOutboxCount}
+                  archivedOutboxCount={archivedOutboxCount}
+                  eventCount={eventCount}
+                  activeReminders={activeReminders}
+                  recentOutboxItems={recentOutboxItems}
+                  isSyncingEntitlements={isSyncingEntitlements}
+                  isRestoringPlanAccess={isRestoringPlanAccess}
+                  isHydratingBackendPlans={isHydratingBackendPlans}
+                  isResolvingBackendPlanConflicts={isResolvingBackendPlanConflicts}
+                  mutationQueueSyncStatus={mutationQueueSyncStatus}
+                  onReviewDayChange={handleReviewDayChange}
+                  onReminderTimeChange={handleReminderTimeChange}
+                  onLoadPreferenceChange={handleLoadPreferenceChange}
+                  onStatusChange={handleStatusChange}
+                  onTacticPriorityChange={handleTacticPriorityChange}
+                  onTacticTypeChange={handleTacticTypeChange}
+                  onTimeBlocksChange={handleTimeBlocksChange}
+                  onPreferenceToggle={handlePreferenceToggle}
+                  onArchivePendingOutbox={handleArchivePendingOutbox}
+                  onRestoreArchivedOutbox={handleRestoreArchivedOutbox}
+                  onOpenReminder={handleOpenReminder}
+                  onExportLocalData={handleExportLocalData}
+                  onExportCloudWorkspace={handleExportCloudWorkspace}
+                  onDeleteCloudWorkspace={handleDeleteCloudWorkspace}
+                  onBrowserNotificationToggle={handleBrowserNotificationToggle}
+                  onRunOutboxSync={handleRunOutboxSync}
+                  onOutboxItemToggle={handleOutboxItemToggle}
+                  onClearEventLog={handleClearEventLog}
+                  onClearArchivedOutbox={handleClearArchivedOutbox}
+                  onOpenClearLocalDialog={() => setIsClearLocalDialogOpen(true)}
+                  onDeleteAllData={handleDeleteAllData}
+                  onOpenDeleteDataDialog={() => setIsDeleteDataDialogOpen(true)}
+                  onOpenResetDialog={() => setIsResetDialogOpen(true)}
+                  onOpenUpgradePlan={(planCode) => handleOpenUpgradeDialog("plan", planCode)}
+                  onSyncEntitlements={handleSyncEntitlements}
+                  onRestorePlanAccess={handleRestorePlanAccess}
+                  onHydrateBackendPlans={handleHydrateBackendPlans}
+                  onRunMutationQueueSync={handleRunMutationQueueSync}
+                  onKeepLocalPlanForConflicts={handleKeepLocalPlanForConflicts}
+                  onUseBackendPlanForConflicts={handleUseBackendPlanForConflicts}
+                  onUseCloudVersion={handleUseCloudVersion}
+                  onOpenBillingPortal={handleOpenBillingPortal}
+                  onNavigateGoals={() => navigate("/goals")}
+                  onNavigateJournal={() => navigate("/journal")}
+                  onNavigateSetup={() => navigate("/life-insight")}
+                />
+              </motion.div>
             </Suspense>
           </TabErrorBoundary>
         )}
