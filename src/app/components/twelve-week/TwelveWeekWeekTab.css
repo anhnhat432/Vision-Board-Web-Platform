@@ -15,7 +15,7 @@
     transform: scale(1);
   }
   50% {
-    transform: scale(1.03);
+    transform: scale(1.02);
   }
 }
 
@@ -75,6 +75,7 @@
   }
 }
 
+/* Base Classes */
 .weekly-stagger-item {
   animation: weekly-stagger-reveal var(--duration-medium, 360ms) var(--ease-emphasized, cubic-bezier(0.22, 1, 0.36, 1)) both;
   animation-delay: calc(var(--stagger-index, 0) * 40ms);
@@ -126,17 +127,14 @@ html.dark .weekly-progress-bar::after {
   transition:
     transform var(--duration-base, 240ms) var(--ease-emphasized, cubic-bezier(0.22, 1, 0.36, 1)),
     box-shadow var(--duration-base, 240ms) var(--ease-emphasized, cubic-bezier(0.22, 1, 0.36, 1)),
-    border-color var(--duration-base, 240ms) var(--ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
+    border-color var(--duration-base, 240ms) var(--ease-standard, cubic-bezier(0.4, 0, 0.2, 1)),
+    background-color var(--duration-base, 240ms) var(--ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .weekly-card-lift:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 28px -8px rgba(26, 26, 26, 0.10), 0 4px 10px -4px rgba(26, 26, 26, 0.05);
-  border-color: var(--app-line);
-}
-
-html.dark .weekly-card-lift:hover {
-  box-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.35), 0 4px 10px -4px rgba(0, 0, 0, 0.18);
+  box-shadow: var(--app-shadow-md);
+  border-color: var(--app-line-strong);
 }
 
 .weekly-status-dot {
@@ -163,7 +161,7 @@ html.dark .weekly-card-lift:hover {
   border-radius: inherit;
   pointer-events: none;
   z-index: 1;
-  opacity: 0.035;
+  opacity: 0.025;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.5'/%3E%3C/svg%3E");
   background-repeat: repeat;
   background-size: 128px 128px;
@@ -171,7 +169,7 @@ html.dark .weekly-card-lift:hover {
 }
 
 html.dark .weekly-grain-overlay::before {
-  opacity: 0.05;
+  opacity: 0.04;
 }
 
 .weekly-score-hero {
@@ -188,7 +186,7 @@ html.dark .weekly-grain-overlay::before {
   height: 140%;
   background: radial-gradient(
     ellipse at center,
-    var(--app-accent-soft, rgba(232, 240, 236, 0.6)) 0%,
+    var(--app-accent-soft, rgba(228, 238, 223, 0.45)) 0%,
     transparent 70%
   );
   pointer-events: none;
@@ -196,10 +194,19 @@ html.dark .weekly-grain-overlay::before {
   border-radius: 50%;
 }
 
+html.dark .weekly-score-hero::before {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(91, 165, 144, 0.12) 0%,
+    transparent 70%
+  );
+}
+
 .weekly-btn-press {
   transition:
     transform var(--duration-fast, 180ms) var(--ease-emphasized, cubic-bezier(0.22, 1, 0.36, 1)),
-    box-shadow var(--duration-fast, 180ms) var(--ease-emphasized, cubic-bezier(0.22, 1, 0.36, 1));
+    box-shadow var(--duration-fast, 180ms) var(--ease-emphasized, cubic-bezier(0.22, 1, 0.36, 1)),
+    background-color var(--duration-fast, 180ms) var(--ease-standard, cubic-bezier(0.4, 0, 0.2, 1));
 }
 
 .weekly-btn-press:active:not(:disabled) {
@@ -219,4 +226,209 @@ html.dark .weekly-grain-overlay::before {
   .weekly-card-lift {
     transition: none !important;
   }
+}
+
+/* Scrollbar-none utility */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ============================================================
+   NEW UI/UX IMPROVEMENTS — TIMELINE RAIL & TIMELINES
+   ============================================================ */
+
+.weekly-rail-outer {
+  position: relative;
+  width: 100%;
+}
+
+.weekly-rail-track-line {
+  position: absolute;
+  top: 50%;
+  left: 38px;
+  right: 38px;
+  height: 2px;
+  background: var(--app-line);
+  transform: translateY(-13px);
+  z-index: 1;
+}
+
+html.dark .weekly-rail-track-line {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Week Selector Cards */
+.weekly-rail-card {
+  z-index: 2;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  min-width: 68px;
+  border-radius: var(--app-radius-control, 12px);
+  border: 1.5px solid var(--app-line);
+  background: var(--app-surface);
+}
+
+.weekly-rail-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--app-line-strong);
+  box-shadow: var(--app-shadow-sm);
+}
+
+.weekly-rail-card:active {
+  transform: scale(0.96);
+}
+
+/* States */
+.weekly-rail-card-completed {
+  border-color: var(--app-status-success);
+  background: rgba(58, 125, 94, 0.03);
+}
+html.dark .weekly-rail-card-completed {
+  background: rgba(107, 181, 138, 0.05);
+}
+
+.weekly-rail-card-missed {
+  border-color: var(--app-status-error);
+  background: rgba(184, 64, 64, 0.02);
+}
+html.dark .weekly-rail-card-missed {
+  background: rgba(224, 120, 120, 0.04);
+}
+
+.weekly-rail-card-active {
+  border-color: var(--app-accent);
+  background: var(--app-accent-subtle);
+  box-shadow: 0 0 0 1px var(--app-accent), var(--app-shadow-md);
+  transform: scale(1.04);
+}
+
+.weekly-rail-card-active:hover {
+  transform: scale(1.04) translateY(-1px);
+  border-color: var(--app-accent);
+  box-shadow: 0 0 0 1px var(--app-accent), var(--app-shadow-lg);
+}
+
+.weekly-rail-card-locked {
+  opacity: 0.65;
+  border-style: dashed;
+  background: var(--app-bg-subtle);
+}
+
+/* ============================================================
+   NEW CARDS & STATUS-SPECIFIC STYLES
+   ============================================================ */
+
+/* Weekly Hero/Score Card */
+.weekly-hero-card {
+  background: var(--app-surface);
+  border: 1px solid var(--app-line);
+  border-radius: var(--app-radius-card-lg, 24px);
+  box-shadow: var(--app-shadow-card);
+}
+
+.weekly-focus-header {
+  border-bottom: 1px solid var(--app-line);
+}
+
+/* Status-colored action cards */
+.weekly-action-card {
+  border: 1px solid var(--app-line);
+  background: var(--app-surface);
+  transition: all var(--duration-base, 240ms) var(--ease-emphasized, cubic-bezier(0.22, 1, 0.36, 1));
+}
+
+.weekly-action-card:hover {
+  transform: translateY(-1.5px);
+  box-shadow: var(--app-shadow-sm);
+  border-color: var(--app-line-strong);
+}
+
+.weekly-action-card-done {
+  background: rgba(58, 125, 94, 0.02);
+  border-color: rgba(58, 125, 94, 0.15);
+}
+.weekly-action-card-done .tactic-name {
+  color: var(--app-ink-soft);
+  text-decoration: line-through;
+  opacity: 0.85;
+}
+html.dark .weekly-action-card-done {
+  background: rgba(107, 181, 138, 0.04);
+  border-color: rgba(107, 181, 138, 0.18);
+}
+
+.weekly-action-card-behind {
+  background: rgba(184, 64, 64, 0.02);
+  border-color: rgba(184, 64, 64, 0.18);
+}
+html.dark .weekly-action-card-behind {
+  background: rgba(224, 120, 120, 0.03);
+  border-color: rgba(224, 120, 120, 0.22);
+}
+
+.weekly-action-card-inprogress {
+  background: rgba(154, 99, 8, 0.02);
+  border-color: rgba(154, 99, 8, 0.15);
+}
+html.dark .weekly-action-card-inprogress {
+  background: rgba(217, 164, 90, 0.03);
+  border-color: rgba(217, 164, 90, 0.18);
+}
+
+.weekly-action-card-notstarted {
+  background: var(--app-bg-subtle);
+  border-color: var(--app-line);
+}
+
+/* Review Form Cards */
+.weekly-review-step-card {
+  background: var(--app-surface);
+  border: 1.5px solid var(--app-line);
+  border-radius: var(--app-radius-card, 18px);
+  padding: 1.5rem;
+  transition: all 0.24s ease;
+}
+
+.weekly-review-step-card:focus-within {
+  border-color: var(--app-accent);
+  box-shadow: 0 0 0 1px var(--app-accent), var(--app-shadow-md);
+}
+
+/* Premium Insights Editorial Box */
+.weekly-editorial-insights {
+  border-radius: var(--app-radius-card, 18px);
+  background: linear-gradient(135deg, rgba(228, 238, 223, 0.4) 0%, rgba(252, 237, 229, 0.4) 100%);
+  border: 1px solid var(--app-line);
+  box-shadow: var(--app-shadow-sm);
+}
+
+html.dark .weekly-editorial-insights {
+  background: linear-gradient(135deg, rgba(91, 165, 144, 0.06) 0%, rgba(232, 152, 120, 0.06) 100%);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Editorial Blockquote */
+.weekly-insights-quote {
+  position: relative;
+  border-left: 4px solid var(--app-accent);
+  background: var(--app-bg-subtle);
+  border-radius: 0 var(--app-radius-control) var(--app-radius-control) 0;
+  padding: 1.25rem 1.5rem;
+  font-family: var(--app-font-serif);
+}
+
+.weekly-insights-quote-warm {
+  border-left-color: var(--app-warm);
+  background: var(--app-warm-subtle);
+}
+
+/* Readiness Indicator Box */
+.weekly-readiness-box {
+  background: var(--app-bg-subtle);
+  border: 1px solid var(--app-line);
+  border-radius: var(--app-radius-card, 18px);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.01);
 }

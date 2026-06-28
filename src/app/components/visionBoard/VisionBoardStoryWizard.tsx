@@ -1,5 +1,5 @@
 import { BookOpen, Briefcase, HeartPulse, Home, type LucideIcon, Sparkles, Sprout, Users, Wallet } from "lucide-react";
-import { type JSX, useCallback, useEffect, useMemo, useState } from "react";
+import { type JSX, memo, useCallback, useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/app/components/ui/button";
 import {
@@ -41,6 +41,9 @@ export interface VisionBoardStoryWizardProps {
 }
 
 type WizardStep = 1 | 2 | 3 | 4;
+type AvailableGoal = VisionBoardStoryWizardProps["availableGoals"][number];
+type StoryFeelingOption = (typeof STORY_FEELING_OPTIONS)[number];
+type StoryThemeOption = (typeof VISION_BOARD_THEMES)[number];
 
 const LIFE_AREA_ICONS: Record<string, LucideIcon> = {
   Career: Briefcase,
@@ -60,6 +63,126 @@ function getLifeAreaLabel(name: string): string {
 function getSafeSeed(value: string): string {
   return value.trim().replace(/\s+/g, "_");
 }
+
+interface FeelingChoiceButtonProps {
+  feeling: StoryFeelingOption;
+  active: boolean;
+  disabled: boolean;
+  onToggle: (id: string) => void;
+}
+
+const FeelingChoiceButton = memo(function FeelingChoiceButton({
+  feeling,
+  active,
+  disabled,
+  onToggle,
+}: FeelingChoiceButtonProps): JSX.Element {
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      disabled={disabled}
+      onClick={() => onToggle(feeling.id)}
+      className={cn(
+        "rounded-full border px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-45",
+        active
+          ? "border-app-accent bg-app-accent-soft text-app-accent"
+          : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/50 hover:bg-app-bg",
+      )}
+    >
+      {feeling.label}
+    </button>
+  );
+});
+
+interface QuoteSuggestionButtonProps {
+  suggestion: string;
+  onSelect: (suggestion: string) => void;
+}
+
+const QuoteSuggestionButton = memo(function QuoteSuggestionButton({
+  suggestion,
+  onSelect,
+}: QuoteSuggestionButtonProps): JSX.Element {
+  return (
+    <button
+      type="button"
+      onClick={() => onSelect(suggestion)}
+      className="rounded-xl border border-app-line bg-app-surface p-4 text-left text-sm leading-6 text-app-ink-soft hover:border-app-accent/50 hover:bg-app-bg"
+    >
+      {suggestion}
+    </button>
+  );
+});
+
+interface FocusAreaChoiceButtonProps {
+  area: (typeof LIFE_AREAS)[number];
+  active: boolean;
+  disabled: boolean;
+  goalCount: number;
+  onToggle: (name: string) => void;
+}
+
+const FocusAreaChoiceButton = memo(function FocusAreaChoiceButton({
+  area,
+  active,
+  disabled,
+  goalCount,
+  onToggle,
+}: FocusAreaChoiceButtonProps): JSX.Element {
+  const Icon = LIFE_AREA_ICONS[area.name] ?? Sparkles;
+
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      disabled={disabled}
+      onClick={() => onToggle(area.name)}
+      className={cn(
+        "min-h-32 rounded-xl border bg-app-surface p-4 text-left disabled:cursor-not-allowed disabled:opacity-45",
+        active
+          ? "border-app-accent bg-app-accent-soft text-app-ink"
+          : "border-slate-200 hover:border-app-accent/50 hover:bg-app-bg/60",
+      )}
+    >
+      <Icon className="h-5 w-5" style={{ color: area.color }} aria-hidden="true" />
+      <span className="mt-3 block font-semibold text-app-ink">{getLifeAreaLabel(area.name)}</span>
+      {goalCount > 0 && <span className="mt-2 block text-xs text-app-accent">{goalCount} mục tiêu sẽ được ghim</span>}
+    </button>
+  );
+});
+
+interface ThemeChoiceButtonProps {
+  theme: StoryThemeOption;
+  active: boolean;
+  onSelect: (id: VisionBoardThemeId) => void;
+}
+
+const ThemeChoiceButton = memo(function ThemeChoiceButton({
+  theme,
+  active,
+  onSelect,
+}: ThemeChoiceButtonProps): JSX.Element {
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      onClick={() => onSelect(theme.id)}
+      className={cn(
+        "rounded-xl border border-app-line bg-app-surface p-3 text-left hover:border-app-accent/40",
+        active && "border-app-accent bg-app-accent-soft",
+      )}
+    >
+      <span
+        className="block h-20 rounded-[var(--r-tile)]"
+        style={{ background: theme.preview.gradient }}
+        aria-hidden="true"
+      />
+      <span className="mt-3 block font-semibold text-app-ink">{theme.label}</span>
+      <span className="mt-1 block text-sm leading-5 text-app-ink-muted">{theme.description}</span>
+    </button>
+  );
+});
 
 export function VisionBoardStoryWizard({
   open,
@@ -92,29 +215,47 @@ export function VisionBoardStoryWizard({
       .slice(0, 6);
   }, [feelings]);
 
-  const toggleFeeling = (feelingId: string) => {
+  const selectedFeelingIds = useMemo(() => new Set(feelings), [feelings]);
+  const selectedFocusAreaNames = useMemo(() => new Set(focusAreas), [focusAreas]);
+
+  const goalsByCategory = useMemo(() => {
+    const grouped = new Map<string, AvailableGoal[]>();
+    for (const goal of availableGoals) {
+      const current = grouped.get(goal.category);
+      if (current) {
+        current.push(goal);
+      } else {
+        grouped.set(goal.category, [goal]);
+      }
+    }
+    return grouped;
+  }, [availableGoals]);
+
+  const toggleFeeling = useCallback((feelingId: string) => {
     setFeelings((current) => {
       if (current.includes(feelingId)) return current.filter((id) => id !== feelingId);
       if (current.length >= 3) return current;
       return [...current, feelingId];
     });
-  };
+  }, []);
 
-  const toggleFocusArea = (areaName: string) => {
+  const toggleFocusArea = useCallback((areaName: string) => {
     setFocusAreas((current) => {
       if (current.includes(areaName)) return current.filter((name) => name !== areaName);
       if (current.length >= 3) return current;
       return [...current, areaName];
     });
-  };
+  }, []);
+
+  const selectCoreQuote = useCallback((quote: string) => {
+    setCoreQuote(quote);
+  }, []);
 
   const buildSeed = (): VisionBoardStorySeed => {
     const items: VisionBoardItem[] = [];
     const ts = Date.now();
     const theme = VISION_BOARD_THEMES.find((item) => item.id === selectedThemeId) ?? VISION_BOARD_THEMES[0];
-    const goalsInFocus = focusAreas
-      .flatMap((area) => availableGoals.filter((goal) => goal.category === area))
-      .slice(0, 4);
+    const goalsInFocus = focusAreas.flatMap((area) => goalsByCategory.get(area) ?? []).slice(0, 4);
 
     goalsInFocus.forEach((goal, index) => {
       items.push({
@@ -192,7 +333,10 @@ export function VisionBoardStoryWizard({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-h-[85vh] max-w-3xl overflow-y-auto">
+      <DialogContent
+        overlayClassName="bg-[#17150f] backdrop-blur-none data-[state=open]:!animate-none data-[state=closed]:!animate-none"
+        className="max-h-[85vh] max-w-3xl overflow-y-auto !duration-0 !transition-none data-[state=open]:!animate-none data-[state=closed]:!animate-none data-[state=open]:zoom-in-100 data-[state=closed]:zoom-out-100"
+      >
         <DialogHeader className="pr-8">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -205,7 +349,7 @@ export function VisionBoardStoryWizard({
           </div>
         </DialogHeader>
 
-        <div className="transition-opacity duration-200">
+        <div>
           {step === 1 && (
             <section className="space-y-5" aria-labelledby="vision-story-step-1">
               <div>
@@ -218,24 +362,15 @@ export function VisionBoardStoryWizard({
               </div>
               <div className="flex flex-wrap gap-2.5">
                 {STORY_FEELING_OPTIONS.map((feeling) => {
-                  const active = feelings.includes(feeling.id);
-                  const disabled = !active && feelings.length >= 3;
+                  const active = selectedFeelingIds.has(feeling.id);
                   return (
-                    <button
+                    <FeelingChoiceButton
                       key={feeling.id}
-                      type="button"
-                      aria-pressed={active}
-                      disabled={disabled}
-                      onClick={() => toggleFeeling(feeling.id)}
-                      className={cn(
-                        "rounded-full border px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-45",
-                        active
-                          ? "border-app-accent bg-app-accent-soft text-app-accent"
-                          : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/50 hover:bg-app-bg",
-                      )}
-                    >
-                      {feeling.label}
-                    </button>
+                      feeling={feeling}
+                      active={active}
+                      disabled={!active && feelings.length >= 3}
+                      onToggle={toggleFeeling}
+                    />
                   );
                 })}
               </div>
@@ -255,30 +390,16 @@ export function VisionBoardStoryWizard({
               </div>
               <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                 {LIFE_AREAS.map((area) => {
-                  const Icon = LIFE_AREA_ICONS[area.name] ?? Sparkles;
-                  const active = focusAreas.includes(area.name);
-                  const disabled = !active && focusAreas.length >= 3;
-                  const goalCount = availableGoals.filter((goal) => goal.category === area.name).length;
+                  const active = selectedFocusAreaNames.has(area.name);
                   return (
-                    <button
+                    <FocusAreaChoiceButton
                       key={area.name}
-                      type="button"
-                      aria-pressed={active}
-                      disabled={disabled}
-                      onClick={() => toggleFocusArea(area.name)}
-                      className={cn(
-                        "min-h-32 rounded-xl border bg-app-surface p-4 text-left shadow-[var(--shadow-1)] transition-all disabled:cursor-not-allowed disabled:opacity-45",
-                        active
-                          ? "border-app-accent bg-app-accent-soft ring-2 ring-app-accent/50"
-                          : "border-slate-200 hover:border-app-accent/50 hover:bg-app-bg/60",
-                      )}
-                    >
-                      <Icon className="h-5 w-5" style={{ color: area.color }} aria-hidden="true" />
-                      <span className="mt-3 block font-semibold text-app-ink">{getLifeAreaLabel(area.name)}</span>
-                      {goalCount > 0 && (
-                        <span className="mt-2 block text-xs text-app-accent">🎯 {goalCount} mục tiêu sẽ được ghim</span>
-                      )}
-                    </button>
+                      area={area}
+                      active={active}
+                      disabled={!active && focusAreas.length >= 3}
+                      goalCount={goalsByCategory.get(area.name)?.length ?? 0}
+                      onToggle={toggleFocusArea}
+                    />
                   );
                 })}
               </div>
@@ -306,14 +427,7 @@ export function VisionBoardStoryWizard({
               {suggestions.length > 0 && (
                 <div className="grid gap-3 md:grid-cols-2">
                   {suggestions.map((suggestion) => (
-                    <button
-                      key={suggestion}
-                      type="button"
-                      onClick={() => setCoreQuote(suggestion)}
-                      className="rounded-xl border border-app-line bg-app-surface p-4 text-left text-sm leading-6 text-app-ink-soft shadow-[var(--shadow-1)] transition-colors hover:border-app-accent/50 hover:bg-app-bg"
-                    >
-                      {suggestion}
-                    </button>
+                    <QuoteSuggestionButton key={suggestion} suggestion={suggestion} onSelect={selectCoreQuote} />
                   ))}
                 </div>
               )}
@@ -334,24 +448,7 @@ export function VisionBoardStoryWizard({
                 {VISION_BOARD_THEMES.map((theme) => {
                   const active = selectedThemeId === theme.id;
                   return (
-                    <button
-                      key={theme.id}
-                      type="button"
-                      aria-pressed={active}
-                      onClick={() => setSelectedThemeId(theme.id)}
-                      className={cn(
-                        "rounded-xl border border-app-line bg-app-surface p-3 text-left shadow-[var(--shadow-1)] transition-all hover:border-app-accent/40",
-                        active && "ring-2 ring-app-accent ring-offset-2",
-                      )}
-                    >
-                      <span
-                        className="block h-20 rounded-[var(--r-tile)]"
-                        style={{ background: theme.preview.gradient }}
-                        aria-hidden="true"
-                      />
-                      <span className="mt-3 block font-semibold text-app-ink">{theme.label}</span>
-                      <span className="mt-1 block text-sm leading-5 text-app-ink-muted">{theme.description}</span>
-                    </button>
+                    <ThemeChoiceButton key={theme.id} theme={theme} active={active} onSelect={setSelectedThemeId} />
                   );
                 })}
               </div>
