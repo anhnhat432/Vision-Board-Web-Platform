@@ -347,7 +347,10 @@ describe("useAssistant streaming", () => {
 
     expect(mockedExecuteAction).not.toHaveBeenCalled();
     const assistantMessage = result.current.messages.find((m) => m.role === "assistant");
-    expect(assistantMessage?.actions).toHaveLength(1);
+    // Workflow nhiều bước (create_goal) không gắn action card vào message;
+    // hành động được đề xuất qua pendingWorkflow để xác nhận một lần qua panel.
+    expect(assistantMessage?.actions).toEqual([]);
+    expect(result.current.pendingWorkflow?.proposedActions).toHaveLength(1);
   });
 
   it("stores a pending clarification instead of ticking vaguely when multiple tasks match", async () => {
