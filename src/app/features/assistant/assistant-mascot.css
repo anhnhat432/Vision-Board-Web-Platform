@@ -1,0 +1,94 @@
+@keyframes mascot-breath {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.03);
+  }
+}
+
+.animate-mascot-breath {
+  animation: mascot-breath 4s ease-in-out infinite;
+}
+
+@keyframes sparkle-twinkle {
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: rotate(12deg) scale(0.94);
+    opacity: 0.75;
+  }
+}
+
+.animate-sparkle-twinkle {
+  animation: sparkle-twinkle 6s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.assistant-pet-sprite {
+  display: inline-block;
+  background-image: url("/assistant/seedy-spritesheet.webp");
+  background-repeat: no-repeat;
+  background-size: var(--pet-bg-width) var(--pet-bg-height);
+  background-position: 0 var(--pet-y);
+  image-rendering: auto;
+  animation: assistant-pet-play var(--pet-duration) steps(var(--pet-frames)) infinite;
+}
+
+.assistant-pet-sprite--still {
+  animation: none;
+}
+
+@keyframes assistant-pet-play {
+  from {
+    background-position: 0 var(--pet-y);
+  }
+  to {
+    background-position: var(--pet-end-x) var(--pet-y);
+  }
+}
+
+@media (hover: hover) {
+  .assistant-mascot-shell:hover .animate-mascot-breath,
+  .assistant-mascot-shell:hover .animate-sparkle-twinkle {
+    animation-play-state: paused;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-mascot-breath,
+  .animate-sparkle-twinkle,
+  .assistant-pet-sprite {
+    animation: none;
+  }
+}
+
+.owl-eyes {
+  transform-box: fill-box;
+  transform-origin: center;
+  transform: scaleY(1);
+}
+
+.owl-eyes.is-blinking {
+  animation: owl-blink 150ms ease-out;
+}
+
+@keyframes owl-blink {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(0.1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .owl-eyes.is-blinking {
+    animation: none;
+  }
+}

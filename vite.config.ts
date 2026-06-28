@@ -22,31 +22,41 @@ export default defineConfig({
         manualChunks(id) {
           if (!id.includes("node_modules")) return undefined;
 
-          if (id.includes("react-router")) return "router";
-          if (id.includes("recharts") || id.includes("d3-")) return "charts";
-          if (id.includes("sonner") || id.includes("next-themes")) return "feedback";
-          if (id.includes("canvas-confetti")) return "effects";
-          if (id.includes("react-day-picker") || id.includes("date-fns")) return "calendar";
+          const normalizedId = id.replaceAll("\\", "/");
+
           if (
-            id.includes("embla-carousel-react") ||
-            id.includes("react-responsive-masonry") ||
-            id.includes("react-slick")
+            normalizedId.includes("/node_modules/@sentry/") ||
+            normalizedId.includes("/node_modules/@sentry-internal/")
+          ) {
+            return "monitoring";
+          }
+          if (normalizedId.includes("react-router")) return "router";
+          if (normalizedId.includes("recharts") || normalizedId.includes("d3-")) return "charts";
+          if (normalizedId.includes("sonner") || normalizedId.includes("next-themes")) return "feedback";
+          if (normalizedId.includes("canvas-confetti")) return "effects";
+          if (normalizedId.includes("react-day-picker") || normalizedId.includes("date-fns")) return "calendar";
+          if (
+            normalizedId.includes("embla-carousel-react") ||
+            normalizedId.includes("react-responsive-masonry") ||
+            normalizedId.includes("react-slick")
           ) {
             return "media";
           }
           if (
-            id.includes("cmdk") ||
-            id.includes("react-hook-form") ||
-            id.includes("input-otp")
+            normalizedId.includes("cmdk") ||
+            normalizedId.includes("react-hook-form") ||
+            normalizedId.includes("input-otp")
           ) {
             return "forms";
           }
-          if (id.includes("@emotion") || id.includes("@mui/")) return "mui";
-          if (id.includes("react-dnd") || id.includes("dnd-core")) return "dnd";
-          if (id.includes("motion") || id.includes("framer-motion")) return "motion";
-          if (id.includes("@radix-ui")) return "radix";
-          if (id.includes("lucide-react")) return "icons";
-          if (id.includes("firebase")) return "firebase";
+          if (normalizedId.includes("react-markdown") || normalizedId.includes("remark-")) return "markdown";
+          if (normalizedId.includes("html-to-image") || normalizedId.includes("qrcode")) return "exporting";
+          if (normalizedId.includes("@emotion") || normalizedId.includes("@mui/")) return "mui";
+          if (normalizedId.includes("react-dnd") || normalizedId.includes("dnd-core")) return "dnd";
+          if (normalizedId.includes("motion") || normalizedId.includes("framer-motion")) return "motion";
+          if (normalizedId.includes("@radix-ui")) return "radix";
+          if (normalizedId.includes("lucide-react")) return "icons";
+          if (normalizedId.includes("firebase")) return "firebase";
 
           return "vendor";
         },

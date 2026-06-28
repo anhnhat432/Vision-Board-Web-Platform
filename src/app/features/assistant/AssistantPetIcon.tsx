@@ -1,3 +1,5 @@
+import "./assistant-mascot.css";
+
 export type AssistantPetState =
   | "idle"
   | "running-right"

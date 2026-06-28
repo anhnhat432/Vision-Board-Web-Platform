@@ -2,6 +2,13 @@ import { useEffect } from "react";
 
 import { prefetchRoute, WARM_PREFETCH_ROUTE_PATHS } from "../navConfig";
 
+interface NavigatorWithConnection extends Navigator {
+  connection?: {
+    effectiveType?: string;
+    saveData?: boolean;
+  };
+}
+
 /**
  * Bật listener Cmd/Ctrl+K toggle CommandPalette ở phạm vi window.
  */
@@ -25,13 +32,31 @@ export function useWarmPrefetch(): void {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    const connection = (window.navigator as NavigatorWithConnection).connection;
+    if (connection?.saveData) return;
+    if (connection?.effectiveType === "slow-2g" || connection?.effectiveType === "2g") return;
+
     const warmPrimaryHeavyRoutes = () => {
       for (const path of WARM_PREFETCH_ROUTE_PATHS) {
         prefetchRoute(path);
       }
     };
 
-    const timeoutId = globalThis.setTimeout(warmPrimaryHeavyRoutes, 300);
-    return () => globalThis.clearTimeout(timeoutId);
+    let idleHandle: number | null = null;
+    const timeoutId = window.setTimeout(() => {
+      if ("requestIdleCallback" in window) {
+        idleHandle = window.requestIdleCallback(warmPrimaryHeavyRoutes, { timeout: 2_500 });
+        return;
+      }
+
+      warmPrimaryHeavyRoutes();
+    }, 900);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+      if (idleHandle !== null && "cancelIdleCallback" in window) {
+        window.cancelIdleCallback(idleHandle);
+      }
+    };
   }, []);
 }

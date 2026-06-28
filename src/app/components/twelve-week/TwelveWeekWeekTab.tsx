@@ -34,6 +34,8 @@ import { TwelveWeekInsightsCard } from "./TwelveWeekInsightsCard";
 import { TwelveWeekPremiumInsightSection } from "./TwelveWeekPremiumInsightSection";
 import { TwelveWeekRescueNudge } from "./TwelveWeekRescueNudge";
 
+import "./TwelveWeekWeekTab.css";
+
 interface WeekRange {
   start: string;
   end: string;

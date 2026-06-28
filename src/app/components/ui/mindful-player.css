@@ -1,0 +1,72 @@
+@keyframes audio-wave-height-1 {
+  0%,
+  100% {
+    height: 4px;
+  }
+  50% {
+    height: 12px;
+  }
+}
+
+@keyframes audio-wave-height-2 {
+  0%,
+  100% {
+    height: 6px;
+  }
+  50% {
+    height: 10px;
+  }
+}
+
+@keyframes audio-wave-height-3 {
+  0%,
+  100% {
+    height: 3px;
+  }
+  50% {
+    height: 11px;
+  }
+}
+
+.animate-audio-wave-1 {
+  animation: audio-wave-height-1 0.8s ease-in-out infinite;
+}
+
+.animate-audio-wave-2 {
+  animation: audio-wave-height-2 0.6s ease-in-out infinite;
+}
+
+.animate-audio-wave-3 {
+  animation: audio-wave-height-3 0.7s ease-in-out infinite;
+}
+
+.animate-pulse-slow {
+  animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.glass-premium {
+  background: rgba(255, 255, 255, 0.45) !important;
+  backdrop-filter: blur(24px) saturate(120%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  box-shadow:
+    0 10px 30px -10px rgba(0, 0, 0, 0.04),
+    0 1px 2px rgba(0, 0, 0, 0.02) !important;
+}
+
+html.dark .glass-premium {
+  background: rgba(17, 17, 20, 0.45) !important;
+  backdrop-filter: blur(24px) saturate(120%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.06) !important;
+  box-shadow:
+    0 10px 30px -10px rgba(0, 0, 0, 0.3),
+    0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-audio-wave-1,
+  .animate-audio-wave-2,
+  .animate-audio-wave-3,
+  .animate-pulse-slow {
+    animation: none !important;
+  }
+}

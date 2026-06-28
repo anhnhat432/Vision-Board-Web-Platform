@@ -2,6 +2,7 @@ import { X } from "lucide-react";
 import { type MouseEvent, type PointerEvent, useEffect, useRef, useState } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../../components/ui/tooltip";
 import { OwlIcon } from "./OwlIcon";
+import "./assistant-mascot.css";
 import type { Position } from "./useDraggableMascot";
 import { useOwlIdleAnimation } from "./useOwlIdleAnimation";
 import type { NudgeState } from "./useProactiveNudge";

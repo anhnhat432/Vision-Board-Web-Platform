@@ -6,7 +6,11 @@ const MindfulPlayer = lazy(() =>
   })),
 );
 
-const DEFER_LOAD_MS = 5200;
+const DEFAULT_DEFER_LOAD_MS = 5200;
+
+interface LazyMindfulPlayerProps {
+  deferMs?: number;
+}
 
 function MindfulPlayerFallback({ onWarmLoad }: { onWarmLoad?: () => void }) {
   return (
@@ -14,12 +18,14 @@ function MindfulPlayerFallback({ onWarmLoad }: { onWarmLoad?: () => void }) {
       aria-hidden="true"
       className="h-9 w-9 shrink-0 rounded-full border border-app-line bg-app-surface"
       onFocus={onWarmLoad}
+      onPointerDown={onWarmLoad}
       onPointerEnter={onWarmLoad}
+      onTouchStart={onWarmLoad}
     />
   );
 }
 
-export function LazyMindfulPlayer() {
+export function LazyMindfulPlayer({ deferMs = DEFAULT_DEFER_LOAD_MS }: LazyMindfulPlayerProps = {}) {
   const [shouldLoad, setShouldLoad] = useState(false);
 
   useEffect(() => {
@@ -34,7 +40,7 @@ export function LazyMindfulPlayer() {
       }
 
       load();
-    }, DEFER_LOAD_MS);
+    }, deferMs);
 
     return () => {
       window.clearTimeout(timeoutHandle);
@@ -42,7 +48,7 @@ export function LazyMindfulPlayer() {
         window.cancelIdleCallback(idleHandle);
       }
     };
-  }, [shouldLoad]);
+  }, [deferMs, shouldLoad]);
 
   const warmLoad = () => setShouldLoad(true);
 

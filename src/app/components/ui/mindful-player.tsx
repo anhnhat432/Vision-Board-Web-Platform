@@ -4,6 +4,8 @@ import { type AmbienceMode, ambienceService } from "../../services/ambienceServi
 import { Button } from "./button";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
+import "./mindful-player.css";
+
 export function MindfulPlayer() {
   const [mode, setMode] = useState<AmbienceMode>("none");
   const [volume, setVolume] = useState(0.2);

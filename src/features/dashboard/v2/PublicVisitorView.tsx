@@ -1,7 +1,6 @@
 import { lazy, Suspense, type CSSProperties, useCallback, useEffect, useRef, useState } from "react";
 
 import { EditorialCard, Eyebrow, HighlightMark, PillButton } from "@/app/components/ui/editorial";
-import { LazyMindfulPlayer } from "@/app/components/ui/lazy-mindful-player";
 import { LazyMamCompanion } from "@/app/features/pet/LazyMamCompanion";
 import { loadWithChunkReload } from "@/app/utils/chunkLoad";
 
@@ -16,6 +15,23 @@ const PublicVisitorDeferredFooter = lazy(async () => {
   const module = await loadWithChunkReload(() => import("./PublicVisitorDeferredSections"));
   return { default: module.PublicVisitorDeferredFooter };
 });
+
+const MindfulPlayer = lazy(async () => {
+  const module = await loadWithChunkReload(() => import("@/app/components/ui/mindful-player"));
+  return { default: module.MindfulPlayer };
+});
+
+const BACKGROUND_DEFERRED_LOAD_MS = 8_400;
+const DEFERRED_SECTION_ROOT_MARGIN = "96px 0px";
+const LANDING_WIDGET_DEFER_MS = 14_000;
+const LANDING_MASCOT_DEFER_MS = 16_000;
+
+interface NavigatorWithConnection extends Navigator {
+  connection?: {
+    effectiveType?: string;
+    saveData?: boolean;
+  };
+}
 
 interface PublicVisitorViewProps {
   isDemo: boolean;
@@ -40,6 +56,16 @@ function scrollToId(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: "auto", block: "start" });
 }
 
+function shouldAvoidBackgroundHydration(): boolean {
+  if (typeof window === "undefined") return true;
+
+  const connection = (window.navigator as NavigatorWithConnection).connection;
+  if (connection?.saveData) return true;
+  if (connection?.effectiveType === "slow-2g" || connection?.effectiveType === "2g") return true;
+
+  return window.navigator.hardwareConcurrency <= 4;
+}
+
 function useLandingDeferredSections() {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [shouldLoadDeferredSections, setShouldLoadDeferredSections] = useState(false);
@@ -58,23 +84,27 @@ function useLandingDeferredSections() {
 
       loadDeferredSections();
     };
-    const timerId = window.setTimeout(loadWhenIdle, 1_200);
     const sentinel = sentinelRef.current;
+    const canObserveSentinel = Boolean(sentinel && "IntersectionObserver" in window);
+    const shouldAutoHydrate = !canObserveSentinel && !shouldAvoidBackgroundHydration();
+    const timerId = shouldAutoHydrate ? window.setTimeout(loadWhenIdle, BACKGROUND_DEFERRED_LOAD_MS) : null;
 
-    if (sentinel && "IntersectionObserver" in window) {
+    if (sentinel && canObserveSentinel) {
       observer = new IntersectionObserver(
         ([entry]) => {
           if (!entry?.isIntersecting) return;
           loadDeferredSections();
           observer?.disconnect();
         },
-        { rootMargin: "900px 0px" },
+        { rootMargin: DEFERRED_SECTION_ROOT_MARGIN },
       );
       observer.observe(sentinel);
     }
 
     return () => {
-      window.clearTimeout(timerId);
+      if (timerId !== null) {
+        window.clearTimeout(timerId);
+      }
       observer?.disconnect();
       if (idleHandle !== null && "cancelIdleCallback" in window) {
         window.cancelIdleCallback(idleHandle);
@@ -92,6 +122,54 @@ function DeferredSectionsFallback() {
       <div />
       <div />
     </div>
+  );
+}
+
+function MindfulPlayerFallback({ onWarmLoad }: { onWarmLoad?: () => void }) {
+  return (
+    <span
+      aria-hidden="true"
+      className="h-9 w-9 shrink-0 rounded-full border border-app-line bg-app-surface"
+      onPointerDown={onWarmLoad}
+      onPointerEnter={onWarmLoad}
+      onTouchStart={onWarmLoad}
+    />
+  );
+}
+
+function LandingMindfulPlayerSlot() {
+  const [shouldLoad, setShouldLoad] = useState(false);
+  const warmLoad = useCallback(() => setShouldLoad(true), []);
+
+  useEffect(() => {
+    if (shouldLoad || shouldAvoidBackgroundHydration()) return undefined;
+
+    let idleHandle: number | null = null;
+    const timerId = window.setTimeout(() => {
+      if ("requestIdleCallback" in window) {
+        idleHandle = window.requestIdleCallback(warmLoad, { timeout: 1_800 });
+        return;
+      }
+
+      warmLoad();
+    }, LANDING_WIDGET_DEFER_MS);
+
+    return () => {
+      window.clearTimeout(timerId);
+      if (idleHandle !== null && "cancelIdleCallback" in window) {
+        window.cancelIdleCallback(idleHandle);
+      }
+    };
+  }, [shouldLoad, warmLoad]);
+
+  if (!shouldLoad) {
+    return <MindfulPlayerFallback onWarmLoad={warmLoad} />;
+  }
+
+  return (
+    <Suspense fallback={<MindfulPlayerFallback />}>
+      <MindfulPlayer />
+    </Suspense>
   );
 }
 
@@ -218,7 +296,7 @@ export function PublicVisitorView({
             <span className="dof-nav-actions" style={{ display: "flex", alignItems: "center", gap: 10 }}>
               {/* Âm thanh tập trung — tính năng sẵn có của app, giữ trên landing */}
               <span className="dof-mindful-slot">
-                <LazyMindfulPlayer />
+                <LandingMindfulPlayerSlot />
               </span>
               <button
                 type="button"
@@ -349,7 +427,7 @@ export function PublicVisitorView({
                   className="dof-landing-mascot"
                   compact
                   animated={false}
-                  deferMs={6200}
+                  deferMs={LANDING_MASCOT_DEFER_MS}
                 />
               </div>
               <div

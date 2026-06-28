@@ -2,12 +2,33 @@ import { createRoot } from "react-dom/client";
 import { cleanupLegacyAssistantHistory } from "./app/features/assistant/cleanupLegacyHistory";
 import { getAppMode } from "./app/utils/app-mode";
 import { installChunkLoadRecovery } from "./app/utils/chunkLoad";
-import "./lib/monitoring/sentry";
+import { installFrontendMonitoring } from "./lib/monitoring/sentry";
 import App from "./app/App.tsx";
 import "./styles/index.css";
 
-cleanupLegacyAssistantHistory();
 installChunkLoadRecovery();
+installFrontendMonitoring({ deferUntilIdle: true });
+
+function scheduleIdleTask(task: () => void, timeout = 3_000): void {
+  const requestIdleCallback = window.requestIdleCallback;
+  if (typeof requestIdleCallback === "function") {
+    requestIdleCallback.call(window, task, { timeout });
+    return;
+  }
+
+  globalThis.setTimeout(task, 0);
+}
+
+function scheduleAfterLoadIdle(task: () => void, timeout = 5_000): void {
+  const schedule = () => scheduleIdleTask(task, timeout);
+
+  if (document.readyState === "complete") {
+    schedule();
+    return;
+  }
+
+  window.addEventListener("load", schedule, { once: true });
+}
 
 // Inject GA4 script only for explicitly configured real-mode analytics.
 const appMode = getAppMode();
@@ -31,12 +52,14 @@ const rootElement = document.getElementById("root");
 if (!rootElement) throw new Error("Root element #root not found in document");
 createRoot(rootElement).render(<App />);
 
+scheduleIdleTask(cleanupLegacyAssistantHistory, 2_000);
+
 // Register service worker only in production. In dev, stale SW caches can serve old CSS/JS and break layout.
 if ("serviceWorker" in navigator) {
   if (import.meta.env.PROD) {
-    window.addEventListener("load", () => {
+    scheduleAfterLoadIdle(() => {
       navigator.serviceWorker.register("/sw.js").catch(() => {});
-    });
+    }, 7_000);
   } else {
     navigator.serviceWorker.getRegistrations().then((registrations) => {
       for (const registration of registrations) {

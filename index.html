@@ -28,6 +28,18 @@
     <link rel="alternate icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
     <link rel="apple-touch-icon" href="/favicon-192.png" />
     <link rel="manifest" href="/manifest.json" />
+    <script>
+      (function() {
+        if (window.location.pathname !== "/") return;
+        var heroPreload = document.createElement("link");
+        heroPreload.rel = "preload";
+        heroPreload.as = "image";
+        heroPreload.href = "/study_desk_hero.webp";
+        heroPreload.type = "image/webp";
+        heroPreload.setAttribute("fetchpriority", "high");
+        document.head.appendChild(heroPreload);
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

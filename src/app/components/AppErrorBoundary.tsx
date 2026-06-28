@@ -1,9 +1,50 @@
-import { AlertTriangle, Home, RefreshCw, Sparkles } from "lucide-react";
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect, type ComponentType, type LazyExoticComponent } from "react";
 import { isRouteErrorResponse, useNavigate, useRouteError } from "react-router";
 
 import { captureFrontendException } from "@/lib/monitoring/sentry";
 import { CelebrationBurst } from "./illustrations";
+
+type DeferredIconProps = {
+  className?: string;
+};
+
+type DeferredIconComponent = LazyExoticComponent<ComponentType<DeferredIconProps>>;
+
+const AlertTriangleIcon = lazy(async (): Promise<{ default: ComponentType<DeferredIconProps> }> => {
+  const { AlertTriangle } = await import("lucide-react");
+  return {
+    default: ({ className }) => <AlertTriangle aria-hidden="true" className={className} />,
+  };
+});
+
+const HomeIcon = lazy(async (): Promise<{ default: ComponentType<DeferredIconProps> }> => {
+  const { Home } = await import("lucide-react");
+  return {
+    default: ({ className }) => <Home aria-hidden="true" className={className} />,
+  };
+});
+
+const RefreshCwIcon = lazy(async (): Promise<{ default: ComponentType<DeferredIconProps> }> => {
+  const { RefreshCw } = await import("lucide-react");
+  return {
+    default: ({ className }) => <RefreshCw aria-hidden="true" className={className} />,
+  };
+});
+
+const SparklesIcon = lazy(async (): Promise<{ default: ComponentType<DeferredIconProps> }> => {
+  const { Sparkles } = await import("lucide-react");
+  return {
+    default: ({ className }) => <Sparkles aria-hidden="true" className={className} />,
+  };
+});
+
+function DeferredIcon({ icon: Icon, className }: { icon: DeferredIconComponent; className: string }) {
+  return (
+    <Suspense fallback={<span aria-hidden="true" className={`inline-block ${className}`} />}>
+      <Icon className={className} />
+    </Suspense>
+  );
+}
 
 function getErrorMessage(error: unknown): string {
   if (isRouteErrorResponse(error)) {
@@ -47,7 +88,7 @@ export function AppErrorBoundary() {
             <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1.1fr)_320px]">
               <div className="space-y-6">
                 <div className="inline-flex items-center gap-2 rounded-full border border-app-line bg-app-accent-soft px-4 py-1.5 text-sm text-app-accent">
-                  <Sparkles className="h-4 w-4 text-app-accent" />
+                  <DeferredIcon icon={SparklesIcon} className="h-4 w-4 text-app-accent" />
                   Dear Our Future
                 </div>
 
@@ -68,7 +109,7 @@ export function AppErrorBoundary() {
                     className="inline-flex items-center justify-center gap-2 rounded-[var(--r-control)] bg-app-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40"
                     onClick={() => navigate("/")}
                   >
-                    <Home className="h-4 w-4" />
+                    <DeferredIcon icon={HomeIcon} className="h-4 w-4" />
                     Về Trang chính
                   </button>
                   <button
@@ -76,7 +117,7 @@ export function AppErrorBoundary() {
                     className="inline-flex items-center justify-center gap-2 rounded-[var(--r-control)] border border-app-line bg-transparent px-4 py-2 text-sm font-semibold text-app-ink transition-colors hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40"
                     onClick={() => window.location.reload()}
                   >
-                    <RefreshCw className="h-4 w-4" />
+                    <DeferredIcon icon={RefreshCwIcon} className="h-4 w-4" />
                     Tải lại trang
                   </button>
                 </div>
@@ -86,7 +127,7 @@ export function AppErrorBoundary() {
                 <CelebrationBurst className="mx-auto mb-4 w-32 text-app-accent opacity-60" />
                 <div className="flex items-center gap-3">
                   <div className="flex h-11 w-11 items-center justify-center rounded-[var(--r-tile)] bg-[color:var(--color-warning-bg)] text-[color:var(--color-warning-fg)]">
-                    <AlertTriangle className="h-5 w-5" />
+                    <DeferredIcon icon={AlertTriangleIcon} className="h-5 w-5" />
                   </div>
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">

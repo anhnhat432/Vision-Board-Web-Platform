@@ -12,6 +12,15 @@ const SignedInDashboard = lazy(() =>
   })),
 );
 
+const SIGNED_OUT_ROUTE_WARM_DELAY_MS = 12_000;
+
+interface NavigatorWithConnection extends Navigator {
+  connection?: {
+    effectiveType?: string;
+    saveData?: boolean;
+  };
+}
+
 let loginRouteWarmPromise: Promise<unknown> | null = null;
 let onboardingRouteWarmPromise: Promise<unknown> | null = null;
 
@@ -50,6 +59,16 @@ function hasLocalWorkspaceData(userData: ReturnType<typeof getUserData>): boolea
   );
 }
 
+function shouldSkipBackgroundRouteWarm(): boolean {
+  if (typeof window === "undefined") return true;
+
+  const connection = (window.navigator as NavigatorWithConnection).connection;
+  if (connection?.saveData) return true;
+  if (connection?.effectiveType === "slow-2g" || connection?.effectiveType === "2g") return true;
+
+  return window.navigator.hardwareConcurrency <= 4;
+}
+
 export function DashboardEntry() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -63,6 +82,7 @@ export function DashboardEntry() {
 
   useEffect(() => {
     if (!isSignedOut || typeof window === "undefined") return undefined;
+    if (shouldSkipBackgroundRouteWarm()) return undefined;
 
     let idleHandle: number | null = null;
     const timerId = window.setTimeout(() => {
@@ -76,7 +96,7 @@ export function DashboardEntry() {
       } else {
         warmRoutes();
       }
-    }, 1_800);
+    }, SIGNED_OUT_ROUTE_WARM_DELAY_MS);
 
     return () => {
       window.clearTimeout(timerId);
