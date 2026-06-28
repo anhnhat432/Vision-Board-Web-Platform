@@ -28,7 +28,6 @@ import { DailyStoicCard } from "@/features/dashboard/v2/DailyStoicCard";
 import { DashboardFooter } from "@/features/dashboard/v2/DashboardFooter";
 import { DashboardHero } from "@/features/dashboard/v2/DashboardHero";
 import { NewUserSetupView } from "@/features/dashboard/v2/NewUserSetupView";
-import { PublicVisitorView } from "@/features/dashboard/v2/PublicVisitorView";
 import { QuoteBlock } from "@/features/dashboard/v2/QuoteBlock";
 import { ReflectionPrompt } from "@/features/dashboard/v2/ReflectionPrompt";
 import { RescueAlert } from "@/features/dashboard/v2/RescueAlert";
@@ -121,6 +120,22 @@ const UpgradePaywallDialog = lazy(() =>
   })),
 );
 
+const PublicVisitorView = lazy(() =>
+  import("@/features/dashboard/v2/PublicVisitorView").then((module) => ({
+    default: module.PublicVisitorView,
+  })),
+);
+
+function PublicVisitorFallback() {
+  return (
+    <div className="min-h-screen bg-app-bg px-4 py-8 text-app-ink">
+      <div className="mx-auto max-w-4xl rounded-card border border-app-line bg-app-surface p-6 shadow-app-sm">
+        <p className="text-sm font-semibold text-app-ink">Đang mở Dear Our Future...</p>
+      </div>
+    </div>
+  );
+}
+
 function getInitialSecondaryInsightsOpen(isDesktopViewport: boolean): boolean {
   if (typeof window === "undefined") return isDesktopViewport;
 
@@ -149,6 +164,18 @@ function useNearViewport<TElement extends Element>(enabled: boolean, rootMargin 
       return;
     }
 
+    let idleHandle: number | null = null;
+    const fallbackTimerId = window.setTimeout(() => {
+      const loadWhenIdle = () => setIsNearViewport(true);
+
+      if ("requestIdleCallback" in window) {
+        idleHandle = window.requestIdleCallback(loadWhenIdle, { timeout: 800 });
+        return;
+      }
+
+      loadWhenIdle();
+    }, 450);
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (!entry?.isIntersecting) return;
@@ -159,7 +186,13 @@ function useNearViewport<TElement extends Element>(enabled: boolean, rootMargin 
     );
 
     observer.observe(element);
-    return () => observer.disconnect();
+    return () => {
+      window.clearTimeout(fallbackTimerId);
+      if (idleHandle !== null && "cancelIdleCallback" in window) {
+        window.cancelIdleCallback(idleHandle);
+      }
+      observer.disconnect();
+    };
   }, [enabled, isNearViewport, rootMargin]);
 
   return [ref, isNearViewport] as const;
@@ -661,13 +694,15 @@ function DashboardContent({
   // để header + footer riêng của thiết kế hiển thị đúng full-bleed.
   if (isSignedOut) {
     return (
-      <PublicVisitorView
-        isDemo={demoMode}
-        hasLocalData={hasSignedOutRealLocalData}
-        onStart={handlePublicVisitorStart}
-        onSignIn={() => handleAuthNavigate("signin")}
-        onSignUp={() => handleAuthNavigate("signup")}
-      />
+      <Suspense fallback={<PublicVisitorFallback />}>
+        <PublicVisitorView
+          isDemo={demoMode}
+          hasLocalData={hasSignedOutRealLocalData}
+          onStart={handlePublicVisitorStart}
+          onSignIn={() => handleAuthNavigate("signin")}
+          onSignUp={() => handleAuthNavigate("signup")}
+        />
+      </Suspense>
     );
   }
 
@@ -1070,7 +1105,10 @@ function DashboardActiveLayout({
       {/* Review prompt (chỉ hiện vào ngày phản tư) */}
       {data.reviewDueToday ? (
         <div className="appear-fade-up" style={{ animationDelay: "350ms" }}>
-          <ReflectionPrompt currentWeek={data.dashboardKpiCurrentWeek} reviewHref={data.dashboardNextAction.ctaTarget} />
+          <ReflectionPrompt
+            currentWeek={data.dashboardKpiCurrentWeek}
+            reviewHref={data.dashboardNextAction.ctaTarget}
+          />
         </div>
       ) : null}
 
@@ -1124,7 +1162,9 @@ function DashboardActiveLayout({
 
                 {shouldLoadTrendChart ? (
                   <Suspense
-                    fallback={<div className="h-[280px] rounded-[18px] border border-app-line bg-app-surface p-5 md:p-6" />}
+                    fallback={
+                      <div className="h-[280px] rounded-[18px] border border-app-line bg-app-surface p-5 md:p-6" />
+                    }
                   >
                     <TwelveWeekTrendCard points={trendPoints} currentWeek={data.dashboardKpiCurrentWeek} />
                   </Suspense>
@@ -1161,7 +1201,11 @@ function FreeGoalLimitCard({ current, limit, onUpgrade }: { current: number; lim
         </span>
         <div>
           <p className="text-[13.5px] font-bold text-app-ink">
-            Gói Free · <span className="font-mono text-app-accent">{current}/{limit}</span> mục tiêu
+            Gói Free ·{" "}
+            <span className="font-mono text-app-accent">
+              {current}/{limit}
+            </span>{" "}
+            mục tiêu
           </p>
           <p className="mt-0.5 text-[12.5px] leading-relaxed text-app-ink-muted">
             Nâng cấp Plus khi bạn cần tạo thêm mục tiêu mới. Dữ liệu cũ vẫn được giữ nguyên.
