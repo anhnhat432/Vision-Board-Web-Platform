@@ -407,7 +407,6 @@
   html {
     font-size: var(--font-size);
     min-height: 100%;
-    scroll-behavior: smooth;
     overflow-x: hidden;
     overflow-y: auto;
   }
