@@ -57,7 +57,7 @@ export function MindfulPlayer() {
         <Button
           variant="outline"
           size="sm"
-          className={`relative h-9 rounded-full border border-app-line/60 bg-app-surface/40 backdrop-blur-md px-3 text-app-foreground transition-all duration-300 hover:border-app-accent/40 hover:bg-app-surface/80 ${
+          className={`relative h-9 rounded-full border border-app-line/60 bg-app-surface px-3 text-app-foreground transition-all duration-200 hover:border-app-accent/40 hover:bg-app-surface/90 ${
             mode !== "none" ? "shadow-md shadow-app-accent/5 ring-1 ring-app-accent/20" : ""
           }`}
           title="Không gian âm thanh chánh niệm"
@@ -78,7 +78,7 @@ export function MindfulPlayer() {
 
       <PopoverContent
         align="end"
-        className="w-72 p-4 rounded-2xl border border-app-line/60 bg-app-surface/90 backdrop-blur-xl shadow-2xl transition-all duration-300"
+        className="w-72 p-4 rounded-2xl border border-app-line/60 bg-app-surface shadow-xl transition-opacity duration-150"
       >
         <div className="space-y-4">
           <div className="flex items-center justify-between border-b border-app-line/40 pb-2">

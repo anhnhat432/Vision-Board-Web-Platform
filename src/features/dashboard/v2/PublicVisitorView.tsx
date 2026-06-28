@@ -9,8 +9,8 @@ import {
   SectionHeader,
   StatBadge,
 } from "@/app/components/ui/editorial";
-import { MamCompanion } from "@/app/features/pet/MamCompanion";
-import { MindfulPlayer } from "@/app/components/ui/mindful-player";
+import { LazyMindfulPlayer } from "@/app/components/ui/lazy-mindful-player";
+import { LazyMamCompanion } from "@/app/features/pet/LazyMamCompanion";
 import { trackAnalyticsEvent } from "@/app/utils/analytics";
 
 import "./PublicVisitorView.css";
@@ -185,9 +185,7 @@ export function PublicVisitorView({
           position: "sticky",
           top: 0,
           zIndex: 50,
-          background: "color-mix(in srgb, var(--app-bg) 92%, transparent)",
-          backdropFilter: "blur(8px)",
-          WebkitBackdropFilter: "blur(8px)",
+          background: "var(--app-bg)",
           borderBottom: "1px solid var(--app-line)",
         }}
       >
@@ -249,7 +247,7 @@ export function PublicVisitorView({
             </span>
             <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
               {/* Âm thanh tập trung — tính năng sẵn có của app, giữ trên landing */}
-              <MindfulPlayer />
+              <LazyMindfulPlayer />
               <button type="button" onClick={onSignIn} style={navLinkStyle} className="dof-navlink">
                 Đăng nhập
               </button>
@@ -344,7 +342,13 @@ export function PublicVisitorView({
 
             <div className="dof-up dof-hero-art" style={{ animationDelay: ".14s", position: "relative" }}>
               <div style={{ position: "absolute", top: 16, right: 16, zIndex: 3 }}>
-                <MamCompanion initialEvent="welcomeBack" className="dof-landing-mascot" compact animated={false} />
+                <LazyMamCompanion
+                  initialEvent="welcomeBack"
+                  className="dof-landing-mascot"
+                  compact
+                  animated={false}
+                  deferMs={3800}
+                />
               </div>
               <div
                 className="dof-float"
@@ -546,7 +550,7 @@ export function PublicVisitorView({
         ) : null}
 
         {/* INTERACTIVE GOAL PREVIEW */}
-        <section style={{ ...SECTION, padding: "40px 24px" }}>
+        <section className="dof-defer-section" style={{ ...SECTION, padding: "40px 24px" }}>
           <SectionHeader
             eyebrow="Xem ví dụ thực tế"
             title="Một mục tiêu, một lộ trình rõ ràng"
@@ -648,7 +652,13 @@ export function PublicVisitorView({
             <div>
               <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 14 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                  <MamCompanion initialEvent="welcomeBack" className="dof-landing-mascot" compact animated={false} />
+                  <LazyMamCompanion
+                    initialEvent="welcomeBack"
+                    className="dof-landing-mascot"
+                    compact
+                    animated={false}
+                    deferMs={3800}
+                  />
                   <div
                     style={{
                       fontSize: 11,
@@ -703,7 +713,11 @@ export function PublicVisitorView({
         </section>
 
         {/* BEFORE / AFTER */}
-        <section style={{ ...SECTION, padding: "48px 24px" }} aria-label="So sánh trước và sau">
+        <section
+          className="dof-defer-section"
+          style={{ ...SECTION, padding: "48px 24px" }}
+          aria-label="So sánh trước và sau"
+        >
           <div className="dof-two-col">
             <EditorialCard tone="muted">
               <Eyebrow
@@ -786,7 +800,7 @@ export function PublicVisitorView({
         </section>
 
         {/* ROADMAP */}
-        <section id="how" style={{ ...SECTION, padding: "48px 24px", ...scrollAnchor }}>
+        <section id="how" className="dof-defer-section" style={{ ...SECTION, padding: "48px 24px", ...scrollAnchor }}>
           <SectionHeader
             eyebrow="Lộ trình của bạn"
             title="Bốn bước chuyển mình rõ nét"
@@ -903,6 +917,7 @@ export function PublicVisitorView({
         {/* WHY / FEATURES */}
         <section
           id="why"
+          className="dof-defer-section"
           style={{ ...SECTION, padding: "48px 24px", ...scrollAnchor }}
           aria-label="Vì sao chọn Dear Our Future"
         >
@@ -957,7 +972,11 @@ export function PublicVisitorView({
         </section>
 
         {/* CTA */}
-        <section id="cta" style={{ ...SECTION, padding: "48px 24px 72px", ...scrollAnchor }}>
+        <section
+          id="cta"
+          className="dof-defer-section"
+          style={{ ...SECTION, padding: "48px 24px 72px", ...scrollAnchor }}
+        >
           <EditorialCard
             tone="accent"
             padding="lg"
@@ -1037,7 +1056,7 @@ export function PublicVisitorView({
       </main>
 
       {/* FOOTER */}
-      <footer style={{ borderTop: "1px solid var(--app-line)", padding: "40px 24px" }}>
+      <footer className="dof-defer-section" style={{ borderTop: "1px solid var(--app-line)", padding: "40px 24px" }}>
         <div
           style={{
             ...SECTION,

@@ -49,11 +49,16 @@
 }
 
 .dof-landing .dof-up {
-  animation: dof-up 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation: dof-up 0.48s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 .dof-landing .dof-float {
   animation: none;
+}
+
+.dof-landing .dof-defer-section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 640px;
 }
 
 /* Tôn trọng người dùng giảm chuyển động: tắt float + reveal động. */

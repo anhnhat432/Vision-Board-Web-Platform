@@ -48,8 +48,8 @@ export function Reveal({
       initial={false}
       animate={
         visible
-          ? { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }
-          : { opacity: 0, y: distance, scale, filter: "blur(10px)" }
+          ? { opacity: 1, y: 0, scale: 1 }
+          : { opacity: 0, y: distance, scale }
       }
       transition={{
         delay,

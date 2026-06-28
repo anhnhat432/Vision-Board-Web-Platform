@@ -40,7 +40,7 @@ import type { SpotlightTourStep } from "../components/SpotlightTour";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../components/ui/collapsible";
 import { Skeleton } from "../components/ui/skeleton";
 import { useSetAssistantPageContext } from "../features/assistant/AssistantPageContextProvider";
-import { MamCompanion } from "../features/pet/MamCompanion";
+import { LazyMamCompanion } from "../features/pet/LazyMamCompanion";
 import { emitPetEvent } from "../features/pet/petEvents";
 import { useBackendProgressOverlay } from "../hooks/useBackendProgressOverlay";
 import { useBreakpoint } from "../hooks/useBreakpoint";
@@ -686,10 +686,22 @@ function DashboardContent({
         <div className="absolute inset-0 bg-[radial-gradient(#8080800c_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#ffffff04_1.2px,transparent_1.2px)] bg-[size:24px_24px] opacity-70" />
 
         {/* Bóng sáng Forest Green (Top Right) */}
-        <div className="absolute -right-[10%] -top-[10%] w-[50%] aspect-square rounded-full bg-app-accent/4 dark:bg-app-accent/6 blur-[120px] mix-blend-multiply dark:mix-blend-screen" />
+        <div
+          className="absolute -right-[18%] -top-[20%] h-[48rem] w-[48rem]"
+          style={{
+            background:
+              "radial-gradient(circle, color-mix(in srgb, var(--app-accent) 8%, transparent) 0%, transparent 68%)",
+          }}
+        />
 
         {/* Bóng sáng Amber (Bottom Left) */}
-        <div className="absolute -left-[10%] bottom-[10%] w-[45%] aspect-square rounded-full bg-app-energy/2 dark:bg-app-energy/4 blur-[130px] mix-blend-multiply dark:mix-blend-screen" />
+        <div
+          className="absolute -left-[18%] bottom-[4%] h-[44rem] w-[44rem]"
+          style={{
+            background:
+              "radial-gradient(circle, color-mix(in srgb, var(--app-energy) 6%, transparent) 0%, transparent 70%)",
+          }}
+        />
       </div>
 
       <div className="mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8 relative z-10">
@@ -714,7 +726,7 @@ function DashboardContent({
             userData={userData}
             displayName={dashboardDisplayName}
             onContinue={(href) => navigate(href)}
-            companion={<MamCompanion initialEvent="welcomeBack" />}
+            companion={<LazyMamCompanion initialEvent="welcomeBack" />}
           />
         ) : (
           <DashboardActiveLayout
@@ -773,14 +785,14 @@ function DashboardContent({
               source="dashboard"
               context="dashboard"
               triggerLabel=""
-              triggerClassName="flex size-10 items-center justify-center rounded-full border border-app-line bg-app-surface/90 text-app-ink-soft shadow-sm transition-all duration-200 hover:bg-app-surface hover:text-app-ink hover:shadow-md backdrop-blur focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+              triggerClassName="flex size-10 items-center justify-center rounded-full border border-app-line bg-app-surface text-app-ink-soft shadow-sm transition-all duration-200 hover:bg-app-surface hover:text-app-ink hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
             />
           </Suspense>
         </div>
       </div>
 
       {showMobileStickyCTA ? (
-        <div className="above-mobile-nav fixed bottom-0 left-0 right-0 z-40 border-t border-app-line/80 bg-app-surface/85 p-3 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] backdrop-blur-md md:hidden">
+        <div className="above-mobile-nav fixed bottom-0 left-0 right-0 z-40 border-t border-app-line/80 bg-app-surface p-3 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] md:hidden">
           <button
             type="button"
             className="w-full rounded-xl bg-app-accent hover:bg-app-accent-hover px-4 py-3 text-sm font-semibold text-white shadow-xs transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40"
@@ -1043,7 +1055,9 @@ function DashboardActiveLayout({
           tasks={data.activeSystemTaskPreview}
           completedCount={data.todayPreviewCompleted}
           totalCount={data.todayPreviewTotal}
-          companion={<MamCompanion initialEvent={data.dashboardOpenTaskCount > 0 ? "gentleNudge" : "welcomeBack"} />}
+          companion={
+            <LazyMamCompanion initialEvent={data.dashboardOpenTaskCount > 0 ? "gentleNudge" : "welcomeBack"} />
+          }
         />
       </div>
 

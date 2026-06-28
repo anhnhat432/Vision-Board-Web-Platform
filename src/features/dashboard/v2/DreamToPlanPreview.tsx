@@ -42,37 +42,23 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
       return;
     }
 
-    let timers: number[] = [];
+    const timers: number[] = [];
 
-    const startCycle = () => {
-      timers.forEach(window.clearTimeout);
-      timers = [];
+    setCyclePhase(0); // Phase 0: Initial state, task 2 unchecked, progress 33%
 
-      setCyclePhase(0); // Phase 0: Initial state, task 2 unchecked, progress 33%
+    // Phase 1: Tick task 2 after 1.8s
+    timers.push(
+      window.setTimeout(() => {
+        setCyclePhase(1);
+      }, 1800),
+    );
 
-      // Phase 1: Tick task 2 after 1.8s
-      timers.push(
-        window.setTimeout(() => {
-          setCyclePhase(1);
-        }, 1800),
-      );
-
-      // Phase 2: Update progress to 67% and show streak pop after 3.2s
-      timers.push(
-        window.setTimeout(() => {
-          setCyclePhase(2);
-        }, 3200),
-      );
-
-      // Restart cycle after 6s
-      timers.push(
-        window.setTimeout(() => {
-          startCycle();
-        }, 6000),
-      );
-    };
-
-    startCycle();
+    // Phase 2: Update progress to 67% and show streak pop after 3.2s
+    timers.push(
+      window.setTimeout(() => {
+        setCyclePhase(2);
+      }, 3200),
+    );
 
     return () => {
       timers.forEach(window.clearTimeout);
@@ -160,13 +146,13 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch relative">
         {/* Floating Streak Pop Badge */}
         <div
-          className={`absolute top-4 right-4 md:right-8 z-30 inline-flex items-center gap-1.5 rounded-full bg-app-accent/10 px-3.5 py-1 text-[10px] font-extrabold text-app-accent shadow-md border border-app-accent/30 transition-all duration-500 backdrop-blur-xs ${
+          className={`absolute top-4 right-4 md:right-8 z-30 inline-flex items-center gap-1.5 rounded-full bg-app-surface px-3.5 py-1 text-[10px] font-extrabold text-app-accent shadow-sm border border-app-accent/30 transition-all duration-300 ${
             showStreakPop
-              ? "translate-y-0 scale-100 opacity-100 animate-bounce"
+              ? "translate-y-0 scale-100 opacity-100"
               : "-translate-y-2 scale-95 opacity-0 pointer-events-none"
           }`}
         >
-          <Sparkles className="size-3 text-app-accent animate-pulse" />
+          <Sparkles className="size-3 text-app-accent" />
           <span>Streak +1 Ngày! 🔥</span>
         </div>
 

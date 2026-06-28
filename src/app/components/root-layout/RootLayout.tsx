@@ -73,7 +73,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
-import { MindfulPlayer } from "../ui/mindful-player";
+import { LazyMindfulPlayer } from "../ui/lazy-mindful-player";
 import { Toaster } from "../ui/sonner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { AppSidebar } from "./AppSidebar";
@@ -1234,7 +1234,7 @@ export function RootLayout() {
                           </Button>
                         </>
                       ) : null}
-                      <MindfulPlayer />
+                      <LazyMindfulPlayer />
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <button
@@ -1257,7 +1257,7 @@ export function RootLayout() {
                     </div>
 
                     <div className="md:hidden flex min-w-0 items-center gap-1.5">
-                      <MindfulPlayer />
+                      <LazyMindfulPlayer />
                       <span className="hidden max-w-[120px] truncate text-sm font-medium tracking-tight text-app-ink sm:inline">
                         {pageMeta.label}
                       </span>
