@@ -1066,11 +1066,6 @@ function DashboardActiveLayout({
         </Suspense>
       </div>
 
-      {/* Next Best Action Banner */}
-      <div className="appear-fade-up animate-delay-100" style={{ animationDelay: "100ms" }}>
-        <NextBestAction data={data} />
-      </div>
-
       {topTrigger ? (
         <div className="appear-fade-up" style={{ animationDelay: "150ms" }}>
           <RescueAlert
@@ -1084,33 +1079,46 @@ function DashboardActiveLayout({
 
       <DashboardPlanStateNotice planLoading={planLoading} hasPlan={hasPlan} planError={planError} />
 
-      {/* Today Tasks - Primary Focus */}
-      <div className="appear-fade-up" style={{ animationDelay: "200ms" }}>
-        <TodayMiniCard
-          title={data.todayPreviewTitle}
-          tasks={data.activeSystemTaskPreview}
-          completedCount={data.todayPreviewCompleted}
-          totalCount={data.todayPreviewTotal}
-          companion={
-            <LazyMamCompanion initialEvent={data.dashboardOpenTaskCount > 0 ? "gentleNudge" : "welcomeBack"} />
-          }
-        />
-      </div>
-
-      {/* Active Goals Card */}
-      <div className="appear-fade-up" style={{ animationDelay: "300ms" }}>
-        <ActiveGoalsCard goals={data.dashboardActiveGoals} onSelectGoal={onSelectGoal} onAddGoal={onAddGoal} />
-      </div>
-
-      {/* Review prompt (chỉ hiện vào ngày phản tư) */}
-      {data.reviewDueToday ? (
-        <div className="appear-fade-up" style={{ animationDelay: "350ms" }}>
-          <ReflectionPrompt
-            currentWeek={data.dashboardKpiCurrentWeek}
-            reviewHref={data.dashboardNextAction.ctaTarget}
-          />
+      {/* Bento Grid layout for Core Funnel widgets */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start">
+        {/* Left Column: Today Tasks (Primary Focus) */}
+        <div className="space-y-6">
+          <div className="appear-fade-up" style={{ animationDelay: "200ms" }}>
+            <TodayMiniCard
+              title={data.todayPreviewTitle}
+              tasks={data.activeSystemTaskPreview}
+              completedCount={data.todayPreviewCompleted}
+              totalCount={data.todayPreviewTotal}
+              companion={
+                <LazyMamCompanion initialEvent={data.dashboardOpenTaskCount > 0 ? "gentleNudge" : "welcomeBack"} />
+              }
+            />
+          </div>
         </div>
-      ) : null}
+
+        {/* Right Column: Next Best Action & Active Goals */}
+        <div className="space-y-6">
+          {/* Next Best Action Banner */}
+          <div className="appear-fade-up animate-delay-100" style={{ animationDelay: "100ms" }}>
+            <NextBestAction data={data} />
+          </div>
+
+          {/* Active Goals Card */}
+          <div className="appear-fade-up" style={{ animationDelay: "300ms" }}>
+            <ActiveGoalsCard goals={data.dashboardActiveGoals} onSelectGoal={onSelectGoal} onAddGoal={onAddGoal} />
+          </div>
+
+          {/* Review prompt (chỉ hiện vào ngày phản tư) */}
+          {data.reviewDueToday ? (
+            <div className="appear-fade-up" style={{ animationDelay: "350ms" }}>
+              <ReflectionPrompt
+                currentWeek={data.dashboardKpiCurrentWeek}
+                reviewHref={data.dashboardNextAction.ctaTarget}
+              />
+            </div>
+          ) : null}
+        </div>
+      </div>
 
       <Collapsible open={secondaryInsightsOpen} onOpenChange={handleSecondaryInsightsOpenChange}>
         <section
@@ -1173,7 +1181,7 @@ function DashboardActiveLayout({
                 )}
               </div>
 
-              <div className="space-y-[18px]">
+              <div className="space-y-[18px] contain-render-lazy">
                 <BalanceCard rows={balanceRows} />
                 <DailyStoicCard />
                 <QuoteBlock />

@@ -1,6 +1,6 @@
 import { AlertTriangle, ArrowRight, Compass, Save, Sparkles, Target } from "lucide-react";
 import { motion } from "motion/react";
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, memo, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useBlocker, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
@@ -274,11 +274,13 @@ export function LifeBalance() {
     trackCompletion();
   };
 
-  const handleScoreChange = (index: number, value: number[]) => {
-    const updated = [...lifeAreas];
-    updated[index] = { ...updated[index], score: value[0] };
-    setLifeAreas(updated);
-  };
+  const handleScoreChange = useCallback((index: number, value: number[]) => {
+    setLifeAreas((prevAreas) => {
+      const updated = [...prevAreas];
+      updated[index] = { ...updated[index], score: value[0] };
+      return updated;
+    });
+  }, []);
 
   const handleSave = () => {
     saveLifeBalance();
@@ -709,139 +711,15 @@ export function LifeBalance() {
                     </header>
 
                     <div className="mt-4 space-y-3.5 sm:mt-5 sm:space-y-4">
-                      {lifeAreas.map((area, index) => {
-                        const AreaIcon = getLifeAreaIcon(area.name);
-                        const colorConfig = getAreaColorConfig(area.name);
-                        const label = getLifeAreaLabel(area.name);
-                        const isChanged = area.score !== (initialScores[area.name] ?? area.score);
-
-                        return (
-                          <div
-                            key={area.name}
-                            className="space-y-3 rounded-xl border p-3.5 transition-all sm:p-4"
-                            style={{
-                              borderColor: isChanged
-                                ? `color-mix(in oklab, ${colorConfig.accent} 40%, transparent)`
-                                : "var(--app-line)",
-                              backgroundColor: isChanged
-                                ? `color-mix(in oklab, ${colorConfig.accent} 14%, var(--app-bg))`
-                                : "var(--app-bg)",
-                            }}
-                          >
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="flex min-w-0 items-start gap-2.5">
-                                <span
-                                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white shadow-sm"
-                                  style={{ backgroundColor: colorConfig.accent }}
-                                >
-                                  <AreaIcon className="h-5 w-5" aria-hidden="true" />
-                                </span>
-                                <div className="min-w-0">
-                                  <h4 className="break-words text-xs font-bold text-app-ink">{label}</h4>
-                                  <p className="mt-0.5 max-w-[58ch] break-words text-[10px] font-medium leading-normal text-app-ink-muted">
-                                    {LIFE_AREA_DETAILS[area.name]}
-                                  </p>
-                                </div>
-                              </div>
-                              <div
-                                className="flex shrink-0 items-baseline gap-1 rounded-lg border px-2.5 py-1 text-sm"
-                                style={{
-                                  borderColor: `color-mix(in oklab, ${colorConfig.accent} 25%, transparent)`,
-                                  backgroundColor: `color-mix(in oklab, ${colorConfig.accent} 16%, var(--app-bg))`,
-                                }}
-                              >
-                                <span
-                                  className="font-[family-name:var(--app-font-serif)] text-lg font-extrabold"
-                                  style={{ color: colorConfig.accent }}
-                                >
-                                  {area.score}
-                                </span>
-                                <span className="text-[10px] font-bold text-app-ink-muted">/10</span>
-                              </div>
-                            </div>
-
-                            <div className="flex items-center gap-3 pt-1">
-                              <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                type="button"
-                                className="flex h-11 w-11 shrink-0 cursor-pointer select-none items-center justify-center rounded-full border border-app-line bg-white text-lg font-bold text-app-ink transition-all hover:bg-app-bg active:scale-95 dark:bg-app-surface"
-                                onClick={() => handleScoreChange(index, [Math.max(1, area.score - 1)])}
-                                aria-label={`Giảm ${label}`}
-                              >
-                                −
-                              </motion.button>
-
-                              <div className="grow px-1">
-                                <Slider
-                                  value={[area.score]}
-                                  onValueChange={(value) => handleScoreChange(index, value)}
-                                  min={1}
-                                  max={10}
-                                  step={1}
-                                  trackColor={colorConfig.accent}
-                                  className="w-full cursor-pointer"
-                                  aria-label={`Điểm ${label}`}
-                                />
-                              </div>
-
-                              <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                type="button"
-                                className="flex h-11 w-11 shrink-0 cursor-pointer select-none items-center justify-center rounded-full border border-app-line bg-white text-lg font-bold text-app-ink transition-all hover:bg-app-bg active:scale-95 dark:bg-app-surface"
-                                onClick={() => handleScoreChange(index, [Math.min(10, area.score + 1)])}
-                                aria-label={`Tăng ${label}`}
-                              >
-                                +
-                              </motion.button>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-1 px-1 text-[9px] font-bold uppercase leading-tight tracking-wider text-app-ink-muted sm:grid-cols-5">
-                              <span
-                                className={cn(
-                                  "break-words rounded-full px-1.5 py-0.5 transition-colors",
-                                  area.score <= 2 && "bg-[#0C5E3A]/15 text-[#0C5E3A]",
-                                )}
-                              >
-                                1–2 Rất chật vật
-                              </span>
-                              <span
-                                className={cn(
-                                  "break-words rounded-full px-1.5 py-0.5 transition-colors",
-                                  area.score >= 3 && area.score <= 4 && "bg-[#0C5E3A]/15 text-[#0C5E3A]",
-                                )}
-                              >
-                                3–4 Thiếu ổn định
-                              </span>
-                              <span
-                                className={cn(
-                                  "break-words rounded-full px-1.5 py-0.5 transition-colors",
-                                  area.score >= 5 && area.score <= 6 && "bg-[#0C5E3A]/15 text-[#0C5E3A]",
-                                )}
-                              >
-                                5–6 Tạm ổn
-                              </span>
-                              <span
-                                className={cn(
-                                  "break-words rounded-full px-1.5 py-0.5 transition-colors",
-                                  area.score >= 7 && area.score <= 8 && "bg-[#0C5E3A]/15 text-[#0C5E3A]",
-                                )}
-                              >
-                                7–8 Khá tốt
-                              </span>
-                              <span
-                                className={cn(
-                                  "break-words rounded-full px-1.5 py-0.5 transition-colors",
-                                  area.score >= 9 && "bg-[#0C5E3A]/15 text-[#0C5E3A]",
-                                )}
-                              >
-                                9–10 Rất tốt
-                              </span>
-                            </div>
-                          </div>
-                        );
-                      })}
+                      {lifeAreas.map((area, index) => (
+                        <LifeAreaRow
+                          key={area.name}
+                          area={area}
+                          index={index}
+                          initialScore={initialScores[area.name] ?? area.score}
+                          onScoreChange={handleScoreChange}
+                        />
+                      ))}
                     </div>
 
                     <footer className="mt-5 flex flex-col-reverse gap-2.5 border-t border-app-line/60 pt-4 sm:flex-row sm:items-center sm:justify-end sm:gap-3">
@@ -1040,3 +918,148 @@ export function LifeBalance() {
     </PageShell>
   );
 }
+
+interface LifeAreaRowProps {
+  area: LifeArea;
+  index: number;
+  initialScore: number;
+  onScoreChange: (index: number, value: number[]) => void;
+}
+
+const LifeAreaRow = memo(function LifeAreaRow({
+  area,
+  index,
+  initialScore,
+  onScoreChange,
+}: LifeAreaRowProps) {
+  const AreaIcon = getLifeAreaIcon(area.name);
+  const colorConfig = getAreaColorConfig(area.name);
+  const label = getLifeAreaLabel(area.name);
+  const isChanged = area.score !== initialScore;
+
+  return (
+    <div
+      className="space-y-3 rounded-xl border p-3.5 transition-all sm:p-4 hover:-translate-y-px hover:shadow-app-md"
+      style={{
+        borderColor: isChanged
+          ? `color-mix(in oklab, ${colorConfig.accent} 40%, transparent)`
+          : "var(--app-line)",
+        backgroundColor: isChanged
+          ? `color-mix(in oklab, ${colorConfig.accent} 14%, var(--app-bg))`
+          : "var(--app-bg)",
+      }}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-start gap-2.5">
+          <span
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-white shadow-sm"
+            style={{ backgroundColor: colorConfig.accent }}
+          >
+            <AreaIcon className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <div className="min-w-0">
+            <h4 className="break-words text-xs font-bold text-app-ink">{label}</h4>
+            <p className="mt-0.5 max-w-[58ch] break-words text-[10px] font-medium leading-normal text-app-ink-muted">
+              {LIFE_AREA_DETAILS[area.name]}
+            </p>
+          </div>
+        </div>
+        <div
+          className="flex shrink-0 items-baseline gap-1 rounded-lg border px-2.5 py-1 text-sm"
+          style={{
+            borderColor: `color-mix(in oklab, ${colorConfig.accent} 25%, transparent)`,
+            backgroundColor: `color-mix(in oklab, ${colorConfig.accent} 16%, var(--app-bg))`,
+          }}
+        >
+          <span
+            className="font-[family-name:var(--app-font-serif)] text-lg font-extrabold"
+            style={{ color: colorConfig.accent }}
+          >
+            {area.score}
+          </span>
+          <span className="text-[10px] font-bold text-app-ink-muted">/10</span>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3 pt-1">
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          type="button"
+          className="flex h-11 w-11 shrink-0 cursor-pointer select-none items-center justify-center rounded-full border border-app-line bg-white text-lg font-bold text-app-ink transition-all hover:bg-app-bg active:scale-95 dark:bg-app-surface"
+          onClick={() => onScoreChange(index, [Math.max(1, area.score - 1)])}
+          aria-label={`Giảm ${label}`}
+        >
+          −
+        </motion.button>
+
+        <div className="grow px-1">
+          <Slider
+            value={[area.score]}
+            onValueChange={(value) => onScoreChange(index, value)}
+            min={1}
+            max={10}
+            step={1}
+            trackColor={colorConfig.accent}
+            className="w-full cursor-pointer"
+            aria-label={`Điểm ${label}`}
+          />
+        </div>
+
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          type="button"
+          className="flex h-11 w-11 shrink-0 cursor-pointer select-none items-center justify-center rounded-full border border-app-line bg-white text-lg font-bold text-app-ink transition-all hover:bg-app-bg active:scale-95 dark:bg-app-surface"
+          onClick={() => onScoreChange(index, [Math.min(10, area.score + 1)])}
+          aria-label={`Tăng ${label}`}
+        >
+          +
+        </motion.button>
+      </div>
+
+      <div className="grid grid-cols-2 gap-1 px-1 text-[9px] font-bold uppercase leading-tight tracking-wider text-app-ink-muted sm:grid-cols-5">
+        <span
+          className={cn(
+            "break-words rounded-full px-1.5 py-0.5 transition-colors",
+            area.score <= 2 && "bg-[#0C5E3A]/15 text-[#0C5E3A]",
+          )}
+        >
+          1–2 Rất chật vật
+        </span>
+        <span
+          className={cn(
+            "break-words rounded-full px-1.5 py-0.5 transition-colors",
+            area.score >= 3 && area.score <= 4 && "bg-[#0C5E3A]/15 text-[#0C5E3A]",
+          )}
+        >
+          3–4 Thiếu ổn định
+        </span>
+        <span
+          className={cn(
+            "break-words rounded-full px-1.5 py-0.5 transition-colors",
+            area.score >= 5 && area.score <= 6 && "bg-[#0C5E3A]/15 text-[#0C5E3A]",
+          )}
+        >
+          5–6 Tạm ổn
+        </span>
+        <span
+          className={cn(
+            "break-words rounded-full px-1.5 py-0.5 transition-colors",
+            area.score >= 7 && area.score <= 8 && "bg-[#0C5E3A]/15 text-[#0C5E3A]",
+          )}
+        >
+          7–8 Khá tốt
+        </span>
+        <span
+          className={cn(
+            "break-words rounded-full px-1.5 py-0.5 transition-colors",
+            area.score >= 9 && "bg-[#0C5E3A]/15 text-[#0C5E3A]",
+          )}
+        >
+          9–10 Rất tốt
+        </span>
+      </div>
+    </div>
+  );
+});

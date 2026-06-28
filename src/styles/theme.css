@@ -4011,6 +4011,53 @@ html.dark .achievements-badge.locked {
   background: var(--app-bg-subtle) !important;
 }
 
+/* Glassmorphism & Custom Gradients */
+.glass-panel {
+  background: var(--app-glass-bg) !important;
+
+
+  border: 1px solid var(--app-glass-border) !important;
+}
+
+.dark .glass-panel {
+  background: var(--app-glass-bg-dark, rgba(26, 26, 26, 0.88)) !important;
+  border-color: var(--app-glass-border-dark, rgba(255, 255, 255, 0.08)) !important;
+}
+
+.gradient-forest-bg {
+  background: var(--gradient-forest) !important;
+}
+
+.gradient-terracotta-bg {
+  background: var(--gradient-terracotta) !important;
+}
+
+.gradient-aurora-bg {
+  background: var(--gradient-aurora) !important;
+}
+
+.gradient-glass-bg {
+  background: var(--gradient-glass) !important;
+}
+
+.glass-panel-hover {
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+  transition: transform var(--duration-base) var(--ease-emphasized),
+              box-shadow var(--duration-base) var(--ease-emphasized),
+              border-color var(--duration-base) var(--ease-emphasized) !important;
+}
+
+.glass-panel-hover:hover {
+  transform: translate3d(0, -2px, 0);
+  box-shadow: var(--app-shadow-lg) !important;
+  border-color: rgba(12, 94, 58, 0.25) !important;
+}
+
+.dark .glass-panel-hover:hover {
+  border-color: rgba(12, 94, 58, 0.4) !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .dof-stagger > *,
   .dof-prog,
@@ -4022,4 +4069,10 @@ html.dark .achievements-badge.locked {
   .dof-ring {
     animation: none !important;
   }
+}
+
+/* Performance Rendering Containment */
+.contain-render-lazy {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 300px;
 }

@@ -753,7 +753,14 @@ export function Onboarding() {
   if (step === "welcome") {
     return (
       <PageShell maxWidth="xl" className="focus:outline-none">
-        <div ref={flowTopRef} tabIndex={-1} className="dof-stagger flex flex-col gap-5 focus:outline-none">
+        <motion.div
+          initial={{ opacity: 0, x: -15 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.28, ease: "easeOut" }}
+          ref={flowTopRef}
+          tabIndex={-1}
+          className="dof-stagger flex flex-col gap-5 focus:outline-none"
+        >
           <ScreenGuide {...SCREEN_GUIDES.onboarding} autoOpen />
           {progressHeader}
 
@@ -899,14 +906,17 @@ export function Onboarding() {
               </section>
             </>
           )}
-        </div>
+        </motion.div>
       </PageShell>
     );
   }
 
   return (
     <PageShell maxWidth="xl" className="focus:outline-none">
-      <div
+      <motion.div
+        initial={{ opacity: 0, x: 15 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.28, ease: "easeOut" }}
         ref={flowTopRef}
         tabIndex={-1}
         className="dof-stagger flex w-full max-w-full flex-col gap-5 focus:outline-none"
@@ -1406,7 +1416,7 @@ export function Onboarding() {
             </svg>
           </button>
         </footer>
-      </div>
+      </motion.div>
     </PageShell>
   );
 }

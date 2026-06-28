@@ -130,6 +130,16 @@
   --app-highlight: #C6F24E;
   --app-energy:   #FF5C3E;
 
+  /* — Glassmorphism — */
+  --app-glass-bg: rgba(255, 255, 255, 0.88);
+  --app-glass-border: rgba(23, 21, 15, 0.08);
+
+  /* — Gradients — */
+  --gradient-forest: linear-gradient(135deg, #0C5E3A 0%, #1E3D35 100%);
+  --gradient-terracotta: linear-gradient(135deg, var(--terra-600) 0%, var(--terra-800) 100%);
+  --gradient-aurora: linear-gradient(135deg, #E4EEDF 0%, #FCEDE5 50%, #E8F0EC 100%);
+  --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.2) 100%);
+
   /* — Elevation / Shadow — */
   /* Neutral shadows, không màu accent/warm — giữ cảm giác nhẹ nhàng, trẻ trung */
   --app-shadow-sm:
@@ -389,4 +399,8 @@ html.dark {
   --shadow-app-lg:   var(--app-shadow-lg);
   --shadow-app-xl:   var(--app-shadow-xl);
   --shadow-app-card: var(--app-shadow-card);
+
+  /* — Glass — */
+  --color-glass-bg: var(--app-glass-bg);
+  --color-glass-border: var(--app-glass-border);
 }

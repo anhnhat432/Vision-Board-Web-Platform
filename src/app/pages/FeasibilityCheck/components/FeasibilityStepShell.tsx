@@ -75,11 +75,10 @@ export function FeasibilityStepShell({
       <section
         data-feasibility-step-shell
         ref={targetRef}
-        className="group relative overflow-hidden rounded-card border border-app-line bg-app-surface/70 p-3 pb-[calc(6.5rem+env(safe-area-inset-bottom))] shadow-app-md backdrop-blur-md transition-all duration-300 motion-reduce:transition-none dark:bg-app-surface/40 sm:p-7 sm:pb-8 md:p-8 md:pb-9"
+        className="group relative overflow-hidden rounded-card border border-app-line bg-app-surface p-3 pb-[calc(6.5rem+env(safe-area-inset-bottom))] shadow-app-card transition-colors duration-200 motion-reduce:transition-none dark:bg-app-surface sm:p-7 sm:pb-8 md:p-8 md:pb-9"
         aria-labelledby={`feasibility-question-${currentQuestion.id}`}
       >
-        {/* Background radial soft light */}
-        <div className="pointer-events-none absolute right-0 top-0 h-40 w-40 rounded-full bg-app-accent/5 blur-3xl" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-app-accent via-app-status-success to-app-accent/45" />
 
         <AnimatePresence mode="wait">
           <motion.div
@@ -134,23 +133,24 @@ export function FeasibilityStepShell({
                 return (
                   <motion.div
                     key={option.value}
-                    whileHover={{ scale: 1.015 }}
-                    whileTap={{ scale: 0.985 }}
-                    className="group flex min-w-0 w-full transition-all duration-200"
+                    whileTap={{ scale: 0.992 }}
+                    className="group flex min-w-0 w-full"
                   >
                     <Label
                       htmlFor={`feasibility-${currentQuestion.id}-${option.value}`}
                       className={cn(
-                        "relative flex h-auto min-h-[3.5rem] min-w-0 w-full cursor-pointer items-center justify-start gap-3 rounded-card border p-3 text-sm font-medium transition-all duration-200 focus-within:ring-2 focus-within:ring-app-accent/30 focus-visible:outline-none sm:min-h-[4.75rem] sm:flex-col sm:justify-between sm:p-4 sm:pb-5",
+                        "relative flex h-auto min-h-[3.5rem] min-w-0 w-full cursor-pointer items-center justify-start gap-3 rounded-card border p-3 text-sm font-medium transition-[background-color,border-color,box-shadow,color] duration-200 focus-within:ring-2 focus-within:ring-app-accent/35 focus-visible:outline-none sm:min-h-[4.75rem] sm:flex-col sm:justify-between sm:p-4 sm:pb-5",
                         isSelected
-                          ? "-translate-y-0.5 border-app-line-strong bg-app-accent-soft text-app-accent shadow-app-sm"
-                          : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-line-strong hover:bg-app-bg-subtle hover:shadow-app-sm",
+                          ? "border-app-accent/35 bg-app-accent-soft text-app-accent shadow-app-sm"
+                          : "border-app-line bg-app-surface text-app-ink-soft hover:border-app-accent/25 hover:bg-app-bg-subtle",
                       )}
                     >
-                      {/* Radial sheen highlight when selected */}
-                      {isSelected && (
-                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--app-accent-subtle),transparent_70%)] pointer-events-none rounded-card" />
-                      )}
+                      {isSelected ? (
+                        <span
+                          className="pointer-events-none absolute inset-y-3 left-0 w-1 rounded-r-full bg-app-accent"
+                          aria-hidden="true"
+                        />
+                      ) : null}
 
                       <span className="relative z-10 flex w-auto items-center justify-between gap-2.5 sm:w-full sm:gap-3">
                         <span className="flex items-center gap-3">
@@ -171,13 +171,7 @@ export function FeasibilityStepShell({
                           className="sr-only"
                         />
                         {isSelected ? (
-                          <motion.div
-                            initial={{ scale: 0.7, opacity: 0 }}
-                            animate={{ scale: 1, opacity: 1 }}
-                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                          >
-                            <CheckCircle2 className="h-5.5 w-5.5 shrink-0 text-app-accent" aria-hidden="true" />
-                          </motion.div>
+                          <CheckCircle2 className="h-5.5 w-5.5 shrink-0 text-app-accent" aria-hidden="true" />
                         ) : null}
                       </span>
 

@@ -55,7 +55,7 @@ export function ActiveGoalsCard({ goals, maxGoals = 3, onSelectGoal, onAddGoal }
 
   return (
     <section
-      className="rounded-[20px] border border-app-line bg-app-surface p-[22px]"
+      className="rounded-[20px] glass-panel glass-panel-hover p-[22px]"
       aria-labelledby="dashboard-active-goals-title"
     >
       <div className="mb-4 flex flex-col gap-3 border-b border-app-line pb-3.5 sm:flex-row sm:items-center sm:justify-between">

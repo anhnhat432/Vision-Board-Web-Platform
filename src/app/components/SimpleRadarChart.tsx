@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { memo, useId } from "react";
 
 interface SimpleRadarChartPoint {
   subject: string;
@@ -37,7 +37,7 @@ function splitLabel(label: string): LabelLine[] {
   ];
 }
 
-export function SimpleRadarChart({ data, className }: SimpleRadarChartProps) {
+export const SimpleRadarChart = memo(function SimpleRadarChart({ data, className }: SimpleRadarChartProps) {
   const titleId = useId();
   const descriptionId = useId();
 
@@ -163,4 +163,4 @@ export function SimpleRadarChart({ data, className }: SimpleRadarChartProps) {
       </svg>
     </div>
   );
-}
+});

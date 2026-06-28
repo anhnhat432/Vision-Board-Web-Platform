@@ -1,6 +1,7 @@
 import { ArrowRight, ListChecks, ListTodo } from "lucide-react";
 import type { ReactNode } from "react";
 import { Link } from "react-router";
+import { motion } from "motion/react";
 
 import type { TwelveWeekTaskInstance } from "@/app/utils/storage";
 
@@ -22,7 +23,7 @@ export function TodayMiniCard(props: TodayMiniCardProps) {
 
   return (
     <section
-      className="overflow-hidden rounded-[20px] border border-app-accent/[0.18] bg-app-surface"
+      className="overflow-hidden rounded-[20px] glass-panel glass-panel-hover"
       aria-labelledby="dashboard-today-mini-title"
     >
       <div className="border-b border-app-line bg-gradient-to-b from-app-accent-subtle to-app-surface px-5 py-4">
@@ -36,9 +37,19 @@ export function TodayMiniCard(props: TodayMiniCardProps) {
                 <ListChecks className="h-[15px] w-[15px]" />
                 {title}
               </h2>
-              <span className="rounded-full bg-app-accent px-3 py-1 font-mono text-xs font-extrabold text-app-highlight">
+              <motion.span
+                key={`${completedCount}/${totalCount}`}
+                initial={{ scale: 0.8, opacity: 0.5 }}
+                animate={{ scale: allDone ? [1, 1.15, 1] : 1, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 350, damping: 15 }}
+                className={`rounded-full px-3 py-1 font-mono text-xs font-extrabold transition-all duration-300 ${
+                  allDone
+                    ? "bg-app-status-success text-white shadow-lg shadow-app-status-success/30"
+                    : "bg-app-accent text-app-highlight"
+                }`}
+              >
                 {completedCount}/{totalCount} việc
-              </span>
+              </motion.span>
             </div>
             <p className="font-serif text-[12.5px] italic text-app-ink-soft">{hint}</p>
           </div>
