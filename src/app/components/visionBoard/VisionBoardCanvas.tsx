@@ -1,6 +1,6 @@
 import { Trash2 } from "lucide-react";
 import type React from "react";
-import { type JSX, useRef, useState } from "react";
+import { type JSX, memo, useRef, useState } from "react";
 
 import { Button } from "@/app/components/ui/button";
 import { ParallaxCard } from "@/app/components/ui/parallax-card";
@@ -30,7 +30,7 @@ interface DragState {
   pointerId: number;
 }
 
-export function VisionBoardCanvas({
+export const VisionBoardCanvas = memo(function VisionBoardCanvas({
   items,
   themeId = "aurora",
   showZones,
@@ -53,7 +53,7 @@ export function VisionBoardCanvas({
     <div
       ref={exportRef}
       className={`relative h-[450px] min-w-0 overflow-hidden sm:h-[580px] lg:h-[620px] xl:h-[600px] ${className ?? ""}`}
-      style={{ background: "var(--grad-vision)", borderRadius: "20px" }}
+      style={{ background: theme.canvasBackground, borderRadius: "20px" }}
       data-theme-id={theme.id}
     >
       <div
@@ -134,7 +134,7 @@ export function VisionBoardCanvas({
       ))}
     </div>
   );
-}
+});
 
 interface DraggableItemProps {
   item: VisionBoardItem;
@@ -145,102 +145,126 @@ interface DraggableItemProps {
   onSelect?: (id: string | null) => void;
 }
 
-function DraggableItem({ item, goalsById, isSelected, onUpdate, onDelete, onSelect }: DraggableItemProps): JSX.Element {
-  const [isDragging, setIsDragging] = useState(false);
-  const dragStateRef = useRef<DragState | null>(null);
-  const containerRectRef = useRef<DOMRect | null>(null);
+const DraggableItem = memo(
+  function DraggableItem({
+    item,
+    goalsById,
+    isSelected,
+    onUpdate,
+    onDelete,
+    onSelect,
+  }: DraggableItemProps): JSX.Element {
+    const [isDragging, setIsDragging] = useState(false);
+    const dragStateRef = useRef<DragState | null>(null);
+    const containerRectRef = useRef<DOMRect | null>(null);
 
-  const updatePosition = (clientX: number, clientY: number, container: HTMLElement) => {
-    const dragState = dragStateRef.current;
-    if (!dragState) return;
+    const updatePosition = (clientX: number, clientY: number, container: HTMLElement) => {
+      const dragState = dragStateRef.current;
+      if (!dragState) return;
 
-    let rect = containerRectRef.current;
-    if (!rect) {
-      rect = container.getBoundingClientRect();
-      containerRectRef.current = rect;
-    }
-    const x = ((clientX - rect.left - dragState.offsetX) / rect.width) * 100;
-    const y = ((clientY - rect.top - dragState.offsetY) / rect.height) * 100;
+      let rect = containerRectRef.current;
+      if (!rect) {
+        rect = container.getBoundingClientRect();
+        containerRectRef.current = rect;
+      }
+      const x = ((clientX - rect.left - dragState.offsetX) / rect.width) * 100;
+      const y = ((clientY - rect.top - dragState.offsetY) / rect.height) * 100;
 
-    onUpdate(item.id, Math.max(0, Math.min(95, x)), Math.max(0, Math.min(95, y)));
-  };
-
-  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    if ((event.target as HTMLElement).closest("button")) return;
-
-    const container = event.currentTarget.parentElement;
-    if (!container) return;
-
-    const rect = container.getBoundingClientRect();
-    containerRectRef.current = rect;
-    const offsetX = event.clientX - rect.left - (rect.width * item.x) / 100;
-    const offsetY = event.clientY - rect.top - (rect.height * item.y) / 100;
-
-    dragStateRef.current = {
-      offsetX,
-      offsetY,
-      pointerId: event.pointerId,
+      onUpdate(item.id, Math.max(0, Math.min(95, x)), Math.max(0, Math.min(95, y)));
     };
 
-    setIsDragging(true);
-    event.currentTarget.setPointerCapture(event.pointerId);
-    onSelect?.(item.id);
-    updatePosition(event.clientX, event.clientY, container);
-  };
+    const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      if ((event.target as HTMLElement).closest("button")) return;
 
-  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (!dragStateRef.current || dragStateRef.current.pointerId !== event.pointerId) return;
+      const container = event.currentTarget.parentElement;
+      if (!container) return;
 
-    const container = event.currentTarget.parentElement;
-    if (!container) return;
+      const rect = container.getBoundingClientRect();
+      containerRectRef.current = rect;
+      const offsetX = event.clientX - rect.left - (rect.width * item.x) / 100;
+      const offsetY = event.clientY - rect.top - (rect.height * item.y) / 100;
 
-    updatePosition(event.clientX, event.clientY, container);
-  };
+      dragStateRef.current = {
+        offsetX,
+        offsetY,
+        pointerId: event.pointerId,
+      };
 
-  const handlePointerEnd = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (!dragStateRef.current || dragStateRef.current.pointerId !== event.pointerId) return;
+      setIsDragging(true);
+      event.currentTarget.setPointerCapture(event.pointerId);
+      onSelect?.(item.id);
+      updatePosition(event.clientX, event.clientY, container);
+    };
 
-    dragStateRef.current = null;
-    containerRectRef.current = null;
-    setIsDragging(false);
+    const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+      if (!dragStateRef.current || dragStateRef.current.pointerId !== event.pointerId) return;
 
-    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
-      event.currentTarget.releasePointerCapture(event.pointerId);
-    }
-  };
+      const container = event.currentTarget.parentElement;
+      if (!container) return;
 
-  return (
-    <div
-      onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerEnd}
-      onPointerCancel={handlePointerEnd}
-      className={`absolute cursor-move touch-none select-none transition-transform duration-[var(--duration-base)] ease-[var(--ease-emphasized)] hover:scale-[1.015] shadow-app-lg ${
-        isSelected ? "rounded-xl ring-2 ring-app-accent ring-offset-2" : ""
-      }`}
-      style={{
-        left: `${item.x}%`,
-        top: `${item.y}%`,
-        width: `${item.width}px`,
-        opacity: isDragging ? 0.56 : 1,
-      }}
-    >
-      <div className="group relative">
-        <ParallaxCard maxTilt={5}>
-          <VisionBoardItemRenderer item={item} goalsById={goalsById} />
-        </ParallaxCard>
-        <Button
-          size="icon"
-          variant="destructive"
-          className="absolute -right-2 -top-2 h-8 w-8 rounded-full opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
-          onClick={() => onDelete(item.id)}
-          aria-label="Xóa phần tử"
-          data-export-skip="true"
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </Button>
+      updatePosition(event.clientX, event.clientY, container);
+    };
+
+    const handlePointerEnd = (event: React.PointerEvent<HTMLDivElement>) => {
+      if (!dragStateRef.current || dragStateRef.current.pointerId !== event.pointerId) return;
+
+      dragStateRef.current = null;
+      containerRectRef.current = null;
+      setIsDragging(false);
+
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
+      }
+    };
+
+    return (
+      <div
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerEnd}
+        onPointerCancel={handlePointerEnd}
+        className={`absolute cursor-move touch-none select-none transition-transform duration-[var(--duration-base)] ease-[var(--ease-emphasized)] hover:scale-[1.015] shadow-app-lg ${
+          isSelected ? "rounded-xl ring-2 ring-app-accent ring-offset-2" : ""
+        }`}
+        style={{
+          left: `${item.x}%`,
+          top: `${item.y}%`,
+          width: `${item.width}px`,
+          opacity: isDragging ? 0.56 : 1,
+        }}
+      >
+        <div className="group relative">
+          <ParallaxCard maxTilt={5}>
+            <VisionBoardItemRenderer item={item} goalsById={goalsById} />
+          </ParallaxCard>
+          <Button
+            size="icon"
+            variant="destructive"
+            className="absolute -right-2 -top-2 h-8 w-8 rounded-full opacity-0 transition-opacity duration-150 group-hover:opacity-100 group-focus-within:opacity-100"
+            onClick={() => onDelete(item.id)}
+            aria-label="Xóa phần tử"
+            data-export-skip="true"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </Button>
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  },
+  (prev, next) => {
+    return (
+      prev.item.id === next.item.id &&
+      prev.item.x === next.item.x &&
+      prev.item.y === next.item.y &&
+      prev.item.width === next.item.width &&
+      prev.item.height === next.item.height &&
+      prev.item.type === next.item.type &&
+      prev.item.content === next.item.content &&
+      prev.item.lifeAreaId === next.item.lifeAreaId &&
+      prev.item.style === next.item.style &&
+      prev.isSelected === next.isSelected &&
+      prev.goalsById === next.goalsById
+    );
+  },
+);
