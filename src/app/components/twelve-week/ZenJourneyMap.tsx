@@ -307,16 +307,18 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
 
       {/* TẤM CARD CHI TIẾT TRẠM DỪNG CHÂN NẰM THÔNG THOÁNG BÊN DƯỚI BẢN ĐỒ */}
       {activeWeek && (
-        <div className="mt-6 rounded-card border border-app-line bg-gradient-to-br from-app-surface via-app-bg/30 to-app-surface p-6 shadow-app-sm transition-all duration-300 animate-[fadeIn_0.3s_ease-out]">
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-app-line/40 pb-3">
-            <div className="flex items-center gap-2.5">
-              <span className="text-2xl">🪨</span>
+        <div className="mt-6 rounded-card border border-app-line/60 bg-gradient-to-br from-app-surface via-app-bg-subtle/20 to-app-surface p-5 sm:p-6 shadow-2xs transition-all duration-300 animate-[fadeIn_0.3s_ease-out]">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-app-line/40 pb-4">
+            <div className="flex items-center gap-3">
+              <span className="flex h-10 w-10 items-center justify-center rounded-full bg-app-accent-soft text-lg shadow-3xs">
+                {activeWeek.weekNumber === currentWeek ? "🔥" : activeWeek.reviewDone ? "💎" : "🪵"}
+              </span>
               <div>
-                <h4 className="font-serif text-base font-semibold text-app-ink flex items-center gap-2">
+                <h4 className="font-serif text-base font-bold text-app-ink flex items-center gap-2">
                   Trạm dừng chân: Tuần {activeWeek.weekNumber}
                   {activeWeek.weekNumber === currentWeek && (
-                    <span className="text-[10px] font-sans font-bold uppercase tracking-wider text-app-status-warning bg-app-status-warning/10 px-2 py-0.5 rounded-full animate-pulse border border-app-status-warning/20 flex items-center gap-0.5">
-                      🔥 Hiện tại
+                    <span className="text-[9px] font-sans font-bold uppercase tracking-wider text-amber-600 bg-amber-50 dark:bg-amber-950/20 px-2 py-0.5 rounded-full border border-amber-200/50 flex items-center gap-0.5 animate-pulse">
+                      Hiện tại
                     </span>
                   )}
                 </h4>
@@ -329,41 +331,43 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
                 </p>
               </div>
             </div>
-            {activeWeek.weekNumber === currentWeek ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-app-status-warning/10 px-3 py-1 text-xs font-bold text-app-status-warning border border-app-status-warning/20 animate-pulse">
-                Đang thắp lửa
-              </span>
-            ) : activeWeek.reviewDone ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-app-accent/10 px-3 py-1 text-xs font-bold text-app-accent border border-app-accent/20">
-                Đã hoàn tất review
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1 rounded-full bg-app-line px-3 py-1 text-xs font-bold text-app-ink-soft border border-app-line/60">
-                {activeWeek.weekNumber > currentWeek ? "Tương lai" : "Cần review"}
-              </span>
-            )}
+            <div>
+              {activeWeek.weekNumber === currentWeek ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 dark:bg-amber-950/25 px-3 py-1 text-xs font-bold text-amber-600 border border-amber-200/50">
+                  Đang thắp lửa
+                </span>
+              ) : activeWeek.reviewDone ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-app-accent-soft/80 px-3 py-1 text-xs font-bold text-app-accent border border-app-accent/20">
+                  Đã hoàn tất review
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 rounded-full bg-app-bg px-3 py-1 text-xs font-bold text-app-ink-muted border border-app-line/60">
+                  {activeWeek.weekNumber > currentWeek ? "Tương lai" : "Cần review"}
+                </span>
+              )}
+            </div>
           </div>
 
-          <div className="mt-4 grid gap-4 sm:grid-cols-3">
-            <div className="rounded-card bg-app-surface/60 p-4 border border-app-line/40 shadow-app-sm flex flex-col justify-between">
+          <div className="mt-5 grid gap-4 sm:grid-cols-3">
+            <div className="rounded-card bg-app-bg-subtle/40 p-4 border border-app-line/50 hover:bg-app-bg-subtle/70 transition-colors shadow-3xs flex flex-col justify-between">
               <span className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">Điểm hiệu suất</span>
-              <p className="mt-2 font-serif text-3xl font-bold text-app-ink tabular-nums">
-                {activeWeek.weeklyScore} <span className="text-xs font-sans font-normal text-app-ink-muted">điểm</span>
+              <p className="mt-3 font-serif text-3xl font-bold text-app-ink tabular-nums">
+                {activeWeek.weeklyScore} <span className="text-xs font-sans font-normal text-app-ink-muted ml-0.5">điểm</span>
               </p>
             </div>
-            <div className="rounded-card bg-app-surface/60 p-4 border border-app-line/40 shadow-app-sm flex flex-col justify-between">
+            <div className="rounded-card bg-app-bg-subtle/40 p-4 border border-app-line/50 hover:bg-app-bg-subtle/70 transition-colors shadow-3xs flex flex-col justify-between">
               <span className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">
                 Hoàn thành cốt lõi
               </span>
-              <p className="mt-2 font-serif text-3xl font-bold text-app-ink tabular-nums">
+              <p className="mt-3 font-serif text-3xl font-bold text-app-ink tabular-nums">
                 {activeWeek.leadCompletionPercent}%
               </p>
             </div>
-            <div className="rounded-card bg-app-surface/60 p-4 border border-app-line/40 shadow-app-sm flex flex-col justify-between">
+            <div className="rounded-card bg-app-bg-subtle/40 p-4 border border-app-line/50 hover:bg-app-bg-subtle/70 transition-colors shadow-3xs flex flex-col justify-between">
               <span className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">
                 Chỉ số tiến triển
               </span>
-              <p className="mt-2 break-words text-xs font-semibold leading-relaxed text-app-ink">
+              <p className="mt-3 break-words text-xs font-semibold leading-relaxed text-app-ink">
                 {activeWeek.mainMetricProgress || "Chưa cập nhật chỉ số chính"}
               </p>
             </div>

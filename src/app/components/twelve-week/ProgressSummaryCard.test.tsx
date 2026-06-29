@@ -125,7 +125,7 @@ describe("ProgressSummaryCard cycle timeline", () => {
       />,
     );
 
-    await userEvent.click(screen.getByRole("button", { name: /tab/i }));
+    await userEvent.click(screen.getByRole("button", { name: /tuần/i }));
     expect(onOpenWeekTab).toHaveBeenCalledTimes(1);
   });
 });
