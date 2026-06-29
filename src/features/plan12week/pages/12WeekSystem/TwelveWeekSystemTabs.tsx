@@ -506,7 +506,7 @@ export function TwelveWeekSystemTabs({
                   onReducePlan={onApplySuggestedPlan}
                   nextWeekRecommendation={nextWeekRecommendation}
                   onAcceptNextWeekRecommendation={onAcceptNextWeekRecommendation ?? onApplySuggestedPlan}
-                  weeklyReflectionInsights={weeklyReflectionInsights}
+                  _weeklyReflectionInsights={weeklyReflectionInsights}
                 />
               </motion.div>
             </Suspense>
