@@ -68,21 +68,11 @@ export function WeeklyReviewSummary({
 }: WeeklyReviewSummaryProps) {
   return (
     <div className="space-y-5 sm:space-y-6">
-      {/* Summary Hero Card */}
+      {/* Summary report card */}
       <div
         data-testid="weekly-review-summary"
-        className="relative overflow-hidden rounded-card-lg border border-app-line bg-app-surface p-6 shadow-app-card weekly-card-lift sm:p-8"
+        className="space-y-5 rounded-card border border-app-line bg-app-surface p-5 shadow-app-sm sm:p-7"
       >
-        {/* Decorative pin */}
-        <div className="absolute -top-2.5 left-1/2 z-20 flex -translate-x-1/2 items-center justify-center pointer-events-none select-none">
-          <div className="w-3.5 h-3.5 rounded-full bg-app-warm shadow-[inset_0_-1px_2px_rgba(0,0,0,0.2),0_1.5px_3px_rgba(0,0,0,0.15)] border border-white/20 flex items-center justify-center">
-            <div className="w-1.5 h-1.5 bg-white/40 rounded-full" />
-          </div>
-        </div>
-
-        {/* Soft glow */}
-        <div className="absolute -top-1/2 -right-1/4 w-2/3 h-full bg-radial-gradient from-app-accent-soft/30 to-transparent rounded-full pointer-events-none" />
-
         {/* Header */}
         <div className="relative z-10 flex flex-wrap items-start justify-between gap-3 border-b border-app-line pb-4">
           <div className="space-y-1.5">
@@ -121,7 +111,7 @@ export function WeeklyReviewSummary({
             <div className="flex items-baseline gap-1">
               <span
                 data-testid="weekly-lead-score"
-                className="weekly-score-animate font-serif text-5xl font-extrabold leading-none text-app-accent sm:text-6xl"
+                className="font-serif text-5xl font-extrabold leading-none text-app-accent sm:text-6xl"
               >
                 {summaryReview.leadCompletionPercent}%
               </span>
@@ -281,11 +271,11 @@ export function WeeklyReviewSummary({
             <span className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted block">
               Bài học kinh nghiệm rút ra
             </span>
-            <blockquote className="weekly-insights-quote weekly-insights-quote-warm shadow-3xs italic leading-relaxed text-app-ink">
-              <span className="absolute top-1 left-2.5 text-app-warm/25 text-4xl font-serif leading-none select-none">
+            <blockquote className="relative rounded-input bg-app-warm-subtle px-4 py-3 font-serif italic leading-relaxed text-app-ink shadow-3xs">
+              <span className="absolute left-2 top-1 select-none font-serif text-4xl leading-none text-app-warm/25" aria-hidden="true">
                 “
               </span>
-              <span className="relative z-10 pl-5 block text-xs sm:text-sm font-medium">
+              <span className="relative z-10 block pl-5 text-xs font-medium sm:text-sm">
                 {summaryInsights}
               </span>
             </blockquote>
@@ -307,7 +297,7 @@ export function WeeklyReviewSummary({
 
       {/* Next Week Action Card */}
       {nextWeekRecommendation && (
-        <div className="space-y-3 rounded-card-lg border border-app-warm-border/10 bg-app-warm-soft/20 p-4 shadow-xs weekly-card-lift sm:space-y-4 sm:p-5">
+        <div className="space-y-3 rounded-card border border-app-warm-border/30 bg-app-warm-subtle p-4 shadow-app-sm sm:space-y-4 sm:p-5">
           <div className="space-y-1">
             <span className="text-[10px] font-bold uppercase tracking-wider text-app-warm block">
               Chuẩn bị tuần sau
@@ -341,9 +331,9 @@ export function WeeklyReviewSummary({
       )}
 
       {/* Insights teaser */}
-      <div className="rounded-card-lg border border-app-line/40 bg-app-surface p-4 shadow-xs weekly-card-lift">
+      <div className="rounded-card border border-app-line bg-app-surface p-4 shadow-app-sm">
         <div className="flex items-start gap-3">
-          <div className="shrink-0 w-8 h-8 rounded-full bg-app-warm-soft flex items-center justify-center">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-app-warm-soft">
             <Lightbulb className="h-4 w-4 text-app-warm" />
           </div>
           <div className="space-y-1">

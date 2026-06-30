@@ -1,8 +1,8 @@
 import { AlertCircle, Loader2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { ExecutionInsight, NextWeekRecommendation, RescueModeStatus } from "@/features/plan12week/logic";
 import { calculateLagScore, interpretWeeklyExecutionScore } from "@/features/plan12week/logic";
-import { formatCalendarDate, getReviewDayLabel } from "../../utils/storage";
+import { formatCalendarDate } from "../../utils/storage";
 import { getTwelveWeekWeekRange } from "../../utils/storage-twelve-week";
 import type {
   LeadIndicator,
@@ -21,7 +21,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "../ui/alert-dialog";
-import { cn } from "../ui/utils";
 import { TwelveWeekRescueNudge } from "./TwelveWeekRescueNudge";
 import { WeeklyEmptyFuture } from "./WeeklyEmptyFuture";
 import { WeeklyHeroBeforeReview } from "./WeeklyHeroBeforeReview";
@@ -258,7 +257,10 @@ export function TwelveWeekWeekTab({
   const [isEditingReview, setIsEditingReview] = useState(false);
   const [isStartingEarly, setIsStartingEarly] = useState(false);
 
-  const canShowFormReview = (reviewDueToday || isStartingEarly || isEditingReview) && isCurrentWeekSelected;
+  // Tuần hiện tại chưa chốt luôn mở worksheet review (CTA "Chốt review tuần này" luôn với tới được,
+  // kể cả khi review chưa tới hạn — early-confirm dialog sẽ xử lý việc lưu sớm).
+  const canShowFormReview =
+    isCurrentWeekSelected && (reviewDueToday || isStartingEarly || isEditingReview || !reviewIsCompleted);
   const showForm = (!reviewIsCompleted || isEditingReview) && isCurrentWeekSelected;
 
   const reviewReadinessItems = [
@@ -343,33 +345,6 @@ export function TwelveWeekWeekTab({
     ...optionalIndicators.map((ind) => ({ ...ind, isCore: false })),
   ];
 
-  // Staggered animation index tracker
-  const staggerRef = useRef(0);
-  const nextStaggerIndex = () => {
-    staggerRef.current += 1;
-    return staggerRef.current - 1;
-  };
-  useEffect(() => {
-    staggerRef.current = 0;
-  }, []);
-
-  const StaggerSection = ({
-    children,
-    className,
-    style,
-  }: {
-    children: React.ReactNode;
-    className?: string;
-    style?: React.CSSProperties;
-  }) => (
-    <div
-      className={cn("weekly-stagger-item", className)}
-      style={{ "--stagger-index": nextStaggerIndex(), ...style } as React.CSSProperties}
-    >
-      {children}
-    </div>
-  );
-
   return (
     <div
       data-testid="weekly-review-shell"
@@ -427,28 +402,28 @@ export function TwelveWeekWeekTab({
       />
 
       {selectedWeek > system.currentWeek ? (
-        <StaggerSection>
+        <div>
           <WeeklyEmptyFuture
             weekNo={selectedWeek}
             currentWeek={system.currentWeek}
             system={system}
           />
-        </StaggerSection>
+        </div>
       ) : (
         <>
           {selectedWeek < system.currentWeek && !reviewIsCompleted && (
-            <StaggerSection>
-              <div className="flex items-center gap-3 rounded-xl border border-app-status-error/20 bg-app-status-error/5 p-4 text-xs text-app-status-error relative overflow-hidden weekly-card-lift">
+            <div>
+              <div className="flex items-center gap-3 rounded-card border border-app-status-error/20 bg-app-status-error/5 p-4 text-xs text-app-status-error">
                 <AlertCircle className="h-4.5 w-4.5 shrink-0" />
                 <span className="leading-relaxed font-serif font-medium">
                   Tuần {selectedWeek} đã kết thúc mà không được chốt đánh giá tuần. Bạn vẫn có thể xem lại điểm thực thi và chi tiết hành động bên dưới.
                 </span>
               </div>
-            </StaggerSection>
+            </div>
           )}
 
           {!reviewIsCompleted && !canShowFormReview && (
-            <StaggerSection>
+            <div>
               <WeeklyHeroBeforeReview
                 currentWeekLimit={currentWeekLimit}
                 totalWeeks={system.totalWeeks}
@@ -463,15 +438,12 @@ export function TwelveWeekWeekTab({
                 mergedIndicators={mergedIndicators}
                 getTacticProgress={getTacticProgress}
                 formatCalendarDate={formatCalendarDate}
-                getReviewDayLabel={(day) => getReviewDayLabel(String(day))}
-                reviewDay={system.reviewDay}
-                onStartEarlyReview={() => setIsStartingEarly(true)}
               />
-            </StaggerSection>
+            </div>
           )}
 
           {!reviewIsCompleted && canShowFormReview && (
-            <StaggerSection>
+            <div>
               <WeeklyReviewForm
                 system={system}
                 currentWeekLimit={currentWeekLimit}
@@ -512,11 +484,11 @@ export function TwelveWeekWeekTab({
                   setIsStartingEarly(false);
                 }}
               />
-            </StaggerSection>
+            </div>
           )}
 
           {summaryReview && (
-            <StaggerSection>
+            <div>
               <WeeklyReviewSummary
                 system={system}
                 currentWeekLimit={currentWeekLimit}
@@ -541,7 +513,7 @@ export function TwelveWeekWeekTab({
                 onAcceptNextWeekRecommendation={onAcceptNextWeekRecommendation}
                 onOpenTodayTab={onOpenTodayTab}
               />
-            </StaggerSection>
+            </div>
           )}
         </>
       )}

@@ -139,21 +139,13 @@ export function WeeklyReviewForm({
   const scoreInterpretation = interpretWeeklyExecutionScore(leadScoreValue);
   return (
     <div className="space-y-5 sm:space-y-6">
-      {/* Form Hero Card */}
-      <div className="relative overflow-hidden rounded-card-lg border border-app-line/45 bg-app-surface p-5 pt-8 shadow-app-card weekly-card-lift sm:p-8 sm:pt-10">
-        {/* Decorative pin */}
-        <div className="absolute -top-2.5 left-1/2 z-20 flex -translate-x-1/2 items-center justify-center pointer-events-none select-none">
-          <div className="w-3.5 h-3.5 rounded-full bg-app-warm shadow-[inset_0_-1px_2px_rgba(0,0,0,0.2),0_1.5px_3px_rgba(0,0,0,0.15)] border border-white/20 flex items-center justify-center">
-            <div className="w-1.5 h-1.5 bg-white/40 rounded-full" />
-          </div>
-        </div>
-
-        {/* Header metadata */}
-        <div className="relative z-10 flex flex-wrap items-center justify-between gap-2.5 text-[10px] font-bold uppercase tracking-widest text-app-ink-muted">
-          <span className="font-serif text-xs font-bold tracking-normal normal-case text-app-accent bg-app-accent-soft/75 px-3 py-1 rounded-lg border border-app-line/20">
-            Tuần {currentWeekLimit} / {totalWeeks}
-          </span>
-          <span className="min-w-0 bg-app-bg-subtle/80 px-3 py-1 rounded-lg border border-app-line/25 font-mono text-[11px] text-app-ink-soft">
+      {/* Worksheet masthead */}
+      <div className="rounded-card border border-app-line bg-app-surface p-5 shadow-app-sm sm:p-7">
+        <div className="flex flex-wrap items-center justify-between gap-2.5">
+          <p className="text-[10px] font-extrabold uppercase tracking-[0.18em] text-app-accent">
+            Tuần {currentWeekLimit} <span className="text-app-ink-disabled">/ {totalWeeks}</span>
+          </p>
+          <span className="min-w-0 font-mono text-[11px] text-app-ink-muted">
             {currentWeekRange
               ? `${formatCalendarDate(currentWeekRange.start)} – ${formatCalendarDate(currentWeekRange.end)}`
               : "Chu kỳ hiện tại"}
@@ -161,23 +153,23 @@ export function WeeklyReviewForm({
         </div>
 
         {currentPlanFocus && (
-          <div className="relative z-10 mt-5">
-            <span className="text-[10px] font-bold text-app-accent uppercase tracking-widest block mb-1">
+          <div className="mt-4">
+            <span className="mb-1 block text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">
               Tiêu điểm tuần
             </span>
-            <p className="max-w-[28ch] text-balance font-serif text-xl sm:text-2xl font-bold leading-snug tracking-tight text-app-ink">
+            <h2 className="max-w-[28ch] text-balance font-serif text-2xl font-bold leading-snug tracking-tight text-app-ink sm:text-3xl">
               {currentPlanFocus}
-            </p>
+            </h2>
           </div>
         )}
 
-        <div className="relative z-10 flex flex-wrap items-center gap-2 mt-3.5">
-          <span className="inline-flex items-center rounded-full border border-app-line bg-app-bg-subtle/60 px-2.5 py-0.5 text-[10px] font-bold text-app-ink-soft uppercase tracking-wider">
+        <div className="mt-3.5 flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center rounded-pill border border-app-line bg-app-bg-subtle px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-app-ink-soft">
             Tiến độ {reviewReadyCount}/4 bước
           </span>
         </div>
 
-        <div className="flex flex-col gap-4 border-t border-app-line/40 pt-5 mt-5 relative z-10 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+        <div className="mt-5 flex flex-col gap-4 border-t border-app-line pt-5 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
           <div className="flex-1 space-y-2">
             <div className="flex items-baseline justify-between text-xs font-semibold text-app-ink-soft">
               <span className="font-serif">Điểm thực thi</span>
@@ -212,14 +204,11 @@ export function WeeklyReviewForm({
         </div>
       </div>
 
-      {/* Review Form Card */}
-      <div className="relative space-y-6 rounded-card-lg border border-app-line/45 bg-app-surface p-5 pt-9 shadow-app-md weekly-card-lift sm:space-y-7 sm:p-8 sm:pt-10">
-        {/* Washi tape */}
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-28 h-5.5 bg-app-warm-soft/40 backdrop-blur-[0.5px] rotate-[-1deg] border border-dashed border-app-warm-border/40 shadow-[0_1px_2px_rgba(0,0,0,0.01)] pointer-events-none select-none z-20" />
-
-        <div className="space-y-1.5 pt-1 border-b border-app-line pb-4">
+      {/* Review ritual card */}
+      <div className="space-y-6 rounded-card border border-app-line bg-app-surface p-5 shadow-app-sm sm:space-y-7 sm:p-7">
+        <div className="space-y-1.5 border-b border-app-line pb-4">
           <div className="flex items-center gap-2">
-            <span className="inline-block w-2.5 h-4 bg-app-warm rounded-md" />
+            <span className="h-4 w-1.5 rounded-full bg-app-warm" />
             <h3 className="font-serif text-xl sm:text-2xl font-bold text-app-ink">Đánh giá và cam kết tuần</h3>
           </div>
           <p className="max-w-[65ch] text-xs leading-relaxed text-app-ink-soft sm:text-sm">
@@ -293,9 +282,9 @@ export function WeeklyReviewForm({
                   </span>
                 )}
                 {!weekCompletion.isEmpty && (
-                  <div className="text-xs text-app-ink-soft leading-snug border-l border-app-line/60 pl-4 py-0.5">
-                    <span className="font-bold text-app-ink block text-sm">{scoreInterpretation.headline}</span>
-                    <span className="text-xs block mt-0.5 text-app-ink-soft">{scoreInterpretation.advice}</span>
+                  <div className="min-w-0 flex-1 text-xs leading-snug text-app-ink-soft">
+                    <span className="block text-sm font-bold text-app-ink">{scoreInterpretation.headline}</span>
+                    <span className="mt-0.5 block text-xs text-app-ink-soft">{scoreInterpretation.advice}</span>
                   </div>
                 )}
               </div>
@@ -348,7 +337,7 @@ export function WeeklyReviewForm({
                       >
                         <p className="text-xs sm:text-sm font-semibold text-app-ink leading-snug">{commitment}</p>
                         {commitmentQuote && (
-                          <p className="text-xs italic text-app-ink-soft leading-relaxed pl-3 border-l-2 border-app-accent/40 bg-app-accent-soft/20 py-1 rounded-r-md">
+                          <p className="rounded-input bg-app-accent-subtle px-3 py-1.5 text-xs italic leading-relaxed text-app-ink-soft">
                             {commitmentQuote}
                           </p>
                         )}
@@ -481,7 +470,7 @@ export function WeeklyReviewForm({
                 <span
                   className={cn(
                     "h-2 w-2 shrink-0 rounded-full",
-                    item.done ? "bg-app-accent shadow-[0_0_6px_rgba(42,84,71,0.35)]" : "bg-app-line-strong/50",
+                    item.done ? "bg-app-accent" : "bg-app-line-strong/50",
                   )}
                 />
                 <span className="min-w-0 break-words leading-snug">{item.label}</span>
@@ -516,7 +505,7 @@ export function WeeklyReviewForm({
       {/* Sticky Mobile Review CTA */}
       <div
         data-testid="weekly-review-mobile-sticky-cta"
-        className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] left-0 right-0 z-40 border-t border-app-line/80 bg-app-surface/95 px-4 pb-4 pt-3 backdrop-blur-md md:hidden shadow-[0_-18px_40px_-30px_rgba(23,21,15,0.45)]"
+        className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] left-0 right-0 z-40 border-t border-app-line/80 bg-app-surface/95 px-4 pb-4 pt-3 backdrop-blur-md md:hidden"
       >
         <div className="mx-auto flex w-full max-w-[42rem] flex-col gap-2.5 md:max-w-none">
           <div className="flex items-start justify-between gap-3 text-[11px] font-semibold text-app-ink-muted">

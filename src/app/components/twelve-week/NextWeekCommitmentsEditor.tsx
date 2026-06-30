@@ -140,7 +140,7 @@ export function NextWeekCommitmentsEditor({
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 shrink-0 rounded-full p-0 text-app-warm hover:bg-app-warm-soft/60 transition-colors"
+                  className="h-11 w-11 sm:h-8 sm:w-8 shrink-0 rounded-full p-0 text-app-warm hover:bg-app-warm-soft/60 transition-colors"
                   onClick={() => removeCommitment(commitment)}
                   disabled={disabled}
                   aria-label={`Xóa cam kết: ${commitment}`}
