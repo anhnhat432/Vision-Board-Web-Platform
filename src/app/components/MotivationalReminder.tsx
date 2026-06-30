@@ -27,6 +27,7 @@ const REMINDER_OVERLAY_SUPPRESSED_ROUTES = [
   "/life-balance",
   "/life-insight",
   "/login",
+  "/settings",
   "/smart-goal-setup",
   "/vision-board",
   "/12-week-setup",

@@ -38,8 +38,8 @@ describe("MotivationalReminder", () => {
     storageMock.getRandomMotivationalQuote.mockClear();
   });
 
-  it("shows a due reminder when the user is away from the target route and public landing", async () => {
-    renderReminder("/settings");
+  it("shows a due reminder when the user is away from suppressed routes and the reminder target", async () => {
+    renderReminder("/pricing");
 
     expect(await screen.findByText(dueReminder.title)).toBeInTheDocument();
     expect(screen.getByText(dueReminder.description)).toBeInTheDocument();
@@ -63,6 +63,14 @@ describe("MotivationalReminder", () => {
 
   it("does not cover the goals page", () => {
     renderReminder("/goals");
+
+    expect(screen.queryByText(dueReminder.title)).not.toBeInTheDocument();
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(localStorage.getItem("last_reminder_date")).toBeNull();
+  });
+
+  it("does not cover the settings page", () => {
+    renderReminder("/settings");
 
     expect(screen.queryByText(dueReminder.title)).not.toBeInTheDocument();
     expect(screen.queryByRole("status")).not.toBeInTheDocument();

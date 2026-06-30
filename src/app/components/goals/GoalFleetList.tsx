@@ -1,9 +1,8 @@
 /**
- * GoalFleetList — Compact fleet list cho Command Center
+ * GoalFleetList — Grid layout cho Command Center Studio
  *
- * Thay thế MissionBoard grid bằng list dọc compact.
- * 12-week goals hiển thị trước, simple goals sau.
- * Mỗi section có header riêng.
+ * 2-column grid desktop, 1 column mobile.
+ * Gộp 12-week và simple goals, sắp xếp theo urgency.
  */
 
 import type { Goal, PricingPlanCode } from "@/app/utils/storage";
@@ -35,75 +34,49 @@ export function GoalFleetList({
   openTwelveWeekCenter,
   setGoalToDelete,
 }: GoalFleetListProps) {
-  return (
-    <div className="space-y-6">
-      {/* 12-week goals section */}
-      {twelveWeekGoals.length > 0 && (
-        <section className="space-y-3">
-          <div className="flex items-baseline justify-between gap-3 px-1">
-            <div>
-              <h2 className="text-sm font-bold tracking-normal text-app-ink">
-                Chu kỳ 12 tuần
-              </h2>
-              <p className="mt-0.5 text-[11px] text-app-ink-muted">
-                {twelveWeekGoals.length} mục tiêu đang chạy
-              </p>
-            </div>
-          </div>
-          <div className="space-y-2">
-            {twelveWeekGoals.map((goal) => {
-              const meta = goalsWithMetadata.get(goal.id);
-              return (
-                <GoalFleetItem
-                  key={goal.id}
-                  goal={goal}
-                  currentPlanCode={currentPlanCode}
-                  progress={meta?.progress ?? 0}
-                  isOverdue={meta?.isOverdue ?? false}
-                  isNearDeadline={meta?.isNearDeadline ?? false}
-                  handleToggleTask={handleToggleTask}
-                  openTwelveWeekCenter={openTwelveWeekCenter}
-                  setGoalToDelete={setGoalToDelete}
-                />
-              );
-            })}
-          </div>
-        </section>
-      )}
+  // Combine all goals for unified grid
+  const allGoals = [...twelveWeekGoals, ...simpleGoals];
 
-      {/* Simple goals section */}
-      {simpleGoals.length > 0 && (
-        <section className="space-y-3">
-          <div className="flex items-baseline justify-between gap-3 px-1">
-            <div>
-              <h2 className="text-sm font-bold tracking-normal text-app-ink">
-                Mục tiêu thường
-              </h2>
-              <p className="mt-0.5 text-[11px] text-app-ink-muted">
-                {simpleGoals.length} mục tiêu
-              </p>
+  if (allGoals.length === 0) return null;
+
+  return (
+    <div className="space-y-4">
+      {/* Section header */}
+      <div className="flex items-baseline justify-between gap-3">
+        <div>
+          <h2 className="text-sm font-bold text-app-ink">
+            Tất cả mục tiêu
+          </h2>
+          <p className="mt-0.5 text-[11px] text-app-ink-muted">
+            {allGoals.length} mục tiêu · {twelveWeekGoals.length} chu kỳ 12 tuần
+          </p>
+        </div>
+      </div>
+
+      {/* Grid layout */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {allGoals.map((goal, index) => {
+          const meta = goalsWithMetadata.get(goal.id);
+          return (
+            <div
+              key={goal.id}
+              className="gt-fade-up"
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              <GoalFleetItem
+                goal={goal}
+                currentPlanCode={currentPlanCode}
+                progress={meta?.progress ?? 0}
+                isOverdue={meta?.isOverdue ?? false}
+                isNearDeadline={meta?.isNearDeadline ?? false}
+                handleToggleTask={handleToggleTask}
+                openTwelveWeekCenter={openTwelveWeekCenter}
+                setGoalToDelete={setGoalToDelete}
+              />
             </div>
-          </div>
-          <div className="space-y-2">
-            {simpleGoals.map((goal) => {
-              const meta = goalsWithMetadata.get(goal.id);
-              return (
-                <GoalFleetItem
-                  key={goal.id}
-                  goal={goal}
-                  currentPlanCode={currentPlanCode}
-                  progress={meta?.progress ?? 0}
-                  isOverdue={meta?.isOverdue ?? false}
-                  isNearDeadline={meta?.isNearDeadline ?? false}
-                  handleToggleTask={handleToggleTask}
-                  openTwelveWeekCenter={openTwelveWeekCenter}
-                  setGoalToDelete={setGoalToDelete}
-                />
-              );
-            })}
-          </div>
-        </section>
-      )}
+          );
+        })}
+      </div>
     </div>
   );
 }

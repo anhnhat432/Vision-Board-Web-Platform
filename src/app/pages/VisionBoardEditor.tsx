@@ -23,7 +23,7 @@ import {
   Zap,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useBeforeUnload, useBlocker, useNavigate, useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 import { getBackendVisionBoardId, saveVisionBoardLink } from "@/lib/api/visionBoardLinkStore";
 import { useAuthContext } from "@/lib/auth/AuthContext";
@@ -35,16 +35,7 @@ import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { ScreenGuide } from "../components/ScreenGuide";
 import { SCREEN_GUIDES } from "../components/screen-guides";
 import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "../components/ui/alert-dialog";
+
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../components/ui/dialog";
@@ -55,6 +46,10 @@ import { ItemControlsPopover } from "../components/visionBoard/ItemControlsPopov
 import { StickerSVG } from "../components/visionBoard/StickerSVGs";
 import { VisionBoardCanvas } from "../components/visionBoard/VisionBoardCanvas";
 import { VisionBoardSidebar } from "../components/visionBoard/VisionBoardSidebar";
+import { UnsavedChangesGuard } from "../components/visionBoard/UnsavedChangesGuard";
+import { ExportDialog } from "../components/visionBoard/ExportDialog";
+import { InitDialog } from "../components/visionBoard/InitDialog";
+import { type VisionBoardTemplate } from "../utils/vision-board-templates";
 import { type VisionBoardStorySeed, VisionBoardStoryWizard } from "../components/visionBoard/VisionBoardStoryWizard";
 import {
   celebrateAchievementUnlock,
@@ -85,12 +80,10 @@ import {
 } from "../utils/vision-board-config";
 import {
   downloadDataUrl,
-  EXPORT_RATIOS,
   type ExportOptions,
   exportVisionBoardToPng,
-  getRatioLabel,
 } from "../utils/vision-board-export";
-import { VISION_BOARD_TEMPLATES, type VisionBoardTemplate } from "../utils/vision-board-templates";
+
 
 const ICON_COMPONENTS = {
   Star,
@@ -117,12 +110,6 @@ const QUOTE_SUGGESTIONS = [
   "Kỷ luật là cây cầu nối tầm nhìn với kết quả.",
   "Tôi đang xây một cuộc sống mình thật sự muốn thức dậy mỗi sáng.",
 ];
-
-function getExportRatioDescription(ratio: ExportOptions["ratio"]): string {
-  if (ratio === "wallpaper") return "Để làm hình nền điện thoại - gợi nhắc mỗi lần mở máy.";
-  if (ratio === "desktop") return "Để làm hình nền máy tính.";
-  return "Để chia sẻ lên Instagram, Facebook.";
-}
 
 const CURATED_IMAGES: Array<{ label: string; url: string }> = [
   {
@@ -246,8 +233,6 @@ export function VisionBoardEditor() {
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [isInitDialogOpen, setIsInitDialogOpen] = useState(false);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
-  const [selectedRatio, setSelectedRatio] = useState<ExportOptions["ratio"]>("wallpaper");
   const [searchQuery, setSearchQuery] = useState("");
   const [quoteText, setQuoteText] = useState("");
   const [iconName, setIconName] = useState<IconName>("Sparkles");
@@ -266,7 +251,7 @@ export function VisionBoardEditor() {
   const uploadInputRef = useRef<HTMLInputElement>(null);
   const canvasExportRef = useRef<HTMLDivElement>(null);
   const boardNameInputRef = useRef<HTMLInputElement>(null);
-  const blocker = useBlocker(hasUnsavedChanges);
+
   const editorUserData = useMemo(() => getUserData(), []);
   const editorGoals = editorUserData.goals;
   const currentPlanForPaywall = useMemo(
@@ -274,17 +259,7 @@ export function VisionBoardEditor() {
     [editorUserData, isVisionBoardLimitPaywallOpen],
   );
 
-  const handleBeforeUnload = useCallback(
-    (e: BeforeUnloadEvent) => {
-      if (hasUnsavedChanges) {
-        e.preventDefault();
-        e.returnValue = "";
-      }
-    },
-    [hasUnsavedChanges],
-  );
 
-  useBeforeUnload(handleBeforeUnload);
 
   useEffect(() => {
     if (!isAddingItem) {
@@ -680,29 +655,29 @@ export function VisionBoardEditor() {
     toast.success(`Đã áp dụng template "${template.name}". Bạn có thể tự do kéo thả, sửa đổi các phần tử!`);
   };
 
-  const handleExport = async () => {
-    if (!canvasExportRef.current || !board) return;
+  const handleExport = useCallback(
+    async (ratio: ExportOptions["ratio"]) => {
+      if (!canvasExportRef.current || !board) return;
 
-    setIsExporting(true);
-    try {
-      setSelectedItemId(null);
-      await new Promise((resolve) => window.setTimeout(resolve, 50));
+      try {
+        setSelectedItemId(null);
+        await new Promise((resolve) => window.setTimeout(resolve, 50));
 
-      const dataUrl = await exportVisionBoardToPng(canvasExportRef.current, {
-        ratio: selectedRatio,
-        pixelRatio: 2,
-      });
-      const filename = `${boardName.trim() || board.name || "vision-board"}-${boardYear.trim() || board.year || "2026"}-${selectedRatio}.png`;
-      downloadDataUrl(dataUrl, filename);
-      toast.success("Đã tải bảng về máy. Đặt làm hình nền điện thoại nhé!");
-      setIsExportDialogOpen(false);
-    } catch (error) {
-      console.error("Export failed", error);
-      toast.error("Không thể xuất ảnh. Vui lòng thử lại hoặc thử trình duyệt khác.");
-    } finally {
-      setIsExporting(false);
-    }
-  };
+        const dataUrl = await exportVisionBoardToPng(canvasExportRef.current, {
+          ratio,
+          pixelRatio: 2,
+        });
+        const filename = `${boardName.trim() || board.name || "vision-board"}-${boardYear.trim() || board.year || "2026"}-${ratio}.png`;
+        downloadDataUrl(dataUrl, filename);
+        toast.success("Đã tải bảng về máy. Đặt làm hình nền điện thoại nhé!");
+      } catch (error) {
+        console.error("Export failed", error);
+        toast.error("Không thể xuất ảnh. Vui lòng thử lại hoặc thử trình duyệt khác.");
+        throw error;
+      }
+    },
+    [board, boardName, boardYear],
+  );
 
   const handleUpdateItemPosition = useCallback((itemId: string, x: number, y: number) => {
     setBoard((prev) => {
@@ -755,40 +730,7 @@ export function VisionBoardEditor() {
         description="Nâng cấp Plus để tạo thêm bảng tầm nhìn. Dữ liệu hiện có vẫn được giữ nguyên."
         source="paywall_dialog"
       />
-      <AlertDialog
-        open={blocker.state === "blocked"}
-        onOpenChange={(open) => {
-          if (!open && blocker.state === "blocked") {
-            blocker.reset();
-          }
-        }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Rời khỏi bảng khi chưa lưu?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Bạn đang có thay đổi chưa được lưu. Nếu rời trang bây giờ, các thay đổi trên bảng sẽ bị mất.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel
-              onClick={() => {
-                if (blocker.state === "blocked") blocker.reset();
-              }}
-            >
-              Ở lại
-            </AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-[color:var(--color-danger-fg)] text-white hover:bg-[color:var(--color-danger-fg)]/90"
-              onClick={() => {
-                if (blocker.state === "blocked") blocker.proceed();
-              }}
-            >
-              Rời khỏi trang
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <UnsavedChangesGuard hasUnsavedChanges={hasUnsavedChanges} />
 
       <VisionBoardStoryWizard
         open={isWizardOpen}
@@ -801,131 +743,18 @@ export function VisionBoardEditor() {
       <div aria-hidden={isWizardOpen} className={isWizardOpen ? "hidden" : "contents"}>
         <ScreenGuide {...SCREEN_GUIDES.visionBoardEditor} className="mb-4" />
 
-        <Dialog open={isExportDialogOpen} onOpenChange={setIsExportDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Tải bảng về máy</DialogTitle>
-              <DialogDescription>
-                Chọn tỉ lệ phù hợp với mục đích sử dụng. Bảng sẽ được render thành ảnh PNG chất lượng cao.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-2 py-2">
-              {EXPORT_RATIOS.map((ratio) => (
-                <button
-                  key={ratio}
-                  type="button"
-                  onClick={() => setSelectedRatio(ratio)}
-                  className={`w-full rounded-card border p-3 text-left transition ${
-                    selectedRatio === ratio
-                      ? "border-app-accent bg-app-accent-soft"
-                      : "border-app-line bg-app-surface hover:border-app-accent/50"
-                  }`}
-                >
-                  <p className="text-sm font-semibold text-app-ink">{getRatioLabel(ratio)}</p>
-                  <p className="text-xs text-app-ink-soft">{getExportRatioDescription(ratio)}</p>
-                </button>
-              ))}
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setIsExportDialogOpen(false)} disabled={isExporting}>
-                Hủy
-              </Button>
-              <Button onClick={handleExport} disabled={isExporting}>
-                {isExporting ? "Đang xuất..." : "Tải về"}
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <ExportDialog open={isExportDialogOpen} onOpenChange={setIsExportDialogOpen} onExport={handleExport} />
 
-        <Dialog open={isInitDialogOpen} onOpenChange={setIsInitDialogOpen}>
-          <DialogContent className="max-w-3xl overflow-y-auto max-h-[90vh]">
-            <DialogHeader>
-              <DialogTitle className="font-serif text-2xl text-app-ink">Khởi tạo Vision Board của bạn</DialogTitle>
-              <DialogDescription className="text-app-ink-soft">
-                Chọn một cách bắt đầu phù hợp để truyền cảm hứng và hình ảnh hóa mục tiêu của bạn.
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="grid gap-6 py-4 md:grid-cols-2">
-              {/* Cột trái: Chọn Template mẫu */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-semibold uppercase tracking-wider text-app-ink-muted">
-                  1. Dùng Template theo chủ đề
-                </h3>
-                <p className="text-xs text-app-ink-soft">
-                  Nạp sẵn bố cục ảnh mẫu, câu nói truyền cảm hứng và biểu tượng phù hợp với chủ đề lựa chọn.
-                </p>
-                <div className="grid gap-2.5">
-                  {VISION_BOARD_TEMPLATES.map((tmpl) => (
-                    <button
-                      key={tmpl.id}
-                      type="button"
-                      onClick={() => handleSelectTemplate(tmpl)}
-                      className="w-full text-left rounded-card border border-app-line bg-app-surface p-3 transition hover:border-app-accent hover:bg-app-accent-soft group"
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-bold text-app-ink group-hover:text-app-accent">{tmpl.name}</span>
-                        <span
-                          className="h-3.5 w-3.5 rounded-full border border-white"
-                          style={{
-                            background: VISION_BOARD_THEMES.find((t) => t.id === tmpl.themeId)?.preview.gradient,
-                          }}
-                        />
-                      </div>
-                      <p className="mt-1 text-xs text-app-ink-muted leading-relaxed">{tmpl.description}</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Cột phải: Các cách khởi tạo khác */}
-              <div className="space-y-6 flex flex-col justify-between">
-                <div className="space-y-4">
-                  <h3 className="text-sm font-semibold uppercase tracking-wider text-app-ink-muted">
-                    2. Chế độ kể chuyện (Story Mode)
-                  </h3>
-                  <div className="rounded-card border border-app-line bg-app-surface p-4 flex flex-col gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
-                      <Wand2 className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <h4 className="text-sm font-bold text-app-ink">Tự động sinh bảng</h4>
-                      <p className="mt-1 text-xs text-app-ink-muted leading-relaxed">
-                        Trả lời 4 câu hỏi cực nhanh về cảm xúc và lĩnh vực tập trung để hệ thống tự động thiết kế bảng
-                        riêng cho bạn.
-                      </p>
-                    </div>
-                    <Button
-                      type="button"
-                      onClick={() => {
-                        setIsInitDialogOpen(false);
-                        // Defer opening the wizard to let the initial dialog close smoothly and prevent layout/reflow clash
-                        setTimeout(() => {
-                          setIsWizardOpen(true);
-                        }, 180);
-                      }}
-                      className="w-full mt-1.5"
-                    >
-                      Bắt đầu Story Mode
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-app-line space-y-3">
-                  <h3 className="text-sm font-semibold uppercase tracking-wider text-app-ink-muted">
-                    3. Bắt đầu từ trang trắng
-                  </h3>
-                  <p className="text-xs text-app-ink-soft">
-                    Nếu bạn đã có sẵn ý tưởng, hãy bắt đầu thiết kế thủ công từ đầu.
-                  </p>
-                  <Button type="button" variant="outline" onClick={() => setIsInitDialogOpen(false)} className="w-full">
-                    Tạo bảng trống
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+        <InitDialog
+          open={isInitDialogOpen}
+          onOpenChange={setIsInitDialogOpen}
+          onSelectTemplate={handleSelectTemplate}
+          onStoryMode={() => {
+            setIsInitDialogOpen(false);
+            setTimeout(() => setIsWizardOpen(true), 180);
+          }}
+          onBlank={() => setIsInitDialogOpen(false)}
+        />
 
         <Card className="overflow-hidden rounded-[20px] border-app-line/60 bg-app-surface shadow-app-lg">
           <CardContent className="relative p-6 sm:p-7 lg:p-8">

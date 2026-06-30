@@ -1,10 +1,10 @@
 /**
- * GoalTracker — Command Center
+ * GoalTracker — Command Center Studio
  *
- * Concept: Trung tâm điều khiển cá nhân
- * Layout: Status Ticker → Today Command (60%) + Goal Fleet (40%)
+ * Concept: Studio desk cá nhân — nơi user nhìn thấy tương lai
+ * Layout: Page Header → Context Pill → Today Focus (full-width editorial) → Goal Fleet Grid
  *
- * Signature moment: Today Command — việc cần làm đầu tiên hôm nay.
+ * Signature moment: Today Focus — editorial card lớn với hình ảnh, progress ring, week roadmap.
  */
 
 import {
@@ -77,21 +77,21 @@ const GOALTRACKER_TOUR_STEPS: SpotlightTourStep[] = [
     targetId: "goaltracker-hero",
     title: "Trung tâm điều khiển",
     description:
-      "Đây là nơi bạn thấy mục tiêu cần hành động nhất hôm nay và quản lý tất cả mục tiêu đang chạy.",
+      "Tổng quan mục tiêu và trạng thái. Tạo mục tiêu mới hoặc bắt đầu chu kỳ 12 tuần từ đây.",
   },
   {
     id: "command",
     targetId: "goaltracker-command",
     title: "Tiêu điểm hôm nay",
     description:
-      "Card lớn này cho biết việc quan trọng nhất bạn nên làm ngay. Một hành động duy nhất, rõ ràng.",
+      "Card lớn cho biết việc quan trọng nhất bạn nên làm ngay. Một hành động duy nhất, rõ ràng.",
   },
   {
     id: "fleet",
     targetId: "goaltracker-fleet",
     title: "Quản lý mục tiêu",
     description:
-      "Danh sách bên phải hiển thị tất cả mục tiêu đang chạy. Lọc, tìm kiếm, và tiếp tục chu kỳ từ đây.",
+      "Grid các mục tiêu đang chạy. Lọc, tìm kiếm, và tiếp tục chu kỳ từ đây.",
   },
 ];
 
@@ -617,56 +617,42 @@ function GoalTrackerContent({
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Command Center Layout */}
-      <div className="space-y-6">
-        {/* Hero Banner — Dreamy Command Center */}
+      {/* Command Center Studio Layout */}
+      <div className="space-y-5">
+        {/* Page Header — compact with eyebrow */}
         <section
           data-tour-id="goaltracker-hero"
-          className="relative rounded-card-lg overflow-hidden"
+          className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 gt-fade-up"
         >
-          {/* Background image */}
-          <div
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-            style={{ backgroundImage: "url('/study_desk_corner.png')" }}
-            aria-hidden="true"
-          />
-          {/* Gradient overlay — left opaque, right transparent */}
-          <div
-            className="absolute inset-0 bg-gradient-to-r from-app-bg via-app-bg/90 to-app-bg/40"
-            aria-hidden="true"
-          />
-
-          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-6 sm:px-8 py-8 sm:py-10">
-            <div className="space-y-2">
-              <h1 className="font-serif text-3xl sm:text-4xl font-bold leading-tight text-app-ink">
-                Mục tiêu của bạn
-              </h1>
-              <p className="text-base text-app-ink-soft max-w-md">
-                Biến ước mơ thành hành động cụ thể mỗi ngày.
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-2.5 shrink-0">
-              <Button
-                className="rounded-full bg-app-accent px-6 py-3 text-sm font-bold text-white shadow-app-md hover:bg-app-accent-hover transition-all duration-200 motion-safe:hover:scale-[1.02]"
-                onClick={handleStartGuidedGoalFlow}
-              >
-                <Zap className="h-4 w-4 mr-2" />
-                Bắt đầu 12 tuần
-              </Button>
-              <Button
-                variant="outline"
-                className="rounded-full border-app-line bg-app-surface/90 backdrop-blur-sm px-5 py-3 text-sm font-semibold text-app-ink hover:bg-app-surface transition-colors duration-200"
-                onClick={handleStartDirectGoalFlow}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Tạo nhanh
-              </Button>
-            </div>
+          <div className="space-y-1">
+            <p className="text-[11px] font-bold uppercase tracking-widest text-app-accent">
+              Trung tâm điều khiển
+            </p>
+            <h1 className="font-serif text-2xl sm:text-3xl font-bold leading-tight text-app-ink text-balance">
+              Mục tiêu của bạn
+            </h1>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <Button
+              variant="outline"
+              className="rounded-full border-app-line bg-app-surface px-4 py-2 text-sm font-semibold text-app-ink hover:bg-app-bg transition-colors duration-200"
+              onClick={handleStartDirectGoalFlow}
+            >
+              <Plus className="h-3.5 w-3.5 mr-1.5" />
+              Tạo nhanh
+            </Button>
+            <Button
+              className="rounded-full bg-app-accent px-5 py-2 text-sm font-bold text-white shadow-app-sm hover:bg-app-accent-hover transition-all duration-200"
+              onClick={handleStartGuidedGoalFlow}
+            >
+              <Zap className="h-3.5 w-3.5 mr-1.5" />
+              Bắt đầu 12 tuần
+            </Button>
           </div>
         </section>
 
-        {/* Status Ticker — compact KPI strip */}
-        <StatusTicker
+        {/* Context Pill — compact status */}
+        <ContextPill
           totalGoals={summary.totalGoals}
           completedGoals={summary.completedGoals}
           completedTasks={summary.completedTasks}
@@ -675,69 +661,63 @@ function GoalTrackerContent({
           needsAttention={summary.needsAttention}
         />
 
-        {/* Main: 2-column layout — Command + Fleet */}
-        <div
-          className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-5 items-start"
-          data-tour-id="goaltracker-main"
-        >
-          {/* Left: Today Command */}
-          <div data-tour-id="goaltracker-command">
-            <TodayCommandCard
-              focusData={focusGoal}
-              openTwelveWeekCenter={openTwelveWeekCenter}
-              handleToggleTask={handleToggleTask}
-              onStartGuidedGoalFlow={handleStartGuidedGoalFlow}
-            />
-          </div>
+        {/* Today Focus — full-width editorial card */}
+        <div data-tour-id="goaltracker-command" className="gt-fade-up gt-delay-100">
+          <TodayCommandCard
+            focusData={focusGoal}
+            openTwelveWeekCenter={openTwelveWeekCenter}
+            handleToggleTask={handleToggleTask}
+            onStartGuidedGoalFlow={handleStartGuidedGoalFlow}
+          />
+        </div>
 
-          {/* Right: Goal Fleet */}
-          <div data-tour-id="goaltracker-fleet" className="space-y-3">
-            {!hasGoals ? (
-              <GoalEmptyState
-                onStartGuidedGoalFlow={handleStartGuidedGoalFlow}
-                onStartDirectGoalFlow={handleStartDirectGoalFlow}
+        {/* Goal Fleet — grid layout */}
+        <div data-tour-id="goaltracker-fleet" className="space-y-4 gt-fade-up gt-delay-200">
+          {!hasGoals ? (
+            <GoalEmptyState
+              onStartGuidedGoalFlow={handleStartGuidedGoalFlow}
+              onStartDirectGoalFlow={handleStartDirectGoalFlow}
+            />
+          ) : (
+            <>
+              <GoalFilterToolbar
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                activeFilter={activeFilter}
+                onFilterChange={setActiveFilter}
+                counts={filterCounts}
               />
-            ) : (
-              <>
-                <GoalFilterToolbar
-                  searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
-                  activeFilter={activeFilter}
-                  onFilterChange={setActiveFilter}
-                  counts={filterCounts}
+              {filteredGoalsWithMetadata.length === 0 ? (
+                <div className="text-center py-8 rounded-card border border-dashed border-app-line bg-app-surface/50">
+                  <p className="text-sm text-app-ink-soft">
+                    {searchQuery.trim()
+                      ? `Không tìm thấy mục tiêu nào khớp với "${searchQuery}"`
+                      : "Không tìm thấy mục tiêu nào phù hợp với bộ lọc hiện tại."}
+                  </p>
+                  <Button
+                    variant="outline"
+                    className="mt-3 border-app-line bg-app-surface text-app-accent hover:bg-app-accent-soft font-bold rounded-lg px-4 py-2 text-sm"
+                    onClick={() => {
+                      setSearchQuery("");
+                      setActiveFilter("all");
+                    }}
+                  >
+                    Xóa tìm kiếm & bộ lọc
+                  </Button>
+                </div>
+              ) : (
+                <GoalFleetList
+                  twelveWeekGoals={displayTwelveWeekGoals}
+                  simpleGoals={displayStandardGoals}
+                  goalsWithMetadata={goalsMetadataMap}
+                  currentPlanCode={currentPlanCode}
+                  handleToggleTask={handleToggleTask}
+                  openTwelveWeekCenter={openTwelveWeekCenter}
+                  setGoalToDelete={setGoalToDelete}
                 />
-                {filteredGoalsWithMetadata.length === 0 ? (
-                  <div className="text-center py-6 rounded-card border border-dashed border-app-line bg-app-surface/50">
-                    <p className="text-sm text-app-ink-soft">
-                      {searchQuery.trim()
-                        ? `Không tìm thấy mục tiêu nào khớp với "${searchQuery}"`
-                        : "Không tìm thấy mục tiêu nào phù hợp với bộ lọc hiện tại."}
-                    </p>
-                    <Button
-                      variant="outline"
-                      className="mt-3 border-app-line bg-app-surface text-app-accent hover:bg-app-accent-soft font-bold rounded-lg px-4 py-2 text-sm"
-                      onClick={() => {
-                        setSearchQuery("");
-                        setActiveFilter("all");
-                      }}
-                    >
-                      Xóa tìm kiếm & bộ lọc
-                    </Button>
-                  </div>
-                ) : (
-                  <GoalFleetList
-                    twelveWeekGoals={displayTwelveWeekGoals}
-                    simpleGoals={displayStandardGoals}
-                    goalsWithMetadata={goalsMetadataMap}
-                    currentPlanCode={currentPlanCode}
-                    handleToggleTask={handleToggleTask}
-                    openTwelveWeekCenter={openTwelveWeekCenter}
-                    setGoalToDelete={setGoalToDelete}
-                  />
-                )}
-              </>
-            )}
-          </div>
+              )}
+            </>
+          )}
         </div>
       </div>
       <SpotlightTour
@@ -751,8 +731,8 @@ function GoalTrackerContent({
   );
 }
 
-/* ─── Status Ticker — Pulse Bar ─── */
-interface StatusTickerProps {
+/* ─── Context Pill — compact status strip ─── */
+interface ContextPillProps {
   totalGoals: number;
   completedGoals: number;
   completedTasks: number;
@@ -761,85 +741,49 @@ interface StatusTickerProps {
   needsAttention: number;
 }
 
-function StatusTicker({
+function ContextPill({
   totalGoals,
   completedGoals,
   completedTasks,
   totalTasks,
   activeSystems,
   needsAttention,
-}: StatusTickerProps) {
+}: ContextPillProps) {
   const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
   return (
     <div
-      className="flex flex-wrap items-center gap-x-6 gap-y-3 rounded-card bg-app-accent-subtle/40 px-5 py-3.5"
+      className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-pill border border-app-line bg-app-surface px-4 py-2 gt-fade-up gt-delay-50"
       data-tour-id="goaltracker-summary"
     >
-      {/* Goals count */}
-      <div className="flex items-center gap-2.5">
-        <Target className="h-4 w-4 text-app-accent shrink-0" />
-        <div className="flex items-baseline gap-1.5">
-          <span className="text-lg font-bold text-app-ink tabular-nums leading-none">
-            {totalGoals}
-          </span>
-          <span className="text-xs text-app-ink-soft">
-            mục tiêu
-          </span>
-        </div>
+      <span className="inline-flex items-center gap-1.5 text-xs text-app-ink-soft">
+        <Target className="h-3.5 w-3.5 text-app-accent shrink-0" aria-hidden="true" />
+        <span className="font-bold text-app-ink tabular-nums">{totalGoals}</span>
+        <span>mục tiêu</span>
         {completedGoals > 0 && (
-          <span className="text-xs font-medium text-app-status-success">
-            {completedGoals} xong
-          </span>
+          <span className="font-semibold text-app-status-success">({completedGoals} xong)</span>
         )}
-      </div>
-
-      <span className="h-5 w-px bg-app-accent/15" aria-hidden="true" />
-
-      {/* Tasks progress */}
-      <div className="flex items-center gap-2.5">
-        <CheckCircle2 className="h-4 w-4 text-app-accent shrink-0" />
-        <div className="flex items-baseline gap-1.5">
-          <span className="text-lg font-bold text-app-ink tabular-nums leading-none">
-            {completionRate}%
-          </span>
-          <span className="text-xs text-app-ink-soft">
-            hoàn thành
-          </span>
-        </div>
-        <span className="text-xs text-app-ink-muted tabular-nums">
-          ({completedTasks}/{totalTasks})
-        </span>
-      </div>
-
-      <span className="h-5 w-px bg-app-accent/15" aria-hidden="true" />
-
-      {/* Active systems */}
-      <div className="flex items-center gap-2.5">
-        <Zap className="h-4 w-4 text-app-accent shrink-0" />
-        <div className="flex items-baseline gap-1.5">
-          <span className="text-lg font-bold text-app-ink tabular-nums leading-none">
-            {activeSystems}
-          </span>
-          <span className="text-xs text-app-ink-soft">
-            chu kỳ chạy
-          </span>
-        </div>
-      </div>
-
-      {/* Needs attention */}
+      </span>
+      <span className="h-3.5 w-px bg-app-line" aria-hidden="true" />
+      <span className="inline-flex items-center gap-1.5 text-xs text-app-ink-soft">
+        <CheckCircle2 className="h-3.5 w-3.5 text-app-accent shrink-0" aria-hidden="true" />
+        <span className="font-bold text-app-ink tabular-nums">{completionRate}%</span>
+        <span className="text-app-ink-muted tabular-nums">({completedTasks}/{totalTasks})</span>
+      </span>
+      <span className="h-3.5 w-px bg-app-line" aria-hidden="true" />
+      <span className="inline-flex items-center gap-1.5 text-xs text-app-ink-soft">
+        <Zap className="h-3.5 w-3.5 text-app-accent shrink-0" aria-hidden="true" />
+        <span className="font-bold text-app-ink tabular-nums">{activeSystems}</span>
+        <span>chu kỳ</span>
+      </span>
       {needsAttention > 0 && (
         <>
-          <span className="h-5 w-px bg-app-accent/15" aria-hidden="true" />
-          <div className="flex items-center gap-2 rounded-full bg-app-status-warning/10 px-3 py-1">
-            <AlertTriangle className="h-3.5 w-3.5 text-app-status-warning shrink-0" />
-            <span className="text-xs font-bold text-app-status-warning tabular-nums">
-              {needsAttention}
-            </span>
-            <span className="text-xs font-medium text-app-status-warning/80">
-              cần chú ý
-            </span>
-          </div>
+          <span className="h-3.5 w-px bg-app-line" aria-hidden="true" />
+          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-app-status-warning">
+            <AlertTriangle className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+            <span className="tabular-nums">{needsAttention}</span>
+            <span className="font-medium">cần chú ý</span>
+          </span>
         </>
       )}
     </div>
@@ -856,16 +800,22 @@ function GoalTrackerSkeleton() {
       aria-busy="true"
     >
       <span className="sr-only">Đang tải danh sách mục tiêu...</span>
-      <Skeleton className="h-16 rounded-card bg-app-line/60" />
-      <Skeleton className="h-10 rounded-card bg-app-line/60" />
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-5">
-        <Skeleton className="h-56 rounded-card-lg bg-app-line/60" />
-        <div className="space-y-3">
-          <Skeleton className="h-10 rounded-control bg-app-line/60" />
-          {[0, 1, 2].map((index) => (
-            <Skeleton key={index} className="h-20 rounded-card bg-app-line/60" />
-          ))}
+      <div className="flex items-end justify-between gap-3">
+        <div className="space-y-2">
+          <Skeleton className="h-3 w-28 rounded-pill bg-app-line/60" />
+          <Skeleton className="h-8 w-48 rounded-card bg-app-line/60" />
         </div>
+        <div className="flex gap-2">
+          <Skeleton className="h-9 w-24 rounded-full bg-app-line/60" />
+          <Skeleton className="h-9 w-32 rounded-full bg-app-line/60" />
+        </div>
+      </div>
+      <Skeleton className="h-9 w-full rounded-pill bg-app-line/60" />
+      <Skeleton className="h-80 rounded-card-lg bg-app-line/60" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {[0, 1, 2, 3].map((index) => (
+          <Skeleton key={index} className="h-28 rounded-card bg-app-line/60" />
+        ))}
       </div>
     </div>
   );

@@ -60,6 +60,7 @@ const syncServiceMock = vi.hoisted(() => ({
 const toastMock = vi.hoisted(() => ({
   success: vi.fn(),
   error: vi.fn(),
+  info: vi.fn(),
   loading: vi.fn(() => "toast-loading"),
   warning: vi.fn(),
 }));
@@ -363,6 +364,89 @@ describe("SettingsPage account lifecycle", () => {
     expect(
       screen.getByText(/chưa thể sao lưu lên tài khoản/i),
     ).toBeInTheDocument();
+  });
+
+  it("deletes only synced 12-week cloud data from Settings after explicit confirmation", async () => {
+    saveLocalVisionSummary("Keep this local vision");
+    syncedUserDataMock.useSyncedUserData.mockReturnValue({
+      userData: getUserData(),
+      reloadUserData: syncedUserDataMock.reloadUserData,
+    });
+    const user = userEvent.setup();
+
+    renderPage();
+
+    await user.click(
+      await screen.findByRole("button", { name: "Xóa dữ liệu tài khoản" }),
+    );
+    const dialog = await screen.findByRole("alertdialog");
+    expect(
+      within(dialog).getByText("Xóa dữ liệu 12 tuần đã đồng bộ?"),
+    ).toBeInTheDocument();
+    const action = within(dialog).getByRole("button", {
+      name: "Xóa dữ liệu đã đồng bộ",
+    });
+    expect(action).toBeDisabled();
+
+    await user.click(
+      within(dialog).getByLabelText(
+        "Tôi hiểu hành động này là không thể rút lại và đồng ý xóa vĩnh viễn.",
+      ),
+    );
+    expect(action).toBeEnabled();
+    await user.click(action);
+
+    await waitFor(() => {
+      expect(syncServiceMock.deleteCloudWorkspace).toHaveBeenCalledTimes(1);
+    });
+    expect(getUserData().aspirationalVision?.summary).toBe(
+      "Keep this local vision",
+    );
+    expect(toastMock.success).toHaveBeenCalledWith(
+      "Đã xóa dữ liệu 12 tuần đã sao lưu.",
+      {
+        description:
+          "Dữ liệu trên thiết bị, quyền Plus và tài khoản không bị ảnh hưởng.",
+      },
+    );
+  });
+
+  it("clears local temporary signals from Settings without wiping core data", async () => {
+    saveLocalVisionSummary("Keep data after clearing local signals");
+    localStorage.setItem(
+      "visionboard_last_outbox_sync",
+      JSON.stringify({
+        at: "2026-06-25T08:16:00.000Z",
+        status: "drain_failed",
+        syncedCount: 0,
+        pendingCount: 1,
+        message: "Một thay đổi chưa gửi được.",
+      }),
+    );
+    syncedUserDataMock.useSyncedUserData.mockReturnValue({
+      userData: getUserData(),
+      reloadUserData: syncedUserDataMock.reloadUserData,
+    });
+    const user = userEvent.setup();
+
+    renderPage();
+
+    await user.click(
+      await screen.findByRole("button", { name: "Xóa dữ liệu tạm" }),
+    );
+    const dialog = await screen.findByRole("alertdialog");
+    expect(
+      within(dialog).getByText("Xóa dữ liệu tạm trên thiết bị?"),
+    ).toBeInTheDocument();
+    await user.click(
+      within(dialog).getByRole("button", { name: "Xóa dữ liệu tạm" }),
+    );
+
+    expect(localStorage.getItem("visionboard_last_outbox_sync")).toBeNull();
+    expect(getUserData().aspirationalVision?.summary).toBe(
+      "Keep data after clearing local signals",
+    );
+    expect(syncedUserDataMock.reloadUserData).toHaveBeenCalled();
   });
 
   it("deletes account through a two-step AlertDialog without window.confirm", async () => {

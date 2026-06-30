@@ -1,0 +1,292 @@
+
+> vision-board-web-platform@0.0.1 lint
+> biome lint .
+
+src\app\components\twelve-week\TwelveWeekProgressTab.tsx:23:8 lint/correctness/noUnusedImports  FIXABLE  ΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöü
+
+  ! This import is unused.
+  
+    21 Γöé import type { HeatmapCell, TacticBreakdownItem, WeekTrendPoint } from "../../utils/twelve-week-system-ui";
+    22 Γöé import { WeeklyReviewIllustration } from "../illustrations";
+  > 23 Γöé import { PrimaryActionCard } from "../layout/PrimaryActionCard";
+       Γöé        ^^^^^^^^^^^^^^^^^^^^^
+    24 Γöé import { SectionBlock } from "../layout/SectionBlock";
+    25 Γöé import { Badge } from "../ui/badge";
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+     20  20 Γöé   import type { TwelveWeekSystem } from "../../utils/storage-types";ΓÉì
+     21  21 Γöé   import type { HeatmapCell, TacticBreakdownItem, WeekTrendPoint } from "../../utils/twelve-week-system-ui";ΓÉì
+     22     Γöé - import┬╖{┬╖WeeklyReviewIllustration┬╖}┬╖from┬╖"../illustrations";ΓÉì
+     23     Γöé - import┬╖{┬╖PrimaryActionCard┬╖}┬╖from┬╖"../layout/PrimaryActionCard";ΓÉì
+         22 Γöé + import┬╖{┬╖WeeklyReviewIllustration┬╖}┬╖from┬╖"../illustrations";ΓÉì
+     24  23 Γöé   import { SectionBlock } from "../layout/SectionBlock";ΓÉì
+     25  24 Γöé   import { Badge } from "../ui/badge";ΓÉì
+  
+
+src\app\features\assistant\__tests__\authSyncMode.test.ts:79:52 lint/suspicious/noExplicitAny ΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöü
+
+  ! Unexpected any. Specify a different type.
+  
+    77 Γöé       vi.mocked(isDemoMode).mockReturnValue(false);
+    78 Γöé       vi.mocked(readMutationQueueStore).mockReturnValue({
+  > 79 Γöé         items: [{ status: "failed_validation" } as any],
+       Γöé                                                    ^^^
+    80 Γöé       } as any);
+    81 Γöé 
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src\app\features\assistant\__tests__\authSyncMode.test.ts:80:12 lint/suspicious/noExplicitAny ΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöü
+
+  ! Unexpected any. Specify a different type.
+  
+    78 Γöé       vi.mocked(readMutationQueueStore).mockReturnValue({
+    79 Γöé         items: [{ status: "failed_validation" } as any],
+  > 80 Γöé       } as any);
+       Γöé            ^^^
+    81 Γöé 
+    82 Γöé       const result = buildAuthSyncMode();
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src\app\features\assistant\__tests__\authSyncMode.test.ts:91:12 lint/suspicious/noExplicitAny ΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöü
+
+  ! Unexpected any. Specify a different type.
+  
+    89 Γöé       vi.mocked(readMutationQueueStore).mockReturnValue({
+    90 Γöé         items: [],
+  > 91 Γöé       } as any);
+       Γöé            ^^^
+    92 Γöé       vi.mocked(summarizeMutationQueueStore).mockReturnValue({
+    93 Γöé         pendingCount: 1,
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src\app\features\assistant\__tests__\authSyncMode.test.ts:95:12 lint/suspicious/noExplicitAny ΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöü
+
+  ! Unexpected any. Specify a different type.
+  
+    93 Γöé         pendingCount: 1,
+    94 Γöé         inFlightCount: 0,
+  > 95 Γöé       } as any);
+       Γöé            ^^^
+    96 Γöé 
+    97 Γöé       const result = buildAuthSyncMode();
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src\app\features\assistant\__tests__\useSpeechToText.test.ts:6:49 lint/suspicious/noExplicitAny ΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöü
+
+  ! Unexpected any. Specify a different type.
+  
+    5 Γöé describe("useSpeechToText Hook", () => {
+  > 6 Γöé   const _originalSpeechRecognition = (window as any).SpeechRecognition;
+      Γöé                                                 ^^^
+    7 Γöé   const _originalWebkitSpeechRecognition = (window as any).webkitSpeechRecognition;
+    8 Γöé 
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src\app\features\assistant\__tests__\useSpeechToText.test.ts:7:55 lint/suspicious/noExplicitAny ΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöü
+
+  ! Unexpected any. Specify a different type.
+  
+    5 Γöé describe("useSpeechToText Hook", () => {
+    6 Γöé   const _originalSpeechRecognition = (window as any).SpeechRecognition;
+  > 7 Γöé   const _originalWebkitSpeechRecognition = (window as any).webkitSpeechRecognition;
+      Γöé                                                       ^^^
+    8 Γöé 
+    9 Γöé   beforeEach(() => {
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src\app\features\assistant\__tests__\useSpeechToText.test.ts:12:23 lint/suspicious/noExplicitAny ΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöü
+
+  ! Unexpected any. Specify a different type.
+  
+    10 Γöé     vi.restoreAllMocks();
+    11 Γöé     // Reset window recognition properties
+  > 12 Γöé     delete (window as any).SpeechRecognition;
+       Γöé                       ^^^
+    13 Γöé     delete (window as any).webkitSpeechRecognition;
+    14 Γöé   });
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src\app\features\assistant\__tests__\useSpeechToText.test.ts:13:23 lint/suspicious/noExplicitAny ΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöü
+
+  ! Unexpected any. Specify a different type.
+  
+    11 Γöé     // Reset window recognition properties
+    12 Γöé     delete (window as any).SpeechRecognition;
+  > 13 Γöé     delete (window as any).webkitSpeechRecognition;
+       Γöé                       ^^^
+    14 Γöé   });
+    15 Γöé 
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src\app\features\assistant\__tests__\useSpeechToText.test.ts:23:16 lint/suspicious/noExplicitAny ΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöü
+
+  ! Unexpected any. Specify a different type.
+  
+    22 Γöé   it("should return isSupported as true when window.SpeechRecognition exists", () => {
+  > 23 Γöé     (window as any).SpeechRecognition = vi.fn().mockImplementation(function (this: any) {
+       Γöé                ^^^
+    24 Γöé       this.start = vi.fn();
+    25 Γöé       this.stop = vi.fn();
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src\app\features\assistant\__tests__\useSpeechToText.test.ts:23:84 lint/suspicious/noExplicitAny ΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöü
+
+  ! Unexpected any. Specify a different type.
+  
+    22 Γöé   it("should return isSupported as true when window.SpeechRecognition exists", () => {
+  > 23 Γöé     (window as any).SpeechRecognition = vi.fn().mockImplementation(function (this: any) {
+       Γöé                                                                                    ^^^
+    24 Γöé       this.start = vi.fn();
+    25 Γöé       this.stop = vi.fn();
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src\app\features\assistant\__tests__\useSpeechToText.test.ts:34:16 lint/suspicious/noExplicitAny ΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöü
+
+  ! Unexpected any. Specify a different type.
+  
+    33 Γöé   it("should return isSupported as true when window.webkitSpeechRecognition exists", () => {
+  > 34 Γöé     (window as any).webkitSpeechRecognition = vi.fn().mockImplementation(function (this: any) {
+       Γöé                ^^^
+    35 Γöé       this.start = vi.fn();
+    36 Γöé       this.stop = vi.fn();
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src\app\features\assistant\__tests__\useSpeechToText.test.ts:34:90 lint/suspicious/noExplicitAny ΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöü
+
+  ! Unexpected any. Specify a different type.
+  
+    33 Γöé   it("should return isSupported as true when window.webkitSpeechRecognition exists", () => {
+  > 34 Γöé     (window as any).webkitSpeechRecognition = vi.fn().mockImplementation(function (this: any) {
+       Γöé                                                                                          ^^^
+    35 Γöé       this.start = vi.fn();
+    36 Γöé       this.stop = vi.fn();
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src\app\features\assistant\__tests__\useSpeechToText.test.ts:49:72 lint/suspicious/noExplicitAny ΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöü
+
+  ! Unexpected any. Specify a different type.
+  
+    47 Γöé     const abortMock = vi.fn();
+    48 Γöé 
+  > 49 Γöé     const MockRecognition = vi.fn().mockImplementation(function (this: any) {
+       Γöé                                                                        ^^^
+    50 Γöé       this.start = startMock;
+    51 Γöé       this.stop = stopMock;
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src\app\features\assistant\__tests__\useSpeechToText.test.ts:55:16 lint/suspicious/noExplicitAny ΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöü
+
+  ! Unexpected any. Specify a different type.
+  
+    53 Γöé     });
+    54 Γöé 
+  > 55 Γöé     (window as any).SpeechRecognition = MockRecognition;
+       Γöé                ^^^
+    56 Γöé 
+    57 Γöé     const { result } = renderHook(() => useSpeechToText());
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src\app\features\assistant\__tests__\useSpeechToText.test.ts:69:59 lint/suspicious/noExplicitAny ΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöü
+
+  ! Unexpected any. Specify a different type.
+  
+    68 Γöé     // Chuyß╗ân sang trß║íng th├íi nghe (giß║ú lß║¡p recognition trigger start event)
+  > 69 Γöé     const instance = MockRecognition.mock.instances[0] as any;
+       Γöé                                                           ^^^
+    70 Γöé     act(() => {
+    71 Γöé       if (instance.onstart) instance.onstart();
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src\app\features\assistant\__tests__\useSpeechToText.test.ts:94:72 lint/suspicious/noExplicitAny ΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöü
+
+  ! Unexpected any. Specify a different type.
+  
+    92 Γöé     const onFinalResultMock = vi.fn();
+    93 Γöé 
+  > 94 Γöé     const MockRecognition = vi.fn().mockImplementation(function (this: any) {
+       Γöé                                                                        ^^^
+    95 Γöé       this.start = startMock;
+    96 Γöé       this.stop = stopMock;
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src\app\features\assistant\__tests__\useSpeechToText.test.ts:100:16 lint/suspicious/noExplicitAny ΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöü
+
+  ! Unexpected any. Specify a different type.
+  
+     98 Γöé     });
+     99 Γöé 
+  > 100 Γöé     (window as any).SpeechRecognition = MockRecognition;
+        Γöé                ^^^
+    101 Γöé 
+    102 Γöé     const { result } = renderHook(() => useSpeechToText({ onFinalResult: onFinalResultMock }));
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src\app\features\assistant\__tests__\useSpeechToText.test.ts:108:59 lint/suspicious/noExplicitAny ΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöü
+
+  ! Unexpected any. Specify a different type.
+  
+    106 Γöé     });
+    107 Γöé 
+  > 108 Γöé     const instance = MockRecognition.mock.instances[0] as any;
+        Γöé                                                           ^^^
+    109 Γöé     act(() => {
+    110 Γöé       if (instance.onstart) instance.onstart();
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+src\app\features\assistant\__tests__\useSpeechToText.test.ts:123:16 lint/suspicious/noExplicitAny ΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöüΓöü
+
+  ! Unexpected any. Specify a different type.
+  
+    121 Γöé               0: { transcript: "t├┤i muß╗æn", confidence: 0.9 },
+    122 Γöé             },
+  > 123 Γöé           ] as any,
+        Γöé                ^^^
+    124 Γöé         });
+    125 Γöé       }
+  
+  i any disables many type checking rules. Its use should be avoided.
+  
+
+The number of diagnostics exceeds the limit allowed. Use --max-diagnostics to increase it.
+Diagnostics not shown: 7.
+Checked 927 files in 1040ms. No fixes applied.
+Found 27 warnings.

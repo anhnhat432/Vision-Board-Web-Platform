@@ -52,7 +52,7 @@ const TWELVE_WEEK_SECTION_TABS = [
   { value: "today", label: "Hôm nay", icon: ListTodo },
   { value: "week", label: "Tuần", icon: CalendarDays },
   { value: "progress", label: "Tiến độ", icon: BarChart3 },
-  { value: "settings", label: "Cài đặt", icon: Settings2 },
+  { value: "settings", label: "Chu kỳ", icon: Settings2 },
 ] satisfies Array<{ value: string; label: string; icon: LucideIcon }>;
 
 interface TwelveWeekSystemTabsProps {
@@ -594,7 +594,7 @@ export function TwelveWeekSystemTabs({
               fallback={
                 <TwelveWeekTabFallback
                   title="Đang mở cài đặt chu kỳ"
-                  description="Phần chỉnh nhịp chu kỳ, dữ liệu trên thiết bị và quyền gói đang được tải."
+                  description="Phần chỉnh nhịp chu kỳ, tactics và lịch tuần tham chiếu đang được tải."
                 />
               }
             >

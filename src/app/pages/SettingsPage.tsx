@@ -17,21 +17,18 @@ import {
   User2,
   Volume2,
   WifiOff,
+  type LucideIcon,
 } from "lucide-react";
-import type { ChangeEvent } from "react";
+import type { ChangeEvent, ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
+import { DeleteCloudWorkspaceDialog } from "@/app/components/twelve-week/DeleteCloudWorkspaceDialog";
 import { clearMemory } from "@/app/features/assistant/assistantMemory";
 import { usePetPreferences } from "@/app/features/pet/usePetPreferences";
 import { useAutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
 import { useAuthContext } from "@/lib/auth/AuthContext";
-import {
-  deleteAccount,
-  deleteCloudWorkspace,
-  exportAccountData,
-} from "@/services/syncService";
-import { PageHero } from "../components/layout/PageHero";
+import { deleteAccount, deleteCloudWorkspace, exportAccountData } from "@/services/syncService";
 import { ScreenGuide } from "../components/ScreenGuide";
 import { SCREEN_GUIDES } from "../components/screen-guides";
 import {
@@ -48,13 +45,14 @@ import { Button } from "../components/ui/button";
 import { Switch } from "../components/ui/switch";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { useTheme } from "../hooks/useTheme";
-import {
-  formatBillingExpiryDate,
-  getBillingExpiryInfo,
-} from "../utils/billing-expiry";
+import { formatBillingExpiryDate, getBillingExpiryInfo } from "../utils/billing-expiry";
 import { downloadLocalUserDataBackup } from "../utils/local-data-backup";
 import {
+  getBrowserNotificationStatus,
   getLastOutboxSyncSnapshot,
+  requestBrowserNotificationPermission,
+  sendTestBrowserNotification,
+  type BrowserNotificationStatus,
   type OutboxSyncSnapshot,
 } from "../utils/production";
 import {
@@ -64,12 +62,14 @@ import {
 } from "../utils/local-data-migration";
 import { isSoundEnabled, setSoundEnabled } from "../utils/sound";
 import {
+  clearLocalDeviceSignals,
   deleteAllUserData,
   getUserData,
   parseStoredUserData,
   saveUserData,
   updateAppPreferences,
 } from "../utils/storage";
+import { getBrowserNotificationStatusLabel } from "../utils/twelve-week-system-ui";
 import { inputClass } from "./SMARTGoalSetup/components/formStyles";
 
 const themeOptions = [
@@ -127,43 +127,194 @@ function getAccountInitial(label: string): string {
   return label.trim().charAt(0).toUpperCase() || "K";
 }
 
+function SettingsNavLink({ href, label }: { href: string; label: string }) {
+  return (
+    <a
+      href={href}
+      className="inline-flex min-h-9 items-center rounded-full px-2 text-sm font-medium text-app-ink-soft transition-colors duration-150 hover:text-app-ink focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-app-accent/25"
+    >
+      {label}
+    </a>
+  );
+}
+
+function SettingsStudioHero({
+  accountValue,
+  syncValue,
+  planValue,
+}: {
+  accountValue: string;
+  syncValue: string;
+  planValue: string;
+}) {
+  return (
+    <section className="rounded-[20px] border border-app-line bg-app-surface px-5 py-6 sm:px-7 sm:py-7">
+      <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(280px,360px)] md:items-end">
+        <div>
+          <p className="text-xs font-semibold text-app-accent">Cài đặt</p>
+          <h1 className="mt-3 text-balance font-serif text-3xl font-semibold leading-tight text-app-ink sm:text-4xl">
+            Quản lý tài khoản, trải nghiệm và dữ liệu.
+          </h1>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-app-ink-soft">
+            Những tuỳ chọn chung của website được gom ở đây; cài đặt riêng cho chu kỳ 12 tuần nằm ở tab chu kỳ.
+          </p>
+        </div>
+
+        <dl className="grid gap-3 rounded-[16px] border border-app-line bg-app-bg-subtle p-4 sm:grid-cols-3 md:grid-cols-1">
+          <div>
+            <dt className="text-xs font-medium text-app-ink-muted">Tài khoản</dt>
+            <dd className="mt-1 truncate text-sm font-semibold text-app-ink">{accountValue}</dd>
+          </div>
+          <div className="border-t border-app-line pt-3 sm:border-l sm:border-t-0 sm:pl-3 sm:pt-0 md:border-l-0 md:border-t md:pl-0 md:pt-3">
+            <dt className="text-xs font-medium text-app-ink-muted">Sao lưu</dt>
+            <dd className="mt-1 truncate text-sm font-semibold text-app-ink">{syncValue}</dd>
+          </div>
+          <div className="border-t border-app-line pt-3 sm:border-l sm:border-t-0 sm:pl-3 sm:pt-0 md:border-l-0 md:border-t md:pl-0 md:pt-3">
+            <dt className="text-xs font-medium text-app-ink-muted">Gói</dt>
+            <dd className="mt-1 truncate text-sm font-semibold text-app-ink">{planValue}</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+  );
+}
+
+function SettingsSection({
+  id,
+  icon: Icon,
+  eyebrow,
+  title,
+  description,
+  children,
+  className = "",
+  bodyClassName = "p-5 sm:p-6",
+  testId,
+}: {
+  id?: string;
+  icon: LucideIcon;
+  eyebrow: string;
+  title: string;
+  description: string;
+  children: ReactNode;
+  className?: string;
+  bodyClassName?: string;
+  testId?: string;
+}) {
+  return (
+    <section
+      id={id}
+      data-testid={testId}
+      className={`scroll-mt-24 overflow-hidden rounded-[18px] border border-app-line bg-app-surface ${className}`}
+      aria-labelledby={id ? `${id}-title` : undefined}
+    >
+      <div className="border-b border-app-line px-4 py-4 sm:px-5">
+        <div className="flex items-start gap-3">
+          <span
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] border border-app-line bg-app-bg-subtle text-app-ink-soft"
+            aria-hidden="true"
+          >
+            <Icon className="h-4 w-4" />
+          </span>
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold leading-5 text-app-ink-muted">{eyebrow}</p>
+            <h2 id={id ? `${id}-title` : undefined} className="mt-0.5 text-xl font-semibold text-app-ink">
+              {title}
+            </h2>
+            <p className="mt-1 max-w-3xl text-sm leading-6 text-app-ink-soft">{description}</p>
+          </div>
+        </div>
+      </div>
+      <div className={bodyClassName}>{children}</div>
+    </section>
+  );
+}
+
+function SettingsControlRow({
+  icon: Icon,
+  title,
+  description,
+  children,
+}: {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  children: ReactNode;
+}) {
+  return (
+    <div className="grid gap-4 border-b border-app-line px-4 py-4 last:border-b-0 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:px-5">
+      <div className="flex min-w-0 gap-3">
+        <span
+          className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] border border-app-line bg-app-surface text-app-ink-muted"
+          aria-hidden="true"
+        >
+          <Icon className="h-4 w-4" />
+        </span>
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-app-ink">{title}</p>
+          <p className="mt-1 max-w-2xl text-xs leading-5 text-app-ink-muted">{description}</p>
+        </div>
+      </div>
+      <div className="sm:min-w-[220px]">{children}</div>
+    </div>
+  );
+}
+
+const settingsNavItems = [
+  {
+    href: "#settings-account",
+    label: "Tài khoản",
+  },
+  {
+    href: "#settings-experience",
+    label: "Trải nghiệm",
+  },
+  {
+    href: "#account-sync",
+    label: "Dữ liệu",
+  },
+  {
+    href: "#settings-safety",
+    label: "An toàn",
+  },
+] satisfies Array<{
+  href: string;
+  label: string;
+}>;
+
 export function SettingsPage() {
   const navigate = useNavigate();
   const importFileRef = useRef<HTMLInputElement>(null);
   const [isExportingAccount, setIsExportingAccount] = useState(false);
-  const [taskSoundEnabled, setTaskSoundEnabled] = useState(() =>
-    isSoundEnabled(),
+  const [taskSoundEnabled, setTaskSoundEnabled] = useState(() => isSoundEnabled());
+  const [migrationBackups, setMigrationBackups] = useState<MigrationBackupSnapshot[]>(() =>
+    getMigrationBackupSnapshots(),
   );
-  const [migrationBackups, setMigrationBackups] = useState<
-    MigrationBackupSnapshot[]
-  >(() => getMigrationBackupSnapshots());
-  const [recoverySnapshotKey, setRecoverySnapshotKey] = useState<string | null>(
-    null,
-  );
+  const [recoverySnapshotKey, setRecoverySnapshotKey] = useState<string | null>(null);
   const [isClearDataDialogOpen, setIsClearDataDialogOpen] = useState(false);
-  const [clearDataConfirmStep, setClearDataConfirmStep] =
-    useState<ClearDataConfirmStep>("review");
-  const [isDeleteAccountDialogOpen, setIsDeleteAccountDialogOpen] =
-    useState(false);
-  const [deleteAccountConfirmStep, setDeleteAccountConfirmStep] =
-    useState<DeleteAccountConfirmStep>("review");
+  const [clearDataConfirmStep, setClearDataConfirmStep] = useState<ClearDataConfirmStep>("review");
+  const [isClearLocalSignalsDialogOpen, setIsClearLocalSignalsDialogOpen] = useState(false);
+  const [isDeleteCloudDialogOpen, setIsDeleteCloudDialogOpen] = useState(false);
+  const [isDeletingCloudWorkspace, setIsDeletingCloudWorkspace] = useState(false);
+  const [isDeleteAccountDialogOpen, setIsDeleteAccountDialogOpen] = useState(false);
+  const [deleteAccountConfirmStep, setDeleteAccountConfirmStep] = useState<DeleteAccountConfirmStep>("review");
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const { theme, resolvedTheme, setTheme } = useTheme();
-  const { preferences: petPreferences, updatePreferences } =
-    usePetPreferences();
+  const { preferences: petPreferences, updatePreferences } = usePetPreferences();
   const { isConfigured, user, userProfile, logout } = useAuthContext();
   const autoSyncState = useAutoCloudSyncContext();
-  const [lastOutboxSyncSnapshot, setLastOutboxSyncSnapshot] =
-    useState<OutboxSyncSnapshot | null>(() => getLastOutboxSyncSnapshot());
+  const [browserNotificationStatus, setBrowserNotificationStatus] = useState<BrowserNotificationStatus>(() =>
+    getBrowserNotificationStatus(),
+  );
+  const [lastOutboxSyncSnapshot, setLastOutboxSyncSnapshot] = useState<OutboxSyncSnapshot | null>(() =>
+    getLastOutboxSyncSnapshot(),
+  );
   const { userData: syncedUserData, reloadUserData } = useSyncedUserData();
   const userData = syncedUserData ?? getUserData();
   const appPreferences = userData.appPreferences;
   const expiryInfo = getBillingExpiryInfo(userData.subscription);
   const shouldShowExpiryNotice =
-    userData.subscription?.planCode === "PLUS" &&
-    (expiryInfo.isExpiringSoon || expiryInfo.isExpired);
-  const accountLabel =
-    userProfile?.displayName || user?.displayName || user?.email || "Khách";
+    userData.subscription?.planCode === "PLUS" && (expiryInfo.isExpiringSoon || expiryInfo.isExpired);
+  const accountLabel = userProfile?.displayName || user?.displayName || user?.email || "Khách";
   const accountEmail = userProfile?.email || user?.email || "Chưa đăng nhập";
   const accountStatus = !isConfigured
     ? "Đang dùng dữ liệu trên thiết bị"
@@ -188,16 +339,10 @@ export function SettingsPage() {
       setLastOutboxSyncSnapshot(getLastOutboxSyncSnapshot());
     };
 
-    window.addEventListener(
-      "email-verification:required",
-      refreshOutboxSyncSnapshot,
-    );
+    window.addEventListener("email-verification:required", refreshOutboxSyncSnapshot);
     window.addEventListener("storage", refreshOutboxSyncSnapshot);
     return () => {
-      window.removeEventListener(
-        "email-verification:required",
-        refreshOutboxSyncSnapshot,
-      );
+      window.removeEventListener("email-verification:required", refreshOutboxSyncSnapshot);
       window.removeEventListener("storage", refreshOutboxSyncSnapshot);
     };
   }, []);
@@ -219,18 +364,11 @@ export function SettingsPage() {
     setIsExportingAccount(true);
     try {
       const exported = await exportAccountData();
-      const dateSlug =
-        exported.generatedAt.slice(0, 10) ||
-        new Date().toISOString().slice(0, 10);
-      downloadJsonFile(
-        exported,
-        `dear-our-future-account-export-${dateSlug}.json`,
-      );
+      const dateSlug = exported.generatedAt.slice(0, 10) || new Date().toISOString().slice(0, 10);
+      downloadJsonFile(exported, `dear-our-future-account-export-${dateSlug}.json`);
       toast.success("Đã tải bản xuất dữ liệu tài khoản.");
     } catch (error) {
-      toast.error(
-        getErrorMessage(error, "Không thể xuất dữ liệu tài khoản lúc này."),
-      );
+      toast.error(getErrorMessage(error, "Không thể xuất dữ liệu tài khoản lúc này."));
     } finally {
       setIsExportingAccount(false);
     }
@@ -270,19 +408,52 @@ export function SettingsPage() {
 
   const handlePetAnimationChange = (enabled: boolean) => {
     updatePreferences({ ...petPreferences, animationEnabled: enabled });
-    toast.success(
-      enabled
-        ? "Đã bật chuyển động của Mầm."
-        : "Mầm sẽ đứng yên để giảm chuyển động.",
-    );
+    toast.success(enabled ? "Đã bật chuyển động của Mầm." : "Mầm sẽ đứng yên để giảm chuyển động.");
   };
 
   const handleInAppRemindersChange = (enabled: boolean) => {
     updateAppPreferences({ enableInAppReminders: enabled });
     reloadUserData();
-    toast.success(
-      enabled ? "Đã bật nhắc việc trong app." : "Đã tắt nhắc việc trong app.",
-    );
+    toast.success(enabled ? "Đã bật nhắc việc trong app." : "Đã tắt nhắc việc trong app.");
+  };
+
+  const handleBrowserNotificationsChange = async (enabled: boolean) => {
+    updateAppPreferences({ enableBrowserNotifications: enabled });
+    reloadUserData();
+
+    if (!enabled) {
+      setBrowserNotificationStatus(getBrowserNotificationStatus());
+      toast.success("Đã tắt thông báo trình duyệt.");
+      return;
+    }
+
+    const permission = await requestBrowserNotificationPermission();
+    setBrowserNotificationStatus(permission);
+
+    if (permission === "granted") {
+      sendTestBrowserNotification();
+      toast.success("Đã bật thông báo trình duyệt.");
+      return;
+    }
+
+    if (permission === "denied") {
+      toast.error("Trình duyệt đang chặn thông báo.");
+      return;
+    }
+
+    toast.info("Thiết bị hiện tại không hỗ trợ thông báo trình duyệt.");
+  };
+
+  const handleLocalAnalyticsChange = (enabled: boolean) => {
+    updateAppPreferences({ allowLocalAnalytics: enabled });
+    reloadUserData();
+    toast.success(enabled ? "Đã bật phân tích trên thiết bị." : "Đã tắt phân tích trên thiết bị.");
+  };
+
+  const handleKeepLocalOutboxChange = (enabled: boolean) => {
+    updateAppPreferences({ keepLocalOutbox: enabled });
+    reloadUserData();
+    toast.success(enabled ? "Đã giữ hàng chờ đồng bộ trên thiết bị." : "Đã tắt lưu hàng chờ đồng bộ trên thiết bị.");
   };
 
   const handleRestoreMigrationBackup = () => {
@@ -300,25 +471,18 @@ export function SettingsPage() {
       setRecoverySnapshotKey(null);
       toast.success("Đã khôi phục dữ liệu cũ.");
     } catch (error) {
-      toast.error(
-        getErrorMessage(error, "Không thể khôi phục dữ liệu cũ lúc này."),
-      );
+      toast.error(getErrorMessage(error, "Không thể khôi phục dữ liệu cũ lúc này."));
     }
   };
 
   const handleRetrySync = async () => {
     const result = await autoSyncState.triggerSyncNow();
     if (result?.status === "conflict" || result?.status === "unsafe") {
-      toast.warning(
-        "Có khác biệt giữa thiết bị và tài khoản. Mở thông báo đồng bộ để chọn phiên bản an toàn.",
-      );
+      toast.warning("Có khác biệt giữa thiết bị và tài khoản. Mở thông báo đồng bộ để chọn phiên bản an toàn.");
       return;
     }
     if (result?.status === "error" || result?.status === "drain_failed") {
-      toast.error(
-        result.message ||
-          "Chưa sao lưu được vào tài khoản. Dữ liệu vẫn được giữ trên thiết bị này.",
-      );
+      toast.error(result.message || "Chưa sao lưu được vào tài khoản. Dữ liệu vẫn được giữ trên thiết bị này.");
       return;
     }
     toast.success("Đã kiểm tra sao lưu tài khoản.");
@@ -327,6 +491,29 @@ export function SettingsPage() {
   const handleClearDataDialogChange = (open: boolean) => {
     setIsClearDataDialogOpen(open);
     if (!open) setClearDataConfirmStep("review");
+  };
+
+  const handleClearLocalSignals = () => {
+    clearLocalDeviceSignals();
+    reloadUserData();
+    setLastOutboxSyncSnapshot(getLastOutboxSyncSnapshot());
+    setIsClearLocalSignalsDialogOpen(false);
+    toast.success("Đã xóa nhật ký, hàng chờ đồng bộ và trạng thái nhắc việc trên thiết bị này.");
+  };
+
+  const handleDeleteCloudWorkspaceOnly = async () => {
+    setIsDeletingCloudWorkspace(true);
+    try {
+      await deleteCloudWorkspace();
+      setIsDeleteCloudDialogOpen(false);
+      toast.success("Đã xóa dữ liệu 12 tuần đã sao lưu.", {
+        description: "Dữ liệu trên thiết bị, quyền Plus và tài khoản không bị ảnh hưởng.",
+      });
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Không thể xóa dữ liệu đã đồng bộ. Kiểm tra kết nối và thử lại."));
+    } finally {
+      setIsDeletingCloudWorkspace(false);
+    }
   };
 
   const handleDeleteAccountDialogChange = (open: boolean) => {
@@ -348,19 +535,13 @@ export function SettingsPage() {
       try {
         await logout();
       } catch (logoutError) {
-        console.error(
-          "Không thể đăng xuất sau khi xóa tài khoản:",
-          logoutError,
-        );
+        console.error("Không thể đăng xuất sau khi xóa tài khoản:", logoutError);
       }
       deleteAllUserData();
       reloadUserData();
       setIsDeleteAccountDialogOpen(false);
       setDeleteAccountConfirmStep("review");
-      toast.success(
-        "Đã gửi yêu cầu xóa tài khoản và xóa dữ liệu local trên thiết bị này.",
-        { id: toastId },
-      );
+      toast.success("Đã gửi yêu cầu xóa tài khoản và xóa dữ liệu local trên thiết bị này.", { id: toastId });
       navigate("/");
     } catch (error) {
       toast.error(getErrorMessage(error, "Không thể xóa tài khoản lúc này."), {
@@ -384,12 +565,9 @@ export function SettingsPage() {
         });
       } catch (error) {
         console.error("Lỗi khi xóa dữ liệu cloud:", error);
-        toast.error(
-          "Không thể xóa dữ liệu trên tài khoản đám mây. Vui lòng kiểm tra kết nối mạng và thử lại.",
-          {
-            id: toastId,
-          },
-        );
+        toast.error("Không thể xóa dữ liệu trên tài khoản đám mây. Vui lòng kiểm tra kết nối mạng và thử lại.", {
+          id: toastId,
+        });
         return;
       }
     }
@@ -400,8 +578,7 @@ export function SettingsPage() {
     navigate("/");
   };
 
-  const syncBlockedByEmailVerification =
-    lastOutboxSyncSnapshot?.status === "email_unverified";
+  const syncBlockedByEmailVerification = lastOutboxSyncSnapshot?.status === "email_unverified";
   const syncIcon = syncBlockedByEmailVerification
     ? ShieldAlert
     : autoSyncState.syncing
@@ -419,35 +596,39 @@ export function SettingsPage() {
       : autoSyncState.syncing
         ? "Đang sao lưu lên tài khoản. Bạn có thể tiếp tục dùng app."
         : "Sao lưu sẵn sàng. Hệ thống tự đồng bộ và xử lý chênh lệch; nếu có lỗi, dữ liệu vẫn được giữ trên thiết bị này để thử lại.";
+  const syncSignalValue = syncBlockedByEmailVerification
+    ? "Tạm dừng"
+    : !autoSyncState.online
+      ? "Offline"
+      : autoSyncState.syncing
+        ? "Đang sao lưu"
+        : autoSyncState.pendingCount > 0
+          ? `${autoSyncState.pendingCount} mục chờ`
+          : "Sẵn sàng";
+  const accountSignalValue = isConfigured && user ? "Đã kết nối" : "Local-only";
 
   return (
-    <div className="mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-5xl px-4 pb-14 pt-6 sm:px-6 lg:px-8">
       <ScreenGuide {...SCREEN_GUIDES.settings} autoOpen />
-      <PageHero
-        className="page-enter"
-        eyebrow="CÀI ĐẶT"
-        title="Tuỳ chỉnh tài khoản"
-        description="Quản lý tài khoản, dữ liệu lưu trên thiết bị và những tuỳ chọn nhỏ để app chạy đúng nhịp của bạn."
-        aside={
-          <div className="relative overflow-hidden rounded-card-lg border border-app-line shadow-app-sm aspect-[4/3] w-full max-w-[320px] mx-auto">
-            <picture className="block h-full w-full">
-              <source srcSet="/settings_safe_data.webp" type="image/webp" />
-              <img
-                src="/settings_safe_data.png"
-                alt="Cài đặt an toàn dữ liệu"
-                className="w-full h-full object-cover dark:brightness-[0.85] dark:contrast-[1.05]"
-                loading="lazy"
-                decoding="async"
-              />
-            </picture>
-          </div>
-        }
+      <SettingsStudioHero
+        accountValue={accountSignalValue}
+        syncValue={syncSignalValue}
+        planValue={userData.subscription?.planCode ?? "FREE"}
       />
 
-      <div className="mt-6 space-y-5">
+      <nav
+        className="mt-3 flex flex-wrap gap-x-4 gap-y-1 border-b border-app-line pb-3"
+        aria-label="Đi tới nhóm cài đặt"
+      >
+        {settingsNavItems.map((item) => (
+          <SettingsNavLink key={item.href} {...item} />
+        ))}
+      </nav>
+
+      <div className="mt-6 space-y-6">
         {firstRecoverySnapshot ? (
           <section
-            className="surface-raised rounded-card border border-app-line bg-app-surface p-5"
+            className="rounded-[16px] border border-app-line bg-app-surface p-4 sm:p-5"
             aria-label="Khôi phục dữ liệu cũ"
           >
             <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-center">
@@ -456,21 +637,13 @@ export function SettingsPage() {
                   <RotateCcw className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-base font-semibold text-app-ink">
-                    Có 1 bản sao dữ liệu cũ chưa được phục hồi
-                  </p>
+                  <p className="text-base font-semibold text-app-ink">Có 1 bản sao dữ liệu cũ chưa được phục hồi</p>
                   <p className="mt-1 text-sm leading-6 text-app-ink-soft">
-                    Bấm để khôi phục dữ liệu cũ. Thao tác này sẽ ghi đè dữ liệu
-                    hiện tại trên thiết bị này.
+                    Bấm để khôi phục dữ liệu cũ. Thao tác này sẽ ghi đè dữ liệu hiện tại trên thiết bị này.
                   </p>
                 </div>
               </div>
-              <Button
-                type="button"
-                onClick={() =>
-                  setRecoverySnapshotKey(firstRecoverySnapshot.key)
-                }
-              >
+              <Button type="button" onClick={() => setRecoverySnapshotKey(firstRecoverySnapshot.key)}>
                 <RotateCcw className="h-4 w-4" />
                 Khôi phục dữ liệu cũ
               </Button>
@@ -480,7 +653,7 @@ export function SettingsPage() {
 
         {shouldShowExpiryNotice ? (
           <section
-            className="surface-raised rounded-card border border-app-line bg-app-surface p-5"
+            className="rounded-[16px] border border-app-line bg-app-surface p-4 sm:p-5"
             aria-label="Trạng thái gói Plus"
           >
             <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-center">
@@ -490,9 +663,7 @@ export function SettingsPage() {
                 </div>
                 <div>
                   <p className="text-base font-semibold text-app-ink">
-                    {expiryInfo.isExpired
-                      ? "Gói Plus đã hết hạn"
-                      : `Gói Plus còn ${expiryInfo.daysLeft ?? 0} ngày`}
+                    {expiryInfo.isExpired ? "Gói Plus đã hết hạn" : `Gói Plus còn ${expiryInfo.daysLeft ?? 0} ngày`}
                   </p>
                   <p className="mt-1 text-sm leading-6 text-app-ink-soft">
                     {expiryInfo.isExpired
@@ -509,336 +680,255 @@ export function SettingsPage() {
           </section>
         ) : null}
 
-        <section
-          className="surface-raised rounded-card-lg border border-app-line bg-app-surface p-5 sm:p-6"
-          aria-label="Tài khoản"
-        >
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
-              <User2 className="h-5 w-5" />
-            </div>
-            <div>
-              <h2 className="font-serif text-xl font-medium text-app-ink">
-                Tài khoản
-              </h2>
-              <p className="mt-1 text-sm leading-6 text-app-ink-soft">
-                Thông tin đăng nhập hiện tại của không gian làm việc này.
-              </p>
-            </div>
-          </div>
+        <div className="grid gap-6">
+          <SettingsSection
+            id="settings-account"
+            icon={User2}
+            eyebrow="Hồ sơ"
+            title="Tài khoản"
+            description="Thông tin đăng nhập hiện tại của không gian làm việc này."
+            bodyClassName="p-0"
+          >
+            <div className="grid gap-6 p-5 sm:p-6 md:grid-cols-[minmax(0,1fr)_minmax(320px,0.9fr)] md:items-start">
+              <div className="flex min-w-0 gap-4">
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-[18px] border border-app-line bg-app-bg-subtle font-serif text-2xl font-semibold text-app-accent">
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt="Ảnh đại diện" className="h-full w-full object-cover" />
+                  ) : (
+                    accountInitial
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-base font-semibold text-app-ink">{accountLabel}</p>
+                  <p className="mt-1 break-all text-sm leading-5 text-app-ink-muted">{accountEmail}</p>
+                  <div className="mt-3 flex flex-wrap gap-2 text-xs font-medium">
+                    <span className="inline-flex min-h-8 items-center gap-2 rounded-full border border-app-line bg-app-bg-subtle px-3 text-app-ink-soft">
+                      <span
+                        className={`h-2 w-2 rounded-full ${isConfigured && user ? "bg-app-accent" : "bg-app-ink-muted"}`}
+                        aria-hidden="true"
+                      />
+                      {accountStatus}
+                    </span>
+                    <span className="inline-flex min-h-8 items-center rounded-full border border-app-line bg-app-bg-subtle px-3 text-app-ink-soft">
+                      Gói {userData.subscription?.planCode ?? "FREE"}
+                    </span>
+                  </div>
+                </div>
+              </div>
 
-          <div className="mt-5 grid gap-5 md:grid-cols-[auto_1fr] md:items-start">
-            <div className="flex items-center gap-3 md:block">
-              <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-app-line bg-app-bg font-serif text-2xl font-semibold text-app-accent">
-                {avatarUrl ? (
-                  <img
-                    src={avatarUrl}
-                    alt="Ảnh đại diện"
-                    className="h-full w-full object-cover"
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label
+                    htmlFor="settings-display-name"
+                    className="mb-1.5 block text-sm font-medium leading-5 text-app-ink"
+                  >
+                    Tên hiển thị
+                  </label>
+                  <input
+                    id="settings-display-name"
+                    readOnly
+                    aria-readonly="true"
+                    value={accountLabel}
+                    className={`${inputClass} bg-app-bg`}
                   />
-                ) : (
-                  accountInitial
-                )}
-              </div>
-              <div className="md:mt-3">
-                <p className="text-xs font-medium text-app-ink-muted">
-                  Ảnh đại diện
-                </p>
-                <p className="mt-1 text-xs leading-5 text-app-ink-muted">
-                  Đồng bộ từ tài khoản đăng nhập nếu có.
-                </p>
-              </div>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div>
-                <label
-                  htmlFor="settings-display-name"
-                  className="mb-1.5 block text-sm font-medium leading-5 text-app-ink"
-                >
-                  Tên hiển thị
-                </label>
-                <input
-                  id="settings-display-name"
-                  readOnly
-                  aria-readonly="true"
-                  value={accountLabel}
-                  className={`${inputClass} bg-app-bg`}
-                />
-              </div>
-              <div>
-                <label
-                  htmlFor="settings-email"
-                  className="mb-1.5 block text-sm font-medium leading-5 text-app-ink"
-                >
-                  Email
-                </label>
-                <input
-                  id="settings-email"
-                  type="email"
-                  readOnly
-                  aria-readonly="true"
-                  value={accountEmail}
-                  className={`${inputClass} bg-app-bg`}
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-5 rounded-lg border border-app-line bg-app-bg p-4">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="flex items-center gap-2 text-sm font-medium text-app-ink">
-                  <span
-                    className={`h-2.5 w-2.5 rounded-full ${isConfigured && user ? "bg-app-accent" : "bg-app-ink-muted"}`}
+                </div>
+                <div>
+                  <label htmlFor="settings-email" className="mb-1.5 block text-sm font-medium leading-5 text-app-ink">
+                    Email
+                  </label>
+                  <input
+                    id="settings-email"
+                    type="email"
+                    readOnly
+                    aria-readonly="true"
+                    value={accountEmail}
+                    className={`${inputClass} bg-app-bg`}
                   />
-                  {accountStatus}
-                </p>
-                <p className="mt-1 text-xs leading-5 text-app-ink-muted">
-                  Gói hiện tại: {userData.subscription?.planCode ?? "FREE"}
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section
-          className="surface-raised rounded-card-lg border border-app-line bg-app-surface p-5 sm:p-6"
-          aria-label="Tuỳ chọn trải nghiệm"
-        >
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
-              <Palette className="h-5 w-5" />
-            </div>
-            <div>
-              <h2 className="font-serif text-xl font-medium text-app-ink">
-                Tuỳ chọn trải nghiệm
-              </h2>
-              <p className="mt-1 text-sm leading-6 text-app-ink-soft">
-                Giao diện, ngôn ngữ và nhắc việc nhẹ trong hệ 12 tuần.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-5 space-y-4">
-            <div className="rounded-lg border border-app-line bg-app-surface p-3">
-              <div className="flex items-start gap-3">
-                <Palette className="mt-0.5 h-4 w-4 text-app-ink-muted" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-app-ink">
-                    Giao diện
-                  </p>
-                  <p className="mt-1 text-xs text-app-ink-muted">
-                    Đang dùng: {resolvedTheme === "dark" ? "Tối" : "Sáng"}
-                  </p>
-                  <fieldset className="mt-3 grid gap-2 sm:grid-cols-3">
-                    <legend className="sr-only">Chọn giao diện</legend>
-                    {themeOptions.map((option) => {
-                      const selected = theme === option.value;
-                      return (
-                        <label
-                          key={option.value}
-                          className={`cursor-pointer rounded-lg border p-3 text-left transition-colors duration-150 focus-within:ring-2 focus-within:ring-app-accent/30 ${
-                            selected
-                              ? "border-app-accent bg-app-accent-soft text-app-accent"
-                              : "border-app-line bg-app-surface text-app-ink hover:bg-app-bg"
-                          }`}
-                        >
-                          <input
-                            type="radio"
-                            name="settings-theme"
-                            value={option.value}
-                            checked={selected}
-                            onChange={() => setTheme(option.value)}
-                            className="sr-only"
-                          />
-                          <span className="block text-sm font-medium">
-                            {option.label}
-                          </span>
-                          <span className="mt-1 block text-xs leading-5 text-app-ink-muted">
-                            {option.description}
-                          </span>
-                        </label>
-                      );
-                    })}
-                  </fieldset>
                 </div>
               </div>
             </div>
+          </SettingsSection>
 
-            <div className="rounded-lg border border-app-line bg-app-surface p-3">
-              <div className="flex items-start gap-3">
-                <Languages className="mt-0.5 h-4 w-4 text-app-ink-muted" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-app-ink">Ngôn ngữ</p>
-                  <fieldset className="mt-3">
-                    <legend className="sr-only">Ngôn ngữ</legend>
-                    <label className="block rounded-lg border border-app-accent bg-app-accent-soft p-3 text-app-accent">
+          <SettingsSection
+            id="settings-experience"
+            icon={Palette}
+            eyebrow="Cảm giác dùng app"
+            title="Tuỳ chọn trải nghiệm"
+            description="Giao diện, ngôn ngữ và nhắc việc nhẹ trong hệ 12 tuần."
+            bodyClassName="p-0"
+          >
+            <SettingsControlRow
+              icon={Palette}
+              title="Giao diện"
+              description={`Đang dùng: ${resolvedTheme === "dark" ? "Tối" : "Sáng"}`}
+            >
+              <fieldset className="grid gap-2 sm:grid-cols-3">
+                <legend className="sr-only">Chọn giao diện</legend>
+                {themeOptions.map((option) => {
+                  const selected = theme === option.value;
+                  return (
+                    <label
+                      key={option.value}
+                      className={`cursor-pointer rounded-[12px] border px-3 py-2.5 text-left transition-colors duration-150 focus-within:ring-2 focus-within:ring-app-accent/30 ${
+                        selected
+                          ? "border-app-accent bg-app-accent-soft text-app-accent shadow-app-sm"
+                          : "border-app-line bg-app-surface text-app-ink hover:bg-app-bg"
+                      }`}
+                    >
                       <input
                         type="radio"
-                        name="settings-language"
-                        checked
-                        readOnly
+                        name="settings-theme"
+                        value={option.value}
+                        checked={selected}
+                        onChange={() => setTheme(option.value)}
                         className="sr-only"
                       />
-                      <span className="block text-sm font-medium">
-                        {localeLabel}
-                      </span>
-                      <span className="mt-1 block text-xs leading-5 text-app-ink-muted">
-                        Tiếng Việt tự nhiên cho toàn bộ flow hiện tại.
-                      </span>
+                      <span className="block text-sm font-semibold">{option.label}</span>
+                      <span className="mt-1 block text-xs leading-5 text-app-ink-muted">{option.description}</span>
                     </label>
-                  </fieldset>
-                </div>
-              </div>
-            </div>
+                  );
+                })}
+              </fieldset>
+            </SettingsControlRow>
 
-            <div className="rounded-lg border border-app-line bg-app-surface p-3">
-              <div className="flex items-start gap-3">
-                <Bell className="mt-0.5 h-4 w-4 text-app-ink-muted" />
-                <div className="min-w-0 flex-1 space-y-3">
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <p className="text-sm font-semibold text-app-ink">
-                        Nhắc việc trong app
-                      </p>
-                      <p className="mt-1 text-xs leading-5 text-app-ink-muted">
-                        Hiện gợi ý nhẹ khi có việc hoặc review cần quay lại.
-                      </p>
-                    </div>
-                    <Switch
-                      checked={appPreferences.enableInAppReminders}
-                      onCheckedChange={handleInAppRemindersChange}
-                      aria-label="Nhắc việc trong app"
-                      className="border border-app-line data-[state=checked]:bg-app-accent data-[state=unchecked]:bg-app-bg"
-                    />
-                  </div>
-                  <div className="flex items-center justify-between gap-4 border-t border-app-line pt-3">
-                    <div>
-                      <p className="flex items-center gap-2 text-sm font-semibold text-app-ink">
-                        <Volume2 className="h-4 w-4 text-app-ink-muted" />
-                        Âm thanh khi xong việc
-                      </p>
-                      <p className="mt-1 text-xs leading-5 text-app-ink-muted">
-                        Phát một tiếng rất nhẹ khi bạn chốt xong việc hôm nay.
-                      </p>
-                    </div>
-                    <Switch
-                      id="task-complete-sound"
-                      checked={taskSoundEnabled}
-                      onCheckedChange={handleTaskSoundEnabledChange}
-                      aria-label="Âm thanh khi xong việc"
-                      className="border border-app-line data-[state=checked]:bg-app-accent data-[state=unchecked]:bg-app-bg"
-                    />
-                  </div>
-                  <div className="flex items-center justify-between gap-4 border-t border-app-line pt-3">
-                    <div>
-                      <p className="text-sm font-semibold text-app-ink">
-                        Animation của Mầm
-                      </p>
-                      <p className="mt-1 text-xs leading-5 text-app-ink-muted">
-                        Giữ Mầm chuyển động nhẹ trên Dashboard, hoặc đứng yên
-                        khi bạn muốn yên tĩnh hơn.
-                      </p>
-                    </div>
-                    <Switch
-                      checked={petPreferences.animationEnabled}
-                      onCheckedChange={handlePetAnimationChange}
-                      aria-label="Animation của Mầm"
-                      className="border border-app-line data-[state=checked]:bg-app-accent data-[state=unchecked]:bg-app-bg"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+            <SettingsControlRow
+              icon={Languages}
+              title="Ngôn ngữ"
+              description="Giữ tiếng Việt tự nhiên cho flow hiện tại."
+            >
+              <fieldset>
+                <legend className="sr-only">Ngôn ngữ</legend>
+                <label className="block rounded-[14px] border border-app-accent bg-app-accent-soft px-3 py-3 text-app-accent shadow-3xs">
+                  <input type="radio" name="settings-language" checked readOnly className="sr-only" />
+                  <span className="block text-sm font-semibold">{localeLabel}</span>
+                  <span className="mt-1 block text-xs leading-5 text-app-ink-muted">
+                    Toàn bộ sản phẩm đang ưu tiên tiếng Việt.
+                  </span>
+                </label>
+              </fieldset>
+            </SettingsControlRow>
 
-        <section
-          className="surface-raised rounded-card-lg border border-app-line bg-app-surface p-5 sm:p-6"
-          aria-label="Dữ liệu"
+            <SettingsControlRow
+              icon={Bell}
+              title="Nhắc việc trong app"
+              description="Hiện gợi ý nhẹ khi có việc hoặc review cần quay lại."
+            >
+              <div className="flex justify-start sm:justify-end">
+                <Switch
+                  checked={appPreferences.enableInAppReminders}
+                  onCheckedChange={handleInAppRemindersChange}
+                  aria-label="Nhắc việc trong app"
+                  className="border border-app-line data-[state=checked]:bg-app-accent data-[state=unchecked]:bg-app-bg"
+                />
+              </div>
+            </SettingsControlRow>
+
+            <SettingsControlRow
+              icon={Bell}
+              title="Thông báo trình duyệt"
+              description={`${getBrowserNotificationStatusLabel(browserNotificationStatus)}.`}
+            >
+              <div className="flex justify-start sm:justify-end">
+                <Switch
+                  checked={appPreferences.enableBrowserNotifications}
+                  onCheckedChange={(enabled) => void handleBrowserNotificationsChange(enabled)}
+                  aria-label="Thông báo trình duyệt"
+                  className="border border-app-line data-[state=checked]:bg-app-accent data-[state=unchecked]:bg-app-bg"
+                />
+              </div>
+            </SettingsControlRow>
+
+            <SettingsControlRow
+              icon={Volume2}
+              title="Âm thanh khi xong việc"
+              description="Phát một tiếng rất nhẹ khi bạn chốt xong việc hôm nay."
+            >
+              <div className="flex justify-start sm:justify-end">
+                <Switch
+                  id="task-complete-sound"
+                  checked={taskSoundEnabled}
+                  onCheckedChange={handleTaskSoundEnabledChange}
+                  aria-label="Âm thanh khi xong việc"
+                  className="border border-app-line data-[state=checked]:bg-app-accent data-[state=unchecked]:bg-app-bg"
+                />
+              </div>
+            </SettingsControlRow>
+
+            <SettingsControlRow
+              icon={Palette}
+              title="Animation của Mầm"
+              description="Giữ Mầm chuyển động nhẹ trên Dashboard, hoặc đứng yên khi bạn muốn yên tĩnh hơn."
+            >
+              <div className="flex justify-start sm:justify-end">
+                <Switch
+                  checked={petPreferences.animationEnabled}
+                  onCheckedChange={handlePetAnimationChange}
+                  aria-label="Animation của Mầm"
+                  className="border border-app-line data-[state=checked]:bg-app-accent data-[state=unchecked]:bg-app-bg"
+                />
+              </div>
+            </SettingsControlRow>
+          </SettingsSection>
+        </div>
+
+        <SettingsSection
+          id="account-sync"
+          testId="settings-sync-section"
+          icon={CloudDownload}
+          eyebrow="Dữ liệu local-first"
+          title="Dữ liệu"
+          description="Dữ liệu lưu trên thiết bị trước, rồi sao lưu vào tài khoản khi đủ điều kiện."
+          bodyClassName="p-0"
         >
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent">
-              <CloudDownload className="h-5 w-5" />
+          <div className="p-5 sm:p-6">
+            <div
+              data-testid="settings-sync-status-copy"
+              className="rounded-[16px] border border-app-line bg-app-bg-subtle p-4 text-sm leading-6 text-app-ink-soft"
+            >
+              <div className="flex gap-3">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[12px] border border-app-line bg-app-surface text-app-accent">
+                  <SyncIcon className={`h-4 w-4 ${autoSyncState.syncing ? "animate-spin" : ""}`} />
+                </span>
+                <div className="min-w-0">
+                  <p className="font-semibold text-app-ink">Sao lưu: {syncSignalValue}</p>
+                  {syncBlockedByEmailVerification ? (
+                    <p className="mt-1">{syncStatusMessage}</p>
+                  ) : (
+                    <p className="mt-1">
+                      {!autoSyncState.online
+                        ? "Bạn đang mất kết nối. Dữ liệu vẫn được lưu trên thiết bị và sẽ gửi lên tài khoản khi có mạng."
+                        : autoSyncState.syncing
+                          ? "Đang sao lưu lên tài khoản. Bạn có thể tiếp tục dùng app."
+                          : "Sao lưu sẵn sàng. Hệ thống tự đồng bộ và xử lý chênh lệch; nếu có lỗi, dữ liệu vẫn được giữ trên thiết bị này để thử lại."}
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
-            <div>
-              <h2 className="font-serif text-xl font-medium text-app-ink">
-                Dữ liệu
-              </h2>
-              <p className="mt-1 text-sm leading-6 text-app-ink-soft">
-                Local-first: dữ liệu lưu trên thiết bị trước, rồi sao lưu vào
-                tài khoản khi đủ điều kiện.
-              </p>
-            </div>
-          </div>
 
-          <div
-            id="account-sync"
-            data-testid="settings-sync-section"
-            className="mt-5 scroll-mt-24 space-y-4"
-          >
-            <div className="grid gap-3 sm:grid-cols-3">
-              <div className="rounded-lg border border-app-line bg-app-bg p-3">
-                <p className="text-sm font-semibold text-app-ink">Thiết bị</p>
-                <p className="mt-1 text-xs leading-5 text-app-ink-muted">
-                  Thay đổi được giữ ngay trên thiết bị này.
-                </p>
-              </div>
-              <div className="rounded-lg border border-app-line bg-app-bg p-3">
-                <p className="text-sm font-semibold text-app-ink">Tài khoản</p>
-                <p
-                  data-testid="settings-sync-last-synced"
-                  className="mt-1 text-xs leading-5 text-app-ink-muted"
-                >
+            <dl className="mt-5 grid gap-4 border-y border-app-line py-4 sm:grid-cols-2">
+              <div>
+                <dt className="text-xs font-semibold text-app-ink">Tài khoản</dt>
+                <dd data-testid="settings-sync-last-synced" className="mt-1 text-xs leading-5 text-app-ink-muted">
                   {formatSyncTime(autoSyncState.lastSyncedAt)}
-                </p>
+                </dd>
               </div>
-              <div className="rounded-lg border border-app-line bg-app-bg p-3">
-                <p className="text-sm font-semibold text-app-ink">
-                  Đang chờ đồng bộ
-                </p>
-                <p
-                  data-testid="settings-sync-pending-count"
-                  className="mt-1 text-xs leading-5 text-app-ink-muted"
-                >
+              <div className="border-t border-app-line pt-4 sm:border-l sm:border-t-0 sm:pl-4 sm:pt-0">
+                <dt className="text-xs font-semibold text-app-ink">Đang chờ đồng bộ</dt>
+                <dd data-testid="settings-sync-pending-count" className="mt-1 text-xs leading-5 text-app-ink-muted">
                   {autoSyncState.pendingCount > 0
                     ? `${autoSyncState.pendingCount} thay đổi chờ đồng bộ`
                     : "Không có thay đổi chờ đồng bộ"}
-                </p>
+                </dd>
               </div>
-            </div>
-
-            <div
-              data-testid="settings-sync-status-copy"
-              className="rounded-lg border border-app-line bg-app-bg p-3 text-sm leading-6 text-app-ink-soft"
-            >
-              <div className="flex gap-2">
-                <SyncIcon
-                  className={`mt-0.5 h-4 w-4 shrink-0 ${autoSyncState.syncing ? "animate-spin text-app-accent" : "text-app-ink-muted"}`}
-                />
-                {syncBlockedByEmailVerification ? (
-                  <p>{syncStatusMessage}</p>
-                ) : (
-                  <p>
-                    {!autoSyncState.online
-                      ? "Bạn đang mất kết nối. Dữ liệu vẫn được lưu trên thiết bị và sẽ gửi lên tài khoản khi có mạng."
-                      : autoSyncState.syncing
-                        ? "Đang sao lưu lên tài khoản. Bạn có thể tiếp tục dùng app."
-                        : "Sao lưu sẵn sàng. Hệ thống tự đồng bộ và xử lý chênh lệch; nếu có lỗi, dữ liệu vẫn được giữ trên thiết bị này để thử lại."}
-                  </p>
-                )}
-              </div>
-            </div>
+            </dl>
 
             {syncBlockedByEmailVerification ? (
               <div
                 data-testid="settings-sync-email-unverified"
-                className="rounded-lg border border-app-warm-border bg-app-warm-soft p-3 text-sm leading-6 text-app-warm-strong"
+                className="mt-4 rounded-[16px] border border-app-warm-border bg-app-warm-soft p-4 text-sm leading-6 text-app-warm-strong"
               >
-                <p className="font-semibold">
-                  Email chưa xác thực, cloud sync đang tạm dừng
-                </p>
+                <p className="font-semibold">Email chưa xác thực, cloud sync đang tạm dừng</p>
                 <p className="mt-1">{lastOutboxSyncSnapshot.message}</p>
               </div>
             ) : null}
@@ -846,121 +936,186 @@ export function SettingsPage() {
             {autoSyncState.lastResult?.message ? (
               <div
                 data-testid="settings-sync-last-result"
-                className="rounded-lg border border-app-line bg-app-surface p-3 text-sm leading-6 text-app-ink-soft"
+                className="mt-4 rounded-[16px] border border-app-line bg-app-surface p-4 text-sm leading-6 text-app-ink-soft"
               >
                 <p className="font-semibold text-app-ink">Kết quả gần nhất</p>
                 <p className="mt-1">{autoSyncState.lastResult.message}</p>
               </div>
             ) : null}
 
-            <div className="flex flex-wrap gap-3">
-              <Button type="button" variant="outline" onClick={handleExport}>
-                <Download className="h-4 w-4" />
-                Xuất dữ liệu thiết bị
-              </Button>
-              {isConfigured && user ? (
+            <div className="mt-5 grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(280px,1fr)] md:items-start">
+              <div>
+                <p className="text-sm font-semibold text-app-ink">Sao lưu và di chuyển dữ liệu</p>
+                <p className="mt-2 text-xs leading-5 text-app-ink-muted">
+                  Tải bản dự phòng trước khi đổi thiết bị, nhập dữ liệu cũ hoặc kiểm tra trạng thái cloud.
+                </p>
+              </div>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <Button type="button" variant="outline" onClick={handleExport}>
+                  <Download className="h-4 w-4" />
+                  Xuất dữ liệu thiết bị
+                </Button>
+                {isConfigured && user ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    data-testid="settings-account-export"
+                    onClick={() => void handleAccountExport()}
+                    disabled={isExportingAccount}
+                  >
+                    {isExportingAccount ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <CloudDownload className="h-4 w-4" />
+                    )}
+                    Xuất dữ liệu tài khoản
+                  </Button>
+                ) : null}
+                <Button type="button" variant="outline" onClick={() => importFileRef.current?.click()}>
+                  <Upload className="h-4 w-4" />
+                  Nhập dữ liệu
+                </Button>
                 <Button
                   type="button"
                   variant="outline"
-                  data-testid="settings-account-export"
-                  onClick={() => void handleAccountExport()}
-                  disabled={isExportingAccount}
+                  onClick={handleRetrySync}
+                  disabled={autoSyncState.syncing || !user}
                 >
-                  {isExportingAccount ? (
+                  {autoSyncState.syncing ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
-                    <CloudDownload className="h-4 w-4" />
+                    <RefreshCw className="h-4 w-4" />
                   )}
-                  Xuất dữ liệu tài khoản
+                  Kiểm tra sao lưu
                 </Button>
-              ) : null}
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => importFileRef.current?.click()}
-              >
-                <Upload className="h-4 w-4" />
-                Nhập dữ liệu
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleRetrySync}
-                disabled={autoSyncState.syncing || !user}
-              >
-                {autoSyncState.syncing ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <RefreshCw className="h-4 w-4" />
-                )}
-                Kiểm tra sao lưu
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate("/12-week-system?tab=settings")}
-              >
-                <CalendarDays className="h-4 w-4" />
-                Cài đặt chu kỳ
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate("/billing/plan")}
-              >
-                <CreditCard className="h-4 w-4" />
-                Gói & thanh toán
-              </Button>
-              <input
-                ref={importFileRef}
-                type="file"
-                accept=".json"
-                className="hidden"
-                onChange={handleImport}
-              />
-            </div>
-
-            <div className="rounded-lg border border-app-line bg-app-bg p-4">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p className="text-sm font-semibold text-app-ink">
-                    Bộ nhớ Trợ lý AI
-                  </p>
-                  <p className="mt-1 text-xs leading-5 text-app-ink-muted">
-                    Xóa sạch các thông tin trợ lý tự động ghi nhớ về bạn (sở
-                    thích học tập, thói quen làm việc).
-                  </p>
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="border-[color:var(--color-warning-border)] text-[color:var(--color-warning-fg)] hover:bg-[color:var(--color-warning-bg)] hover:text-[color:var(--color-warning-fg)]"
-                  onClick={() => {
-                    clearMemory(user?.uid ?? null);
-                    toast.success("Đã xóa sạch bộ nhớ của Trợ lý AI.");
-                  }}
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Xóa bộ nhớ Trợ lý
+                <Button type="button" variant="outline" onClick={() => navigate("/12-week-system?tab=settings")}>
+                  <CalendarDays className="h-4 w-4" />
+                  Cài đặt chu kỳ
                 </Button>
+                <Button type="button" variant="outline" onClick={() => navigate("/billing/plan")}>
+                  <CreditCard className="h-4 w-4" />
+                  Gói & thanh toán
+                </Button>
+                <input ref={importFileRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
               </div>
             </div>
+          </div>
 
-            <div className="rounded-card border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] p-5">
-              <div className="grid gap-4 sm:grid-cols-[1fr_auto] sm:items-center">
-                <div className="flex gap-3">
-                  <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-[color:var(--color-danger-fg)]" />
+          <div className="border-t border-app-line">
+            <SettingsControlRow
+              icon={Download}
+              title="Phân tích trên thiết bị"
+              description="Lưu lịch sử thao tác để xem hành trình thực hiện mà không phụ thuộc máy chủ."
+            >
+              <div className="flex justify-start sm:justify-end">
+                <Switch
+                  checked={appPreferences.allowLocalAnalytics}
+                  onCheckedChange={handleLocalAnalyticsChange}
+                  aria-label="Phân tích trên thiết bị"
+                  className="border border-app-line data-[state=checked]:bg-app-accent data-[state=unchecked]:bg-app-bg"
+                />
+              </div>
+            </SettingsControlRow>
+            <SettingsControlRow
+              icon={Upload}
+              title="Hàng chờ đồng bộ trên thiết bị"
+              description="Giữ thay đổi đang chờ gửi để app vẫn dùng được khi mạng hoặc tài khoản chưa sẵn sàng."
+            >
+              <div className="flex justify-start sm:justify-end">
+                <Switch
+                  checked={appPreferences.keepLocalOutbox}
+                  onCheckedChange={handleKeepLocalOutboxChange}
+                  aria-label="Hàng chờ đồng bộ trên thiết bị"
+                  className="border border-app-line data-[state=checked]:bg-app-accent data-[state=unchecked]:bg-app-bg"
+                />
+              </div>
+            </SettingsControlRow>
+          </div>
+        </SettingsSection>
+
+        <SettingsSection
+          id="settings-safety"
+          icon={ShieldAlert}
+          eyebrow="Xác nhận trước khi xoá"
+          title="An toàn & dọn dẹp"
+          description="Những thao tác có thể xoá trạng thái cục bộ hoặc dữ liệu đã đồng bộ được tách riêng và luôn đi qua dialog."
+          bodyClassName="p-0"
+        >
+          <SettingsControlRow
+            icon={Trash2}
+            title="Bộ nhớ Trợ lý AI"
+            description="Xóa sạch các thông tin trợ lý tự động ghi nhớ về bạn như sở thích học tập và thói quen làm việc."
+          >
+            <div className="flex justify-start sm:justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                className="border-[color:var(--color-warning-border)] text-[color:var(--color-warning-fg)] hover:bg-[color:var(--color-warning-bg)] hover:text-[color:var(--color-warning-fg)]"
+                onClick={() => {
+                  clearMemory(user?.uid ?? null);
+                  toast.success("Đã xóa sạch bộ nhớ của Trợ lý AI.");
+                }}
+              >
+                <Trash2 className="h-4 w-4" />
+                Xóa bộ nhớ Trợ lý
+              </Button>
+            </div>
+          </SettingsControlRow>
+
+          <div className="p-5 sm:p-6">
+            <div className="rounded-[16px] border border-[color:var(--color-danger-border)] bg-app-surface">
+              <div className="border-b border-[color:var(--color-danger-border)] px-4 py-4">
+                <p className="text-sm font-semibold text-[color:var(--color-danger-fg)]">Thao tác xoá dữ liệu</p>
+                <p className="mt-1 text-xs leading-5 text-app-ink-muted">
+                  Nên xuất dữ liệu trước. Các nút bên dưới vẫn dùng dialog xác nhận riêng.
+                </p>
+              </div>
+              <div className="divide-y divide-app-line">
+                <div className="grid gap-3 px-4 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
                   <div>
-                    <p className="text-base font-semibold text-[color:var(--color-danger-fg)]">
-                      Vùng nguy hiểm
-                    </p>
-                    <p className="mt-1 text-sm leading-6 text-[color:var(--color-danger-fg)]">
-                      Xóa dữ liệu trên thiết bị này chỉ nên làm sau khi bạn đã
-                      tải bản dự phòng.
+                    <p className="text-sm font-semibold text-app-ink">Dọn dữ liệu tạm trên thiết bị</p>
+                    <p className="mt-1 text-xs leading-5 text-app-ink-muted">
+                      Xóa nhật ký thao tác, hàng chờ đồng bộ và trạng thái nhắc việc cục bộ.
                     </p>
                   </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="border-[color:var(--color-warning-border)] text-[color:var(--color-warning-fg)] hover:bg-[color:var(--color-warning-bg)] hover:text-[color:var(--color-warning-fg)]"
+                    onClick={() => setIsClearLocalSignalsDialogOpen(true)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Xóa dữ liệu tạm
+                  </Button>
                 </div>
-                <div className="flex flex-col gap-2 sm:items-end">
+
+                {isConfigured && user ? (
+                  <div className="grid gap-3 px-4 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+                    <div>
+                      <p className="text-sm font-semibold text-app-ink">Xóa dữ liệu đã sao lưu</p>
+                      <p className="mt-1 text-xs leading-5 text-app-ink-muted">
+                        Xóa dữ liệu 12 tuần trên tài khoản; dữ liệu local, quyền Plus và tài khoản không bị ảnh hưởng.
+                      </p>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="border-[color:var(--color-danger-border)] text-[color:var(--color-danger-fg)] hover:bg-[color:var(--color-danger-bg)] hover:text-[color:var(--color-danger-fg)]"
+                      onClick={() => setIsDeleteCloudDialogOpen(true)}
+                    >
+                      <CloudDownload className="h-4 w-4" />
+                      Xóa dữ liệu tài khoản
+                    </Button>
+                  </div>
+                ) : null}
+
+                <div className="grid gap-3 px-4 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+                  <div>
+                    <p className="text-sm font-semibold text-app-ink">Xóa toàn bộ dữ liệu trong app</p>
+                    <p className="mt-1 text-xs leading-5 text-app-ink-muted">
+                      Xóa dữ liệu local và, nếu đã đăng nhập, xóa dữ liệu cloud trước khi quay về trạng thái mới.
+                    </p>
+                  </div>
                   <Button
                     type="button"
                     className="bg-[color:var(--color-danger-fg)] text-white hover:bg-[color:var(--color-danger-fg)]/90 focus-visible:ring-[color:var(--color-danger-border)]"
@@ -969,7 +1124,16 @@ export function SettingsPage() {
                     <Trash2 className="h-4 w-4" />
                     Xóa tất cả dữ liệu
                   </Button>
-                  {isConfigured && user ? (
+                </div>
+
+                {isConfigured && user ? (
+                  <div className="grid gap-3 px-4 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+                    <div>
+                      <p className="text-sm font-semibold text-app-ink">Xóa tài khoản</p>
+                      <p className="mt-1 text-xs leading-5 text-app-ink-muted">
+                        Xóa hoặc vô hiệu hóa tài khoản theo khả năng backend/Firebase, rồi đăng xuất khỏi app.
+                      </p>
+                    </div>
                     <Button
                       type="button"
                       variant="outline"
@@ -980,40 +1144,34 @@ export function SettingsPage() {
                       <ShieldAlert className="h-4 w-4" />
                       Xóa tài khoản
                     </Button>
-                  ) : null}
-                </div>
+                  </div>
+                ) : null}
               </div>
             </div>
           </div>
-        </section>
+        </SettingsSection>
 
-        <section
-          className="surface-raised rounded-card-lg border border-app-line bg-app-surface p-5 sm:p-6"
-          aria-label="Thông tin ứng dụng"
-        >
-          <h2 className="font-serif text-xl font-medium text-app-ink">
-            Thông tin
-          </h2>
+        <section className="border-t border-app-line pt-5" aria-label="Thông tin ứng dụng">
+          <h2 className="text-base font-semibold text-app-ink">Thông tin</h2>
           <p className="mt-2 text-xs leading-5 text-app-ink-muted">
-            Phiên bản v0.4 · Vision Board Web Platform · local-first 12-Week
-            Year.
+            Phiên bản v0.4 · Vision Board Web Platform · local-first 12-Week Year.
           </p>
           <div className="mt-4 flex flex-wrap gap-3 text-xs font-medium text-app-ink-soft">
             <Link
               to="/privacy"
-              className="rounded-full border border-app-line bg-app-bg px-3 py-1.5 hover:text-app-accent"
+              className="rounded-full border border-app-line bg-app-surface px-3 py-1.5 hover:text-app-accent"
             >
               Bảo mật
             </Link>
             <Link
               to="/terms"
-              className="rounded-full border border-app-line bg-app-bg px-3 py-1.5 hover:text-app-accent"
+              className="rounded-full border border-app-line bg-app-surface px-3 py-1.5 hover:text-app-accent"
             >
               Điều khoản
             </Link>
             <Link
               to="/billing/faq"
-              className="rounded-full border border-app-line bg-app-bg px-3 py-1.5 hover:text-app-accent"
+              className="rounded-full border border-app-line bg-app-surface px-3 py-1.5 hover:text-app-accent"
             >
               Hỏi đáp thanh toán
             </Link>
@@ -1021,38 +1179,55 @@ export function SettingsPage() {
         </section>
       </div>
 
-      <AlertDialog
-        open={Boolean(recoverySnapshotKey)}
-        onOpenChange={(open) => !open && setRecoverySnapshotKey(null)}
-      >
+      <DeleteCloudWorkspaceDialog
+        open={isDeleteCloudDialogOpen}
+        onOpenChange={setIsDeleteCloudDialogOpen}
+        onConfirm={handleDeleteCloudWorkspaceOnly}
+        isLoading={isDeletingCloudWorkspace}
+      />
+
+      <AlertDialog open={isClearLocalSignalsDialogOpen} onOpenChange={setIsClearLocalSignalsDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Khôi phục dữ liệu cũ?</AlertDialogTitle>
+            <AlertDialogTitle>Xóa dữ liệu tạm trên thiết bị?</AlertDialogTitle>
             <AlertDialogDescription>
-              Dữ liệu hiện tại trên thiết bị này sẽ được thay bằng bản sao dữ
-              liệu cũ. Hãy tải backup thiết bị trước nếu bạn muốn giữ cả hai
-              phiên bản.
+              Hành động này xóa nhật ký thao tác, hàng chờ đồng bộ và trạng thái nhắc việc cục bộ. Mục tiêu, kế hoạch,
+              check-in và review chính vẫn được giữ.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Quay lại</AlertDialogCancel>
-            <AlertDialogAction onClick={handleRestoreMigrationBackup}>
-              Khôi phục dữ liệu cũ
+            <AlertDialogAction
+              onClick={handleClearLocalSignals}
+              className="bg-[color:var(--color-danger-fg)] text-white hover:bg-[color:var(--color-danger-fg)]/90"
+            >
+              Xóa dữ liệu tạm
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog
-        open={isDeleteAccountDialogOpen}
-        onOpenChange={handleDeleteAccountDialogChange}
-      >
+      <AlertDialog open={Boolean(recoverySnapshotKey)} onOpenChange={(open) => !open && setRecoverySnapshotKey(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Khôi phục dữ liệu cũ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Dữ liệu hiện tại trên thiết bị này sẽ được thay bằng bản sao dữ liệu cũ. Hãy tải backup thiết bị trước nếu
+              bạn muốn giữ cả hai phiên bản.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Quay lại</AlertDialogCancel>
+            <AlertDialogAction onClick={handleRestoreMigrationBackup}>Khôi phục dữ liệu cũ</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={isDeleteAccountDialogOpen} onOpenChange={handleDeleteAccountDialogChange}>
         <AlertDialogContent data-testid="settings-delete-account-dialog">
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {deleteAccountConfirmStep === "review"
-                ? "Xóa tài khoản và dữ liệu?"
-                : "Xác nhận xóa tài khoản lần cuối"}
+              {deleteAccountConfirmStep === "review" ? "Xóa tài khoản và dữ liệu?" : "Xác nhận xóa tài khoản lần cuối"}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {deleteAccountConfirmStep === "review"
@@ -1061,9 +1236,7 @@ export function SettingsPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeletingAccount}>
-              Quay lại
-            </AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeletingAccount}>Quay lại</AlertDialogCancel>
             {deleteAccountConfirmStep === "review" ? (
               <AlertDialogAction
                 disabled={isDeletingAccount}
@@ -1085,9 +1258,7 @@ export function SettingsPage() {
                 }}
                 className="bg-[color:var(--color-danger-fg)] text-white hover:bg-[color:var(--color-danger-fg)]/90"
               >
-                {isDeletingAccount ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : null}
+                {isDeletingAccount ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                 Xóa tài khoản
               </AlertDialogAction>
             )}
@@ -1095,16 +1266,11 @@ export function SettingsPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog
-        open={isClearDataDialogOpen}
-        onOpenChange={handleClearDataDialogChange}
-      >
+      <AlertDialog open={isClearDataDialogOpen} onOpenChange={handleClearDataDialogChange}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {clearDataConfirmStep === "review"
-                ? "Xóa tất cả dữ liệu trên thiết bị?"
-                : "Xác nhận lần cuối"}
+              {clearDataConfirmStep === "review" ? "Xóa tất cả dữ liệu trên thiết bị?" : "Xác nhận lần cuối"}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {clearDataConfirmStep === "review"

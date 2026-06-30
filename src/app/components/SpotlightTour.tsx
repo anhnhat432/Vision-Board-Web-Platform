@@ -219,6 +219,9 @@ function useTargetRect(open: boolean, targetId: string | undefined) {
       return undefined;
     }
 
+    let rafId: number | null = null;
+    let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+
     const updateTargetRect = () => {
       const target = getTourTarget(targetId);
       if (!target) {
@@ -251,16 +254,30 @@ function useTargetRect(open: boolean, targetId: string | undefined) {
       });
     };
 
-    updateTargetRect();
-    const settleTimer = window.setTimeout(updateTargetRect, 360);
+    const scheduleUpdate = () => {
+      if (rafId !== null) return;
+      if (debounceTimer !== null) {
+        clearTimeout(debounceTimer);
+        debounceTimer = null;
+      }
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        updateTargetRect();
+      });
+    };
 
-    window.addEventListener("resize", updateTargetRect);
-    window.addEventListener("scroll", updateTargetRect, true);
+    updateTargetRect();
+    const settleTimer = window.setTimeout(scheduleUpdate, 360);
+
+    window.addEventListener("resize", scheduleUpdate);
+    window.addEventListener("scroll", scheduleUpdate, true);
 
     return () => {
       window.clearTimeout(settleTimer);
-      window.removeEventListener("resize", updateTargetRect);
-      window.removeEventListener("scroll", updateTargetRect, true);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      if (debounceTimer !== null) clearTimeout(debounceTimer);
+      window.removeEventListener("resize", scheduleUpdate);
+      window.removeEventListener("scroll", scheduleUpdate, true);
     };
   }, [open, targetId]);
 
@@ -426,7 +443,7 @@ export function SpotlightTour({ open, onOpenChange, title, description, steps }:
           <DialogPrimitive.Content
             aria-describedby={`spotlight-tour-description-${step.id}`}
             aria-labelledby={`spotlight-tour-title-${step.id}`}
-            className="fixed max-h-[calc(100vh-2rem)] overflow-y-auto rounded-[22px] border border-app-line bg-app-surface/95 text-app-ink shadow-app-lg ring-1 ring-app-line/70 backdrop-blur-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+className="fixed max-h-[calc(100vh-2rem)] overflow-y-auto rounded-[22px] border border-app-line bg-app-surface/95 text-app-ink shadow-app-lg ring-1 ring-app-line/70 backdrop-blur-sm max-sm:backdrop-blur-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
             onEscapeKeyDown={(event) => {
               event.preventDefault();
               closeTour();

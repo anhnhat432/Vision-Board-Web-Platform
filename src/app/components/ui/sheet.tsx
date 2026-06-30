@@ -38,8 +38,8 @@ const SheetOverlay = React.forwardRef<
     <SheetPrimitive.Overlay
       ref={ref}
       data-slot="sheet-overlay"
-      className={cn(
-        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-app-ink/60 backdrop-blur-sm",
+className={cn(
+        "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-app-ink/60 backdrop-blur-[1px] max-sm:backdrop-blur-none motion-reduce:animate-none motion-reduce:backdrop-blur-none",
         className,
       )}
       {...props}
@@ -60,8 +60,8 @@ const SheetContent = React.forwardRef<
       <SheetPrimitive.Content
         ref={ref}
         data-slot="sheet-content"
-        className={cn(
-          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out fixed z-50 flex flex-col gap-4 shadow-lg transition ease-in-out data-[state=closed]:duration-200 data-[state=open]:duration-300",
+className={cn(
+          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out fixed z-50 flex flex-col gap-4 shadow-lg transition ease-in-out data-[state=closed]:duration-150 data-[state=open]:duration-200 max-sm:duration-150 motion-reduce:transition-none motion-reduce:animate-none will-change-transform",
           side === "right" &&
             "data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right inset-y-0 right-0 h-full w-3/4 rounded-l-[var(--r-card)] border-l sm:max-w-sm",
           side === "left" &&

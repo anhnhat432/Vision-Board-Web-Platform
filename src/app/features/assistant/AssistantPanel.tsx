@@ -431,7 +431,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 50 }}
         transition={{ duration: 0.2 }}
-        className="fixed inset-x-0 bottom-0 z-[60] flex flex-col overflow-hidden border border-emerald-200/70 dark:border-emerald-400/15 rounded-t-[28px] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(247,255,251,0.86))] dark:bg-[linear-gradient(180deg,rgba(15,23,20,0.94),rgba(7,20,18,0.9))] backdrop-blur-2xl shadow-[0_24px_80px_rgba(15,118,110,0.22),0_3px_18px_rgba(15,23,42,0.08)] dark:shadow-[0_24px_80px_rgba(0,0,0,0.52)] sm:bottom-6 sm:left-auto sm:right-6 sm:inset-x-auto sm:w-[420px] sm:max-w-[calc(100vw-3rem)] sm:rounded-[28px] transition-all duration-300"
+        className="fixed inset-x-0 bottom-0 z-[60] flex flex-col overflow-hidden border border-emerald-200/70 dark:border-emerald-400/15 rounded-t-[28px] bg-[linear-gradient(180deg,rgba(255,255,255,0.92),rgba(247,255,251,0.86))] dark:bg-[linear-gradient(180deg,rgba(15,23,20,0.94),rgba(7,20,18,0.9))] backdrop-blur-md shadow-[0_24px_80px_rgba(15,118,110,0.22),0_3px_18px_rgba(15,23,42,0.08)] dark:shadow-[0_24px_80px_rgba(0,0,0,0.52)] sm:bottom-6 sm:left-auto sm:right-6 sm:inset-x-auto sm:w-[420px] sm:max-w-[calc(100vw-3rem)] sm:rounded-[28px] transition-all duration-300"
         style={{ height: "min(80vh, 720px)" }}
         role="dialog"
         aria-modal="true"
@@ -541,7 +541,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                           className={`min-w-[8rem] max-w-[86%] rounded-[22px] px-4 py-2.5 text-[14.5px] leading-relaxed shadow-sm transition-[border-color,box-shadow,transform] duration-200 ${
                             message.role === "user"
                               ? "rounded-br-[7px] bg-gradient-to-br from-emerald-500 via-teal-600 to-emerald-800 text-white font-semibold shadow-[0_10px_26px_rgba(0,137,102,0.22)] ring-1 ring-white/20"
-                              : "rounded-bl-[7px] bg-[linear-gradient(135deg,rgba(255,255,255,0.92),rgba(239,253,247,0.9))] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.07),rgba(16,185,129,0.06))] backdrop-blur-xl border border-emerald-100/90 dark:border-emerald-400/15 text-app-ink shadow-[inset_3px_0_0_rgba(16,185,129,0.42),0_14px_34px_rgba(15,118,110,0.08)] dark:shadow-[inset_3px_0_0_rgba(52,211,153,0.55),0_14px_34px_rgba(0,0,0,0.22)] px-4.5 py-3"
+: "rounded-bl-[7px] bg-[linear-gradient(135deg,rgba(255,255,255,0.92),rgba(239,253,247,0.9))] dark:bg-[linear-gradient(135deg,rgba(255,255,255,0.07),rgba(16,185,129,0.06))] backdrop-blur-sm max-sm:backdrop-blur-none border border-emerald-100/90 dark:border-emerald-400/15 text-app-ink shadow-[inset_3px_0_0_rgba(16,185,129,0.42),0_14px_34px_rgba(15,118,110,0.08)] dark:shadow-[inset_3px_0_0_rgba(52,211,153,0.55),0_14px_34px_rgba(0,0,0,0.22)] px-4.5 py-3"
                           }`}
                         >
                           {message.role === "user" ? (
@@ -873,7 +873,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
                 {isShowingCommands && (
                   <div
                     ref={dropdownRef}
-                    className="absolute bottom-full left-0 right-0 mb-2 max-h-60 overflow-y-auto rounded-2xl border border-emerald-100/90 bg-white/95 backdrop-blur-xl shadow-[0_18px_48px_rgba(15,118,110,0.18)] z-10 dark:border-white/10 dark:bg-app-surface/95"
+className="absolute bottom-full left-0 right-0 mb-2 max-h-60 overflow-y-auto rounded-2xl border border-emerald-100/90 bg-white/95 backdrop-blur-sm max-sm:backdrop-blur-none shadow-[0_18px_48px_rgba(15,118,110,0.18)] z-10 dark:border-white/10 dark:bg-app-surface/95"
                   >
                     {filteredCommands.map((cmd, idx) => (
                       <button

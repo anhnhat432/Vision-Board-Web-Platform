@@ -196,6 +196,34 @@ describe("TwelveWeekTodayTab — primary task hero", () => {
     const hero = screen.getByTestId("today-primary-hero");
     expect(hero).toHaveTextContent(/Tuyệt vời! Bạn đã hoàn thành việc quan trọng nhất hôm nay/i);
   });
+
+  it("keeps the celebration hero and hides the next-action panel when the primary task is completed (no duplicate save CTA)", () => {
+    const completed = makeTask({ completed: true });
+    render(
+      <TwelveWeekTodayTab
+        {...makeProps({
+          todayQueue: [completed],
+          firstPriorityTask: completed,
+          todayCompletedCount: 1,
+        })}
+      />,
+    );
+
+    // Hero handles the post-completion guidance...
+    expect(screen.getByTestId("today-primary-hero")).toBeInTheDocument();
+    // ...so the next-action panel must not double up with its own save CTA.
+    expect(screen.queryByTestId("today-next-action-panel")).toBeNull();
+    // Single save check-in CTA lives only in the check-in card.
+    expect(screen.getAllByRole("button", { name: /Lưu check-in/i })).toHaveLength(1);
+  });
+
+  it("shows the week-context chip in the command bar", () => {
+    render(<TwelveWeekTodayTab {...makeProps({ currentWeek: 4 })} />);
+    const strip = screen.getByTestId("today-dashboard-cards");
+    const weekChip = within(strip).getByText(/\/12$/);
+    expect(weekChip).toBeInTheDocument();
+    expect(strip).toHaveTextContent(/Tuần\s*4\s*\/12/);
+  });
 });
 
 describe("TwelveWeekTodayTab — Performance Time Blocking", () => {

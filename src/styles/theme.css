@@ -656,10 +656,18 @@
    * Convenience classes for the 4 semantic gradients defined
    * in tokens.css Layer 2. Use these instead of inline styles.
    * ───────────────────────────────────────────────────────── */
-  .bg-grad-aspire { background: var(--grad-aspire); }
-  .bg-grad-celebrate { background: var(--grad-celebrate); }
-  .bg-grad-vision { background: var(--grad-vision); }
-  .bg-grad-surface { background: var(--grad-surface); }
+  .bg-grad-aspire {
+    background: var(--grad-aspire);
+  }
+  .bg-grad-celebrate {
+    background: var(--grad-celebrate);
+  }
+  .bg-grad-vision {
+    background: var(--grad-vision);
+  }
+  .bg-grad-surface {
+    background: var(--grad-surface);
+  }
 
   .app-shell {
     position: relative;
@@ -3711,39 +3719,79 @@ html.theme-transitioning *::after {
 /* ── Respect reduced motion ───────────────────────────────── */
 /* ── 12 Week System: staggered card entrance ────────────────── */
 @keyframes dof-rise {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes dof-ring {
-  0% { transform: scale(0.85); opacity: 0.55; }
-  100% { transform: scale(1.15); opacity: 0; }
+  0% {
+    transform: scale(0.85);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(1.15);
+    opacity: 0;
+  }
 }
 .tab-pane > * {
   animation: dof-rise 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
-.tab-pane > *:nth-child(1)  { animation-delay: 0.02s; }
-.tab-pane > *:nth-child(2)  { animation-delay: 0.07s; }
-.tab-pane > *:nth-child(3)  { animation-delay: 0.12s; }
-.tab-pane > *:nth-child(4)  { animation-delay: 0.17s; }
-.tab-pane > *:nth-child(5)  { animation-delay: 0.22s; }
-.tab-pane > *:nth-child(6)  { animation-delay: 0.27s; }
-.tab-pane > *:nth-child(7)  { animation-delay: 0.32s; }
-.tab-pane > *:nth-child(8)  { animation-delay: 0.37s; }
-.tab-pane > *:nth-child(n+9) { animation-delay: 0.42s; }
+.tab-pane > *:nth-child(1) {
+  animation-delay: 0.02s;
+}
+.tab-pane > *:nth-child(2) {
+  animation-delay: 0.07s;
+}
+.tab-pane > *:nth-child(3) {
+  animation-delay: 0.12s;
+}
+.tab-pane > *:nth-child(4) {
+  animation-delay: 0.17s;
+}
+.tab-pane > *:nth-child(5) {
+  animation-delay: 0.22s;
+}
+.tab-pane > *:nth-child(6) {
+  animation-delay: 0.27s;
+}
+.tab-pane > *:nth-child(7) {
+  animation-delay: 0.32s;
+}
+.tab-pane > *:nth-child(8) {
+  animation-delay: 0.37s;
+}
+.tab-pane > *:nth-child(n + 9) {
+  animation-delay: 0.42s;
+}
 
 /* ── Life Balance: radar chart entrance animation ────────────── */
 @keyframes dof-radar-in {
-  from { opacity: 0; transform: scale(0.45); }
-  to   { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.45);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 .dof-radar-grp {
   transform-origin: 220px 200px;
   animation: dof-radar-in 1.1s cubic-bezier(0.2, 0.7, 0.2, 1) 0.45s both;
 }
 @keyframes dof-dot {
-  0%   { r: 0; }
-  100% { r: 4; }
+  0% {
+    r: 0;
+  }
+  100% {
+    r: 4;
+  }
 }
 .dof-radar-grp circle {
   animation: dof-dot 0.5s ease-out 0.9s both;
@@ -3761,8 +3809,12 @@ html.theme-transitioning *::after {
 
 /* ── 12 Week System: progress bar grow animation ────────────── */
 @keyframes dof-bar {
-  from { transform: scaleX(0); }
-  to   { transform: scaleX(1); }
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }
 .tab-pane .bar-fill {
   transform-origin: left center;
@@ -3771,8 +3823,12 @@ html.theme-transitioning *::after {
 
 /* ── 12 Week System: hero gauge draw animation ──────────────── */
 @keyframes dof-gauge {
-  from { stroke-dashoffset: var(--tws-gauge-max, 339); }
-  to   { stroke-dashoffset: var(--tws-gauge-target, 283); }
+  from {
+    stroke-dashoffset: var(--tws-gauge-max, 339);
+  }
+  to {
+    stroke-dashoffset: var(--tws-gauge-target, 283);
+  }
 }
 .tab-pane .dof-gauge {
   animation: dof-gauge 1.4s cubic-bezier(0.2, 0.7, 0.2, 1) 0.35s both;
@@ -3780,8 +3836,15 @@ html.theme-transitioning *::after {
 
 /* ── 12 Week System: glow pulse on hero gauge ───────────────── */
 @keyframes dof-glow {
-  0%, 100% { opacity: 0.45; transform: scale(0.95); }
-  50%      { opacity: 0.85; transform: scale(1.05); }
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.05);
+  }
 }
 .tab-pane .dof-glow {
   animation: dof-glow 4s ease-in-out infinite;
@@ -3789,7 +3852,9 @@ html.theme-transitioning *::after {
 
 /* ── 12 Week System: Zen path draw animation ────────────────── */
 @keyframes dof-draw {
-  to { stroke-dashoffset: 0; }
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 .tab-pane .dof-path {
   stroke-dasharray: 900;
@@ -3799,16 +3864,29 @@ html.theme-transitioning *::after {
 
 /* ── 12 Week System: campfire pulse ─────────────────────────── */
 @keyframes dof-fire {
-  0%, 100% { r: 13; opacity: 1; }
-  50%      { r: 15; opacity: 0.85; }
+  0%,
+  100% {
+    r: 13;
+    opacity: 1;
+  }
+  50% {
+    r: 15;
+    opacity: 0.85;
+  }
 }
 .tab-pane .dof-fire {
   animation: dof-fire 1.8s ease-in-out infinite;
 }
 
 @keyframes dof-fire-ring {
-  0%   { r: 13; opacity: 0.5; }
-  100% { r: 26; opacity: 0; }
+  0% {
+    r: 13;
+    opacity: 0.5;
+  }
+  100% {
+    r: 26;
+    opacity: 0;
+  }
 }
 .tab-pane .dof-fire-ring {
   animation: dof-fire-ring 1.8s ease-out infinite;
@@ -3825,29 +3903,56 @@ html.theme-transitioning *::after {
   .tab-pane .dof-fire-ring {
     animation: none !important;
   }
-  .tab-pane .bar-fill { transform: none; }
-  .tab-pane .dof-path { stroke-dashoffset: 0; }
+  .tab-pane .bar-fill {
+    transform: none;
+  }
+  .tab-pane .dof-path {
+    stroke-dashoffset: 0;
+  }
 }
 
 /* ── Vision Board: animations & utilities ────────────────────── */
 @keyframes dof-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-7px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-7px);
+  }
 }
 
 @keyframes dof-glow {
-  0%, 100% { opacity: 0.4; transform: scale(0.96); }
-  50% { opacity: 0.8; transform: scale(1.04); }
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.04);
+  }
 }
 
 @keyframes dof-rise {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes dof-bob {
-  0%, 100% { transform: translateY(0) rotate(0); }
-  50% { transform: translateY(-2px) rotate(-4deg); }
+  0%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+  50% {
+    transform: translateY(-2px) rotate(-4deg);
+  }
 }
 
 /* Vision Board custom scrollbar */
@@ -3872,23 +3977,47 @@ html.theme-transitioning *::after {
 .achievements-stagger > * {
   animation: dof-rise 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
-.achievements-stagger > *:nth-child(1) { animation-delay: 0.02s; }
-.achievements-stagger > *:nth-child(2) { animation-delay: 0.08s; }
-.achievements-stagger > *:nth-child(3) { animation-delay: 0.14s; }
-.achievements-stagger > *:nth-child(4) { animation-delay: 0.20s; }
-.achievements-stagger > *:nth-child(n+5) { animation-delay: 0.26s; }
+.achievements-stagger > *:nth-child(1) {
+  animation-delay: 0.02s;
+}
+.achievements-stagger > *:nth-child(2) {
+  animation-delay: 0.08s;
+}
+.achievements-stagger > *:nth-child(3) {
+  animation-delay: 0.14s;
+}
+.achievements-stagger > *:nth-child(4) {
+  animation-delay: 0.2s;
+}
+.achievements-stagger > *:nth-child(n + 5) {
+  animation-delay: 0.26s;
+}
 
 /* ── Achievements: stagger animation for badge grid ──────────── */
 .achievements-grid > * {
   animation: dof-rise 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
-.achievements-grid > *:nth-child(1) { animation-delay: 0.10s; }
-.achievements-grid > *:nth-child(2) { animation-delay: 0.16s; }
-.achievements-grid > *:nth-child(3) { animation-delay: 0.22s; }
-.achievements-grid > *:nth-child(4) { animation-delay: 0.28s; }
-.achievements-grid > *:nth-child(5) { animation-delay: 0.34s; }
-.achievements-grid > *:nth-child(6) { animation-delay: 0.40s; }
-.achievements-grid > *:nth-child(7) { animation-delay: 0.46s; }
+.achievements-grid > *:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.achievements-grid > *:nth-child(2) {
+  animation-delay: 0.16s;
+}
+.achievements-grid > *:nth-child(3) {
+  animation-delay: 0.22s;
+}
+.achievements-grid > *:nth-child(4) {
+  animation-delay: 0.28s;
+}
+.achievements-grid > *:nth-child(5) {
+  animation-delay: 0.34s;
+}
+.achievements-grid > *:nth-child(6) {
+  animation-delay: 0.4s;
+}
+.achievements-grid > *:nth-child(7) {
+  animation-delay: 0.46s;
+}
 
 /* ── Achievements: progress bar fill ─────────────────────────── */
 .achievements-bar {
@@ -3898,8 +4027,13 @@ html.theme-transitioning *::after {
 
 /* ── Achievements: seal stamp bounce ─────────────────────────── */
 @keyframes dof-seal {
-  0%, 100% { transform: rotate(-8deg) scale(1); }
-  50% { transform: rotate(-8deg) scale(1.08); }
+  0%,
+  100% {
+    transform: rotate(-8deg) scale(1);
+  }
+  50% {
+    transform: rotate(-8deg) scale(1.08);
+  }
 }
 .achievements-seal {
   animation: dof-seal 3.2s ease-in-out infinite;
@@ -3907,9 +4041,10 @@ html.theme-transitioning *::after {
 
 /* ── Achievements: badge hover transitions ───────────────────── */
 .achievements-badge {
-  transition: box-shadow 0.2s cubic-bezier(0.2, 0.7, 0.2, 1),
-              transform 0.2s cubic-bezier(0.2, 0.7, 0.2, 1),
-              border-color 0.2s;
+  transition:
+    box-shadow 0.2s cubic-bezier(0.2, 0.7, 0.2, 1),
+    transform 0.2s cubic-bezier(0.2, 0.7, 0.2, 1),
+    border-color 0.2s;
 }
 .achievements-badge.unlocked:hover {
   transform: translateY(-3px);
@@ -3928,7 +4063,9 @@ html.theme-transitioning *::after {
   .achievements-seal {
     animation: none !important;
   }
-  .achievements-bar { transform: none; }
+  .achievements-bar {
+    transform: none;
+  }
 }
 
 /* ── Achievements: locked badge surface ──────────────────────── */
@@ -3943,21 +4080,41 @@ html.dark .achievements-badge.locked {
 
 /* ── Onboarding: Dear Our Future design animations ─────────────── */
 @keyframes dof-rise {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 .dof-stagger > * {
   animation: dof-rise 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
-.dof-stagger > *:nth-child(1) { animation-delay: 0.02s; }
-.dof-stagger > *:nth-child(2) { animation-delay: 0.08s; }
-.dof-stagger > *:nth-child(3) { animation-delay: 0.14s; }
-.dof-stagger > *:nth-child(4) { animation-delay: 0.20s; }
-.dof-stagger > *:nth-child(n+5) { animation-delay: 0.26s; }
+.dof-stagger > *:nth-child(1) {
+  animation-delay: 0.02s;
+}
+.dof-stagger > *:nth-child(2) {
+  animation-delay: 0.08s;
+}
+.dof-stagger > *:nth-child(3) {
+  animation-delay: 0.14s;
+}
+.dof-stagger > *:nth-child(4) {
+  animation-delay: 0.2s;
+}
+.dof-stagger > *:nth-child(n + 5) {
+  animation-delay: 0.26s;
+}
 
 @keyframes dof-prog {
-  from { transform: scaleX(0); }
-  to { transform: scaleX(1); }
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
 }
 .dof-prog {
   transform-origin: left center;
@@ -3965,8 +4122,14 @@ html.dark .achievements-badge.locked {
 }
 
 @keyframes dof-wheel-in {
-  from { opacity: 0; transform: scale(0.55) rotate(-12deg); }
-  to { opacity: 1; transform: scale(1) rotate(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.55) rotate(-12deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0);
+  }
 }
 .dof-wheel-grp {
   transform-origin: 190px 190px;
@@ -3974,8 +4137,13 @@ html.dark .achievements-badge.locked {
 }
 
 @keyframes dof-pin {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
 }
 .dof-pin {
   animation: dof-pin 2.4s ease-in-out infinite;
@@ -3983,8 +4151,9 @@ html.dark .achievements-badge.locked {
 
 /* Hover: primary CTA button */
 .dof-primary {
-  transition: transform 0.18s cubic-bezier(0.2, 0.7, 0.2, 1),
-              box-shadow 0.18s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition:
+    transform 0.18s cubic-bezier(0.2, 0.7, 0.2, 1),
+    box-shadow 0.18s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 .dof-primary:hover {
   transform: translateY(-2px);
@@ -3993,8 +4162,9 @@ html.dark .achievements-badge.locked {
 
 /* Hover: mini card */
 .dof-mini {
-  transition: transform 0.15s cubic-bezier(0.2, 0.7, 0.2, 1),
-              border-color 0.15s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition:
+    transform 0.15s cubic-bezier(0.2, 0.7, 0.2, 1),
+    border-color 0.15s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 .dof-mini:hover {
   transform: translateY(-2px);
@@ -4006,7 +4176,7 @@ html.dark .achievements-badge.locked {
   transition: background 0.15s;
 }
 .dof-acc:hover {
-  background: #FAF8F3 !important;
+  background: #faf8f3 !important;
 }
 .dark .dof-acc:hover {
   background: var(--app-bg-subtle) !important;
@@ -4016,13 +4186,15 @@ html.dark .achievements-badge.locked {
 .glass-panel {
   background: var(--app-glass-bg) !important;
 
-
   border: 1px solid var(--app-glass-border) !important;
 }
 
 .dark .glass-panel {
   background: var(--app-glass-bg-dark, rgba(26, 26, 26, 0.88)) !important;
-  border-color: var(--app-glass-border-dark, rgba(255, 255, 255, 0.08)) !important;
+  border-color: var(
+    --app-glass-border-dark,
+    rgba(255, 255, 255, 0.08)
+  ) !important;
 }
 
 .gradient-forest-bg {
@@ -4044,9 +4216,10 @@ html.dark .achievements-badge.locked {
 .glass-panel-hover {
   transform: translate3d(0, 0, 0);
   will-change: transform;
-  transition: transform var(--duration-base) var(--ease-emphasized),
-              box-shadow var(--duration-base) var(--ease-emphasized),
-              border-color var(--duration-base) var(--ease-emphasized) !important;
+  transition:
+    transform var(--duration-base) var(--ease-emphasized),
+    box-shadow var(--duration-base) var(--ease-emphasized),
+    border-color var(--duration-base) var(--ease-emphasized) !important;
 }
 
 .glass-panel-hover:hover {
@@ -4066,7 +4239,9 @@ html.dark .achievements-badge.locked {
   .dof-pin {
     animation: none !important;
   }
-  .dof-prog { transform: none; }
+  .dof-prog {
+    transform: none;
+  }
   .dof-ring {
     animation: none !important;
   }
@@ -4076,4 +4251,45 @@ html.dark .achievements-badge.locked {
 .contain-render-lazy {
   content-visibility: auto;
   contain-intrinsic-size: auto 300px;
+}
+
+/* ─── GoalTracker Studio Animations ─── */
+@keyframes gt-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.gt-fade-up {
+  animation: gt-fade-up 0.4s var(--ease-decelerate) both;
+}
+
+.gt-delay-50 {
+  animation-delay: 50ms;
+}
+
+.gt-delay-100 {
+  animation-delay: 100ms;
+}
+
+.gt-delay-200 {
+  animation-delay: 200ms;
+}
+
+.gt-delay-300 {
+  animation-delay: 300ms;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .gt-fade-up {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
 }
