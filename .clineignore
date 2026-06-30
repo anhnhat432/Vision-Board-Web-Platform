@@ -1,0 +1,46 @@
+# Keep Cline focused on source files and away from large/generated/sensitive data.
+
+# VCS and dependencies
+.git/
+node_modules/
+
+# Build output and test artifacts
+dist/
+build/
+coverage/
+.vite/
+playwright-report/
+test-results/
+artifacts/
+audit/
+qa-artifacts/
+screenshots/
+
+# Local agent/tool state
+.claude/
+.codex/
+.codex-worktrees/
+.kilo/
+.superpowers/
+.kilocode/node_modules/
+.kilocode/package-lock.json
+.kilocode/package.json
+
+# Backups, logs, and temporary files
+backups/
+codex-backups/
+*.log
+*.tmp
+*.temp
+
+# Secrets and local environment files
+.env
+.env.*
+!.env.example
+!.env.sample
+**/*credential*.json
+**/*credentials*.json
+**/*secret*.json
+**/*service-account*.json
+**/*serviceAccount*.json
+**/*firebase-admin*.json
