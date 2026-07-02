@@ -46,7 +46,7 @@ export const PillButton = forwardRef<HTMLButtonElement | HTMLAnchorElement, Pill
 
           variant === "solid" && [
             "bg-app-accent text-white",
-            "shadow-[0_8px_22px_-6px_rgba(12,94,58,0.45)]",
+            "shadow-[0_10px_24px_-16px_rgba(12,94,58,0.62)]",
             "hover:bg-app-accent-hover",
           ],
           variant === "outline" && [
@@ -56,7 +56,7 @@ export const PillButton = forwardRef<HTMLButtonElement | HTMLAnchorElement, Pill
           ],
           variant === "highlight" && [
             "bg-app-highlight text-app-ink",
-            "shadow-[0_10px_26px_-8px_rgba(198,242,78,0.4)]",
+            "shadow-[0_8px_20px_-14px_rgba(23,21,15,0.28)]",
             "hover:brightness-105",
           ],
 

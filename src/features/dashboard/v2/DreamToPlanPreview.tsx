@@ -1,4 +1,4 @@
-import { ArrowRight, Check, Sparkles, Target } from "lucide-react";
+import { ArrowRight, Check, Flame, Target } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useReducedMotion } from "@/app/hooks/useReducedMotion";
 
@@ -152,13 +152,13 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
               : "-translate-y-2 scale-95 opacity-0 pointer-events-none"
           }`}
         >
-          <Sparkles className="size-3 text-app-accent" />
+          <Flame className="size-3 text-app-accent" />
           <span>Streak +1 Ngày! 🔥</span>
         </div>
 
         {/* 🎨 COLUMN 1: Dreamy Vision Board */}
         <div
-          className={`md:flex flex-col justify-between rounded-3xl border border-app-line/80 bg-gradient-to-br from-app-surface to-app-surface/40 p-6 shadow-3xs min-h-[380px] md:min-h-0 relative group hover:shadow-2xs transition-all duration-300 ${
+          className={`md:flex flex-col justify-between rounded-[22px] border border-app-line/80 bg-app-surface p-6 shadow-3xs min-h-[380px] md:min-h-0 relative group hover:shadow-2xs transition-all duration-300 ${
             activeMobileTab === "vision" ? "flex" : "hidden"
           }`}
         >
@@ -201,12 +201,12 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
 
         {/* 🎯 COLUMN 2: SMART Goal Card */}
         <div
-          className={`md:flex flex-col justify-between rounded-3xl border border-app-line/80 bg-app-surface p-6 shadow-3xs min-h-[380px] md:min-h-0 relative group hover:shadow-2xs transition-all duration-300 ${
+          className={`md:flex flex-col justify-between rounded-[22px] border border-app-line/80 bg-app-surface p-6 shadow-3xs min-h-[380px] md:min-h-0 relative group hover:shadow-2xs transition-all duration-300 ${
             activeMobileTab === "smart" ? "flex" : "hidden"
           }`}
         >
           {/* Subtle warm background glow */}
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-app-accent/3 via-transparent to-app-accent/2 opacity-80 rounded-3xl" />
+          <div className="pointer-events-none absolute inset-0 bg-app-accent-soft/10 opacity-80 rounded-[22px]" />
 
           <div className="relative z-10 space-y-4">
             <span className="hidden sm:inline absolute -top-4 -left-2 text-xl filter drop-shadow-[0_1.5px_2px_rgba(0,0,0,0.06)] z-20">
@@ -245,7 +245,7 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
                 </div>
                 <div className="mt-1.5 h-2 w-full rounded-full bg-app-bg-subtle overflow-hidden">
                   <div
-                    className="h-full rounded-full bg-gradient-to-r from-app-accent to-green-600 transition-all duration-500 ease-out"
+                    className="h-full rounded-full bg-app-accent transition-all duration-500 ease-out"
                     style={{ width: isProgressAdvanced ? "67%" : "33%" }}
                   />
                 </div>
@@ -283,7 +283,7 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
 
         {/* ⚡ COLUMN 3: First-Week Action Plan */}
         <div
-          className={`md:flex flex-col justify-between rounded-3xl border border-app-line/80 bg-app-surface p-6 shadow-3xs min-h-[380px] md:min-h-0 relative group hover:shadow-2xs transition-all duration-300 ${
+          className={`md:flex flex-col justify-between rounded-[22px] border border-app-line/80 bg-app-surface p-6 shadow-3xs min-h-[380px] md:min-h-0 relative group hover:shadow-2xs transition-all duration-300 ${
             activeMobileTab === "action" ? "flex" : "hidden"
           }`}
         >
@@ -359,7 +359,7 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
           </div>
 
           <div className="relative z-10 pt-3 border-t border-app-line/50 flex items-center justify-between text-[9px] font-sans text-app-ink-muted font-bold mt-4">
-            <span>● Today Checklist v2</span>
+            <span>● Việc hôm nay</span>
             <span className="text-app-accent font-extrabold">Dành 2 phút mỗi ngày</span>
           </div>
         </div>

@@ -277,15 +277,15 @@ export function LoginPage() {
   const displayError = localError ?? authError;
 
   return (
-    <div className="flex min-h-screen flex-col overflow-x-hidden bg-app-bg">
+    <div className="flex min-h-screen flex-col overflow-x-hidden bg-app-bg bg-[linear-gradient(180deg,var(--app-bg)_0%,color-mix(in_srgb,var(--app-accent-subtle)_30%,var(--app-bg))_100%)]">
       <a href="#login-main" className="skip-to-content">
         Bỏ qua điều hướng
       </a>
       {/* Top bar */}
-      <header className="flex w-full items-center justify-center px-4 py-6">
+      <header className="flex w-full items-center justify-center px-4 py-5">
         <div className="flex flex-col items-center gap-1.5">
           <div className="flex items-center gap-2.5">
-            <div className="flex size-10 items-center justify-center rounded-lg bg-app-accent shadow-app-sm ring-1 ring-app-accent/20">
+            <div className="flex size-10 items-center justify-center rounded-[10px] bg-app-accent shadow-[0_12px_24px_-18px_rgba(12,94,58,0.8)] ring-1 ring-app-accent/20">
               <Target className="h-5 w-5 text-white" />
             </div>
             <span className="text-lg font-semibold tracking-tight text-app-ink">Dear Our Future</span>
@@ -297,24 +297,33 @@ export function LoginPage() {
       <main
         id="login-main"
         aria-label="Đăng nhập"
-        className="flex w-full flex-1 items-center justify-center overflow-x-hidden px-4 pb-12"
+        className="flex w-full flex-1 items-start justify-center overflow-x-hidden px-4 pb-12 pt-8 sm:pt-10 lg:pt-14"
       >
         <div className="w-full max-w-6xl min-w-0">
-          <div className="grid min-w-0 gap-8 lg:grid-cols-[1.1fr_1fr] lg:gap-12">
+          <div className="grid min-w-0 items-stretch gap-8 lg:grid-cols-[1.02fr_minmax(420px,0.9fr)] lg:gap-12">
             {/* Left column - Hero panel (desktop only) */}
-            <div className="hidden lg:block">
-              <div className="rounded-[14px] border border-app-line/15 bg-grad-aspire p-8 text-white">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">{captionText}</p>
+            <div className="hidden lg:flex">
+              <div className="relative flex min-h-[520px] w-full flex-col overflow-hidden rounded-card-lg border border-white/10 bg-[#0C5E3A] p-8 text-white shadow-[0_26px_70px_-44px_rgba(12,94,58,0.75)]">
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 bg-[radial-gradient(rgba(255,255,255,0.09)_1px,transparent_1px)] bg-[size:18px_18px] opacity-45"
+                />
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -right-20 -top-20 h-72 w-72 rounded-full border border-white/10"
+                />
+                <div className="relative z-10">
+                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-highlight">{captionText}</p>
                 <h1 className="mt-3 font-serif text-3xl font-medium leading-tight tracking-tight text-white max-w-md">
                   {heroTitle}
                 </h1>
                 <p className="mt-3 text-sm text-white/80 max-w-md">{heroSubline}</p>
 
                 {/* Trust features */}
-                <div className="mt-8 grid grid-cols-1 gap-3 max-w-sm">
+                <div className="mt-8 grid max-w-sm grid-cols-1 gap-3">
                   {TRUST_FEATURES.map(({ icon: Icon, title, sub }) => (
-                    <div key={title} className="flex items-start gap-3">
-                      <div className="flex size-9 items-center justify-center rounded-lg bg-app-surface/15 text-white shrink-0">
+                    <div key={title} className="flex items-start gap-3 rounded-[12px] border border-white/10 bg-white/[0.055] p-3">
+                      <div className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-white/[0.12] text-app-highlight">
                         <Icon className="h-5 w-5" />
                       </div>
                       <div>
@@ -324,9 +333,10 @@ export function LoginPage() {
                     </div>
                   ))}
                 </div>
+                </div>
 
                 {/* Quote */}
-                <blockquote className="mt-10 font-serif italic text-sm text-white/60 max-w-md leading-relaxed">
+                <blockquote className="relative z-10 mt-auto max-w-md rounded-[14px] border border-white/12 bg-white/[0.06] px-4 py-3 font-serif text-sm italic leading-relaxed text-white/76">
                   "Kỷ luật là cây cầu giữa mục tiêu và thành quả." — Jim Rohn
                 </blockquote>
               </div>
@@ -346,13 +356,13 @@ export function LoginPage() {
                     </h1>
                   </div>
 
-                  {/* 3 trust chip ngang scrollable trên mobile */}
-                  <div className="mt-5 -mx-4 px-4 overflow-x-auto">
-                    <ul className="flex gap-2 w-max">
+                  {/* 3 trust chip trên mobile */}
+                  <div className="mt-5">
+                    <ul className="flex flex-wrap justify-center gap-2">
                       {TRUST_FEATURES.map(({ icon: Icon, title }) => (
                         <li
                           key={title}
-                          className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1.5 text-xs text-app-ink-soft whitespace-nowrap"
+                          className="inline-flex items-center gap-1.5 rounded-[10px] border border-app-line bg-app-surface px-3 py-1.5 text-xs text-app-ink-soft shadow-[0_8px_18px_-18px_rgba(23,21,15,0.28)]"
                         >
                           <Icon className="h-3.5 w-3.5 text-app-accent" />
                           {title}
@@ -362,7 +372,7 @@ export function LoginPage() {
                   </div>
                 </div>
 
-                <div className="rounded-[14px] border border-app-line bg-app-surface p-6 md:p-8">
+                <div className="rounded-card-lg border border-app-line bg-app-surface p-6 shadow-[0_18px_42px_-34px_rgba(23,21,15,0.28)] md:p-8">
                   {/* Form header */}
                   <div>
                     <h2 className="font-serif text-2xl font-medium text-app-ink">{formTitle}</h2>
@@ -370,10 +380,10 @@ export function LoginPage() {
                   </div>
 
                   {/* Mode switch */}
-                  <div className="mt-5 inline-flex w-full gap-1 p-1 rounded-full border border-app-line bg-app-bg">
+                  <div className="mt-5 inline-flex w-full gap-1 rounded-[var(--r-control)] border border-app-line bg-app-bg p-1">
                     <Link
                       to={{ pathname: "/login", search: "" }}
-                      className={`flex-1 text-sm font-medium text-center py-1.5 px-4 rounded-full transition-colors duration-150 ${
+                      className={`flex-1 rounded-[9px] px-4 py-1.5 text-center text-sm font-medium transition-colors duration-150 ${
                         isSignIn ? "bg-app-surface text-app-ink shadow-app-sm" : "text-app-ink-soft hover:text-app-ink"
                       }`}
                     >
@@ -381,7 +391,7 @@ export function LoginPage() {
                     </Link>
                     <Link
                       to={{ pathname: "/login", search: "?mode=signup" }}
-                      className={`flex-1 text-sm font-medium text-center py-1.5 px-4 rounded-full transition-colors duration-150 ${
+                      className={`flex-1 rounded-[9px] px-4 py-1.5 text-center text-sm font-medium transition-colors duration-150 ${
                         !isSignIn ? "bg-app-surface text-app-ink shadow-app-sm" : "text-app-ink-soft hover:text-app-ink"
                       }`}
                     >
@@ -393,7 +403,7 @@ export function LoginPage() {
                     type="button"
                     onClick={handleGoogleLogin}
                     disabled={googleSubmitting || authLoading}
-                    className="mt-5 flex w-full items-center justify-center gap-2.5 rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg disabled:cursor-not-allowed disabled:bg-app-line disabled:text-app-ink-muted disabled:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                    className="mt-5 flex min-h-11 w-full items-center justify-center gap-2.5 rounded-[var(--r-control)] border border-app-line bg-app-surface px-4 py-2.5 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg disabled:cursor-not-allowed disabled:bg-app-line disabled:text-app-ink-muted disabled:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                     aria-label="Tiếp tục với Google"
                   >
                     {googleSubmitting ? (

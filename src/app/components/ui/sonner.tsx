@@ -18,7 +18,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       toastOptions={{
         classNames: {
           toast:
-            "group toast rounded-[var(--r-card)] border border-app-line bg-app-surface text-sm font-medium text-app-ink shadow-2xl ring-1 ring-app-ink/5 backdrop-blur-xl dark:border-app-line dark:bg-app-bg dark:text-app-ink dark:ring-app-ink/10",
+            "group toast rounded-[var(--r-card)] border border-app-line bg-app-surface text-sm font-medium text-app-ink shadow-app-lg ring-1 ring-app-ink/5 backdrop-blur-xl dark:border-app-line dark:bg-app-bg dark:text-app-ink dark:ring-app-ink/10",
           description: "text-app-ink-muted text-[0.82rem]",
           actionButton: "rounded-[var(--r-pill)] bg-primary px-3 text-xs font-semibold text-primary-foreground",
           cancelButton:

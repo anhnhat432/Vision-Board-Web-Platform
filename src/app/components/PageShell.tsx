@@ -28,10 +28,9 @@ interface PageShellProps {
 export function PageShell({ children, maxWidth = "lg", className, outerClassName }: PageShellProps) {
   return (
     <div
-      className={cn("min-h-screen px-4 pb-12 sm:px-6 lg:px-8", outerClassName)}
-      style={{ paddingTop: "var(--space-section)" }}
+      className={cn("min-h-screen px-4 pt-6 pb-14 sm:px-6 sm:pt-8 sm:pb-16 lg:px-10 lg:pt-10", outerClassName)}
     >
-      <div className={cn("mx-auto w-full", PAGE_SHELL_MAX_WIDTH[maxWidth], className)}>{children}</div>
+      <div className={cn("mx-auto w-full min-w-0", PAGE_SHELL_MAX_WIDTH[maxWidth], className)}>{children}</div>
     </div>
   );
 }

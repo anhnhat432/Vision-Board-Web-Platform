@@ -6,8 +6,8 @@ import {
   CalendarDays,
   CheckCircle2,
   Flag,
+  Gauge,
   Minus,
-  Sparkles,
   Target,
 } from "lucide-react";
 import { interpretProgressTrend, type ProgressTrendInterpretation } from "@/features/plan12week/logic";
@@ -50,34 +50,34 @@ function getNarrativeStyle(level: ProgressTrendInterpretation["level"]) {
     case "on_track":
       return {
         container:
-          "border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white dark:bg-app-surface rounded-card",
+          "border-[rgba(23,21,15,0.08)] dark:border-app-line bg-app-surface rounded-card",
         badge: "border-app-accent/15 bg-app-accent-soft/80 text-app-accent px-3 py-1 rounded-full",
         badgeLabel: "Đang đúng nhịp",
       };
     case "early":
       return {
         container:
-          "border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white dark:bg-app-surface rounded-card",
+          "border-[rgba(23,21,15,0.08)] dark:border-app-line bg-app-surface rounded-card",
         badge: "border-app-accent/15 bg-app-accent-soft/80 text-app-accent px-3 py-1 rounded-full",
         badgeLabel: "Mới bắt đầu",
       };
     case "slowing":
       return {
         container:
-          "border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white dark:bg-app-surface rounded-card",
+          "border-[rgba(23,21,15,0.08)] dark:border-app-line bg-app-surface rounded-card",
         badge: "border-app-warm/20 bg-app-warm-soft/80 text-app-warm-strong px-3 py-1 rounded-full",
         badgeLabel: "Cần chú ý",
       };
     case "at_risk":
       return {
         container:
-          "border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white dark:bg-app-surface rounded-card",
+          "border-[rgba(23,21,15,0.08)] dark:border-app-line bg-app-surface rounded-card",
         badge: "border-app-warm/25 bg-app-warm-soft text-app-warm-strong px-3 py-1 rounded-full",
         badgeLabel: "Cần quay lại nhịp",
       };
     default:
       return {
-        container: "border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white dark:bg-app-surface rounded-card",
+        container: "border-[rgba(23,21,15,0.08)] dark:border-app-line bg-app-surface rounded-card",
         badge: "border-app-line bg-app-bg text-app-ink-soft px-3 py-1 rounded-full",
         badgeLabel: "Chưa có dữ liệu",
       };
@@ -180,7 +180,7 @@ export function ProgressSummaryCard({
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <p className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-app-ink-muted">
-                <Sparkles className="h-3.5 w-3.5 text-app-accent" />
+                <Gauge className="h-3.5 w-3.5 text-app-accent" />
                 Trạng thái nhịp tuần này
               </p>
               <p className="mt-2 font-serif text-lg font-bold leading-snug text-app-ink sm:text-xl">
@@ -314,7 +314,7 @@ export function ProgressSummaryCard({
       </div>
 
       {/* 3. BẢN ĐỒ CHU KỲ (TIMELINE 12 TUẦN) */}
-      <Card className="rounded-card border border-app-line/60 bg-white dark:bg-app-surface shadow-xs">
+      <Card className="rounded-card border border-app-line/60 bg-app-surface shadow-xs">
         <CardContent className="stack-stack p-5 md:p-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>

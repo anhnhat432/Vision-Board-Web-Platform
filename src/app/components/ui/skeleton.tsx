@@ -8,7 +8,7 @@ function FormSkeleton({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="form-skeleton"
-      className={cn("surface-raised space-y-5 rounded-2xl border border-app-line bg-app-surface p-5 sm:p-6", className)}
+      className={cn("surface-raised space-y-5 rounded-card border border-app-line bg-app-surface p-5 sm:p-6", className)}
       aria-busy="true"
       {...props}
     >

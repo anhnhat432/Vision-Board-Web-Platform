@@ -1,4 +1,4 @@
-import { ChevronDown, CircleAlert, Lightbulb, Sparkles } from "lucide-react";
+import { CheckCircle2, ChevronDown, CircleAlert, Lightbulb } from "lucide-react";
 import type { GoalArchetype } from "@/lib/smart-goal";
 import { getGoalArchetypeExample, getGoalArchetypeLabel } from "@/lib/smart-goal";
 import { cn } from "./ui/utils";
@@ -81,7 +81,7 @@ export function GoalArchetypeExamples({
               >
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider">
                   {isStrong ? (
-                    <Sparkles className="h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
                   ) : (
                     <CircleAlert className="h-4 w-4 shrink-0 text-app-ink-muted" aria-hidden="true" />
                   )}
@@ -99,7 +99,7 @@ export function GoalArchetypeExamples({
             className="rounded-[14px] border border-app-line bg-app-surface/80 p-4 text-sm leading-relaxed text-app-ink-soft"
           >
             <p className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-app-accent">
-              <Sparkles className="h-3.5 w-3.5 animate-pulse" />
+              <Lightbulb className="h-3.5 w-3.5" />
               Việc bắt đầu cho tuần 1
             </p>
             <p className="mt-2 font-medium text-app-ink">{example.week1StarterTask}</p>

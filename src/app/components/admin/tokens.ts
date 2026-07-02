@@ -35,7 +35,7 @@ export const adminFocusRing =
 /** Accent bar colours for stat cards — each card gets a unique top-bar hue. */
 export const statAccentBars = {
   users: "bg-gradient-to-r from-emerald-400 to-teal-500",
-  plus: "bg-gradient-to-r from-violet-400 to-purple-500",
+  plus: "bg-gradient-to-r from-app-accent to-app-warm",
   revenue: "bg-gradient-to-r from-amber-400 to-orange-500",
   orders: "bg-gradient-to-r from-sky-400 to-blue-500",
 } as const;
@@ -43,7 +43,7 @@ export const statAccentBars = {
 /** Icon container gradient backgrounds for stat cards. */
 export const statIconBg = {
   users: "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400",
-  plus: "bg-violet-50 text-violet-600 dark:bg-violet-500/15 dark:text-violet-400",
+  plus: "bg-app-accent-soft text-app-accent dark:bg-app-accent/15 dark:text-app-accent",
   revenue: "bg-amber-50 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400",
   orders: "bg-sky-50 text-sky-600 dark:bg-sky-500/15 dark:text-sky-400",
 } as const;

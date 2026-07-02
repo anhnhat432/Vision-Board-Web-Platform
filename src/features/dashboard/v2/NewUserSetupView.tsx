@@ -1,4 +1,4 @@
-import { BookOpen, Check, ChevronDown, ChevronUp, Sparkles, Target } from "lucide-react";
+import { BookOpen, Check, ChevronDown, ChevronUp, MapPinned, Target } from "lucide-react";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { VisionMapIllustration } from "@/app/components/illustrations";
@@ -110,9 +110,9 @@ export function NewUserSetupView({ userData, displayName, onContinue, companion 
   };
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto w-full">
+    <div className="mx-auto w-full max-w-6xl space-y-6">
       {/* 1. Editorial Greeting Banner - Premium Light-first Studio style */}
-      <section className="relative overflow-hidden rounded-3xl border border-app-line/70 bg-gradient-to-br from-app-accent-soft/40 via-app-surface to-app-status-warning/10 p-6 md:p-10 shadow-3xs">
+      <section className="relative overflow-hidden rounded-card-lg border border-app-line bg-app-surface p-6 shadow-[0_18px_42px_-34px_rgba(23,21,15,0.28)] md:p-8">
 
         {/* Ambient background Vision Map Illustration */}
         <div
@@ -123,12 +123,12 @@ export function NewUserSetupView({ userData, displayName, onContinue, companion 
         </div>
 
         <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-          <div className="space-y-4 max-w-3xl">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-app-status-warning/30 bg-app-status-warning/5 px-3 py-0.5 text-[9px] font-bold uppercase tracking-wide text-app-status-warning shadow-sm">
-              Studio Ước Mơ & Thực Thi
+          <div className="max-w-3xl space-y-4">
+            <span className="inline-flex items-center gap-1.5 rounded-[9px] border border-app-accent/20 bg-app-accent-soft/50 px-3 py-1 text-[9.5px] font-bold uppercase tracking-[0.12em] text-app-accent">
+              Chu kỳ 12 tuần
             </span>
 
-            <h1 className="font-serif text-3xl font-semibold leading-[1.25] tracking-tight text-app-ink sm:text-[2.5rem]">
+            <h1 className="font-serif text-3xl font-semibold leading-[1.16] tracking-tight text-app-ink sm:text-[2.45rem]">
               Chào {capitalizeVietnameseName(displayName)}, hãy thiết lập <br className="hidden sm:inline" />{" "}
               <span className="underline decoration-app-accent/55 underline-offset-4">
                 chu kỳ 12 tuần
@@ -136,13 +136,13 @@ export function NewUserSetupView({ userData, displayName, onContinue, companion 
               đầu tiên
             </h1>
 
-            <p className="text-xs sm:text-sm font-medium leading-relaxed text-app-ink-soft font-serif italic max-w-2xl">
+            <p className="max-w-2xl font-serif text-xs font-medium italic leading-relaxed text-app-ink-soft sm:text-sm">
               Biến mục tiêu lớn thành kế hoạch 12 tuần và việc cần làm mỗi ngày, để bạn biết bắt đầu từ đâu.
             </p>
 
             <div className="pt-2 flex items-center">
-              <div className="inline-flex items-center gap-2 rounded-full border border-app-line bg-app-surface/90 px-3.5 py-1 text-[11px] font-semibold text-app-ink-soft shadow-sm">
-                <Sparkles className="h-3.5 w-3.5 text-app-accent" />
+              <div className="inline-flex items-center gap-2 rounded-[var(--r-control)] border border-app-line bg-app-bg-subtle px-3.5 py-1.5 text-[11px] font-semibold text-app-ink-soft">
+                <MapPinned className="h-3.5 w-3.5 text-app-accent" />
                 <span>Cần xem hướng dẫn nhanh?</span>
                 <button
                   type="button"
@@ -162,10 +162,10 @@ export function NewUserSetupView({ userData, displayName, onContinue, companion 
       {/* 2. Setup Steps Panel - Guided studio layout */}
       <section
         data-testid="fresh-workspace-empty-state"
-        className="rounded-3xl border border-app-line/80 bg-app-surface/40 p-6 md:p-8 shadow-3xs w-full"
+        className="w-full rounded-card-lg border border-app-line bg-app-surface p-5 shadow-[0_18px_42px_-34px_rgba(23,21,15,0.26)] md:p-7"
         aria-labelledby="dashboard-new-user-title"
       >
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-app-line/80 pb-6 mb-8">
+        <div className="mb-6 flex flex-col gap-4 border-b border-app-line/80 pb-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
             <h2
               id="dashboard-new-user-title"
@@ -182,14 +182,14 @@ export function NewUserSetupView({ userData, displayName, onContinue, companion 
           <button
             type="button"
             onClick={() => onContinue(nextStep.href)}
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-app-accent hover:bg-app-accent-hover px-6 py-2.5 text-xs font-bold text-app-ink-on-accent shadow-md transition-all duration-200 hover:-translate-y-px active:translate-y-0 active:scale-[0.99] cursor-pointer"
+            className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-[var(--r-control)] bg-app-accent px-5 py-2.5 text-xs font-bold text-app-ink-on-accent shadow-[0_10px_22px_-15px_rgba(12,94,58,0.62)] transition-all duration-200 hover:-translate-y-px hover:bg-app-accent-hover active:translate-y-0 active:scale-[0.99]"
           >
             Bắt đầu: {nextStep.title} →
           </button>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2 grid gap-4 relative select-none">
+        <div className="grid gap-5 lg:grid-cols-3">
+          <div className="relative grid select-none gap-3.5 lg:col-span-2">
             {steps.map((step, index) => {
               const theme = getStepTheme(index);
               const isNextStep = step.title === nextStep.title;
@@ -199,12 +199,12 @@ export function NewUserSetupView({ userData, displayName, onContinue, companion 
                   key={step.title}
                   type="button"
                   onClick={() => onContinue(step.href)}
-                  className={`group flex text-left gap-4 rounded-2xl border p-5 transition-all duration-300 active:scale-[0.99] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 relative ${
+                  className={`group relative flex cursor-pointer gap-4 rounded-[16px] border p-4 text-left transition-all duration-300 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:p-5 ${
                     step.completed
                       ? "border-app-line bg-app-bg-subtle/20 opacity-55 hover:opacity-85 hover:border-app-line-strong"
                       : isNextStep
-                        ? "bg-app-surface border-app-accent/65 shadow-[0_8px_30px_rgba(47,93,80,0.06)] ring-1 ring-app-accent/15"
-                        : `bg-app-surface/40 ${theme.border} ${theme.hoverBg} ${theme.rotate}`
+                        ? "border-app-accent/45 bg-app-accent-subtle/28 shadow-[0_10px_28px_-24px_rgba(12,94,58,0.55)] ring-1 ring-app-accent/12"
+                        : `bg-app-surface/45 ${theme.border} ${theme.hoverBg} ${theme.rotate}`
                   }`}
                 >
                   {/* Index / Check bubble */}
@@ -232,7 +232,7 @@ export function NewUserSetupView({ userData, displayName, onContinue, companion 
                       </h3>
 
                       <span
-                        className={`inline-block rounded-full px-2 py-0.5 text-[9px] font-bold tracking-wide ${
+                        className={`inline-block rounded-[8px] px-2 py-0.5 text-[9px] font-bold tracking-wide ${
                           isNextStep && !step.completed
                             ? "bg-app-accent/10 text-app-accent border border-app-accent/10"
                             : "bg-app-bg-subtle text-app-ink-muted"
@@ -242,7 +242,7 @@ export function NewUserSetupView({ userData, displayName, onContinue, companion 
                       </span>
 
                       {isNextStep && !step.completed && (
-                        <span className="inline-block rounded-full bg-app-accent/10 text-app-accent px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide border border-app-accent/10">
+                        <span className="inline-block rounded-[8px] border border-app-accent/10 bg-app-accent/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wide text-app-accent">
                           Đề xuất
                         </span>
                       )}
@@ -259,14 +259,14 @@ export function NewUserSetupView({ userData, displayName, onContinue, companion 
             })}
 
             {/* 💡 Accordion: First Week Plan Mockup */}
-            <div className="mt-4 rounded-2xl border border-app-line/60 bg-app-surface/30 shadow-3xs overflow-hidden">
+            <div className="mt-3 overflow-hidden rounded-[16px] border border-app-line/70 bg-app-bg-subtle/30">
               <button
                 type="button"
                 onClick={() => setShowSamplePlan(!showSamplePlan)}
-                className="w-full flex items-center justify-between px-5 py-4 text-xs font-bold text-app-ink-soft hover:bg-app-bg-subtle/50 transition-colors cursor-pointer select-none"
+                className="flex w-full cursor-pointer select-none items-center justify-between px-5 py-4 text-xs font-bold text-app-ink-soft transition-colors hover:bg-app-bg-subtle/60"
               >
                 <span className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4 text-app-accent" /> Xem cách một chu kỳ 12 tuần vận hành mẫu
+                  <BookOpen className="h-4 w-4 text-app-accent" /> Xem cách một chu kỳ 12 tuần vận hành mẫu
                 </span>
                 {showSamplePlan ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </button>
@@ -282,7 +282,7 @@ export function NewUserSetupView({ userData, displayName, onContinue, companion 
           {/* Mini Wheel of Life Visual Anchor & Study Corner Image */}
           <div className="space-y-4">
             {hasLifeBalance && userData.currentWheelOfLife && userData.currentWheelOfLife.length > 0 ? (
-              <div className="rounded-3xl border border-app-line/80 bg-app-surface/60 p-5 shadow-xs relative">
+              <div className="relative rounded-card border border-app-line bg-app-surface p-5 shadow-xs">
                 <p className="text-[10px] font-extrabold uppercase tracking-wide text-app-accent mb-4">
                   Kết quả chấm điểm của bạn
                 </p>
@@ -308,7 +308,7 @@ export function NewUserSetupView({ userData, displayName, onContinue, companion 
               </div>
             ) : (
               <div className="space-y-4">
-                <div className="relative rounded-3xl border border-app-line/80 overflow-hidden shadow-3xs aspect-square w-full group select-none transition-all duration-300 hover:shadow-md">
+                <div className="group relative aspect-square w-full select-none overflow-hidden rounded-card border border-app-line/80 shadow-3xs transition-all duration-300 hover:shadow-md">
                   <img
                     src="/vision_board_detail.png"
                     alt="Bảng tầm nhìn chi tiết mẫu"
@@ -321,7 +321,7 @@ export function NewUserSetupView({ userData, displayName, onContinue, companion 
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-dashed border-app-line/80 p-5 text-center space-y-2.5 bg-app-surface/30">
+                <div className="space-y-2.5 rounded-[16px] border border-dashed border-app-line/80 bg-app-surface/30 p-5 text-center">
                   <Target className="h-5 w-5 mx-auto text-app-accent" />
                   <h4 className="text-xs font-bold text-app-ink">
                     Định hình cuộc sống bạn muốn
@@ -335,7 +335,7 @@ export function NewUserSetupView({ userData, displayName, onContinue, companion 
             )}
 
             {/* 🎨 Cozy planning corner generated image asset */}
-            <div className="relative rounded-3xl border border-app-line/80 overflow-hidden shadow-3xs aspect-video w-full group select-none">
+            <div className="group relative aspect-video w-full select-none overflow-hidden rounded-card border border-app-line/80 shadow-3xs">
               <picture>
                 <source srcSet="/study_desk_hero.webp" type="image/webp" />
                 <img

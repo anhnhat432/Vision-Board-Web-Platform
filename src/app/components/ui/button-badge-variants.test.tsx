@@ -28,9 +28,9 @@ describe("UI primitive visual hierarchy", () => {
 
   it("applies the four-state interaction pattern across button variants", () => {
     const primary = buttonVariants({ variant: "default" });
-    expect(primary).toContain("hover:bg-app-accent/95");
+    expect(primary).toContain("hover:bg-app-accent-hover");
     expect(primary).toContain("active:scale-[0.98]");
-    expect(primary).toContain("focus-visible:ring-app-accent/40");
+    expect(primary).toContain("focus-visible:ring-app-accent/35");
     expect(primary).toContain("disabled:opacity-50");
 
     const ghost = buttonVariants({ variant: "ghost" });
@@ -38,8 +38,8 @@ describe("UI primitive visual hierarchy", () => {
     expect(ghost).toContain("active:scale-[0.98]");
 
     const outline = buttonVariants({ variant: "outline" });
-    expect(outline).toContain("hover:border-app-accent/40");
-    expect(outline).toContain("hover:bg-app-accent-soft/30");
+    expect(outline).toContain("hover:border-app-accent/35");
+    expect(outline).toContain("hover:bg-app-accent-soft/20");
 
     const link = buttonVariants({ variant: "link" });
     expect(link).toContain("text-app-accent");
@@ -74,13 +74,13 @@ describe("UI primitive visual hierarchy", () => {
   it("uses semantic radius tokens for primitive defaults", () => {
     expect(buttonVariants()).toContain("rounded-[var(--r-control)]");
     expect(buttonVariants({ size: "icon" })).not.toContain("rounded-[var(--r-card)]");
-    expect(badgeVariants()).toContain("rounded-full");
+    expect(badgeVariants()).toContain("rounded-[var(--r-control)]");
 
     render(<Card data-testid="card" />);
     expect(document.querySelector('[data-testid="card"]')?.className).toContain("rounded-card");
 
     render(<Input aria-label="Name" />);
-    expect(document.querySelector('[data-slot="input"]')?.className).toContain("rounded-lg");
+    expect(document.querySelector('[data-slot="input"]')?.className).toContain("rounded-[var(--r-input)]");
 
     render(
       <Dialog open>

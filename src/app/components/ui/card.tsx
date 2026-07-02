@@ -95,7 +95,7 @@ function Card({ className, interactive = false, style, onPointerMove, onPointerL
       data-slot="card"
       data-card-hovering="false"
       className={cn(
-        "surface-raised flex flex-col gap-5 rounded-card text-card-foreground sm:gap-6",
+        "surface-raised flex min-w-0 flex-col gap-4 rounded-card text-card-foreground sm:gap-5",
         interactive && "surface-clickable-raised card-interactive-base",
         className,
       )}
@@ -113,7 +113,7 @@ function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card-header"
       className={cn(
-        "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-4 pt-4 has-data-[slot=card-action]:grid-cols-[1fr_auto] sm:px-6 sm:pt-6 [.border-b]:pb-4 sm:[.border-b]:pb-6",
+        "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-4 pt-4 has-data-[slot=card-action]:grid-cols-[minmax(0,1fr)_auto] sm:px-5 sm:pt-5 [.border-b]:pb-4 sm:[.border-b]:pb-5",
         className,
       )}
       {...props}
@@ -129,7 +129,7 @@ function CardTitle({ className, as: Heading = "h3", ...props }: CardTitleProps) 
   return (
     <Heading
       data-slot="card-title"
-      className={cn("font-serif text-lg font-medium leading-tight tracking-normal text-app-ink", className)}
+      className={cn("font-serif text-lg font-semibold leading-tight tracking-normal text-app-ink", className)}
       {...props}
     />
   );
@@ -139,7 +139,7 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <p
       data-slot="card-description"
-      className={cn("text-sm leading-6 tracking-normal text-app-ink-soft", className)}
+      className={cn("max-w-[68ch] text-sm leading-6 tracking-normal text-app-ink-soft", className)}
       {...props}
     />
   );
@@ -159,7 +159,7 @@ function CardContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-content"
-      className={cn("px-4 sm:px-6 [&:last-child]:pb-4 sm:[&:last-child]:pb-6", className)}
+      className={cn("min-w-0 px-4 sm:px-5 [&:last-child]:pb-4 sm:[&:last-child]:pb-5", className)}
       {...props}
     />
   );
@@ -169,7 +169,7 @@ function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-footer"
-      className={cn("flex items-center px-4 pb-4 sm:px-6 sm:pb-6 [.border-t]:pt-4 sm:[.border-t]:pt-6", className)}
+      className={cn("flex min-w-0 items-center px-4 pb-4 sm:px-5 sm:pb-5 [.border-t]:pt-4 sm:[.border-t]:pt-5", className)}
       {...props}
     />
   );

@@ -1,4 +1,4 @@
-import { Check, Sparkles } from "lucide-react";
+import { Check, Lightbulb } from "lucide-react";
 import { cn } from "@/app/components/ui/utils";
 
 import type { QualityLevel } from "@/lib/smart-goal/quality";
@@ -114,7 +114,7 @@ export function QualityFeedbackPanel({
                 </span>
               ) : (
                 <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#FFF8DE] dark:bg-[#2A2410] text-[#9A7B00] dark:text-[#E7B400] mt-0.5">
-                  <Sparkles className="h-3 w-3" />
+                  <Lightbulb className="h-3 w-3" />
                 </span>
               )}
               <p className="leading-relaxed text-[#5C574B] pt-0.5">{item}</p>

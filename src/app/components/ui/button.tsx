@@ -7,7 +7,7 @@ import { cn } from "./utils";
 
 const buttonVariants = cva(
   cn(
-    "relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--r-control)] text-sm font-semibold tracking-tight after:absolute after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2 after:h-11 after:w-full after:min-w-[44px] sm:after:hidden",
+    "relative inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[var(--r-control)] text-sm font-semibold tracking-normal after:absolute after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2 after:h-11 after:w-full after:min-w-[44px] sm:after:hidden",
     "shrink-0 [&_svg]:shrink-0 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4",
     "transition-[transform,box-shadow,background-color,color,border-color,text-decoration-color] duration-[180ms] ease-[cubic-bezier(0.4,0,0.2,1)]",
     "active:duration-[150ms]",
@@ -19,33 +19,33 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: cn(
-          "border border-transparent bg-app-accent text-white shadow-app-sm",
-          "hover:bg-app-accent-hover hover:shadow-app-md",
-          "active:scale-[0.97] active:shadow-app-sm",
+          "border border-transparent bg-app-accent text-white shadow-[0_8px_18px_-12px_rgba(12,94,58,0.55)]",
+          "hover:bg-app-accent-hover hover:shadow-[0_10px_22px_-14px_rgba(12,94,58,0.62)]",
+          "active:scale-[0.98] active:shadow-app-sm",
           "focus-visible:ring-app-accent/35",
         ),
         destructive: cn(
-          "border border-transparent bg-destructive text-white shadow-app-sm",
-          "hover:bg-destructive/90 hover:shadow-app-md",
-          "active:scale-[0.97] active:shadow-app-sm",
+          "border border-transparent bg-destructive text-white shadow-[0_8px_18px_-12px_rgba(184,64,64,0.48)]",
+          "hover:bg-destructive/90 hover:shadow-[0_10px_22px_-14px_rgba(184,64,64,0.58)]",
+          "active:scale-[0.98] active:shadow-app-sm",
           "focus-visible:ring-destructive/35",
         ),
         outline: cn(
-          "border border-app-line bg-app-surface text-app-ink shadow-3xs",
-          "hover:border-app-accent/50 hover:bg-app-accent-soft/20 hover:shadow-2xs",
-          "active:scale-[0.97] active:bg-app-accent-soft/40",
+          "border border-app-line bg-app-surface text-app-ink shadow-none",
+          "hover:border-app-accent/35 hover:bg-app-accent-soft/20",
+          "active:scale-[0.98] active:bg-app-accent-soft/35",
           "focus-visible:ring-app-accent/35",
         ),
         secondary: cn(
-          "border border-transparent bg-app-accent-soft text-app-accent",
-          "hover:bg-app-accent-soft/80",
-          "active:scale-[0.97]",
+          "border border-app-accent/10 bg-app-accent-soft text-app-accent",
+          "hover:border-app-accent/20 hover:bg-app-accent-soft/80",
+          "active:scale-[0.98]",
           "focus-visible:ring-app-accent/35",
         ),
         ghost: cn(
           "bg-transparent text-app-ink",
           "hover:bg-app-ink/5",
-          "active:scale-[0.97] active:bg-app-ink/[0.08]",
+          "active:scale-[0.98] active:bg-app-ink/[0.08]",
           "focus-visible:ring-app-accent/35",
         ),
         link: cn(

@@ -12,8 +12,8 @@ export const HighlightMark = forwardRef<HTMLSpanElement, HTMLAttributes<HTMLSpan
     <span ref={ref} className={cn("relative whitespace-nowrap", className)} {...props}>
       <span className="relative z-[1]">{children}</span>
       <span
-        className="absolute left-[-4px] right-[-4px] bottom-[6px] h-[34%] rounded-[3px] z-0 pointer-events-none"
-        style={{ background: "var(--app-highlight)" }}
+        className="absolute left-[-4px] right-[-4px] bottom-[8px] h-[26%] rounded-[3px] z-0 pointer-events-none"
+        style={{ background: "color-mix(in srgb, var(--app-highlight) 76%, transparent)" }}
       />
     </span>
   ),

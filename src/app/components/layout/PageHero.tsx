@@ -108,10 +108,7 @@ export function PageHero({
   if (tourId) heroExtraProps["data-tour-id"] = tourId;
 
   return (
-    <Card
-      className={cn("relative overflow-hidden border border-app-line bg-app-surface", className)}
-      {...heroExtraProps}
-    >
+    <Card className={cn("surface-raised relative overflow-hidden", className)} {...heroExtraProps}>
       <CardContent className={cn(DENSITY_CLASS[density], "relative", contentClassName)}>
         <div className={cn("grid items-start gap-5", aside ? "xl:grid-cols-[minmax(0,1fr)_minmax(280px,360px)]" : "")}>
           <div className={cn("min-w-0 space-y-3", alignClass)}>
@@ -130,14 +127,14 @@ export function PageHero({
             <Heading
               data-slot="page-hero-title"
               className={cn(
-                "text-3xl tracking-tight text-app-ink sm:text-4xl lg:text-5xl",
+                "text-3xl tracking-normal text-app-ink sm:text-4xl lg:text-5xl",
                 serif ? "font-serif font-medium" : "font-bold",
               )}
             >
               {title}
             </Heading>
             {description ? (
-              <p className="max-w-prose text-base leading-relaxed tracking-normal text-app-ink-muted sm:text-base">
+              <p className="max-w-[66ch] text-base leading-relaxed tracking-normal text-app-ink-muted sm:text-base">
                 {description}
               </p>
             ) : null}

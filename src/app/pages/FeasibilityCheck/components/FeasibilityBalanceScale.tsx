@@ -1,4 +1,4 @@
-import { Scale, Sparkles } from "lucide-react";
+import { CheckCircle2, Scale } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { QUESTIONS } from "../constants";
 import { FeasibilityScaleSVG } from "./FeasibilityScaleSVG";
@@ -144,7 +144,7 @@ export function FeasibilityBalanceScale({ answers }: FeasibilityBalanceScaleProp
 
         <div className="flex min-h-8 min-w-0 flex-wrap items-center gap-1.5 rounded-pill border border-app-line bg-app-bg-subtle px-3 py-1.5 leading-tight">
           {answeredCount > 0 && isHeavyRight && (
-            <Sparkles className="h-3 w-3 shrink-0 text-app-accent motion-safe:animate-pulse motion-reduce:animate-none" />
+            <CheckCircle2 className="h-3 w-3 shrink-0 text-app-accent" />
           )}
           <span className="break-words text-xs font-semibold text-app-ink-muted">Mức khả thi</span>
           <span

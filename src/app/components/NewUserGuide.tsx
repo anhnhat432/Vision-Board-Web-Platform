@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle2, Compass, Sparkles } from "lucide-react";
+import { ArrowRight, CheckCircle2, Compass } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import {
@@ -267,7 +267,7 @@ export function NewUserGuideDialog({ open, onOpenChange, userData }: NewUserGuid
         >
           <div className="border-b border-app-line px-5 pb-4 pt-5 pr-12">
             <div className="inline-flex w-fit items-center gap-2 rounded-[var(--r-pill)] border border-app-line bg-app-bg px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-soft">
-              <Sparkles className="h-3.5 w-3.5" />
+              <Compass className="h-3.5 w-3.5" />
               Cách bắt đầu nhanh
             </div>
             <SheetTitle className="mt-3 font-serif text-xl font-semibold leading-tight text-app-ink text-wrap-balance">
@@ -312,7 +312,7 @@ export function NewUserGuideDialog({ open, onOpenChange, userData }: NewUserGuid
       <DialogContent className="max-h-[88vh] max-w-[calc(100%-2rem)] overflow-y-auto sm:max-w-3xl">
         <DialogHeader>
           <div className="inline-flex w-fit items-center gap-2 rounded-[var(--r-pill)] border border-app-line bg-app-bg px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-app-ink-soft">
-            <Sparkles className="h-3.5 w-3.5" />
+            <Compass className="h-3.5 w-3.5" />
             Cách bắt đầu nhanh
           </div>
           <DialogTitle className="text-xl tracking-normal text-app-ink sm:text-2xl">

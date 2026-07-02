@@ -23,7 +23,7 @@ export function TodayMiniCard(props: TodayMiniCardProps) {
 
   return (
     <section
-      className="overflow-hidden rounded-[20px] glass-panel glass-panel-hover"
+      className="overflow-hidden rounded-card border border-app-line bg-app-surface shadow-[0_16px_38px_-30px_rgba(23,21,15,0.32)]"
       aria-labelledby="dashboard-today-mini-title"
     >
       <div className="border-b border-app-line bg-gradient-to-b from-app-accent-subtle to-app-surface px-5 py-4">

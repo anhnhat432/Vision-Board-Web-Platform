@@ -16,8 +16,8 @@ export type AdminBadgeTone =
 const DOT_CLASS: Record<AdminBadgeTone, string> = {
   pending: "bg-amber-400",
   confirmed: "bg-sky-400",
-  printing: "bg-violet-400",
-  shipping: "bg-blue-400",
+  printing: "bg-app-warm",
+  shipping: "bg-app-status-info",
   delivered: "bg-emerald-400",
   cancelled: "bg-rose-400",
   completed: "bg-emerald-400",
@@ -32,9 +32,9 @@ const TONE_CLASS: Record<AdminBadgeTone, string> = {
   confirmed:
     "bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-500/15 dark:text-sky-300 dark:border-sky-500/30",
   printing:
-    "bg-violet-50 text-violet-700 border-violet-200 dark:bg-violet-500/15 dark:text-violet-300 dark:border-violet-500/30",
+    "bg-app-warm-soft text-app-warm border-app-warm-border dark:bg-app-warm-soft dark:text-app-warm-strong dark:border-app-warm-border",
   shipping:
-    "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-500/15 dark:text-blue-300 dark:border-blue-500/30",
+    "bg-[color:var(--color-info-bg)] text-[color:var(--color-info-fg)] border-[color:var(--color-info-border)] dark:bg-app-bg-subtle dark:text-app-status-info dark:border-app-line-strong",
   delivered:
     "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-app-accent-soft dark:text-app-accent dark:border-app-accent/30",
   cancelled:

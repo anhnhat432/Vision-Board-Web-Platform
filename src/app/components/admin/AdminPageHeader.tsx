@@ -12,7 +12,7 @@ interface AdminPageHeaderProps {
 /**
  * Standard "page chrome" header used at the top of each admin page.
  *
- * Features: gradient accent bar at top, refined typography, responsive layout.
+ * Features: restrained accent rule, refined typography, responsive layout.
  */
 export function AdminPageHeader({
   title,
@@ -21,24 +21,13 @@ export function AdminPageHeader({
   className,
 }: AdminPageHeaderProps) {
   return (
-    <header
-      className={cn(
-        "relative border-b border-app-line pb-5",
-        className,
-      )}
-    >
-      {/* Gradient accent line at the top edge */}
-      <span className="absolute inset-x-0 -top-5 h-px bg-gradient-to-r from-transparent via-app-accent/30 to-transparent" />
-
+    <header className={cn("relative border-b border-app-line pb-5", className)}>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0 space-y-1">
-          <h1 className="text-[1.6rem] font-bold tracking-tight text-app-ink leading-tight">
-            {title}
-          </h1>
+          <div className="mb-2 h-1 w-10 rounded-full bg-app-accent/80" aria-hidden="true" />
+          <h1 className="font-serif text-[1.65rem] font-semibold leading-tight tracking-normal text-app-ink">{title}</h1>
           {description ? (
-            <p className="max-w-2xl text-sm leading-6 text-app-ink-muted">
-              {description}
-            </p>
+            <p className="max-w-2xl text-sm leading-6 tracking-normal text-app-ink-muted">{description}</p>
           ) : null}
         </div>
         {actions ? (

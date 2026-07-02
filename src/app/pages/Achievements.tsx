@@ -7,8 +7,8 @@ import {
   Crown,
   Flame,
   LockKeyhole,
+  Palette,
   type LucideIcon,
-  Sparkles,
   Target,
   Trophy,
   Unlock,
@@ -30,7 +30,7 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Trophy,
   Award,
   Crown,
-  Sparkles,
+  Palette,
   BookOpen,
   Flame,
 };
@@ -59,7 +59,7 @@ const ACHIEVEMENT_COPY: Record<string, { title: string; description: string; ico
   Visionary: {
     title: "Người có tầm nhìn",
     description: "Tạo vision board đầu tiên của bạn.",
-    icon: "Sparkles",
+    icon: "Palette",
   },
   "Reflective Mind": {
     title: "Người hay nhìn lại",
@@ -360,7 +360,7 @@ function AchievementsContent() {
             onClick={() => navigate("/gallery")}
             className="inline-flex items-center gap-2 rounded-pill border border-app-line bg-app-surface px-5 py-3 text-[13.5px] font-semibold text-app-ink transition-all duration-200 hover:bg-app-bg-subtle active:scale-[0.98] focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-app-accent/40 focus-visible:ring-offset-2 focus-visible:ring-offset-app-bg-subtle"
           >
-            <Sparkles className="h-[15px] w-[15px]" strokeWidth={2.2} />
+            <Palette className="h-[15px] w-[15px]" strokeWidth={2.2} />
             Mở thư viện vision board
           </button>
         </div>

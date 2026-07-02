@@ -1,4 +1,4 @@
-import { ChevronDown, Lightbulb, Lock, Sparkles } from "lucide-react";
+import { ChevronDown, Lightbulb, Lock } from "lucide-react";
 
 import { Input } from "@/app/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/app/components/ui/select";
@@ -81,7 +81,7 @@ export function OutcomeStep({
     <div className="mx-auto max-w-4xl space-y-5">
       {smartGoal.measurable ? (
         <div role="note" className={cn(infoBoxClass, "flex items-start gap-2")}>
-          <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
+          <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
           <p>
             <span className="font-medium text-app-ink">Đã suy ra từ SMART Goal của bạn:</span> {smartGoal.measurable}
           </p>

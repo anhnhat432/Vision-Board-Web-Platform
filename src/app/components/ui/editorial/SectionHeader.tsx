@@ -18,7 +18,7 @@ export interface SectionHeaderProps extends HTMLAttributes<HTMLDivElement> {
 
 /**
  * SectionHeader — khối tiêu đề có eyebrow + heading serif + mô tả.
- * Heading dùng font-serif (Bricolage Grotesque) với cỡ chữ clamp.
+ * Heading dùng font-serif với cỡ chữ clamp.
  */
 export const SectionHeader = forwardRef<HTMLDivElement, SectionHeaderProps>(
   ({ eyebrow, title, description, align = "left", as = "h2", className, ...props }, ref) => (
@@ -32,8 +32,8 @@ export const SectionHeader = forwardRef<HTMLDivElement, SectionHeaderProps>(
         as,
         {
           className: cn(
-            "font-serif font-extrabold tracking-[-0.03em] m-0",
-            as === "h1" && "text-[clamp(32px,4.5vw,56px)] leading-[0.98] tracking-[-0.035em]",
+            "m-0 font-serif font-extrabold tracking-normal",
+            as === "h1" && "text-[clamp(32px,4.5vw,56px)] leading-[0.98]",
             as === "h2" && "text-[clamp(26px,3.4vw,40px)] leading-[1.08]",
             as === "h3" && "text-[clamp(22px,2.8vw,32px)] leading-[1.12]",
           ),

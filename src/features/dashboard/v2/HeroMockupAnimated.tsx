@@ -1,4 +1,4 @@
-import { Check, Sparkles, Target } from "lucide-react";
+import { Check, Flame, Target } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { useReducedMotion } from "@/app/hooks/useReducedMotion";
@@ -21,7 +21,7 @@ const DEFAULT_PREVIEW: GoalPreviewData = {
   visionIcons: [
     { emoji: "📚", bgClass: "bg-app-accent-soft/50", borderClass: "border-app-accent/20" },
     { emoji: "🏃‍♂️", bgClass: "bg-app-status-warning/10", borderClass: "border-app-status-warning/20" },
-    { emoji: "💼", bgClass: "bg-blue-800/10", borderClass: "border-blue-800/20" },
+    { emoji: "💼", bgClass: "bg-app-warm-soft/50", borderClass: "border-app-warm-border/50" },
   ],
   visionLabel: '"Khát vọng tương lai"',
   todayTasks: ['Đọc 30 trang "Atomic Habits"', "Ghi 3 dòng phản tư", "Review tuần lúc 21h"],
@@ -106,7 +106,7 @@ export function HeroMockupAnimated({ previewData }: HeroMockupAnimatedProps) {
               transitionTimingFunction: badgeVisible ? "var(--ease-overshoot)" : "ease-in",
             }}
           >
-            <Sparkles className="size-3 text-app-accent animate-spin-slow" />
+            <Flame className="size-3 text-app-accent" />
             Streak +1 Ngày!
           </div>
 
@@ -237,8 +237,8 @@ export function HeroMockupAnimated({ previewData }: HeroMockupAnimatedProps) {
 
           {/* Minimalist status bar footer */}
           <div className="mt-6 pt-3 border-t border-app-line/45 flex items-center justify-between text-[9px] text-app-ink-muted/65 font-medium">
-            <span>● Đồng bộ đám mây cục bộ</span>
-            <span>Vite SPA v2.1</span>
+            <span>● Đồng bộ sẵn sàng</span>
+            <span>Lịch hôm nay</span>
           </div>
         </div>
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, CornerDownLeft, Search, Sparkles, Target } from "lucide-react";
+import { ArrowRight, CalendarDays, CornerDownLeft, Search, Target } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Dialog, DialogContent, DialogTitle } from "../ui/dialog";
@@ -156,7 +156,7 @@ export function CommandPalette({
           ) : (
             filtered.map((action, index) => {
               const isActive = index === highlight;
-              const Icon = action.kind === "nav" ? action.icon : action.kind === "twelve" ? Sparkles : Target;
+              const Icon = action.kind === "nav" ? action.icon : action.kind === "twelve" ? CalendarDays : Target;
               return (
                 <button
                   key={action.key}
