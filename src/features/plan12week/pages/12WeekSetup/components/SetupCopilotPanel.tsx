@@ -1,4 +1,4 @@
-import { Award, Check, Compass, Lightbulb, ShieldAlert, Target, X } from "lucide-react";
+import { Award, Check, Compass, Lightbulb, ShieldAlert, Sparkles, Target, X } from "lucide-react";
 import { cn } from "@/app/components/ui/utils";
 import { getLifeAreaLabel } from "@/app/utils/storage";
 import type { AdaptiveTemplateSupport, TwelveWeekTemplateDefinition } from "@/app/utils/twelve-week-premium";
@@ -31,7 +31,7 @@ export function SetupCopilotPanel({
     >
       <div className="flex items-center gap-2 border-b border-app-line pb-4">
         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-app-accent-soft text-app-accent">
-          <Compass className="h-5 w-5" />
+          <Sparkles className="h-5 w-5 animate-pulse" />
         </div>
         <div>
           <h3 className="text-sm font-bold text-app-ink">Trợ lý thiết lập 12 tuần</h3>

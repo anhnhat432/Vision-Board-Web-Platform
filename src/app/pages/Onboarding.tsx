@@ -9,6 +9,7 @@ import {
   Home,
   type LucideIcon,
   Smile,
+  Sparkles,
   Sprout,
   Users,
   WalletCards,
@@ -926,7 +927,7 @@ export function Onboarding() {
 
         <header className="space-y-2 max-w-3xl">
           <div className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-app-accent">
-            <Compass className="h-3.5 w-3.5" aria-hidden="true" />
+            <Sparkles className="h-3.5 w-3.5 motion-safe:animate-pulse motion-reduce:animate-none" aria-hidden="true" />
             Bước 1 / 3 · Bánh xe cuộc sống
           </div>
           <h1 className="font-serif text-[28px] font-semibold leading-tight text-app-ink sm:text-4xl">

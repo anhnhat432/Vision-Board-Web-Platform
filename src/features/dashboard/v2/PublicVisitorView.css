@@ -6,13 +6,11 @@
   position: relative;
   isolation: isolate;
   background:
-    radial-gradient(circle at 10% 0%, color-mix(in srgb, var(--app-accent-soft) 26%, transparent), transparent 34rem),
-    radial-gradient(circle at 92% 8%, color-mix(in srgb, var(--app-warm-soft) 22%, transparent), transparent 32rem),
     linear-gradient(
       180deg,
-      color-mix(in srgb, var(--app-bg) 86%, var(--app-surface)) 0%,
+      color-mix(in srgb, var(--app-bg) 78%, var(--app-surface)) 0%,
       var(--app-bg) 38%,
-      color-mix(in srgb, var(--app-accent-subtle) 16%, var(--app-bg)) 100%
+      color-mix(in srgb, var(--app-accent-subtle) 28%, var(--app-bg)) 100%
     );
   color: var(--app-ink);
   font-family: var(--app-font-sans);
@@ -30,7 +28,7 @@
   height: 920px;
   pointer-events: none;
   content: "";
-  opacity: 0.18;
+  opacity: 0.32;
   background-image:
     linear-gradient(rgba(23, 21, 15, 0.035) 1px, transparent 1px),
     linear-gradient(90deg, rgba(23, 21, 15, 0.025) 1px, transparent 1px);
@@ -57,95 +55,6 @@
 
 .dof-display {
   font-family: var(--app-font-serif);
-}
-
-.dof-landing .dof-hero-section {
-  padding: clamp(44px, 6vw, 72px) 24px 42px;
-}
-
-.dof-landing .dof-kicker-pill {
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.58);
-}
-
-.dof-landing .dof-kicker-dot {
-  display: inline-block;
-  width: 5px;
-  height: 5px;
-  border-radius: 999px;
-  background: currentColor;
-}
-
-.dof-landing .dof-hero-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  align-items: center;
-  margin-bottom: 24px;
-}
-
-.dof-landing .dof-hero-secondary-cta {
-  border-color: color-mix(in srgb, var(--app-accent) 24%, var(--app-line-strong));
-  background: color-mix(in srgb, var(--app-surface) 78%, var(--app-accent-soft));
-  color: var(--app-accent);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.62);
-}
-
-.dof-landing .dof-hero-note {
-  max-width: 54ch;
-}
-
-.dof-landing .dof-journey-card {
-  margin-top: clamp(34px, 5vw, 56px);
-  border-color: color-mix(in srgb, var(--app-accent) 16%, var(--app-line));
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--app-surface) 94%, var(--app-accent-soft)), var(--app-surface));
-}
-
-.dof-landing .dof-journey-step {
-  position: relative;
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 7px;
-  padding-left: 18px;
-}
-
-.dof-landing .dof-journey-step::before {
-  position: absolute;
-  top: 2px;
-  bottom: 2px;
-  left: 0;
-  width: 2px;
-  border-radius: 999px;
-  content: "";
-  background: color-mix(in srgb, var(--app-accent) 18%, var(--app-line));
-}
-
-.dof-landing .dof-journey-step.is-active::before {
-  background: var(--app-accent);
-}
-
-.dof-landing .dof-journey-step-title {
-  color: var(--app-ink);
-}
-
-.dof-landing .dof-journey-step-title > span {
-  background: var(--app-bg-subtle);
-  color: var(--app-accent);
-}
-
-.dof-landing .dof-journey-step.is-active .dof-journey-step-title {
-  color: var(--app-accent);
-}
-
-.dof-landing .dof-journey-step.is-active .dof-journey-step-title > span {
-  background: var(--app-accent);
-  color: var(--app-highlight);
-}
-
-.dof-landing .dof-journey-caption {
-  font-size: 12.5px;
-  color: var(--app-ink-muted);
 }
 
 .dof-landing :where(button, a) {
@@ -211,9 +120,9 @@
 .dof-landing .dof-deferred-fallback > div {
   min-height: 180px;
   border: 1px solid color-mix(in srgb, var(--app-line) 75%, transparent);
-  border-radius: var(--app-radius-card);
+  border-radius: 20px;
   background:
-    linear-gradient(110deg, transparent 0 38%, color-mix(in srgb, var(--app-accent-soft) 36%, transparent) 48%, transparent 58%),
+    linear-gradient(110deg, transparent 0 38%, color-mix(in srgb, var(--app-highlight) 18%, transparent) 48%, transparent 58%),
     color-mix(in srgb, var(--app-surface) 80%, var(--app-bg));
   background-size: 220% 100%, 100% 100%;
 }
@@ -239,7 +148,7 @@
 
 /* ---- Typography responsive (clamp như prototype) ---- */
 .dof-landing .dof-hero-title {
-  font-size: clamp(38px, 5.1vw, 70px);
+  font-size: clamp(40px, 5.4vw, 74px);
 }
 .dof-landing .dof-h2 {
   font-size: clamp(26px, 3.4vw, 40px);
@@ -357,7 +266,10 @@
     gap: 8px !important;
   }
   .dof-landing .dof-brand-name {
-    display: none;
+    max-width: 126px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .dof-landing .dof-nav {
     gap: 10px !important;
@@ -391,29 +303,6 @@
 
 /* ---- Mobile: stack toàn bộ, ẩn art hero phụ cho gọn ---- */
 @media (max-width: 760px) {
-  .dof-landing .dof-hero-section {
-    padding: 38px 24px 34px;
-  }
-  .dof-landing .dof-hero-title {
-    font-size: clamp(36px, 10.2vw, 46px);
-    line-height: 1.04 !important;
-  }
-  .dof-landing .dof-hero-actions {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-  .dof-landing .dof-hero-actions > * {
-    width: 100%;
-  }
-  .dof-landing .dof-hero-secondary-cta {
-    min-height: 48px;
-    border-color: color-mix(in srgb, var(--app-accent) 34%, var(--app-line-strong));
-    background: color-mix(in srgb, var(--app-accent-soft) 54%, var(--app-surface));
-  }
-  .dof-landing .dof-hero-note {
-    align-items: flex-start !important;
-  }
   .dof-landing .dof-hero-grid,
   .dof-landing .dof-preview-card,
   .dof-landing .dof-two-col,

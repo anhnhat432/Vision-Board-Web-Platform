@@ -1,8 +1,8 @@
-import { BookOpen, Calendar, FileText } from "lucide-react";
+import { BookOpen, Calendar, Sparkles } from "lucide-react";
 
 import { INCLUDED_DOCS } from "@/features/order/catalog/included";
 
-const ICON_MAP: Record<string, typeof BookOpen> = {
+const ICON_MAP: Record<string, typeof Sparkles> = {
   "smart-guide": BookOpen,
   "twelve-week-guide": Calendar,
 };
@@ -39,7 +39,7 @@ export function OrderHero() {
         <div className="text-[11px] font-bold text-[var(--order-text-soft)] mb-3">Bao gồm sẵn</div>
         <div className="flex flex-col gap-[11px]">
           {INCLUDED_DOCS.map((doc) => {
-            const Icon = ICON_MAP[doc.id] ?? FileText;
+            const Icon = ICON_MAP[doc.id] ?? Sparkles;
             return (
               <div key={doc.id} className="flex items-start gap-[9px]">
                 <span className="w-5 h-5 rounded-md bg-[var(--order-success-soft)] text-[var(--order-success)] flex items-center justify-center shrink-0">

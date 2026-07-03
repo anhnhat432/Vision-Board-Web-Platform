@@ -12,7 +12,7 @@ export function QuoteBlock({
   imageCaption = "Góc nhỏ kỷ luật cho những chu kỳ chuyển mình rõ nét.",
 }: QuoteBlockProps) {
   return (
-    <div className="select-none rounded-card border border-app-line bg-app-surface p-5 shadow-[0_16px_38px_-32px_rgba(23,21,15,0.24)]">
+    <div className="rounded-[20px] glass-panel glass-panel-hover p-5 select-none">
       <p className="mb-4 text-center font-serif text-[15px] italic leading-snug text-app-ink">“{text}”</p>
       <div className="mb-3 text-center text-[10px] font-bold uppercase tracking-[0.16em] text-app-accent">{author}</div>
       <div className="relative overflow-hidden rounded-[13px]">

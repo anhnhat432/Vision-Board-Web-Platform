@@ -214,9 +214,8 @@ export function PublicVisitorView({
           position: "sticky",
           top: 0,
           zIndex: 50,
-          background: "color-mix(in srgb, var(--app-bg) 92%, var(--app-surface))",
+          background: "var(--app-bg)",
           borderBottom: "1px solid var(--app-line)",
-          backdropFilter: "saturate(110%) blur(10px)",
         }}
       >
         <div
@@ -256,7 +255,7 @@ export function PublicVisitorView({
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "var(--app-bg)",
+                color: "var(--app-highlight)",
                 fontWeight: 800,
                 fontSize: 18,
                 transform: "rotate(-6deg)",
@@ -332,30 +331,27 @@ export function PublicVisitorView({
 
       <main>
         {/* HERO */}
-        <section className="dof-hero-section" style={{ ...SECTION }}>
+        <section style={{ ...SECTION, padding: "56px 24px 40px" }}>
           <div
-            className="dof-up dof-hero-kicker"
+            className="dof-up"
             style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 22, flexWrap: "wrap" }}
           >
             <span
-              className="dof-kicker-pill"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 7,
-                background: "var(--app-accent-soft)",
-                border: "1px solid color-mix(in srgb, var(--app-accent) 22%, transparent)",
-                color: "var(--app-accent)",
+                background: "var(--app-accent)",
+                color: "var(--app-highlight)",
                 fontSize: 11,
                 fontWeight: 700,
                 letterSpacing: "0.14em",
                 textTransform: "uppercase",
                 padding: "7px 14px",
-                borderRadius: "var(--app-radius-control)",
+                borderRadius: 999,
               }}
             >
-              <span aria-hidden="true" className="dof-kicker-dot" />
-              Dear Our Future
+              ★ Dear Our Future
             </span>
             <span style={{ fontSize: 13, color: "var(--app-ink-soft)", fontWeight: 500 }}>
               Dành cho người trẻ có hoài bão nhưng dễ mất đà.
@@ -366,7 +362,7 @@ export function PublicVisitorView({
             <div className="dof-up" style={{ animationDelay: ".06s" }}>
               <h1
                 className="dof-display dof-hero-title"
-                style={{ fontWeight: 760, lineHeight: 1.02, letterSpacing: "-0.02em", margin: "0 0 24px" }}
+                style={{ fontWeight: 800, lineHeight: 0.98, letterSpacing: "-0.035em", margin: "0 0 24px" }}
               >
                 Biến ước mơ
                 <br />
@@ -387,7 +383,7 @@ export function PublicVisitorView({
                 Có nhiều mục tiêu nhưng không biết bắt đầu từ đâu, và thường bỏ cuộc sau vài tuần? Dear Our Future biến
                 mong muốn mơ hồ thành việc làm cụ thể mỗi ngày — theo lộ trình 12 tuần có cơ sở khoa học.
               </p>
-              <div className="dof-hero-actions">
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 14, alignItems: "center", marginBottom: 26 }}>
                 <PillButton
                   size="lg"
                   onClick={onStart}
@@ -401,7 +397,6 @@ export function PublicVisitorView({
                 <PillButton
                   variant="outline"
                   size="lg"
-                  className="dof-hero-secondary-cta"
                   onClick={() => handleDeferredScroll("how")}
                   onFocus={loadDeferredSections}
                   onPointerEnter={loadDeferredSections}
@@ -410,7 +405,6 @@ export function PublicVisitorView({
                 </PillButton>
               </div>
               <p
-                className="dof-hero-note"
                 style={{
                   fontSize: 13,
                   color: "var(--app-ink-soft)",
@@ -439,10 +433,10 @@ export function PublicVisitorView({
               <div
                 className="dof-float"
                 style={{
-                  ["--r" as string]: "-1.2deg",
+                  ["--r" as string]: "-2.5deg",
                   position: "relative",
                   background: "var(--app-surface)",
-                  transform: "rotate(-1.2deg)",
+                  transform: "rotate(-2.5deg)",
                 }}
               >
                 <span
@@ -453,8 +447,8 @@ export function PublicVisitorView({
                     transform: "translateX(-50%) rotate(3deg)",
                     width: 92,
                     height: 26,
-                    background: "color-mix(in srgb, var(--app-highlight) 52%, transparent)",
-                    border: "1px dashed color-mix(in srgb, var(--app-accent) 30%, transparent)",
+                    background: "color-mix(in srgb, var(--app-highlight) 70%, transparent)",
+                    border: "1px dashed color-mix(in srgb, var(--app-accent) 40%, transparent)",
                   }}
                 />
                 <picture>
@@ -466,15 +460,7 @@ export function PublicVisitorView({
                     height={960}
                     loading="eager"
                     decoding="async"
-                    style={{
-                      width: "100%",
-                      height: 300,
-                      objectFit: "cover",
-                      borderRadius: 6,
-                      display: "block",
-                      outline: "1px solid color-mix(in srgb, var(--app-line) 80%, transparent)",
-                      outlineOffset: -1,
-                    }}
+                    style={{ width: "100%", height: 300, objectFit: "cover", borderRadius: 3, display: "block" }}
                   />
                 </picture>
                 <p
@@ -489,13 +475,12 @@ export function PublicVisitorView({
                   position: "absolute",
                   bottom: 34,
                   right: -26,
-                  background: "var(--app-surface)",
-                  color: "var(--app-accent)",
-                  border: "1px solid color-mix(in srgb, var(--app-accent) 24%, transparent)",
+                  background: "var(--app-energy)",
+                  color: "#fff",
                   padding: "12px 16px",
-                  borderRadius: "var(--app-radius-card)",
-                  transform: "rotate(-3deg)",
-                  boxShadow: "var(--app-shadow-md)",
+                  borderRadius: 14,
+                  transform: "rotate(-7deg)",
+                  boxShadow: "0 12px 24px -8px rgba(255,92,62,0.6)",
                 }}
               >
                 <div style={{ fontSize: 11, fontWeight: 600, opacity: 0.9, letterSpacing: "0.04em" }}>TUẦN</div>
@@ -507,18 +492,19 @@ export function PublicVisitorView({
           </div>
 
           {/* JOURNEY STRIP */}
-          <EditorialCard tone="surface" className="dof-up dof-journey-card" style={{ animationDelay: ".2s" }}>
-            <Eyebrow tone="accent" style={{ marginBottom: 18 }}>
+          <EditorialCard tone="ink" className="dof-up mt-[52px]" style={{ animationDelay: ".2s" }}>
+            <Eyebrow tone="muted" style={{ color: "var(--app-highlight)", marginBottom: 18 }}>
               Hành trình 4 bước gặt hái kết quả
             </Eyebrow>
             <div className="dof-journey-grid">
               {JOURNEY_STEPS.map((step) => (
-                <div key={step.n} className={`dof-journey-step ${step.active ? "is-active" : ""}`}>
+                <div key={step.n} style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                   <div
-                    className="dof-display dof-journey-step-title"
+                    className="dof-display"
                     style={{
                       fontSize: 13,
                       fontWeight: 700,
+                      color: step.active ? "var(--app-highlight)" : "#fff",
                       display: "flex",
                       alignItems: "center",
                       gap: 8,
@@ -529,6 +515,10 @@ export function PublicVisitorView({
                         width: 24,
                         height: 24,
                         borderRadius: 7,
+                        background: step.active
+                          ? "var(--app-highlight)"
+                          : "color-mix(in srgb, var(--app-highlight) 18%, transparent)",
+                        color: step.active ? "var(--app-ink)" : "var(--app-highlight)",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
@@ -539,7 +529,7 @@ export function PublicVisitorView({
                     </span>
                     {step.title}
                   </div>
-                  <div className="dof-journey-caption">{step.caption}</div>
+                  <div style={{ fontSize: 12.5, color: "var(--app-ink-muted)" }}>{step.caption}</div>
                 </div>
               ))}
             </div>
@@ -553,7 +543,7 @@ export function PublicVisitorView({
               style={{
                 background: "var(--app-surface)",
                 border: "1px solid color-mix(in srgb, var(--app-energy) 35%, transparent)",
-                borderRadius: "var(--app-radius-card)",
+                borderRadius: 18,
                 padding: "20px 22px",
                 display: "flex",
                 flexWrap: "wrap",
@@ -673,5 +663,5 @@ const signupPillStyle: CSSProperties = {
   fontSize: 13,
   fontWeight: 600,
   padding: "10px 18px",
-  borderRadius: "var(--app-radius-control)",
+  borderRadius: 999,
 };

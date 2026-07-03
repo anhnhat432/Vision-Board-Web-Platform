@@ -1,4 +1,4 @@
-import { BellRing, Quote, X } from "lucide-react";
+import { BellRing, Sparkles, X } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
@@ -125,7 +125,7 @@ export function MotivationalReminder() {
           </div>
         ) : (
           <div className="flex items-start gap-2.5">
-            <Quote className="mt-1 h-5 w-5 flex-shrink-0 text-app-accent" />
+            <Sparkles className="mt-1 h-5 w-5 flex-shrink-0 text-app-accent" />
             <div className="min-w-0 flex-1">
               <p className="font-semibold text-foreground">Cảm hứng hôm nay</p>
               <p className="line-clamp-2 text-sm italic text-muted-foreground">"{quote}"</p>

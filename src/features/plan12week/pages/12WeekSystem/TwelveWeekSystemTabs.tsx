@@ -338,10 +338,10 @@ export function TwelveWeekSystemTabs({
   return (
     <>
       <nav id="twelve-week-tabs-nav" className="mt-3 sm:mt-4" aria-label="Điều hướng hệ 12 tuần">
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="block overflow-x-auto scrollbar-none sm:overflow-visible">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="block overflow-x-auto scrollbar-none">
           <TabsList
             aria-label="Điều hướng hệ 12 tuần"
-            className="grid w-full grid-cols-4 gap-1 rounded-[14px] border border-app-line bg-app-surface p-[5px] sm:inline-flex sm:w-fit"
+            className="inline-flex rounded-[14px] bg-app-surface p-[5px] gap-1 border border-app-line w-fit"
           >
             {TWELVE_WEEK_SECTION_TABS.map(({ value, label, icon: Icon }) => {
               const hasDot = (value === "today" && showTodayDot) || (value === "week" && showWeekDot);
@@ -354,7 +354,7 @@ export function TwelveWeekSystemTabs({
                   value={value}
                   aria-controls={tabPanelId}
                   aria-label={`Mở tab ${label}`}
-                  className={`relative z-10 flex min-h-11 min-w-0 cursor-pointer items-center justify-center gap-1 rounded-[10px] px-1.5 py-2 text-[11px] font-semibold leading-tight transition-all duration-150 data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=inactive]:text-app-ink-soft hover:data-[state=inactive]:text-app-ink sm:flex-none sm:gap-2 sm:px-[18px] sm:py-[10px] sm:text-[13px]`}
+                  className={`relative flex min-h-11 flex-none cursor-pointer items-center justify-center gap-1.5 rounded-[10px] px-3 py-2 text-[12px] font-semibold leading-tight transition-all duration-150 data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=inactive]:text-app-ink-soft hover:data-[state=inactive]:text-app-ink z-10 sm:min-h-11 sm:gap-2 sm:px-[18px] sm:py-[10px] sm:text-[13px]`}
                 >
                   <Icon
                     className="h-[15px] w-[15px] shrink-0 transition-transform duration-150 group-hover:scale-110"
@@ -362,7 +362,10 @@ export function TwelveWeekSystemTabs({
                   />
                   <span>{label}</span>
                   {hasDot && (
-                    <span className="absolute right-1 top-1 z-20 h-2 w-2 rounded-full bg-app-status-warning ring-2 ring-app-surface" />
+                    <span className="absolute top-1 right-1 flex h-2 w-2 z-20">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-app-status-warning opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-app-status-warning" />
+                    </span>
                   )}
                   {isActive && (
                     <motion.div

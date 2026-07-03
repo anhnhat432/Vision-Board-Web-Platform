@@ -72,8 +72,8 @@ interface EmptyStateProps {
   testId?: string;
 }
 
-const CARD_CLASSES = "surface-raised rounded-card border border-app-line bg-app-surface p-5 sm:p-6";
-const DASHED_CLASSES = "surface-empty rounded-card border border-dashed border-app-line bg-app-bg/50 px-6 py-8";
+const CARD_CLASSES = "surface-raised rounded-xl border border-app-line bg-app-surface p-5 sm:p-6";
+const DASHED_CLASSES = "surface-empty rounded-xl border border-dashed border-app-line bg-app-bg/50 px-6 py-8";
 
 export function EmptyState({
   icon,
@@ -113,7 +113,7 @@ export function EmptyState({
       {icon ? (
         <div
           className={cn(
-            "flex h-12 w-12 items-center justify-center rounded-[var(--r-control)] border border-app-line bg-app-bg/50 text-app-ink-muted",
+            "flex h-12 w-12 items-center justify-center rounded-lg border border-app-line bg-app-bg/50 text-app-ink-muted",
             blockAlignClass,
           )}
           aria-hidden="true"

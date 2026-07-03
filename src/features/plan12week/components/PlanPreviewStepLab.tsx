@@ -1,4 +1,4 @@
-import { Calendar, CheckCircle2, Flag } from "lucide-react";
+import { Calendar, CheckCircle2, Sparkles } from "lucide-react";
 import { useMemo } from "react";
 import { formatDateInputValue } from "@/app/utils/storage-date-utils";
 import { getArchetypeForIntent, getUserIntentId, hasActionableArchetypeHint } from "@/app/utils/user-intent";
@@ -148,9 +148,9 @@ export function PlanPreviewStepLab({
             <div className="flex items-center justify-between border-b border-app-line/40 pb-2.5 pt-1">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-wider text-app-accent">Hôm nay · Today</p>
-                <h5 className="font-serif text-base font-semibold text-app-ink">Ngày khởi động</h5>
+                <h5 className="font-serif text-base font-semibold text-app-ink">Ngày khởi động 🚀</h5>
               </div>
-              <Flag className="h-5 w-5 text-app-accent" />
+              <Sparkles className="h-5 w-5 text-app-accent animate-pulse" />
             </div>
 
             {/* Đích đến 12 tuần mini */}
@@ -208,7 +208,7 @@ export function PlanPreviewStepLab({
             <span className="flex items-center gap-1">
               <Calendar className="h-3.5 w-3.5 text-app-accent" /> Tuần 1 / 12
             </span>
-            <span className="text-app-accent">Nhịp thực thi: 100%</span>
+            <span className="text-app-accent">Nhịp thực thi: 100% 🔥</span>
           </div>
         </div>
       </section>

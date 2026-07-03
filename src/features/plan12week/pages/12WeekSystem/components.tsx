@@ -1,4 +1,4 @@
-import { AlertTriangle, Award, CheckCircle2, Compass, Loader2, Map as MapIcon, Target, TrendingUp } from "lucide-react";
+import { AlertTriangle, Award, CheckCircle2, Compass, Loader2, Sparkles, Target, TrendingUp } from "lucide-react";
 import { type ReactNode, useEffect, useRef } from "react";
 
 import { InlineGoalTitleEdit } from "@/app/components/twelve-week/InlineGoalTitleEdit";
@@ -41,7 +41,7 @@ function getHeaderPhaseInfo(currentWeek: number) {
 
 export function TwelveWeekTabFallback({ title, description }: { title: string; description: string }) {
   return (
-    <div className="surface-empty rounded-card border border-dashed border-app-line p-8 text-center">
+    <div className="surface-empty rounded-2xl border border-dashed border-app-line bg-gradient-to-br from-app-bg/30 to-app-surface/60 p-8 text-center shadow-xs">
       <div className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-app-accent-soft/30 text-app-accent mb-3">
         <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
       </div>
@@ -65,11 +65,11 @@ export function TwelveWeekDashboardState({
   description: string;
   children?: ReactNode;
 }) {
-  const Icon = kind === "loading" ? Loader2 : MapIcon;
+  const Icon = kind === "loading" ? Loader2 : Sparkles;
 
   if (kind === "loading") {
     return (
-      <div className="surface-raised mx-auto mt-8 max-w-2xl rounded-card p-8 text-center">
+      <div className="mx-auto mt-8 max-w-2xl rounded-2xl border border-app-line bg-app-surface p-8 text-center shadow-app-sm">
         <Loader2 className="mx-auto h-8 w-8 animate-spin text-app-accent" aria-hidden="true" />
         <p className="mt-4 text-xs font-semibold uppercase tracking-widest text-app-ink-muted">{eyebrow}</p>
         <h1 className="mt-1 font-serif text-xl font-semibold text-app-ink">{title}</h1>
@@ -82,19 +82,19 @@ export function TwelveWeekDashboardState({
   }
 
   return (
-    <div className="surface-raised mx-auto mt-8 max-w-3xl rounded-card p-8 text-center md:p-12">
-      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] border border-app-line bg-app-surface text-app-accent shadow-app-sm">
+    <div className="mx-auto mt-8 max-w-3xl rounded-3xl border border-app-line bg-app-surface p-8 md:p-12 text-center shadow-app-sm">
+      <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-app-accent-soft text-app-accent">
         <Icon className="h-5 w-5" aria-hidden="true" />
       </div>
       <p className="mt-6 text-xs font-semibold uppercase tracking-[0.2em] text-app-accent">{eyebrow}</p>
-      <h1 className="mt-2 font-serif text-2xl font-bold leading-tight tracking-normal text-app-ink sm:text-3xl">
+      <h1 className="mt-2 font-serif text-2xl sm:text-3xl font-bold leading-tight text-app-ink tracking-tight">
         {title}
       </h1>
       <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-app-ink-soft">{description}</p>
 
       {/* 3 Step Onboarding Visual - Warm soft cards */}
       <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-3 text-left">
-        <div className="rounded-[var(--r-tile)] border border-app-line bg-app-bg-subtle/55 p-6 transition-colors hover:border-app-accent/40">
+        <div className="rounded-2xl border border-app-line bg-app-bg p-6 transition-colors hover:border-app-accent/40">
           <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-app-accent-soft text-xs font-bold text-app-accent">
             1
           </span>
@@ -104,7 +104,7 @@ export function TwelveWeekDashboardState({
           </p>
         </div>
 
-        <div className="rounded-[var(--r-tile)] border border-app-line bg-app-bg-subtle/55 p-6 transition-colors hover:border-app-accent/40">
+        <div className="rounded-2xl border border-app-line bg-app-bg p-6 transition-colors hover:border-app-accent/40">
           <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-app-accent-soft text-xs font-bold text-app-accent">
             2
           </span>
@@ -114,7 +114,7 @@ export function TwelveWeekDashboardState({
           </p>
         </div>
 
-        <div className="rounded-[var(--r-tile)] border border-app-line bg-app-bg-subtle/55 p-6 transition-colors hover:border-app-accent/40">
+        <div className="rounded-2xl border border-app-line bg-app-bg p-6 transition-colors hover:border-app-accent/40">
           <span className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-app-accent-soft text-xs font-bold text-app-accent">
             3
           </span>

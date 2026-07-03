@@ -28,7 +28,7 @@ const DEFAULT_STYLE = { bar: "#0C5E3A", icon: Activity, iconColor: "#0C5E3A", ic
 export function BalanceCard({ rows }: BalanceCardProps) {
   return (
     <section
-      className="rounded-card border border-app-line bg-app-surface p-[22px] shadow-[0_16px_38px_-30px_rgba(23,21,15,0.24)]"
+      className="rounded-[20px] glass-panel glass-panel-hover p-[22px]"
       aria-labelledby="dashboard-balance-title"
     >
       <div className="mb-4 border-b border-app-line pb-3.5">

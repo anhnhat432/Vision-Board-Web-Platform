@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowRight, Compass, Lightbulb, Save, Target } from "lucide-react";
+import { AlertTriangle, ArrowRight, Compass, Save, Sparkles, Target } from "lucide-react";
 import { motion } from "motion/react";
 import { lazy, memo, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useBlocker, useNavigate, useSearchParams } from "react-router";
@@ -436,7 +436,7 @@ export function LifeBalance() {
           </p>
           <div className="flex flex-wrap items-center gap-2">
             {formattedLastSaved ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1.5 text-xs font-medium text-app-ink-soft">
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-white dark:bg-app-surface px-3 py-1.5 text-xs font-medium text-app-ink-soft">
                 <svg
                   aria-hidden="true"
                   width="13"
@@ -463,14 +463,14 @@ export function LifeBalance() {
               status={hasChanges ? autoSaveStatus : "saved"}
               lastSavedAt={lastSavedAt}
               variant="prominent"
-              className="bg-app-surface"
+              className="bg-white dark:bg-app-surface"
             />
           </div>
         </header>
 
         {/* KPI ROW */}
         <section data-life-balance-kpi-grid className="mt-5 grid grid-cols-3 gap-2 sm:mt-6 sm:gap-4">
-          <div className="min-w-0 overflow-hidden rounded-[16px] border border-app-line bg-app-surface p-3 sm:rounded-[18px] sm:p-5 md:p-6">
+          <div className="min-w-0 overflow-hidden rounded-[16px] border border-app-line bg-white p-3 dark:bg-app-surface sm:rounded-[18px] sm:p-5 md:p-6">
             <p className="mb-2 text-[8.5px] font-bold uppercase leading-[1.35] tracking-[0.12em] text-app-ink-muted sm:mb-3.5 sm:text-[10px]">
               Trung bình
             </p>
@@ -485,7 +485,7 @@ export function LifeBalance() {
               />
             </div>
           </div>
-          <div className="min-w-0 overflow-hidden rounded-[16px] border border-app-line bg-app-surface p-3 sm:rounded-[18px] sm:p-5 md:p-6">
+          <div className="min-w-0 overflow-hidden rounded-[16px] border border-app-line bg-white p-3 dark:bg-app-surface sm:rounded-[18px] sm:p-5 md:p-6">
             <p className="mb-2 text-[8.5px] font-bold uppercase leading-[1.35] tracking-[0.12em] text-app-ink-muted sm:mb-3.5 sm:text-[10px]">
               <span className="sm:hidden">Mạnh nhất</span>
               <span className="hidden sm:inline">Lĩnh vực mạnh nhất</span>
@@ -502,7 +502,7 @@ export function LifeBalance() {
               <span className="min-w-0 break-words">{getLifeAreaLabel(strongestArea.name)}</span>
             </p>
           </div>
-          <div className="min-w-0 overflow-hidden rounded-[16px] border border-app-warm-border bg-app-warm-soft p-3 sm:rounded-[18px] sm:p-5 md:p-6">
+          <div className="min-w-0 overflow-hidden rounded-[16px] border border-[rgba(176,103,60,0.22)] bg-[#F4ECDD] p-3 dark:border-app-line dark:bg-app-bg-subtle sm:rounded-[18px] sm:p-5 md:p-6">
             <p className="mb-2 text-[8.5px] font-bold uppercase leading-[1.35] tracking-[0.12em] text-[#A07A4A] sm:mb-3.5 sm:text-[10px]">
               <span className="sm:hidden">Ưu tiên</span>
               <span className="hidden sm:inline">Lĩnh vực cần ưu tiên</span>
@@ -525,7 +525,7 @@ export function LifeBalance() {
         <Tabs value={activeTab} onValueChange={handleTabChange} className="mt-5 sm:mt-6">
           <TabsList
             data-life-balance-tabs-list
-            className="grid w-full grid-cols-3 gap-1 rounded-2xl border border-app-line bg-app-surface p-1 sm:inline-grid sm:w-auto sm:p-1.5"
+            className="grid w-full grid-cols-3 gap-1 rounded-2xl border border-app-line bg-white p-1 dark:bg-app-surface sm:inline-grid sm:w-auto sm:p-1.5"
           >
             <TabsTrigger
               value="current"
@@ -554,7 +554,7 @@ export function LifeBalance() {
               {/* LEFT COLUMN */}
               <div className="min-w-0 space-y-4 lg:space-y-5">
                 {/* Radar chart card */}
-                <section className="rounded-[20px] border border-app-line bg-app-surface p-4 md:p-6">
+                <section className="rounded-[20px] border border-app-line bg-white p-4 dark:bg-app-surface md:p-6">
                   <header className="mb-2.5 sm:mb-3">
                     <h2 className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-app-ink">
                       Bản đồ Cân bằng cuộc sống
@@ -567,10 +567,10 @@ export function LifeBalance() {
                 </section>
 
                 {/* Priority insight card */}
-                <section className="relative overflow-hidden rounded-[20px] border border-app-warm-border bg-app-warm-soft p-4 md:p-6">
+                <section className="relative overflow-hidden rounded-[20px] border border-[rgba(176,103,60,0.2)] bg-[#F4ECDD] p-4 dark:border-app-line dark:bg-app-bg-subtle md:p-6">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-[rgba(176,103,60,0.06)] rounded-full blur-3xl pointer-events-none" />
                   <header className="mb-3.5 flex items-start gap-3 sm:mb-4">
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-app-warm-border bg-app-surface text-app-warm sm:h-10 sm:w-10">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[rgba(176,103,60,0.22)] bg-white text-[#B0673C] dark:bg-app-surface sm:h-10 sm:w-10">
                       <Target className="h-5 w-5" aria-hidden="true" />
                     </span>
                     <div className="min-w-0">
@@ -600,8 +600,8 @@ export function LifeBalance() {
                   <p className="text-[13px] leading-relaxed text-app-ink-muted mb-4">
                     {getFocusInsight(weakestArea, lifeAreas, getLifeAreaLabel(weakestArea.name)).reason}
                   </p>
-                  <div className="flex items-start gap-3 bg-app-surface border border-[rgba(12,94,58,0.16)] rounded-[13px] p-3.5">
-                    <Lightbulb className="h-4.5 w-4.5 shrink-0 text-[#0C5E3A] mt-0.5" aria-hidden="true" />
+                  <div className="flex items-start gap-3 bg-white dark:bg-app-surface border border-[rgba(12,94,58,0.16)] rounded-[13px] p-3.5">
+                    <Sparkles className="h-4.5 w-4.5 shrink-0 text-[#0C5E3A] mt-0.5" aria-hidden="true" />
                     <p className="max-w-[68ch] break-words text-xs leading-relaxed text-[#3F4A3F]">
                       <strong className="text-[#0C5E3A]">Hành động đề xuất:</strong>{" "}
                       {getFocusInsight(weakestArea, lifeAreas, getLifeAreaLabel(weakestArea.name)).tip}
@@ -615,7 +615,7 @@ export function LifeBalance() {
                 {!isCheckInMode ? (
                   <>
                     {/* Check-in banner */}
-                    <section className="rounded-[20px] border border-[rgba(12,94,58,0.18)] bg-app-accent-soft/45 p-4 dark:border-[rgba(91,165,144,0.25)] md:p-6">
+                    <section className="rounded-[20px] border border-[rgba(12,94,58,0.18)] bg-[#EDF5EA] p-4 dark:border-[rgba(91,165,144,0.25)] dark:bg-[#1A2218] md:p-6">
                       <p className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-[#0C5E3A] mb-3">
                         Check-in cân bằng
                       </p>
@@ -641,7 +641,7 @@ export function LifeBalance() {
                     </section>
 
                     {/* Area scores (static) */}
-                    <section className="rounded-[20px] border border-app-line bg-app-surface p-4 md:p-6">
+                    <section className="rounded-[20px] border border-app-line bg-white p-4 dark:bg-app-surface md:p-6">
                       <h3 className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-app-ink mb-4">
                         Điểm số hiện tại của 8 lĩnh vực
                       </h3>
@@ -692,7 +692,7 @@ export function LifeBalance() {
                   </>
                 ) : (
                   /* CHECK-IN EDIT MODE */
-                  <section className="rounded-[20px] border border-[rgba(12,94,58,0.18)] bg-app-surface p-4 shadow-md md:p-6">
+                  <section className="rounded-[20px] border border-[rgba(12,94,58,0.18)] bg-white p-4 shadow-md dark:bg-app-surface md:p-6">
                     <header className="mb-1 border-b border-app-line/60 pb-3.5 sm:pb-4">
                       <div className="flex items-center justify-between mb-2">
                         <h3 className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-[#0C5E3A]">
@@ -867,7 +867,7 @@ export function LifeBalance() {
 
                     <div className="mt-4 space-y-2 rounded-xl border border-app-line bg-app-surface p-3.5 sm:p-4">
                       <span className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider text-app-accent">
-                        <Lightbulb className="h-3 w-3" aria-hidden="true" />
+                        <Sparkles className="h-3 w-3" aria-hidden="true" />
                         Gợi ý mục tiêu 12 tuần
                       </span>
                       <p className="break-words text-xs font-[family-name:var(--app-font-serif)] italic leading-relaxed text-app-ink">
@@ -986,7 +986,7 @@ const LifeAreaRow = memo(function LifeAreaRow({
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           type="button"
-          className="flex h-11 w-11 shrink-0 cursor-pointer select-none items-center justify-center rounded-full border border-app-line bg-app-surface text-lg font-bold text-app-ink transition-all hover:bg-app-bg active:scale-95"
+          className="flex h-11 w-11 shrink-0 cursor-pointer select-none items-center justify-center rounded-full border border-app-line bg-white text-lg font-bold text-app-ink transition-all hover:bg-app-bg active:scale-95 dark:bg-app-surface"
           onClick={() => onScoreChange(index, [Math.max(1, area.score - 1)])}
           aria-label={`Giảm ${label}`}
         >
@@ -1010,7 +1010,7 @@ const LifeAreaRow = memo(function LifeAreaRow({
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           type="button"
-          className="flex h-11 w-11 shrink-0 cursor-pointer select-none items-center justify-center rounded-full border border-app-line bg-app-surface text-lg font-bold text-app-ink transition-all hover:bg-app-bg active:scale-95"
+          className="flex h-11 w-11 shrink-0 cursor-pointer select-none items-center justify-center rounded-full border border-app-line bg-white text-lg font-bold text-app-ink transition-all hover:bg-app-bg active:scale-95 dark:bg-app-surface"
           onClick={() => onScoreChange(index, [Math.min(10, area.score + 1)])}
           aria-label={`Tăng ${label}`}
         >

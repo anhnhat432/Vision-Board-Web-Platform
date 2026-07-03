@@ -3,6 +3,7 @@ import {
   Edit,
   Eye,
   Heart,
+  Image as ImageIcon,
   Images,
   Moon,
   Plus,
@@ -21,7 +22,7 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { type NavigateFunction, useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import { EmptyState } from "@/app/components/states/EmptyState";
 import { getBackendVisionBoardId, getLocalVisionBoardId, saveVisionBoardLink } from "@/lib/api/visionBoardLinkStore";
 import { useAuthContext } from "@/lib/auth/AuthContext";
@@ -67,7 +68,6 @@ const ICON_COMPONENTS = {
 };
 
 type IconName = keyof typeof ICON_COMPONENTS;
-type BoardSort = "newest" | "oldest" | "name" | "items";
 
 function BoardPreviewIcon({ content }: { content: string }) {
   const Icon = ICON_COMPONENTS[content as IconName] ?? Sparkles;
@@ -88,7 +88,7 @@ function Gallery3DHeroMockup() {
       
       {/* Left Frame */}
       <div className="absolute w-[130px] h-[160px] rounded-lg border border-app-line bg-app-surface p-2 shadow-md origin-bottom-left transition-all duration-500 hover:z-20 hover:scale-110 hover:shadow-lg [transform:translateX(-48px)_translateY(8px)_rotate(-15deg)_translateZ(-20px)] cursor-pointer group/left">
-        <div className="w-full h-[100px] rounded bg-app-accent-soft/60 relative overflow-hidden flex items-center justify-center">
+        <div className="w-full h-[100px] rounded bg-gradient-to-br from-purple-500/20 to-pink-500/20 relative overflow-hidden flex items-center justify-center">
           <span className="text-[2rem] filter drop-shadow">🏔️</span>
           <div className="absolute inset-0 bg-black/5 group-hover/left:bg-transparent transition-colors" />
         </div>
@@ -115,7 +115,7 @@ function Gallery3DHeroMockup() {
       </div>
 
       {/* Center Frame */}
-      <div className="absolute w-[140px] h-[170px] rounded-lg border-2 border-app-accent-soft bg-app-surface p-2.5 shadow-app-lg transition-all duration-500 hover:scale-110 hover:-translate-y-2 hover:shadow-app-xl z-10 [transform:rotate(-2deg)] cursor-pointer group/center">
+      <div className="absolute w-[140px] h-[170px] rounded-lg border-2 border-app-accent-soft bg-app-surface p-2.5 shadow-xl transition-all duration-500 hover:scale-110 hover:-translate-y-2 hover:shadow-2xl z-10 [transform:rotate(-2deg)] cursor-pointer group/center">
         <div className="w-full h-[105px] rounded bg-gradient-to-br from-amber-500/20 to-orange-500/20 relative overflow-hidden flex items-center justify-center">
           <span className="text-[2.2rem] filter drop-shadow">✨</span>
           <div className="absolute inset-0 bg-black/3 group-hover/center:bg-transparent transition-colors" />
@@ -248,15 +248,7 @@ function BoardCollagePreview({ board }: { board: VisionBoard }) {
 }
 
 // Bảng dữ liệu List View
-function BoardListView({
-  boards,
-  navigate,
-  onDeleteClick,
-}: {
-  boards: VisionBoard[];
-  navigate: NavigateFunction;
-  onDeleteClick: (id: string) => void;
-}) {
+function BoardListView({ boards, navigate, onDeleteClick }: { boards: VisionBoard[], navigate: any, onDeleteClick: (id: string) => void }) {
   const { user } = useAuthContext();
   
   return (
@@ -292,7 +284,7 @@ function BoardListView({
                         {firstImage ? (
                           <ImageWithFallback src={firstImage} alt={board.name} className="w-full h-full object-cover" />
                         ) : (
-                          <Images className="h-4 w-4 text-app-ink-muted/50" />
+                          <Sparkles className="h-4 w-4 text-app-ink-muted/50" />
                         )}
                       </div>
                       <div>
@@ -388,7 +380,7 @@ export function VisionBoardGallery() {
   // States cho bộ lọc & Toolbar
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedYear, setSelectedYear] = useState<string>("all");
-  const [sortBy, setSortBy] = useState<BoardSort>("newest");
+  const [sortBy, setSortBy] = useState<"newest" | "oldest" | "name" | "items">("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   // Hydrate from backend: import any backend boards that have no local counterpart.
@@ -675,14 +667,14 @@ export function VisionBoardGallery() {
           </Card>
 
           {/* Card 3: Tổng phần tử */}
-          <Card className="relative overflow-hidden rounded-card shadow-app-sm border border-app-line/60 bg-app-surface group/bento-el transition-all duration-300 hover:shadow-md hover:border-app-accent/20">
+          <Card className="relative overflow-hidden rounded-card shadow-app-sm border border-app-line/60 bg-gradient-to-br from-blue-50/60 to-app-surface dark:from-blue-900/10 dark:to-app-surface group/bento-el transition-all duration-300 hover:shadow-md hover:border-blue-500/20">
             <CardHeader className="flex flex-row items-start justify-between pb-2">
               <div className="space-y-1">
                 <CardDescription className="text-xs uppercase tracking-wider text-app-ink-muted">Tích lũy</CardDescription>
-                <CardTitle className="text-3xl font-bold font-serif text-app-accent">{stats.totalItemsCount}</CardTitle>
+                <CardTitle className="text-3xl font-bold font-serif text-blue-600 dark:text-blue-400">{stats.totalItemsCount}</CardTitle>
               </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-[var(--r-tile)] bg-app-accent-soft text-app-accent transition-transform duration-300 group-hover/bento-el:scale-110">
-                <Images className="h-5 w-5" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-[var(--r-tile)] bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 transition-transform duration-300 group-hover/bento-el:scale-110">
+                <Sparkles className="h-5 w-5 animate-pulse" />
               </div>
             </CardHeader>
             <CardContent className="pt-2 pb-5">
@@ -763,7 +755,7 @@ export function VisionBoardGallery() {
             <div className="flex items-center gap-2">
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as BoardSort)}
+                onChange={(e) => setSortBy(e.target.value as any)}
                 className="rounded-[var(--r-input)] border border-app-line bg-app-surface px-3 py-2 text-sm font-semibold text-app-ink-soft focus:border-app-accent/40 focus:ring-2 focus:ring-app-accent/14 outline-none transition-all"
               >
                 <option value="newest">Mới nhất trước</option>

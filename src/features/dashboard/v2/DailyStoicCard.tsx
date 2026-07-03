@@ -1,4 +1,4 @@
-import { BookOpen, Bookmark, Check, HelpCircle } from "lucide-react";
+import { Bookmark, Check, HelpCircle, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/app/components/ui/button";
 
@@ -143,10 +143,10 @@ export function DailyStoicCard() {
           onClick={handleFlip}
           onKeyDown={handleKeyDown}
         >
-          {/* Warm reading surface */}
+          {/* Glow amber radial */}
           <div
             className="pointer-events-none absolute inset-0"
-            style={{ background: "radial-gradient(circle at 50% 0%, rgba(231,180,0,0.1), transparent 60%)" }}
+            style={{ background: "radial-gradient(circle at 50% 0%, rgba(231,180,0,0.18), transparent 60%)" }}
             aria-hidden="true"
           />
 
@@ -157,7 +157,7 @@ export function DailyStoicCard() {
 
           <div className="relative z-10 my-auto flex flex-col items-center gap-4">
             <div className="flex h-[58px] w-[58px] items-center justify-center rounded-full border border-[#E7B400]/40 bg-[#E7B400]/[0.16] text-[#E7B400]">
-              <BookOpen className="h-[26px] w-[26px]" />
+              <Sparkles className="h-[26px] w-[26px]" />
             </div>
             <div>
               <h3 className="font-serif text-[18px] font-bold text-white">Lá Bài Trí Tuệ</h3>

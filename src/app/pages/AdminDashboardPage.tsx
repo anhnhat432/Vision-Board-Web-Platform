@@ -71,10 +71,13 @@ function ReminderBanner({
   const expiringCount = overview?.summary.expiringSoonSubscriptions ?? 0;
 
   return (
-    <div className="surface-raised relative overflow-hidden rounded-[var(--r-card)] p-5">
+    <div className="relative overflow-hidden rounded-[var(--r-card)] border border-app-accent/20 bg-gradient-to-r from-app-accent-soft via-app-surface to-app-surface p-5">
+      {/* Decorative accent circle */}
+      <span className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-app-accent/5 blur-xl" />
+
       <div className="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex gap-4">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[var(--r-tile)] bg-app-accent text-white shadow-app-sm">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-app-accent to-app-accent/70 text-white shadow-sm">
             <Bell className="h-5 w-5" />
           </span>
           <div className="min-w-0">
@@ -176,7 +179,7 @@ function RecentUserList({ users }: { users: AdminUserSummary[] }) {
         >
           <div className="min-w-0 flex items-center gap-3">
             {/* Avatar placeholder */}
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--r-tile)] border border-app-line bg-app-surface text-xs font-bold text-app-accent">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-app-accent-soft to-app-bg-subtle text-xs font-bold text-app-accent">
               {(user.displayName || user.email || "?")
                 .charAt(0)
                 .toUpperCase()}
@@ -481,7 +484,7 @@ export function AdminDashboardPage() {
 
         <div className={`${adminSurface.card} p-5`}>
           <div className="mb-4 flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-app-accent-soft text-app-accent dark:bg-app-accent/15">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-50 text-violet-600 dark:bg-violet-500/15 dark:text-violet-400">
               <Users className="h-3.5 w-3.5" />
             </span>
             <div>

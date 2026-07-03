@@ -14,7 +14,7 @@ interface AdminEmptyStateProps {
 /**
  * Friendly empty placeholder for admin lists.
  *
- * Features: restrained icon container, refined typography, warm feel.
+ * Features: gradient icon container, refined typography, warm feel.
  */
 export function AdminEmptyState({
   title,
@@ -30,7 +30,7 @@ export function AdminEmptyState({
         className,
       )}
     >
-      <span className="flex h-14 w-14 items-center justify-center rounded-[var(--r-tile)] border border-app-line bg-app-surface text-app-accent shadow-app-sm">
+      <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-app-accent-soft to-app-bg-subtle text-app-accent shadow-sm">
         <Icon className="h-7 w-7" />
       </span>
       <div className="space-y-1.5">
