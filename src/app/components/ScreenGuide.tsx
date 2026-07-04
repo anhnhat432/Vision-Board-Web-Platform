@@ -254,7 +254,7 @@ export function ScreenGuide({
             className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg border border-app-line bg-app-bg/60 text-app-accent"
             aria-hidden="true"
           >
-            <Lightbulb className="size-4" />
+            <Lightbulb className="size-4" aria-hidden="true" />
           </span>
           <div className="min-w-0 space-y-1 pr-8 sm:pr-0">
             {surface === "sheet" ? (

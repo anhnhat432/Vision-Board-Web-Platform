@@ -981,7 +981,7 @@ export function RootLayout() {
                 role="note"
                 className="border-b border-[color:var(--color-info-border)] bg-[color:var(--color-info-bg)] px-4 py-1.5 text-center text-xs font-medium text-[color:var(--color-info-fg)] sm:px-6"
               >
-                <HardDrive className="mr-1 inline h-3 w-3 align-text-bottom" />
+                <HardDrive className="mr-1 inline h-3 w-3 align-text-bottom" aria-hidden="true" />
                 Bản demo · Dữ liệu lưu trên trình duyệt này.
               </div>
             ) : null}

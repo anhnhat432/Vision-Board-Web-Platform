@@ -18,7 +18,7 @@ test.describe('Visual QA - Motion Effects Checklist', () => {
     await page.waitForLoadState('networkidle');
     await page.screenshot({ path: path.join(screenshotDir, 'qa-dashboard-desktop.png'), fullPage: true });
 
-    const ctaButton = page.getByRole('button', { name: /Mở trung tâm 12 tuần/i });
+    const ctaButton = page.getByRole('button', { name: /Thiết lập chu kỳ 12 tuần/i }).first();
     await expect(ctaButton).toBeVisible();
   });
 
