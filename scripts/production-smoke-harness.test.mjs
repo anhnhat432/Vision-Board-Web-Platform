@@ -24,7 +24,10 @@ describe("production smoke harness guards", () => {
   it("opens the real weekly review flow before filling review inputs", () => {
     expect(smokeScript).toContain("async function tryClickButtonByNormalizedText(page, normalizedNeedle)");
     expect(smokeScript).toContain("const isVisible = (element) => {");
-    expect(smokeScript).toContain("!candidate.disabled && isVisible(candidate) && text.includes(needle)");
+    expect(smokeScript).toContain(
+      'const searchableText = normalize(`${candidate.textContent ?? ""} ${candidate.getAttribute("aria-label") ?? ""}`);',
+    );
+    expect(smokeScript).toContain("!candidate.disabled && isVisible(candidate) && searchableText.includes(needle)");
     expect(smokeScript).toContain("async function hasVisibleWeeklyReviewForm(page)");
     expect(smokeScript).toContain("async function waitForWeeklyReviewFormVisible(page, label)");
     expect(smokeScript).toContain("async function prepareWeeklyReviewFormData(page)");
