@@ -92,6 +92,28 @@ function isRectOutsideViewport(rect: DOMRect, viewport: ReturnType<typeof getVie
   return rect.bottom <= 0 || rect.top >= viewport.height || rect.right <= 0 || rect.left >= viewport.width;
 }
 
+function almostSamePosition(left: number, right: number): boolean {
+  return Math.abs(left - right) < 0.5;
+}
+
+function areTargetRectsEqual(left: TargetRect | null, right: TargetRect | null): boolean {
+  if (left === right) return true;
+  if (!left || !right) return false;
+
+  return (
+    almostSamePosition(left.top, right.top) &&
+    almostSamePosition(left.right, right.right) &&
+    almostSamePosition(left.bottom, right.bottom) &&
+    almostSamePosition(left.left, right.left) &&
+    almostSamePosition(left.width, right.width) &&
+    almostSamePosition(left.height, right.height)
+  );
+}
+
+function areTargetStatesEqual(left: TargetRectState, right: TargetRectState): boolean {
+  return left.targetOffscreen === right.targetOffscreen && areTargetRectsEqual(left.targetRect, right.targetRect);
+}
+
 function getPaddedRect(rect: TargetRect): TargetRect {
   const viewport = getViewportSize();
   const top = clamp(rect.top - SPOTLIGHT_PADDING, 8, viewport.height);
@@ -212,33 +234,42 @@ function useTargetRect(open: boolean, targetId: string | undefined) {
     targetRect: null,
     targetOffscreen: false,
   });
+  const targetStateRef = useRef<TargetRectState>({ targetRect: null, targetOffscreen: false });
+
+  const commitTargetState = useCallback((nextState: TargetRectState) => {
+    if (areTargetStatesEqual(targetStateRef.current, nextState)) return;
+    targetStateRef.current = nextState;
+    setTargetState(nextState);
+  }, []);
 
   useEffect(() => {
     if (!open || !targetId) {
-      setTargetState({ targetRect: null, targetOffscreen: false });
+      commitTargetState({ targetRect: null, targetOffscreen: false });
       return undefined;
     }
+
+    let frameId: number | null = null;
 
     const updateTargetRect = () => {
       const target = getTourTarget(targetId);
       if (!target) {
-        setTargetState({ targetRect: null, targetOffscreen: false });
+        commitTargetState({ targetRect: null, targetOffscreen: false });
         return;
       }
 
       const rect = target.getBoundingClientRect();
       if (rect.width <= 0 || rect.height <= 0) {
-        setTargetState({ targetRect: null, targetOffscreen: false });
+        commitTargetState({ targetRect: null, targetOffscreen: false });
         return;
       }
 
       const viewport = getViewportSize();
       if (isRectOutsideViewport(rect, viewport)) {
-        setTargetState({ targetRect: null, targetOffscreen: true });
+        commitTargetState({ targetRect: null, targetOffscreen: true });
         return;
       }
 
-      setTargetState({
+      commitTargetState({
         targetOffscreen: false,
         targetRect: {
           top: rect.top,
@@ -251,18 +282,27 @@ function useTargetRect(open: boolean, targetId: string | undefined) {
       });
     };
 
-    updateTargetRect();
-    const settleTimer = window.setTimeout(updateTargetRect, 360);
+    const scheduleTargetRectUpdate = () => {
+      if (frameId !== null) return;
+      frameId = window.requestAnimationFrame(() => {
+        frameId = null;
+        updateTargetRect();
+      });
+    };
 
-    window.addEventListener("resize", updateTargetRect);
-    window.addEventListener("scroll", updateTargetRect, true);
+    updateTargetRect();
+    const settleTimer = window.setTimeout(scheduleTargetRectUpdate, 360);
+
+    window.addEventListener("resize", scheduleTargetRectUpdate);
+    window.addEventListener("scroll", scheduleTargetRectUpdate, { capture: true, passive: true });
 
     return () => {
+      if (frameId !== null) window.cancelAnimationFrame(frameId);
       window.clearTimeout(settleTimer);
-      window.removeEventListener("resize", updateTargetRect);
-      window.removeEventListener("scroll", updateTargetRect, true);
+      window.removeEventListener("resize", scheduleTargetRectUpdate);
+      window.removeEventListener("scroll", scheduleTargetRectUpdate, true);
     };
-  }, [open, targetId]);
+  }, [commitTargetState, open, targetId]);
 
   return {
     targetOffscreen: targetState.targetOffscreen,
@@ -405,7 +445,7 @@ export function SpotlightTour({ open, onOpenChange, title, description, steps }:
             <div
               key={panel.key}
               aria-hidden="true"
-              className="fixed bg-app-ink/8 backdrop-blur-[1px] dark:bg-black/24"
+              className="fixed bg-app-ink/8 dark:bg-black/24"
               style={panel.style}
             />
           ))}
@@ -426,7 +466,7 @@ export function SpotlightTour({ open, onOpenChange, title, description, steps }:
           <DialogPrimitive.Content
             aria-describedby={`spotlight-tour-description-${step.id}`}
             aria-labelledby={`spotlight-tour-title-${step.id}`}
-            className="fixed max-h-[calc(100vh-2rem)] overflow-y-auto rounded-[22px] border border-app-line bg-app-surface/95 text-app-ink shadow-app-lg ring-1 ring-app-line/70 backdrop-blur-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+            className="fixed max-h-[calc(100vh-2rem)] transform-gpu overflow-y-auto rounded-[22px] border border-app-line bg-app-surface/98 text-app-ink shadow-app-lg ring-1 ring-app-line/70 [contain:layout_paint_style] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
             onEscapeKeyDown={(event) => {
               event.preventDefault();
               closeTour();

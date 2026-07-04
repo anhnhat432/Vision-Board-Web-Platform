@@ -981,7 +981,7 @@ export function RootLayout() {
                 role="note"
                 className="border-b border-[color:var(--color-info-border)] bg-[color:var(--color-info-bg)] px-4 py-1.5 text-center text-xs font-medium text-[color:var(--color-info-fg)] sm:px-6"
               >
-                <HardDrive className="mr-1 inline h-3 w-3 align-text-bottom" />
+                <HardDrive className="mr-1 inline h-3 w-3 align-text-bottom" aria-hidden="true" />
                 Bản demo · Dữ liệu lưu trên trình duyệt này.
               </div>
             ) : null}
@@ -1081,7 +1081,7 @@ export function RootLayout() {
           <div className={showSidebar ? "flex-1 lg:pl-[248px]" : "flex-1"}>
             {isPublicLanding ? null : (
               <header
-                className={`sticky top-0 z-40 border-b border-app-line/70 bg-app-bg/92 backdrop-blur supports-[backdrop-filter]:bg-app-bg/84 transition-[border-color,background-color] duration-150 ${
+                className={`sticky top-0 z-40 border-b border-app-line/80 bg-app-bg transition-[border-color] duration-150 ${
                   showSidebar ? "lg:hidden" : ""
                 }`}
               >
@@ -1671,7 +1671,7 @@ export function RootLayout() {
               aria-label="Điều hướng dưới"
               style={{ animation: "bottom-nav-rise 0.38s cubic-bezier(0.22,1,0.36,1) both" }}
             >
-              <div className="bottom-nav-inner bg-app-surface border-t border-app-line/75 shadow-[0_-10px_28px_-24px_rgba(23,21,15,0.28)] rounded-t-[18px] p-2 pb-[calc(0.4rem+env(safe-area-inset-bottom,0))]">
+              <div className="bottom-nav-inner bg-app-surface border-t border-app-line/75 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] rounded-t-2xl p-2 pb-[calc(0.4rem+env(safe-area-inset-bottom,0))]">
                 {bottomNavItems.map((item) => {
                   const Icon = item.icon;
                   const active = isActive(item.path);

@@ -1,6 +1,6 @@
 {
   "generatedFrom": "production sources under src + src/app/utils/storage-constants.ts",
-  "keyCount": 89,
+  "keyCount": 90,
   "keys": [
     "assistant.action_audit_log",
     "assistant.chat.history",
@@ -59,6 +59,7 @@
     "review-step-suggestions-open",
     "selected_focus_area",
     "show_12week_setup_success",
+    "smart-goal-audio-enabled",
     "trust_badge_dismissed_v1",
     "user_intent",
     "vb-celebrate:",
@@ -79,9 +80,9 @@
     "visionboard_last_restore_access",
     "visionboard_local_data_import_backup:",
     "visionboard_local_data_migration_prompt_state",
+    "visionboard_mam_pet_preferences_v1",
     "visionboard_mock_billing_account",
     "visionboard_mock_billing_session_",
-    "visionboard_mam_pet_preferences_v1",
     "visionboard_new_user_guide_dismissed",
     "visionboard_new_user_guide_seen_at",
     "visionboard_orders_v1",

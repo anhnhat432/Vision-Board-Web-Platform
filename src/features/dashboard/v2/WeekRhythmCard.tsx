@@ -180,7 +180,7 @@ export function WeekRhythmCard({
   return (
     <section
       data-testid="dashboard-kpi-row"
-      className="rounded-card border border-app-line bg-app-surface p-[22px] shadow-[0_16px_38px_-30px_rgba(23,21,15,0.26)]"
+      className="rounded-[20px] glass-panel glass-panel-hover p-[22px]"
       aria-labelledby="dashboard-week-rhythm-title"
     >
       <div className="mb-5 border-b border-app-line pb-3.5">

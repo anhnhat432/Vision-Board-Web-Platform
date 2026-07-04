@@ -253,7 +253,7 @@ export function AdminOrderDetailPage() {
                   {themeLines.map((line) => (
                     <tr key={line.itemId}>
                       <td className="py-2.5 pr-3">
-                        <span className="inline-flex items-center rounded-full bg-app-accent-soft px-2 py-0.5 text-xs font-medium text-app-accent">
+                        <span className="inline-flex items-center rounded-full bg-violet-500/10 px-2 py-0.5 text-xs font-medium text-violet-600 dark:text-violet-400">
                           Ảnh
                         </span>
                       </td>

@@ -232,7 +232,7 @@ export function ScreenGuide({
       type="button"
       variant="ghost"
       size="sm"
-      className="relative min-h-11 gap-1.5 rounded-[12px] border border-app-line/80 bg-app-surface/95 px-4 text-app-ink-soft shadow-[0_12px_24px_-22px_rgba(23,21,15,0.3)] hover:bg-app-bg hover:text-app-ink active:scale-[0.97]"
+      className="relative min-h-11 gap-1.5 border border-app-line bg-app-surface px-4 text-app-ink-soft shadow-3xs hover:bg-app-bg hover:text-app-ink active:scale-[0.97]"
       aria-label={`Hướng dẫn nhanh: ${title}`}
     >
       <HelpCircle className="size-4" aria-hidden="true" />
@@ -248,20 +248,17 @@ export function ScreenGuide({
 
   const renderGuideBody = (surface: "popover" | "sheet") => (
     <>
-      <div className={cn("space-y-3.5 p-4", surface === "sheet" && "max-h-[50dvh] overflow-y-auto px-5 pb-4 pt-5")}>
-        {surface === "sheet" ? (
-          <div className="mx-auto mb-1 h-1 w-10 rounded-full bg-app-line-strong/50" aria-hidden="true" />
-        ) : null}
-        <div className="flex items-start gap-3 border-b border-app-line/70 pb-3">
+      <div className={cn("space-y-3 p-4", surface === "sheet" && "max-h-[62dvh] overflow-y-auto px-5 pb-4 pt-5")}>
+        <div className="flex items-start gap-2.5">
           <span
-            className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-[10px] border border-app-accent/15 bg-app-accent-soft/70 text-app-accent"
+            className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-lg border border-app-line bg-app-bg/60 text-app-accent"
             aria-hidden="true"
           >
-            <Lightbulb className="size-4" />
+            <Lightbulb className="size-4" aria-hidden="true" />
           </span>
           <div className="min-w-0 space-y-1 pr-8 sm:pr-0">
             {surface === "sheet" ? (
-              <SheetTitle className="font-serif text-[1.05rem] font-semibold leading-snug text-app-ink text-wrap-balance">
+              <SheetTitle className="font-serif text-lg font-semibold leading-snug text-app-ink text-wrap-balance">
                 {title}
               </SheetTitle>
             ) : (
@@ -278,14 +275,11 @@ export function ScreenGuide({
             ) : null}
           </div>
         </div>
-        <ol className="space-y-2">
+        <ol className="space-y-2.5">
           {steps.map((step, index) => (
-            <li
-              key={step.text}
-              className="flex gap-2.5 rounded-[12px] bg-app-bg-subtle/55 px-3 py-2.5 text-sm leading-relaxed text-app-ink-soft"
-            >
+            <li key={step.text} className="flex gap-2.5 text-sm leading-relaxed text-app-ink-soft">
               <span
-                className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-[7px] bg-app-surface text-xs font-semibold text-app-accent shadow-3xs"
+                className="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full bg-app-accent/12 text-xs font-semibold text-app-accent"
                 aria-hidden="true"
               >
                 {index + 1}
@@ -298,15 +292,13 @@ export function ScreenGuide({
           ))}
         </ol>
         {tip ? (
-          <p className="rounded-[12px] border border-app-line/70 bg-app-surface px-3 py-2 text-xs leading-relaxed text-app-ink-muted">
-            {tip}
-          </p>
+          <p className="rounded-lg bg-app-bg/60 px-3 py-2 text-xs leading-relaxed text-app-ink-muted">{tip}</p>
         ) : null}
       </div>
       <div
         className={cn(
-          "flex flex-col gap-2 border-t border-app-line/80 bg-app-surface/95 px-4 py-2.5 sm:flex-row sm:justify-end",
-          surface === "sheet" && "px-5 pb-[calc(env(safe-area-inset-bottom)+0.85rem)] pt-3",
+          "flex flex-col gap-2 border-t border-app-line px-4 py-2.5 sm:flex-row sm:justify-end",
+          surface === "sheet" && "bg-app-surface/95 px-5 pb-[calc(env(safe-area-inset-bottom)+1rem)] pt-3",
         )}
       >
         {action ? (
@@ -337,7 +329,7 @@ export function ScreenGuide({
           )}
           <SheetContent
             side="bottom"
-            className="max-h-[74dvh] gap-0 overflow-hidden rounded-t-[1.5rem] border-app-line/80 bg-app-surface p-0 shadow-[0_-22px_60px_-34px_rgba(23,21,15,0.45)]"
+            className="max-h-[88dvh] gap-0 overflow-hidden rounded-t-[1.5rem] border-app-line bg-app-surface p-0 shadow-app-lg"
             onCloseAutoFocus={handleCloseAutoFocus}
           >
             {renderGuideBody("sheet")}
@@ -357,7 +349,7 @@ export function ScreenGuide({
           <PopoverContent
             align="end"
             sideOffset={8}
-            className="w-[min(20.5rem,calc(100vw-2rem))] overflow-hidden rounded-[16px] border-app-line/80 bg-app-surface p-0 shadow-[0_22px_60px_-38px_rgba(23,21,15,0.55)]"
+            className="w-[min(22rem,calc(100vw-2rem))] border-app-line bg-app-surface p-0 shadow-app-lg"
             role="dialog"
             aria-label={title}
             onCloseAutoFocus={handleCloseAutoFocus}

@@ -53,6 +53,11 @@ import {
 } from "@/test/app-flow-helpers";
 
 const INTEGRATION_TEST_TIMEOUT_MS = 30_000;
+const REVIEW_DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] as const;
+
+function getTodayReviewDay(): (typeof REVIEW_DAYS)[number] {
+  return REVIEW_DAYS[new Date().getDay()] ?? "Sunday";
+}
 
 function getPrimaryButton(name: string | RegExp) {
   const [button] = screen.getAllByRole("button", { name });
@@ -64,6 +69,9 @@ async function openWeeklyReviewDetails(_user: ReturnType<typeof userEvent.setup>
   await screen.findByTestId("wam-section-next-commitments", undefined, {
     timeout: INTEGRATION_TEST_TIMEOUT_MS,
   });
+  await act(async () => {
+    await Promise.resolve();
+  });
 }
 
 async function typeWamReview(
@@ -72,11 +80,20 @@ async function typeWamReview(
 ) {
   await openWeeklyReviewDetails(user);
   const insightsInput = document.querySelector("#weekly-insights");
-  const commitmentsInput = document.querySelector("#weekly-next-commitments");
   expect(insightsInput).toBeInTheDocument();
-  expect(commitmentsInput).toBeInTheDocument();
-  await user.type(insightsInput as HTMLElement, input.insights);
-  await user.type(commitmentsInput as HTMLElement, `${input.nextWeekCommitments}{Enter}`);
+  fireEvent.change(insightsInput as HTMLElement, { target: { value: input.insights } });
+  await waitFor(() => {
+    expect((document.querySelector("#weekly-insights") as HTMLTextAreaElement | null)?.value).toBe(input.insights);
+  });
+
+  const commitmentsInput = within(screen.getByTestId("weekly-review-flow")).getByLabelText(/cam kết của tuần tới/i);
+  fireEvent.change(commitmentsInput, { target: { value: `${input.nextWeekCommitments},` } });
+  await screen.findByLabelText(`Cam kết: ${input.nextWeekCommitments}`, undefined, {
+    timeout: 3_000,
+  });
+  await waitFor(() => {
+    expect(screen.getByTestId("weekly-review-readiness")).toHaveTextContent("4/4");
+  });
 }
 
 async function confirmEarlyReviewIfPrompted(user: ReturnType<typeof userEvent.setup>) {
@@ -204,7 +221,7 @@ describe("12-week write-path safety", () => {
   it(
     "keeps local weekly review and reflection saved when queue persistence fails",
     async () => {
-      const { goalId } = seedTwelveWeekGoal();
+      const { goalId } = seedTwelveWeekGoal({ reviewDay: getTodayReviewDay() });
 
       renderAppRoute("/12-week-system");
       const user = userEvent.setup();
@@ -253,7 +270,7 @@ describe("12-week write-path safety", () => {
   it(
     "keeps lag metric, weekly review, and scoreboard metric aligned before weekly-review sync",
     async () => {
-      const { goalId } = seedTwelveWeekGoal();
+      const { goalId } = seedTwelveWeekGoal({ reviewDay: getTodayReviewDay() });
 
       updateUserData((data) => {
         const goal = data.goals.find((item) => item.id === goalId);
@@ -306,7 +323,7 @@ describe("12-week write-path safety", () => {
     "keeps weekly review, linked reflection, and outbox event when backend review sync fails",
     async () => {
       syncWeeklyReviewMock.mockResolvedValueOnce(false);
-      const { goalId } = seedTwelveWeekGoal();
+      const { goalId } = seedTwelveWeekGoal({ reviewDay: getTodayReviewDay() });
 
       renderAppRoute("/12-week-system");
       const user = userEvent.setup();

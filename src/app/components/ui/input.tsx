@@ -11,9 +11,9 @@ const Input = React.forwardRef<HTMLInputElement, React.ComponentProps<"input">>(
         type={type}
         data-slot="input"
         className={cn(
-          "file:text-app-ink placeholder:text-app-ink-muted selection:bg-app-accent selection:text-white text-app-ink border border-app-line flex h-11 w-full min-w-0 rounded-[var(--r-input)] px-3 py-2 text-base leading-6 font-normal tracking-normal bg-app-surface shadow-none transition-[color,box-shadow,border-color,background-color] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium md:text-sm hover:border-app-accent/40",
+          "file:text-app-ink placeholder:text-app-ink-muted selection:bg-app-accent selection:text-white text-app-ink border border-app-line flex h-11 w-full min-w-0 rounded-xl px-3 py-2 text-base leading-6 font-normal tracking-tight bg-app-surface shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-[color,box-shadow,border-color] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium md:text-sm hover:border-app-accent/50",
           "disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-app-bg/50 disabled:text-app-ink-muted disabled:opacity-100",
-          "focus-visible:border-app-accent focus-visible:ring-3 focus-visible:ring-app-accent/25",
+          "focus-visible:border-app-accent focus-visible:ring-4 focus-visible:ring-app-accent/20 focus-visible:shadow-[0_1px_2px_rgba(15,23,42,0.04)]",
           "aria-invalid:ring-4 aria-invalid:ring-rose-500/20 dark:aria-invalid:ring-rose-900/30 aria-invalid:border-rose-500 dark:aria-invalid:border-rose-800",
           className,
         )}

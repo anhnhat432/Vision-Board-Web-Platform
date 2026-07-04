@@ -36,7 +36,7 @@ import {
 } from "../utils/user-intent";
 import { buildDefaultFeasibilityAnswers, buildQuickPlanFeasibilityResult } from "./FeasibilityCheck/helpers";
 import { AchievableStep } from "./SMARTGoalSetup/components/AchievableStep";
-import { AnvilForgingEffect } from "./SMARTGoalSetup/components/AnvilForgingEffect";
+import { CompletionBridge } from "./SMARTGoalSetup/components/CompletionBridge";
 import { MeasurableStep } from "./SMARTGoalSetup/components/MeasurableStep";
 import { RelevantStep } from "./SMARTGoalSetup/components/RelevantStep";
 import { SmartGoalHero } from "./SMARTGoalSetup/components/SmartGoalHero";
@@ -101,7 +101,7 @@ export function SMARTGoalSetup() {
     "checking",
   );
   const [currentStep, setCurrentStep] = useState(0);
-  const [showAnvilEffect, setShowAnvilEffect] = useState(false);
+  const [showCompletionBridge, setShowCompletionBridge] = useState(false);
   const [postSmartGoalDestination, setPostSmartGoalDestination] = useState<"/feasibility" | "/12-week-setup">(
     "/feasibility",
   );
@@ -382,7 +382,7 @@ export function SMARTGoalSetup() {
     });
 
     setPostSmartGoalDestination(destination);
-    setShowAnvilEffect(true);
+    setShowCompletionBridge(true);
   };
 
   const handleCreateQuickPlan = () => handleCompleteSmartGoal("/12-week-setup");
@@ -530,11 +530,6 @@ export function SMARTGoalSetup() {
             smartData={smartData}
             setSmartData={setSmartData}
             currentStepHasDraftContent={currentStepHasDraftContent}
-            clarityItems={clarityItems}
-            clarityDoneCount={clarityDoneCount}
-            summaryRows={summaryRows}
-            onJumpToStep={handleJumpToStep}
-            qualityFeedback={qualityFeedback}
             focusArea={focusArea}
           />
         );
@@ -599,51 +594,50 @@ export function SMARTGoalSetup() {
         description="Nâng cấp Plus để tạo thêm mục tiêu. Dữ liệu hiện có vẫn được giữ nguyên."
         source="paywall_dialog"
       />
-      <div className="space-y-4 sm:space-y-6">
-        <div>
-          <CoreFlowProgress currentStepId="smart_goal" onExit={() => navigate("/")} className="mb-1 sm:mb-2" />
-          <div className="sticky top-2 z-20 flex justify-end">
+      <div className="space-y-4 sm:space-y-5">
+        <CoreFlowProgress
+          currentStepId="smart_goal"
+          onExit={() => navigate("/")}
+          compactOnMobile
+          saveBadge={
             <AutoSaveIndicator
               status={isDirty ? autoSaveStatus : "saved"}
               lastSavedAt={lastSavedAt}
-              variant="prominent"
+              variant="default"
             />
-          </div>
-        </div>
+          }
+        />
 
         {!isVisionPromptDismissed ? (
           <section
-            className="hidden rounded-[14px] border border-app-accent-soft bg-app-accent-soft p-5 md:block md:p-6"
+            className="hidden rounded-[20px] border border-app-line bg-app-surface/55 px-4 py-3 backdrop-blur md:flex md:items-center md:justify-between md:gap-4"
             aria-label="Tầm nhìn dài hạn"
           >
-            <span className="inline-flex rounded-full bg-app-surface px-3 py-1 text-xs font-medium text-app-accent">
-              Tầm nhìn dài hạn
-            </span>
             {aspirationalVision ? (
-              <p className="mt-3 font-serif text-lg font-medium leading-7 text-app-ink">
+              <p className="min-w-0 text-sm font-semibold leading-6 text-app-ink-soft">
                 Mục tiêu này phục vụ tầm nhìn 3 năm: {aspirationalVision.summary}
               </p>
             ) : (
-              <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-sm leading-6 text-app-ink-soft">
-                  Bạn đang đặt mục tiêu 12 tuần. Hãy nghĩ thêm về tầm nhìn 3 năm trước.
+              <>
+                <p className="min-w-0 text-sm leading-6 text-app-ink-soft">
+                  Muốn neo mục tiêu vào bức tranh 3 năm?
                 </p>
-                <div className="flex shrink-0 flex-wrap gap-2">
+                <div className="flex shrink-0 flex-wrap gap-1.5">
                   <Link
                     to="/vision"
-                    className="inline-flex min-h-11 items-center justify-center rounded-lg bg-app-accent px-3.5 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                    className="inline-flex min-h-9 items-center justify-center rounded-[12px] border border-app-accent/15 bg-app-accent-subtle px-3 py-1.5 text-xs font-bold text-app-accent transition-colors duration-150 hover:bg-app-accent-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                   >
-                    Điền 2 phút →
+                    Mở tầm nhìn
                   </Link>
                   <button
                     type="button"
-                    className="inline-flex min-h-11 items-center justify-center rounded-lg px-3.5 py-2 text-sm font-medium text-app-ink-muted transition-colors duration-150 hover:bg-app-surface hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                    className="inline-flex min-h-9 items-center justify-center rounded-[12px] px-3 py-1.5 text-xs font-bold text-app-ink-muted transition-colors duration-150 hover:bg-app-bg-subtle hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                     onClick={() => setIsVisionPromptDismissed(true)}
                   >
                     Bỏ qua
                   </button>
                 </div>
-              </div>
+              </>
             )}
           </section>
         ) : null}
@@ -655,7 +649,6 @@ export function SMARTGoalSetup() {
           completedCount={completedCount}
           totalSteps={totalSteps}
           progressPercentage={progressPercentage}
-          smartGoalStarter={smartGoalStarter}
         />
 
         <div ref={stepTopRef}>
@@ -688,10 +681,16 @@ export function SMARTGoalSetup() {
           </SmartGoalStepShell>
         </div>
       </div>
-      {showAnvilEffect && (
-        <AnvilForgingEffect
-          onComplete={() => navigate(postSmartGoalDestination)}
-          goalStatement={smartData.specific.goal_statement}
+      {showCompletionBridge && (
+        <CompletionBridge
+          smartData={smartData}
+          focusArea={focusArea}
+          onContinue={() => navigate(postSmartGoalDestination)}
+          onCheckFeasibility={
+            postSmartGoalDestination === "/feasibility"
+              ? () => navigate(postSmartGoalDestination)
+              : undefined
+          }
         />
       )}
     </PageShell>

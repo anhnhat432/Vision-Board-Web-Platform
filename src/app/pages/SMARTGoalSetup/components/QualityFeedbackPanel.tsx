@@ -17,28 +17,28 @@ function getClarityDetails(score: number) {
   if (score >= 80) {
     return {
       label: "Rất rõ ràng",
-      badgeClass: "text-[#0C5E3A] bg-[#EDF7E0] border-[#0C5E3A]/20",
-      barClass: "bg-[#0C5E3A]",
+      badgeClass: "text-app-accent bg-app-accent-subtle border-app-accent/20",
+      barClass: "bg-app-accent",
     };
   }
   if (score >= 60) {
     return {
       label: "Khá rõ nét",
-      badgeClass: "text-[#0C5E3A] bg-[#EDF7E0]/70 border-[#0C5E3A]/10",
-      barClass: "bg-[#0C5E3A]",
+      badgeClass: "text-app-accent bg-app-accent-subtle/70 border-app-accent/10",
+      barClass: "bg-app-accent",
     };
   }
   if (score >= 40) {
     return {
       label: "Đang hình thành",
-      badgeClass: "text-[#9A7B00] dark:text-[#E7B400] bg-[#FFF8DE] dark:bg-[#2A2410] border-[#D6B228]/20",
-      barClass: "bg-[#9A7B00]",
+      badgeClass: "text-app-status-warning bg-app-status-warning/10 border-app-status-warning/20",
+      barClass: "bg-app-status-warning",
     };
   }
   return {
     label: "Đang phác thảo",
-      badgeClass: "text-[#C2410C] dark:text-[#FF8C66] bg-[#FBEAE2] dark:bg-[#2A1510] border-[#C2410C]/20",
-    barClass: "bg-[#C2410C]",
+    badgeClass: "text-app-status-error bg-app-status-error/10 border-app-status-error/20",
+    barClass: "bg-app-status-error",
   };
 }
 
@@ -74,11 +74,11 @@ export function QualityFeedbackPanel({
 
   return (
     <section
-      className="rounded-[14px] border border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white dark:bg-app-surface p-5 space-y-4"
+      className="space-y-4 rounded-[16px] border border-app-line bg-app-surface p-4 sm:p-5"
       aria-label="Mức độ rõ ràng mục tiêu"
     >
       <div className="flex flex-wrap items-center justify-between gap-3 select-none">
-        <h3 className="text-[13px] font-bold text-[#17150F]">Mức độ rõ nét của mục tiêu</h3>
+        <h3 className="text-[13px] font-bold text-app-ink">Điểm rõ nét</h3>
         <span
           className={cn(
             "rounded-full px-3 py-1 text-xs font-bold border transition-all duration-300",
@@ -95,7 +95,7 @@ export function QualityFeedbackPanel({
         aria-valuemin={0}
         aria-valuemax={100}
         aria-label="Độ rõ nét mục tiêu"
-        className="relative h-[9px] w-full rounded-full bg-[#E4E0D4] dark:bg-app-line overflow-hidden"
+        className="relative h-[9px] w-full overflow-hidden rounded-full bg-app-line"
       >
         <div
           className={cn("h-full rounded-full transition-all duration-500 ease-out", clarity.barClass)}
@@ -107,17 +107,20 @@ export function QualityFeedbackPanel({
         {hintItems.map((item, index) => {
           const isSuccessMessage = index === 0;
           return (
-            <li key={item} className="flex items-start gap-2.5 text-[12px] sm:text-[13px] animate-[fade-in_0.2s_ease-out]">
+            <li
+              key={item}
+              className="flex items-start gap-2.5 text-[12px] animate-[fade-in_0.2s_ease-out] sm:text-[13px]"
+            >
               {isSuccessMessage ? (
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#EDF7E0] text-[#0C5E3A] mt-0.5">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-app-accent-subtle text-app-accent">
                   <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden="true" />
                 </span>
               ) : (
-                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#FFF8DE] dark:bg-[#2A2410] text-[#9A7B00] dark:text-[#E7B400] mt-0.5">
-                  <Lightbulb className="h-3 w-3" />
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-app-status-warning/10 text-app-status-warning">
+                  <Lightbulb className="h-3 w-3" aria-hidden="true" />
                 </span>
               )}
-              <p className="leading-relaxed text-[#5C574B] pt-0.5">{item}</p>
+              <p className="pt-0.5 leading-relaxed text-app-ink-soft">{item}</p>
             </li>
           );
         })}

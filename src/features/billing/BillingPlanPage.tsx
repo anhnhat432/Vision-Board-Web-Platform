@@ -9,6 +9,7 @@ import {
   ReceiptText,
   RefreshCw,
   Shield,
+  Sparkles,
   TicketPercent,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState, type MouseEvent } from "react";
@@ -651,7 +652,7 @@ export function BillingPlan() {
 
       {/* ===== CÁCH DÙNG MÀN NÀY PILL ===== */}
       <div className="flex justify-end">
-        <button type="button" className="relative inline-flex items-center gap-2 rounded-[var(--r-control)] border border-app-line bg-app-surface px-[15px] py-[9px] text-[12.5px] font-semibold text-app-ink-soft shadow-app-sm">
+        <button type="button" className="relative inline-flex items-center gap-2 rounded-full border border-app-line bg-white px-[15px] py-[9px] text-[12.5px] font-semibold text-app-ink-soft">
           <span className="absolute -right-[3px] -top-[3px] h-[9px] w-[9px] rounded-full bg-app-accent" />
           <LifeBuoy className="h-[15px] w-[15px]" aria-hidden="true" />
           Cách dùng màn này
@@ -659,20 +660,20 @@ export function BillingPlan() {
       </div>
 
       {/* ===== HERO ===== */}
-      <section className="surface-raised relative grid items-center gap-7 overflow-hidden rounded-card-lg px-8 py-8 sm:px-[34px] sm:py-[34px] lg:grid-cols-[1fr_280px]">
+      <section className="relative grid items-center gap-7 overflow-hidden rounded-[22px] border border-app-line bg-white px-8 py-8 sm:px-[34px] sm:py-[34px] lg:grid-cols-[1fr_280px]">
         <div>
           <div className="mb-[13px] flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.14em] text-app-accent">
             <span className="inline-block h-[6px] w-[6px] rounded-full bg-app-accent" />
             Gói &amp; thanh toán
           </div>
-          <h1 className="mb-[13px] font-serif text-[clamp(26px,3vw,38px)] font-extrabold leading-[1.03] tracking-normal text-app-ink">
+          <h1 className="font-serif text-[clamp(26px,3vw,38px)] font-extrabold leading-[1.03] tracking-[-0.02em] text-app-ink mb-[13px]">
             Chọn gói phù hợp với bạn
           </h1>
           <p className="max-w-[50ch] text-[14.5px] leading-[1.55] text-app-ink-soft">
             Nâng cấp, kiểm tra quyền nâng cao và quản lý thanh toán cho tài khoản. Quyền Plus chỉ mở sau khi hệ thống xác nhận giao dịch.
           </p>
         </div>
-        <div className="relative flex min-h-[180px] items-center justify-center self-stretch rounded-[18px] border border-app-accent/15 bg-app-accent-soft/35">
+        <div className="relative flex min-h-[180px] items-center justify-center self-stretch rounded-[18px] border border-[rgba(12,94,58,0.12)] bg-gradient-to-br from-app-accent-subtle to-[#F4ECDD]">
           <span className="absolute h-[120px] w-[120px] animate-[dof-ring_3s_ease-out_infinite] rounded-full border-2 border-app-accent/30" />
           <span className="relative flex h-24 w-24 items-center justify-center text-app-accent">
             <Shield className="h-24 w-24" strokeWidth={1.4} aria-hidden="true" />
@@ -681,11 +682,11 @@ export function BillingPlan() {
       </section>
 
       {/* ===== TRUST ===== */}
-      <section className="surface-raised rounded-card px-[26px] py-6">
+      <section className="rounded-[18px] border border-app-line bg-white px-[26px] py-6">
         <div className="mb-[18px] flex items-start justify-between gap-4">
           <div>
             <div className="mb-[5px] text-[10px] font-extrabold uppercase tracking-[0.1em] text-app-accent">Tin cậy khi thanh toán</div>
-            <h2 className="font-serif text-[18px] font-bold tracking-normal text-app-ink">Chuyển khoản rõ ràng, hỗ trợ sau thanh toán.</h2>
+            <h2 className="font-serif text-[18px] font-bold tracking-[-0.01em] text-app-ink">Chuyển khoản rõ ràng, hỗ trợ sau thanh toán.</h2>
           </div>
           <span className="inline-flex shrink-0 items-center gap-2 rounded-full border border-app-accent/20 bg-app-accent-subtle py-[5px] pl-[5px] pr-[6px]">
             <span className="rounded-full bg-app-accent px-[6px] py-[3px] font-mono text-[10px] font-bold text-white">VN</span>
@@ -693,25 +694,25 @@ export function BillingPlan() {
           </span>
         </div>
         <div className="grid grid-cols-1 gap-[13px] sm:grid-cols-2">
-          <div className="flex items-start gap-3 rounded-[13px] border border-app-line bg-app-bg-subtle/55 p-[15px_17px]">
+          <div className="flex items-start gap-3 rounded-[13px] border border-app-line bg-[#FAF8F3] p-[15px_17px]">
             <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg bg-app-accent-subtle text-app-accent">
               <CreditCard className="h-4 w-4" aria-hidden="true" />
             </span>
             <span className="text-[13px] leading-[1.45] text-app-ink-soft">Thanh toán tự động được xác nhận qua nhà cung cấp thanh toán.</span>
           </div>
-          <div className="flex items-start gap-3 rounded-[13px] border border-app-line bg-app-bg-subtle/55 p-[15px_17px]">
+          <div className="flex items-start gap-3 rounded-[13px] border border-app-line bg-[#FAF8F3] p-[15px_17px]">
             <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg bg-app-accent-subtle text-app-accent">
               <ReceiptText className="h-4 w-4" aria-hidden="true" />
             </span>
             <span className="text-[13px] leading-[1.45] text-app-ink-soft">Biên nhận điện tử gửi qua email trong 1–2 phút.</span>
           </div>
-          <div className="flex items-start gap-3 rounded-[13px] border border-app-line bg-app-bg-subtle/55 p-[15px_17px]">
+          <div className="flex items-start gap-3 rounded-[13px] border border-app-line bg-[#FAF8F3] p-[15px_17px]">
             <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg bg-app-accent-subtle text-app-accent">
               <Shield className="h-4 w-4" aria-hidden="true" />
             </span>
             <span className="text-[13px] leading-[1.45] text-app-ink-soft">Hoàn tiền linh hoạt theo{" "}<strong className="font-semibold text-app-ink">chính sách hoàn tiền</strong>.</span>
           </div>
-          <div className="flex items-start gap-3 rounded-[13px] border border-app-line bg-app-bg-subtle/55 p-[15px_17px]">
+          <div className="flex items-start gap-3 rounded-[13px] border border-app-line bg-[#FAF8F3] p-[15px_17px]">
             <span className="flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg bg-app-accent-subtle text-app-accent">
               <LifeBuoy className="h-4 w-4" aria-hidden="true" />
             </span>
@@ -793,12 +794,12 @@ export function BillingPlan() {
       )}
 
       {/* ===== CURRENT PLAN ===== */}
-      <section className="surface-raised relative overflow-hidden rounded-card px-[28px] py-[26px]">
+      <section className="relative overflow-hidden rounded-[18px] border border-app-line bg-white px-[28px] py-[26px]">
         <div className="mb-[11px] flex items-center gap-[7px] text-[10px] font-extrabold uppercase tracking-[0.1em] text-app-accent">
           <Crown className="h-3.5 w-3.5" />
           Tài khoản
         </div>
-        <h2 className="mb-[5px] font-serif text-xl font-bold tracking-normal text-app-ink">Gói hiện tại</h2>
+        <h2 className="mb-[5px] font-serif text-xl font-bold tracking-[-0.01em] text-app-ink">Gói hiện tại</h2>
         <p className="mb-4 text-[13.5px] text-app-ink-soft">
           {currentPlanCode === "FREE" ? "Bạn đang dùng gói miễn phí." : `Bạn đang dùng ${currentPlanName} trên tài khoản này và có thể tiếp tục trên thiết bị khác sau khi đăng nhập.`}
         </p>
@@ -828,7 +829,7 @@ export function BillingPlan() {
             data-testid="billing-plan-upgrade-cta"
             className="inline-flex items-center gap-[9px] rounded-[11px] bg-app-accent px-[22px] py-3 text-[13.5px] font-bold text-white shadow-[0_12px_26px_-14px_rgba(12,94,58,0.8)] hover:bg-app-accent-hover"
           >
-            <Crown className="h-[15px] w-[15px]" />
+            <Sparkles className="h-[15px] w-[15px]" />
             {paidCheckoutDisabled ? "Tạm khóa thanh toán" : "Nâng cấp Plus"}
           </Button>
         ) : realMode || billingStatus.manageBillingReady ? (
@@ -939,13 +940,13 @@ export function BillingPlan() {
       {/* ===== PAYMENT HISTORY ===== */}
       {realMode && (
         <section
-          className="surface-raised rounded-card px-[26px] py-6"
+          className="rounded-[18px] border border-app-line bg-white px-[26px] py-6"
           data-payment-history-state={paymentHistoryState}
           data-testid="billing-payment-history"
         >
           <div className="mb-[7px] flex items-center gap-[9px]">
             <ReceiptText className="h-[17px] w-[17px] text-app-ink-soft" aria-hidden="true" />
-            <h2 className="font-serif text-[17px] font-bold tracking-normal text-app-ink">Lịch sử thanh toán</h2>
+            <h2 className="font-serif text-[17px] font-bold tracking-[-0.01em] text-app-ink">Lịch sử thanh toán</h2>
           </div>
           <p className="mb-4 text-[13px] text-[#8C887C]">Các giao dịch gần đây của tài khoản này qua đơn vị thanh toán đang cấu hình.</p>
 
@@ -1030,13 +1031,13 @@ export function BillingPlan() {
 
       {/* ===== PAYMENT SUPPORT ===== */}
       {realMode && (
-        <section className="surface-raised rounded-card px-[26px] py-6">
+        <section className="rounded-[18px] border border-app-line bg-white px-[26px] py-6">
           <div className="mb-[7px] flex items-center gap-[9px]">
             <LifeBuoy className="h-[17px] w-[17px] text-app-accent" aria-hidden="true" />
-            <h2 className="font-serif text-[17px] font-bold tracking-normal text-app-ink">Hỗ trợ thanh toán</h2>
+            <h2 className="font-serif text-[17px] font-bold tracking-[-0.01em] text-app-ink">Hỗ trợ thanh toán</h2>
           </div>
           <p className="mb-4 text-[13px] text-[#8C887C]">Nếu đơn vị thanh toán đã xác nhận nhưng Plus chưa mở sau vài phút, gửi mã đơn để kiểm tra thủ công.</p>
-          <div className="flex items-center gap-[14px] rounded-[13px] border border-app-line bg-app-bg-subtle/55 px-[18px] py-[15px]">
+          <div className="flex items-center gap-[14px] rounded-[13px] border border-app-line bg-[#FAF8F3] px-[18px] py-[15px]">
             <div className="min-w-0 flex-1">
               <div className="mb-[3px] text-[11px] font-semibold text-[#8C887C]">Email hỗ trợ</div>
               <div className="text-[13.5px] font-semibold text-app-ink">
@@ -1066,17 +1067,17 @@ export function BillingPlan() {
       )}
 
       {/* ===== PERMISSIONS / ENTITLEMENTS ===== */}
-      <section className="surface-raised rounded-card px-[26px] py-6">
+      <section className="rounded-[18px] border border-app-line bg-white px-[26px] py-6">
         <div className="mb-[7px] flex items-center gap-[9px]">
           <Shield className="h-[17px] w-[17px] text-app-accent" aria-hidden="true" />
-          <h2 className="font-serif text-[17px] font-bold tracking-normal text-app-ink">Quyền truy cập</h2>
+          <h2 className="font-serif text-[17px] font-bold tracking-[-0.01em] text-app-ink">Quyền truy cập</h2>
         </div>
         <p className="mb-4 text-[13px] text-[#8C887C]">{realMode ? "Quyền nâng cao được quản lý qua tài khoản của bạn." : "Các quyền Plus đang mở trên trình duyệt này."}</p>
         <div className="grid gap-[13px] sm:grid-cols-2">
           {premiumStatusItems.map((key) => {
             const isActive = entitlementKeys.includes(key);
             return (
-              <div key={key} className={`flex items-center gap-3 rounded-[13px] border p-[14px_17px] ${isActive ? "border-app-accent-soft bg-app-accent-soft" : "border-app-line bg-app-bg-subtle/55"}`}>
+              <div key={key} className={`flex items-center gap-3 rounded-[13px] border p-[14px_17px] ${isActive ? "border-app-accent-soft bg-app-accent-soft" : "border-app-line bg-[#FAF8F3]"}`}>
                 <span className={`flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-lg text-base ${isActive ? "bg-app-accent text-white" : "bg-[#ECEAE2] text-[#B0AB9E]"}`}>
                   {isActive ? <Check className="h-4 w-4" /> : "—"}
                 </span>
@@ -1091,8 +1092,8 @@ export function BillingPlan() {
       </section>
 
       {/* ===== ACTIONS ===== */}
-      <section className="surface-raised rounded-card px-[26px] py-6">
-        <h2 className="mb-[6px] font-serif text-[17px] font-bold tracking-normal text-app-ink">Thao tác</h2>
+      <section className="rounded-[18px] border border-app-line bg-white px-[26px] py-6">
+        <h2 className="mb-[6px] font-serif text-[17px] font-bold tracking-[-0.01em] text-app-ink">Thao tác</h2>
         <p className="mb-4 text-[13px] text-[#8C887C]">Kiểm tra quyền nâng cao, khôi phục giao dịch đã mua hoặc quay lại trang chính.</p>
         <div className="flex flex-wrap gap-[11px]">
           <Button variant="outline" onClick={handleSyncEntitlements} disabled={isSyncing} className="inline-flex items-center gap-[9px] rounded-[11px] border-app-line px-[18px] py-[11px] text-[13px] font-semibold text-app-ink-soft hover:bg-[#FAF8F3]">
@@ -1120,7 +1121,7 @@ export function BillingPlan() {
 
       {/* ===== DISCOUNT ===== */}
       {!paidCheckoutDisabled && currentPlanCode === "FREE" && (
-        <section className="surface-raised rounded-card px-[26px] py-6">
+        <section className="rounded-[18px] border border-app-line bg-white px-[26px] py-6">
           <div className="mb-4 flex items-center gap-[9px]">
             <TicketPercent className="h-4 w-4 text-app-accent" />
             <span className="text-[15px] font-bold text-app-ink">Mã giảm giá / Ưu đãi</span>
@@ -1159,7 +1160,7 @@ export function BillingPlan() {
               placeholder="NHẬP MÃ GIẢM GIÁ"
               value={couponCode}
               onChange={(e) => setCouponCode(e.target.value)}
-              className="h-11 flex-1 rounded-[11px] border border-app-line bg-app-surface px-[14px] font-mono text-[12.5px] tracking-[0.04em] text-app-ink outline-none transition-[border-color,box-shadow] focus:border-app-accent focus:shadow-[0_0_0_3px_rgba(12,94,58,0.1)]"
+              className="h-11 flex-1 rounded-[11px] border border-app-line bg-white px-[14px] font-mono text-[12.5px] tracking-[0.04em] text-app-ink outline-none transition-[border-color,box-shadow] focus:border-app-accent focus:shadow-[0_0_0_3px_rgba(12,94,58,0.1)]"
             />
             {couponStatus === "valid" || activeDiscount ? (
               <button type="button" onClick={() => { setCouponCode(""); resetCoupon(); handleCouponChange(null); }} className="shrink-0 rounded-[11px] bg-[#5C7A5C] px-[22px] text-[13px] font-bold text-white">
@@ -1186,8 +1187,8 @@ export function BillingPlan() {
       )}
 
       {/* ===== PLAN COMPARISON ===== */}
-      <section className="surface-raised rounded-card px-[28px] py-[26px]">
-        <h2 className="mb-[5px] font-serif text-[18px] font-bold tracking-normal text-app-ink">So sánh các gói</h2>
+      <section className="rounded-[18px] border border-app-line bg-white px-[28px] py-[26px]">
+        <h2 className="mb-[5px] font-serif text-[18px] font-bold tracking-[-0.01em] text-app-ink">So sánh các gói</h2>
         <p className="mb-5 text-[13px] text-[#8C887C]">Chọn gói phù hợp với nhu cầu của bạn.</p>
         <div className="grid gap-4 md:grid-cols-2">
           {PLAN_DEFINITIONS.map((plan) => {
@@ -1199,10 +1200,10 @@ export function BillingPlan() {
                 key={plan.code}
                 className={`relative flex flex-col rounded-2xl p-6 ${
                   isRecommended
-                    ? "border-[1.5px] border-app-accent bg-app-surface shadow-[0_16px_40px_-28px_rgba(12,94,58,0.4)]"
+                    ? "border-[1.5px] border-app-accent bg-white shadow-[0_16px_40px_-28px_rgba(12,94,58,0.4)]"
                     : isCurrent
                       ? "border-[1.5px] border-app-accent/40 bg-app-accent-soft/60"
-                      : "border border-app-line/70 bg-app-bg-subtle/55"
+                      : "border border-app-line/10 bg-[#FAF8F3]"
                 }`}
               >
                 {isRecommended && (
@@ -1213,7 +1214,7 @@ export function BillingPlan() {
                   {plan.shortLabel}
                 </div>
                 {/* Name */}
-                <div className="font-serif text-[22px] font-extrabold tracking-normal text-app-ink">{plan.name}</div>
+                <div className="font-serif text-[22px] font-extrabold tracking-[-0.01em] text-app-ink">{plan.name}</div>
                 {/* Price */}
                 {isPlus && saleEvent ? (
                   <div className="mt-1.5 space-y-1">
@@ -1256,15 +1257,15 @@ export function BillingPlan() {
                       onClick={() => handleOpenUpgrade("plan")}
                       disabled={paidCheckoutDisabled}
                     >
-                      <Crown className="h-4 w-4" />
+                      <Sparkles className="h-4 w-4" />
                       {paidCheckoutDisabled ? "Tạm khóa thanh toán" : "Nâng cấp Plus"}
                     </Button>
                   )}
                   {isCurrent && !isPlus && (
-                    <button type="button" disabled className="w-full cursor-default rounded-[11px] border border-app-line bg-app-surface py-[13px] text-[13px] font-semibold text-app-ink-muted">Gói hiện tại</button>
+                    <button type="button" disabled className="w-full rounded-[11px] border border-app-line bg-white py-[13px] text-[13px] font-semibold text-[#8C887C] cursor-default">Gói hiện tại</button>
                   )}
                   {isCurrent && isPlus && (
-                    <button type="button" disabled className="w-full cursor-default rounded-[11px] border border-app-line bg-app-surface py-[13px] text-[13px] font-semibold text-app-ink">Đang dùng</button>
+                    <button type="button" disabled className="w-full rounded-[11px] border border-app-line bg-white py-[13px] text-[13px] font-semibold text-app-ink cursor-default">Đang dùng</button>
                   )}
                   {!isCurrent && !isRecommended && (
                     <Button className="w-full" onClick={() => handleOpenUpgrade("plan")} disabled={paidCheckoutDisabled}>

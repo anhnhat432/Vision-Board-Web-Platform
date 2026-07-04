@@ -582,17 +582,16 @@ describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
       "above-mobile-nav",
       "sm:hidden",
       "fixed",
-      "left-4",
-      "right-4",
+      "left-0",
+      "right-0",
       "bottom-[calc(5rem+env(safe-area-inset-bottom))]",
       "z-40",
-      "rounded-card",
-      "border",
+      "border-t",
       "border-app-line/80",
       "bg-app-surface/95",
-      "px-3",
-      "pb-3",
-      "pt-2.5",
+      "px-4",
+      "pb-4",
+      "pt-3",
       "backdrop-blur-md",
     );
     expect(within(actionBar as HTMLElement).getByText("Chưa lưu")).toBeInTheDocument();
@@ -610,47 +609,6 @@ describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
     );
 
     expect(document.querySelector("[data-twelve-week-today-mobile-checkin-bar]")).toBeNull();
-  });
-
-  it("does not show the mobile check-in CTA while the check-in card is still below the fold", async () => {
-    Object.defineProperty(window, "innerWidth", {
-      configurable: true,
-      writable: true,
-      value: 375,
-    });
-
-    render(
-      <TwelveWeekTodayTab
-        {...makeProps({
-          dailyNote: "Có một ý cần nhớ",
-          latestCheckIn: null,
-        })}
-      />,
-    );
-
-    const checkInCard = document.querySelector("[data-twelve-week-checkin-card]") as HTMLElement | null;
-
-    expect(checkInCard).not.toBeNull();
-
-    vi.spyOn(checkInCard as HTMLElement, "getBoundingClientRect").mockReturnValue({
-      x: 0,
-      y: 980,
-      width: 320,
-      height: 360,
-      top: 980,
-      right: 320,
-      bottom: 1340,
-      left: 0,
-      toJSON: () => ({}),
-    });
-
-    act(() => {
-      window.dispatchEvent(new Event("scroll"));
-    });
-
-    await waitFor(() => {
-      expect(document.querySelector("[data-twelve-week-today-mobile-checkin-bar]")).toBeNull();
-    });
   });
 });
 

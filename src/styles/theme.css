@@ -26,19 +26,19 @@
    * Each level pairs an inset highlight with a soft drop.
    * ───────────────────────────────────────────────────────── */
   --shadow-1:
-    0 1px 2px rgba(23, 21, 15, 0.035), 0 0 0 1px rgba(23, 21, 15, 0.045);
+    0 1px 2px rgba(15, 23, 42, 0.04), 0 0 0 1px rgba(15, 23, 42, 0.04);
   --shadow-2:
-    0 1px 2px rgba(23, 21, 15, 0.04), 0 8px 18px -14px rgba(23, 21, 15, 0.16),
-    0 0 0 1px rgba(23, 21, 15, 0.05);
+    0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 10px -6px rgba(15, 23, 42, 0.08),
+    0 0 0 1px rgba(15, 23, 42, 0.04);
   --shadow-3:
-    0 2px 4px rgba(23, 21, 15, 0.035), 0 16px 34px -24px rgba(23, 21, 15, 0.22),
-    0 0 0 1px rgba(23, 21, 15, 0.055);
+    0 2px 4px rgba(15, 23, 42, 0.04), 0 12px 28px -16px rgba(15, 23, 42, 0.16),
+    0 0 0 1px rgba(15, 23, 42, 0.05);
   --shadow-4:
-    0 4px 8px -4px rgba(23, 21, 15, 0.06),
-    0 24px 48px -32px rgba(23, 21, 15, 0.24), 0 0 0 1px rgba(23, 21, 15, 0.06);
+    0 4px 8px -2px rgba(15, 23, 42, 0.06),
+    0 20px 40px -24px rgba(15, 23, 42, 0.2), 0 0 0 1px rgba(15, 23, 42, 0.06);
   --shadow-5:
-    0 8px 16px -8px rgba(23, 21, 15, 0.08),
-    0 32px 68px -40px rgba(23, 21, 15, 0.26), 0 0 0 1px rgba(23, 21, 15, 0.06);
+    0 8px 16px -4px rgba(15, 23, 42, 0.08),
+    0 28px 60px -28px rgba(15, 23, 42, 0.24), 0 0 0 1px rgba(15, 23, 42, 0.06);
   --shadow-glow-primary:
     0 0 0 1px color-mix(in oklab, var(--primary) 28%, transparent),
     0 12px 36px -10px color-mix(in oklab, var(--primary) 38%, transparent);
@@ -190,21 +190,21 @@
   --sidebar-accent-foreground: var(--app-accent);
   --sidebar-border: var(--app-line);
   --sidebar-ring: var(--app-accent);
-  --tone-bg-left: rgba(12, 94, 58, 0.055);
-  --tone-bg-right: rgba(168, 82, 47, 0.04);
-  --tone-bg-bottom: rgba(184, 178, 170, 0.06);
-  --tone-overlay-left: rgba(12, 94, 58, 0.075);
-  --tone-overlay-right: rgba(168, 82, 47, 0.055);
-  --tone-cursor-a: rgba(12, 94, 58, 0.08);
-  --tone-cursor-b: rgba(168, 82, 47, 0.045);
-  --tone-hero-start: rgba(21, 43, 37, 0.98);
-  --tone-hero-mid: rgba(30, 61, 53, 0.95);
-  --tone-hero-accent: rgba(42, 84, 71, 0.9);
-  --tone-hero-end: rgba(168, 82, 47, 0.78);
-  --tone-hero-shadow: rgba(23, 21, 15, 0.26);
-  --tone-orb-a: rgba(12, 94, 58, 0.08);
-  --tone-orb-b: rgba(168, 82, 47, 0.055);
-  --tone-orb-c: rgba(184, 178, 170, 0.05);
+  --tone-bg-left: rgba(167, 139, 250, 0.1);
+  --tone-bg-right: rgba(232, 121, 249, 0.08);
+  --tone-bg-bottom: rgba(244, 114, 182, 0.06);
+  --tone-overlay-left: rgba(37, 99, 235, 0.08);
+  --tone-overlay-right: rgba(45, 212, 191, 0.08);
+  --tone-cursor-a: rgba(37, 99, 235, 0.1);
+  --tone-cursor-b: rgba(20, 184, 166, 0.06);
+  --tone-hero-start: rgba(23, 37, 84, 0.98);
+  --tone-hero-mid: rgba(30, 64, 175, 0.94);
+  --tone-hero-accent: rgba(8, 145, 178, 0.92);
+  --tone-hero-end: rgba(16, 185, 129, 0.88);
+  --tone-hero-shadow: rgba(30, 64, 175, 0.36);
+  --tone-orb-a: rgba(124, 58, 237, 0.12);
+  --tone-orb-b: rgba(217, 70, 239, 0.1);
+  --tone-orb-c: rgba(244, 114, 182, 0.08);
   --vivid-cyan: oklch(0.78 0.18 205);
   --vivid-amber: oklch(0.82 0.18 75);
 }
@@ -271,21 +271,21 @@
   --sidebar-ring: var(--app-accent);
   --input-background: rgba(15, 23, 42, 0.82);
   --switch-background: rgba(51, 65, 85, 0.95);
-  --tone-bg-left: rgba(91, 165, 144, 0.08);
-  --tone-bg-right: rgba(232, 152, 120, 0.055);
-  --tone-bg-bottom: rgba(163, 155, 140, 0.05);
-  --tone-overlay-left: rgba(91, 165, 144, 0.09);
-  --tone-overlay-right: rgba(232, 152, 120, 0.07);
-  --tone-cursor-a: rgba(91, 165, 144, 0.1);
-  --tone-cursor-b: rgba(232, 152, 120, 0.055);
-  --tone-hero-start: rgba(15, 31, 26, 0.98);
-  --tone-hero-mid: rgba(20, 48, 39, 0.95);
-  --tone-hero-accent: rgba(47, 163, 107, 0.82);
-  --tone-hero-end: rgba(232, 152, 120, 0.74);
-  --tone-hero-shadow: rgba(0, 0, 0, 0.34);
-  --tone-orb-a: rgba(91, 165, 144, 0.08);
-  --tone-orb-b: rgba(232, 152, 120, 0.06);
-  --tone-orb-c: rgba(163, 155, 140, 0.05);
+  --tone-bg-left: rgba(124, 58, 237, 0.16);
+  --tone-bg-right: rgba(217, 70, 239, 0.12);
+  --tone-bg-bottom: rgba(244, 114, 182, 0.1);
+  --tone-overlay-left: rgba(37, 99, 235, 0.14);
+  --tone-overlay-right: rgba(45, 212, 191, 0.12);
+  --tone-cursor-a: rgba(37, 99, 235, 0.16);
+  --tone-cursor-b: rgba(45, 212, 191, 0.08);
+  --tone-hero-start: rgba(8, 47, 73, 0.98);
+  --tone-hero-mid: rgba(30, 64, 175, 0.95);
+  --tone-hero-accent: rgba(14, 116, 144, 0.92);
+  --tone-hero-end: rgba(13, 148, 136, 0.9);
+  --tone-hero-shadow: rgba(14, 116, 144, 0.42);
+  --tone-orb-a: rgba(124, 58, 237, 0.2);
+  --tone-orb-b: rgba(217, 70, 239, 0.16);
+  --tone-orb-c: rgba(244, 114, 182, 0.12);
   --vivid-cyan: oklch(0.82 0.16 205);
   --vivid-amber: oklch(0.85 0.16 75);
 }
@@ -419,7 +419,7 @@
     font-family: var(--font-family-sans);
     font-size: var(--text-base);
     line-height: var(--text-base--line-height);
-    letter-spacing: 0;
+    letter-spacing: -0.005em;
     font-feature-settings: "cv11", "ss03", "ss04";
     background-color: var(--app-bg);
     background-image: none;
@@ -443,7 +443,7 @@
     font-size: var(--text-3xl);
     font-weight: 700;
     line-height: 1.1;
-    letter-spacing: 0;
+    letter-spacing: -0.018em;
     text-wrap: balance;
   }
 
@@ -451,7 +451,7 @@
     font-size: var(--text-2xl);
     font-weight: 700;
     line-height: 1.15;
-    letter-spacing: 0;
+    letter-spacing: -0.014em;
     text-wrap: balance;
   }
 
@@ -459,7 +459,7 @@
     font-size: var(--text-xl);
     font-weight: 600;
     line-height: 1.22;
-    letter-spacing: 0;
+    letter-spacing: -0.01em;
     text-wrap: balance;
   }
 
@@ -467,14 +467,14 @@
     font-size: var(--text-lg);
     font-weight: 600;
     line-height: 1.26;
-    letter-spacing: 0;
+    letter-spacing: -0.01em;
   }
 
   h5,
   h6 {
     font-weight: 600;
     line-height: 1.32;
-    letter-spacing: 0;
+    letter-spacing: -0.006em;
   }
 
   @media (min-width: 1024px) {
@@ -668,60 +668,60 @@
     overflow-x: hidden;
     overflow-y: visible;
     background-color: var(--app-bg);
+    /* Subtle loang màu sage & terracotta mộc mạc tạo chiều sâu chánh niệm */
     background-image:
       radial-gradient(
         circle at 5% 5%,
-        var(--tone-bg-left) 0%,
+        rgba(12, 94, 58, 0.035) 0%,
         transparent 40%
       ),
       radial-gradient(
         circle at 95% 95%,
-        var(--tone-bg-right) 0%,
+        rgba(211, 106, 71, 0.035) 0%,
         transparent 45%
       );
-    background-attachment: fixed;
   }
 
   .app-shell[data-route-tone="journal"] {
-    --tone-bg-left: rgba(168, 82, 47, 0.07);
-    --tone-bg-right: rgba(154, 99, 8, 0.055);
-    --tone-bg-bottom: rgba(12, 94, 58, 0.035);
-    --tone-overlay-left: rgba(168, 82, 47, 0.075);
-    --tone-overlay-right: rgba(154, 99, 8, 0.055);
-    --tone-cursor-a: rgba(168, 82, 47, 0.08);
-    --tone-cursor-b: rgba(154, 99, 8, 0.04);
-    --tone-hero-start: rgba(92, 58, 46, 0.98);
-    --tone-hero-mid: rgba(110, 45, 17, 0.94);
-    --tone-hero-accent: rgba(168, 82, 47, 0.86);
-    --tone-hero-end: rgba(12, 94, 58, 0.72);
-    --tone-hero-shadow: rgba(92, 58, 46, 0.26);
-    --tone-orb-a: rgba(168, 82, 47, 0.08);
-    --tone-orb-b: rgba(154, 99, 8, 0.055);
-    --tone-orb-c: rgba(12, 94, 58, 0.035);
+    --tone-bg-left: rgba(244, 63, 94, 0.1);
+    --tone-bg-right: rgba(245, 158, 11, 0.08);
+    --tone-bg-bottom: rgba(20, 184, 166, 0.06);
+    --tone-overlay-left: rgba(244, 63, 94, 0.1);
+    --tone-overlay-right: rgba(245, 158, 11, 0.08);
+    --tone-cursor-a: rgba(244, 63, 94, 0.12);
+    --tone-cursor-b: rgba(245, 158, 11, 0.06);
+    --tone-hero-start: rgba(136, 19, 55, 0.98);
+    --tone-hero-mid: rgba(190, 18, 60, 0.94);
+    --tone-hero-accent: rgba(225, 29, 72, 0.9);
+    --tone-hero-end: rgba(245, 158, 11, 0.84);
+    --tone-hero-shadow: rgba(190, 18, 60, 0.38);
+    --tone-orb-a: rgba(244, 63, 94, 0.16);
+    --tone-orb-b: rgba(245, 158, 11, 0.12);
+    --tone-orb-c: rgba(20, 184, 166, 0.08);
   }
 
   .app-shell[data-route-tone="system"] {
-    --tone-bg-left: rgba(12, 94, 58, 0.065);
-    --tone-bg-right: rgba(58, 114, 97, 0.045);
-    --tone-bg-bottom: rgba(168, 82, 47, 0.035);
-    --tone-overlay-left: rgba(12, 94, 58, 0.075);
-    --tone-overlay-right: rgba(58, 114, 97, 0.055);
-    --tone-cursor-a: rgba(12, 94, 58, 0.08);
-    --tone-cursor-b: rgba(168, 82, 47, 0.04);
-    --tone-hero-start: rgba(21, 43, 37, 0.98);
-    --tone-hero-mid: rgba(30, 61, 53, 0.95);
-    --tone-hero-accent: rgba(58, 114, 97, 0.88);
-    --tone-hero-end: rgba(168, 82, 47, 0.72);
-    --tone-hero-shadow: rgba(23, 21, 15, 0.28);
-    --tone-orb-a: rgba(12, 94, 58, 0.08);
-    --tone-orb-b: rgba(58, 114, 97, 0.06);
-    --tone-orb-c: rgba(168, 82, 47, 0.04);
+    --tone-bg-left: rgba(167, 139, 250, 0.1);
+    --tone-bg-right: rgba(232, 121, 249, 0.08);
+    --tone-bg-bottom: rgba(20, 184, 166, 0.06);
+    --tone-overlay-left: rgba(167, 139, 250, 0.1);
+    --tone-overlay-right: rgba(20, 184, 166, 0.08);
+    --tone-cursor-a: rgba(124, 58, 237, 0.12);
+    --tone-cursor-b: rgba(20, 184, 166, 0.08);
+    --tone-hero-start: rgba(88, 28, 135, 0.98);
+    --tone-hero-mid: rgba(124, 58, 237, 0.95);
+    --tone-hero-accent: rgba(217, 70, 239, 0.9);
+    --tone-hero-end: rgba(20, 184, 166, 0.88);
+    --tone-hero-shadow: rgba(124, 58, 237, 0.4);
+    --tone-orb-a: rgba(124, 58, 237, 0.14);
+    --tone-orb-b: rgba(217, 70, 239, 0.12);
+    --tone-orb-c: rgba(20, 184, 166, 0.09);
   }
 
   .app-shell[data-route-tone="achievements"] {
     --tone-bg-left: rgba(13, 148, 136, 0.1);
     --tone-bg-right: rgba(245, 158, 11, 0.08);
-    --tone-bg-bottom: rgba(168, 82, 47, 0.045);
+    --tone-bg-bottom: rgba(37, 99, 235, 0.06);
     --tone-overlay-left: rgba(13, 148, 136, 0.1);
     --tone-overlay-right: rgba(245, 158, 11, 0.08);
     --tone-cursor-a: rgba(13, 148, 136, 0.12);
@@ -729,92 +729,92 @@
     --tone-hero-start: rgba(19, 78, 74, 0.98);
     --tone-hero-mid: rgba(13, 148, 136, 0.94);
     --tone-hero-accent: rgba(245, 158, 11, 0.9);
-    --tone-hero-end: rgba(168, 82, 47, 0.74);
+    --tone-hero-end: rgba(37, 99, 235, 0.84);
     --tone-hero-shadow: rgba(13, 148, 136, 0.38);
     --tone-orb-a: rgba(13, 148, 136, 0.16);
     --tone-orb-b: rgba(245, 158, 11, 0.12);
-    --tone-orb-c: rgba(168, 82, 47, 0.045);
+    --tone-orb-c: rgba(37, 99, 235, 0.08);
   }
 
   .app-shell[data-route-tone="balance"] {
-    --tone-bg-left: rgba(12, 94, 58, 0.06);
-    --tone-bg-right: rgba(22, 163, 74, 0.04);
-    --tone-bg-bottom: rgba(184, 178, 170, 0.05);
-    --tone-overlay-left: rgba(12, 94, 58, 0.07);
-    --tone-overlay-right: rgba(22, 163, 74, 0.05);
-    --tone-cursor-a: rgba(12, 94, 58, 0.08);
-    --tone-cursor-b: rgba(22, 163, 74, 0.04);
-    --tone-hero-start: rgba(21, 83, 45, 0.98);
-    --tone-hero-mid: rgba(12, 94, 58, 0.95);
-    --tone-hero-accent: rgba(58, 114, 97, 0.88);
-    --tone-hero-end: rgba(168, 82, 47, 0.68);
-    --tone-hero-shadow: rgba(23, 21, 15, 0.26);
-    --tone-orb-a: rgba(12, 94, 58, 0.08);
-    --tone-orb-b: rgba(22, 163, 74, 0.045);
-    --tone-orb-c: rgba(184, 178, 170, 0.045);
+    --tone-bg-left: rgba(16, 185, 129, 0.1);
+    --tone-bg-right: rgba(34, 211, 238, 0.08);
+    --tone-bg-bottom: rgba(14, 165, 233, 0.06);
+    --tone-overlay-left: rgba(16, 185, 129, 0.1);
+    --tone-overlay-right: rgba(34, 211, 238, 0.08);
+    --tone-cursor-a: rgba(16, 185, 129, 0.12);
+    --tone-cursor-b: rgba(14, 165, 233, 0.06);
+    --tone-hero-start: rgba(20, 83, 45, 0.98);
+    --tone-hero-mid: rgba(6, 95, 70, 0.95);
+    --tone-hero-accent: rgba(13, 148, 136, 0.92);
+    --tone-hero-end: rgba(14, 165, 233, 0.88);
+    --tone-hero-shadow: rgba(6, 95, 70, 0.36);
+    --tone-orb-a: rgba(16, 185, 129, 0.16);
+    --tone-orb-b: rgba(34, 211, 238, 0.12);
+    --tone-orb-c: rgba(14, 165, 233, 0.08);
   }
 
   .app-shell[data-route-tone="vision"] {
-    --tone-bg-left: rgba(168, 82, 47, 0.06);
-    --tone-bg-right: rgba(12, 94, 58, 0.045);
-    --tone-bg-bottom: rgba(154, 99, 8, 0.035);
-    --tone-overlay-left: rgba(168, 82, 47, 0.07);
-    --tone-overlay-right: rgba(12, 94, 58, 0.055);
-    --tone-cursor-a: rgba(168, 82, 47, 0.08);
-    --tone-cursor-b: rgba(12, 94, 58, 0.045);
-    --tone-hero-start: rgba(30, 61, 53, 0.98);
-    --tone-hero-mid: rgba(42, 84, 71, 0.95);
-    --tone-hero-accent: rgba(168, 82, 47, 0.82);
-    --tone-hero-end: rgba(154, 99, 8, 0.68);
-    --tone-hero-shadow: rgba(23, 21, 15, 0.28);
-    --tone-orb-a: rgba(168, 82, 47, 0.075);
-    --tone-orb-b: rgba(12, 94, 58, 0.055);
-    --tone-orb-c: rgba(154, 99, 8, 0.04);
+    --tone-bg-left: rgba(168, 85, 247, 0.1);
+    --tone-bg-right: rgba(244, 114, 182, 0.08);
+    --tone-bg-bottom: rgba(59, 130, 246, 0.06);
+    --tone-overlay-left: rgba(168, 85, 247, 0.1);
+    --tone-overlay-right: rgba(59, 130, 246, 0.08);
+    --tone-cursor-a: rgba(168, 85, 247, 0.12);
+    --tone-cursor-b: rgba(59, 130, 246, 0.06);
+    --tone-hero-start: rgba(88, 28, 135, 0.98);
+    --tone-hero-mid: rgba(109, 40, 217, 0.95);
+    --tone-hero-accent: rgba(236, 72, 153, 0.88);
+    --tone-hero-end: rgba(59, 130, 246, 0.9);
+    --tone-hero-shadow: rgba(109, 40, 217, 0.4);
+    --tone-orb-a: rgba(168, 85, 247, 0.16);
+    --tone-orb-b: rgba(244, 114, 182, 0.12);
+    --tone-orb-c: rgba(59, 130, 246, 0.1);
   }
 
   .app-shell[data-route-tone="onboarding"] {
-    --tone-bg-left: rgba(12, 94, 58, 0.065);
-    --tone-bg-right: rgba(168, 82, 47, 0.05);
-    --tone-bg-bottom: rgba(198, 242, 78, 0.035);
-    --tone-orb-a: rgba(12, 94, 58, 0.08);
-    --tone-orb-b: rgba(168, 82, 47, 0.055);
-    --tone-orb-c: rgba(198, 242, 78, 0.035);
+    --tone-bg-left: rgba(167, 139, 250, 0.12);
+    --tone-bg-right: rgba(232, 121, 249, 0.1);
+    --tone-bg-bottom: rgba(244, 114, 182, 0.08);
+    --tone-orb-a: rgba(124, 58, 237, 0.14);
+    --tone-orb-b: rgba(217, 70, 239, 0.12);
+    --tone-orb-c: rgba(244, 114, 182, 0.1);
   }
 
   .app-shell[data-route-tone="dashboard"] {
-    --tone-bg-left: rgba(12, 94, 58, 0.055);
-    --tone-bg-right: rgba(168, 82, 47, 0.04);
-    --tone-bg-bottom: rgba(184, 178, 170, 0.055);
-    --tone-orb-a: rgba(12, 94, 58, 0.07);
-    --tone-orb-b: rgba(168, 82, 47, 0.045);
-    --tone-orb-c: rgba(184, 178, 170, 0.045);
+    --tone-bg-left: rgba(167, 139, 250, 0.1);
+    --tone-bg-right: rgba(232, 121, 249, 0.08);
+    --tone-bg-bottom: rgba(34, 211, 238, 0.06);
+    --tone-orb-a: rgba(124, 58, 237, 0.12);
+    --tone-orb-b: rgba(217, 70, 239, 0.1);
+    --tone-orb-c: rgba(34, 211, 238, 0.08);
   }
 
   .app-shell[data-route-tone="setup"] {
-    --tone-bg-left: rgba(12, 94, 58, 0.06);
-    --tone-bg-right: rgba(58, 114, 97, 0.04);
-    --tone-bg-bottom: rgba(168, 82, 47, 0.035);
-    --tone-orb-a: rgba(12, 94, 58, 0.075);
-    --tone-orb-b: rgba(58, 114, 97, 0.05);
-    --tone-orb-c: rgba(168, 82, 47, 0.04);
+    --tone-bg-left: rgba(129, 140, 248, 0.1);
+    --tone-bg-right: rgba(167, 139, 250, 0.08);
+    --tone-bg-bottom: rgba(232, 121, 249, 0.06);
+    --tone-orb-a: rgba(99, 102, 241, 0.12);
+    --tone-orb-b: rgba(124, 58, 237, 0.1);
+    --tone-orb-c: rgba(217, 70, 239, 0.08);
   }
 
   .app-shell[data-route-tone="billing"] {
-    --tone-bg-left: rgba(12, 94, 58, 0.05);
-    --tone-bg-right: rgba(168, 82, 47, 0.045);
-    --tone-bg-bottom: rgba(154, 99, 8, 0.035);
-    --tone-orb-a: rgba(12, 94, 58, 0.065);
-    --tone-orb-b: rgba(168, 82, 47, 0.05);
-    --tone-orb-c: rgba(154, 99, 8, 0.035);
+    --tone-bg-left: rgba(252, 211, 77, 0.1);
+    --tone-bg-right: rgba(251, 113, 133, 0.08);
+    --tone-bg-bottom: rgba(244, 63, 94, 0.06);
+    --tone-orb-a: rgba(245, 158, 11, 0.12);
+    --tone-orb-b: rgba(251, 113, 133, 0.1);
+    --tone-orb-c: rgba(244, 63, 94, 0.08);
   }
 
   .app-shell[data-route-tone="settings"] {
     --tone-bg-left: rgba(148, 163, 184, 0.08);
-    --tone-bg-right: rgba(12, 94, 58, 0.035);
-    --tone-bg-bottom: rgba(184, 178, 170, 0.045);
+    --tone-bg-right: rgba(167, 139, 250, 0.06);
+    --tone-bg-bottom: rgba(94, 234, 212, 0.05);
     --tone-orb-a: rgba(100, 116, 139, 0.1);
-    --tone-orb-b: rgba(12, 94, 58, 0.045);
-    --tone-orb-c: rgba(184, 178, 170, 0.04);
+    --tone-orb-b: rgba(124, 58, 237, 0.08);
+    --tone-orb-c: rgba(20, 184, 166, 0.06);
   }
 
   .app-shell::before {
@@ -935,23 +935,30 @@
   /* .surface-aurora removed — superseded by simple Card + token shadows. */
 
   .surface-glass {
-    background: color-mix(in srgb, var(--app-surface) 88%, transparent);
-    border: 1px solid color-mix(in srgb, var(--app-line) 80%, transparent);
-    backdrop-filter: saturate(112%) blur(6px);
-    -webkit-backdrop-filter: saturate(112%) blur(6px);
+    background: color-mix(in oklab, var(--color-surface) 80%, transparent);
+    backdrop-filter: saturate(120%) blur(8px);
+    -webkit-backdrop-filter: saturate(120%) blur(8px);
   }
 
   .surface-glass-deep {
     position: relative;
-    background: color-mix(in srgb, var(--app-surface) 90%, transparent);
-    backdrop-filter: saturate(116%) blur(12px);
-    -webkit-backdrop-filter: saturate(116%) blur(12px);
-    border: 1px solid color-mix(in srgb, var(--app-line) 75%, transparent);
+    background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-surface) 70%, transparent),
+      color-mix(in oklab, var(--color-surface) 90%, transparent)
+    );
+    backdrop-filter: saturate(150%) blur(20px);
+    -webkit-backdrop-filter: saturate(150%) blur(20px);
+    border: 1px solid color-mix(in oklab, white 8%, transparent);
   }
 
   .dark .surface-glass-deep {
-    background: color-mix(in srgb, var(--app-surface) 86%, transparent);
-    border: 1px solid color-mix(in srgb, var(--app-line) 88%, transparent);
+    background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-surface) 60%, transparent),
+      color-mix(in oklab, var(--color-surface) 85%, transparent)
+    );
+    border: 1px solid color-mix(in oklab, white 6%, transparent);
   }
 
   .surface-glass-deep::before {
@@ -960,7 +967,11 @@
     inset: 0;
     pointer-events: none;
     border-radius: inherit;
-    background: none;
+    background: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--app-accent) 8%, transparent),
+      transparent 60%
+    );
   }
 
   /* .ring-soft-glow removed — use Tailwind ring + shadow utilities instead. */
@@ -974,8 +985,8 @@
   /* .glow-vivid, .featured-surface removed — use shadow-sm or FeaturedCard ring helpers. */
 
   .glass-surface {
-    background: var(--app-surface);
-    border: 1px solid var(--app-line);
+    background: #ffffff;
+    border: 1px solid rgba(15, 23, 42, 0.06);
     box-shadow: var(--shadow-2);
     transition:
       transform var(--duration-fast) var(--ease-emphasized),
@@ -986,15 +997,15 @@
 
   @media (hover: hover) {
     .glass-surface:hover {
-      box-shadow: var(--shadow-2);
-      border-color: color-mix(in srgb, var(--app-accent) 22%, var(--app-line));
+      box-shadow: var(--shadow-3);
+      border-color: rgba(15, 23, 42, 0.1);
       transform: translateY(-1px);
     }
   }
 
   .glass-surface-sm {
-    background: var(--app-surface);
-    border: 1px solid var(--app-line);
+    background: #ffffff;
+    border: 1px solid rgba(15, 23, 42, 0.05);
     box-shadow: var(--shadow-1);
   }
 
@@ -1004,11 +1015,11 @@
     background:
       linear-gradient(rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.86))
         padding-box,
-        linear-gradient(
+      linear-gradient(
           160deg,
-          rgba(12, 94, 58, 0.34),
-          rgba(58, 114, 97, 0.28),
-          rgba(168, 82, 47, 0.22)
+          rgba(37, 99, 235, 0.42),
+          rgba(8, 145, 178, 0.36),
+          rgba(16, 185, 129, 0.34)
         )
         border-box;
     box-shadow:
@@ -1023,11 +1034,11 @@
       background:
         linear-gradient(rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.88))
           padding-box,
-          linear-gradient(
+        linear-gradient(
             160deg,
-            rgba(12, 94, 58, 0.42),
-            rgba(58, 114, 97, 0.34),
-            rgba(168, 82, 47, 0.28)
+            rgba(37, 99, 235, 0.52),
+            rgba(8, 145, 178, 0.46),
+            rgba(16, 185, 129, 0.42)
           )
           border-box;
       box-shadow:
@@ -1234,13 +1245,13 @@
     background: radial-gradient(
       circle at calc(var(--card-pointer-x, 0.5) * 100%)
         calc(var(--card-pointer-y, 0.5) * 100%),
-      color-mix(in srgb, var(--app-accent-soft) 36%, transparent) 0%,
-      color-mix(in srgb, var(--app-accent-soft) 12%, transparent) 20%,
-      transparent 52%
+      rgba(255, 255, 255, 0.16) 0%,
+      rgba(255, 255, 255, 0.05) 18%,
+      rgba(255, 255, 255, 0) 48%
     );
     opacity: 0;
     transition: opacity 220ms ease;
-    mix-blend-mode: normal;
+    mix-blend-mode: screen;
   }
 
   .card-interactive-base[data-card-hovering="true"]::before {
@@ -2025,10 +2036,14 @@
   .skeleton-shimmer {
     position: relative;
     overflow: hidden;
-    background: color-mix(in srgb, var(--app-surface) 68%, var(--app-bg-subtle));
+    background: color-mix(
+      in oklab,
+      var(--color-surface) 70%,
+      var(--color-muted) 30%
+    );
     border-radius: inherit;
     filter: blur(0);
-    animation: skeleton-progressive 2.2s ease-in-out infinite;
+    animation: skeleton-progressive 2.4s ease-in-out infinite;
   }
   .skeleton-shimmer::after {
     content: "";
@@ -2037,7 +2052,7 @@
     background: linear-gradient(
       90deg,
       transparent 0%,
-      color-mix(in srgb, var(--app-accent-soft) 54%, transparent) 50%,
+      color-mix(in oklab, var(--color-primary) 12%, transparent) 50%,
       transparent 100%
     );
     animation: skeleton-sweep 1.6s ease-in-out infinite;
@@ -2081,8 +2096,8 @@
     }
 
     50% {
-      filter: blur(0);
-      opacity: 0.72;
+      filter: blur(2px);
+      opacity: 0.8;
     }
   }
 
@@ -2154,9 +2169,9 @@
     border: 1px solid var(--app-line);
     border-bottom: none;
     box-shadow:
-      0 -10px 28px -24px rgba(23, 21, 15, 0.28),
+      0 -8px 30px rgba(0, 0, 0, 0.05),
       0 -1px 0 rgba(26, 26, 26, 0.02);
-    border-radius: 1.125rem 1.125rem 0 0;
+    border-radius: 1.5rem 1.5rem 0 0;
     padding: 0.65rem 0.5rem calc(0.45rem + env(safe-area-inset-bottom, 0));
   }
 
@@ -2168,7 +2183,7 @@
     min-width: 0;
     min-height: 56px;
     padding: 0.4rem 0.2rem;
-    border-radius: var(--r-control);
+    border-radius: 0.875rem;
     border: none;
     background: transparent;
     cursor: pointer;
@@ -2195,7 +2210,7 @@
     justify-content: center;
     width: 2rem;
     height: 2rem;
-    border-radius: 0.55rem;
+    border-radius: 0.625rem;
     transition: background-color 180ms ease;
   }
 
@@ -2917,14 +2932,14 @@
   }
 
   .surface-raised {
-    background: color-mix(in srgb, var(--app-surface) 94%, var(--app-bg));
-    border: 1px solid color-mix(in srgb, var(--app-line) 88%, transparent);
+    background: var(--app-surface);
+    border: 1px solid var(--app-line);
     box-shadow: var(--shadow-1);
   }
 
   .surface-elevated {
     background: var(--app-surface);
-    border: 1px solid color-mix(in srgb, var(--app-line) 92%, transparent);
+    border: 1px solid var(--app-line);
     box-shadow: var(--shadow-3);
   }
 
@@ -2949,12 +2964,10 @@
     .surface-clickable-raised:hover {
       transform: translateY(-1px);
       box-shadow: var(--shadow-2);
-      border-color: color-mix(in srgb, var(--app-accent) 18%, var(--app-line));
     }
 
     .surface-clickable-elevated:hover {
-      box-shadow: var(--shadow-3);
-      border-color: color-mix(in srgb, var(--app-accent) 18%, var(--app-line));
+      box-shadow: var(--shadow-4);
     }
   }
 

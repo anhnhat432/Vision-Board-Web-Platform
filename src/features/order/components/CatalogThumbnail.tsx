@@ -1,12 +1,12 @@
-import { Images, Package, Tags } from "lucide-react";
+import { Package, Sparkles } from "lucide-react";
 
 import { cn } from "@/app/components/ui/utils";
 import type { CatalogItem } from "@/features/order/catalog/types";
 
-const ICON_BY_TYPE: Record<CatalogItem["type"], typeof Package> = {
+const ICON_BY_TYPE: Record<CatalogItem["type"], typeof Sparkles> = {
   frame: Package,
-  theme: Images,
-  sticker: Tags,
+  theme: Sparkles,
+  sticker: Sparkles,
 };
 
 export interface CatalogThumbnailProps {
@@ -36,7 +36,7 @@ export function CatalogThumbnail({
     );
   }
 
-  const Icon = ICON_BY_TYPE[item.type] ?? Package;
+  const Icon = ICON_BY_TYPE[item.type] ?? Sparkles;
 
   return (
     <div

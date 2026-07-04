@@ -48,7 +48,7 @@ export function ArchetypePicker({
     <div className="rounded-[14px] border border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white dark:bg-app-surface p-4">
       <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[rgba(23,21,15,0.06)] dark:border-app-line">
         <div>
-          <p className="text-[11px] font-extrabold uppercase tracking-[0.06em] text-[#0C5E3A]">Chọn loại mục tiêu</p>
+          <p className="text-[12px] font-extrabold text-[#0C5E3A]">Chọn loại mục tiêu</p>
           <p className="text-[11.5px] text-[#5C574B] dark:text-app-ink-soft mt-1">
             Hệ thống tự động đoán loại để gợi ý chính xác hơn. Bạn có thể tự thay đổi nếu chưa đúng.
           </p>

@@ -67,18 +67,18 @@ export function AppSidebar({
   return (
     <aside
       aria-label="Điều hướng chính"
-      className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 lg:flex lg:w-[248px] lg:flex-col border-r border-white/[0.08] bg-[#1B1D17] text-[#ECE8DC]"
+      className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 lg:flex lg:w-[248px] lg:flex-col border-r border-white/10 bg-[#17150F] text-[#E4E2DB]"
     >
-      <div className="flex h-16 shrink-0 items-center gap-3 border-b border-white/[0.08] px-4">
+      <div className="flex h-16 shrink-0 items-center gap-3 border-b border-white/10 px-4">
         <button
           type="button"
           onClick={() => onNavigate("/")}
-          className="-mx-1 flex items-center gap-3 rounded-[var(--r-control)] px-1 py-1 text-left transition-colors duration-[180ms] ease-[cubic-bezier(0.4,0,0.2,1)] hover:bg-white/[0.055] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#DCEB84]/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#1B1D17]"
+          className="-mx-1 flex items-center gap-3 rounded-lg px-1 py-1 text-left transition-colors duration-[180ms] ease-[cubic-bezier(0.4,0,0.2,1)] hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C6F24E]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#17150F]"
           aria-label="Về trang chủ Dear Our Future"
         >
           <span
             aria-hidden="true"
-            className="flex size-[38px] shrink-0 -rotate-3 items-center justify-center rounded-[10px] bg-[#0C5E3A] font-serif text-[19px] font-bold text-[#E8F2B8]"
+            className="flex size-[38px] shrink-0 -rotate-6 items-center justify-center rounded-[11px] bg-[#0C5E3A] font-serif text-[19px] font-extrabold text-[#C6F24E]"
           >
             D
           </span>
@@ -86,7 +86,7 @@ export function AppSidebar({
             <span className="block truncate font-serif text-[15px] font-bold tracking-tight text-white">
               Dear Our Future
             </span>
-            <span className="block truncate text-[10.5px] font-medium tracking-[0.04em] text-[#A39B8C]">
+            <span className="block truncate text-[10.5px] font-medium tracking-[0.04em] text-[#8C887C]">
               12 tuần · Vision
             </span>
           </div>
@@ -94,7 +94,7 @@ export function AppSidebar({
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3.5 py-4" aria-label="Mục điều hướng">
-        <p className="px-2.5 pb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#8A8275]">Đi nhanh</p>
+        <p className="px-2.5 pb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[#6E6A5E]">Đi nhanh</p>
         <ul className="space-y-0.5">
           {primaryNavItems.map((item) => {
             const Icon = item.icon;
@@ -103,7 +103,7 @@ export function AppSidebar({
               <li key={item.path} className="relative">
                 <span
                   aria-hidden="true"
-                  className={`absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-[#DCEB84] transition-all duration-200 ${
+                  className={`absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-[#C6F24E] transition-all duration-200 ${
                     active ? "opacity-100" : "opacity-0"
                   }`}
                 />
@@ -112,15 +112,15 @@ export function AppSidebar({
                   aria-current={active ? "page" : undefined}
                   onClick={() => onNavigate(item.path)}
                   onPointerEnter={() => onPrefetch(item.path)}
-                  className={`group flex w-full items-center gap-3 rounded-[10px] px-3 py-2.5 text-[13.5px] tracking-normal transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#DCEB84]/30 ${
+                  className={`group flex w-full items-center gap-3 rounded-[11px] px-3 py-2.5 text-[13.5px] tracking-tight transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C6F24E]/30 ${
                     active
-                      ? "bg-[#DCEB84]/10 font-semibold text-white"
-                      : "font-medium text-[#CAC3B6] hover:bg-white/[0.055] hover:text-white"
+                      ? "bg-[#C6F24E]/10 font-semibold text-white"
+                      : "font-medium text-[#B5B1A6] hover:bg-white/[0.06] hover:text-white"
                   }`}
                 >
                   <Icon
                     className={`h-[17px] w-[17px] shrink-0 transition-transform duration-200 group-hover:scale-110 ${
-                      active ? "text-[#DCEB84]" : "text-[#A39B8C] group-hover:text-[#ECE8DC]"
+                      active ? "text-[#C6F24E]" : "text-[#8C887C] group-hover:text-[#E4E2DB]"
                     }`}
                     strokeWidth={2}
                   />
@@ -133,7 +133,7 @@ export function AppSidebar({
 
         {secondaryNavItems.length > 0 ? (
           <>
-            <p className="mt-5 px-2.5 pb-2 text-[10px] font-bold uppercase tracking-[0.14em] text-[#8A8275]">Thêm</p>
+            <p className="mt-5 px-2.5 pb-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[#6E6A5E]">Thêm</p>
             <ul className="space-y-0.5">
               {secondaryNavItems.map((item) => {
                 const Icon = item.icon;
@@ -142,7 +142,7 @@ export function AppSidebar({
                   <li key={item.path} className="relative">
                     <span
                       aria-hidden="true"
-                      className={`absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-[#DCEB84] transition-all duration-200 ${
+                      className={`absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-[#C6F24E] transition-all duration-200 ${
                         active ? "opacity-100" : "opacity-0"
                       }`}
                     />
@@ -151,15 +151,15 @@ export function AppSidebar({
                       aria-current={active ? "page" : undefined}
                       onClick={() => onNavigate(item.path)}
                       onPointerEnter={() => onPrefetch(item.path)}
-                      className={`group flex w-full items-center gap-3 rounded-[10px] px-3 py-2.5 text-[13.5px] tracking-normal transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#DCEB84]/30 ${
+                      className={`group flex w-full items-center gap-3 rounded-[11px] px-3 py-2.5 text-[13.5px] tracking-tight transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C6F24E]/30 ${
                         active
-                          ? "bg-[#DCEB84]/10 font-semibold text-white"
-                          : "font-medium text-[#CAC3B6] hover:bg-white/[0.055] hover:text-white"
+                          ? "bg-[#C6F24E]/10 font-semibold text-white"
+                          : "font-medium text-[#B5B1A6] hover:bg-white/[0.06] hover:text-white"
                       }`}
                     >
                       <Icon
                         className={`h-[17px] w-[17px] shrink-0 transition-transform duration-200 group-hover:scale-110 ${
-                          active ? "text-[#DCEB84]" : "text-[#A39B8C] group-hover:text-[#ECE8DC]"
+                          active ? "text-[#C6F24E]" : "text-[#8C887C] group-hover:text-[#E4E2DB]"
                         }`}
                         strokeWidth={2}
                       />
@@ -173,16 +173,16 @@ export function AppSidebar({
         ) : null}
       </nav>
 
-      <div className="shrink-0 border-t border-white/[0.08] p-3.5">
+      <div className="shrink-0 border-t border-white/10 p-3.5">
         <div className="flex items-center gap-2 pb-2.5">
           <button
             type="button"
             onClick={onToggleTheme}
-            className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-[10px] border border-white/[0.08] bg-white/[0.055] px-3 text-[12.5px] font-semibold text-[#ECE8DC] transition-all duration-200 hover:bg-white/[0.095] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#DCEB84]/30"
+            className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-[11px] border border-white/10 bg-white/[0.06] px-3 text-[12.5px] font-semibold text-[#E4E2DB] transition-all duration-200 hover:bg-white/[0.1] active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C6F24E]/30"
             aria-label={resolvedTheme === "dark" ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"}
           >
             {resolvedTheme === "dark" ? (
-              <Sun className="h-[15px] w-[15px] text-[#DCEB84]" />
+              <Sun className="h-[15px] w-[15px] text-[#C6F24E]" />
             ) : (
               <Moon className="h-[15px] w-[15px]" />
             )}
@@ -191,7 +191,7 @@ export function AppSidebar({
           <button
             type="button"
             onClick={onOpenGuide}
-            className="flex size-11 items-center justify-center rounded-[10px] border border-white/[0.08] bg-white/[0.055] text-[#ECE8DC] transition-all duration-200 hover:bg-white/[0.095] active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#DCEB84]/30"
+            className="flex size-11 items-center justify-center rounded-[11px] border border-white/10 bg-white/[0.06] text-[#E4E2DB] transition-all duration-200 hover:bg-white/[0.1] active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C6F24E]/30"
             aria-label="Mở hướng dẫn sử dụng"
             title="Hướng dẫn"
           >
@@ -204,10 +204,10 @@ export function AppSidebar({
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="flex w-full items-center gap-2.5 rounded-[10px] p-1.5 text-left transition-all duration-200 hover:bg-white/[0.055] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#DCEB84]/30"
+                className="flex w-full items-center gap-2.5 rounded-[11px] p-1.5 text-left transition-all duration-200 hover:bg-white/[0.06] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C6F24E]/30"
               >
                 <div
-                  className="flex size-[34px] shrink-0 items-center justify-center rounded-[10px] bg-[#DCEB84] font-serif text-[15px] font-bold text-[#1B1D17]"
+                  className="flex size-[34px] shrink-0 items-center justify-center rounded-full bg-[#C6F24E] font-serif text-[15px] font-extrabold text-[#17150F]"
                   aria-hidden="true"
                 >
                   {user.avatarLetter}
@@ -216,11 +216,11 @@ export function AppSidebar({
                   <p className="truncate text-[13px] font-semibold text-white leading-tight">
                     {user.displayName ?? user.email ?? "Tài khoản"}
                   </p>
-                  <p className="truncate text-[10px] font-semibold text-[#A39B8C] uppercase tracking-[0.06em] mt-0.5">
+                  <p className="truncate text-[10px] font-semibold text-[#8C887C] uppercase tracking-[0.06em] mt-0.5">
                     {user.planLabel}
                   </p>
                 </div>
-                <ChevronsUpDown className="h-4 w-4 shrink-0 text-[#A39B8C]" />
+                <ChevronsUpDown className="h-4 w-4 shrink-0 text-[#8C887C]" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
@@ -280,7 +280,7 @@ export function AppSidebar({
             <Button
               variant="ghost"
               size="sm"
-              className="h-10 w-full rounded-[10px] bg-[#DCEB84] text-sm font-semibold text-[#1B1D17] transition-all duration-200 hover:bg-[#E5F1A0] hover:scale-[1.01] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#DCEB84]/40"
+              className="h-10 w-full rounded-xl bg-[#C6F24E] text-sm font-semibold text-[#17150F] transition-all duration-200 hover:bg-[#d4f76e] hover:scale-[1.01] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C6F24E]/40"
               onClick={() => onAuthNavigate("signup")}
             >
               Đăng ký
@@ -288,7 +288,7 @@ export function AppSidebar({
             <Button
               variant="ghost"
               size="sm"
-              className="h-10 w-full rounded-[10px] border border-white/[0.08] bg-white/[0.055] text-sm font-semibold text-[#ECE8DC] transition-all duration-200 hover:bg-white/[0.095] hover:scale-[1.01] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#DCEB84]/30"
+              className="h-10 w-full rounded-xl border border-white/10 bg-white/[0.06] text-sm font-semibold text-[#E4E2DB] transition-all duration-200 hover:bg-white/[0.1] hover:scale-[1.01] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C6F24E]/30"
               onClick={() => onAuthNavigate("signin")}
             >
               Đăng nhập

@@ -718,7 +718,28 @@ function DashboardContent({
       <div className="pointer-events-none absolute inset-0 overflow-hidden z-0">
         {/* Lưới điểm mịn (Dot Grid) */}
         <div className="absolute inset-0 bg-[radial-gradient(#8080800c_1.2px,transparent_1.2px)] dark:bg-[radial-gradient(#ffffff04_1.2px,transparent_1.2px)] bg-[size:24px_24px] opacity-70" />
-        <div className="absolute inset-x-0 top-0 h-64 bg-[linear-gradient(180deg,color-mix(in_srgb,var(--app-accent-subtle)_34%,transparent),transparent)]" />
+
+        {/* Bóng sáng Forest Green (Top Right) */}
+        <div
+          className="absolute -right-[18%] -top-[20%] h-[48rem] w-[48rem]"
+          style={{
+            background:
+              "radial-gradient(circle, color-mix(in srgb, var(--app-accent) 8%, transparent) 0%, transparent 68%)",
+            willChange: "transform",
+            transform: "translate3d(0, 0, 0)",
+          }}
+        />
+
+        {/* Bóng sáng Amber (Bottom Left) */}
+        <div
+          className="absolute -left-[18%] bottom-[4%] h-[44rem] w-[44rem]"
+          style={{
+            background:
+              "radial-gradient(circle, color-mix(in srgb, var(--app-energy) 6%, transparent) 0%, transparent 70%)",
+            willChange: "transform",
+            transform: "translate3d(0, 0, 0)",
+          }}
+        />
       </div>
 
       <div className="mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8 relative z-10">
@@ -809,7 +830,7 @@ function DashboardContent({
       </div>
 
       {showMobileStickyCTA ? (
-        <div className="above-mobile-nav fixed bottom-0 left-0 right-0 z-40 border-t border-app-line/80 bg-app-surface p-3 shadow-[0_-10px_28px_-24px_rgba(23,21,15,0.28)] md:hidden">
+        <div className="above-mobile-nav fixed bottom-0 left-0 right-0 z-40 border-t border-app-line/80 bg-app-surface p-3 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] md:hidden">
           <button
             type="button"
             className="w-full rounded-xl bg-app-accent hover:bg-app-accent-hover px-4 py-3 text-sm font-semibold text-white shadow-xs transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40"
@@ -922,11 +943,11 @@ function NextBestAction({ data }: { data: DashboardData }) {
       button: "bg-app-status-warning text-white hover:bg-app-status-warning/85",
     },
     review: {
-      card: "bg-app-highlight/25 border-app-accent/20",
-      icon: "bg-app-highlight text-app-accent",
-      label: "text-app-accent",
-      desc: "text-app-ink-soft",
-      button: "bg-app-accent text-white hover:bg-app-accent-hover",
+      card: "bg-purple-500/10 border-purple-500/20 dark:bg-purple-950/20 dark:border-purple-800/30",
+      icon: "bg-purple-600 text-white",
+      label: "text-purple-700 dark:text-purple-300",
+      desc: "text-purple-700/80 dark:text-purple-300/80",
+      button: "bg-purple-700 text-white hover:bg-purple-800",
     },
   }[tone];
 
@@ -1105,7 +1126,7 @@ function DashboardActiveLayout({
 
       <Collapsible open={secondaryInsightsOpen} onOpenChange={handleSecondaryInsightsOpenChange}>
         <section
-          className="appear-fade-up rounded-card border border-app-line bg-app-surface p-4 shadow-[0_16px_38px_-32px_rgba(23,21,15,0.24)] sm:p-5"
+          className="rounded-2xl border border-app-line bg-app-surface/70 p-4 shadow-app-sm appear-fade-up sm:p-5"
           style={{ animationDelay: "400ms" }}
           aria-labelledby="dashboard-secondary-insights-title"
         >

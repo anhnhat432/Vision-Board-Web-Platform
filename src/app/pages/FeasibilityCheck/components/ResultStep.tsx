@@ -13,6 +13,7 @@ import {
   Key,
   type LucideIcon,
   ShieldCheck,
+  Sparkles,
   Target,
   Wrench,
 } from "lucide-react";
@@ -310,7 +311,7 @@ export function ResultStep({
               {strongAxes.length > 0 && (
                 <div className="space-y-2 rounded-card bg-app-status-success/5 p-4 sm:p-5">
                   <h3 className="text-sm font-semibold text-app-status-success flex items-center gap-1.5">
-                    <CheckCircle2 className="h-4 w-4" /> Điểm tựa vững vàng
+                    <Sparkles className="h-4 w-4" /> Điểm tựa vững vàng
                   </h3>
 
                   <ul className="space-y-1 text-xs text-app-ink font-bold">
@@ -365,7 +366,7 @@ export function ResultStep({
               {/* Bước 2: Tuần khởi động */}
               <div className="flex items-start gap-3.5 rounded-card border border-app-line/70 bg-app-surface/60 p-3.5 sm:p-4">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-control bg-app-accent-soft text-app-accent font-bold shadow-app-sm">
-                  <Calendar className="h-4 w-4" aria-hidden="true" />
+                  <Sparkles className="h-4 w-4" aria-hidden="true" />
                 </div>
                 <div className="min-w-0 space-y-1">
                   <h4 className="text-sm font-semibold text-app-accent">2. Tuần khởi động (Tuần 1)</h4>

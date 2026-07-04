@@ -1,6 +1,5 @@
 import { TrendingUp } from "lucide-react";
-import type { TooltipProps } from "recharts";
-import { Area, AreaChart, CartesianGrid, ReferenceDot, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { useId, useMemo } from "react";
 
 import type { WeeklyProgressPoint } from "@/features/dashboard/helpers/dashboardInsights";
 
@@ -17,6 +16,9 @@ interface TrendPoint {
 }
 
 const TREND_TICKS = [1, 4, 8, 12];
+const CHART_WIDTH = 320;
+const CHART_HEIGHT = 180;
+const CHART_PADDING = { top: 10, right: 12, bottom: 28, left: 12 };
 const EMPTY_POINTS: TrendPoint[] = Array.from({ length: 12 }, (_, index) => ({
   week: index + 1,
   percent: 0,
@@ -42,26 +44,46 @@ function buildTrendPoints(points: WeeklyProgressPoint[]): TrendPoint[] {
   });
 }
 
-// Custom Glassmorphism Tooltip for Recharts
-const CustomTooltip = ({ active, payload, label }: TooltipProps<number, string>) => {
-  if (active && payload?.length) {
-    const data = payload[0].payload as TrendPoint;
-    return (
-      <div className="bg-app-surface border border-app-line p-3 rounded-[12px] text-xs space-y-1">
-        <p className="font-bold text-app-ink">Tuần {label}</p>
-        <p className="text-app-accent font-extrabold text-[13px]">Tiến độ: {data.percent}%</p>
-        <p className="text-app-ink-soft font-semibold">
-          Đã xong: {data.completedTasks}/{data.totalTasks} việc
-        </p>
-      </div>
-    );
-  }
-  return null;
-};
+function clampPercent(value: number): number {
+  return Math.max(0, Math.min(100, value));
+}
+
+function getPointCoordinates(point: TrendPoint) {
+  const plotWidth = CHART_WIDTH - CHART_PADDING.left - CHART_PADDING.right;
+  const plotHeight = CHART_HEIGHT - CHART_PADDING.top - CHART_PADDING.bottom;
+  return {
+    x: CHART_PADDING.left + ((point.week - 1) / 11) * plotWidth,
+    y: CHART_PADDING.top + (1 - clampPercent(point.percent) / 100) * plotHeight,
+  };
+}
+
+function buildLinePath(data: TrendPoint[]): string {
+  return data
+    .map((point, index) => {
+      const { x, y } = getPointCoordinates(point);
+      return `${index === 0 ? "M" : "L"} ${x.toFixed(1)} ${y.toFixed(1)}`;
+    })
+    .join(" ");
+}
+
+function buildAreaPath(data: TrendPoint[]): string {
+  if (data.length === 0) return "";
+
+  const linePath = buildLinePath(data);
+  const first = getPointCoordinates(data[0]);
+  const last = getPointCoordinates(data[data.length - 1]);
+  const baselineY = CHART_HEIGHT - CHART_PADDING.bottom;
+  return `${linePath} L ${last.x.toFixed(1)} ${baselineY} L ${first.x.toFixed(1)} ${baselineY} Z`;
+}
 
 export function TwelveWeekTrendCard({ points, currentWeek }: TwelveWeekTrendCardProps) {
-  const data = buildTrendPoints(points);
+  const gradientIdSeed = useId().replace(/:/g, "");
+  const gradientId = `dashboard-trend-fill-${gradientIdSeed}`;
+  const data = useMemo(() => buildTrendPoints(points), [points]);
+  const linePath = useMemo(() => buildLinePath(data), [data]);
+  const areaPath = useMemo(() => buildAreaPath(data), [data]);
   const activePoint = currentWeek ? data.find((point) => point.week === currentWeek) : null;
+  const activePointPosition = activePoint ? getPointCoordinates(activePoint) : null;
 
   return (
     <section
@@ -89,45 +111,85 @@ export function TwelveWeekTrendCard({ points, currentWeek }: TwelveWeekTrendCard
             </p>
           </div>
         ) : null}
-        <ResponsiveContainer width="100%" height={180}>
-          <AreaChart data={data} margin={{ top: 8, right: 8, bottom: 4, left: 4 }}>
+        <svg
+          role="img"
+          aria-label="Biểu đồ tiến độ 12 tuần"
+          className="h-[180px] w-full overflow-visible"
+          viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
+          preserveAspectRatio="none"
+        >
+          <title>Tiến độ thực thi theo từng tuần</title>
+          <g>
             <defs>
-              <linearGradient id="colorProgress" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="5%" stopColor="var(--app-accent)" stopOpacity={0.02} />
                 <stop offset="95%" stopColor="var(--app-accent)" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid stroke="var(--app-line)" strokeDasharray="2 2" vertical={false} />
-            <XAxis
-              dataKey="week"
-              axisLine={false}
-              tickLine={false}
-              tick={{ fontSize: 11, fill: "var(--app-ink-muted)", fontWeight: "bold" }}
-              ticks={TREND_TICKS}
-            />
-            <YAxis hide domain={[0, 100]} />
-            <Tooltip content={<CustomTooltip />} />
-            <Area
-              type="monotone"
-              dataKey="percent"
+            {[0, 25, 50, 75, 100].map((tick) => {
+              const y = CHART_PADDING.top + (1 - tick / 100) * (CHART_HEIGHT - CHART_PADDING.top - CHART_PADDING.bottom);
+              return (
+                <line
+                  key={tick}
+                  x1={CHART_PADDING.left}
+                  x2={CHART_WIDTH - CHART_PADDING.right}
+                  y1={y}
+                  y2={y}
+                  stroke="var(--app-line)"
+                  strokeDasharray="2 2"
+                  strokeWidth="1"
+                  vectorEffect="non-scaling-stroke"
+                />
+              );
+            })}
+            <path d={areaPath} fill={`url(#${gradientId})`} />
+            <path
+              d={linePath}
+              fill="none"
               stroke="var(--app-accent)"
-              strokeWidth={2}
-              fillOpacity={1}
-              fill="url(#colorProgress)"
-              activeDot={{ r: 4, fill: "var(--app-accent)", stroke: "var(--app-surface)", strokeWidth: 1 }}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              vectorEffect="non-scaling-stroke"
             />
-            {activePoint ? (
-              <ReferenceDot
-                x={activePoint.week}
-                y={activePoint.percent}
-                r={5}
-                stroke="var(--app-accent)"
-                strokeWidth={2}
+            {activePointPosition ? (
+              <circle
+                cx={activePointPosition.x}
+                cy={activePointPosition.y}
+                r="5"
                 fill="var(--app-highlight)"
+                stroke="var(--app-accent)"
+                strokeWidth="2"
+                vectorEffect="non-scaling-stroke"
               />
             ) : null}
-          </AreaChart>
-        </ResponsiveContainer>
+            {TREND_TICKS.map((week) => {
+              const point = data[week - 1] ?? { week, percent: 0, completedTasks: 0, totalTasks: 0 };
+              const { x } = getPointCoordinates(point);
+              return (
+                <text
+                  key={week}
+                  x={x}
+                  y={CHART_HEIGHT - 8}
+                  fill="var(--app-ink-muted)"
+                  fontSize="11"
+                  fontWeight="700"
+                  textAnchor="middle"
+                >
+                  {week}
+                </text>
+              );
+            })}
+          </g>
+          {data.map((point) => {
+            const { x, y } = getPointCoordinates(point);
+            return (
+              <circle key={point.week} cx={x} cy={y} r="9" fill="transparent">
+                <title>{`Tuần ${point.week}: ${point.percent}% (${point.completedTasks}/${point.totalTasks} việc)`}</title>
+              </circle>
+            );
+          })}
+        </svg>
       </div>
     </section>
   );

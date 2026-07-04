@@ -5,16 +5,17 @@ import {
   Check,
   CheckCircle2,
   ChevronDown,
-  Compass,
   Crown,
   Gauge,
   Loader2,
+  Sparkles,
   X,
 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { SecondaryPanel } from "@/app/components/layout/SecondaryPanel";
-import { MotionStaggerItem, MotionStaggerList } from "@/app/components/motion";
 import { emitPetEvent } from "@/app/features/pet/petEvents";
+
+import { MotionStaggerItem, MotionStaggerList } from "@/app/components/motion";
 import type { RescueModeStatus } from "@/features/plan12week/logic";
 import { getUpcomingStrategicBlock } from "@/features/plan12week/logic/timeBlocks";
 import { hapticLight } from "../../utils/haptics";
@@ -357,10 +358,7 @@ export function TwelveWeekTodayTab({
         return;
       }
 
-      const checkInCardIsAboveViewport = rect.bottom <= 156;
-      const checkInCardIsVisibleEnough = rect.top < window.innerHeight - 132 && rect.bottom > 156;
-
-      setIsCheckInCardInView(!checkInCardIsAboveViewport || checkInCardIsVisibleEnough);
+      setIsCheckInCardInView(rect.top < window.innerHeight - 132 && rect.bottom > 156);
     };
 
     updateCheckInCardVisibility();
@@ -515,10 +513,10 @@ export function TwelveWeekTodayTab({
         <div
           data-testid="today-next-action-panel"
           data-state={nextActionState.key}
-          className="order-1 rounded-card-lg border border-app-accent/20 bg-app-accent-subtle/30 p-4 ring-1 ring-inset ring-app-accent/10 dark:bg-app-surface sm:rounded-[18px] sm:p-6 sm:px-[26px]"
+          className="order-1 rounded-card-lg border border-[rgba(12,94,58,0.18)] border-l-4 border-l-[#0C5E3A] bg-white p-4 dark:bg-app-surface sm:rounded-[18px] sm:p-6 sm:px-[26px]"
         >
           <p className="mb-2.5 flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#0C5E3A] sm:mb-3">
-            <Compass className="h-3 w-3" />
+            <Sparkles className="h-3 w-3" />
             {nextActionState.key === "setup-needed" ? "Cần thiết lập" : "Hành động tiếp theo"}
           </p>
           <h2 className="m-0 mb-2 font-serif text-xl font-bold tracking-[-0.01em] text-app-ink sm:text-[23px]">
@@ -658,7 +656,7 @@ export function TwelveWeekTodayTab({
                 <>
                   <div className="flex flex-wrap items-center gap-2 mb-3">
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-app-accent/10 bg-app-accent-subtle text-[10px] font-bold uppercase tracking-[0.12em] text-app-accent">
-                      <CheckCircle2 className="h-3 w-3" />
+                      <Sparkles className="h-3 w-3" />
                       {isFirstWeek ? "Tuần 1 · Khởi đầu" : "Ưu tiên duy nhất"}
                     </span>
                     {primaryTaskOverdue && (
@@ -682,10 +680,10 @@ export function TwelveWeekTodayTab({
                   )}
                   {primaryTaskCommitmentQuote && (
                     <p
-                      className={`mt-4 max-w-2xl rounded-[12px] border px-3.5 py-2 font-serif text-sm italic leading-relaxed ${
+                      className={`mt-4 text-sm italic leading-relaxed max-w-2xl border-l-2 pl-3.5 py-1 font-serif ${
                         primaryTaskOverdue
-                          ? "border-app-warm-border/45 bg-app-warm-soft/25 text-app-warm-strong"
-                          : "border-app-accent/18 bg-app-accent-subtle/25 text-app-ink-soft"
+                          ? "border-app-warm/40 text-app-warm-strong"
+                          : "border-app-accent/30 text-app-ink-soft"
                       }`}
                     >
                       {primaryTaskCommitmentQuote}
@@ -1154,11 +1152,13 @@ export function TwelveWeekTodayTab({
       {showMobileStickyCheckIn ? (
         <div
           data-twelve-week-today-mobile-checkin-bar
-          className="above-mobile-nav fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] left-4 right-4 z-40 rounded-card border border-app-line/80 bg-app-surface/95 px-3 pb-3 pt-2.5 shadow-[0_18px_44px_-26px_rgba(23,21,15,0.45)] backdrop-blur-md sm:hidden"
+          className="above-mobile-nav fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] left-0 right-0 z-40 border-t border-app-line/80 bg-app-surface px-4 pb-4 pt-3 shadow-[0_-18px_40px_-30px_rgba(23,21,15,0.45)] sm:hidden"
         >
-          <div className="mx-auto flex w-full max-w-md flex-col gap-2">
-            <p className="flex items-start justify-between gap-3 text-[11px] font-semibold text-app-ink-muted">
-              <span className="min-w-0 leading-snug">Check-in hôm nay có thay đổi chưa lưu.</span>
+          <div className="mx-auto flex w-full max-w-[42rem] flex-col gap-2.5">
+            <p className="flex items-center justify-between gap-3 text-[11px] font-semibold text-app-ink-muted">
+              <span className="min-w-0 leading-relaxed">
+                Check-in hôm nay có thay đổi chưa lưu. Lưu trước khi rời tab này.
+              </span>
               <span className="shrink-0 rounded-full border border-app-warm-border/30 bg-app-warm-soft/30 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em] text-app-warm-strong">
                 Chưa lưu
               </span>
@@ -1166,7 +1166,7 @@ export function TwelveWeekTodayTab({
             <Button
               size="lg"
               variant="default"
-              className="min-h-11 w-full rounded-[12px] bg-app-accent px-4 py-2.5 text-sm font-bold text-white shadow-app-sm transition-all duration-150 hover:bg-app-accent-hover active:scale-[0.98]"
+              className="min-h-12 w-full rounded-xl bg-app-accent px-4 py-3 text-sm font-bold text-white shadow-app-sm transition-all duration-150 hover:bg-app-accent-hover active:scale-[0.98]"
               onClick={handleSaveCheckInClick}
               disabled={isSavingCheckIn}
               aria-busy={isSavingCheckIn}

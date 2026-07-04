@@ -6,10 +6,10 @@ import {
   Compass,
   Dumbbell,
   GraduationCap,
-  HelpCircle,
   type LucideIcon,
   PiggyBank,
   RotateCcw,
+  Sparkles,
   Target,
   TrendingDown,
   TrendingUp,
@@ -26,7 +26,7 @@ const INTENT_ICONS: Record<UserIntentId, LucideIcon> = {
   prepare_exam: Award,
   grow_finance: PiggyBank,
   find_direction: Compass,
-  unsure: HelpCircle,
+  unsure: Sparkles,
 };
 
 interface IntentColorConfig {
@@ -65,14 +65,14 @@ const getIntentColorConfig = (id: UserIntentId): IntentColorConfig => {
       };
     case "learn_skill":
       return {
-        hoverBorder: "hover:border-app-accent/35",
-        hoverBg: "hover:bg-app-accent-soft/20",
+        hoverBorder: "hover:border-purple-400",
+        hoverBg: "hover:bg-purple-50/30 dark:hover:bg-purple-950/10",
         selectedBg:
-          "border-app-accent bg-app-accent-soft text-app-accent ring-1 ring-app-accent/20",
-        selectedText: "text-app-accent",
-        iconBg: "bg-app-accent-soft text-app-accent group-hover:bg-app-accent-soft/80",
-        iconSelectedBg: "bg-app-accent/15 text-app-accent",
-        accent: "text-app-accent",
+          "border-purple-500 bg-purple-50 text-purple-700 dark:bg-purple-950/30 dark:text-purple-300 ring-1 ring-purple-500/20",
+        selectedText: "text-purple-700 dark:text-purple-300",
+        iconBg: "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400 group-hover:bg-purple-200",
+        iconSelectedBg: "bg-purple-500/20 text-purple-700 dark:bg-purple-500/30 dark:text-purple-300",
+        accent: "text-purple-600 dark:text-purple-400",
       };
     case "improve_health":
       return {
@@ -121,14 +121,14 @@ const getIntentColorConfig = (id: UserIntentId): IntentColorConfig => {
       };
     default:
       return {
-        hoverBorder: "hover:border-app-warm/35",
-        hoverBg: "hover:bg-app-warm-soft/40",
+        hoverBorder: "hover:border-violet-400",
+        hoverBg: "hover:bg-violet-50/30 dark:hover:bg-violet-950/10",
         selectedBg:
-          "border-app-warm bg-app-warm-soft text-app-warm-strong ring-1 ring-app-warm/20",
-        selectedText: "text-app-warm-strong",
-        iconBg: "bg-app-warm-soft text-app-warm-strong group-hover:bg-app-warm-soft/80",
-        iconSelectedBg: "bg-app-warm/15 text-app-warm-strong",
-        accent: "text-app-warm-strong",
+          "border-violet-500 bg-violet-50 text-violet-700 dark:bg-violet-950/30 dark:text-violet-300 ring-1 ring-violet-500/20",
+        selectedText: "text-violet-700 dark:text-violet-300",
+        iconBg: "bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400 group-hover:bg-violet-200",
+        iconSelectedBg: "bg-violet-500/20 text-violet-700 dark:bg-violet-500/30 dark:text-violet-300",
+        accent: "text-violet-600 dark:text-violet-400",
       };
   }
 };
@@ -408,7 +408,7 @@ export function LifeInsight() {
             {isCustomSelection ? (
               <>
                 <span className="inline-flex min-w-0 items-center gap-1.5 break-words rounded-full border border-app-status-warning/20 bg-app-status-warning/10 px-3 py-1.5 text-xs font-semibold text-app-status-warning shadow-sm">
-                  <Compass className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" />
+                  <Sparkles className="mr-1.5 h-3.5 w-3.5 motion-safe:animate-pulse" aria-hidden="true" />
                   Trọng tâm chọn: {focusAreaLabel}
                 </span>
                 <span className="inline-flex min-w-0 items-center gap-1.5 break-words rounded-full border border-app-line bg-app-surface px-3 py-1.5 text-xs font-semibold text-app-ink-soft shadow-3xs">
@@ -449,7 +449,7 @@ export function LifeInsight() {
                 {lifePattern && (
                   <div className={`mt-3 rounded-xl border p-3.5 leading-relaxed sm:mt-4 sm:p-4 ${lifePattern.bgColor}`}>
                     <h4 className={`text-xs font-bold flex items-center gap-1.5 ${lifePattern.accentColor}`}>
-                      <Compass className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                      <Sparkles className="h-3.5 w-3.5 shrink-0 motion-safe:animate-pulse" aria-hidden="true" />
                       {lifePattern.title}
                     </h4>
                     <p className="mt-1.5 max-w-[65ch] break-words text-xs leading-relaxed text-app-ink-soft">
