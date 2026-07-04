@@ -73,7 +73,7 @@ export function ArchetypeHint({ archetype, variant, showArchetypeTag = true }: A
       data-archetype-hint-variant={variant}
     >
       {showArchetypeTag ? (
-        <p className="mb-2.5 text-[11px] font-bold uppercase tracking-[0.06em] text-[#5C574B]">
+        <p className="mb-2.5 text-[11px] font-bold text-[#5C574B]">
           Loại mục tiêu: {archetypeLabel}
         </p>
       ) : null}
