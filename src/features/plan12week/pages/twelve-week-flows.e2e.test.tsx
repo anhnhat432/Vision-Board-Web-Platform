@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { toast } from "sonner";
 import { vi } from "vitest";
@@ -89,11 +89,20 @@ async function typeWamReview(
 ) {
   await openWeeklyReviewDetails(user);
   const insightsInput = document.querySelector("#weekly-insights");
-  const commitmentsInput = document.querySelector("#weekly-next-commitments");
   expect(insightsInput).toBeInTheDocument();
-  expect(commitmentsInput).toBeInTheDocument();
-  await user.type(insightsInput as HTMLElement, input.insights);
-  await user.type(commitmentsInput as HTMLElement, `${input.nextWeekCommitments}{Enter}`);
+  fireEvent.change(insightsInput as HTMLElement, { target: { value: input.insights } });
+  await waitFor(() => {
+    expect((document.querySelector("#weekly-insights") as HTMLTextAreaElement | null)?.value).toBe(input.insights);
+  });
+
+  const commitmentsInput = within(screen.getByTestId("weekly-review-flow")).getByLabelText(/cam kết của tuần tới/i);
+  fireEvent.change(commitmentsInput, { target: { value: `${input.nextWeekCommitments},` } });
+  await screen.findByLabelText(`Cam kết: ${input.nextWeekCommitments}`, undefined, {
+    timeout: 3_000,
+  });
+  await waitFor(() => {
+    expect(screen.getByTestId("weekly-review-readiness")).toHaveTextContent("4/4");
+  });
 }
 
 async function confirmEarlyReviewIfPrompted(user: ReturnType<typeof userEvent.setup>) {
@@ -812,14 +821,24 @@ describe("12-week core flows", () => {
       // Click Chỉnh sửa đánh giá to open form since it is completed and hidden
       await user.click(screen.getByRole("button", { name: "Chỉnh sửa đánh giá" }));
 
-      const insightsInput = document.querySelector("#weekly-insights");
-      const commitmentsInput = document.querySelector("#weekly-next-commitments");
-      expect(insightsInput).toBeInTheDocument();
-      expect(commitmentsInput).toBeInTheDocument();
-      await user.clear(insightsInput as HTMLElement);
-      await user.type(insightsInput as HTMLElement, "Latest weekly insight.");
+      const reviewFlow = await screen.findByTestId("weekly-review-flow");
+      const insightsInput = within(reviewFlow).getByLabelText(/góc nhìn\/điều học được/i);
+      fireEvent.change(insightsInput, { target: { value: "Latest weekly insight." } });
+      await waitFor(() => {
+        expect(insightsInput).toHaveValue("Latest weekly insight.");
+      });
       await user.click(screen.getByRole("button", { name: "Xóa cam kết: First priority." }));
-      await user.type(commitmentsInput as HTMLElement, "Latest priority.{Enter}");
+      await waitFor(() => {
+        expect(screen.queryByLabelText("Cam kết: First priority.")).not.toBeInTheDocument();
+      });
+      const latestReviewFlow = screen.getByTestId("weekly-review-flow");
+      const commitmentsInput = latestReviewFlow.querySelector("#weekly-next-commitments");
+      expect(commitmentsInput).toBeInTheDocument();
+      fireEvent.change(commitmentsInput as HTMLElement, { target: { value: "Latest priority.," } });
+      await screen.findByLabelText("Cam kết: Latest priority.");
+      await waitFor(() => {
+        expect(screen.getByTestId("weekly-review-readiness")).toHaveTextContent("4/4");
+      });
       await user.click(getPrimaryButton("Chốt review tuần này"));
       await confirmEarlyReviewIfPrompted(user);
 

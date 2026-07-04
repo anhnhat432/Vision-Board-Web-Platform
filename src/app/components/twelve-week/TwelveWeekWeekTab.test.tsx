@@ -158,12 +158,12 @@ describe("TwelveWeekWeekTab review flow", () => {
     expect(chip).toBeInTheDocument();
     expect(within(chip).getByText("Plan a")).toHaveClass("break-words");
     expect(within(chip).getByRole("button", { name: "Xóa cam kết: Plan a" })).toHaveClass(
-      "h-11",
-      "w-11",
-      "sm:h-8",
-      "sm:w-8",
+      "size-11",
+      "sm:size-9",
+      "after:h-11",
+      "after:min-w-[44px]",
     );
-    expect(input).toHaveValue("");
+    expect(screen.getByLabelText(/cam kết của tuần tới/i)).toHaveValue("");
   });
 
   it("does not add a case-insensitive duplicate commitment and flags the existing chip", async () => {
@@ -196,7 +196,7 @@ describe("TwelveWeekWeekTab review flow", () => {
 
     expect(screen.getByLabelText("Cam kết: Plan 5")).toBeInTheDocument();
     expect(screen.queryByLabelText("Cam kết: Plan 6")).not.toBeInTheDocument();
-    expect(input).toBeDisabled();
+    expect(screen.getByLabelText(/cam kết của tuần tới/i)).toBeDisabled();
     expect(screen.getByText("Đã đạt tối đa 5 cam kết. Xoá bớt chip để thêm mới.")).toBeInTheDocument();
   });
 
@@ -306,6 +306,7 @@ describe("TwelveWeekWeekTab review flow", () => {
       />,
     );
 
+    await user.click(screen.getByRole("button", { name: /bắt đầu review sớm/i }));
     const saveButton = screen.getAllByRole("button", { name: /chốt review tuần này/i })[0];
     await user.click(saveButton);
     expect(onSaveWeeklyReview).not.toHaveBeenCalled();
@@ -316,7 +317,8 @@ describe("TwelveWeekWeekTab review flow", () => {
     expect(onSaveWeeklyReview).not.toHaveBeenCalled();
 
     // Reopen and confirm — save fires
-    await user.click(saveButton);
+    const confirmSaveButton = screen.getAllByRole("button", { name: /chốt review tuần này/i })[0];
+    await user.click(confirmSaveButton);
     expect(await screen.findByRole("alertdialog")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /vẫn lưu sớm/i }));
     expect(onSaveWeeklyReview).toHaveBeenCalledTimes(1);

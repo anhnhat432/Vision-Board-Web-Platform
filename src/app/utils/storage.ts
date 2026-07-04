@@ -437,11 +437,20 @@ function mergeDailyCheckIns(
     ...localCheckIns.filter((checkIn) => !incomingKeys.has(getDailyCheckInMergeKey(checkIn))),
   ];
 
+  const dailyCounts = new Map<string, number>();
+
   return mergedCheckIns
     .sort((left, right) => {
       const dateDelta = getDailyCheckInSortDate(right).localeCompare(getDailyCheckInSortDate(left));
       if (dateDelta !== 0) return dateDelta;
       return (right.updatedCount ?? 1) - (left.updatedCount ?? 1);
+    })
+    .filter((checkIn) => {
+      const dateKey = getDailyCheckInSortDate(checkIn);
+      const count = dailyCounts.get(dateKey) ?? 0;
+      if (count >= 5) return false;
+      dailyCounts.set(dateKey, count + 1);
+      return true;
     })
     .slice(0, 120);
 }
