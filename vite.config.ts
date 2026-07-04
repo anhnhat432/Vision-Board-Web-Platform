@@ -31,7 +31,7 @@ export default defineConfig({
             return "monitoring";
           }
           if (normalizedId.includes("react-router")) return "router";
-          if (normalizedId.includes("recharts") || normalizedId.includes("d3-")) return "charts";
+          if (normalizedId.includes("d3-")) return "charts";
           if (normalizedId.includes("sonner") || normalizedId.includes("next-themes")) return "feedback";
           if (normalizedId.includes("canvas-confetti")) return "effects";
           if (normalizedId.includes("react-day-picker") || normalizedId.includes("date-fns")) return "calendar";

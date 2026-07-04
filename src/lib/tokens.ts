@@ -4,7 +4,7 @@
  * Dùng file này khi cần token values trong:
  *   - Inline styles (style={{ color: tokens.ink }})
  *   - Animation/motion values (framer-motion, CSS-in-JS)
- *   - Canvas drawing / recharts fill props
+ *   - Canvas drawing / chart fill props
  *   - Unit tests asserting colors
  *
  * QUAN TRỌNG:
