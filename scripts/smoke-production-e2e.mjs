@@ -766,8 +766,8 @@ async function tryClickButtonByNormalizedText(page, normalizedNeedle) {
       return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
     };
     const button = Array.from(document.querySelectorAll("button")).find((candidate) => {
-      const text = normalize(candidate.textContent ?? "");
-      return !candidate.disabled && isVisible(candidate) && text.includes(needle);
+      const searchableText = normalize(`${candidate.textContent ?? ""} ${candidate.getAttribute("aria-label") ?? ""}`);
+      return !candidate.disabled && isVisible(candidate) && searchableText.includes(needle);
     });
     if (!button) return false;
     button.scrollIntoView({ block: "center" });
@@ -821,8 +821,8 @@ async function waitForEnabledButtonByNormalizedText(page, normalizedNeedle, time
             .replace(/\u0110/g, "d")
             .toLowerCase();
         const button = Array.from(document.querySelectorAll("button")).find((candidate) => {
-          const text = normalize(candidate.textContent ?? "");
-          return text.includes(needle);
+          const searchableText = normalize(`${candidate.textContent ?? ""} ${candidate.getAttribute("aria-label") ?? ""}`);
+          return searchableText.includes(needle);
         });
         return button && !button.disabled ? true : false;
       }, normalizedNeedle),
