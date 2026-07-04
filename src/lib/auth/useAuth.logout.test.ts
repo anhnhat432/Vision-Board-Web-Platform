@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import type { User } from "firebase/auth";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const firebaseMock = vi.hoisted(() => {
   let currentUser: Pick<User, "uid"> | null = null;
@@ -104,6 +104,10 @@ function seedPlusBillingState(): void {
 
 describe("useAuth logout", () => {
   beforeEach(() => {
+    vi.stubEnv("VITE_FIREBASE_API_KEY", "test-api-key");
+    vi.stubEnv("VITE_FIREBASE_AUTH_DOMAIN", "test.firebaseapp.com");
+    vi.stubEnv("VITE_FIREBASE_PROJECT_ID", "vision-board-test");
+    vi.stubEnv("VITE_FIREBASE_APP_ID", "test-app-id");
     localStorage.clear();
     deleteAllUserData();
     firebaseMock.setCurrentUser(null);
@@ -114,6 +118,10 @@ describe("useAuth logout", () => {
     firebaseMock.registerWithEmail.mockReset();
     firebaseMock.subscribeAuthState.mockClear();
     firebaseMock.subscribeIdToken.mockClear();
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   it("clears billing, entitlement sync, and UID-scoped mutation queue before signing out", async () => {
