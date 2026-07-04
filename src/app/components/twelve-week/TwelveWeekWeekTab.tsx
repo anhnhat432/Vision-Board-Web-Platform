@@ -470,7 +470,7 @@ export function TwelveWeekWeekTab({
             </StaggerSection>
           )}
 
-          {!reviewIsCompleted && canShowFormReview && (
+          {showForm && canShowFormReview && (
             <StaggerSection>
               <WeeklyReviewForm
                 system={system}
@@ -515,7 +515,7 @@ export function TwelveWeekWeekTab({
             </StaggerSection>
           )}
 
-          {summaryReview && (
+          {summaryReview && !isEditingReview && (
             <StaggerSection>
               <WeeklyReviewSummary
                 system={system}

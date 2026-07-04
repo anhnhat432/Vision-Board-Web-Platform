@@ -759,15 +759,33 @@ async function tryClickButtonByNormalizedText(page, normalizedNeedle) {
         .replace(/\u0111/g, "d")
         .replace(/\u0110/g, "d")
         .toLowerCase();
+    const isVisible = (element) => {
+      if (!element || element.closest("[hidden], [aria-hidden='true']")) return false;
+      const style = window.getComputedStyle(element);
+      const rect = element.getBoundingClientRect();
+      return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
+    };
     const button = Array.from(document.querySelectorAll("button")).find((candidate) => {
       const text = normalize(candidate.textContent ?? "");
-      return !candidate.disabled && text.includes(needle);
+      return !candidate.disabled && isVisible(candidate) && text.includes(needle);
     });
     if (!button) return false;
     button.scrollIntoView({ block: "center" });
     button.click();
     return true;
   }, normalizedNeedle);
+}
+
+async function waitForWeeklyReviewFormVisible(page, label) {
+  try {
+    await waitForCondition(label, () => hasVisibleWeeklyReviewForm(page));
+  } catch (error) {
+    throw new Error(
+      `${error.message}\nWeekly review surface: ${JSON.stringify(
+        await readWeeklyReviewSurface(page).catch(() => null),
+      )}\n${await getDiagnostics(page)}`,
+    );
+  }
 }
 
 async function clickButtonByNormalizedText(page, normalizedNeedle) {
@@ -1264,12 +1282,12 @@ async function ensureWeeklyReviewFormVisible(page) {
   if (await hasVisibleWeeklyReviewForm(page)) return;
 
   if (await tryClickButtonByNormalizedText(page, "bat dau review som")) {
-    await waitForCondition("weekly review flow after start-early action", () => hasVisibleWeeklyReviewForm(page));
+    await waitForWeeklyReviewFormVisible(page, "weekly review flow after start-early action");
     return;
   }
 
   if (await tryClickButtonByNormalizedText(page, "chinh sua danh gia")) {
-    await waitForCondition("weekly review flow after edit action", () => hasVisibleWeeklyReviewForm(page));
+    await waitForWeeklyReviewFormVisible(page, "weekly review flow after edit action");
     return;
   }
 
@@ -1282,7 +1300,7 @@ async function ensureWeeklyReviewFormVisible(page) {
   if (await hasVisibleWeeklyReviewForm(page)) return;
 
   if (await tryClickButtonByNormalizedText(page, "bat dau review som")) {
-    await waitForCondition("weekly review flow after prepared start-early action", () => hasVisibleWeeklyReviewForm(page));
+    await waitForWeeklyReviewFormVisible(page, "weekly review flow after prepared start-early action");
     return;
   }
 

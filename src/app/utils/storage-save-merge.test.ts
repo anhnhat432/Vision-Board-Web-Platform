@@ -94,6 +94,14 @@ const dailyCheckIn: UniversalDailyCheckIn = {
   updatedCount: 1,
 };
 
+function createDailyCheckInVersion(version: number): UniversalDailyCheckIn {
+  return {
+    ...dailyCheckIn,
+    optionalNote: `Local check-in ${version}`,
+    updatedCount: version,
+  };
+}
+
 const weeklyReview: UniversalWeeklyReview = {
   weekNumber: 1,
   leadCompletionPercent: 100,
@@ -134,6 +142,28 @@ describe("saveUserData merge protection", () => {
     expect(savedSystem?.dailyCheckIns).toEqual([dailyCheckIn]);
     expect(savedSystem?.weeklyReviews).toHaveLength(1);
     expect(savedSystem?.weeklyReviews[0]).toEqual(expect.objectContaining(weeklyReview));
+  });
+
+  it("keeps only the five latest same-day check-ins when merging stale local records", () => {
+    const baseData = createUserData(
+      createSystem({
+        dailyCheckIns: [6, 5, 4, 3, 2, 1].map(createDailyCheckInVersion),
+      }),
+    );
+    expect(saveUserData(baseData)).toBe(true);
+
+    const prunedSave = clone(getUserData());
+    prunedSave.goals[0]!.twelveWeekSystem!.dailyCheckIns = [7, 6, 5, 4, 3].map(createDailyCheckInVersion);
+    expect(saveUserData(prunedSave)).toBe(true);
+
+    const savedSystem = getUserData().goals[0]!.twelveWeekSystem;
+    expect(savedSystem?.dailyCheckIns.map((checkIn) => checkIn.optionalNote)).toEqual([
+      "Local check-in 7",
+      "Local check-in 6",
+      "Local check-in 5",
+      "Local check-in 4",
+      "Local check-in 3",
+    ]);
   });
 
   it("allows an intentional new cycle save to clear old execution records", () => {
