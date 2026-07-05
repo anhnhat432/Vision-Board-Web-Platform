@@ -15,46 +15,46 @@
  * ───────────────────────────────────────────────────────────── */
 :root {
   /* Green palette */
-  --green-950: #152B25;
-  --green-900: #1E3D35;
-  --green-800: #264E43;
-  --green-700: #2A5447;   /* accent base - deeper, calmer forest green */
-  --green-600: #3A7261;
-  --green-100: #E8F0EC;   /* accent-soft base */
-  --green-050: #F2F7F4;   /* accent-subtle base */
+  --green-950: #152b25;
+  --green-900: #1e3d35;
+  --green-800: #264e43;
+  --green-700: #2a5447; /* accent base - deeper, calmer forest green */
+  --green-600: #3a7261;
+  --green-100: #e8f0ec; /* accent-soft base */
+  --green-050: #f2f7f4; /* accent-subtle base */
 
   /* Terracotta palette */
-  --terra-800: #6E2D11;   /* deepest active warm */
-  --terra-700: #8A4220;   /* hover for warm */
-  --terra-600: #A8522F;   /* warm base — deeper terracotta to satisfy ≥4.5:1 vs white & warm-soft */
-  --terra-100: #FCEDE5;   /* warm-soft base */
-  --terra-050: #FEF6F1;   /* warm-subtle base */
+  --terra-800: #6e2d11; /* deepest active warm */
+  --terra-700: #8a4220; /* hover for warm */
+  --terra-600: #a8522f; /* warm base — deeper terracotta to satisfy ≥4.5:1 vs white & warm-soft */
+  --terra-100: #fcede5; /* warm-soft base */
+  --terra-050: #fef6f1; /* warm-subtle base */
 
   /* Neutral palette */
-  --neutral-950: #1A1A1A;
-  --neutral-700: #4A4A4A;
-  --neutral-500: #6B6B6B;
-  --neutral-400: #767068;   /* warm taupe — control affordance neutral, ≥3:1 vs white */
-  --neutral-300: #B8B2AA;
-  --neutral-200: #D4CFC8;
-  --neutral-150: #EAE5DB;   /* slightly warmer, softer border */
-  --neutral-050: #FCFAF7;   /* brighter neutral background */
-  --neutral-000: #FFFFFF;
+  --neutral-950: #1a1a1a;
+  --neutral-700: #4a4a4a;
+  --neutral-500: #6b6b6b;
+  --neutral-400: #767068; /* warm taupe — control affordance neutral, ≥3:1 vs white */
+  --neutral-300: #b8b2aa;
+  --neutral-200: #d4cfc8;
+  --neutral-150: #eae5db; /* slightly warmer, softer border */
+  --neutral-050: #fcfaf7; /* brighter neutral background */
+  --neutral-000: #ffffff;
 
   /* Life areas accents (Light Mode) */
-  --color-career-accent: #2563EB;
-  --color-finance-accent: #E7A400;
-  --color-health-accent: #16A34A;
-  --color-education-accent: #7C5CFC;
-  --color-relationships-accent: #E8456B;
-  --color-family-accent: #0E9F8E;
-  --color-personal-growth-accent: #EA7A2B;
-  --color-leisure-accent: #2BA8E0;
+  --color-career-accent: #2563eb;
+  --color-finance-accent: #e7a400;
+  --color-health-accent: #16a34a;
+  --color-education-accent: #7c5cfc;
+  --color-relationships-accent: #e8456b;
+  --color-family-accent: #0e9f8e;
+  --color-personal-growth-accent: #ea7a2b;
+  --color-leisure-accent: #2ba8e0;
   /* Status palette */
-  --status-green:  #3A7D5E;
-  --status-amber:  #9A6308;   /* deeper amber — ≥4.5:1 vs white */
-  --status-red:    #B84040;
-  --status-blue:   #3A6B9E;
+  --status-green: #3a7d5e;
+  --status-amber: #9a6308; /* deeper amber — ≥4.5:1 vs white */
+  --status-red: #b84040;
+  --status-blue: #3a6b9e;
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -63,14 +63,16 @@
  * ───────────────────────────────────────────────────────────── */
 :root {
   /* — Font families — */
-  --app-font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", sans-serif;
+  --app-font-sans:
+    "Be Vietnam Pro", ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
   --app-font-serif: "Bricolage Grotesque", system-ui, sans-serif;
-  --app-font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
+  --app-font-mono:
+    "JetBrains Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
 
   /* — Spacing & shape — */
   --app-radius-card: 18px;
-  --app-radius-card-lg: 24px;
+  --app-radius-card-lg: 22px; /* Match reference: hero card 22px */
   --app-radius-pill: 9999px;
   --app-radius-input: 10px;
   --app-radius-control: 12px;
@@ -80,45 +82,47 @@
   --app-card-padding-mobile: 20px;
 
   /* — Background — */
-  --app-bg:          #F7F4ED;  /* nền trang chính */
-  --app-bg-subtle:   #F2EFE6;             /* section lồng trong card */
-  --app-surface:     #FFFFFF;  /* card, panel, modal */
-  --app-overlay:     rgba(26, 26, 26, 0.40); /* modal backdrop */
+  --app-bg: #f2efe6; /* nền trang chính */
+  --app-bg-subtle: #faf8f3; /* section lồng trong card */
+  --app-surface: #ffffff; /* card, panel, modal */
+  --app-overlay: rgba(26, 26, 26, 0.4); /* modal backdrop */
 
   /* — Text — */
-  --app-ink:         #17150F;  /* body, label chính */
-  --app-ink-soft:    #5C574B;  /* description, sub-label */
-  --app-ink-muted:   var(--neutral-500);  /* placeholder, caption (AA contrast) */
+  --app-ink: #17150f; /* body, label chính */
+  --app-ink-soft: #5c574b; /* description, sub-label */
+  --app-ink-muted: var(--neutral-500); /* placeholder, caption (AA contrast) */
   --app-ink-disabled: var(--neutral-300); /* input/button disabled */
   --app-ink-on-accent: var(--neutral-000); /* text trên nền accent */
-  --app-ink-on-warm:  var(--neutral-000); /* text trên nền warm */
-  --app-ink-link:    #0C5E3A;    /* link inline */
+  --app-ink-on-warm: var(--neutral-000); /* text trên nền warm */
+  --app-ink-link: #0c5e3a; /* link inline */
 
   /* — Border / Divider — */
-  --app-line:        rgba(23,21,15,0.08);  /* border mặc định (decorative) */
-  --app-line-strong: var(--neutral-400);  /* control affordance ≥3:1 vs surface */
+  --app-line: rgba(23, 21, 15, 0.08); /* border mặc định (decorative) */
+  --app-line-strong: var(
+    --neutral-400
+  ); /* control affordance ≥3:1 vs surface */
 
   /* — Accent (Forest Green) — Execution / Action / Progress — */
-  --app-accent:        #0C5E3A;
-  --app-accent-hover:  #0A4E30;
-  --app-accent-active: #083D26;
-  --app-accent-soft:   #E4EEDF;   /* pill bg, tag bg */
-  --app-accent-subtle: #EDF7E0;   /* row hover, selected row bg */
+  --app-accent: #0c5e3a;
+  --app-accent-hover: #0a4e30;
+  --app-accent-active: #083d26;
+  --app-accent-soft: #e4eedf; /* pill bg, tag bg */
+  --app-accent-subtle: #edf7e0; /* row hover, selected row bg */
 
   /* — Warm (Terracotta) — CHỈNH DÙNG TRONG REFLECTION CONTEXT — */
-  --app-warm:          var(--terra-600);
-  --app-warm-hover:    var(--terra-700);
-  --app-warm-active:   var(--terra-800);
-  --app-warm-soft:     var(--terra-100);   /* pill bg trong reflection */
-  --app-warm-subtle:   var(--terra-050);   /* background nhẹ trong reflection */
-  --app-warm-strong:   #5C3A2E;            /* dark text trong warm context */
-  --app-warm-border:   #ECD4C6;            /* border warm-tinted */
+  --app-warm: var(--terra-600);
+  --app-warm-hover: var(--terra-700);
+  --app-warm-active: var(--terra-800);
+  --app-warm-soft: var(--terra-100); /* pill bg trong reflection */
+  --app-warm-subtle: var(--terra-050); /* background nhẹ trong reflection */
+  --app-warm-strong: #5c3a2e; /* dark text trong warm context */
+  --app-warm-border: #ecd4c6; /* border warm-tinted */
 
   /* — Status — */
   --app-status-success: var(--status-green);
   --app-status-warning: var(--status-amber);
-  --app-status-error:   var(--status-red);
-  --app-status-info:    var(--status-blue);
+  --app-status-error: var(--status-red);
+  --app-status-info: var(--status-blue);
 
   /* — Focus Ring —
    * Solid 3px ring, alpha 0.85 → visible color giữ contrast ≥3:1 trên surface/bg
@@ -127,43 +131,57 @@
   --app-focus-ring-warm: 0 0 0 3px rgba(168, 82, 47, 0.85);
 
   /* — Highlight / Energy — CHỈ dùng cho highlight/nền tối, KHÔNG làm chữ trên nền sáng — */
-  --app-highlight: #C6F24E;
-  --app-energy:   #FF5C3E;
+  --app-highlight: #c6f24e;
+  --app-energy: #ff5c3e;
 
   /* — Glassmorphism — */
   --app-glass-bg: rgba(255, 255, 255, 0.88);
   --app-glass-border: rgba(23, 21, 15, 0.08);
 
   /* — Gradients — */
-  --gradient-forest: linear-gradient(135deg, #0C5E3A 0%, #1E3D35 100%);
-  --gradient-terracotta: linear-gradient(135deg, var(--terra-600) 0%, var(--terra-800) 100%);
-  --gradient-aurora: linear-gradient(135deg, #E4EEDF 0%, #FCEDE5 50%, #E8F0EC 100%);
-  --gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.2) 100%);
+  --gradient-forest: linear-gradient(135deg, #0c5e3a 0%, #1e3d35 100%);
+  --gradient-terracotta: linear-gradient(
+    135deg,
+    var(--terra-600) 0%,
+    var(--terra-800) 100%
+  );
+  --gradient-aurora: linear-gradient(
+    135deg,
+    #e4eedf 0%,
+    #fcede5 50%,
+    #e8f0ec 100%
+  );
+  --gradient-glass: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.6) 0%,
+    rgba(255, 255, 255, 0.2) 100%
+  );
 
   /* — Elevation / Shadow — */
-  /* Neutral shadows, không màu accent/warm — giữ cảm giác nhẹ nhàng, trẻ trung */
+  /* Neutral shadows, warm-tinted — match reference rgba(23,21,15,...) */
   --app-shadow-sm:
-    0 1px 2px rgba(26, 26, 26, 0.04),
-    0 0 0 1px rgba(26, 26, 26, 0.01);
+    0 1px 2px rgba(23, 21, 15, 0.04), 0 0 0 1px rgba(23, 21, 15, 0.01);
   --app-shadow-md:
-    0 6px 16px -4px rgba(26, 26, 26, 0.06),
-    0 2px 6px -2px rgba(26, 26, 26, 0.03);
+    0 6px 16px -4px rgba(23, 21, 15, 0.08),
+    0 2px 6px -2px rgba(23, 21, 15, 0.04);
   --app-shadow-lg:
-    0 12px 32px -8px rgba(26, 26, 26, 0.08),
-    0 4px 12px -4px rgba(26, 26, 26, 0.03);
+    0 12px 32px -8px rgba(23, 21, 15, 0.12),
+    0 4px 12px -4px rgba(23, 21, 15, 0.04);
   --app-shadow-xl:
-     0 20px 48px -12px rgba(26, 26, 26, 0.10),
-     0 8px 20px -6px rgba(26, 26, 26, 0.04);
+    0 20px 48px -12px rgba(23, 21, 15, 0.16),
+    0 8px 20px -6px rgba(23, 21, 15, 0.06);
 
-  /* Bóng "thẻ giấy" mềm — dùng cho card lớn, hero, CTA editorial */
-  --app-shadow-card:
-     0 18px 40px -24px rgba(23, 21, 15, 0.18);
+  /* Bóng "thẻ giấy" mềm — dùng cho card lớn, hero, CTA editorial */
+  --app-shadow-card: 0 18px 40px -24px rgba(23, 21, 15, 0.18);
+
+  /* Focus rail shadow - match reference exact */
+  --app-shadow-focus-rail: 0 16px 36px -28px rgba(23, 21, 15, 0.3);
 
   /* — Energy Gradients — CHỈ dùng ở vùng cảm xúc (hero, vision board, achievement) — */
-  --grad-aspire: linear-gradient(135deg, #2A5447 0%, #3A7D5E 55%, #5BA590 100%);
-  --grad-celebrate: linear-gradient(135deg, #A8522F 0%, #D9A45A 100%);
-  --grad-vision: linear-gradient(160deg, #1E3D35 0%, #2A5447 60%, #6E2D11 140%);
-  --grad-surface: linear-gradient(180deg, #F7F4ED 0%, #EDF7E0 100%);
+  --grad-aspire: linear-gradient(135deg, #2a5447 0%, #3a7d5e 55%, #5ba590 100%);
+  --grad-celebrate: linear-gradient(135deg, #a8522f 0%, #d9a45a 100%);
+  --grad-vision: linear-gradient(160deg, #1e3d35 0%, #2a5447 60%, #6e2d11 140%);
+  --grad-surface: linear-gradient(180deg, #f7f4ed 0%, #edf7e0 100%);
 }
 
 /* — Dark Mode Overrides — */
@@ -172,80 +190,73 @@ html.dark {
    * Accent sáng hơn để đủ contrast trên nền tối.
    * Warm giữ terracotta, sáng hơn nhẹ. */
 
-  --app-bg:          #1C1A15;
-  --app-bg-subtle:   #211F1A;
-  --app-surface:     #26231D;
-  --app-overlay:     rgba(0, 0, 0, 0.60);
+  --app-bg: #1c1a15;
+  --app-bg-subtle: #211f1a;
+  --app-surface: #26231d;
+  --app-overlay: rgba(0, 0, 0, 0.6);
 
   /* Life areas accents (Dark Mode) */
-    --color-career-accent: #60a5fa;
-    --color-finance-accent: #fbbf24;
-    --color-health-accent: #34d399;
-    --color-education-accent: #a78bfa;
-    --color-relationships-accent: #fb7185;
-    --color-family-accent: #2dd4bf;
-    --color-personal-growth-accent: #fb923c;
-    --color-leisure-accent: #38bdf8;
-  --app-ink:         #F2EDE5;
-  --app-ink-soft:    #C8C2B5;
-  --app-ink-muted:   #A39B8C;  /* AA contrast ~6.9:1 trên #1C1A15 */
-  --app-ink-disabled: #6B6358;
-  --app-ink-on-accent: #0A1F18;  /* dark forest text trên accent sáng — ≥4.5:1 cho mọi accent state */
-  --app-ink-on-warm:  #1A0E06;   /* dark warm-brown text trên warm sáng — ≥4.5:1 cho mọi warm state */
-  --app-ink-link:    #2FA36B;
+  --color-career-accent: #60a5fa;
+  --color-finance-accent: #fbbf24;
+  --color-health-accent: #34d399;
+  --color-education-accent: #a78bfa;
+  --color-relationships-accent: #fb7185;
+  --color-family-accent: #2dd4bf;
+  --color-personal-growth-accent: #fb923c;
+  --color-leisure-accent: #38bdf8;
+  --app-ink: #f2ede5;
+  --app-ink-soft: #c8c2b5;
+  --app-ink-muted: #a39b8c; /* AA contrast ~6.9:1 trên #1C1A15 */
+  --app-ink-disabled: #6b6358;
+  --app-ink-on-accent: #0a1f18; /* dark forest text trên accent sáng — ≥4.5:1 cho mọi accent state */
+  --app-ink-on-warm: #1a0e06; /* dark warm-brown text trên warm sáng — ≥4.5:1 cho mọi warm state */
+  --app-ink-link: #2fa36b;
 
-  --app-line:        #3A342B;
-  --app-line-strong: #87796A;  /* lighter neutral để control affordance ≥3:1 vs dark surface */
+  --app-line: #3a342b;
+  --app-line-strong: #87796a; /* lighter neutral để control affordance ≥3:1 vs dark surface */
 
-  --app-accent:        #5BA590;  /* sáng hơn để text accent ≥4.5:1 trên accent-soft (dark) */
-  --app-accent-hover:  #6FB7A2;
-  --app-accent-active: #4F9482;
-  --app-accent-soft:   rgba(91, 165, 144, 0.16);
+  --app-accent: #5ba590; /* sáng hơn để text accent ≥4.5:1 trên accent-soft (dark) */
+  --app-accent-hover: #6fb7a2;
+  --app-accent-active: #4f9482;
+  --app-accent-soft: rgba(91, 165, 144, 0.16);
   --app-accent-subtle: rgba(91, 165, 144, 0.08);
 
-  --app-warm:          #E89878;
-  --app-warm-hover:    #D98060;
-  --app-warm-active:   #D27148;  /* lighter để dark text trên warm-active vẫn ≥4.5:1 */
-  --app-warm-soft:     #3A2820;
-  --app-warm-subtle:   #2E201A;
-  --app-warm-strong:   #F8D5C2;
-  --app-warm-border:   #5C3A2E;
+  --app-warm: #e89878;
+  --app-warm-hover: #d98060;
+  --app-warm-active: #d27148; /* lighter để dark text trên warm-active vẫn ≥4.5:1 */
+  --app-warm-soft: #3a2820;
+  --app-warm-subtle: #2e201a;
+  --app-warm-strong: #f8d5c2;
+  --app-warm-border: #5c3a2e;
 
   /* — Status (dark mode brighter để ≥4.5:1 vs surface tối) — */
-  --app-status-success: #6BB58A;
-  --app-status-warning: #D9A45A;
-  --app-status-error:   #E07878;
-  --app-status-info:    #7AA8D9;
+  --app-status-success: #6bb58a;
+  --app-status-warning: #d9a45a;
+  --app-status-error: #e07878;
+  --app-status-info: #7aa8d9;
 
   /* — Focus Ring (dark mode) — solid 3px alpha 0.85 trên màu sáng hơn */
   --app-focus-ring: 0 0 0 3px rgba(47, 163, 107, 0.85);
   --app-focus-ring-warm: 0 0 0 3px rgba(232, 152, 120, 0.85);
 
-  --app-shadow-sm:
-    0 1px 3px rgba(0, 0, 0, 0.20),
-    0 1px 2px rgba(0, 0, 0, 0.15);
+  --app-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.15);
   --app-shadow-md:
-    0 4px 12px rgba(0, 0, 0, 0.28),
-    0 2px 4px rgba(0, 0, 0, 0.16);
-  --app-shadow-lg:
-    0 8px 24px rgba(0, 0, 0, 0.36),
-    0 4px 8px rgba(0, 0, 0, 0.20);
+    0 4px 12px rgba(0, 0, 0, 0.28), 0 2px 4px rgba(0, 0, 0, 0.16);
+  --app-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.36), 0 4px 8px rgba(0, 0, 0, 0.2);
   --app-shadow-xl:
-      0 16px 40px rgba(0, 0, 0, 0.44),
-      0 8px 16px rgba(0, 0, 0, 0.24);
+    0 16px 40px rgba(0, 0, 0, 0.44), 0 8px 16px rgba(0, 0, 0, 0.24);
 
-  --app-shadow-card:
-      0 14px 32px -20px rgba(0, 0, 0, 0.48);
+  --app-shadow-card: 0 14px 32px -20px rgba(0, 0, 0, 0.48);
 
   /* — Highlight & Energy (dark mode) — sáng hơn để nổi trên nền tối */
-  --app-highlight: #C6F24E;
-  --app-energy:    #FF6B4F;
+  --app-highlight: #c6f24e;
+  --app-energy: #ff6b4f;
 
   /* — Energy Gradients (dark mode) — */
-  --grad-aspire: linear-gradient(135deg, #143027 0%, #1E4A37 55%, #2FA36B 100%);
-  --grad-celebrate: linear-gradient(135deg, #6E2D11 0%, #E89878 100%);
-  --grad-vision: linear-gradient(160deg, #0F1F1A 0%, #1C1A15 60%, #3A2820 140%);
-  --grad-surface: linear-gradient(180deg, #1C1A15 0%, #211F1A 100%);
+  --grad-aspire: linear-gradient(135deg, #143027 0%, #1e4a37 55%, #2fa36b 100%);
+  --grad-celebrate: linear-gradient(135deg, #6e2d11 0%, #e89878 100%);
+  --grad-vision: linear-gradient(160deg, #0f1f1a 0%, #1c1a15 60%, #3a2820 140%);
+  --grad-surface: linear-gradient(180deg, #1c1a15 0%, #211f1a 100%);
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -255,75 +266,75 @@ html.dark {
  * ───────────────────────────────────────────────────────────── */
 :root {
   /* — Button: Primary (Accent) — */
-  --btn-primary-bg:          var(--app-accent);
-  --btn-primary-bg-hover:    var(--app-accent-hover);
-  --btn-primary-bg-active:   var(--app-accent-active);
+  --btn-primary-bg: var(--app-accent);
+  --btn-primary-bg-hover: var(--app-accent-hover);
+  --btn-primary-bg-active: var(--app-accent-active);
   --btn-primary-bg-disabled: var(--app-ink-disabled);
-  --btn-primary-text:        var(--app-ink-on-accent);
-  --btn-primary-shadow:      var(--app-shadow-sm);
+  --btn-primary-text: var(--app-ink-on-accent);
+  --btn-primary-shadow: var(--app-shadow-sm);
 
   /* — Button: Ghost — */
-  --btn-ghost-bg:            transparent;
-  --btn-ghost-bg-hover:      var(--app-accent-subtle);
-  --btn-ghost-bg-active:     var(--app-accent-soft);
-  --btn-ghost-text:          var(--app-accent);
-  --btn-ghost-border:        var(--app-line-strong);  /* control affordance ≥3:1 */
+  --btn-ghost-bg: transparent;
+  --btn-ghost-bg-hover: var(--app-accent-subtle);
+  --btn-ghost-bg-active: var(--app-accent-soft);
+  --btn-ghost-text: var(--app-accent);
+  --btn-ghost-border: var(--app-line-strong); /* control affordance ≥3:1 */
 
   /* — Button: Outline — */
-  --btn-outline-bg:          var(--app-surface);
-  --btn-outline-bg-hover:    var(--app-accent-subtle);
-  --btn-outline-border:      var(--app-line-strong);
-  --btn-outline-text:        var(--app-ink);
+  --btn-outline-bg: var(--app-surface);
+  --btn-outline-bg-hover: var(--app-accent-subtle);
+  --btn-outline-border: var(--app-line-strong);
+  --btn-outline-text: var(--app-ink);
 
   /* — Button: Destructive — */
-  --btn-danger-bg:           var(--app-status-error);
-  --btn-danger-bg-hover:     #A03636;
-  --btn-danger-text:         #FFFFFF;
+  --btn-danger-bg: var(--app-status-error);
+  --btn-danger-bg-hover: #a03636;
+  --btn-danger-text: #ffffff;
 
   /* — Input — */
-  --input-bg:                var(--app-surface);
-  --input-border:            var(--app-line-strong);  /* control affordance ≥3:1 */
-  --input-border-focus:      var(--app-accent);
-  --input-border-error:      var(--app-status-error);
-  --input-text:              var(--app-ink);
-  --input-placeholder:       var(--app-ink-muted);
-  --input-bg-disabled:       var(--app-bg-subtle);
-  --input-text-disabled:     var(--app-ink-disabled);
-  --input-focus-ring:        var(--app-focus-ring);
+  --input-bg: var(--app-surface);
+  --input-border: var(--app-line-strong); /* control affordance ≥3:1 */
+  --input-border-focus: var(--app-accent);
+  --input-border-error: var(--app-status-error);
+  --input-text: var(--app-ink);
+  --input-placeholder: var(--app-ink-muted);
+  --input-bg-disabled: var(--app-bg-subtle);
+  --input-text-disabled: var(--app-ink-disabled);
+  --input-focus-ring: var(--app-focus-ring);
 
   /* — Card — */
-  --card-bg:                 var(--app-surface);
-  --card-border:             var(--app-line);
-  --card-shadow:             var(--app-shadow-sm);
-  --card-radius:             var(--app-radius-card);
-  --card-padding:            var(--app-card-padding);
+  --card-bg: var(--app-surface);
+  --card-border: var(--app-line);
+  --card-shadow: var(--app-shadow-sm);
+  --card-radius: var(--app-radius-card);
+  --card-padding: var(--app-card-padding);
 
   /* — Progress — */
-  --progress-track:          var(--app-accent-soft);
-  --progress-fill:           var(--app-accent);
-  --progress-label:          var(--app-ink-soft);
+  --progress-track: var(--app-accent-soft);
+  --progress-fill: var(--app-accent);
+  --progress-label: var(--app-ink-soft);
 
   /* — Tag / Pill — */
-  --tag-accent-bg:           var(--app-accent-soft);
-  --tag-accent-text:         var(--app-accent);
-  --tag-neutral-bg:          var(--app-bg-subtle);
-  --tag-neutral-text:        var(--app-ink-soft);
+  --tag-accent-bg: var(--app-accent-soft);
+  --tag-accent-text: var(--app-accent);
+  --tag-neutral-bg: var(--app-bg-subtle);
+  --tag-neutral-text: var(--app-ink-soft);
 
   /* — Reflection Card (Warm Context) —
    * Chỉ dùng những token này trong Reflection/Review screens.
    * Tuyệt đối không dùng trong Execution/Goal/Plan screens. */
-  --reflection-bg:           var(--app-surface);
-  --reflection-border:       var(--app-warm-border);
-  --reflection-accent-bg:    var(--app-warm-soft);
-  --reflection-prompt-text:  var(--app-warm);
-  --reflection-prompt-font:  var(--app-font-serif);
-  --reflection-btn-bg:       var(--app-warm);
-  --reflection-btn-hover:    var(--app-warm-hover);
-  --reflection-btn-active:   var(--app-warm-active);
-  --reflection-btn-text:     var(--app-ink-on-warm);
-  --reflection-tag-bg:       var(--app-warm-soft);
-  --reflection-tag-text:     var(--app-warm-strong);
-  --reflection-focus-ring:   var(--app-focus-ring-warm);
+  --reflection-bg: var(--app-surface);
+  --reflection-border: var(--app-warm-border);
+  --reflection-accent-bg: var(--app-warm-soft);
+  --reflection-prompt-text: var(--app-warm);
+  --reflection-prompt-font: var(--app-font-serif);
+  --reflection-btn-bg: var(--app-warm);
+  --reflection-btn-hover: var(--app-warm-hover);
+  --reflection-btn-active: var(--app-warm-active);
+  --reflection-btn-text: var(--app-ink-on-warm);
+  --reflection-tag-bg: var(--app-warm-soft);
+  --reflection-tag-text: var(--app-warm-strong);
+  --reflection-focus-ring: var(--app-focus-ring-warm);
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -336,7 +347,7 @@ html.dark {
  * mục tiêu contrast.
  * ───────────────────────────────────────────────────────────── */
 html.dark {
-  --btn-danger-bg: #B84040; /* ~5.19:1 vs #FFFFFF — khớp light mode */
+  --btn-danger-bg: #b84040; /* ~5.19:1 vs #FFFFFF — khớp light mode */
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -345,59 +356,59 @@ html.dark {
  * ───────────────────────────────────────────────────────────── */
 @theme inline {
   /* — App brand colors — */
-  --color-app-bg:            var(--app-bg);
-  --color-app-bg-subtle:     var(--app-bg-subtle);
-  --color-app-surface:       var(--app-surface);
+  --color-app-bg: var(--app-bg);
+  --color-app-bg-subtle: var(--app-bg-subtle);
+  --color-app-surface: var(--app-surface);
 
-  --color-app-ink:           var(--app-ink);
-  --color-app-ink-soft:      var(--app-ink-soft);
-  --color-app-ink-muted:     var(--app-ink-muted);
-  --color-app-ink-disabled:  var(--app-ink-disabled);
-  --color-app-ink-link:      var(--app-ink-link);
+  --color-app-ink: var(--app-ink);
+  --color-app-ink-soft: var(--app-ink-soft);
+  --color-app-ink-muted: var(--app-ink-muted);
+  --color-app-ink-disabled: var(--app-ink-disabled);
+  --color-app-ink-link: var(--app-ink-link);
 
-  --color-app-line:          var(--app-line);
-  --color-app-line-strong:   var(--app-line-strong);
+  --color-app-line: var(--app-line);
+  --color-app-line-strong: var(--app-line-strong);
 
-  --color-app-accent:        var(--app-accent);
-  --color-app-accent-hover:  var(--app-accent-hover);
-  --color-app-accent-soft:   var(--app-accent-soft);
+  --color-app-accent: var(--app-accent);
+  --color-app-accent-hover: var(--app-accent-hover);
+  --color-app-accent-soft: var(--app-accent-soft);
   --color-app-accent-subtle: var(--app-accent-subtle);
 
   --color-app-highlight: var(--app-highlight);
-  --color-app-energy:   var(--app-energy);
+  --color-app-energy: var(--app-energy);
 
-  --color-app-highlight:     var(--app-highlight);
-  --color-app-energy:        var(--app-energy);
+  --color-app-highlight: var(--app-highlight);
+  --color-app-energy: var(--app-energy);
 
-  --color-app-warm:          var(--app-warm);
-  --color-app-warm-hover:    var(--app-warm-hover);
-  --color-app-warm-soft:     var(--app-warm-soft);
-  --color-app-warm-subtle:   var(--app-warm-subtle);
-  --color-app-warm-strong:   var(--app-warm-strong);
-  --color-app-warm-border:   var(--app-warm-border);
+  --color-app-warm: var(--app-warm);
+  --color-app-warm-hover: var(--app-warm-hover);
+  --color-app-warm-soft: var(--app-warm-soft);
+  --color-app-warm-subtle: var(--app-warm-subtle);
+  --color-app-warm-strong: var(--app-warm-strong);
+  --color-app-warm-border: var(--app-warm-border);
 
   --color-app-status-success: var(--app-status-success);
   --color-app-status-warning: var(--app-status-warning);
-  --color-app-status-error:   var(--app-status-error);
-  --color-app-status-info:    var(--app-status-info);
+  --color-app-status-error: var(--app-status-error);
+  --color-app-status-info: var(--app-status-info);
 
   /* — Font — */
-  --font-sans:  var(--app-font-sans);
+  --font-sans: var(--app-font-sans);
   --font-serif: var(--app-font-serif);
-  --font-mono:  var(--app-font-mono);
+  --font-mono: var(--app-font-mono);
 
   /* — Shape — */
-  --radius-card:    var(--app-radius-card);
+  --radius-card: var(--app-radius-card);
   --radius-card-lg: var(--app-radius-card-lg);
-  --radius-pill:    var(--app-radius-pill);
-  --radius-input:   var(--app-radius-input);
+  --radius-pill: var(--app-radius-pill);
+  --radius-input: var(--app-radius-input);
   --radius-control: var(--app-radius-control);
 
   /* — Shadow — */
-  --shadow-app-sm:   var(--app-shadow-sm);
-  --shadow-app-md:   var(--app-shadow-md);
-  --shadow-app-lg:   var(--app-shadow-lg);
-  --shadow-app-xl:   var(--app-shadow-xl);
+  --shadow-app-sm: var(--app-shadow-sm);
+  --shadow-app-md: var(--app-shadow-md);
+  --shadow-app-lg: var(--app-shadow-lg);
+  --shadow-app-xl: var(--app-shadow-xl);
   --shadow-app-card: var(--app-shadow-card);
 
   /* — Glass — */

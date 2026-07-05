@@ -470,7 +470,7 @@ function GoalTrackerContent({
   }, [goalsWithMetadata]);
 
   return (
-    <div className="mx-auto max-w-[1100px] px-4 pt-6 pb-16 sm:px-6 lg:px-9">
+    <div className="mx-auto max-w-[1100px] px-[26px] pt-[26px] pb-[64px] sm:px-[36px]">
       <style>{completedGoalStyle}</style>
       <UpgradePaywallDialog
         open={isGoalLimitPaywallOpen}
@@ -506,20 +506,20 @@ function GoalTrackerContent({
         </AlertDialogContent>
       </AlertDialog>
 
-      <div className="space-y-5">
+      <div className="space-y-[18px]">
         {/* HERO + FOCUS RAIL */}
-        <section className="grid gap-5 lg:grid-cols-[1fr_240px]">
+        <section className="grid gap-[18px] lg:grid-cols-[1fr_320px]">
           {/* Hero Section */}
           <section
             data-tour-id="goaltracker-hero"
-            className="relative grid overflow-hidden rounded-[var(--app-radius-card-lg)] border border-app-line bg-app-surface p-6 sm:p-[30px_32px] shadow-[var(--app-shadow-card)] lg:grid-cols-[minmax(0,1fr)_220px] lg:items-center lg:gap-6 dark:border-app-line/70 dark:bg-app-surface"
+            className="relative grid overflow-hidden rounded-[var(--app-radius-card-lg)] border border-app-line bg-app-surface p-6 sm:p-[30px_32px] shadow-[var(--app-shadow-card)] lg:grid-cols-[minmax(0,1fr)_190px] lg:items-center lg:gap-6 dark:border-app-line/70 dark:bg-app-surface"
           >
             <div className="min-w-0">
-              <div className="mb-3.5 flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-[0.14em] text-app-accent">
+              <div className="mb-3.5 flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.14em] text-app-accent">
                 <span className="h-1.5 w-1.5 rounded-full bg-app-accent" />
-                Mục tiêu của bạn
+                Mục tiêu
               </div>
-              <h1 className="font-serif text-[clamp(28px,3.2vw,40px)] font-extrabold leading-[1.04] tracking-[-0.02em] text-app-ink">
+              <h1 className="font-serif text-[clamp(26px,3vw,36px)] font-extrabold leading-[1.04] tracking-[-0.02em] text-app-ink">
                 Hành trình mục tiêu
               </h1>
               <p className="mt-3 max-w-[46ch] text-sm leading-[1.55] text-app-ink-soft">
@@ -528,7 +528,7 @@ function GoalTrackerContent({
               </p>
               <div className="mt-5 flex flex-col flex-wrap gap-2.5 sm:flex-row">
                 <Button
-                  className="inline-flex h-auto items-center justify-center gap-2 rounded-full bg-app-accent px-5 py-3 text-[13px] font-bold text-white shadow-[var(--app-shadow-sm)] transition-all duration-200 hover:bg-app-accent-hover sm:w-auto"
+                  className="inline-flex h-auto items-center justify-center gap-[9px] rounded-full bg-app-accent px-5 py-3 text-[13.5px] font-bold text-white shadow-[var(--app-shadow-sm)] transition-all duration-200 hover:bg-app-accent-hover sm:w-auto"
                   onClick={handleStartGuidedGoalFlow}
                 >
                   <Zap className="h-4 w-4" />
@@ -536,7 +536,7 @@ function GoalTrackerContent({
                 </Button>
                 <Button
                   variant="outline"
-                  className="inline-flex h-auto items-center justify-center gap-2 rounded-full border border-app-line bg-app-surface px-5 py-3 text-[13px] font-semibold text-app-ink shadow-none transition-all duration-200 hover:bg-app-bg sm:w-auto dark:border-app-line dark:bg-app-surface"
+                  className="inline-flex h-auto items-center justify-center gap-2 rounded-full border border-app-line/14 bg-app-surface px-5 py-3 text-[13.5px] font-semibold text-app-ink shadow-none transition-all duration-200 hover:bg-app-bg sm:w-auto dark:border-app-line dark:bg-app-surface"
                   onClick={handleStartDirectGoalFlow}
                 >
                   <Plus className="h-4 w-4" />
@@ -544,7 +544,7 @@ function GoalTrackerContent({
                 </Button>
               </div>
             </div>
-            <div className="relative mt-6 min-h-[170px] overflow-hidden rounded-[var(--app-radius-card)] lg:mt-0 lg:h-full">
+            <div className="relative mt-6 min-h-[170px] overflow-hidden rounded-2xl lg:mt-0 lg:h-full">
               <img
                 src="/vision_board_detail.png"
                 alt="Bản đồ tầm nhìn và mục tiêu"
@@ -556,12 +556,12 @@ function GoalTrackerContent({
           </section>
 
           {/* Focus Rail bên phải */}
-          <div className="flex flex-col gap-3.5">
+          <div className="flex flex-col gap-[14px]">
             {/* Tiêu điểm hôm nay mini */}
-            <div className="rounded-[var(--app-radius-card)] border border-app-line/60 bg-app-surface p-5 shadow-[var(--app-shadow-md)]">
+            <div className="rounded-[18px] border border-app-line bg-app-surface p-5 shadow-[0_16px_36px_-28px_rgba(23,21,15,0.3)]">
               <div className="flex items-center gap-2 mb-3.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-app-accent shrink-0" />
-                <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-app-accent">
+                <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-app-accent">
                   Tiêu điểm hôm nay
                 </p>
               </div>
@@ -580,18 +580,18 @@ function GoalTrackerContent({
                         {firstOpenTask ? (
                           <>
                             <span
-                              className="goaltracker-visual-text block text-[13px] font-semibold leading-[1.35] text-app-ink line-clamp-2"
+                              className="goaltracker-visual-text block text-[13.5px] font-semibold leading-[1.35] text-app-ink line-clamp-2"
                               data-visual-text={firstOpenTask.title}
                             />
                             <span
-                              className="goaltracker-visual-text mt-1 block text-xs text-app-ink-muted line-clamp-1"
+                              className="goaltracker-visual-text mt-1 block text-[11.5px] text-app-ink-muted line-clamp-1"
                               data-visual-text={goal.title}
                             />
                           </>
                         ) : (
                           <>
                             <span
-                              className="goaltracker-visual-text block text-[13px] font-semibold leading-[1.35] text-app-ink line-clamp-2"
+                              className="goaltracker-visual-text block text-[13.5px] font-semibold leading-[1.35] text-app-ink line-clamp-2"
                               data-visual-text={goal.title}
                             />
                             <p className="text-xs text-app-ink-muted mt-1">
@@ -611,7 +611,7 @@ function GoalTrackerContent({
             </div>
 
             {/* Quote card */}
-            <div className="rounded-[var(--app-radius-card)] bg-app-ink p-5 text-white relative overflow-hidden">
+            <div className="rounded-[18px] bg-app-ink px-[22px] py-[20px] text-white relative overflow-hidden">
               <div
                 className="absolute inset-0 pointer-events-none"
                 style={{
@@ -631,7 +631,7 @@ function GoalTrackerContent({
                 <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z" />
                 <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z" />
               </svg>
-              <p className="relative font-serif italic text-[13px] leading-relaxed text-app-bg">
+              <p className="relative font-serif italic text-[13.5px] leading-[1.5] text-app-bg">
                 Đừng cố gắng làm mọi thứ. Hãy làm những điều thực sự quan trọng một cách trọn vẹn nhất.
               </p>
             </div>
@@ -666,17 +666,11 @@ function GoalTrackerContent({
               placeholder="Tìm theo tên hoặc mô tả mục tiêu…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-11 w-full rounded-[var(--app-radius-control)] border border-app-line bg-app-surface pl-11 pr-4 text-[13px] text-app-ink placeholder:text-app-ink-muted focus:outline-none focus:ring-2 focus:ring-app-accent/20 focus:border-app-accent transition-all duration-200"
+              className="h-[46px] w-full rounded-[13px] border border-app-line bg-app-surface pl-11 pr-4 text-[13.5px] text-app-ink placeholder:text-app-ink-muted focus:outline-none focus:ring-2 focus:ring-app-accent/20 focus:border-app-accent transition-all duration-200"
             />
           </div>
 
-          <div className="relative w-full overflow-x-auto">
-            <GoalFilterChips activeFilter={activeFilter} setActiveFilter={setActiveFilter} counts={filterCounts} />
-            <div
-              className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-app-surface to-transparent sm:hidden"
-              aria-hidden="true"
-            />
-          </div>
+          <GoalFilterChips activeFilter={activeFilter} setActiveFilter={setActiveFilter} counts={filterCounts} />
         </div>
 
         {/* Danh sách mục tiêu */}
@@ -712,11 +706,14 @@ function GoalTrackerContent({
                   <div className="mx-1 mb-1 mt-2">
                     <div className="flex items-baseline justify-between gap-3">
                       <div>
-                        <h2 className="font-serif text-[clamp(22px,2.5vw,28px)] font-bold tracking-normal text-app-ink">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted mb-1">
+                          Chu kỳ 12 tuần
+                        </p>
+                        <h2 className="font-serif text-[20px] font-bold tracking-normal text-app-ink">
                           Mục tiêu đang chạy
                         </h2>
-                        <p className="mt-1 text-xs text-app-ink-muted">
-                          {displayTwelveWeekGoals.length} chu kỳ 12 tuần
+                        <p className="mt-0.5 text-[12.5px] text-app-ink-muted">
+                          {displayTwelveWeekGoals.length} mục tiêu
                         </p>
                       </div>
                     </div>
@@ -747,10 +744,10 @@ function GoalTrackerContent({
                   <div className="mx-1 mb-1 mt-2">
                     <div className="flex items-baseline justify-between gap-3">
                       <div>
-                        <h2 className="font-serif text-[clamp(22px,2.5vw,28px)] font-bold tracking-normal text-app-ink">
+                        <h2 className="font-serif text-[20px] font-bold tracking-normal text-app-ink">
                           Mục tiêu thường
                         </h2>
-                        <p className="mt-1 text-xs text-app-ink-muted">{displayStandardGoals.length} mục tiêu</p>
+                        <p className="mt-0.5 text-[12.5px] text-app-ink-muted">{displayStandardGoals.length} mục tiêu</p>
                       </div>
                     </div>
                   </div>

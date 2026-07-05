@@ -19,12 +19,12 @@ export function GoalFilterChips({ activeFilter, setActiveFilter, counts }: GoalF
     { id: "12week", label: "12 tuần", count: counts.twelveWeek },
     { id: "simple", label: "Mục tiêu thường", count: counts.simple },
     { id: "dueSoon", label: "Sắp đến hạn", count: counts.dueSoon },
-    { id: "atRisk", label: "Cần chỉnh nhịp 🌊", count: counts.atRisk },
+    { id: "atRisk", label: "Cần chỉnh nhịp", count: counts.atRisk },
     { id: "completed", label: "Hoàn thành", count: counts.completed },
   ] as const;
 
   return (
-    <div className="flex gap-2.5 overflow-x-auto pb-1 max-w-full [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div className="flex flex-wrap gap-[9px]">
       {chips.map((chip) => {
         const isActive = activeFilter === chip.id;
         return (
@@ -33,7 +33,7 @@ export function GoalFilterChips({ activeFilter, setActiveFilter, counts }: GoalF
             type="button"
             onClick={() => setActiveFilter(chip.id)}
             className={cn(
-              "inline-flex min-h-11 items-center justify-center px-3.5 py-1.5 text-xs font-bold rounded-full border transition-all duration-150 gap-2 shadow-[var(--app-shadow-sm)] shrink-0",
+              "inline-flex min-h-9 items-center justify-center px-[14px] py-2 text-[12.5px] font-semibold rounded-full border transition-all duration-150 gap-2 shrink-0",
               "active:scale-[0.97]",
               isActive
                 ? "border-app-accent bg-app-accent text-white"
@@ -43,7 +43,7 @@ export function GoalFilterChips({ activeFilter, setActiveFilter, counts }: GoalF
             <span>{chip.label}</span>
             <span
               className={cn(
-                "text-xs px-2 py-0.5 rounded-full font-bold tabular-nums",
+                "text-[11px] px-1.5 py-0.5 rounded-full font-bold tabular-nums",
                 isActive ? "bg-white/20 text-white" : "bg-app-bg text-app-ink-muted",
               )}
             >

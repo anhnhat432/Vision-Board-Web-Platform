@@ -43,20 +43,20 @@ export function GoalSummaryStrip({
       value: activeSystems,
       note: "đang chạy",
       icon: Zap,
-      iconBg: "bg-app-status-warning/10 text-app-status-warning",
+      iconBg: "bg-[#FFF8DE] text-[#E7B400]",
     },
     {
       title: "Cần chú ý",
       value: needsAttention,
       note: "quá hạn / review",
       icon: AlertTriangle,
-      iconBg: "bg-app-status-error/10 text-app-status-error",
+      iconBg: "bg-[#FFEDE8] text-[#FF5C3E]",
       attention: true,
     },
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 items-stretch" data-tour-id="goaltracker-summary">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-[14px] items-stretch" data-tour-id="goaltracker-summary">
       {items.map((item) => {
         const Icon = item.icon;
         const isFractionItem = (item as typeof item & { isFraction?: boolean }).isFraction;
@@ -70,15 +70,15 @@ export function GoalSummaryStrip({
           <div
             key={item.title}
             className={cn(
-              "h-full rounded-[var(--app-radius-card)] border p-5 flex flex-col transition-all duration-300",
+              "h-full rounded-[18px] border px-5 py-[18px] flex flex-col transition-all duration-300",
               isAttention && needsAttention > 0
-                ? "border-app-status-error/40 bg-app-status-error/[0.04] shadow-[var(--app-shadow-md)] hover:border-app-status-error/60 hover:shadow-[var(--app-shadow-lg)]"
-                : "border-app-line/30 bg-app-surface shadow-[var(--app-shadow-sm)] hover:border-app-accent/20 hover:shadow-[var(--app-shadow-md)]",
+                ? "border-app-status-error/40 bg-app-status-error/[0.04] hover:border-app-status-error/60 hover:shadow-[var(--app-shadow-md)]"
+                : "border-[rgba(23,21,15,0.08)] bg-app-surface hover:border-app-accent/20 hover:shadow-[var(--app-shadow-md)]",
             )}
           >
             <div
               className={cn(
-                "flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] mb-3",
+                "flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[10px] mb-3",
                 item.iconBg,
               )}
             >
@@ -86,15 +86,15 @@ export function GoalSummaryStrip({
             </div>
             <p
               className={cn(
-                "text-[11px] font-bold uppercase tracking-[0.1em] mb-1",
-                isAttention && needsAttention > 0 ? "text-app-status-error" : "text-app-ink-muted",
+                "text-[10px] font-bold uppercase tracking-[0.1em] mb-1",
+                isAttention && needsAttention > 0 ? "text-app-status-error" : "text-[#A8A296]",
               )}
             >
               {item.title}
             </p>
             <p
               className={cn(
-                "font-serif text-[clamp(24px,2.8vw,32px)] font-extrabold leading-none",
+                "font-serif text-[28px] font-extrabold leading-none",
                 isAttention && needsAttention > 0 ? "text-app-status-error" : "text-app-ink",
               )}
             >
@@ -110,7 +110,7 @@ export function GoalSummaryStrip({
             <p
               className={cn(
                 "mt-1.5 text-[11px] font-medium leading-tight",
-                isAttention && needsAttention > 0 ? "text-app-status-error/80" : "text-app-ink-muted",
+                isAttention && needsAttention > 0 ? "text-app-status-error/80" : "text-[#8C887C]",
               )}
             >
               {monoNoteNumVal !== undefined ? (

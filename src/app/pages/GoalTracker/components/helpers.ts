@@ -73,34 +73,34 @@ export const getGoalHealthStatus = (
 
   if (progress === 100) {
     return {
-      label: "Hoàn thành ✨",
+      label: "Hoàn thành",
       bgClass:
         "bg-app-status-success/10 text-app-status-success border border-app-status-success/30",
     };
   }
   if (isOverdue) {
     return {
-      label: "Cần chỉnh nhịp 🌊",
+      label: "Cần chỉnh nhịp",
       bgClass:
         "bg-app-status-warning/10 text-app-status-warning border border-app-status-warning/30",
     };
   }
   if (stats.reviewDueToday) {
     return {
-      label: "Đến ngày review 📋",
+      label: "Đến ngày review",
       bgClass:
         "bg-app-status-warning/10 text-app-status-warning border border-app-status-warning/30",
     };
   }
   if (isNearDeadline) {
     return {
-      label: "Sắp đến hạn ⏳",
+      label: "Sắp đến hạn",
       bgClass:
         "bg-app-status-warning/10 text-app-status-warning border border-app-status-warning/30",
     };
   }
   return {
-    label: "Đang đi đều 🌱",
+    label: "Đang đi đều",
     bgClass: "bg-app-status-info/10 text-app-status-info border border-app-status-info/30",
   };
 };

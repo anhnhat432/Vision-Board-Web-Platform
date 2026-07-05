@@ -216,7 +216,7 @@ export function AppSidebar({
                   <p className="truncate text-[13px] font-semibold text-white leading-tight">
                     {user.displayName ?? user.email ?? "Tài khoản"}
                   </p>
-                  <p className="truncate text-[10px] font-semibold text-[#8C887C] uppercase tracking-[0.06em] mt-0.5">
+                  <p className="truncate text-[10px] font-bold text-[#C6F24E] uppercase tracking-[0.08em] mt-0.5">
                     {user.planLabel}
                   </p>
                 </div>

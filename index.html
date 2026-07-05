@@ -25,11 +25,16 @@
     <meta name="apple-mobile-web-app-title" content="Dear Our Future" />
     <meta name="mobile-web-app-capable" content="yes" />
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
-    <link rel="alternate icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
+    <link
+      rel="alternate icon"
+      type="image/png"
+      sizes="192x192"
+      href="/favicon-192.png"
+    />
     <link rel="apple-touch-icon" href="/favicon-192.png" />
     <link rel="manifest" href="/manifest.json" />
     <script>
-      (function() {
+      (function () {
         if (window.location.pathname !== "/") return;
         var heroPreload = document.createElement("link");
         heroPreload.rel = "preload";
@@ -51,18 +56,20 @@
     <link rel="preconnect" href="https://apis.google.com" />
     <link rel="dns-prefetch" href="https://apis.google.com" />
     <link
-      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Be+Vietnam+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=JetBrains+Mono:wght@500;600&display=swap"
       rel="stylesheet"
     />
     <script>
-      (function() {
+      (function () {
         try {
           var stored = localStorage.getItem("dof_theme");
           var resolved = "light";
           if (stored === "dark") {
             resolved = "dark";
           } else if (stored === "system") {
-            resolved = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+            resolved = window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light";
           }
           if (resolved === "dark") {
             document.documentElement.classList.add("dark");

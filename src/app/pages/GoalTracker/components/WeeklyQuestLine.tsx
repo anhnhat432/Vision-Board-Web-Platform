@@ -20,14 +20,10 @@ export function WeeklyQuestLine({ system }: WeeklyQuestLineProps) {
   const { completedDays, targetDays } = quest;
 
   return (
-    <div className="bg-app-bg-subtle/30 rounded-lg p-2.5 border border-app-line/30 text-xs flex justify-between items-center transition-all duration-300">
-      <div className="min-w-0 flex-1 truncate">
-        <span className="font-bold text-app-ink-soft">Nhiệm vụ tuần:</span>{" "}
-        <span className="text-app-ink-muted">Hoàn thành {targetDays} ngày hành động</span>
-      </div>
-      <div className="font-bold text-app-accent shrink-0 pl-2 tabular-nums">
-        {completedDays}/{targetDays} ngày đã chốt
-      </div>
+    <div className="flex items-center justify-between text-[12px]">
+      <span className="text-app-ink-muted truncate">
+        Nhiệm vụ tuần: <span className="font-bold text-app-ink">{completedDays}/{targetDays} ngày đã chốt</span>
+      </span>
     </div>
   );
 }

@@ -85,21 +85,24 @@ export function TodayFocusCard({
   };
 
   return (
-    <div className="rounded-[var(--app-radius-card)] bg-app-accent-subtle dark:bg-app-accent-subtle border border-app-accent/20 p-5 sm:p-6 shadow-[var(--app-shadow-sm)] flex flex-col sm:flex-row sm:items-center justify-between gap-5 relative overflow-hidden">
+    <div className="rounded-[18px] bg-app-accent-subtle dark:bg-app-accent-subtle border border-app-accent/20 px-6 py-[22px] shadow-[var(--app-shadow-sm)] flex flex-col sm:flex-row sm:items-center justify-between gap-5 relative overflow-hidden">
       <div className="space-y-3 min-w-0 flex-1 z-10">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-[7px] mb-[10px]">
           <span className="w-1.5 h-1.5 rounded-full bg-app-accent shrink-0" />
-          <p className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-app-accent">
+          <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-app-accent">
             Tiêu điểm hôm nay
           </p>
         </div>
 
-        <div className="space-y-1">
-          <span
-            className="goaltracker-visual-text block text-base font-bold leading-snug text-app-ink break-words"
+        <div className="space-y-[5px]">
+          <h2
+            className="goaltracker-visual-text block text-[16px] font-bold leading-[1.4] text-app-ink break-words"
             data-visual-text={goal.title}
-          />
-          <p className="text-xs text-app-accent/80 dark:text-app-accent/70 font-semibold">
+            aria-label={goal.title}
+          >
+            <span className="sr-only">{goal.title}</span>
+          </h2>
+          <p className="text-[12px] text-[#5C7A5C] font-semibold">
             {isTwelveWeek ? `Tuần ${systemCurrentWeek ?? "-"}/12` : "Mục tiêu thường"} ·{" "}
             <span className="font-bold text-app-accent">{getLifeAreaLabel(goal.category)}</span>
           </p>
@@ -107,7 +110,7 @@ export function TodayFocusCard({
 
         <div className="flex items-start gap-2 pt-0.5 min-w-0">
           {showTaskCheckbox && firstOpenTask ? (
-            <div className="inline-flex items-center gap-2.5 rounded-[11px] border border-app-accent/20 bg-white/70 dark:bg-white/10 px-[15px] py-[11px] transition-all duration-300">
+            <div className="inline-flex items-center gap-[10px] rounded-[11px] border border-app-accent/[0.16] bg-white/70 dark:bg-white/10 px-[15px] py-[11px] transition-all duration-300">
               <button
                 type="button"
                 onClick={() => handleToggleTask(goal.id, firstOpenTask.id)}
@@ -132,7 +135,7 @@ export function TodayFocusCard({
       <div className="shrink-0 z-10 self-end sm:self-center">
         <Button
           onClick={handleCtaClick}
-          className="bg-app-accent text-white hover:bg-app-accent-hover font-bold rounded-full px-5 py-3 text-[13px] shadow-[var(--app-shadow-sm)] transition-all duration-200 flex items-center gap-2"
+          className="bg-app-accent text-white hover:bg-app-accent-hover font-bold rounded-full px-[22px] py-[13px] text-[13.5px] shadow-none transition-all duration-200 flex items-center gap-[9px] whitespace-nowrap"
         >
           {ctaLabel}
           <ArrowRight className="h-4 w-4" />

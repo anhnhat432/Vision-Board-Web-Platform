@@ -54,14 +54,14 @@ export function StreakHeatmap({ system }: StreakHeatmapProps) {
         const dateKey = formatDateStr(targetDate);
         const stats = tasksMap.get(dateKey) || { total: 0, completed: 0 };
 
-        let colorClass = "bg-app-bg-subtle dark:bg-app-bg-subtle/40 border border-transparent";
+        let colorClass = "bg-app-bg border border-app-line/5";
         if (stats.total > 0) {
           if (stats.completed === stats.total) {
-            colorClass = "bg-app-accent border border-app-accent-hover/10";
+            colorClass = "bg-app-accent";
           } else if (stats.completed > 0) {
-            colorClass = "bg-app-accent-soft border border-app-accent/10";
+            colorClass = "bg-app-accent/50";
           } else {
-            colorClass = "bg-app-status-error/10 border border-app-status-error/20";
+            colorClass = "bg-app-energy/30";
           }
         }
 
@@ -86,39 +86,37 @@ export function StreakHeatmap({ system }: StreakHeatmapProps) {
 
   return (
     <div className="space-y-1.5 pt-1">
-      <div className="flex items-center justify-between text-xs font-bold text-app-ink-soft">
+      <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.08em] text-app-ink-muted">
         <span>Nhịp độ hành động</span>
-        <span className="text-xs text-app-ink-muted font-normal">Hover xem chi tiết</span>
+        <span className="text-[10px] font-normal normal-case tracking-normal text-app-ink-muted/70">Hover xem chi tiết</span>
       </div>
 
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full">
-        <div className="flex flex-col justify-between h-[96px] text-[9px] font-bold text-app-ink-muted pr-1 select-none leading-none pt-0.5 pb-0.5">
-          <span>T2</span>
-          <span>T4</span>
-          <span>T6</span>
-          <span>CN</span>
-        </div>
-
-        <div className="flex gap-1">
-          {weeks.map((weekDays) => (
-            <div key={`week-${weekDays[0].dateStr}`} className="flex flex-col gap-1">
-              {weekDays.map((day) => (
-                <div key={day.dateStr} className="relative group flex justify-center">
-                  <div
-                    className={cn(
-                      "w-3 h-3 rounded-[2.5px] transition-colors duration-150 cursor-pointer hover:scale-125",
-                      day.colorClass,
-                    )}
-                  />
-                  <div className="absolute bottom-full mb-1.5 hidden group-hover:block z-30 bg-app-ink text-app-bg text-[10px] rounded px-2 py-1 whitespace-nowrap shadow-[var(--app-shadow-md)] pointer-events-none transform -translate-y-0.5 border border-app-line/40 leading-normal">
-                    {day.label}
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-app-ink dark:border-t-app-ink" />
+      <div className="space-y-[3px]">
+        {(["T2", "", "T4", "", "T6", "", "CN"] as const).map((rowLabel, rowIdx) => {
+          return (
+            <div key={`dayrow-${rowLabel || "empty"}`} className="grid grid-cols-[22px_repeat(12,1fr)] gap-[3px] items-center">
+              <span className="text-[9px] text-app-ink-muted font-mono">{rowLabel}</span>
+              {weeks.map((weekDays) => {
+                const day = weekDays[rowIdx];
+                if (!day) return null;
+                return (
+                  <div key={day.dateStr} className="relative group">
+                    <div
+                      className={cn(
+                        "w-full h-[12px] rounded-[3px] block transition-colors duration-150 cursor-pointer hover:scale-105",
+                        day.colorClass,
+                      )}
+                    />
+                    <div className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 hidden group-hover:block z-30 bg-app-ink text-app-bg text-[10px] rounded px-2 py-1 whitespace-nowrap shadow-[var(--app-shadow-md)] pointer-events-none border border-app-line/40 leading-normal">
+                      {day.label}
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-app-ink" />
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
-          ))}
-        </div>
+          );
+        })}
       </div>
     </div>
   );
