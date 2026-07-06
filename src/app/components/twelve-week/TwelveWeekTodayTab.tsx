@@ -220,7 +220,7 @@ export function TwelveWeekTodayTab({
       window.removeEventListener("click", handleGlobalClick, true);
     };
   }, []);
-  const toggleTimerRef = useRef<number | null>(null);
+  const toggleTimerByTaskIdRef = useRef<Record<string, number>>({});
   const upcomingStrategicBlock = getUpcomingStrategicBlock(system.weeklyTimeBlocks, new Date());
   const prefersReducedMotion = useReducedMotion();
   const fadeInClassName = "min-w-0";
@@ -249,9 +249,10 @@ export function TwelveWeekTodayTab({
 
   useEffect(() => {
     return () => {
-      if (toggleTimerRef.current) {
-        window.clearTimeout(toggleTimerRef.current);
-      }
+      Object.values(toggleTimerByTaskIdRef.current).forEach((timerId) => {
+        window.clearTimeout(timerId);
+      });
+      toggleTimerByTaskIdRef.current = {};
     };
   }, []);
 
@@ -310,12 +311,14 @@ export function TwelveWeekTodayTab({
           console.error("Failed to toggle task:", error);
         });
     } else {
-      if (toggleTimerRef.current) {
-        window.clearTimeout(toggleTimerRef.current);
+      const existingTimer = toggleTimerByTaskIdRef.current[taskId];
+      if (existingTimer) {
+        window.clearTimeout(existingTimer);
       }
 
       // Hoãn tác vụ re-render cha nặng nề đi 180ms trên production để trình duyệt vẽ checkbox checked mượt mà 60/120fps lập tức
-      toggleTimerRef.current = window.setTimeout(() => {
+      toggleTimerByTaskIdRef.current[taskId] = window.setTimeout(() => {
+        delete toggleTimerByTaskIdRef.current[taskId];
         Promise.resolve(onToggleTask(taskId, completed))
           .then(emitCompletionEvent)
           .catch((error) => {

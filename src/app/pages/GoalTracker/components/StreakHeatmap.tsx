@@ -7,6 +7,16 @@ interface StreakHeatmapProps {
   system: TwelveWeekSystem;
 }
 
+const DAY_ROWS = [
+  { key: "monday", label: "T2" },
+  { key: "tuesday", label: "" },
+  { key: "wednesday", label: "T4" },
+  { key: "thursday", label: "" },
+  { key: "friday", label: "T6" },
+  { key: "saturday", label: "" },
+  { key: "sunday", label: "CN" },
+] as const;
+
 export function StreakHeatmap({ system }: StreakHeatmapProps) {
   const startDate = useMemo(() => {
     try {
@@ -92,10 +102,10 @@ export function StreakHeatmap({ system }: StreakHeatmapProps) {
       </div>
 
       <div className="space-y-[3px]">
-        {(["T2", "", "T4", "", "T6", "", "CN"] as const).map((rowLabel, rowIdx) => {
+        {DAY_ROWS.map((row, rowIdx) => {
           return (
-            <div key={`dayrow-${rowLabel || "empty"}`} className="grid grid-cols-[22px_repeat(12,1fr)] gap-[3px] items-center">
-              <span className="text-[9px] text-app-ink-muted font-mono">{rowLabel}</span>
+            <div key={`dayrow-${row.key}`} className="grid grid-cols-[22px_repeat(12,1fr)] gap-[3px] items-center">
+              <span className="text-[9px] text-app-ink-muted font-mono">{row.label}</span>
               {weeks.map((weekDays) => {
                 const day = weekDays[rowIdx];
                 if (!day) return null;

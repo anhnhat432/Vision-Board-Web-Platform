@@ -31,6 +31,14 @@ const TACTIC_TWO = `Smoke review tactic ${TIMESTAMP}`;
 const DAILY_CHECKIN_NOTE = `Smoke daily check-in ${TIMESTAMP}`;
 const WEEKLY_REVIEW_OBSTACLE = `Smoke weekly obstacle ${TIMESTAMP}`;
 const WEEKLY_REVIEW_PRIORITY = `Smoke priority next week ${TIMESTAMP}`;
+const WEEKLY_REVIEW_FORM_READY =
+  `document.querySelector('[data-testid="wam-section-score"]') && ` +
+  `document.querySelector('[data-testid="wam-section-commitments"]') && ` +
+  `document.querySelector('[data-testid="wam-section-insights"]') && ` +
+  `document.querySelector('[data-testid="wam-section-next-commitments"]') && ` +
+  `document.querySelector("#weekly-insights") && ` +
+  `document.querySelector("#weekly-next-commitments")`;
+const AGENT_BROWSER_DEFAULT_TIMEOUT_MS = "90000";
 
 function log(message) {
   console.log(`[core-quality] ${message}`);
@@ -80,6 +88,10 @@ function runAgentBrowser(args, { input, timeoutMs = 60_000 } = {}) {
         : ["agent-browser", "--session", SESSION, ...args];
     const child = spawn(command, commandArgs, {
       cwd: process.cwd(),
+      env: {
+        ...process.env,
+        AGENT_BROWSER_DEFAULT_TIMEOUT: process.env.AGENT_BROWSER_DEFAULT_TIMEOUT ?? AGENT_BROWSER_DEFAULT_TIMEOUT_MS,
+      },
       stdio: ["pipe", "pipe", "pipe"],
       windowsVerbatimArguments: process.platform === "win32",
       windowsHide: true,
@@ -657,17 +669,17 @@ async function saveDailyCheckIn() {
 
 async function saveWeeklyReview() {
   await clickTab("tuan");
-  await waitFor(
-    "weekly review form",
-    `document.querySelector('[data-testid="wam-section-score"]') && document.querySelector('[data-testid="wam-section-commitments"]') && document.querySelector('[data-testid="wam-section-insights"]') && document.querySelector('[data-testid="wam-section-next-commitments"]') && document.querySelector("#weekly-insights") && document.querySelector("#weekly-next-commitments")`,
-    { timeoutMs: 30_000 },
-  ).catch(async () => {
+  await waitFor("weekly review shell", `document.querySelector('[data-testid="weekly-review-shell"]')`, {
+    timeoutMs: 30_000,
+  }).catch(async () => {
     await openPage("/12-week-system?tab=week");
-    await waitFor(
-      "weekly review form (direct URL)",
-      `document.querySelector('[data-testid="wam-section-score"]') && document.querySelector('[data-testid="wam-section-commitments"]') && document.querySelector('[data-testid="wam-section-insights"]') && document.querySelector('[data-testid="wam-section-next-commitments"]') && document.querySelector("#weekly-next-commitments")`,
-    );
+    await waitFor("weekly review shell (direct URL)", `document.querySelector('[data-testid="weekly-review-shell"]')`);
   });
+  const hasWeeklyReviewForm = await browserEval(`Boolean(${WEEKLY_REVIEW_FORM_READY})`);
+  if (!hasWeeklyReviewForm) {
+    await clickButton("bat dau review som");
+  }
+  await waitFor("weekly review form", WEEKLY_REVIEW_FORM_READY, { timeoutMs: 30_000 });
 
   await fill("#weekly-insights", WEEKLY_REVIEW_OBSTACLE);
   await addNextWeekCommitment(WEEKLY_REVIEW_PRIORITY);

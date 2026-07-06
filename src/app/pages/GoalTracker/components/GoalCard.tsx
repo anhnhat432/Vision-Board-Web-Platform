@@ -228,13 +228,6 @@ export function GoalCard({
                         key={task.id}
                         className="group/task flex items-center gap-[11px] rounded-xl border border-app-line/50 bg-[#FAF8F3] px-[15px] py-[13px] transition-all duration-200 hover:border-app-accent/20 hover:bg-app-accent-subtle/10"
                       >
-                        <input
-                          type="checkbox"
-                          checked={task.completed}
-                          onChange={() => handleToggleTask(goal.id, task.id)}
-                          className="sr-only"
-                          aria-label={task.completed ? "Hủy chốt việc" : "Chốt việc"}
-                        />
                         <button
                           type="button"
                           onClick={() => handleToggleTask(goal.id, task.id)}
