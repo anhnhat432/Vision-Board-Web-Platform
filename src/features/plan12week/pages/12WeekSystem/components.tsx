@@ -224,7 +224,7 @@ export function TwelveWeekDashboardHeader({
   const gaugeOffset = 339.292 * (1 - cyclePercent / 100);
 
   return (
-    <header className="relative overflow-hidden rounded-[22px] bg-gradient-to-br from-[#0C5E3A] to-[#0A4E31] py-[30px] px-[34px] text-white">
+    <header className="relative overflow-hidden rounded-[22px] bg-gradient-to-br from-app-accent to-app-accent-hover py-[30px] px-[34px] text-white">
       {/* Dot pattern overlay */}
       <div
         aria-hidden="true"
@@ -239,13 +239,13 @@ export function TwelveWeekDashboardHeader({
       <div
         aria-hidden="true"
         className="pointer-events-none absolute -top-[60px] -right-[30px] h-[240px] w-[240px] rounded-full"
-        style={{ background: "rgba(198,242,78,0.1)" }}
+        style={{ background: "var(--app-highlight-10, rgba(198,242,78,0.1))" }}
       />
       {/* Decorative ring 1 */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute -top-[90px] -right-[60px] h-[300px] w-[300px] rounded-full border"
-        style={{ borderColor: "rgba(198,242,78,0.12)" }}
+        style={{ borderColor: "var(--app-highlight-12, rgba(198,242,78,0.12))" }}
       />
       {/* Decorative ring 2 */}
       <div
@@ -268,7 +268,7 @@ export function TwelveWeekDashboardHeader({
             <span className="rounded-full border border-white/[0.16] bg-white/[0.12] px-[11px] py-[5px] text-[10px] font-bold uppercase tracking-[0.1em] text-white/90 font-mono">
               Tuần {currentWeek} / {system.totalWeeks}
             </span>
-            <span className="inline-flex items-center gap-[6px] rounded-full bg-[#C6F24E] px-[11px] py-[5px] text-[10px] font-bold uppercase tracking-[0.08em] text-[#17150F]">
+            <span className="inline-flex items-center gap-[6px] rounded-full bg-app-highlight px-[11px] py-[5px] text-[10px] font-bold uppercase tracking-[0.08em] text-app-ink">
               <span className="inline-block h-[6px] w-[6px] animate-pulse rounded-full bg-app-accent" />
               <span>Nhịp {phaseInfo.label}</span>
             </span>
@@ -289,8 +289,8 @@ export function TwelveWeekDashboardHeader({
           {/* Pills row 2 */}
           <div className="flex flex-wrap items-center gap-2 mb-[22px]">
             <span className="rounded-full bg-white/[0.1] px-3 py-[5px] text-[11.5px] font-semibold">Gói {getPlanLabel(activePlanCode)}</span>
-            <span className="inline-flex items-center gap-2 text-[11.5px] font-medium text-[#9CB89A]">
-              <span className="inline-block h-1 w-1 rounded-full bg-[#9CB89A]" />
+            <span className="inline-flex items-center gap-2 text-[11.5px] font-medium text-white/60">
+              <span className="inline-block h-1 w-1 rounded-full bg-white/60" />
               {syncBadgeLabel}
             </span>
           </div>
@@ -327,7 +327,7 @@ export function TwelveWeekDashboardHeader({
             <div
               aria-hidden="true"
               className="pointer-events-none absolute left-[6px] top-[6px] h-[130px] w-[130px] rounded-full blur-[36px]"
-              style={{ background: "rgba(198,242,78,0.22)" }}
+              style={{ background: "var(--app-highlight-22, rgba(198,242,78,0.22))" }}
             />
             {/* SVG gauge */}
             <div className="relative h-[128px] w-[128px] shrink-0">
@@ -338,7 +338,7 @@ export function TwelveWeekDashboardHeader({
                   cy="64"
                   r="54"
                   fill="none"
-                  stroke="#C6F24E"
+                  stroke="var(--app-highlight)"
                   strokeWidth="10"
                   strokeLinecap="round"
                   strokeDasharray="339.29"
@@ -350,15 +350,15 @@ export function TwelveWeekDashboardHeader({
               <div className="absolute inset-0 flex flex-col items-center justify-center">
                 <span className="font-serif text-[32px] font-extrabold leading-none text-white">
                   {currentWeek}
-                  <span className="text-[16px] text-[#9CB89A]">/{system.totalWeeks}</span>
+                  <span className="text-[16px] text-white/60">/{system.totalWeeks}</span>
                 </span>
-                <span className="mt-[3px] text-[9px] font-bold uppercase tracking-[0.06em] text-[#9CB89A]">tuần chu kỳ</span>
+                <span className="mt-[3px] text-[9px] font-bold uppercase tracking-[0.06em] text-white/60">tuần chu kỳ</span>
               </div>
             </div>
             {/* Gauge text */}
             <div className="relative min-w-0">
-              <div className="mb-[7px] text-[10px] font-bold uppercase tracking-[0.12em] text-[#C6F24E]">Tiến độ chu kỳ</div>
-              <p className="text-[12.5px] leading-[1.5] text-[#D6E4CE]">
+              <div className="mb-[7px] text-[10px] font-bold uppercase tracking-[0.12em] text-app-highlight">Tiến độ chu kỳ</div>
+              <p className="text-[12.5px] leading-[1.5] text-white/80">
                 Đang ở nhịp {phaseInfo.label.toLowerCase()} — giữ đều mỗi tuần một đầu ra thật.
               </p>
             </div>
@@ -367,15 +367,15 @@ export function TwelveWeekDashboardHeader({
           {/* Stat cards */}
           <div className="grid grid-cols-2 gap-[12px]">
             <div className="rounded-[13px] border border-white/[0.1] bg-white/[0.06] p-[14px]">
-              <div className="font-serif text-[26px] font-extrabold leading-none text-[#C6F24E]">{weekPercent}%</div>
-              <div className="mt-[5px] text-[11px] font-medium text-[#9CB89A]">Tuần này</div>
+              <div className="font-serif text-[26px] font-extrabold leading-none text-app-highlight">{weekPercent}%</div>
+              <div className="mt-[5px] text-[11px] font-medium text-white/60">Tuần này</div>
             </div>
             <div className="rounded-[13px] border border-white/[0.1] bg-white/[0.06] p-[14px]">
               <div className="font-serif text-[26px] font-extrabold leading-none text-white">
                 {todayCompletedCount}
-                <span className="text-[15px] text-[#9CB89A]">/{todayCompletedCount + todayRemainingCount}</span>
+                <span className="text-[15px] text-white/60">/{todayCompletedCount + todayRemainingCount}</span>
               </div>
-              <div className="mt-[5px] text-[11px] font-medium text-[#9CB89A]">Việc hôm nay</div>
+              <div className="mt-[5px] text-[11px] font-medium text-white/60">Việc hôm nay</div>
             </div>
           </div>
         </div>
@@ -399,7 +399,7 @@ export function TwelveWeekGoalSwitcher({
     <div className="flex">
       <Select value={activeGoalId} onValueChange={onLoadGoal}>
         <SelectTrigger
-          className="h-auto w-full max-w-full rounded-[14px] border-[rgba(23,21,15,0.1)] dark:border-app-line bg-white dark:bg-app-surface px-4 py-2.5 text-[14px] font-semibold text-[#17150F] dark:text-app-ink shadow-2xs hover:bg-app-bg/50 focus-visible:border-app-accent focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto sm:max-w-md transition-all"
+          className="h-auto w-full max-w-full rounded-[14px] border-app-line bg-app-surface px-4 py-2.5 text-[14px] font-semibold text-app-ink shadow-2xs hover:bg-app-bg/50 focus-visible:border-app-accent focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto sm:max-w-md transition-all"
           aria-label="Chọn mục tiêu 12 tuần"
         >
           <SelectValue placeholder="Chọn mục tiêu" />

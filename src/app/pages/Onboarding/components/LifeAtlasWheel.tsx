@@ -1,6 +1,6 @@
 import { motion, useReducedMotion } from "motion/react";
 import { useMemo } from "react";
-import { type LifeArea } from "../../../utils/storage";
+import type { LifeArea } from "../../../utils/storage";
 
 interface LifeAtlasWheelProps {
   lifeAreas: LifeArea[];

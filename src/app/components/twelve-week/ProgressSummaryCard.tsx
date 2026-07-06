@@ -50,34 +50,34 @@ function getNarrativeStyle(level: ProgressTrendInterpretation["level"]) {
     case "on_track":
       return {
         container:
-          "border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white dark:bg-app-surface rounded-card",
+          "border-app-line bg-white dark:bg-app-surface rounded-card",
         badge: "border-app-accent/15 bg-app-accent-soft/80 text-app-accent px-3 py-1 rounded-full",
         badgeLabel: "Đang đúng nhịp",
       };
     case "early":
       return {
         container:
-          "border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white dark:bg-app-surface rounded-card",
+          "border-app-line bg-white dark:bg-app-surface rounded-card",
         badge: "border-app-accent/15 bg-app-accent-soft/80 text-app-accent px-3 py-1 rounded-full",
         badgeLabel: "Mới bắt đầu",
       };
     case "slowing":
       return {
         container:
-          "border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white dark:bg-app-surface rounded-card",
+          "border-app-line bg-white dark:bg-app-surface rounded-card",
         badge: "border-app-warm/20 bg-app-warm-soft/80 text-app-warm-strong px-3 py-1 rounded-full",
         badgeLabel: "Cần chú ý",
       };
     case "at_risk":
       return {
         container:
-          "border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white dark:bg-app-surface rounded-card",
+          "border-app-line bg-white dark:bg-app-surface rounded-card",
         badge: "border-app-warm/25 bg-app-warm-soft text-app-warm-strong px-3 py-1 rounded-full",
         badgeLabel: "Cần quay lại nhịp",
       };
     default:
       return {
-        container: "border-[rgba(23,21,15,0.08)] dark:border-app-line bg-white dark:bg-app-surface rounded-card",
+        container: "border-app-line bg-white dark:bg-app-surface rounded-card",
         badge: "border-app-line bg-app-bg text-app-ink-soft px-3 py-1 rounded-full",
         badgeLabel: "Chưa có dữ liệu",
       };

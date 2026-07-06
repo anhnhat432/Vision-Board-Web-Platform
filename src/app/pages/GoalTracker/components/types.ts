@@ -1,4 +1,4 @@
-import type { Goal, TwelveWeekSystem } from "@/app/utils/storage";
+import type { Goal } from "@/app/utils/storage";
 
 export interface GoalCompletionDetails {
   completedAtStr: string;

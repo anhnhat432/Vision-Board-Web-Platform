@@ -1,6 +1,4 @@
 import {
-  calculateGoalProgress,
-  getCalendarDayDifference,
   type Goal,
   getGoalExecutionStats,
   getTwelveWeekCurrentWeek,

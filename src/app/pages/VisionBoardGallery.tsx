@@ -3,7 +3,6 @@ import {
   Edit,
   Eye,
   Heart,
-  Image as ImageIcon,
   Images,
   Moon,
   Plus,
@@ -22,7 +21,7 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { type NavigateFunction, useLocation, useNavigate } from "react-router";
 import { EmptyState } from "@/app/components/states/EmptyState";
 import { getBackendVisionBoardId, getLocalVisionBoardId, saveVisionBoardLink } from "@/lib/api/visionBoardLinkStore";
 import { useAuthContext } from "@/lib/auth/AuthContext";
@@ -248,7 +247,9 @@ function BoardCollagePreview({ board }: { board: VisionBoard }) {
 }
 
 // Bảng dữ liệu List View
-function BoardListView({ boards, navigate, onDeleteClick }: { boards: VisionBoard[], navigate: any, onDeleteClick: (id: string) => void }) {
+type VisionBoardSort = "newest" | "oldest" | "name" | "items";
+
+function BoardListView({ boards, navigate, onDeleteClick }: { boards: VisionBoard[]; navigate: NavigateFunction; onDeleteClick: (id: string) => void }) {
   const { user } = useAuthContext();
   
   return (
@@ -380,7 +381,7 @@ export function VisionBoardGallery() {
   // States cho bộ lọc & Toolbar
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedYear, setSelectedYear] = useState<string>("all");
-  const [sortBy, setSortBy] = useState<"newest" | "oldest" | "name" | "items">("newest");
+  const [sortBy, setSortBy] = useState<VisionBoardSort>("newest");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   // Hydrate from backend: import any backend boards that have no local counterpart.
@@ -755,7 +756,7 @@ export function VisionBoardGallery() {
             <div className="flex items-center gap-2">
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
+                onChange={(e) => setSortBy(e.target.value as VisionBoardSort)}
                 className="rounded-[var(--r-input)] border border-app-line bg-app-surface px-3 py-2 text-sm font-semibold text-app-ink-soft focus:border-app-accent/40 focus:ring-2 focus:ring-app-accent/14 outline-none transition-all"
               >
                 <option value="newest">Mới nhất trước</option>

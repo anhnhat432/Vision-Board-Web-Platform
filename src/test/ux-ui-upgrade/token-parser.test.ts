@@ -58,10 +58,10 @@ describe("token-parser — parseTokens (tokens.css thật)", () => {
   });
 
   it("override giá trị :root bằng html.dark ở mode dark", () => {
-    expect(lightSet.get("--app-bg")?.rawValue).toBe("#F7F4ED");
-    expect(darkSet.get("--app-bg")?.rawValue).toBe("#1C1A15");
-    expect(lightSet.get("--app-accent")?.rawValue).toBe("#0C5E3A");
-    expect(darkSet.get("--app-accent")?.rawValue).toBe("#5BA590");
+    expect(lightSet.get("--app-bg")?.rawValue).toBe("#f2efe6");
+    expect(darkSet.get("--app-bg")?.rawValue).toBe("#1c1a15");
+    expect(lightSet.get("--app-accent")?.rawValue).toBe("#0c5e3a");
+    expect(darkSet.get("--app-accent")?.rawValue).toBe("#5ba590");
   });
 });
 
@@ -69,9 +69,9 @@ describe("token-parser — resolveToken", () => {
   const set = loadTokenSet({ mode: "light" });
 
   it("đi hết chuỗi var() tới literal Primitive, non-empty đúng kiểu", () => {
-    // --btn-primary-bg → --app-accent → #0C5E3A
+    // --btn-primary-bg → --app-accent → #0c5e3a
     const btn = resolveToken("--btn-primary-bg", set);
-    expect(btn.resolvedValue).toBe("#0C5E3A");
+    expect(btn.resolvedValue).toBe("#0c5e3a");
     expect(btn.isNonEmpty).toBe(true);
     expect(btn.kindValid).toBe(true);
 

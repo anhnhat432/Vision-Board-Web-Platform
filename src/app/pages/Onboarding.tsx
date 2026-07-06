@@ -14,7 +14,7 @@ import {
   Users,
   WalletCards,
 } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -37,7 +37,6 @@ import { FloatingSparkles } from "./Onboarding/components/FloatingSparkles";
 import { HeroSection } from "./Onboarding/components/HeroSection";
 import { LifeAtlasWheel } from "./Onboarding/components/LifeAtlasWheel";
 import { AreaPickerCard } from "./Onboarding/components/AreaPickerCard";
-import { MotionCountUp } from "../components/motion/MotionCountUp";
 
 type OnboardingStep = "welcome" | "assessment";
 
@@ -220,8 +219,8 @@ export function Onboarding() {
   const [reviewedAreaIndices, setReviewedAreaIndices] = useState<Set<number>>(new Set());
   const [isDirty, setIsDirty] = useState(false);
   const [availableDraft, setAvailableDraft] = useState<OnboardingDraft | null>(null);
-  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
-  const [autoSaveStatus, setAutoSaveStatus] = useState<AutoSaveDraftStatus>("saved");
+  const [_lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const [_autoSaveStatus, setAutoSaveStatus] = useState<AutoSaveDraftStatus>("saved");
   const flowTopRef = useRef<HTMLDivElement | null>(null);
   const activeAreaHeadingRef = useRef<HTMLHeadingElement | null>(null);
   const didFocusActiveAreaRef = useRef(false);
@@ -287,7 +286,6 @@ export function Onboarding() {
   const reviewedAreaCount = reviewedAreaIndices.size;
   const remainingAreaCount = Math.max(0, lifeAreas.length - reviewedAreaCount);
   const canCompleteAssessment = remainingAreaCount === 0;
-  const progressPercent = Math.round((reviewedAreaCount / lifeAreas.length) * 100);
 
   useScrollToTopOnChange(step, {
     focusRef: flowTopRef,

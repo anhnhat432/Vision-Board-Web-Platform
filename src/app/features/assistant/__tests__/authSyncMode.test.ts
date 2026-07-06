@@ -33,7 +33,52 @@ import { isDemoMode } from "@/app/utils/app-mode";
 import { getUserData } from "@/app/utils/storage";
 import { APP_STORAGE_KEYS } from "@/app/utils/storage-constants";
 import type { Goal, TwelveWeekSystem, UserData } from "@/app/utils/storage-types";
-import { readMutationQueueStore, summarizeMutationQueueStore } from "@/features/plan12week/persistence/mutationQueue";
+import {
+  type DataMutationItem,
+  type DataMutationQueueStore,
+  type DataMutationQueueStoreSummary,
+  readMutationQueueStore,
+  summarizeMutationQueueStore,
+} from "@/features/plan12week/persistence/mutationQueue";
+
+const createMutationQueueStore = (items: DataMutationItem[] = []): DataMutationQueueStore => ({
+  version: 1,
+  ownerUid: "test_user_123",
+  deviceId: "test_device",
+  updatedAt: "2026-07-06T00:00:00.000Z",
+  items,
+});
+
+const createGoalDeletedMutation = (status: DataMutationItem["status"]): DataMutationItem => ({
+  id: "mutation_1",
+  idempotencyKey: "mutation_1",
+  collapseKey: "goal_deleted:g1",
+  kind: "goal_deleted",
+  status,
+  createdAt: "2026-07-06T00:00:00.000Z",
+  updatedAt: "2026-07-06T00:00:00.000Z",
+  attemptCount: 0,
+  maxAttempts: 3,
+  ownerUid: "test_user_123",
+  goalId: "g1",
+  payload: {
+    clientGoalId: "g1",
+    deletedAt: "2026-07-06T00:00:00.000Z",
+  },
+});
+
+const createMutationQueueSummary = (
+  overrides: Partial<DataMutationQueueStoreSummary> = {},
+): DataMutationQueueStoreSummary => ({
+  totalCount: 0,
+  pendingCount: 0,
+  inFlightCount: 0,
+  failedOrRetryableCount: 0,
+  succeededCount: 0,
+  lastDrainStartedAt: null,
+  lastDrainFinishedAt: null,
+  ...overrides,
+});
 
 describe("AI Assistant Context - AuthSyncMode & Sanitization & Limits", () => {
   beforeEach(() => {
@@ -75,9 +120,9 @@ describe("AI Assistant Context - AuthSyncMode & Sanitization & Limits", () => {
 
     it("returns error status if queue contains error mutations", () => {
       vi.mocked(isDemoMode).mockReturnValue(false);
-      vi.mocked(readMutationQueueStore).mockReturnValue({
-        items: [{ status: "failed_validation" } as any],
-      } as any);
+      vi.mocked(readMutationQueueStore).mockReturnValue(
+        createMutationQueueStore([createGoalDeletedMutation("failed_validation")]),
+      );
 
       const result = buildAuthSyncMode();
 
@@ -86,13 +131,8 @@ describe("AI Assistant Context - AuthSyncMode & Sanitization & Limits", () => {
 
     it("returns syncing status if queue contains pending mutations", () => {
       vi.mocked(isDemoMode).mockReturnValue(false);
-      vi.mocked(readMutationQueueStore).mockReturnValue({
-        items: [],
-      } as any);
-      vi.mocked(summarizeMutationQueueStore).mockReturnValue({
-        pendingCount: 1,
-        inFlightCount: 0,
-      } as any);
+      vi.mocked(readMutationQueueStore).mockReturnValue(createMutationQueueStore());
+      vi.mocked(summarizeMutationQueueStore).mockReturnValue(createMutationQueueSummary({ pendingCount: 1 }));
 
       const result = buildAuthSyncMode();
 

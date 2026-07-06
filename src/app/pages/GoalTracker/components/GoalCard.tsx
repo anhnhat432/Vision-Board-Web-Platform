@@ -2,13 +2,7 @@ import { ArrowRight, Award, Calendar, CheckCircle2, Circle, RotateCcw, Trash2 } 
 import { useMemo, useState } from "react";
 import { getGoalArchetypeIcon } from "@/app/components/illustrations";
 import type { Goal, PricingPlanCode } from "@/app/utils/storage";
-import {
-  calculateGoalProgress,
-  getLifeAreaLabel,
-  getTwelveWeekCurrentWeek,
-  getTwelveWeekTodayTasks,
-} from "@/app/utils/storage";
-import { getGoalExecutionStats } from "@/app/utils/storage";
+import { getLifeAreaLabel, getTwelveWeekCurrentWeek, getTwelveWeekTodayTasks } from "@/app/utils/storage";
 import { getPlanLabel } from "@/app/utils/twelve-week-premium";
 import { Button } from "@/app/components/ui/button";
 import { CountUp } from "@/app/components/ui/count-up";

@@ -2,15 +2,70 @@ import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useSpeechToText } from "../useSpeechToText";
 
+type MockSpeechRecognitionResult = {
+  isFinal: boolean;
+  0: {
+    transcript: string;
+    confidence: number;
+  };
+};
+
+type MockSpeechRecognitionEvent = {
+  resultIndex: number;
+  results: ArrayLike<MockSpeechRecognitionResult>;
+};
+
+type MockSpeechRecognitionErrorEvent = {
+  error: string;
+  message?: string;
+};
+
+type MockSpeechRecognitionInstance = {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  start: ReturnType<typeof vi.fn>;
+  stop: ReturnType<typeof vi.fn>;
+  abort: ReturnType<typeof vi.fn>;
+  onstart: (() => void) | null;
+  onend: (() => void) | null;
+  onresult: ((event: MockSpeechRecognitionEvent) => void) | null;
+  onerror: ((event: MockSpeechRecognitionErrorEvent) => void) | null;
+};
+
+const speechWindow = window;
+
+const initializeMockRecognition = (recognition: MockSpeechRecognitionInstance) => {
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.lang = "";
+  recognition.onstart = null;
+  recognition.onend = null;
+  recognition.onresult = null;
+  recognition.onerror = null;
+};
+
+const createMockRecognition = () =>
+  vi.fn().mockImplementation(function (this: MockSpeechRecognitionInstance) {
+    initializeMockRecognition(this);
+    this.start = vi.fn();
+    this.stop = vi.fn();
+    this.abort = vi.fn();
+  });
+
+const assignSpeechRecognition = (recognition: ReturnType<typeof vi.fn>, key: "SpeechRecognition" | "webkitSpeechRecognition") => {
+  speechWindow[key] = recognition as unknown as typeof window.SpeechRecognition;
+};
+
 describe("useSpeechToText Hook", () => {
-  const _originalSpeechRecognition = (window as any).SpeechRecognition;
-  const _originalWebkitSpeechRecognition = (window as any).webkitSpeechRecognition;
+  const _originalSpeechRecognition = speechWindow.SpeechRecognition;
+  const _originalWebkitSpeechRecognition = speechWindow.webkitSpeechRecognition;
 
   beforeEach(() => {
     vi.restoreAllMocks();
     // Reset window recognition properties
-    delete (window as any).SpeechRecognition;
-    delete (window as any).webkitSpeechRecognition;
+    delete speechWindow.SpeechRecognition;
+    delete speechWindow.webkitSpeechRecognition;
   });
 
   it("should return isSupported as false when browser does not support Speech API", () => {
@@ -20,22 +75,14 @@ describe("useSpeechToText Hook", () => {
   });
 
   it("should return isSupported as true when window.SpeechRecognition exists", () => {
-    (window as any).SpeechRecognition = vi.fn().mockImplementation(function (this: any) {
-      this.start = vi.fn();
-      this.stop = vi.fn();
-      this.abort = vi.fn();
-    });
+    assignSpeechRecognition(createMockRecognition(), "SpeechRecognition");
 
     const { result } = renderHook(() => useSpeechToText());
     expect(result.current.isSupported).toBe(true);
   });
 
   it("should return isSupported as true when window.webkitSpeechRecognition exists", () => {
-    (window as any).webkitSpeechRecognition = vi.fn().mockImplementation(function (this: any) {
-      this.start = vi.fn();
-      this.stop = vi.fn();
-      this.abort = vi.fn();
-    });
+    assignSpeechRecognition(createMockRecognition(), "webkitSpeechRecognition");
 
     const { result } = renderHook(() => useSpeechToText());
     expect(result.current.isSupported).toBe(true);
@@ -46,13 +93,14 @@ describe("useSpeechToText Hook", () => {
     const stopMock = vi.fn();
     const abortMock = vi.fn();
 
-    const MockRecognition = vi.fn().mockImplementation(function (this: any) {
+    const MockRecognition = vi.fn().mockImplementation(function (this: MockSpeechRecognitionInstance) {
+      initializeMockRecognition(this);
       this.start = startMock;
       this.stop = stopMock;
       this.abort = abortMock;
     });
 
-    (window as any).SpeechRecognition = MockRecognition;
+    assignSpeechRecognition(MockRecognition, "SpeechRecognition");
 
     const { result } = renderHook(() => useSpeechToText());
 
@@ -66,7 +114,7 @@ describe("useSpeechToText Hook", () => {
     expect(startMock).toHaveBeenCalledTimes(1);
 
     // Chuyển sang trạng thái nghe (giả lập recognition trigger start event)
-    const instance = MockRecognition.mock.instances[0] as any;
+    const instance = MockRecognition.mock.instances[0] as MockSpeechRecognitionInstance;
     act(() => {
       if (instance.onstart) instance.onstart();
     });
@@ -91,13 +139,14 @@ describe("useSpeechToText Hook", () => {
     const abortMock = vi.fn();
     const onFinalResultMock = vi.fn();
 
-    const MockRecognition = vi.fn().mockImplementation(function (this: any) {
+    const MockRecognition = vi.fn().mockImplementation(function (this: MockSpeechRecognitionInstance) {
+      initializeMockRecognition(this);
       this.start = startMock;
       this.stop = stopMock;
       this.abort = abortMock;
     });
 
-    (window as any).SpeechRecognition = MockRecognition;
+    assignSpeechRecognition(MockRecognition, "SpeechRecognition");
 
     const { result } = renderHook(() => useSpeechToText({ onFinalResult: onFinalResultMock }));
 
@@ -105,7 +154,7 @@ describe("useSpeechToText Hook", () => {
       result.current.startListening();
     });
 
-    const instance = MockRecognition.mock.instances[0] as any;
+    const instance = MockRecognition.mock.instances[0] as MockSpeechRecognitionInstance;
     act(() => {
       if (instance.onstart) instance.onstart();
     });
@@ -120,7 +169,7 @@ describe("useSpeechToText Hook", () => {
               isFinal: false,
               0: { transcript: "tôi muốn", confidence: 0.9 },
             },
-          ] as any,
+          ] satisfies ArrayLike<MockSpeechRecognitionResult>,
         });
       }
     });
@@ -138,7 +187,7 @@ describe("useSpeechToText Hook", () => {
               isFinal: true,
               0: { transcript: "tôi muốn tạo mục tiêu", confidence: 0.95 },
             },
-          ] as any,
+          ] satisfies ArrayLike<MockSpeechRecognitionResult>,
         });
       }
     });
@@ -149,13 +198,14 @@ describe("useSpeechToText Hook", () => {
   });
 
   it("should handle error events correctly", () => {
-    const MockRecognition = vi.fn().mockImplementation(function (this: any) {
+    const MockRecognition = vi.fn().mockImplementation(function (this: MockSpeechRecognitionInstance) {
+      initializeMockRecognition(this);
       this.start = vi.fn();
       this.stop = vi.fn();
       this.abort = vi.fn();
     });
 
-    (window as any).SpeechRecognition = MockRecognition;
+    assignSpeechRecognition(MockRecognition, "SpeechRecognition");
 
     const { result } = renderHook(() => useSpeechToText());
 
@@ -163,7 +213,7 @@ describe("useSpeechToText Hook", () => {
       result.current.startListening();
     });
 
-    const instance = MockRecognition.mock.instances[0] as any;
+    const instance = MockRecognition.mock.instances[0] as MockSpeechRecognitionInstance;
     act(() => {
       if (instance.onstart) instance.onstart();
     });

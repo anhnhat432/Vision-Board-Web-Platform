@@ -436,7 +436,7 @@ export function TwelveWeekTodayTab({
   const reviewDuePrompt = reviewDueToday ? (
     <div
       data-testid="today-review-due-prompt"
-      className="order-2 rounded-card-lg border border-app-warm-border/15 bg-app-warm-soft/10 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:justify-between transition-all duration-150"
+      className="order-2 rounded-card-lg border-2 border-app-warm-border bg-app-warm-soft/70 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:justify-between transition-all duration-150"
     >
       <div className="min-w-0">
         <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-app-warm-strong">
@@ -450,7 +450,7 @@ export function TwelveWeekTodayTab({
       {onOpenWeekTab ? (
         <Button
           variant="ghost"
-          className="shrink-0 text-app-warm hover:text-app-warm-hover text-xs font-bold rounded-card px-3 py-2 transition-all"
+          className="shrink-0 text-app-warm-strong hover:text-app-warm-hover text-xs font-bold rounded-card px-3 py-2 transition-all"
           onClick={onOpenWeekTab}
         >
           Mở review tuần
@@ -513,22 +513,23 @@ export function TwelveWeekTodayTab({
         <div
           data-testid="today-next-action-panel"
           data-state={nextActionState.key}
-          className="order-1 rounded-card-lg border border-[rgba(12,94,58,0.18)] border-l-4 border-l-[#0C5E3A] bg-white p-4 dark:bg-app-surface sm:rounded-[18px] sm:p-6 sm:px-[26px]"
+          className="order-1 rounded-card-lg border-l-[4px] bg-white p-4 dark:bg-app-surface sm:rounded-[18px] sm:p-6 sm:px-[26px]"
+          style={{ border: "1px solid rgba(12,94,58,0.18)", borderLeft: "4px solid #0c5e3a" }}
         >
-          <p className="mb-2.5 flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#0C5E3A] sm:mb-3">
+          <p className="mb-2.5 flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.14em] text-app-accent sm:mb-3">
             <Sparkles className="h-3 w-3" />
             {nextActionState.key === "setup-needed" ? "Cần thiết lập" : "Hành động tiếp theo"}
           </p>
           <h2 className="m-0 mb-2 font-serif text-xl font-bold tracking-[-0.01em] text-app-ink sm:text-[23px]">
             {nextActionState.title}
           </h2>
-          <p className="m-0 mb-4 max-w-[62ch] text-[13px] leading-[1.5] text-[#5C574B] dark:text-app-ink-soft sm:mb-[18px] sm:text-[13.5px]">
+          <p className="m-0 mb-4 max-w-[62ch] text-[13px] leading-[1.5] text-app-ink-soft sm:mb-[18px] sm:text-[13.5px]">
             {nextActionState.description}
           </p>
           {nextActionState.onAction && nextActionState.actionLabel ? (
             <Button
               variant="default"
-              className="h-auto rounded-full bg-[#0C5E3A] px-5 py-3 text-[13px] font-bold text-white transition-all hover:bg-[#0C5E3A]/90 active:scale-[0.98] sm:px-[22px] sm:py-[13px] sm:text-[13.5px]"
+              className="h-auto rounded-full bg-app-accent px-5 py-3 text-[13px] font-bold text-white transition-all hover:bg-app-accent-hover active:scale-[0.98] sm:px-[22px] sm:py-[13px] sm:text-[13.5px]"
               onClick={nextActionState.onAction}
             >
               {nextActionState.actionLabel}
@@ -614,13 +615,20 @@ export function TwelveWeekTodayTab({
       {hasPrimaryTask && firstPriorityTask && !isHeroDismissed && (
         <div
           data-testid="today-primary-hero"
-          className={`order-2 bg-app-surface rounded-card-lg border shadow-app-sm overflow-hidden ${
+          className={`order-2 bg-white rounded-card-lg border shadow-app-sm overflow-hidden ${
             isPrimaryTaskCompleted
               ? "border-app-accent/20"
               : primaryTaskOverdue
                 ? "border-app-warm-border/40"
-                : "border-app-line/30"
+                : ""
           }`}
+          style={
+            !isPrimaryTaskCompleted && !primaryTaskOverdue
+              ? { border: "1px solid rgba(12,94,58,0.18)", borderLeft: "4px solid #0c5e3a" }
+              : primaryTaskOverdue
+                ? { borderLeft: "4px solid #e07a5f" }
+                : undefined
+          }
         >
           <div className="flex flex-col sm:flex-row">
             <div
@@ -723,7 +731,7 @@ export function TwelveWeekTodayTab({
         <div className={fadeInClassName}>
           <Card
             data-tour-id="system-today-queue"
-            className={`min-h-[360px] min-w-0 overflow-hidden rounded-[20px] border border-[rgba(23,21,15,0.08)] bg-white p-4 dark:border-app-line dark:bg-app-surface sm:min-h-[420px] sm:p-6 lg:h-full`}
+            className={`min-h-[360px] min-w-0 overflow-hidden rounded-[20px] border border-app-line bg-white p-4 dark:border-app-line dark:bg-app-surface sm:min-h-[420px] sm:p-6 lg:h-full`}
           >
             <CardHeader className="min-w-0 [&>*+*]:mt-0 px-0 pt-0 pb-0">
               <div className="flex min-w-0 flex-wrap items-end justify-between gap-3">
@@ -731,8 +739,8 @@ export function TwelveWeekTodayTab({
                   <CardTitle as="h2" className="break-words text-app-ink text-[18px] font-bold m-0 mb-1">
                     Hàng việc hôm nay
                   </CardTitle>
-                  <CardDescription className="m-0 mb-4 break-words text-[12.5px] text-[#8C887C] dark:text-app-ink-muted sm:mb-[22px]">
-                    <span className="font-mono font-semibold text-[#0C5E3A]">
+                  <CardDescription className="m-0 mb-4 break-words text-[12.5px] text-app-ink-muted sm:mb-[22px]">
+                    <span className="font-mono font-semibold text-app-accent">
                       {todayCompletedCount}/{checkInTotal}
                     </span>{" "}
                     hoàn thành · Ưu tiên việc quan trọng nhất trước
@@ -829,10 +837,10 @@ export function TwelveWeekTodayTab({
                               >
                                 {task.title}
                               </p>
-                              <p className="mt-[3px] text-[12px] text-[#8C887C] dark:text-app-ink-muted">
+                              <p className="mt-[3px] text-[12px] text-app-ink-muted">
                                 {task.leadIndicatorName}
                                 {task.isCore && (
-                                  <span className="ml-1 inline-flex items-center bg-[#EDF7E0] text-[#0C5E3A] text-[9.5px] font-bold rounded-[5px] px-[7px] py-0.5 tracking-[0.06em]">
+                                  <span className="ml-1 inline-flex items-center bg-app-accent-subtle text-app-accent text-[9.5px] font-bold rounded-[5px] px-[7px] py-0.5 tracking-[0.06em]">
                                     CỐT LÕI
                                   </span>
                                 )}
@@ -848,7 +856,7 @@ export function TwelveWeekTodayTab({
                                 isOverdue
                                   ? "text-app-warm"
                                   : taskCompleted
-                                    ? "text-[#0C5E3A]"
+                                    ? "text-app-accent"
                                     : isPrimaryTask
                                       ? "text-app-accent"
                                       : "text-app-ink-muted"
@@ -968,12 +976,12 @@ export function TwelveWeekTodayTab({
                   )}
                 </details>
               )}
-              <div className="rounded-[14px] border border-[rgba(23,21,15,0.08)] dark:border-app-line bg-[#FAF8F3] dark:bg-app-bg-subtle p-[16px_18px]">
+              <div className="rounded-[14px] border border-app-line dark:border-app-line bg-app-bg-subtle p-[16px_18px]">
                 <div className="flex items-center justify-between mb-[9px]">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#A8A296] dark:text-app-ink-muted">
+                  <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-app-ink-muted">
                     Tiến độ tuần {currentWeek}
                   </span>
-                  <span className="font-mono text-[13px] font-bold text-[#0C5E3A]">{weekCompletion.percent}%</span>
+                  <span className="font-mono text-[13px] font-bold text-app-accent">{weekCompletion.percent}%</span>
                 </div>
                 <Progress value={weekCompletion.percent} className="h-2 shadow-none rounded-full" />
               </div>
@@ -994,17 +1002,17 @@ export function TwelveWeekTodayTab({
           className={fadeInClassName}
           style={{ animationDelay: "0.06s" }}
         >
-          <Card className="scroll-mt-24 min-w-0 overflow-hidden rounded-[20px] border border-[rgba(23,21,15,0.08)] bg-white p-4 dark:border-app-line dark:bg-app-surface sm:p-6 lg:h-full">
+          <Card className="scroll-mt-24 min-w-0 overflow-hidden rounded-[20px] border border-app-line bg-white p-4 dark:border-app-line dark:bg-app-surface sm:p-6 lg:h-full">
             <div className="min-w-0">
               <div className="flex min-w-0 items-start justify-between gap-3">
                 <div className="min-w-0">
                   <h2 className="flex items-center gap-[9px] break-words text-app-ink text-[18px] font-bold m-0 mb-1">
-                    <span className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-lg bg-[#EDF7E0] text-[#0C5E3A]">
+                    <span className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-lg bg-app-accent-subtle text-app-accent">
                       <Gauge className="h-3.5 w-3.5" />
                     </span>
                     Check-in hôm nay
                   </h2>
-                  <p className="text-[12.5px] text-[#8C887C] dark:text-app-ink-muted m-0 mb-5">
+                  <p className="text-[12.5px] text-app-ink-muted m-0 mb-5">
                     30 giây · Lắng nghe bản thân
                   </p>
                 </div>
@@ -1033,7 +1041,7 @@ export function TwelveWeekTodayTab({
                 </div>
               )}
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#A8A296] dark:text-app-ink-muted mb-2.5">
+                <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-app-ink-muted mb-2.5">
                   Năng lượng
                 </div>
                 <div role="radiogroup" aria-label="Năng lượng" className="grid grid-cols-3 gap-2 mb-5">
@@ -1063,7 +1071,7 @@ export function TwelveWeekTodayTab({
               <div>
                 <label
                   htmlFor="daily-note"
-                  className="block text-[10px] font-bold uppercase tracking-[0.12em] text-[#A8A296] dark:text-app-ink-muted mb-2.5"
+                  className="block text-[10px] font-bold uppercase tracking-[0.12em] text-app-ink-muted mb-2.5"
                 >
                   Ghi chú nhanh
                 </label>
@@ -1073,12 +1081,12 @@ export function TwelveWeekTodayTab({
                   value={dailyNote}
                   onChange={(event) => onDailyNoteChange(event.target.value)}
                   placeholder="Bài học nhỏ hay cảm nhận hôm nay..."
-                  className="border-[rgba(23,21,15,0.12)] dark:border-app-line bg-[#FAF8F3] dark:bg-app-bg-subtle text-[#17150F] dark:text-app-ink placeholder:text-app-ink-muted/50 focus:border-[#0C5E3A]/30 focus:ring-1 focus:ring-[#0C5E3A]/10 rounded-[12px] shadow-none text-[13px] transition-all duration-150 p-[12px_14px] h-[84px] mb-4"
+                  className="border-app-line dark:border-app-line bg-app-bg-subtle text-app-ink placeholder:text-app-ink-muted/50 focus:border-app-accent/30 focus:ring-1 focus:ring-app-accent/10 rounded-[12px] shadow-none text-[13px] transition-all duration-150 p-[12px_14px] h-[84px] mb-4"
                 />
               </div>
               <Button
                 variant="default"
-                className="w-full bg-[#0C5E3A] hover:bg-[#0C5E3A]/90 text-white font-bold text-[13.5px] py-[13px] rounded-[12px] mb-[14px] transition-all active:scale-[0.98]"
+                className="w-full bg-app-accent hover:bg-app-accent-hover text-white font-bold text-[13.5px] py-[13px] rounded-[12px] mb-[14px] transition-all active:scale-[0.98]"
                 onClick={handleSaveCheckInClick}
                 disabled={isSavingCheckIn}
                 aria-busy={isSavingCheckIn}
@@ -1099,7 +1107,7 @@ export function TwelveWeekTodayTab({
                 <Button
                   data-testid="today-check-in-open-week"
                   variant="ghost"
-                  className="w-full justify-center text-[#0C5E3A] hover:text-[#0C5E3A]/80 text-[12.5px] font-bold h-auto py-1 transition-colors mb-4"
+                  className="w-full justify-center text-app-accent hover:text-app-accent/80 text-[12.5px] font-bold h-auto py-1 transition-colors mb-4"
                   onClick={onOpenWeekTab}
                 >
                   Xem đánh giá tuần
@@ -1123,10 +1131,10 @@ export function TwelveWeekTodayTab({
                 {latestCheckIn && (
                   <div
                     aria-live="polite"
-                    className="rounded-[12px] border border-[rgba(23,21,15,0.06)] dark:border-app-line bg-[#FAF8F3] dark:bg-app-bg-subtle p-[13px_16px] text-[11px] text-app-ink-muted leading-relaxed"
+                    className="rounded-[12px] border border-app-line/60 dark:border-app-line bg-app-bg-subtle p-[13px_16px] text-[11px] text-app-ink-muted leading-relaxed"
                   >
                     Gần nhất: {formatCalendarDate(latestCheckIn.date)} ·{" "}
-                    <span className="font-semibold text-[#17150F] dark:text-app-ink">
+                    <span className="font-semibold text-app-ink">
                       {getMoodLabel((latestCheckIn.mood as DailyMood | undefined) ?? "steady")}
                     </span>
                   </div>

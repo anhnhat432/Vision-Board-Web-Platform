@@ -20,7 +20,6 @@ import { formatCalendarDate, getReviewDayLabel } from "../../utils/storage";
 import type { TwelveWeekSystem } from "../../utils/storage-types";
 import type { HeatmapCell, TacticBreakdownItem, WeekTrendPoint } from "../../utils/twelve-week-system-ui";
 import { WeeklyReviewIllustration } from "../illustrations";
-import { PrimaryActionCard } from "../layout/PrimaryActionCard";
 import { SectionBlock } from "../layout/SectionBlock";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";

@@ -23,7 +23,7 @@ import { getTwelveWeekClientPlanId } from "@/features/plan12week/persistence/twe
 import { isApiBaseUrlConfigured } from "@/lib/api/apiClient";
 import { getBackendGoalId } from "@/lib/api/goalLinkStore";
 import { useOptionalAuthContext } from "@/lib/auth/AuthContext";
-import { getGoalArchetypeIcon, MountainMoonIllustration } from "../components/illustrations";
+import { MountainMoonIllustration } from "../components/illustrations";
 import { useBackendProgressOverlayMap } from "../hooks/useBackendProgressOverlay";
 import { usePageTour } from "../hooks/usePageTour";
 import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
@@ -44,7 +44,6 @@ import {
   getTwelveWeekCurrentWeek,
   getTwelveWeekTodayTasks,
   getUserData,
-  type PricingPlanCode,
   recomputeGoalProgressFromWeeks,
   saveUserData,
   toggleTwelveWeekTask,
@@ -53,8 +52,6 @@ import {
 } from "../utils/storage";
 import {
   completedGoalStyle,
-  type FocusGoalData,
-  type GoalMetadata,
   GoalCard,
   GoalFilterChips,
   GoalSummaryStrip,

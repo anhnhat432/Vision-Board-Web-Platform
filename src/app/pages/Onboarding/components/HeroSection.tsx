@@ -33,7 +33,7 @@ export function HeroSection({
   onStart,
   onBreathing,
   onDefer,
-  onHelpToggle,
+  onHelpToggle: _onHelpToggle,
   children,
 }: HeroSectionProps) {
   const reduceMotion = useReducedMotion();

@@ -370,7 +370,7 @@ export function TwelveWeekSystemTabs({
                   {isActive && (
                     <motion.div
                       layoutId="activeTwelveWeekTabIndicator"
-                      className="absolute inset-0 rounded-[10px] bg-[#0C5E3A] dark:bg-[#1A3A2A] -z-10 shadow-sm"
+                      className="absolute inset-0 rounded-[10px] bg-app-accent -z-10 shadow-sm"
                       transition={{ type: "spring", stiffness: 380, damping: 30 }}
                     />
                   )}
