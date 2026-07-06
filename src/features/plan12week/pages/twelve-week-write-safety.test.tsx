@@ -44,6 +44,7 @@ import { getUserData } from "@/app/utils/storage";
 import { getTwelveWeekCurrentWeek } from "@/app/utils/storage-twelve-week";
 import { listStoredPendingMutations } from "@/features/plan12week/persistence/mutationQueue";
 import { getUniversalWeeklyReviewExecutionScore } from "@/features/plan12week/persistence/reviewExecutionScore";
+import { getTodayQueueForSystem } from "@/features/plan12week/pages/12WeekSystem/helpers";
 import {
   readGoal,
   renderAppRoute,
@@ -115,7 +116,12 @@ describe("12-week write-path safety", () => {
 
   it("keeps local task changes on async failure and preserves newer local task changes", async () => {
     const { goalId } = seedTwelveWeekGoal();
-    const initialTasks = readGoal(goalId).twelveWeekSystem?.taskInstances ?? [];
+    const initialSystem = readGoal(goalId).twelveWeekSystem;
+    if (!initialSystem) {
+      throw new Error("Expected seeded 12-week system to exist.");
+    }
+    const initialTasks = initialSystem.taskInstances;
+    const initialTodayQueue = getTodayQueueForSystem(initialSystem);
     expect(initialTasks.length).toBeGreaterThanOrEqual(2);
 
     let resolveSync: ((value: boolean) => void) | null = null;
@@ -129,7 +135,7 @@ describe("12-week write-path safety", () => {
     const taskListCard = (await screen.findByText("Hàng việc hôm nay")).closest("[data-slot='card']");
     expect(taskListCard).not.toBeNull();
 
-    const initialIncompleteTask = initialTasks.find((task) => !task.completed);
+    const initialIncompleteTask = initialTodayQueue.find((task) => !task.completed);
     expect(initialIncompleteTask).toBeDefined();
     const firstCheckbox = within(taskListCard as HTMLElement).getByRole("checkbox", {
       name: `Hoàn thành việc: ${initialIncompleteTask?.title}`,

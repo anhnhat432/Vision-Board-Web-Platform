@@ -71,18 +71,8 @@ export function WeeklyReviewSummary({
       {/* Summary Hero Card */}
       <div
         data-testid="weekly-review-summary"
-        className="relative overflow-hidden rounded-card-lg border border-app-line bg-app-surface p-6 shadow-app-card weekly-card-lift sm:p-8"
+        className="relative overflow-hidden rounded-[var(--app-radius-card-lg)] border border-app-line/70 bg-app-surface p-6 shadow-[var(--app-shadow-card)] sm:p-8"
       >
-        {/* Decorative pin */}
-        <div className="absolute -top-2.5 left-1/2 z-20 flex -translate-x-1/2 items-center justify-center pointer-events-none select-none">
-          <div className="w-3.5 h-3.5 rounded-full bg-app-warm shadow-[inset_0_-1px_2px_rgba(0,0,0,0.2),0_1.5px_3px_rgba(0,0,0,0.15)] border border-white/20 flex items-center justify-center">
-            <div className="w-1.5 h-1.5 bg-white/40 rounded-full" />
-          </div>
-        </div>
-
-        {/* Soft glow */}
-        <div className="absolute -top-1/2 -right-1/4 w-2/3 h-full bg-radial-gradient from-app-accent-soft/30 to-transparent rounded-full pointer-events-none" />
-
         {/* Header */}
         <div className="relative z-10 flex flex-wrap items-start justify-between gap-3 border-b border-app-line pb-4">
           <div className="space-y-1.5">
@@ -281,11 +271,8 @@ export function WeeklyReviewSummary({
             <span className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted block">
               Bài học kinh nghiệm rút ra
             </span>
-            <blockquote className="weekly-insights-quote weekly-insights-quote-warm shadow-3xs italic leading-relaxed text-app-ink">
-              <span className="absolute top-1 left-2.5 text-app-warm/25 text-4xl font-serif leading-none select-none">
-                “
-              </span>
-              <span className="relative z-10 pl-5 block text-xs sm:text-sm font-medium">
+            <blockquote className="rounded-2xl border border-app-warm-border/30 bg-app-warm-soft/35 px-4 py-3 italic leading-relaxed text-app-ink shadow-[var(--app-shadow-sm)]">
+              <span className="block text-xs font-medium sm:text-sm">
                 {summaryInsights}
               </span>
             </blockquote>

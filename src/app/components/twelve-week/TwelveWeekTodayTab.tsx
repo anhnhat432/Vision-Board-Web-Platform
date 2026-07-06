@@ -220,7 +220,7 @@ export function TwelveWeekTodayTab({
       window.removeEventListener("click", handleGlobalClick, true);
     };
   }, []);
-  const toggleTimerRef = useRef<number | null>(null);
+  const toggleTimerByTaskIdRef = useRef<Record<string, number>>({});
   const upcomingStrategicBlock = getUpcomingStrategicBlock(system.weeklyTimeBlocks, new Date());
   const prefersReducedMotion = useReducedMotion();
   const fadeInClassName = "min-w-0";
@@ -249,9 +249,10 @@ export function TwelveWeekTodayTab({
 
   useEffect(() => {
     return () => {
-      if (toggleTimerRef.current) {
-        window.clearTimeout(toggleTimerRef.current);
-      }
+      Object.values(toggleTimerByTaskIdRef.current).forEach((timerId) => {
+        window.clearTimeout(timerId);
+      });
+      toggleTimerByTaskIdRef.current = {};
     };
   }, []);
 
@@ -310,12 +311,14 @@ export function TwelveWeekTodayTab({
           console.error("Failed to toggle task:", error);
         });
     } else {
-      if (toggleTimerRef.current) {
-        window.clearTimeout(toggleTimerRef.current);
+      const existingTimer = toggleTimerByTaskIdRef.current[taskId];
+      if (existingTimer) {
+        window.clearTimeout(existingTimer);
       }
 
       // Hoãn tác vụ re-render cha nặng nề đi 180ms trên production để trình duyệt vẽ checkbox checked mượt mà 60/120fps lập tức
-      toggleTimerRef.current = window.setTimeout(() => {
+      toggleTimerByTaskIdRef.current[taskId] = window.setTimeout(() => {
+        delete toggleTimerByTaskIdRef.current[taskId];
         Promise.resolve(onToggleTask(taskId, completed))
           .then(emitCompletionEvent)
           .catch((error) => {
@@ -468,9 +471,9 @@ export function TwelveWeekTodayTab({
       {/* ── Status chips (nhịp hôm nay) — bổ sung cho bảng tiến độ ở header, không lặp lại ── */}
       <div
         data-testid="today-dashboard-cards"
-        className="order-0 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-2.5"
+        className="order-0 grid grid-cols-2 gap-2 rounded-[18px] border border-app-line/70 bg-app-surface/78 p-1.5 shadow-[var(--app-shadow-sm)] sm:flex sm:flex-wrap sm:gap-2.5"
       >
-        <span className="inline-flex min-w-0 items-center gap-2 rounded-full border border-app-accent/20 bg-app-accent-soft/40 px-3 py-1.5 text-[11px] font-semibold text-app-accent sm:px-3.5 sm:text-xs">
+        <span className="inline-flex min-w-0 items-center gap-2 rounded-full border border-app-accent/20 bg-app-accent-soft/45 px-3 py-1.5 text-[11px] font-semibold text-app-accent sm:px-3.5 sm:text-xs">
           <CheckCircle2 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
           <span className="min-w-0 break-words leading-tight">
             <span className="font-mono font-bold tabular-nums">{todayCompletionLabel}</span> hôm nay
@@ -479,13 +482,13 @@ export function TwelveWeekTodayTab({
         <span
           className={`inline-flex min-w-0 items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-semibold sm:px-3.5 sm:text-xs ${
             overdueOpenCount > 0
-              ? "border-app-warm-border/40 bg-app-warm-soft/30 text-app-warm"
-              : "border-app-line/50 bg-app-surface text-app-ink-soft"
+              ? "border-app-warm-border/45 bg-app-warm-soft/35 text-app-warm"
+              : "border-transparent bg-app-bg-subtle/70 text-app-ink-soft"
           }`}
         >
           <span
             className={`inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 font-mono text-[11px] font-bold tabular-nums ${
-              overdueOpenCount > 0 ? "bg-app-warm text-white" : "bg-app-bg-subtle text-app-ink-muted"
+              overdueOpenCount > 0 ? "bg-app-warm text-white" : "bg-app-surface text-app-ink-muted"
             }`}
           >
             {overdueOpenCount}
@@ -498,8 +501,8 @@ export function TwelveWeekTodayTab({
         <span
           className={`col-span-2 inline-flex min-w-0 items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-semibold sm:col-span-1 sm:px-3.5 sm:text-xs ${
             reviewDueToday
-              ? "border-app-warm-border/40 bg-app-warm-soft/30 text-app-warm"
-              : "border-app-accent/20 bg-app-accent-soft/40 text-app-accent"
+              ? "border-app-warm-border/45 bg-app-warm-soft/35 text-app-warm"
+              : "border-transparent bg-app-bg-subtle/70 text-app-ink-soft"
           }`}
         >
           <CalendarClock className="h-3.5 w-3.5" aria-hidden="true" />
@@ -513,17 +516,16 @@ export function TwelveWeekTodayTab({
         <div
           data-testid="today-next-action-panel"
           data-state={nextActionState.key}
-          className="order-1 rounded-card-lg border-l-[4px] bg-white p-4 dark:bg-app-surface sm:rounded-[18px] sm:p-6 sm:px-[26px]"
-          style={{ border: "1px solid rgba(12,94,58,0.18)", borderLeft: "4px solid #0c5e3a" }}
+          className="order-1 overflow-hidden rounded-[var(--app-radius-card-lg)] border border-app-accent/20 bg-app-accent-subtle/45 p-5 shadow-[var(--app-shadow-sm)] dark:bg-app-accent-subtle/20 sm:p-6 sm:px-[26px]"
         >
           <p className="mb-2.5 flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.14em] text-app-accent sm:mb-3">
-            <Sparkles className="h-3 w-3" />
+            <span className="h-1.5 w-1.5 rounded-full bg-app-accent" />
             {nextActionState.key === "setup-needed" ? "Cần thiết lập" : "Hành động tiếp theo"}
           </p>
           <h2 className="m-0 mb-2 font-serif text-xl font-bold tracking-[-0.01em] text-app-ink sm:text-[23px]">
             {nextActionState.title}
           </h2>
-          <p className="m-0 mb-4 max-w-[62ch] text-[13px] leading-[1.5] text-app-ink-soft sm:mb-[18px] sm:text-[13.5px]">
+          <p className="m-0 mb-4 max-w-[62ch] text-[13px] leading-[1.6] text-app-ink-soft sm:mb-[18px] sm:text-[13.5px]">
             {nextActionState.description}
           </p>
           {nextActionState.onAction && nextActionState.actionLabel ? (
@@ -615,29 +617,22 @@ export function TwelveWeekTodayTab({
       {hasPrimaryTask && firstPriorityTask && !isHeroDismissed && (
         <div
           data-testid="today-primary-hero"
-          className={`order-2 bg-white rounded-card-lg border shadow-app-sm overflow-hidden ${
+          className={`order-2 overflow-hidden rounded-[var(--app-radius-card-lg)] border bg-app-surface shadow-[var(--app-shadow-card)] ${
             isPrimaryTaskCompleted
               ? "border-app-accent/20"
               : primaryTaskOverdue
-                ? "border-app-warm-border/40"
-                : ""
+                ? "border-app-warm-border/45"
+                : "border-app-accent/20"
           }`}
-          style={
-            !isPrimaryTaskCompleted && !primaryTaskOverdue
-              ? { border: "1px solid rgba(12,94,58,0.18)", borderLeft: "4px solid #0c5e3a" }
-              : primaryTaskOverdue
-                ? { borderLeft: "4px solid #e07a5f" }
-                : undefined
-          }
         >
-          <div className="flex flex-col sm:flex-row">
+          <div className="flex flex-col">
             <div
-              className={`h-1.5 w-full shrink-0 sm:h-auto sm:w-2 ${
-                isPrimaryTaskCompleted ? "bg-app-accent/40" : primaryTaskOverdue ? "bg-app-warm/50" : "bg-app-accent/50"
+              className={`h-1 w-full shrink-0 ${
+                isPrimaryTaskCompleted ? "bg-app-accent/35" : primaryTaskOverdue ? "bg-app-warm/45" : "bg-app-accent/45"
               }`}
               aria-hidden="true"
             />
-            <div className="relative min-w-0 flex-1 p-4 sm:p-7">
+            <div className="relative min-w-0 flex-1 p-5 sm:p-7">
               {isPrimaryTaskCompleted ? (
                 <>
                   <button
@@ -688,10 +683,10 @@ export function TwelveWeekTodayTab({
                   )}
                   {primaryTaskCommitmentQuote && (
                     <p
-                      className={`mt-4 text-sm italic leading-relaxed max-w-2xl border-l-2 pl-3.5 py-1 font-serif ${
+                      className={`mt-4 max-w-2xl rounded-2xl border px-4 py-3 font-serif text-sm italic leading-relaxed ${
                         primaryTaskOverdue
-                          ? "border-app-warm/40 text-app-warm-strong"
-                          : "border-app-accent/30 text-app-ink-soft"
+                          ? "border-app-warm-border/35 bg-app-warm-soft/30 text-app-warm-strong"
+                          : "border-app-accent/15 bg-app-accent-soft/25 text-app-ink-soft"
                       }`}
                     >
                       {primaryTaskCommitmentQuote}
@@ -731,7 +726,7 @@ export function TwelveWeekTodayTab({
         <div className={fadeInClassName}>
           <Card
             data-tour-id="system-today-queue"
-            className={`min-h-[360px] min-w-0 overflow-hidden rounded-[20px] border border-app-line bg-white p-4 dark:border-app-line dark:bg-app-surface sm:min-h-[420px] sm:p-6 lg:h-full`}
+            className="min-h-[360px] min-w-0 overflow-hidden rounded-[22px] border border-app-line/70 bg-app-surface p-4 shadow-[var(--app-shadow-card)] dark:border-app-line dark:bg-app-surface sm:min-h-[420px] sm:p-6 lg:h-full"
           >
             <CardHeader className="min-w-0 [&>*+*]:mt-0 px-0 pt-0 pb-0">
               <div className="flex min-w-0 flex-wrap items-end justify-between gap-3">
@@ -793,7 +788,7 @@ export function TwelveWeekTodayTab({
                   />
                 )
               ) : (
-                <MotionStaggerList className="divide-y divide-app-line/15">
+                <MotionStaggerList className="space-y-2.5">
                   {todayQueue.map((task, taskIndex) => {
                     const taskCompleted = optimisticTaskCompletionById[task.id] ?? task.completed;
                     const isOverdue = !taskCompleted && task.scheduledDate < todayDateKey;
@@ -814,11 +809,11 @@ export function TwelveWeekTodayTab({
                     return (
                       <MotionStaggerItem
                         key={task.id}
-                        className={`group flex min-w-0 items-start gap-3 rounded-[14px] px-2.5 py-3 transition-colors duration-150 hover:bg-app-bg-subtle/60 ${
-                          taskCompleted ? "opacity-50" : ""
+                        className={`group flex min-w-0 items-start gap-3 rounded-2xl border border-app-line/55 bg-app-bg-subtle/35 px-3 py-3.5 transition-all duration-150 hover:border-app-accent/20 hover:bg-app-accent-subtle/12 ${
+                          taskCompleted ? "opacity-60" : ""
                         }`}
                       >
-                        <span className="font-mono text-xs font-semibold text-[#C7C2B5] tabular-nums pt-0.5 shrink-0">
+                        <span className="shrink-0 pt-0.5 font-mono text-xs font-semibold tabular-nums text-app-ink-muted/60">
                           {taskNumber}
                         </span>
                         <Checkbox
@@ -1002,7 +997,7 @@ export function TwelveWeekTodayTab({
           className={fadeInClassName}
           style={{ animationDelay: "0.06s" }}
         >
-          <Card className="scroll-mt-24 min-w-0 overflow-hidden rounded-[20px] border border-app-line bg-white p-4 dark:border-app-line dark:bg-app-surface sm:p-6 lg:h-full">
+          <Card className="scroll-mt-24 min-w-0 overflow-hidden rounded-[22px] border border-app-line/70 bg-app-surface p-4 shadow-[var(--app-shadow-card)] dark:border-app-line dark:bg-app-surface sm:p-6 lg:h-full">
             <div className="min-w-0">
               <div className="flex min-w-0 items-start justify-between gap-3">
                 <div className="min-w-0">

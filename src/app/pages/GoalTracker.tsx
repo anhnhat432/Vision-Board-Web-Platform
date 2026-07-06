@@ -40,9 +40,6 @@ import {
   type Goal,
   getCalendarDayDifference,
   getGoalExecutionStats,
-  getLifeAreaLabel,
-  getTwelveWeekCurrentWeek,
-  getTwelveWeekTodayTasks,
   getUserData,
   recomputeGoalProgressFromWeeks,
   saveUserData,
@@ -503,133 +500,53 @@ function GoalTrackerContent({
         </AlertDialogContent>
       </AlertDialog>
 
-      <div className="space-y-[18px]">
-        {/* HERO + FOCUS RAIL */}
-        <section className="grid gap-[18px] lg:grid-cols-[1fr_320px]">
-          {/* Hero Section */}
-          <section
-            data-tour-id="goaltracker-hero"
-            className="relative grid overflow-hidden rounded-[var(--app-radius-card-lg)] border border-app-line bg-app-surface p-6 sm:p-[30px_32px] shadow-[var(--app-shadow-card)] lg:grid-cols-[minmax(0,1fr)_190px] lg:items-center lg:gap-6 dark:border-app-line/70 dark:bg-app-surface"
-          >
-            <div className="min-w-0">
-              <div className="mb-3.5 flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.14em] text-app-accent">
-                <span className="h-1.5 w-1.5 rounded-full bg-app-accent" />
-                Mục tiêu
-              </div>
-              <h1 className="font-serif text-[clamp(26px,3vw,36px)] font-extrabold leading-[1.04] tracking-[-0.02em] text-app-ink">
-                Hành trình mục tiêu
-              </h1>
-              <p className="mt-3 max-w-[46ch] text-sm leading-[1.55] text-app-ink-soft">
-                Tập trung vào những gì cốt lõi nhất. Chia nhỏ mục tiêu lớn thành các chu kỳ 12 tuần để hành động đều
-                đặn.
-              </p>
-              <div className="mt-5 flex flex-col flex-wrap gap-2.5 sm:flex-row">
-                <Button
-                  className="inline-flex h-auto items-center justify-center gap-[9px] rounded-full bg-app-accent px-5 py-3 text-[13.5px] font-bold text-white shadow-[var(--app-shadow-sm)] transition-all duration-200 hover:bg-app-accent-hover sm:w-auto"
-                  onClick={handleStartGuidedGoalFlow}
-                >
-                  <Zap className="h-4 w-4" />
-                  Bắt đầu chu kỳ 12 tuần
-                </Button>
-                <Button
-                  variant="outline"
-                  className="inline-flex h-auto items-center justify-center gap-2 rounded-full border border-app-line/14 bg-app-surface px-5 py-3 text-[13.5px] font-semibold text-app-ink shadow-none transition-all duration-200 hover:bg-app-bg sm:w-auto dark:border-app-line dark:bg-app-surface"
-                  onClick={handleStartDirectGoalFlow}
-                >
-                  <Plus className="h-4 w-4" />
-                  Tạo nhanh mục tiêu
-                </Button>
-              </div>
+      <div className="space-y-5 sm:space-y-6">
+        {/* HERO */}
+        <section
+          data-tour-id="goaltracker-hero"
+          className="relative grid overflow-hidden rounded-[var(--app-radius-card-lg)] border border-app-line/70 bg-app-surface shadow-[var(--app-shadow-card)] lg:grid-cols-[minmax(0,1fr)_280px] dark:border-app-line/70 dark:bg-app-surface"
+        >
+          <div className="min-w-0 px-6 py-7 sm:px-8 sm:py-8 lg:px-9 lg:py-9">
+            <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-app-accent/15 bg-app-accent-soft/45 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.14em] text-app-accent">
+              <span className="h-1.5 w-1.5 rounded-full bg-app-accent" />
+              Core loop
             </div>
-            <div className="relative mt-6 min-h-[170px] overflow-hidden rounded-2xl lg:mt-0 lg:h-full">
-              <img
-                src="/vision_board_detail.png"
-                alt="Bản đồ tầm nhìn và mục tiêu"
-                className="absolute inset-0 h-full w-full object-cover dark:brightness-[0.85] dark:contrast-[1.05]"
-                loading="lazy"
-              />
-              <div className="absolute inset-0 bg-gradient-to-br from-app-accent/10 to-transparent" />
-            </div>
-          </section>
-
-          {/* Focus Rail bên phải */}
-          <div className="flex flex-col gap-[14px]">
-            {/* Tiêu điểm hôm nay mini */}
-            <div className="rounded-[18px] border border-app-line bg-app-surface p-5 shadow-[0_16px_36px_-28px_rgba(23,21,15,0.3)]">
-              <div className="flex items-center gap-2 mb-3.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-app-accent shrink-0" />
-                <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-app-accent">
-                  Tiêu điểm hôm nay
-                </p>
-              </div>
-              {focusGoal ? (
-                (() => {
-                  const { goal, isTwelveWeek } = focusGoal;
-                  const system = goal.twelveWeekSystem;
-                  const firstOpenTask =
-                    isTwelveWeek && system
-                      ? getTwelveWeekTodayTasks(system).find((t) => !t.completed) || null
-                      : null;
-                  return (
-                    <div className="flex items-start gap-3">
-                      <span className="w-5 h-5 rounded-full border-2 border-app-line/60 shrink-0 mt-0.5" />
-                      <div className="min-w-0">
-                        {firstOpenTask ? (
-                          <>
-                            <span
-                              className="goaltracker-visual-text block text-[13.5px] font-semibold leading-[1.35] text-app-ink line-clamp-2"
-                              data-visual-text={firstOpenTask.title}
-                            />
-                            <span
-                              className="goaltracker-visual-text mt-1 block text-[11.5px] text-app-ink-muted line-clamp-1"
-                              data-visual-text={goal.title}
-                            />
-                          </>
-                        ) : (
-                          <>
-                            <span
-                              className="goaltracker-visual-text block text-[13.5px] font-semibold leading-[1.35] text-app-ink line-clamp-2"
-                              data-visual-text={goal.title}
-                            />
-                            <p className="text-xs text-app-ink-muted mt-1">
-                              {isTwelveWeek && system
-                                ? `Tuần ${getTwelveWeekCurrentWeek(system)}/12 · ${getLifeAreaLabel(goal.category)}`
-                                : getLifeAreaLabel(goal.category)}
-                            </p>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })()
-              ) : (
-                <p className="text-xs text-app-ink-muted italic">Không có tiêu điểm hành động cần xử lý.</p>
-              )}
-            </div>
-
-            {/* Quote card */}
-            <div className="rounded-[18px] bg-app-ink px-[22px] py-[20px] text-white relative overflow-hidden">
-              <div
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                  background: "radial-gradient(circle at 80% 0%, rgba(198,242,78,0.16), transparent 60%)",
-                }}
-              />
-              <svg
-                width="22"
-                height="22"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#C6F24E"
-                strokeWidth="2"
-                className="relative mb-2.5"
-                aria-hidden="true"
+            <h1 className="max-w-[11ch] font-serif text-[clamp(30px,4vw,46px)] font-extrabold leading-[0.98] tracking-[-0.035em] text-app-ink sm:max-w-none">
+              Hành trình mục tiêu
+            </h1>
+            <p className="mt-4 max-w-[54ch] text-[14px] leading-[1.7] text-app-ink-soft sm:text-[15px]">
+              Chọn đúng việc, giữ nhịp tuần và biến mục tiêu lớn thành tiến triển nhìn thấy được mỗi ngày.
+            </p>
+            <div className="mt-6 flex flex-col flex-wrap gap-2.5 sm:flex-row">
+              <Button
+                className="inline-flex h-auto items-center justify-center gap-[9px] rounded-full bg-app-accent px-5 py-3 text-[13.5px] font-bold text-white shadow-[var(--app-shadow-sm)] transition-all duration-200 hover:bg-app-accent-hover sm:w-auto"
+                onClick={handleStartGuidedGoalFlow}
               >
-                <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z" />
-                <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z" />
-              </svg>
-              <p className="relative font-serif italic text-[13.5px] leading-[1.5] text-app-bg">
-                Đừng cố gắng làm mọi thứ. Hãy làm những điều thực sự quan trọng một cách trọn vẹn nhất.
+                <Zap className="h-4 w-4" />
+                Bắt đầu chu kỳ 12 tuần
+              </Button>
+              <Button
+                variant="outline"
+                className="inline-flex h-auto items-center justify-center gap-2 rounded-full border border-app-line bg-app-surface px-5 py-3 text-[13.5px] font-semibold text-app-ink shadow-none transition-all duration-200 hover:bg-app-bg sm:w-auto dark:border-app-line dark:bg-app-surface"
+                onClick={handleStartDirectGoalFlow}
+              >
+                <Plus className="h-4 w-4" />
+                Tạo nhanh mục tiêu
+              </Button>
+            </div>
+          </div>
+          <div className="relative min-h-[210px] border-t border-app-line/60 bg-app-bg-subtle lg:min-h-full lg:border-l lg:border-t-0">
+            <img
+              src="/vision_board_detail.png"
+              alt="Bản đồ tầm nhìn và mục tiêu"
+              className="absolute inset-0 h-full w-full object-cover opacity-90 saturate-[0.92] dark:brightness-[0.82] dark:contrast-[1.05]"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-gradient-to-br from-app-surface/15 via-transparent to-app-accent/10" />
+            <div className="absolute bottom-4 left-4 right-4 rounded-2xl border border-white/35 bg-app-surface/88 p-4 shadow-[0_18px_46px_-32px_rgba(23,21,15,0.55)] backdrop-blur-md dark:border-app-line/60 dark:bg-app-surface/90">
+              <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-app-accent">Nhịp hôm nay</p>
+              <p className="mt-1 text-sm font-semibold leading-snug text-app-ink">
+                {summary.completedTasks}/{summary.totalTasks || 0} việc đã chốt · {summary.activeSystems} chu kỳ đang chạy
               </p>
             </div>
           </div>

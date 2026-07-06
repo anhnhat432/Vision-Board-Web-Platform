@@ -140,14 +140,7 @@ export function WeeklyReviewForm({
   return (
     <div className="space-y-5 sm:space-y-6">
       {/* Form Hero Card */}
-      <div className="relative overflow-hidden rounded-card-lg border border-app-line/45 bg-app-surface p-5 pt-8 shadow-app-card weekly-card-lift sm:p-8 sm:pt-10">
-        {/* Decorative pin */}
-        <div className="absolute -top-2.5 left-1/2 z-20 flex -translate-x-1/2 items-center justify-center pointer-events-none select-none">
-          <div className="w-3.5 h-3.5 rounded-full bg-app-warm shadow-[inset_0_-1px_2px_rgba(0,0,0,0.2),0_1.5px_3px_rgba(0,0,0,0.15)] border border-white/20 flex items-center justify-center">
-            <div className="w-1.5 h-1.5 bg-white/40 rounded-full" />
-          </div>
-        </div>
-
+      <div className="relative overflow-hidden rounded-[var(--app-radius-card-lg)] border border-app-line/70 bg-app-surface p-5 shadow-[var(--app-shadow-card)] sm:p-8">
         {/* Header metadata */}
         <div className="relative z-10 flex flex-wrap items-center justify-between gap-2.5 text-[10px] font-bold uppercase tracking-widest text-app-ink-muted">
           <span className="font-serif text-xs font-bold tracking-normal normal-case text-app-accent bg-app-accent-soft/75 px-3 py-1 rounded-lg border border-app-line/20">
@@ -213,14 +206,11 @@ export function WeeklyReviewForm({
       </div>
 
       {/* Review Form Card */}
-      <div className="relative space-y-6 rounded-card-lg border border-app-line/45 bg-app-surface p-5 pt-9 shadow-app-md weekly-card-lift sm:space-y-7 sm:p-8 sm:pt-10">
-        {/* Washi tape */}
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-28 h-5.5 bg-app-warm-soft/40 backdrop-blur-[0.5px] rotate-[-1deg] border border-dashed border-app-warm-border/40 shadow-[0_1px_2px_rgba(0,0,0,0.01)] pointer-events-none select-none z-20" />
-
-        <div className="space-y-1.5 pt-1 border-b border-app-line pb-4">
+      <div className="relative space-y-6 rounded-[var(--app-radius-card-lg)] border border-app-line/70 bg-app-surface p-5 shadow-[var(--app-shadow-card)] sm:space-y-7 sm:p-8">
+        <div className="space-y-1.5 border-b border-app-line/70 pb-4">
           <div className="flex items-center gap-2">
-            <span className="inline-block w-2.5 h-4 bg-app-warm rounded-md" />
-            <h3 className="font-serif text-xl sm:text-2xl font-bold text-app-ink">Đánh giá và cam kết tuần</h3>
+            <span className="h-1.5 w-1.5 rounded-full bg-app-warm" />
+            <h3 className="font-serif text-xl font-bold text-app-ink sm:text-2xl">Đánh giá và cam kết tuần</h3>
           </div>
           <p className="max-w-[65ch] text-xs leading-relaxed text-app-ink-soft sm:text-sm">
             Ghi chép lại bài học tuần cũ và thiết lập ưu tiên tuần mới để giữ nhịp thực thi ổn định.
@@ -348,7 +338,7 @@ export function WeeklyReviewForm({
                       >
                         <p className="text-xs sm:text-sm font-semibold text-app-ink leading-snug">{commitment}</p>
                         {commitmentQuote && (
-                          <p className="text-xs italic text-app-ink-soft leading-relaxed pl-3 border-l-2 border-app-accent/40 bg-app-accent-soft/20 py-1 rounded-r-md">
+                          <p className="rounded-xl border border-app-accent/12 bg-app-accent-soft/25 px-3 py-2 text-xs italic leading-relaxed text-app-ink-soft">
                             {commitmentQuote}
                           </p>
                         )}

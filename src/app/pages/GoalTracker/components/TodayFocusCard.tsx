@@ -19,24 +19,27 @@ export function TodayFocusCard({
 }: TodayFocusCardProps) {
   if (!focusData) {
     return (
-      <div className="rounded-[var(--app-radius-card)] border border-app-line bg-app-surface p-5 shadow-[var(--app-shadow-sm)] text-center py-6 space-y-3 relative overflow-hidden">
-        <div className="absolute -top-2 left-6 w-12 h-3.5 bg-app-accent/10 dark:bg-app-accent/20 backdrop-blur-[1px] rotate-[-2deg] border border-dashed border-app-accent/15 z-10" />
-        <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-app-accent-soft text-app-accent">
-          <Target className="h-5 w-5" />
+      <div className="relative overflow-hidden rounded-[var(--app-radius-card-lg)] border border-app-line/70 bg-app-surface px-5 py-6 shadow-[var(--app-shadow-sm)] sm:px-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-start gap-4">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-app-accent/15 bg-app-accent-soft/55 text-app-accent">
+              <Target className="h-5 w-5" />
+            </div>
+            <div className="min-w-0 space-y-1.5">
+              <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-app-accent">Tiêu điểm hôm nay</p>
+              <h3 className="text-base font-bold leading-snug text-app-ink">Không có việc cần ưu tiên ngay</h3>
+              <p className="max-w-2xl text-sm leading-relaxed text-app-ink-soft">
+                Bạn đã xử lý xong các mục tiêu đang cần chú ý. Có thể bắt đầu một chu kỳ mới khi đã sẵn sàng.
+              </p>
+            </div>
+          </div>
+          <Button
+            onClick={onStartGuidedGoalFlow}
+            className="h-auto rounded-full bg-app-accent px-5 py-3 text-[13px] font-bold text-white hover:bg-app-accent-hover sm:shrink-0"
+          >
+            Thiết lập mục tiêu mới
+          </Button>
         </div>
-        <div className="space-y-1">
-          <h3 className="text-sm font-bold text-app-ink">Tất cả mục tiêu đã hoàn tất!</h3>
-          <p className="text-xs text-app-ink-soft leading-relaxed max-w-md mx-auto">
-            Không có tiêu điểm hành động cần xử lý. Hãy thiết lập một chu kỳ 12 tuần mới hoặc thêm mục tiêu thường để
-            tiếp tục hành trình.
-          </p>
-        </div>
-        <Button
-          onClick={onStartGuidedGoalFlow}
-          className="bg-app-accent hover:bg-app-accent-hover text-white text-xs font-bold rounded-lg px-4 py-2"
-        >
-          Thiết lập mục tiêu mới
-        </Button>
       </div>
     );
   }
@@ -85,57 +88,44 @@ export function TodayFocusCard({
   };
 
   return (
-    <div className="rounded-[18px] bg-app-accent-subtle dark:bg-app-accent-subtle border border-app-accent/20 px-6 py-[22px] shadow-[var(--app-shadow-sm)] flex flex-col sm:flex-row sm:items-center justify-between gap-5 relative overflow-hidden">
-      <div className="space-y-3 min-w-0 flex-1 z-10">
-        <div className="flex items-center gap-[7px] mb-[10px]">
-          <span className="w-1.5 h-1.5 rounded-full bg-app-accent shrink-0" />
-          <p className="text-[10px] font-extrabold uppercase tracking-[0.12em] text-app-accent">
-            Tiêu điểm hôm nay
-          </p>
-        </div>
+    <div className="relative overflow-hidden rounded-[var(--app-radius-card-lg)] border border-app-accent/20 bg-app-accent-subtle/55 px-5 py-5 shadow-[var(--app-shadow-sm)] dark:bg-app-accent-subtle/25 sm:px-6 sm:py-6">
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0 flex-1 space-y-3.5">
+          <div className="flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-app-accent" />
+            <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-app-accent">Tiêu điểm hôm nay</p>
+          </div>
 
-        <div className="space-y-[5px]">
-          <h2
-            className="goaltracker-visual-text block text-[16px] font-bold leading-[1.4] text-app-ink break-words"
-            data-visual-text={goal.title}
-            aria-label={goal.title}
-          >
-            <span className="sr-only">{goal.title}</span>
-          </h2>
-          <p className="text-[12px] text-[#5C7A5C] font-semibold">
-            {isTwelveWeek ? `Tuần ${systemCurrentWeek ?? "-"}/12` : "Mục tiêu thường"} ·{" "}
-            <span className="font-bold text-app-accent">{getLifeAreaLabel(goal.category)}</span>
-          </p>
-        </div>
+          <div className="space-y-1.5">
+            <h2 className="break-words text-lg font-bold leading-snug tracking-[-0.01em] text-app-ink sm:text-xl">
+              {goal.title}
+            </h2>
+            <p className="text-[12.5px] font-semibold text-app-ink-soft">
+              {isTwelveWeek ? `Tuần ${systemCurrentWeek ?? "-"}/12` : "Mục tiêu thường"} ·{" "}
+              <span className="text-app-accent">{getLifeAreaLabel(goal.category)}</span>
+            </p>
+          </div>
 
-        <div className="flex items-start gap-2 pt-0.5 min-w-0">
           {showTaskCheckbox && firstOpenTask ? (
-            <div className="inline-flex items-center gap-[10px] rounded-[11px] border border-app-accent/[0.16] bg-white/70 dark:bg-white/10 px-[15px] py-[11px] transition-all duration-300">
+            <div className="inline-flex max-w-full items-center gap-3 rounded-2xl border border-app-accent/16 bg-app-surface/78 px-4 py-3 shadow-[0_12px_28px_-24px_rgba(23,21,15,0.45)] dark:bg-app-surface/80">
               <button
                 type="button"
                 onClick={() => handleToggleTask(goal.id, firstOpenTask.id)}
-                className="flex shrink-0 items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-app-accent/35 bg-app-surface text-app-accent transition-colors hover:bg-app-accent-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                 aria-label="Chốt việc"
               >
-                <span className="flex size-[18px] items-center justify-center rounded-full border-2 border-app-accent hover:bg-app-accent/10 transition-all duration-200">
-                  <Circle className="size-3 text-app-ink-muted hover:text-app-accent shrink-0 opacity-0" />
-                </span>
+                <Circle className="size-3.5 shrink-0" />
               </button>
-              <span
-                className="goaltracker-visual-text block truncate text-[13px] font-semibold text-app-ink"
-                data-visual-text={firstOpenTask.title}
-              />
+              <span className="min-w-0 truncate text-[13.5px] font-semibold text-app-ink">{firstOpenTask.title}</span>
             </div>
           ) : (
-            <p className="text-sm text-app-ink-soft leading-relaxed font-medium">💡 {recommendedAction}</p>
+            <p className="max-w-2xl text-sm font-medium leading-relaxed text-app-ink-soft">{recommendedAction}</p>
           )}
         </div>
-      </div>
 
-      <div className="shrink-0 z-10 self-end sm:self-center">
         <Button
           onClick={handleCtaClick}
-          className="bg-app-accent text-white hover:bg-app-accent-hover font-bold rounded-full px-[22px] py-[13px] text-[13.5px] shadow-none transition-all duration-200 flex items-center gap-[9px] whitespace-nowrap"
+          className="h-auto rounded-full bg-app-accent px-[22px] py-[13px] text-[13.5px] font-bold text-white shadow-none transition-all duration-200 hover:bg-app-accent-hover sm:shrink-0"
         >
           {ctaLabel}
           <ArrowRight className="h-4 w-4" />
