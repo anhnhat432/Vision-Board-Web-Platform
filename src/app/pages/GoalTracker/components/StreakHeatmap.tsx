@@ -95,38 +95,45 @@ export function StreakHeatmap({ system }: StreakHeatmapProps) {
   }, [startDate, system.taskInstances]);
 
   return (
-    <div className="space-y-1.5 pt-1">
-      <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-[0.08em] text-app-ink-muted">
+    <div className="space-y-2 pt-1">
+      <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-bold uppercase tracking-[0.08em] text-app-ink-muted">
         <span>Nhịp độ hành động</span>
-        <span className="text-[10px] font-normal normal-case tracking-normal text-app-ink-muted/70">Hover xem chi tiết</span>
+        <span className="text-[10px] font-semibold normal-case tracking-normal text-app-ink-muted/75">
+          Chạm hoặc hover từng ô để xem ngày
+        </span>
       </div>
 
-      <div className="space-y-[3px]">
-        {DAY_ROWS.map((row, rowIdx) => {
-          return (
-            <div key={`dayrow-${row.key}`} className="grid grid-cols-[22px_repeat(12,1fr)] gap-[3px] items-center">
-              <span className="text-[9px] text-app-ink-muted font-mono">{row.label}</span>
-              {weeks.map((weekDays) => {
-                const day = weekDays[rowIdx];
-                if (!day) return null;
-                return (
-                  <div key={day.dateStr} className="relative group">
-                    <div
-                      className={cn(
-                        "w-full h-[12px] rounded-[3px] block transition-colors duration-150 cursor-pointer hover:scale-105",
-                        day.colorClass,
-                      )}
-                    />
-                    <div className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 hidden group-hover:block z-30 bg-app-ink text-app-bg text-[10px] rounded px-2 py-1 whitespace-nowrap shadow-[var(--app-shadow-md)] pointer-events-none border border-app-line/40 leading-normal">
-                      {day.label}
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-app-ink" />
+      <div className="rounded-2xl border border-app-line/60 bg-app-bg-subtle/40 p-2.5">
+        <div className="space-y-[3px]">
+          {DAY_ROWS.map((row, rowIdx) => {
+            return (
+              <div key={`dayrow-${row.key}`} className="grid grid-cols-[22px_repeat(12,1fr)] items-center gap-[3px]">
+                <span className="font-mono text-[9px] text-app-ink-muted">{row.label}</span>
+                {weeks.map((weekDays) => {
+                  const day = weekDays[rowIdx];
+                  if (!day) return null;
+                  return (
+                    <div key={day.dateStr} className="group relative">
+                      <button
+                        type="button"
+                        className={cn(
+                          "block h-[12px] w-full cursor-default rounded-[4px] transition-transform duration-150 hover:scale-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
+                          day.colorClass,
+                        )}
+                        aria-label={day.label}
+                        title={day.label}
+                      />
+                      <div className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-1.5 hidden -translate-x-1/2 whitespace-nowrap rounded border border-app-line/40 bg-app-ink px-2 py-1 text-[10px] leading-normal text-app-bg shadow-[var(--app-shadow-md)] group-hover:block group-focus-within:block">
+                        {day.label}
+                        <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-app-ink" />
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          );
-        })}
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

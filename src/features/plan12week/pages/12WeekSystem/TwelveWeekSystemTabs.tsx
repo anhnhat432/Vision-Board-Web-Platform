@@ -341,7 +341,7 @@ export function TwelveWeekSystemTabs({
         <Tabs value={activeTab} onValueChange={handleTabChange} className="block overflow-x-auto scrollbar-none">
           <TabsList
             aria-label="Điều hướng hệ 12 tuần"
-            className="inline-flex rounded-[14px] bg-app-surface p-[5px] gap-1 border border-app-line w-fit"
+            className="inline-flex w-fit gap-1 rounded-[18px] border border-app-line/70 bg-app-surface/88 p-1.5 shadow-[var(--app-shadow-sm)]"
           >
             {TWELVE_WEEK_SECTION_TABS.map(({ value, label, icon: Icon }) => {
               const hasDot = (value === "today" && showTodayDot) || (value === "week" && showWeekDot);
@@ -354,23 +354,20 @@ export function TwelveWeekSystemTabs({
                   value={value}
                   aria-controls={tabPanelId}
                   aria-label={`Mở tab ${label}`}
-                  className={`relative flex min-h-11 flex-none cursor-pointer items-center justify-center gap-1.5 rounded-[10px] px-3 py-2 text-[12px] font-semibold leading-tight transition-all duration-150 data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=inactive]:text-app-ink-soft hover:data-[state=inactive]:text-app-ink z-10 sm:min-h-11 sm:gap-2 sm:px-[18px] sm:py-[10px] sm:text-[13px]`}
+                  className="relative z-10 flex min-h-11 flex-none cursor-pointer items-center justify-center gap-1.5 rounded-[13px] px-3.5 py-2 text-[12px] font-bold leading-tight text-app-ink-soft transition-all duration-150 data-[state=active]:bg-transparent data-[state=active]:text-white hover:data-[state=inactive]:bg-app-bg hover:data-[state=inactive]:text-app-ink sm:min-h-11 sm:gap-2 sm:px-[18px] sm:py-[10px] sm:text-[13px]"
                 >
-                  <Icon
-                    className="h-[15px] w-[15px] shrink-0 transition-transform duration-150 group-hover:scale-110"
-                    aria-hidden="true"
-                  />
+                  <Icon className="h-[15px] w-[15px] shrink-0" aria-hidden="true" />
                   <span>{label}</span>
                   {hasDot && (
-                    <span className="absolute top-1 right-1 flex h-2 w-2 z-20">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-app-status-warning opacity-75" />
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-app-status-warning" />
+                    <span className="absolute right-1.5 top-1.5 z-20 flex h-2 w-2">
+                      <span className="absolute inline-flex h-full w-full rounded-full bg-app-status-warning opacity-70 motion-safe:animate-ping" />
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-app-status-warning" />
                     </span>
                   )}
                   {isActive && (
                     <motion.div
                       layoutId="activeTwelveWeekTabIndicator"
-                      className="absolute inset-0 rounded-[10px] bg-app-accent -z-10 shadow-sm"
+                      className="absolute inset-0 -z-10 rounded-[13px] bg-app-accent shadow-[var(--app-shadow-sm)]"
                       transition={{ type: "spring", stiffness: 380, damping: 30 }}
                     />
                   )}
