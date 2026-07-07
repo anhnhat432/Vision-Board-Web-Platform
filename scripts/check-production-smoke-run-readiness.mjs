@@ -9,6 +9,9 @@ const RELEVANT_LOCAL_FILES = [
   "scripts/smoke-production-e2e.mjs",
   "scripts/smoke-production-quick.mjs",
   ".github/workflows/production-smoke-e2e.yml",
+  "src/app/components/twelve-week/TwelveWeekTodayTab.tsx",
+  "src/app/components/twelve-week/TwelveWeekTodayTab.test.tsx",
+  "docs/specs/2026-07-06-production-smoke-today-task-toggle.md",
 ];
 
 function readRunListJson() {
@@ -95,11 +98,14 @@ function parseLocalState(rawJson) {
     throw new Error("Production smoke local state JSON must be an object.");
   }
 
+  const normalizeFileList = (values) =>
+    Array.isArray(values) ? values.filter((value) => typeof value === "string" && value.trim()).map((value) => value.trim()) : [];
+
   return {
     headSha: typeof parsed.headSha === "string" && parsed.headSha.trim() ? parsed.headSha.trim() : "unknown",
-    cachedFiles: Array.isArray(parsed.cachedFiles)
-      ? parsed.cachedFiles.filter((value) => typeof value === "string" && value.trim()).map((value) => value.trim())
-      : [],
+    cachedFiles: normalizeFileList(parsed.cachedFiles),
+    workingFiles: normalizeFileList(parsed.workingFiles),
+    untrackedFiles: normalizeFileList(parsed.untrackedFiles),
   };
 }
 
@@ -110,6 +116,8 @@ function readLocalState() {
 
   const headSha = readGitText(["rev-parse", "HEAD"]) ?? "unknown";
   const cachedOutput = readGitText(["diff", "--cached", "--name-only", "--", ...RELEVANT_LOCAL_FILES]) ?? "";
+  const workingOutput = readGitText(["diff", "--name-only", "--", ...RELEVANT_LOCAL_FILES]) ?? "";
+  const untrackedOutput = readGitText(["ls-files", "--others", "--exclude-standard", "--", ...RELEVANT_LOCAL_FILES]) ?? "";
 
   return {
     headSha,
@@ -117,7 +125,19 @@ function readLocalState() {
       .split(/\r?\n/)
       .map((value) => value.trim())
       .filter(Boolean),
+    workingFiles: workingOutput
+      .split(/\r?\n/)
+      .map((value) => value.trim())
+      .filter(Boolean),
+    untrackedFiles: untrackedOutput
+      .split(/\r?\n/)
+      .map((value) => value.trim())
+      .filter(Boolean),
   };
+}
+
+function uniqueFiles(files) {
+  return [...new Set(files.filter(Boolean))];
 }
 
 function formatRunMetadata(run) {
@@ -162,6 +182,12 @@ function main() {
     if (localState.cachedFiles.length > 0 && latest.sha === localState.headSha) {
       console.log(
         `NOTE Production smoke local mitigation is staged but unpublished: ${localState.cachedFiles.join(", ")}. The failed run was on HEAD before these staged changes reached default branch.`,
+      );
+    }
+    const workingTreeFiles = uniqueFiles([...(localState.workingFiles ?? []), ...(localState.untrackedFiles ?? [])]);
+    if (workingTreeFiles.length > 0 && latest.sha === localState.headSha) {
+      console.log(
+        `NOTE Production smoke local mitigation exists in the working tree but is unpublished: ${workingTreeFiles.join(", ")}. Commit, deploy, and rerun production smoke before treating launch proof as ready.`,
       );
     }
     process.exitCode = 1;
