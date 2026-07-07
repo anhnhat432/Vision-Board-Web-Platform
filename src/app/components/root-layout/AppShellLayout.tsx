@@ -486,7 +486,7 @@ export function RootLayout() {
     };
   }, [demoMode, user]);
 
-  useWarmPrefetch();
+  useWarmPrefetch({ enabled: Boolean(user) });
   usePageViewAnalytics(Boolean(user));
 
   const isActive = (path: string) => isActiveRoute(location.pathname, path);

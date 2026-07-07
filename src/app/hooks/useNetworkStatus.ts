@@ -9,6 +9,8 @@ function getBrowserNetworkStatus(): NetworkStatus {
 }
 
 export interface UseNetworkStatusOptions {
+  /** Whether to attach browser network listeners. Default: true. */
+  enabled?: boolean;
   /** Called when the browser transitions to online after being offline. */
   onReconnect?: () => void;
   /** Debounce delay (ms) before calling onReconnect. Default: 3000ms. */
@@ -23,7 +25,7 @@ export interface UseNetworkStatusOptions {
  * when the browser transitions from offline → online.
  */
 export function useNetworkStatus(options: UseNetworkStatusOptions = {}) {
-  const { onReconnect, reconnectDebounceMs = 3000 } = options;
+  const { enabled = true, onReconnect, reconnectDebounceMs = 3000 } = options;
   const [status, setStatus] = useState<NetworkStatus>(getBrowserNetworkStatus);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const onReconnectRef = useRef(onReconnect);
@@ -37,6 +39,13 @@ export function useNetworkStatus(options: UseNetworkStatusOptions = {}) {
   }, []);
 
   useEffect(() => {
+    if (!enabled) {
+      cancelReconnectTimer();
+      return;
+    }
+
+    setStatus(getBrowserNetworkStatus());
+
     const handleOnline = () => {
       setStatus("online");
       cancelReconnectTimer();
@@ -61,7 +70,7 @@ export function useNetworkStatus(options: UseNetworkStatusOptions = {}) {
       window.removeEventListener("offline", handleOffline);
       cancelReconnectTimer();
     };
-  }, [cancelReconnectTimer, reconnectDebounceMs]);
+  }, [cancelReconnectTimer, enabled, reconnectDebounceMs]);
 
   return useMemo(
     () => ({

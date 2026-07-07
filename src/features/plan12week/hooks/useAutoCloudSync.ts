@@ -223,11 +223,14 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
     apiConfigured,
   });
   const { user, userProfile, userProfileLoading } = useAuthContext();
+  const ownerUid = user?.uid ?? null;
   const triggerSyncNowRef = useRef<(() => Promise<TwelveWeekManualCloudSyncResult | null>) | null>(null);
   const handleReconnect = useCallback(() => {
     void triggerSyncNowRef.current?.();
   }, []);
+  const shouldTrackNetworkForAutoSync = Boolean(ownerUid) && (fullSyncEnabled || drainSyncEnabled);
   const networkStatusInfo = useNetworkStatus({
+    enabled: shouldTrackNetworkForAutoSync,
     onReconnect: handleReconnect,
     reconnectDebounceMs: RECONNECT_DEBOUNCE_MS,
   });
@@ -236,7 +239,6 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
     lastResult: manualSyncLastResult,
     syncNow: runManualSyncNow,
   } = useTwelveWeekManualCloudSync({ enabled: fullSyncEnabled });
-  const ownerUid = user?.uid ?? null;
   const userProfileReady = Boolean(userProfile && !userProfileLoading);
   const [documentVisible, setDocumentVisible] = useState(isDocumentVisible);
   const [lastResult, setLastResult] = useState<TwelveWeekManualCloudSyncResult | null>(null);

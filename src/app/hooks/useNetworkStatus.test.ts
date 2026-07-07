@@ -134,4 +134,27 @@ describe("useNetworkStatus", () => {
     expect(listeners.get("online")?.size ?? 0).toBe(0);
     expect(listeners.get("offline")?.size ?? 0).toBe(0);
   });
+
+  it("does not attach browser listeners when disabled", () => {
+    const { result } = renderHook(() => useNetworkStatus({ enabled: false }));
+
+    expect(result.current.status).toBe("online");
+    expect(listeners.get("online")?.size ?? 0).toBe(0);
+    expect(listeners.get("offline")?.size ?? 0).toBe(0);
+  });
+
+  it("refreshes browser status when tracking is enabled after mount", () => {
+    const { rerender, result } = renderHook(({ enabled }) => useNetworkStatus({ enabled }), {
+      initialProps: { enabled: false },
+    });
+
+    expect(result.current.status).toBe("online");
+    Object.defineProperty(navigator, "onLine", { value: false, writable: true, configurable: true });
+
+    rerender({ enabled: true });
+
+    expect(result.current.status).toBe("offline");
+    expect(listeners.get("online")?.size ?? 0).toBeGreaterThan(0);
+    expect(listeners.get("offline")?.size ?? 0).toBeGreaterThan(0);
+  });
 });
