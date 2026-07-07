@@ -126,7 +126,7 @@ describe("useAuth logout", () => {
 
   it("clears billing, entitlement sync, and UID-scoped mutation queue before signing out", async () => {
     firebaseMock.setCurrentUser(makeAuthUser(USER_A_UID));
-    localStorage.setItem("firebase_id_token", "token_a");
+    localStorage.setItem("firebase_id_token", "session");
 
     const { result } = renderHook(() => useAuth());
 

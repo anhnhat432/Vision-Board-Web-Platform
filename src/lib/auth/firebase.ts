@@ -19,7 +19,10 @@ import {
   verifyBeforeUpdateEmail,
 } from "firebase/auth";
 
-const FIREBASE_TOKEN_STORAGE_KEY = "firebase_id_token";
+// Legacy key kept as a non-sensitive session hint so useAuth can subscribe
+// after refresh without storing a bearer token in web storage.
+const FIREBASE_SESSION_STORAGE_KEY = "firebase_id_token";
+const FIREBASE_SESSION_HINT_VALUE = "session";
 
 type FirebaseConfig = {
   apiKey: string;
@@ -51,6 +54,7 @@ function isFirebaseConfigured(config: FirebaseConfig): boolean {
 
 let firebaseApp: FirebaseApp | null = null;
 let firebaseAuth: Auth | null = null;
+let cachedFirebaseToken: string | null = null;
 
 function getFirebaseBundle(): { app: FirebaseApp; auth: Auth } | null {
   if (firebaseApp && firebaseAuth) {
@@ -77,27 +81,24 @@ export function getFirebaseAuth(): Auth | null {
 }
 
 export function getStoredFirebaseToken(): string | null {
-  if (typeof window === "undefined") return null;
-  try {
-    return localStorage.getItem(FIREBASE_TOKEN_STORAGE_KEY);
-  } catch {
-    return null;
-  }
+  return cachedFirebaseToken;
 }
 
 function setStoredFirebaseToken(token: string): void {
+  cachedFirebaseToken = token;
   if (typeof window === "undefined") return;
   try {
-    localStorage.setItem(FIREBASE_TOKEN_STORAGE_KEY, token);
+    localStorage.setItem(FIREBASE_SESSION_STORAGE_KEY, FIREBASE_SESSION_HINT_VALUE);
   } catch {
     // ignore storage errors
   }
 }
 
 function clearStoredFirebaseToken(): void {
+  cachedFirebaseToken = null;
   if (typeof window === "undefined") return;
   try {
-    localStorage.removeItem(FIREBASE_TOKEN_STORAGE_KEY);
+    localStorage.removeItem(FIREBASE_SESSION_STORAGE_KEY);
   } catch {
     // ignore storage errors
   }
@@ -112,7 +113,7 @@ async function persistCurrentUserToken(user: User): Promise<string> {
 export async function getFirebaseToken(forceRefresh = false): Promise<string | null> {
   const auth = getFirebaseAuth();
   if (!auth) {
-    return getStoredFirebaseToken();
+    return null;
   }
 
   // Ngay sau khi tải trang, Firebase khôi phục phiên bất đồng bộ và currentUser
@@ -127,9 +128,8 @@ export async function getFirebaseToken(forceRefresh = false): Promise<string | n
   }
 
   if (!auth.currentUser) {
-    // Không xóa token đã lưu ở đây: việc dọn token thuộc luồng đăng xuất
-    // (subscribeAuthState). Trả token đã lưu làm fallback nếu còn.
-    return getStoredFirebaseToken();
+    clearStoredFirebaseToken();
+    return null;
   }
 
   try {

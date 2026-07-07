@@ -104,7 +104,7 @@ describe("registerWithEmail", () => {
       "password123",
     );
     expect(credential.user.getIdToken).toHaveBeenCalledTimes(1);
-    expect(window.localStorage.getItem("firebase_id_token")).toBe("token-test");
+    expect(window.localStorage.getItem("firebase_id_token")).toBe("session");
     expect(firebaseAuthMock.sendEmailVerification).toHaveBeenCalledWith(credential.user);
     expect(window.localStorage.getItem("emailVerificationLastSentAt:user_signup")).toBe("1765000000000");
   });
@@ -129,7 +129,7 @@ describe("registerWithEmail", () => {
 
     await expect(registerWithEmail("new@example.test", "password123")).resolves.toBe(credential);
 
-    expect(window.localStorage.getItem("firebase_id_token")).toBe("token-test");
+    expect(window.localStorage.getItem("firebase_id_token")).toBe("session");
     expect(window.localStorage.getItem("emailVerificationLastSentAt:user_signup")).toBeNull();
     expect(consoleError).toHaveBeenCalledWith("Failed to send initial verification email.", expect.any(Error));
   });
@@ -143,5 +143,17 @@ describe("registerWithEmail", () => {
 
     expect(firebaseAuthMock.createUserWithEmailAndPassword).not.toHaveBeenCalled();
     expect(firebaseAuthMock.sendEmailVerification).not.toHaveBeenCalled();
+  });
+
+  it("does not return a legacy localStorage token when Firebase restores no current user", async () => {
+    const authStateReady = vi.fn().mockResolvedValue(undefined);
+    firebaseAuthMock.getAuth.mockReturnValue({ authStateReady, currentUser: null });
+    window.localStorage.setItem("firebase_id_token", "legacy-bearer-token");
+    const { getFirebaseToken } = await loadFirebaseModule();
+
+    await expect(getFirebaseToken()).resolves.toBeNull();
+
+    expect(authStateReady).toHaveBeenCalledTimes(1);
+    expect(window.localStorage.getItem("firebase_id_token")).toBeNull();
   });
 });
