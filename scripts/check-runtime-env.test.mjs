@@ -13,36 +13,43 @@ function readIndexHtml() {
   return readFileSync(path.resolve("index.html"), "utf8");
 }
 
-function getMetaContent(html, attributeName, attributeValue) {
-  const pattern = new RegExp(
-    `<meta\\s+(?=[^>]*\\b${attributeName}="${attributeValue.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}")(?=[^>]*\\bcontent="([^"]+)")[^>]*>`,
-    "i",
+function getTagAttributes(tag) {
+  return Object.fromEntries(
+    Array.from(tag.matchAll(/\s([^\s=]+)="([^"]*)"/g), (match) => [match[1], match[2]]),
   );
-  return html.match(pattern)?.[1] ?? null;
+}
+
+function findTagAttributes(html, tagName, predicate) {
+  const tagPattern = tagName === "meta" ? /<meta\s+[^>]*>/gi : /<link\s+[^>]*>/gi;
+
+  for (const [tag] of html.matchAll(tagPattern)) {
+    const attributes = getTagAttributes(tag);
+    if (predicate(attributes)) return attributes;
+  }
+
+  return null;
+}
+
+function getMetaContent(html, attributeName, attributeValue) {
+  return findTagAttributes(html, "meta", (attributes) => attributes[attributeName] === attributeValue)?.content ?? null;
 }
 
 function getLinkHref(html, rel) {
-  const pattern = new RegExp(
-    `<link\\s+(?=[^>]*\\brel="${rel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}")(?=[^>]*\\bhref="([^"]+)")[^>]*>`,
-    "i",
-  );
-  return html.match(pattern)?.[1] ?? null;
+  return findTagAttributes(html, "link", (attributes) => attributes.rel === rel)?.href ?? null;
 }
 
 function getThemeColor(html, media) {
-  const pattern = new RegExp(
-    `<meta\\s+(?=[^>]*\\bname="theme-color")(?=[^>]*\\bmedia="${media.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}")(?=[^>]*\\bcontent="([^"]+)")[^>]*>`,
-    "i",
+  return (
+    findTagAttributes(
+      html,
+      "meta",
+      (attributes) => attributes.name === "theme-color" && attributes.media === media,
+    )?.content ?? null
   );
-  return html.match(pattern)?.[1] ?? null;
 }
 
 function hasLinkRelHref(html, rel, href) {
-  const pattern = new RegExp(
-    `<link\\s+(?=[^>]*\\brel="${rel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}")(?=[^>]*\\bhref="${href.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}")`,
-    "i",
-  );
-  return pattern.test(html);
+  return findTagAttributes(html, "link", (attributes) => attributes.rel === rel && attributes.href === href) !== null;
 }
 
 function runEnvCheck({ files = {}, args = [] } = {}) {
