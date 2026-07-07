@@ -5,6 +5,7 @@ import express, { type Express } from "express";
 
 import { createAuthMiddleware } from "../middleware/authMiddlewareCore";
 import { errorMiddleware } from "../middleware/errorMiddleware";
+import { generalApiRateLimiter } from "../middleware/rateLimiters";
 import { planBulkSyncRoutes } from "../routes/planBulkSyncRoutes";
 import * as planBulkSyncService from "../services/planBulkSyncService";
 import type { BulkSyncRequest, BulkSyncResponse } from "../types/bulkSync";
@@ -91,6 +92,7 @@ function installBulkSyncServiceMock(): Restorer {
 function createPlanBulkSyncTestApp(): Express {
   const app = express();
   app.use(express.json());
+  app.use("/api", generalApiRateLimiter);
   app.use(
     "/api",
     createAuthMiddleware({

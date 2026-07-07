@@ -5,6 +5,7 @@ import express, { type Express } from "express";
 
 import { createAuthMiddleware } from "../middleware/authMiddlewareCore";
 import { errorMiddleware } from "../middleware/errorMiddleware";
+import { generalApiRateLimiter } from "../middleware/rateLimiters";
 import { authRoutes } from "../routes/authRoutes";
 import { authService } from "../services/authService";
 import type { UpdateUserData, UserEntity } from "../repositories/mongo/MongoUserRepository";
@@ -103,6 +104,7 @@ function installAuthServiceMocks(): Restorer {
 function createAuthRoutesTestApp(): Express {
   const app = express();
   app.use(express.json());
+  app.use("/api", generalApiRateLimiter);
   app.use(
     "/api",
     createAuthMiddleware({
