@@ -346,13 +346,13 @@ export function LoginPage() {
                     </h1>
                   </div>
 
-                  {/* 3 trust chip ngang scrollable trên mobile */}
-                  <div className="mt-5 -mx-4 px-4 overflow-x-auto">
-                    <ul className="flex gap-2 w-max">
+                  {/* 3 trust chip mobile, wrap trong khung để không bị cắt mép. */}
+                  <div className="mt-5 overflow-hidden">
+                    <ul className="flex flex-wrap justify-center gap-2" aria-label="Điểm an tâm khi đăng nhập">
                       {TRUST_FEATURES.map(({ icon: Icon, title }) => (
                         <li
                           key={title}
-                          className="inline-flex items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1.5 text-xs text-app-ink-soft whitespace-nowrap"
+                          className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-app-line bg-app-surface px-3 py-1.5 text-xs text-app-ink-soft whitespace-nowrap"
                         >
                           <Icon className="h-3.5 w-3.5 text-app-accent" />
                           {title}
