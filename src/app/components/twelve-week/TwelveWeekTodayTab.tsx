@@ -220,7 +220,6 @@ export function TwelveWeekTodayTab({
       window.removeEventListener("click", handleGlobalClick, true);
     };
   }, []);
-  const toggleTimerByTaskIdRef = useRef<Record<string, number>>({});
   const upcomingStrategicBlock = getUpcomingStrategicBlock(system.weeklyTimeBlocks, new Date());
   const prefersReducedMotion = useReducedMotion();
   const fadeInClassName = "min-w-0";
@@ -246,15 +245,6 @@ export function TwelveWeekTodayTab({
       return changed ? next : current;
     });
   }, [todayQueue]);
-
-  useEffect(() => {
-    return () => {
-      Object.values(toggleTimerByTaskIdRef.current).forEach((timerId) => {
-        window.clearTimeout(timerId);
-      });
-      toggleTimerByTaskIdRef.current = {};
-    };
-  }, []);
 
   const handleSaveCheckInClick = async () => {
     if (isSavingCheckIn) return;
@@ -294,45 +284,17 @@ export function TwelveWeekTodayTab({
       triggerSparkles(x, y);
     }
 
-    const isTest =
-      typeof process !== "undefined" && (process.env.NODE_ENV === "test" || import.meta.env.MODE === "test");
-
-    if (isTest) {
-      // Gọi đồng bộ trực tiếp trong môi trường unit test để các test case pass ngay lập tức
-      Promise.resolve(onToggleTask(taskId, completed))
-        .then(emitCompletionEvent)
-        .catch((error) => {
-          setOptimisticTaskCompletionById((current) => {
-            if (!(taskId in current)) return current;
-            const next = { ...current };
-            delete next[taskId];
-            return next;
-          });
-          console.error("Failed to toggle task:", error);
+    Promise.resolve(onToggleTask(taskId, completed))
+      .then(emitCompletionEvent)
+      .catch((error) => {
+        setOptimisticTaskCompletionById((current) => {
+          if (!(taskId in current)) return current;
+          const next = { ...current };
+          delete next[taskId];
+          return next;
         });
-    } else {
-      const existingTimer = toggleTimerByTaskIdRef.current[taskId];
-      if (existingTimer) {
-        window.clearTimeout(existingTimer);
-      }
-
-      // Hoãn tác vụ re-render cha nặng nề đi 180ms trên production để trình duyệt vẽ checkbox checked mượt mà 60/120fps lập tức
-      toggleTimerByTaskIdRef.current[taskId] = window.setTimeout(() => {
-        delete toggleTimerByTaskIdRef.current[taskId];
-        Promise.resolve(onToggleTask(taskId, completed))
-          .then(emitCompletionEvent)
-          .catch((error) => {
-            // Chỉ hoàn tác trạng thái optimistic khi xảy ra lỗi thực tế
-            setOptimisticTaskCompletionById((current) => {
-              if (!(taskId in current)) return current;
-              const next = { ...current };
-              delete next[taskId];
-              return next;
-            });
-            console.error("Failed to toggle task:", error);
-          });
-      }, 180);
-    }
+        console.error("Failed to toggle task:", error);
+      });
   };
 
   const todayCheckIn = latestCheckIn?.date === todayDateKey ? latestCheckIn : null;
