@@ -475,6 +475,31 @@ describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
     expect(onToggleTask).toHaveBeenCalled();
   });
 
+  it("dispatches production task toggles before unmount cleanup can drop them", async () => {
+    const originalNodeEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = "production";
+    vi.stubEnv("MODE", "production");
+    vi.useFakeTimers();
+
+    try {
+      const onToggleTask = vi.fn().mockResolvedValue(undefined);
+      const { unmount } = render(<TwelveWeekTodayTab {...makeProps({ onToggleTask })} />);
+      const checkbox = screen.getAllByRole("checkbox")[0];
+
+      await act(async () => {
+        checkbox.click();
+        unmount();
+        await vi.advanceTimersByTimeAsync(200);
+      });
+
+      expect(onToggleTask).toHaveBeenCalledWith("task_1", true);
+    } finally {
+      process.env.NODE_ENV = originalNodeEnv;
+      vi.unstubAllEnvs();
+      vi.useRealTimers();
+    }
+  });
+
   it("emits taskCompleted after a normal task completion succeeds", async () => {
     const onToggleTask = vi.fn().mockResolvedValue(undefined);
     render(
@@ -588,11 +613,11 @@ describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
       "z-40",
       "border-t",
       "border-app-line/80",
-      "bg-app-surface/95",
+      "bg-app-surface",
       "px-4",
       "pb-4",
       "pt-3",
-      "backdrop-blur-md",
+      "shadow-[0_-18px_40px_-30px_rgba(23,21,15,0.45)]",
     );
     expect(within(actionBar as HTMLElement).getByText("Chưa lưu")).toBeInTheDocument();
     expect(
