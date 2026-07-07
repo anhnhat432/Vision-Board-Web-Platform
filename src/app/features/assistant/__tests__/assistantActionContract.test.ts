@@ -13,6 +13,8 @@ describe("assistant action schema contract (frontend)", () => {
 
   it("frontend route whitelist matches the shared schema and drops the phantom /today-v2 route", () => {
     expect(VALID_ROUTES).toContain("/today");
+    expect(VALID_ROUTES).toContain("/journal");
+    expect(VALID_ROUTES).not.toContain("/reflection");
     expect(VALID_ROUTES).not.toContain("/today-v2");
   });
 

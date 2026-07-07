@@ -449,6 +449,38 @@ describe("aiAssistantService processAIAssistantRequest", () => {
     }
   });
 
+  it("routes journal context to the smart Gemini model", async () => {
+    ensureBackendEnvForServiceImports();
+    const { env } = await import("../config/env");
+    const previous = {
+      GEMINI_MODEL: env.GEMINI_MODEL,
+      AI_MODEL: env.AI_MODEL,
+      GEMINI_SMART_MODEL: env.GEMINI_SMART_MODEL,
+      AI_SMART_MODEL: env.AI_SMART_MODEL,
+    };
+
+    try {
+      (env as any).GEMINI_MODEL = "gemini-2.5-flash-lite";
+      (env as any).AI_MODEL = "gemini-2.5-flash-lite";
+      (env as any).GEMINI_SMART_MODEL = "gemini-3.1-flash-lite";
+      (env as any).AI_SMART_MODEL = "gemini-3.1-flash-lite";
+
+      const selection = selectGeminiModelForAssistantRequest({
+        message: "giúp tôi nhìn lại",
+        context: { ...sampleContext, route: "/journal", pageContext: { ...sampleContext.pageContext, route: "/journal" } },
+      });
+
+      assert.equal(selection.tier, "smart");
+      assert.equal(selection.primaryModel, "gemini-3.1-flash-lite");
+      assert.equal(selection.fallbackModel, "gemini-2.5-flash-lite");
+    } finally {
+      (env as any).GEMINI_MODEL = previous.GEMINI_MODEL;
+      (env as any).AI_MODEL = previous.AI_MODEL;
+      (env as any).GEMINI_SMART_MODEL = previous.GEMINI_SMART_MODEL;
+      (env as any).AI_SMART_MODEL = previous.AI_SMART_MODEL;
+    }
+  });
+
   it("retries the fast Gemini model when the smart model is rate-limited", async () => {
     ensureBackendEnvForServiceImports();
     const { env } = await import("../config/env");

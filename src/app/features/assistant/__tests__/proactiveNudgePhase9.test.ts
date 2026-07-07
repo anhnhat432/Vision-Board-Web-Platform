@@ -193,7 +193,7 @@ describe("Phase 9 proactive nudges", () => {
 
     const { result } = renderHook(() => useProactiveNudge(false), { wrapper });
 
-    expect(result.current.nudge).toMatchObject({ type: "weekly_review_due", route: "/weekly-review" });
+    expect(result.current.nudge).toMatchObject({ type: "weekly_review_due", route: "/12-week-system?tab=week" });
   });
 
   it("detects reflection due nudge", () => {
@@ -202,7 +202,7 @@ describe("Phase 9 proactive nudges", () => {
 
     const { result } = renderHook(() => useProactiveNudge(false), { wrapper });
 
-    expect(result.current.nudge).toMatchObject({ type: "reflection_due", route: "/reflection" });
+    expect(result.current.nudge).toMatchObject({ type: "reflection_due", route: "/journal" });
   });
 
   it("cooldown prevents repeated nudge", () => {

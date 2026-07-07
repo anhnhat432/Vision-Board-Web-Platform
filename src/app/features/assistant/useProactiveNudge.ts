@@ -232,7 +232,7 @@ function selectNudgeCandidate(context: AssistantContext): ProactiveNudgeCandidat
       title: "Cần SMART goal",
       message: "Bạn chưa có SMART goal rõ. Viết một mục tiêu đo được trước nhé.",
       actionLabel: "Tạo SMART goal",
-      route: "/smart-goal",
+      route: "/smart-goal-setup",
       cooldownHours: 24,
       suggestedAssistantMessage: "Giúp mình biến ý tưởng hiện tại thành SMART goal.",
     };
@@ -259,7 +259,7 @@ function selectNudgeCandidate(context: AssistantContext): ProactiveNudgeCandidat
       title: "Cần 12-week plan",
       message: "Goal đã đủ điều kiện. Tạo 12-week plan để có việc tuần này.",
       actionLabel: "Tạo plan",
-      route: "/12-week-plan",
+      route: "/12-week-setup",
       cooldownHours: 24,
       relatedGoalId: firstGoal?.id,
       suggestedAssistantMessage: "Giúp mình tạo 12-week plan từ goal hiện tại.",
@@ -306,7 +306,7 @@ function selectNudgeCandidate(context: AssistantContext): ProactiveNudgeCandidat
         title: "Review tuần đến hạn",
         message: `Bạn chưa review tuần ${context.currentWeek - 1}. Làm bản ngắn 3 phút nhé?`,
         actionLabel: "Review tuần",
-        route: "/weekly-review",
+        route: "/12-week-system?tab=week",
         cooldownHours: 24,
         suggestedAssistantMessage: "Dẫn mình qua weekly review ngắn cho tuần vừa rồi.",
       };
@@ -321,7 +321,7 @@ function selectNudgeCandidate(context: AssistantContext): ProactiveNudgeCandidat
       title: "Reflection ngắn",
       message: "Đã lâu chưa reflection. Ghi 3 dòng để chốt bài học tuần này nhé.",
       actionLabel: "Viết reflection",
-      route: "/reflection",
+      route: "/journal",
       cooldownHours: 24,
       suggestedAssistantMessage: "Gợi ý cho mình 3 câu hỏi reflection ngắn.",
     };

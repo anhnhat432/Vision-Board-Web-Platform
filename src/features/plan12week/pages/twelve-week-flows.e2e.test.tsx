@@ -25,6 +25,11 @@ import {
 } from "@/test/app-flow-helpers";
 
 const INTEGRATION_TEST_TIMEOUT_MS = 20_000;
+const REVIEW_DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] as const;
+
+function getTodayReviewDay(): (typeof REVIEW_DAYS)[number] {
+  return REVIEW_DAYS[new Date().getDay()] ?? "Sunday";
+}
 
 function makeCycleReview(weekNumber: number, leadScore: number) {
   return {
@@ -339,7 +344,7 @@ describe("12-week core flows", () => {
   it(
     "renders the cycle review panel instead of the task list when the cycle reaches week 13",
     async () => {
-      const { goalId } = seedTwelveWeekGoal();
+      const { goalId } = seedTwelveWeekGoal({ reviewDay: getTodayReviewDay() });
       updateUserData((data) => {
         const goal = data.goals.find((item) => item.id === goalId);
         if (!goal?.twelveWeekSystem) return;
@@ -371,7 +376,7 @@ describe("12-week core flows", () => {
   it(
     "starts a new cycle from the cycle review panel without creating a new goal",
     async () => {
-      const { goalId } = seedTwelveWeekGoal();
+      const { goalId } = seedTwelveWeekGoal({ reviewDay: getTodayReviewDay() });
       updateUserData((data) => {
         const goal = data.goals.find((item) => item.id === goalId);
         if (!goal?.twelveWeekSystem) return;
@@ -510,7 +515,7 @@ describe("12-week core flows", () => {
   it(
     "shows tactic commitment reminders in Today and Weekly Review",
     async () => {
-      const { goalId } = seedTwelveWeekGoal();
+      const { goalId } = seedTwelveWeekGoal({ reviewDay: getTodayReviewDay() });
       updateUserData((data) => {
         const goal = data.goals.find((item) => item.id === goalId);
         const system = goal?.twelveWeekSystem;
@@ -557,7 +562,7 @@ describe("12-week core flows", () => {
   it(
     "compacts repeated daily check-ins for the same day to the latest queued payload",
     async () => {
-      const { goalId } = seedTwelveWeekGoal();
+      const { goalId } = seedTwelveWeekGoal({ reviewDay: getTodayReviewDay() });
       renderAppRoute("/12-week-system");
       const user = userEvent.setup();
 
@@ -596,7 +601,7 @@ describe("12-week core flows", () => {
   it(
     "keeps only the five latest daily check-in entries after the seventh same-day save",
     async () => {
-      const { goalId } = seedTwelveWeekGoal();
+      const { goalId } = seedTwelveWeekGoal({ reviewDay: getTodayReviewDay() });
       const todayKey = formatDateInputValue(new Date());
       updateUserData((data) => {
         const goal = data.goals.find((item) => item.id === goalId);
@@ -647,7 +652,7 @@ describe("12-week core flows", () => {
   it(
     "keeps daily execution state when a weekly review is submitted after check-in",
     async () => {
-      const { goalId } = seedTwelveWeekGoal();
+      const { goalId } = seedTwelveWeekGoal({ reviewDay: getTodayReviewDay() });
       renderAppRoute("/12-week-system");
       const user = userEvent.setup();
 
@@ -679,7 +684,7 @@ describe("12-week core flows", () => {
   it(
     "submits the weekly review and writes the linked journal entry",
     async () => {
-      const { goalId } = seedTwelveWeekGoal();
+      const { goalId } = seedTwelveWeekGoal({ reviewDay: getTodayReviewDay() });
       renderAppRoute("/12-week-system");
       const user = userEvent.setup();
 
@@ -723,7 +728,7 @@ describe("12-week core flows", () => {
   it(
     "saves WAM fields and shows the post-save summary card",
     async () => {
-      const { goalId } = seedTwelveWeekGoal();
+      const { goalId } = seedTwelveWeekGoal({ reviewDay: getTodayReviewDay() });
       renderAppRoute("/12-week-system");
       const user = userEvent.setup();
 
@@ -751,7 +756,7 @@ describe("12-week core flows", () => {
   it(
     "loads a legacy review without keep/reduce fields without breaking the form",
     async () => {
-      const { goalId } = seedTwelveWeekGoal();
+      const { goalId } = seedTwelveWeekGoal({ reviewDay: getTodayReviewDay() });
       updateUserData((data) => {
         const goal = data.goals.find((item) => item.id === goalId);
         if (!goal?.twelveWeekSystem) return;
@@ -802,7 +807,7 @@ describe("12-week core flows", () => {
   it(
     "compacts repeated weekly reviews for the same week to the latest queued payload",
     async () => {
-      const { goalId } = seedTwelveWeekGoal();
+      const { goalId } = seedTwelveWeekGoal({ reviewDay: getTodayReviewDay() });
       renderAppRoute("/12-week-system");
       const user = userEvent.setup();
 
