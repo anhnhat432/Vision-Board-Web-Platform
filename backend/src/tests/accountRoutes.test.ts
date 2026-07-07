@@ -90,6 +90,13 @@ function mockDeleteMany(model: MockableModel, key: string, deletedCount: number)
   };
 }
 
+function mockDeleteManyFailure(model: MockableModel, key: string): void {
+  model.deleteMany = async (filter: unknown) => {
+    deleteFilters[key] = [...(deleteFilters[key] ?? []), filter];
+    throw new Error(`${key}_delete_failed`);
+  };
+}
+
 function mockDeleteOne(model: MockableModel, key: string, deletedCount: number): void {
   model.deleteOne = async (filter: unknown) => {
     deleteFilters[key] = [...(deleteFilters[key] ?? []), filter];
@@ -251,7 +258,7 @@ describe("DELETE /api/account/delete", () => {
     assert.equal(firebaseDeleteUid, ownerUserId);
   });
 
-  it("fails the request when Firebase user removal fails so frontend keeps local data", async () => {
+  it("does not delete owner account data when Firebase user removal fails", async () => {
     firebaseDeleteBehavior = "failure";
 
     const response = await requestJson(createTestApp(), "/api/account/delete");
@@ -259,8 +266,25 @@ describe("DELETE /api/account/delete", () => {
     assert.equal(response.status, 502);
     assert.equal(response.body.success, false);
     assert.equal(response.body.errorCode, "firebase_account_delete_failed");
-    assert.match(response.body.message ?? "", /Local data was kept/i);
+    assert.match(response.body.message ?? "", /dữ liệu tài khoản trên cloud chưa bị xóa/i);
     assert.equal(firebaseDeleteUid, ownerUserId);
-    assert.deepEqual(deleteFilters.users, [{ firebaseUid: ownerUserId }]);
+    assert.equal(deleteFilters.users, undefined);
+    assert.equal(deleteFilters.goals, undefined);
+    assert.equal(deleteFilters.paymentOrders, undefined);
+    assert.equal(deleteFilters.plans, undefined);
+  });
+
+  it("returns a specific recovery error when account data deletion fails after Firebase removal", async () => {
+    mockDeleteManyFailure(GoalModel as unknown as MockableModel, "goals");
+
+    const response = await requestJson(createTestApp(), "/api/account/delete");
+
+    assert.equal(response.status, 502);
+    assert.equal(response.body.success, false);
+    assert.equal(response.body.errorCode, "account_data_delete_failed_after_auth_delete");
+    assert.match(response.body.message ?? "", /đăng nhập tài khoản có thể đã được xóa/i);
+    assert.match(response.body.message ?? "", /liên hệ hỗ trợ/i);
+    assert.equal(firebaseDeleteUid, ownerUserId);
+    assert.deepEqual(deleteFilters.goals, [{ userId: ownerUserId }]);
   });
 });

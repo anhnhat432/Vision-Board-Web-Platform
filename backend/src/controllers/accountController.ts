@@ -16,6 +16,7 @@ import { UserModel } from "../models/UserModel";
 import { VisionBoardModel } from "../models/VisionBoardModel";
 import { WeekModel } from "../models/WeekModel";
 import { WeekReviewModel } from "../models/WeekReviewModel";
+import { captureBackendException } from "../monitoring/sentry";
 import { successResponse } from "../utils/apiResponse";
 import { ApiError } from "../utils/apiError";
 import { withoutTombstones } from "../utils/tombstone";
@@ -134,9 +135,35 @@ async function deleteFirebaseAccount(uid: string): Promise<void> {
     console.error("[accountController] Failed to delete Firebase user during account deletion:", error);
     throw new ApiError(
       502,
-      "Account data was deleted, but Firebase account removal failed. Local data was kept so the user can retry account deletion.",
+      "Chưa xóa được tài khoản xác thực, nên dữ liệu tài khoản trên cloud chưa bị xóa. Vui lòng thử lại.",
       undefined,
       "firebase_account_delete_failed",
+    );
+  }
+}
+
+async function deleteUserCollectionsAfterFirebaseAccountDeleted(userId: string): Promise<AccountDeleteCounts> {
+  try {
+    return await deleteUserCollections(userId);
+  } catch (error) {
+    const event = "account_data_delete_failed_after_auth_delete";
+    console.error("[accountController] Failed to delete account data after Firebase account deletion.", {
+      event,
+      message: error instanceof Error ? error.message : String(error),
+    });
+    captureBackendException(error, {
+      tags: {
+        feature: "account",
+        severity: "critical",
+        event,
+      },
+      extra: { event },
+    });
+    throw new ApiError(
+      502,
+      "Đăng nhập tài khoản có thể đã được xóa, nhưng hệ thống chưa xác nhận xóa hết dữ liệu cloud. Vui lòng liên hệ hỗ trợ để kiểm tra trước khi thử lại.",
+      undefined,
+      event,
     );
   }
 }
@@ -235,8 +262,8 @@ export async function deleteAccount(
   try {
     const user = requireAuthUser(req);
     const deletedAt = new Date().toISOString();
-    const counts = await deleteUserCollections(user.uid);
     await deleteFirebaseAccount(user.uid);
+    const counts = await deleteUserCollectionsAfterFirebaseAccountDeleted(user.uid);
 
     res.status(200).json(
       successResponse(

@@ -111,26 +111,31 @@ function serializeOrder(order: {
   };
 }
 
+function shouldShowPublicPaymentInstructions(status: string): boolean {
+  return status === "pending";
+}
+
 function serializePublicOrder(order: Parameters<typeof serializeOrder>[0]) {
   const payosCheckoutUrl =
     order.provider === "payos" && typeof order.metadata?.payos?.checkoutUrl === "string"
       ? order.metadata.payos.checkoutUrl
       : null;
+  const showPaymentInstructions = shouldShowPublicPaymentInstructions(order.status);
 
   return {
     orderId: order.orderId,
     status: order.status,
     amount: order.amount,
     currency: order.currency,
-    discount: serializePaymentDiscount(order.metadata?.discount, order.amount),
+    discount: showPaymentInstructions ? serializePaymentDiscount(order.metadata?.discount, order.amount) : null,
     provider: order.provider,
     purpose: order.purpose ?? "plus_subscription",
-    bankAccount: order.bankAccount,
-    bankName: order.bankName,
-    accountName: order.accountName,
-    description: order.description ?? order.orderId,
-    qrDataUrl: order.qrDataUrl,
-    checkoutUrl: payosCheckoutUrl,
+    bankAccount: showPaymentInstructions ? order.bankAccount : "",
+    bankName: showPaymentInstructions ? order.bankName : "",
+    accountName: showPaymentInstructions ? order.accountName : "",
+    description: showPaymentInstructions ? order.description ?? order.orderId : "",
+    qrDataUrl: showPaymentInstructions ? order.qrDataUrl : "",
+    checkoutUrl: showPaymentInstructions ? payosCheckoutUrl : null,
     expiresAt: toIsoString(order.expiresAt),
   };
 }
