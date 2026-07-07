@@ -253,6 +253,94 @@ describe("production billing surfaces", () => {
     ).toBeInTheDocument();
   });
 
+  it("does not show redacted public payment instructions for a completed checkout page", async () => {
+    const apiClient = stubRealBillingEnv("payos");
+    stubAuthContext(null);
+    apiClient.get.mockImplementation((path: string) => {
+      if (path.startsWith("/billing/public-order-status/")) {
+        return Promise.resolve({
+          orderId: "VBDONE001",
+          status: "completed",
+          amount: 99000,
+          currency: "VND",
+          provider: "payos",
+          checkoutUrl: null,
+          bankAccount: "",
+          bankName: "",
+          accountName: "",
+          description: "",
+          qrDataUrl: "",
+          discount: null,
+          expiresAt: "2099-05-10T10:30:00.000Z",
+          completedAt: "2026-05-10T10:10:00.000Z",
+          createdAt: "2026-05-10T10:00:00.000Z",
+        });
+      }
+      return Promise.resolve({ orders: [] });
+    });
+
+    const { BillingCheckoutQR } = await import("./BillingCheckoutQR");
+    const router = createMemoryRouter(
+      [{ path: "/billing/checkout/:orderId", element: <BillingCheckoutQR /> }],
+      {
+        initialEntries: ["/billing/checkout/VBDONE001"],
+      },
+    );
+
+    render(<RouterProvider router={router} />);
+
+    expect(await screen.findByText("Thanh toán thành công!")).toBeInTheDocument();
+    expect(apiClient.get).toHaveBeenCalledWith("/billing/public-order-status/VBDONE001");
+    expect(screen.queryByText("Thông tin chuyển khoản")).not.toBeInTheDocument();
+    expect(screen.queryByText("123456789")).not.toBeInTheDocument();
+    expect(screen.queryByText("DEAR OUR FUTURE")).not.toBeInTheDocument();
+    expect(screen.queryByText(/Mở PayOS/i)).not.toBeInTheDocument();
+  });
+
+  it("does not show redacted public payment instructions for an expired checkout page", async () => {
+    const apiClient = stubRealBillingEnv("casso");
+    stubAuthContext(null);
+    apiClient.get.mockImplementation((path: string) => {
+      if (path.startsWith("/billing/public-order-status/")) {
+        return Promise.resolve({
+          orderId: "VBEXPIRED1",
+          status: "expired",
+          amount: 99000,
+          currency: "VND",
+          provider: "casso",
+          checkoutUrl: null,
+          bankAccount: "",
+          bankName: "",
+          accountName: "",
+          description: "",
+          qrDataUrl: "",
+          discount: null,
+          expiresAt: "2026-05-10T10:30:00.000Z",
+          completedAt: null,
+          createdAt: "2026-05-10T10:00:00.000Z",
+        });
+      }
+      return Promise.resolve({ orders: [] });
+    });
+
+    const { BillingCheckoutQR } = await import("./BillingCheckoutQR");
+    const router = createMemoryRouter(
+      [{ path: "/billing/checkout/:orderId", element: <BillingCheckoutQR /> }],
+      {
+        initialEntries: ["/billing/checkout/VBEXPIRED1"],
+      },
+    );
+
+    render(<RouterProvider router={router} />);
+
+    expect(await screen.findByText("Hết thời gian thanh toán")).toBeInTheDocument();
+    expect(apiClient.get).toHaveBeenCalledWith("/billing/public-order-status/VBEXPIRED1");
+    expect(screen.queryByText("Thông tin chuyển khoản")).not.toBeInTheDocument();
+    expect(screen.queryByText("123456789")).not.toBeInTheDocument();
+    expect(screen.queryByText("DEAR OUR FUTURE")).not.toBeInTheDocument();
+    expect(screen.queryByAltText("Mã thanh toán tự động")).not.toBeInTheDocument();
+  });
+
   it(
     "renders the active Plus plan with renewal, provider, and subscription management copy",
     async () => {

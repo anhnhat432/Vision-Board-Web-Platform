@@ -154,6 +154,54 @@ describe("OrderStatusPage payment polling", () => {
     expect(screen.getByText(/Nếu bạn đã chuyển khoản, liên hệ support@example.test/)).toBeInTheDocument();
   });
 
+  it("renders completed state from a redacted terminal public order response", async () => {
+    apiClientMock.get.mockResolvedValue(
+      createPaymentOrder({
+        status: "completed",
+        purpose: "plus_subscription",
+        bankAccount: "",
+        bankName: "",
+        accountName: "",
+        description: "",
+        qrDataUrl: "",
+        checkoutUrl: null,
+        discount: null,
+        completedAt: new Date().toISOString(),
+      }),
+    );
+
+    renderOrderStatus();
+
+    expect(await screen.findByText("Plus đã kích hoạt!")).toBeInTheDocument();
+    expect(screen.getByText("Đang chuyển bạn về trang gói để tiếp tục sử dụng Plus.")).toBeInTheDocument();
+    expect(screen.queryByText("Thông tin chuyển khoản")).not.toBeInTheDocument();
+    expect(screen.queryByText("1234567890")).not.toBeInTheDocument();
+    expect(toastMock.success).toHaveBeenCalledWith("Plus đã kích hoạt!");
+  });
+
+  it("renders expired state from a redacted terminal public order response", async () => {
+    apiClientMock.get.mockResolvedValue(
+      createPaymentOrder({
+        status: "expired",
+        bankAccount: "",
+        bankName: "",
+        accountName: "",
+        description: "",
+        qrDataUrl: "",
+        checkoutUrl: null,
+        discount: null,
+        expiresAt: new Date(Date.now() - 60_000).toISOString(),
+      }),
+    );
+
+    renderOrderStatus();
+
+    expect(await screen.findByText("Đơn hàng đã huỷ")).toBeInTheDocument();
+    expect(screen.getByText(/Nếu bạn đã chuyển khoản, liên hệ support@example.test/)).toBeInTheDocument();
+    expect(screen.queryByText("Thông tin chuyển khoản")).not.toBeInTheDocument();
+    expect(screen.queryByText("1234567890")).not.toBeInTheDocument();
+  });
+
   it("generates a visible QR image from PayOS payload and formats PayOS bank info", async () => {
     const rawPayosQrPayload = "00020101021238540010A000000727012400069704220110VQRQAJWLZ9808";
     apiClientMock.get.mockResolvedValue(
