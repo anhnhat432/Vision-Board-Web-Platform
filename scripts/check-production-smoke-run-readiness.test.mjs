@@ -81,6 +81,33 @@ describe("check-production-smoke-run-readiness", () => {
     expect(result.stdout).toContain(".github/workflows/production-smoke-e2e.yml");
   });
 
+  it("notes unpublished working-tree mitigation when the failed run matches HEAD", () => {
+    const result = runSmokeReadiness(
+      JSON.stringify([
+        {
+          databaseId: 28842465390,
+          status: "completed",
+          conclusion: "failure",
+          event: "schedule",
+          headSha: "f6b4f94f8add78a30e95dedeb38fee63f82cdc10",
+          createdAt: "2026-07-07T04:52:52Z",
+          url: "https://github.com/anhnhat432/Vision-Board-Web-Platform/actions/runs/28842465390",
+        },
+      ]),
+      JSON.stringify({
+        headSha: "f6b4f94f8add78a30e95dedeb38fee63f82cdc10",
+        cachedFiles: [],
+        workingFiles: ["src/app/components/twelve-week/TwelveWeekTodayTab.tsx"],
+        untrackedFiles: ["docs/specs/2026-07-06-production-smoke-today-task-toggle.md"],
+      }),
+    );
+
+    expect(result.status).toBe(1);
+    expect(result.stdout).toContain("NOTE Production smoke local mitigation exists in the working tree but is unpublished");
+    expect(result.stdout).toContain("src/app/components/twelve-week/TwelveWeekTodayTab.tsx");
+    expect(result.stdout).toContain("docs/specs/2026-07-06-production-smoke-today-task-toggle.md");
+  });
+
   it("blocks when the latest production smoke run is still in progress", () => {
     const result = runSmokeReadiness(
       JSON.stringify([
