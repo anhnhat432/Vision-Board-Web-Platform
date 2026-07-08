@@ -25,6 +25,7 @@ const BACKGROUND_DEFERRED_LOAD_MS = 8_400;
 const DEFERRED_SECTION_ROOT_MARGIN = "96px 0px";
 const LANDING_WIDGET_DEFER_MS = 14_000;
 const LANDING_MASCOT_DEFER_MS = 16_000;
+const PUBLIC_HERO_TITLE = "Biến ước mơ thành kế hoạch 12 tuần bền bỉ.";
 
 interface NavigatorWithConnection extends Navigator {
   connection?: {
@@ -246,7 +247,7 @@ export function PublicVisitorView({
             aria-label="Về đầu trang Dear Our Future"
           >
             <span
-              className="dof-display"
+              className="dof-display dof-brand-mark"
               style={{
                 width: 34,
                 height: 34,
@@ -361,6 +362,7 @@ export function PublicVisitorView({
           <div className="dof-hero-grid">
             <div className="dof-up" style={{ animationDelay: ".06s" }}>
               <h1
+                aria-label={PUBLIC_HERO_TITLE}
                 className="dof-display dof-hero-title"
                 style={{ fontWeight: 800, lineHeight: 0.98, letterSpacing: "-0.035em", margin: "0 0 24px" }}
               >
@@ -587,6 +589,9 @@ export function PublicVisitorView({
               <div style={{ display: "flex", flexWrap: "wrap", gap: 10, flexShrink: 0 }}>
                 <button
                   type="button"
+                  onPointerEnter={onAuthIntent}
+                  onFocus={onAuthIntent}
+                  onTouchStart={onAuthIntent}
                   onClick={onSignIn}
                   style={{
                     display: "inline-flex",
@@ -606,6 +611,9 @@ export function PublicVisitorView({
                 </button>
                 <button
                   type="button"
+                  onPointerEnter={onAuthIntent}
+                  onFocus={onAuthIntent}
+                  onTouchStart={onAuthIntent}
                   onClick={onSignUp}
                   style={{
                     border: "1.5px solid color-mix(in srgb, var(--app-energy) 40%, transparent)",

@@ -260,13 +260,22 @@
 @media (max-width: 520px) {
   .dof-landing .dof-topbar {
     gap: 10px !important;
+    padding: 12px 16px !important;
   }
   .dof-landing .dof-brand {
     min-width: 0;
     gap: 8px !important;
   }
+  .dof-landing .dof-brand-mark {
+    width: 32px !important;
+    height: 32px !important;
+    flex: 0 0 32px;
+    border-radius: 9px !important;
+    font-size: 17px !important;
+  }
   .dof-landing .dof-brand-name {
-    max-width: 126px;
+    max-width: 154px;
+    font-size: 16px !important;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -285,7 +294,13 @@
     white-space: nowrap;
   }
   .dof-landing .dof-signup-pill {
-    padding: 9px 14px !important;
+    padding: 8px 12px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .dof-landing .dof-brand-name {
+    max-width: 128px;
   }
 }
 
