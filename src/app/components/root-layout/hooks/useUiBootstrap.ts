@@ -9,6 +9,10 @@ interface NavigatorWithConnection extends Navigator {
   };
 }
 
+interface UseWarmPrefetchOptions {
+  enabled?: boolean;
+}
+
 /**
  * Bật listener Cmd/Ctrl+K toggle CommandPalette ở phạm vi window.
  */
@@ -28,8 +32,11 @@ export function useCommandPaletteHotkey(setOpen: (toggle: (open: boolean) => boo
 /**
  * Sau khi RootLayout mount, prefetch các heavy route để tránh spinner đầu tiên.
  */
-export function useWarmPrefetch(): void {
+export function useWarmPrefetch(options: UseWarmPrefetchOptions = {}): void {
+  const { enabled = true } = options;
+
   useEffect(() => {
+    if (!enabled) return;
     if (typeof window === "undefined") return;
 
     const connection = (window.navigator as NavigatorWithConnection).connection;
@@ -58,5 +65,5 @@ export function useWarmPrefetch(): void {
         window.cancelIdleCallback(idleHandle);
       }
     };
-  }, []);
+  }, [enabled]);
 }

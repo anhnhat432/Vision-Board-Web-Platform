@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { buildLoginPath } from "@/features/dashboard/helpers/dashboardNavigation";
 import { PublicVisitorView } from "@/features/dashboard/v2/PublicVisitorView";
@@ -11,15 +11,6 @@ const SignedInDashboard = lazy(() =>
     default: module.Dashboard,
   })),
 );
-
-const SIGNED_OUT_ROUTE_WARM_DELAY_MS = 12_000;
-
-interface NavigatorWithConnection extends Navigator {
-  connection?: {
-    effectiveType?: string;
-    saveData?: boolean;
-  };
-}
 
 let loginRouteWarmPromise: Promise<unknown> | null = null;
 let onboardingRouteWarmPromise: Promise<unknown> | null = null;
@@ -59,16 +50,6 @@ function hasLocalWorkspaceData(userData: ReturnType<typeof getUserData>): boolea
   );
 }
 
-function shouldSkipBackgroundRouteWarm(): boolean {
-  if (typeof window === "undefined") return true;
-
-  const connection = (window.navigator as NavigatorWithConnection).connection;
-  if (connection?.saveData) return true;
-  if (connection?.effectiveType === "slow-2g" || connection?.effectiveType === "2g") return true;
-
-  return window.navigator.hardwareConcurrency <= 4;
-}
-
 export function DashboardEntry() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -79,32 +60,6 @@ export function DashboardEntry() {
   const isSignedOut = !user;
   const hasSignedOutRealLocalData = !demoMode && isSignedOut && hasLocalWorkspaceData(initialUserData);
   const warmStartRoute = demoMode ? warmOnboardingRoute : warmLoginRoute;
-
-  useEffect(() => {
-    if (!isSignedOut || typeof window === "undefined") return undefined;
-    if (shouldSkipBackgroundRouteWarm()) return undefined;
-
-    let idleHandle: number | null = null;
-    const timerId = window.setTimeout(() => {
-      const warmRoutes = () => {
-        warmLoginRoute();
-        if (demoMode) warmOnboardingRoute();
-      };
-
-      if ("requestIdleCallback" in window) {
-        idleHandle = window.requestIdleCallback(warmRoutes, { timeout: 3_000 });
-      } else {
-        warmRoutes();
-      }
-    }, SIGNED_OUT_ROUTE_WARM_DELAY_MS);
-
-    return () => {
-      window.clearTimeout(timerId);
-      if (idleHandle !== null && "cancelIdleCallback" in window) {
-        window.cancelIdleCallback(idleHandle);
-      }
-    };
-  }, [demoMode, isSignedOut]);
 
   const handleAuthNavigate = (mode: "signin" | "signup") => {
     navigate(buildLoginPath(mode, authDestination));
