@@ -34,7 +34,6 @@ export const VALID_ROUTES = [
   "/journal",
   "/gallery",
   "/today",
-  "/reflection",
   "/dashboard",
   "/twelve-week",
 ] as const;

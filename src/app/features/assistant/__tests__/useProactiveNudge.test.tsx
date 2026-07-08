@@ -72,8 +72,15 @@ type ContextOverrides = {
   };
 };
 
+function hasOverride(overrides: ContextOverrides, key: keyof ContextOverrides): boolean {
+  return key in overrides;
+}
+
 function makeContext(overrides: ContextOverrides = {}): AssistantContext {
-  const currentWeek = "currentWeek" in overrides ? (overrides.currentWeek ?? null) : 3;
+  const currentWeek = hasOverride(overrides, "currentWeek") ? (overrides.currentWeek ?? null) : 3;
+  const feasibility = hasOverride(overrides, "feasibility")
+    ? (overrides.feasibility ?? null)
+    : { readinessScore: 80, bottleneckLabel: null, bottleneckAction: null };
 
   return {
     currentWeek,
@@ -81,7 +88,7 @@ function makeContext(overrides: ContextOverrides = {}): AssistantContext {
     goals: overrides.goals ?? [{ id: "goal-1", title: "Run marathon", progress: 20 }],
     todayTasks: overrides.todayTasks ?? [],
     lastReflectionDate: overrides.lastReflectionDate ?? TODAY,
-    feasibility: overrides.feasibility ?? { readinessScore: 80, bottleneckLabel: null, bottleneckAction: null },
+    feasibility,
     latestWeeklyReview: overrides.latestWeeklyReview ?? {
       weekNumber: 2,
       leadCompletionPercent: 80,
@@ -149,7 +156,7 @@ describe("useProactiveNudge", () => {
 
     const { result } = renderHook(() => useProactiveNudge(false), { wrapper });
 
-    expect(result.current.nudge).toMatchObject({ type: "missing_smart_goal", route: "/smart-goal" });
+    expect(result.current.nudge).toMatchObject({ type: "missing_smart_goal", route: "/smart-goal-setup" });
   });
 
   it("detects missing feasibility check nudge", () => {
@@ -165,7 +172,7 @@ describe("useProactiveNudge", () => {
 
     const { result } = renderHook(() => useProactiveNudge(false), { wrapper });
 
-    expect(result.current.nudge).toMatchObject({ type: "missing_12_week_plan", route: "/12-week-plan" });
+    expect(result.current.nudge).toMatchObject({ type: "missing_12_week_plan", route: "/12-week-setup" });
   });
 
   it("shows new-week nudge when current week is newer than last seen week", () => {
@@ -243,7 +250,7 @@ describe("useProactiveNudge", () => {
 
     const { result } = renderHook(() => useProactiveNudge(false), { wrapper });
 
-    expect(result.current.nudge).toMatchObject({ type: "weekly_review_due", route: "/weekly-review" });
+    expect(result.current.nudge).toMatchObject({ type: "weekly_review_due", route: "/12-week-system?tab=week" });
   });
 
   it("detects reflection due nudge", () => {
@@ -252,7 +259,7 @@ describe("useProactiveNudge", () => {
 
     const { result } = renderHook(() => useProactiveNudge(false), { wrapper });
 
-    expect(result.current.nudge).toMatchObject({ type: "reflection_due", route: "/reflection" });
+    expect(result.current.nudge).toMatchObject({ type: "reflection_due", route: "/journal" });
   });
 
   it("detects sync error nudge without backend calls", () => {

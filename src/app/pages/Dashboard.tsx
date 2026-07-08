@@ -155,7 +155,13 @@ function useNearViewport<TElement extends Element>(enabled: boolean, rootMargin 
   const [isNearViewport, setIsNearViewport] = useState(false);
 
   useEffect(() => {
-    if (!enabled || isNearViewport) return;
+    if (!enabled) {
+      setIsNearViewport(false);
+      return;
+    }
+
+    if (isNearViewport) return;
+
     const element = ref.current;
     if (!element) return;
 
@@ -163,18 +169,6 @@ function useNearViewport<TElement extends Element>(enabled: boolean, rootMargin 
       setIsNearViewport(true);
       return;
     }
-
-    let idleHandle: number | null = null;
-    const fallbackTimerId = window.setTimeout(() => {
-      const loadWhenIdle = () => setIsNearViewport(true);
-
-      if ("requestIdleCallback" in window) {
-        idleHandle = window.requestIdleCallback(loadWhenIdle, { timeout: 800 });
-        return;
-      }
-
-      loadWhenIdle();
-    }, 450);
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -187,15 +181,11 @@ function useNearViewport<TElement extends Element>(enabled: boolean, rootMargin 
 
     observer.observe(element);
     return () => {
-      window.clearTimeout(fallbackTimerId);
-      if (idleHandle !== null && "cancelIdleCallback" in window) {
-        window.cancelIdleCallback(idleHandle);
-      }
       observer.disconnect();
     };
   }, [enabled, isNearViewport, rootMargin]);
 
-  return [ref, isNearViewport] as const;
+  return [ref, enabled && isNearViewport] as const;
 }
 
 const LIFE_BALANCE_ROWS = [
@@ -910,7 +900,7 @@ function NextBestAction({ data }: { data: DashboardData }) {
     title = `Đến ngày Phản tư Tuần ${activeSystemWeek}`;
     description = "Hãy dành 5 phút tĩnh lặng để nhìn nhận lại chặng đường 7 ngày qua và đúc rút bài học.";
     ctaLabel = "Viết phản tư";
-    ctaPath = "/12-week-system?tab=review";
+    ctaPath = "/12-week-system?tab=week";
     Icon = Award;
     tone = "review";
   } else if (activeSystemWeekOpenTasks.length > 0) {

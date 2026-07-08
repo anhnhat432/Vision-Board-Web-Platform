@@ -24,6 +24,8 @@ describe("assistant action schema contract (backend)", () => {
 
   it("backend route whitelist matches the shared schema and drops the phantom /today-v2 route", () => {
     assert.ok((VALID_ROUTES as readonly string[]).includes("/today"));
+    assert.ok((VALID_ROUTES as readonly string[]).includes("/journal"));
+    assert.ok(!(VALID_ROUTES as readonly string[]).includes("/reflection"));
     assert.ok(!(VALID_ROUTES as readonly string[]).includes("/today-v2"));
   });
 

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -31,6 +31,36 @@ vi.mock("../utils/app-mode", () => ({
 
 vi.mock("@/features/dashboard/hooks/useDashboardPlanLink", () => ({
   useDashboardPlanLink: () => null,
+}));
+
+vi.mock("@/features/dashboard/v2/ReflectionPrompt", () => ({
+  ReflectionPrompt: ({ reviewHref }: { reviewHref?: string }) => (
+    <div data-testid="reflection-prompt" data-review-href={reviewHref} />
+  ),
+}));
+
+vi.mock("@/features/dashboard/v2/TodayMiniCard", () => ({
+  TodayMiniCard: ({ title = "Việc hôm nay" }: { title?: string }) => (
+    <section aria-labelledby="dashboard-today-mini-title">
+      <h2 id="dashboard-today-mini-title">{title}</h2>
+    </section>
+  ),
+}));
+
+vi.mock("@/features/dashboard/v2/TwelveWeekTrendCard", () => ({
+  TwelveWeekTrendCard: () => (
+    <section aria-labelledby="dashboard-trend-title">
+      <h2 id="dashboard-trend-title">Đường 12 tuần</h2>
+    </section>
+  ),
+}));
+
+vi.mock("@/features/dashboard/v2/WeekRhythmCard", () => ({
+  WeekRhythmCard: ({ currentWeek }: { currentWeek: number | null }) => (
+    <section aria-labelledby="dashboard-week-rhythm-title" data-testid="dashboard-kpi-row">
+      <h2 id="dashboard-week-rhythm-title">Nhịp tuần {currentWeek ?? 1}</h2>
+    </section>
+  ),
 }));
 
 vi.mock("@/features/plan12week/hooks", () => ({
@@ -106,6 +136,19 @@ function makeSystem(tasks: TwelveWeekTaskInstance[]): TwelveWeekSystem {
   };
 }
 
+function getTodayReviewDay(): TwelveWeekSystem["reviewDay"] {
+  const reviewDays: TwelveWeekSystem["reviewDay"][] = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
+  return reviewDays[new Date().getDay()];
+}
+
 function seedActiveDashboard() {
   const data = getUserData();
   const goal: Goal = {
@@ -145,10 +188,11 @@ function renderDashboard() {
     { initialEntries: ["/"] },
   );
 
-  return render(<RouterProvider router={router} />);
+  return { router, ...render(<RouterProvider router={router} />) };
 }
 
 const SECONDARY_INSIGHTS_OPEN_KEY = "visionboard_dashboard_secondary_insights_open";
+let intersectionObserverCallback: IntersectionObserverCallback | null = null;
 
 function setViewportWidth(width: number) {
   Object.defineProperty(window, "innerWidth", { configurable: true, value: width });
@@ -173,12 +217,51 @@ function setViewportWidth(width: number) {
   });
 }
 
+function installIntersectionObserverMock() {
+  intersectionObserverCallback = null;
+  class MockIntersectionObserver implements IntersectionObserver {
+    readonly root: Element | Document | null = null;
+    readonly rootMargin = "0px";
+    readonly scrollMargin = "0px";
+    readonly thresholds: ReadonlyArray<number> = [0];
+
+    constructor(callback: IntersectionObserverCallback) {
+      intersectionObserverCallback = callback;
+    }
+
+    observe = vi.fn();
+    unobserve = vi.fn();
+    disconnect = vi.fn();
+    takeRecords = vi.fn(() => []);
+  }
+
+  Object.defineProperty(window, "IntersectionObserver", {
+    configurable: true,
+    writable: true,
+    value: MockIntersectionObserver,
+  });
+}
+
+function revealNearViewportInsights() {
+  act(() => {
+    intersectionObserverCallback?.(
+      [
+        {
+          isIntersecting: true,
+        } as IntersectionObserverEntry,
+      ],
+      {} as IntersectionObserver,
+    );
+  });
+}
+
 describe("Dashboard active 12-week system UX", () => {
   beforeEach(() => {
     localStorage.clear();
     planHookMock.loadPlan.mockReset();
     setAuthContext();
     setViewportWidth(1024);
+    installIntersectionObserverMock();
   });
 
   it("keeps the active dashboard primary cards first and groups secondary insights on desktop", async () => {
@@ -190,7 +273,8 @@ describe("Dashboard active 12-week system UX", () => {
     const todayHeading = screen.getByRole("heading", { name: "Việc hôm nay" });
     const secondaryTitle = screen.getByText("Phân tích & nhịp độ");
     const rhythmHeading = screen.getByRole("heading", { name: "Nhịp tuần 1" });
-    const trendHeading = screen.getByRole("heading", { name: "Đường 12 tuần" });
+    revealNearViewportInsights();
+    const trendHeading = await screen.findByRole("heading", { name: "Đường 12 tuần" });
 
     expect(hero).toHaveTextContent("Tuần 1 / 12");
     expect(screen.getByRole("button", { name: /Thu gọn/ })).toBeInTheDocument();
@@ -199,6 +283,20 @@ describe("Dashboard active 12-week system UX", () => {
     expect(goalsHeading.compareDocumentPosition(secondaryTitle)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     expect(secondaryTitle.compareDocumentPosition(rhythmHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     expect(rhythmHeading.compareDocumentPosition(trendHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  it("defers the trend chart until secondary insights are near the viewport on desktop", async () => {
+    seedActiveDashboard();
+    renderDashboard();
+
+    await screen.findByTestId("dashboard-primary-action-card");
+
+    expect(screen.getByRole("heading", { name: "Nhịp tuần 1" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Đường 12 tuần" })).not.toBeInTheDocument();
+
+    revealNearViewportInsights();
+
+    expect(await screen.findByRole("heading", { name: "Đường 12 tuần" })).toBeInTheDocument();
   });
 
   it("collapses secondary insights by default on mobile and remembers the disclosure state", async () => {
@@ -224,7 +322,8 @@ describe("Dashboard active 12-week system UX", () => {
     expect(localStorage.getItem(SECONDARY_INSIGHTS_OPEN_KEY)).toBe("true");
     const kpiRow = await screen.findByTestId("dashboard-kpi-row");
     expect(screen.getByRole("heading", { name: "Nhịp tuần 1" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Đường 12 tuần" })).toBeInTheDocument();
+    revealNearViewportInsights();
+    expect(await screen.findByRole("heading", { name: "Đường 12 tuần" })).toBeInTheDocument();
     expect(goalsHeading.compareDocumentPosition(kpiRow)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
 
     fireEvent.click(screen.getByRole("button", { name: /Thu gọn/ }));
@@ -255,5 +354,41 @@ describe("Dashboard active 12-week system UX", () => {
     expect(screen.getByText("Sức khoẻ")).toBeInTheDocument();
     expect(screen.queryByTestId("dashboard-radar-deferred")).not.toBeInTheDocument();
     expect(screen.queryByTestId("dashboard-radar-chart")).not.toBeInTheDocument();
+  });
+
+  it("opens the supported weekly review tab when review is due", async () => {
+    const data = getUserData();
+    const system = makeSystem([makeTask("task_done", "Finish the week", true)]);
+    system.leadIndicators = [];
+    system.reviewDay = getTodayReviewDay();
+    const goal: Goal = {
+      id: "goal_dashboard_review",
+      category: "Career",
+      focusArea: "Career",
+      title: "Review the active week",
+      description: "Keep the weekly review easy to reach.",
+      deadline: "2026-07-31",
+      feasibilityResult: "Khả thi",
+      readinessScore: 16,
+      tasks: [],
+      createdAt: "2026-05-08T00:00:00.000Z",
+      twelveWeekSystem: system,
+    };
+
+    data.goals = [goal];
+    data.currentWheelOfLife = [
+      { name: "Career", score: 7, color: "#0f172a" },
+      { name: "Health", score: 5, color: "#059669" },
+    ];
+    data.onboardingCompleted = true;
+    saveUserData(data);
+
+    const { router } = renderDashboard();
+    const reviewButton = await screen.findByRole("button", { name: /Viết phản tư/ });
+
+    fireEvent.click(reviewButton);
+
+    expect(router.state.location.pathname).toBe("/12-week-system");
+    expect(router.state.location.search).toBe("?tab=week");
   });
 });

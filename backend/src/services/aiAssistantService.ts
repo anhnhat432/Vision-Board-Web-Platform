@@ -126,7 +126,7 @@ const SMART_ASSISTANT_ROUTES = new Set([
   "/12-week-plan-setup",
   "/12-week-plan-overview",
   "/12-week-system",
-  "/reflection",
+  "/journal",
 ]);
 
 export interface GeminiModelSelection {
