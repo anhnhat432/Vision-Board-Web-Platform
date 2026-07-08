@@ -50,6 +50,7 @@ export interface RedactedTelemetryEvent {
 let buffer: RedactedTelemetryEvent[] = [];
 let flushTimer: ReturnType<typeof setTimeout> | null = null;
 let onlineListenerBound = false;
+let visibilityListenerBound = false;
 let started = false;
 
 function isOnline(): boolean {
@@ -125,6 +126,32 @@ function enqueue(event: AssistantEvent): void {
   }
 }
 
+function handleOnline(): void {
+  void flushTelemetry();
+}
+
+function handleBeforeUnload(): void {
+  void flushTelemetry();
+}
+
+function handleVisibilityChange(): void {
+  if (document.visibilityState !== "hidden") return;
+  void flushTelemetry();
+}
+
+function unbindLifecycleListeners(): void {
+  if (typeof window !== "undefined" && onlineListenerBound) {
+    window.removeEventListener("online", handleOnline);
+    window.removeEventListener("beforeunload", handleBeforeUnload);
+    onlineListenerBound = false;
+  }
+
+  if (typeof document !== "undefined" && visibilityListenerBound) {
+    document.removeEventListener("visibilitychange", handleVisibilityChange);
+    visibilityListenerBound = false;
+  }
+}
+
 /**
  * Bật forwarder: đăng ký sink vào observability + lắng nghe online để flush buffer.
  * An toàn khi gọi nhiều lần (idempotent). Ở demo-mode sẽ không gửi gì.
@@ -137,13 +164,14 @@ export function startAssistantTelemetryForwarding(): void {
 
   if (typeof window !== "undefined" && !onlineListenerBound) {
     onlineListenerBound = true;
-    window.addEventListener("online", () => {
-      void flushTelemetry();
-    });
+    window.addEventListener("online", handleOnline);
     // Flush sót lại trước khi rời trang (best-effort).
-    window.addEventListener("beforeunload", () => {
-      void flushTelemetry();
-    });
+    window.addEventListener("beforeunload", handleBeforeUnload);
+  }
+
+  if (typeof document !== "undefined" && !visibilityListenerBound) {
+    visibilityListenerBound = true;
+    document.addEventListener("visibilitychange", handleVisibilityChange);
   }
 }
 
@@ -155,6 +183,7 @@ export function stopAssistantTelemetryForwarding(): void {
     clearTimeout(flushTimer);
     flushTimer = null;
   }
+  unbindLifecycleListeners();
 }
 
 /** Chỉ dùng cho test: đọc/đặt lại buffer hiện tại. */
@@ -170,4 +199,5 @@ export function __resetTelemetryForTest(): void {
   }
   started = false;
   setAssistantEventSink(null);
+  unbindLifecycleListeners();
 }
