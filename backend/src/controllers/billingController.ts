@@ -31,6 +31,7 @@ function isPaidCheckoutDisabled(): boolean {
 
 const PAID_CHECKOUT_DISABLED_MESSAGE =
   "Paid checkout is temporarily disabled. Please contact support to upgrade manually.";
+const DEFAULT_BILLING_SUPPORT_EMAIL = "support@dearourfuture.com";
 
 function isValidHttpUrl(value: unknown): value is string {
   if (typeof value !== "string" || value.length === 0 || value.length > 2048) return false;
@@ -58,6 +59,19 @@ function isOriginAllowed(url: string, allowedOrigins: string | undefined): boole
 
 function getPublicCheckoutUserId(clientUserId: string): string {
   return `public:${clientUserId}`;
+}
+
+function getBillingSupportEmail(): string {
+  return (
+    process.env.SUPPORT_EMAIL?.trim() ||
+    process.env.VITE_BILLING_SUPPORT_EMAIL?.trim() ||
+    process.env.BILLING_SUPPORT_EMAIL?.trim() ||
+    DEFAULT_BILLING_SUPPORT_EMAIL
+  );
+}
+
+function buildCustomerPortalFallbackMessage(prefix: string, supportEmail: string): string {
+  return `${prefix} Vui lòng liên hệ ${supportEmail} để được hỗ trợ.`;
 }
 
 function getPlusPriceFromEnv(): number {
@@ -416,14 +430,16 @@ export async function createCustomerPortal(req: Request, res: Response): Promise
 
   // Check if adapter supports customer portal
   if (!adapter.createCustomerPortalSession) {
+    const supportEmail = getBillingSupportEmail();
     res.status(200).json(
       successResponse({
         supported: false,
         provider: adapter.providerId,
-        message:
-          "Provider hiện tại chưa hỗ trợ cổng quản lý thanh toán tự phục vụ. " +
-          "Vui lòng liên hệ support@visionboard.app để được hỗ trợ.",
-        supportEmail: "support@visionboard.app",
+        message: buildCustomerPortalFallbackMessage(
+          "Provider hiện tại chưa hỗ trợ cổng quản lý thanh toán tự phục vụ.",
+          supportEmail,
+        ),
+        supportEmail,
       }),
     );
     return;
@@ -437,14 +453,13 @@ export async function createCustomerPortal(req: Request, res: Response): Promise
     });
 
     if (!result) {
+      const supportEmail = getBillingSupportEmail();
       res.status(200).json(
         successResponse({
           supported: false,
           provider: adapter.providerId,
-          message:
-            "Provider không thể tạo cổng quản lý lúc này. " +
-            "Vui lòng liên hệ support@visionboard.app để được hỗ trợ.",
-          supportEmail: "support@visionboard.app",
+          message: buildCustomerPortalFallbackMessage("Provider không thể tạo cổng quản lý lúc này.", supportEmail),
+          supportEmail,
         }),
       );
       return;

@@ -121,6 +121,45 @@ function createCheckoutSpyAdapter(providerId: PaymentProviderAdapter["providerId
   };
 }
 
+function createPaymentOrderFixture({ status }: { status: "pending" | "completed" | "expired" | "failed" }) {
+  return {
+    orderId: "VBTEST0001",
+    userId: checkoutUserId,
+    planCode: "PLUS",
+    billingCycle: "twelve_week",
+    amount: 99000,
+    currency: "VND",
+    status,
+    provider: "payos",
+    purpose: "plus_subscription",
+    bankAccount: "123456789",
+    bankName: "970422",
+    accountName: "Dear Our Future",
+    description: "VBTEST0001",
+    qrDataUrl: "https://img.vietqr.io/image/970422-123456789-compact2.png",
+    metadata: {
+      discount: {
+        source: "coupon",
+        couponCode: "SAVE20",
+        discountId: "discount_20",
+        discountName: "Launch sale",
+        discountPercent: 20,
+        discountAmount: 20000,
+        originalAmount: 119000,
+        finalAmount: 99000,
+      },
+      payos: {
+        checkoutUrl: "https://pay.example.test/checkout/VBTEST0001",
+      },
+    },
+    expiresAt: new Date(Date.now() + 30 * 60 * 1000),
+    completedAt: status === "completed" ? new Date() : null,
+    createdAt: new Date(),
+    receiptSentAt: status === "completed" ? new Date() : null,
+    save: async () => undefined,
+  };
+}
+
 // ─── GET /api/billing/entitlement Tests ──────────────────────────────────────
 
 describe("GET /api/billing/entitlement", () => {
@@ -547,6 +586,37 @@ describe("GET /api/billing/order-status/:orderId", () => {
     assert.equal(response.status, 400);
     assert.equal(response.body.errorCode, "invalid_order_id");
   });
+
+  it("keeps full payment instructions for the authenticated order owner", async () => {
+    const paymentOrderModel = PaymentOrderModel as unknown as {
+      findOne: (...args: unknown[]) => Promise<unknown>;
+    };
+    const originalFindOne = paymentOrderModel.findOne;
+    let capturedQuery: unknown = null;
+    paymentOrderModel.findOne = async (query: unknown) => {
+      capturedQuery = query;
+      return createPaymentOrderFixture({ status: "completed" });
+    };
+
+    try {
+      const response = await requestJson(createBillingTestApp(), "GET", "/api/billing/order-status/VBTEST0001", {
+        token: "checkout-token",
+      });
+
+      assert.equal(response.status, 200);
+      assert.deepEqual(capturedQuery, { orderId: "VBTEST0001", userId: checkoutUserId });
+      const data = response.body.data as Record<string, unknown>;
+      assert.equal(data.bankAccount, "123456789");
+      assert.equal(data.bankName, "970422");
+      assert.equal(data.accountName, "Dear Our Future");
+      assert.equal(data.qrDataUrl, "https://img.vietqr.io/image/970422-123456789-compact2.png");
+      assert.equal(data.checkoutUrl, "https://pay.example.test/checkout/VBTEST0001");
+      assert.equal(data.description, "VBTEST0001");
+      assert.ok(data.discount);
+    } finally {
+      paymentOrderModel.findOne = originalFindOne;
+    }
+  });
 });
 
 describe("GET /api/billing/public-order-status/:orderId", () => {
@@ -558,6 +628,69 @@ describe("GET /api/billing/public-order-status/:orderId", () => {
     assert.equal(response.status, 400);
     assert.equal(response.body.errorCode, "invalid_order_id");
   });
+
+  it("keeps payment instructions for pending public orders", async () => {
+    const paymentOrderModel = PaymentOrderModel as unknown as {
+      findOne: (...args: unknown[]) => Promise<unknown>;
+    };
+    const originalFindOne = paymentOrderModel.findOne;
+    let capturedQuery: unknown = null;
+    paymentOrderModel.findOne = async (query: unknown) => {
+      capturedQuery = query;
+      return createPaymentOrderFixture({ status: "pending" });
+    };
+
+    try {
+      const response = await requestJson(createBillingTestApp(), "GET", "/api/billing/public-order-status/VBTEST0001", {
+        token: null,
+      });
+
+      assert.equal(response.status, 200);
+      assert.deepEqual(capturedQuery, { orderId: "VBTEST0001" });
+      const data = response.body.data as Record<string, unknown>;
+      assert.equal(data.bankAccount, "123456789");
+      assert.equal(data.bankName, "970422");
+      assert.equal(data.accountName, "Dear Our Future");
+      assert.equal(data.qrDataUrl, "https://img.vietqr.io/image/970422-123456789-compact2.png");
+      assert.equal(data.checkoutUrl, "https://pay.example.test/checkout/VBTEST0001");
+      assert.equal(data.description, "VBTEST0001");
+      assert.ok(data.discount);
+    } finally {
+      paymentOrderModel.findOne = originalFindOne;
+    }
+  });
+
+  for (const terminalStatus of ["completed", "expired", "failed"] as const) {
+    it(`redacts payment instructions for ${terminalStatus} public orders`, async () => {
+      const paymentOrderModel = PaymentOrderModel as unknown as {
+        findOne: (...args: unknown[]) => Promise<unknown>;
+      };
+      const originalFindOne = paymentOrderModel.findOne;
+      paymentOrderModel.findOne = async () => createPaymentOrderFixture({ status: terminalStatus });
+
+      try {
+        const response = await requestJson(createBillingTestApp(), "GET", "/api/billing/public-order-status/VBTEST0001", {
+          token: null,
+        });
+
+        assert.equal(response.status, 200);
+        const data = response.body.data as Record<string, unknown>;
+        assert.equal(data.orderId, "VBTEST0001");
+        assert.equal(data.status, terminalStatus);
+        assert.equal(data.amount, 99000);
+        assert.equal(data.currency, "VND");
+        assert.equal(data.bankAccount, "");
+        assert.equal(data.bankName, "");
+        assert.equal(data.accountName, "");
+        assert.equal(data.description, "");
+        assert.equal(data.qrDataUrl, "");
+        assert.equal(data.checkoutUrl, null);
+        assert.equal(data.discount, null);
+      } finally {
+        paymentOrderModel.findOne = originalFindOne;
+      }
+    });
+  }
 });
 
 describe("GET /api/billing/payment-history", () => {
@@ -635,16 +768,16 @@ describe("GET /api/billing/payment-history", () => {
 });
 
 describe("POST /api/billing/customer-portal", () => {
-  const portalUserId = "user_portal_test";
+  const defaultPortalUserId = "user_portal_test";
 
-  function createPortalTestApp(): Express {
+  function createPortalTestApp(userId = defaultPortalUserId): Express {
     const app = express();
     app.use(express.json());
     app.use(
       "/api",
       createAuthMiddleware({
         async verifyIdToken(token: string) {
-          if (token === "portal-token") return { uid: portalUserId, email: "portal@test.com", emailVerified: true };
+          if (token === "portal-token") return { uid: userId, email: "portal@test.com", emailVerified: true };
           throw new Error("Invalid test token");
         },
       }),
@@ -653,6 +786,44 @@ describe("POST /api/billing/customer-portal", () => {
     app.use(errorMiddleware);
     return app;
   }
+
+  function createPortalFallbackAdapter(
+    mode: "missing-method" | "null-result",
+  ): PaymentProviderAdapter {
+    return {
+      providerId: "momo",
+      isConfigured: true,
+      async createCheckoutSession() {
+        throw new Error("Adapter createCheckoutSession should not be called by the portal route.");
+      },
+      verifyWebhookSignature: () => ({ valid: false }),
+      parseWebhookEvent: () => {
+        throw new Error("Not used in customer portal route tests.");
+      },
+      mapSubscriptionStatus: () => null,
+      ...(mode === "null-result"
+        ? {
+            createCustomerPortalSession: async () => null,
+          }
+        : {}),
+    };
+  }
+
+  beforeEach(() => {
+    _resetAdapterCacheForTesting();
+    delete process.env.BILLING_PROVIDER;
+    delete process.env.SUPPORT_EMAIL;
+    delete process.env.VITE_BILLING_SUPPORT_EMAIL;
+    delete process.env.BILLING_SUPPORT_EMAIL;
+  });
+
+  afterEach(() => {
+    _resetAdapterCacheForTesting();
+    delete process.env.BILLING_PROVIDER;
+    delete process.env.SUPPORT_EMAIL;
+    delete process.env.VITE_BILLING_SUPPORT_EMAIL;
+    delete process.env.BILLING_SUPPORT_EMAIL;
+  });
 
   it("returns 401 when no auth token is provided", async () => {
     const response = await requestJson(createPortalTestApp(), "POST", "/api/billing/customer-portal", {
@@ -663,7 +834,7 @@ describe("POST /api/billing/customer-portal", () => {
   });
 
   it("returns unsupported for user with no subscription", async () => {
-    const response = await requestJson(createPortalTestApp(), "POST", "/api/billing/customer-portal", {
+    const response = await requestJson(createPortalTestApp("user_portal_no_subscription_test"), "POST", "/api/billing/customer-portal", {
       token: "portal-token",
       body: {},
     });
@@ -673,9 +844,10 @@ describe("POST /api/billing/customer-portal", () => {
   });
 
   it("returns portalUrl for PLUS user with mock provider", async () => {
+    const portalUserId = "user_portal_mock_provider_test";
     await billingService.createMockOrManualEntitlement(portalUserId, "PLUS", "mock");
 
-    const response = await requestJson(createPortalTestApp(), "POST", "/api/billing/customer-portal", {
+    const response = await requestJson(createPortalTestApp(portalUserId), "POST", "/api/billing/customer-portal", {
       token: "portal-token",
       body: { returnUrl: "https://example.com/billing" },
     });
@@ -684,6 +856,89 @@ describe("POST /api/billing/customer-portal", () => {
     assert.equal(data.supported, true);
     assert.ok(typeof data.portalUrl === "string");
     assert.ok((data.portalUrl as string).length > 0);
+  });
+
+  it("uses configured support email when provider has no portal method", async () => {
+    const portalUserId = "user_portal_missing_method_test";
+    process.env.BILLING_PROVIDER = "momo";
+    process.env.SUPPORT_EMAIL = "care@example.test";
+    process.env.VITE_BILLING_SUPPORT_EMAIL = "billing-care@example.test";
+    process.env.BILLING_SUPPORT_EMAIL = "legacy-billing-care@example.test";
+    _setAdapterForTesting("momo", createPortalFallbackAdapter("missing-method"));
+    await billingService.createMockOrManualEntitlement(portalUserId, "PLUS", "mock");
+
+    const response = await requestJson(createPortalTestApp(portalUserId), "POST", "/api/billing/customer-portal", {
+      token: "portal-token",
+      body: {},
+    });
+
+    assert.equal(response.status, 200);
+    const data = response.body.data as Record<string, unknown>;
+    assert.equal(data.supported, false);
+    assert.equal(data.supportEmail, "care@example.test");
+    assert.match(String(data.message), /care@example\.test/);
+    assert.doesNotMatch(String(data.message), /support@visionboard\.app/);
+    assert.doesNotMatch(String(data.message), /billing-care@example\.test/);
+    assert.doesNotMatch(String(data.message), /legacy-billing-care@example\.test/);
+  });
+
+  it("uses configured billing support email when provider returns no portal session", async () => {
+    const portalUserId = "user_portal_null_result_test";
+    process.env.BILLING_PROVIDER = "momo";
+    process.env.VITE_BILLING_SUPPORT_EMAIL = "billing-care@example.test";
+    _setAdapterForTesting("momo", createPortalFallbackAdapter("null-result"));
+    await billingService.createMockOrManualEntitlement(portalUserId, "PLUS", "mock");
+
+    const response = await requestJson(createPortalTestApp(portalUserId), "POST", "/api/billing/customer-portal", {
+      token: "portal-token",
+      body: {},
+    });
+
+    assert.equal(response.status, 200);
+    const data = response.body.data as Record<string, unknown>;
+    assert.equal(data.supported, false);
+    assert.equal(data.supportEmail, "billing-care@example.test");
+    assert.match(String(data.message), /billing-care@example\.test/);
+    assert.doesNotMatch(String(data.message), /support@visionboard\.app/);
+  });
+
+  it("uses legacy billing support email when primary support envs are absent", async () => {
+    const portalUserId = "user_portal_legacy_support_email_test";
+    process.env.BILLING_PROVIDER = "momo";
+    process.env.BILLING_SUPPORT_EMAIL = "legacy-billing-care@example.test";
+    _setAdapterForTesting("momo", createPortalFallbackAdapter("missing-method"));
+    await billingService.createMockOrManualEntitlement(portalUserId, "PLUS", "mock");
+
+    const response = await requestJson(createPortalTestApp(portalUserId), "POST", "/api/billing/customer-portal", {
+      token: "portal-token",
+      body: {},
+    });
+
+    assert.equal(response.status, 200);
+    const data = response.body.data as Record<string, unknown>;
+    assert.equal(data.supported, false);
+    assert.equal(data.supportEmail, "legacy-billing-care@example.test");
+    assert.match(String(data.message), /legacy-billing-care@example\.test/);
+    assert.doesNotMatch(String(data.message), /support@visionboard\.app/);
+  });
+
+  it("uses the branded fallback support email when no support env is configured", async () => {
+    const portalUserId = "user_portal_default_support_email_test";
+    process.env.BILLING_PROVIDER = "momo";
+    _setAdapterForTesting("momo", createPortalFallbackAdapter("null-result"));
+    await billingService.createMockOrManualEntitlement(portalUserId, "PLUS", "mock");
+
+    const response = await requestJson(createPortalTestApp(portalUserId), "POST", "/api/billing/customer-portal", {
+      token: "portal-token",
+      body: {},
+    });
+
+    assert.equal(response.status, 200);
+    const data = response.body.data as Record<string, unknown>;
+    assert.equal(data.supported, false);
+    assert.equal(data.supportEmail, "support@dearourfuture.com");
+    assert.match(String(data.message), /support@dearourfuture\.com/);
+    assert.doesNotMatch(String(data.message), /support@visionboard\.app/);
   });
 });
 

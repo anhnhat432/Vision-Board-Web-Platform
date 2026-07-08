@@ -8,6 +8,9 @@ afterEach(() => {
   mock.restoreAll();
   delete process.env.SUPPORT_EMAIL;
   delete process.env.VITE_BILLING_SUPPORT_EMAIL;
+  delete process.env.BILLING_SUPPORT_EMAIL;
+  delete process.env.EMAIL_REPLY_TO;
+  delete process.env.EMAIL_FROM;
 });
 
 describe("receiptEmailService", () => {
@@ -66,5 +69,20 @@ describe("receiptEmailService", () => {
     assert.match(payload.text, /Plus yearly/);
     assert.match(payload.html ?? "", /casso_ref_456/);
     assert.equal(payload.replyTo, "billing@example.test");
+  });
+
+  it("uses the branded support fallback when no support env is configured", () => {
+    const rendered = renderPaymentReceiptEmail({
+      orderId: "VBRCPT003",
+      userEmail: "buyer@example.test",
+      amount: 99000,
+      currency: "VND",
+      planName: "Plus",
+      paidAt: "2026-05-14T10:00:00.000Z",
+    });
+
+    assert.match(rendered.text, /support@dearourfuture\.com/);
+    assert.match(rendered.html, /support@dearourfuture\.com/);
+    assert.equal(rendered.replyTo, "support@dearourfuture.com");
   });
 });
