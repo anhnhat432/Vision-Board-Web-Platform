@@ -101,6 +101,7 @@ import {
   prefetchRoute,
 } from "./navConfig";
 import { GUIDED_PATHS, applyRouteDocumentMetadata, getBreadcrumbTrail, getRouteMeta } from "./routeMeta";
+import { SyncStatusIndicatorContainer } from "./SyncStatusIndicatorContainer";
 import { SyncStatusPill } from "./SyncStatusPill";
 import { buildLoginRedirect, isAuthProtectedPath, isPublicCheckoutPath, useWorkspaceGate } from "./useWorkspaceGate";
 
@@ -1213,6 +1214,7 @@ export function RootLayout() {
                     </nav>
 
                     <div className="hidden shrink-0 items-center gap-1.5 md:flex">
+                      {!demoMode && user ? <SyncStatusIndicatorContainer testId="sync-status-indicator" /> : null}
                       {user ? renderAccountMenu("desktop") : null}
                       {!user ? (
                         <>

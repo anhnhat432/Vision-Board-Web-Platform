@@ -14,13 +14,15 @@ import {
   Smile,
   TrendingUp,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import { MotionCountUp } from "@/app/components/motion";
 import { EmptyState } from "@/app/components/states/EmptyState";
-import { emptyNarratives } from "../components/empty-states/narratives";
+import { ScreenStateView } from "@/app/components/states/ScreenStateView";
+import { useScreenDataState } from "@/app/components/states/useScreenDataState";
 import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
+import { emptyNarratives } from "../components/empty-states/narratives";
 import { ScreenGuide } from "../components/ScreenGuide";
 import { SCREEN_GUIDES } from "../components/screen-guides";
 import {
@@ -296,6 +298,21 @@ function ReflectionJournalContent() {
   );
   const hasReflections = sortedReflections.length > 0;
 
+  // Máy trạng thái loại trừ lẫn nhau cho vùng nội dung nhật ký (Req 5.1–5.6).
+  // Nguồn dữ liệu là localStorage qua useSyncedUserData; retry chỉ tải lại
+  // (reloadUserData) và KHÔNG đụng/xoá dữ liệu local. Loading do skeleton cấp
+  // trang đảm nhận nên vùng này không hiển thị empty khi đang tải.
+  const [journalLoadFailed, setJournalLoadFailed] = useState(false);
+  const handleJournalRetry = useCallback(() => {
+    setJournalLoadFailed(false);
+    reloadUserData();
+  }, [reloadUserData]);
+  const journalScreenState = useScreenDataState({
+    status: journalLoadFailed ? "error" : userData ? "ready" : "loading",
+    isEmpty: sortedReflections.length === 0,
+    onRetry: handleJournalRetry,
+  });
+
   const activeGoal = useMemo(() => (userData ? getActiveTwelveWeekGoal(userData.goals) : null), [userData]);
 
   const weekCompletion = useMemo(() => {
@@ -534,7 +551,7 @@ function ReflectionJournalContent() {
               <div className="text-[11.5px] text-[#7A6E5E] dark:text-app-ink-soft font-medium mt-1.5">tiến độ tuần</div>
               <div className="w-[120px] h-1.5 rounded-full bg-app-warm/15 overflow-hidden mt-2">
                 <div
-                  className="h-full rounded-full bg-app-warm transition-all duration-700"
+                  className="h-full rounded-full bg-app-warm transition-all duration-300"
                   style={{ width: `${Math.max(2, weekCompletion.percent)}%` }}
                 />
               </div>
@@ -731,93 +748,100 @@ function ReflectionJournalContent() {
         </section>
       )}
 
-      {/* Empty State */}
-      {sortedReflections.length === 0 ? (
-        <section className="flex flex-col items-center text-center bg-app-surface border border-app-line rounded-[20px] p-10 sm:p-11 sm:pt-12">
-          <div className="relative w-[150px] h-[108px] rounded-2xl overflow-hidden border-[3px] border-app-surface shadow-[0_16px_34px_-20px_rgba(23,21,15,0.55)] mb-5">
-            <img
-              src="/reflection_journal.png"
-              alt="Trang giấy còn trắng"
-              className="w-full h-full object-cover block dark:brightness-[0.85] dark:contrast-[1.05]"
-            />
-          </div>
-          <h3 className="font-serif text-[22px] font-bold text-app-ink tracking-[-0.01em] mb-2">
-            {emptyNarratives.noJournalEntries.title}
-          </h3>
-          <p className="text-[13.5px] text-app-ink-soft mb-6 max-w-[42ch] leading-relaxed">
-            {emptyNarratives.noJournalEntries.body} Bắt đầu từ một gợi ý bên dưới.
-          </p>
-          <Button
-            onClick={() => setIsAddingReflection(true)}
-            className="min-h-11 bg-app-warm text-white hover:bg-app-warm-hover hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.97] transition-all duration-200 rounded-full px-6 py-3.5 text-sm font-bold leading-tight shadow-lg shadow-app-warm/25 gap-2.5 mb-7"
-          >
-            <Plus className="h-4 w-4" strokeWidth={2.4} />
-            Viết entry đầu tiên
-          </Button>
-
-          {/* Prompt Cards */}
-          <div className="w-full max-w-[660px] border-t border-app-line pt-6">
-            <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#A8A296] mb-3.5">Gợi ý mở đầu</div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {(
-                [
-                  {
-                    title: "Điều tôi học được",
-                    hint: "Một bài học hoặc nhận ra hôm nay.",
-                    iconBg: "#EDF7E0",
-                    iconColor: "#0C5E3A",
-                    prompt: "Điều gì hôm nay khiến bạn tự hào về bản thân?",
-                  },
-                  {
-                    title: "Điều tôi biết ơn",
-                    hint: "Một điều nhỏ khiến hôm nay nhẹ hơn.",
-                    iconBg: "#FBEAE0",
-                    iconColor: "#B0673C",
-                    prompt: "Một điều bạn muốn làm tốt hơn vào ngày mai là gì?",
-                  },
-                  {
-                    title: "Điều muốn cải thiện",
-                    hint: "Một việc tuần tới làm tốt hơn.",
-                    iconBg: "#FFF8DE",
-                    iconColor: "#9A7B00",
-                    prompt: "Bạn đang học được điều gì từ chặng đường hiện tại?",
-                  },
-                ] as const
-              ).map((item) => (
-                <button
-                  key={item.title}
-                  type="button"
-                  onClick={() => {
-                    setIsAddingReflection(true);
-                    setNewReflection((prev) => ({
-                      ...prev,
-                      content: prev.content ? `${prev.content}\n\n${item.prompt}` : item.prompt,
-                    }));
-                    saveDraft(item.prompt);
-                  }}
-                  className="min-h-28 text-left bg-[#FAF8F3] dark:bg-app-bg border border-app-line rounded-[14px] p-4 cursor-pointer transition-all duration-150 hover:border-app-warm/50 hover:bg-[#FBF5EF] dark:hover:bg-app-warm-soft/20 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm focus-visible:ring-offset-2"
-                >
-                  <span
-                    className="flex w-[30px] h-[30px] rounded-[9px] items-center justify-center mb-2.5"
-                    style={{ backgroundColor: item.iconBg, color: item.iconColor }}
-                  >
-                    {item.title === "Điều tôi học được" ? (
-                      <BookOpen className="h-4 w-4" aria-hidden="true" />
-                    ) : item.title === "Điều tôi biết ơn" ? (
-                      <Heart className="h-4 w-4" aria-hidden="true" />
-                    ) : (
-                      <TrendingUp className="h-4 w-4" aria-hidden="true" />
-                    )}
-                  </span>
-                  <span className="block text-[13px] font-bold text-app-ink mb-1">{item.title}</span>
-                  <span className="block text-[11.5px] text-app-ink-soft leading-relaxed">{item.hint}</span>
-                </button>
-              ))}
+      {/* Empty / Loading / Error / Ready — máy trạng thái loại trừ lẫn nhau (Req 5) */}
+      <ScreenStateView
+        state={journalScreenState.kind}
+        onRetry={journalScreenState.retry}
+        errorDescription="Chưa tải được nhật ký. Dữ liệu cục bộ của bạn vẫn được giữ nguyên. Hãy thử lại."
+        empty={
+          <section className="flex flex-col items-center text-center bg-app-surface border border-app-line rounded-[20px] p-10 sm:p-11 sm:pt-12">
+            <div className="relative w-[150px] h-[108px] rounded-2xl overflow-hidden border-[3px] border-app-surface shadow-[0_16px_34px_-20px_rgba(23,21,15,0.55)] mb-5">
+              <img
+                src="/reflection_journal.png"
+                alt="Trang giấy còn trắng"
+                className="w-full h-full object-cover block dark:brightness-[0.85] dark:contrast-[1.05]"
+              />
             </div>
-          </div>
-        </section>
-      ) : (
-        /* Past Entries List */
+            <h3 className="font-serif text-[22px] font-bold text-app-ink tracking-[-0.01em] mb-2">
+              {emptyNarratives.noJournalEntries.title}
+            </h3>
+            <p className="text-[13.5px] text-app-ink-soft mb-6 max-w-[42ch] leading-relaxed">
+              {emptyNarratives.noJournalEntries.body} Bắt đầu từ một gợi ý bên dưới.
+            </p>
+            <Button
+              onClick={() => setIsAddingReflection(true)}
+              className="min-h-11 bg-app-warm text-white hover:bg-app-warm-hover hover:-translate-y-0.5 hover:shadow-xl active:scale-[0.97] transition-all duration-200 rounded-full px-6 py-3.5 text-sm font-bold leading-tight shadow-lg shadow-app-warm/25 gap-2.5 mb-7"
+            >
+              <Plus className="h-4 w-4" strokeWidth={2.4} />
+              Viết entry đầu tiên
+            </Button>
+
+            {/* Prompt Cards */}
+            <div className="w-full max-w-[660px] border-t border-app-line pt-6">
+              <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#A8A296] mb-3.5">
+                Gợi ý mở đầu
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {(
+                  [
+                    {
+                      title: "Điều tôi học được",
+                      hint: "Một bài học hoặc nhận ra hôm nay.",
+                      iconBg: "#EDF7E0",
+                      iconColor: "#0C5E3A",
+                      prompt: "Điều gì hôm nay khiến bạn tự hào về bản thân?",
+                    },
+                    {
+                      title: "Điều tôi biết ơn",
+                      hint: "Một điều nhỏ khiến hôm nay nhẹ hơn.",
+                      iconBg: "#FBEAE0",
+                      iconColor: "#B0673C",
+                      prompt: "Một điều bạn muốn làm tốt hơn vào ngày mai là gì?",
+                    },
+                    {
+                      title: "Điều muốn cải thiện",
+                      hint: "Một việc tuần tới làm tốt hơn.",
+                      iconBg: "#FFF8DE",
+                      iconColor: "#9A7B00",
+                      prompt: "Bạn đang học được điều gì từ chặng đường hiện tại?",
+                    },
+                  ] as const
+                ).map((item) => (
+                  <button
+                    key={item.title}
+                    type="button"
+                    onClick={() => {
+                      setIsAddingReflection(true);
+                      setNewReflection((prev) => ({
+                        ...prev,
+                        content: prev.content ? `${prev.content}\n\n${item.prompt}` : item.prompt,
+                      }));
+                      saveDraft(item.prompt);
+                    }}
+                    className="min-h-28 text-left bg-[#FAF8F3] dark:bg-app-bg border border-app-line rounded-[14px] p-4 cursor-pointer transition-all duration-150 hover:border-app-warm/50 hover:bg-[#FBF5EF] dark:hover:bg-app-warm-soft/20 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm focus-visible:ring-offset-2"
+                  >
+                    <span
+                      className="flex w-[30px] h-[30px] rounded-[9px] items-center justify-center mb-2.5"
+                      style={{ backgroundColor: item.iconBg, color: item.iconColor }}
+                    >
+                      {item.title === "Điều tôi học được" ? (
+                        <BookOpen className="h-4 w-4" aria-hidden="true" />
+                      ) : item.title === "Điều tôi biết ơn" ? (
+                        <Heart className="h-4 w-4" aria-hidden="true" />
+                      ) : (
+                        <TrendingUp className="h-4 w-4" aria-hidden="true" />
+                      )}
+                    </span>
+                    <span className="block text-[13px] font-bold text-app-ink mb-1">{item.title}</span>
+                    <span className="block text-[11.5px] text-app-ink-soft leading-relaxed">{item.hint}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </section>
+        }
+      >
+        {/* Past Entries List */}
         <section id="journal-entries">
           <div className="mb-4 flex min-w-0 flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -949,7 +973,7 @@ function ReflectionJournalContent() {
             />
           )}
         </section>
-      )}
+      </ScreenStateView>
     </div>
   );
 }

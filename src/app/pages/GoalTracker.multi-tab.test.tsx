@@ -115,14 +115,36 @@ async function renderGoalTracker() {
   return render(<RouterProvider router={router} />);
 }
 
-function getTaskCheckbox(taskTitle: string): HTMLInputElement {
-  const taskRow = screen.getByText(taskTitle).closest("div");
-  const checkbox = taskRow?.querySelector<HTMLInputElement>('input[type="checkbox"]');
-  if (!checkbox) {
-    throw new Error(`Missing checkbox for task: ${taskTitle}`);
+// The goals list region (`data-tour-id="goaltracker-goals"`) excludes the
+// "Tiêu điểm hôm nay" focus card, which intentionally mirrors the focus
+// goal's title/task. Scoping queries here disambiguates the duplicates
+// without weakening the assertions (we still verify the goal card itself).
+function getGoalsRegion(): HTMLElement {
+  const region = document.querySelector('[data-tour-id="goaltracker-goals"]');
+  if (!region) {
+    throw new Error("Missing goals list region");
   }
 
-  return checkbox;
+  return region as HTMLElement;
+}
+
+// GoalCard renders each open task as a toggle button (aria-label "Chốt việc"
+// when open, "Hủy chốt việc" when done) instead of a native checkbox.
+function getTaskToggleButton(taskTitle: string): HTMLButtonElement {
+  const taskRow = within(getGoalsRegion()).getByText(taskTitle).closest("div");
+  const button = taskRow?.querySelector<HTMLButtonElement>(
+    'button[aria-label="Chốt việc"], button[aria-label="Hủy chốt việc"]',
+  );
+  if (!button) {
+    throw new Error(`Missing toggle button for task: ${taskTitle}`);
+  }
+
+  return button;
+}
+
+// Completion state is conveyed by the toggle button's aria-label.
+function isTaskCompleted(taskTitle: string): boolean {
+  return getTaskToggleButton(taskTitle).getAttribute("aria-label") === "Hủy chốt việc";
 }
 
 describe("GoalTracker multi-tab task updates", () => {
@@ -240,9 +262,8 @@ describe("GoalTracker multi-tab task updates", () => {
     expect(await screen.findAllByText("40%")).not.toHaveLength(0);
 
     const channel = MockBroadcastChannel.channels[0];
-    await screen.findByText("Deep work A 5");
-    const checkbox = getTaskCheckbox("Deep work A 5");
-    await userEvent.click(checkbox);
+    await within(getGoalsRegion()).findByText("Deep work A 5");
+    await userEvent.click(getTaskToggleButton("Deep work A 5"));
 
     expect(channel.postMessage).toHaveBeenCalledWith(expect.objectContaining({ source: expect.any(String) }));
     await waitFor(() => expect(screen.getAllByText("50%")).not.toHaveLength(0));
@@ -316,7 +337,7 @@ describe("GoalTracker multi-tab task updates", () => {
 
     await renderGoalTracker();
 
-    expect(await screen.findByText("Delete synced goal")).toBeInTheDocument();
+    expect((await within(getGoalsRegion()).findAllByText("Delete synced goal")).length).toBeGreaterThan(0);
     await userEvent.click(screen.getByRole("button", { name: "Xóa mục tiêu Delete synced goal" }));
     const dialog = await screen.findByRole("alertdialog");
     await userEvent.click(within(dialog).getByRole("button", { name: "Xóa" }));
@@ -429,12 +450,12 @@ describe("GoalTracker multi-tab task updates", () => {
     const channel = MockBroadcastChannel.channels[0];
     expect(channel).toBeDefined();
 
-    await screen.findByText("Task A");
-    expect(getTaskCheckbox("Task A")).not.toBeChecked();
+    await within(getGoalsRegion()).findByText("Task A");
+    expect(isTaskCompleted("Task A")).toBe(false);
 
-    await userEvent.click(getTaskCheckbox("Task A"));
+    await userEvent.click(getTaskToggleButton("Task A"));
     expect(channel.postMessage).toHaveBeenCalledWith(expect.objectContaining({ source: expect.any(String) }));
-    await waitFor(() => expect(screen.queryByText("Task A")).toBeNull());
+    await waitFor(() => expect(within(getGoalsRegion()).queryByText("Task A")).toBeNull());
 
     const externalData = storage.getUserData();
     externalData.goals = externalData.goals.map((goal) =>
@@ -456,7 +477,7 @@ describe("GoalTracker multi-tab task updates", () => {
 
     channel.dispatchMessage({ at: Date.now(), source: "tab_b" });
 
-    await screen.findByText("Task A");
-    expect(getTaskCheckbox("Task A")).not.toBeChecked();
+    await within(getGoalsRegion()).findByText("Task A");
+    expect(isTaskCompleted("Task A")).toBe(false);
   });
 });

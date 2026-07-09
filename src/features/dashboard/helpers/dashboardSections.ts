@@ -1,3 +1,5 @@
+import type { CoreFlowStepId } from "@/app/utils/core-flow-position";
+
 type DashboardNextActionInput = {
   hasGoal: boolean;
   hasTwelveWeekSystem: boolean;
@@ -75,4 +77,33 @@ export function getDashboardNextAction(state: DashboardNextActionInput): Dashboa
     ctaLabel: "Mở 12 tuần",
     ctaTarget: "/12-week-system",
   };
+}
+
+/**
+ * Nối Next_Step_Guidance của Dashboard với vị trí Core_Flow.
+ *
+ * Tái sử dụng `getDashboardNextAction` (giữ nguyên copy/eyebrow/title) rồi tinh
+ * chỉnh `ctaTarget` để trỏ đúng **bước Core_Flow chưa hoàn tất đầu tiên** theo
+ * thứ tự Core_Flow (Req 2.1). Chỉ ghi đè target khi route đó đã được đăng ký
+ * trong `createAppRoutes` (Req 2.6) — nếu không, giữ nguyên target gốc của
+ * `getDashboardNextAction` để không bao giờ trỏ tới route chưa đăng ký/bị guard.
+ *
+ * Hàm thuần (không import storage/routes) — nhận `stepRoute` và
+ * `isRouteRegistered` qua tham số để dễ test và tránh phụ thuộc vòng.
+ */
+export function resolveDashboardNextStepGuidance(params: {
+  baseAction: DashboardNextAction;
+  firstIncompleteStepId: CoreFlowStepId | null;
+  stepRoute: Record<CoreFlowStepId, string>;
+  isRouteRegistered: (target: string) => boolean;
+}): DashboardNextAction {
+  const { baseAction, firstIncompleteStepId, stepRoute, isRouteRegistered } = params;
+
+  // Không còn bước nào chưa hoàn tất (đã qua toàn bộ Core_Flow) → giữ guidance gốc.
+  if (!firstIncompleteStepId) return baseAction;
+
+  const target = stepRoute[firstIncompleteStepId];
+  if (!target || !isRouteRegistered(target)) return baseAction;
+
+  return { ...baseAction, ctaTarget: target };
 }

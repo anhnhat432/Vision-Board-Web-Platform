@@ -4,6 +4,8 @@ import { lazy, memo, Suspense, useCallback, useEffect, useMemo, useRef, useState
 import { Link, useBlocker, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
+import { CoreFlowNextStepCta } from "../components/CoreFlowNextStepCta";
+import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { getLifeAreaIcon } from "../components/illustrations";
 import type { LifeBalanceHistoryChartPoint } from "../components/LifeBalanceHistoryChart";
 import { PageShell } from "../components/PageShell";
@@ -32,6 +34,7 @@ import { loadWithChunkReload } from "../utils/chunkLoad";
 import { getAreaColorConfig } from "../utils/life-area-theme";
 import { getFocusInsight } from "../utils/life-balance-insight";
 import { getSmartGoalStarter } from "../utils/smart-goal-starters";
+import { deriveCoreFlowCompletion } from "../utils/core-flow-navigation";
 import { APP_STORAGE_KEYS, getLifeAreaLabel, type LifeArea, updateWheelOfLife } from "../utils/storage";
 
 const LifeBalanceHistoryChart = lazy(() =>
@@ -422,6 +425,7 @@ export function LifeBalance() {
       </AlertDialog>
 
       <div ref={pageTopRef} className="pb-10 sm:pb-12">
+        <CoreFlowProgress currentStepId="life_balance" onExit={() => navigate("/")} className="mb-5 sm:mb-6" />
         {/* HERO */}
         <header className="page-enter max-w-3xl">
           <div className="mb-2.5 flex items-center gap-2 sm:mb-3">
@@ -480,7 +484,7 @@ export function LifeBalance() {
             </p>
             <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-app-bg sm:mt-3.5 sm:h-[7px]">
               <div
-                className="h-full rounded-full bg-[#0C5E3A] transition-all duration-700 ease-out"
+                className="h-full rounded-full bg-[#0C5E3A] transition-all duration-300 ease-out"
                 style={{ width: `${avgPercent}%` }}
               />
             </div>
@@ -878,19 +882,15 @@ export function LifeBalance() {
                       </p>
                     </div>
 
-                    <motion.button
-                      whileHover={{ scale: 1.015 }}
-                      whileTap={{ scale: 0.985 }}
-                      type="button"
-                      onClick={handleContinueToGoalSetup}
-                      className="group mt-5 inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-card bg-app-accent px-5 py-3 text-sm font-bold text-white shadow-app-sm transition-all hover:bg-app-accent-hover active:scale-[0.97] sm:mt-6 sm:min-h-12 sm:px-6"
-                    >
-                      Tạo mục tiêu SMART
-                      <ArrowRight
-                        className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
-                        aria-hidden="true"
-                      />
-                    </motion.button>
+                    <CoreFlowNextStepCta
+                      currentStepId="life_balance"
+                      completion={deriveCoreFlowCompletion(userData)}
+                      nextStepId="smart_goal"
+                      ready={Boolean(focusArea)}
+                      label="Tạo mục tiêu SMART"
+                      onActivate={handleContinueToGoalSetup}
+                      className="mt-5 sm:mt-6"
+                    />
                     <p className="mt-2 text-[11px] text-app-ink-muted text-center">
                       Bước tiếp: biến trọng tâm thành mục tiêu 12 tuần rõ ràng.
                     </p>

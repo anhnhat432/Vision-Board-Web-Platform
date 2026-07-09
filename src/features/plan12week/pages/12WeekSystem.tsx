@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/app/components/ui/dialog";
 import { Skeleton } from "@/app/components/ui/skeleton";
+import { CoreFlowProgress } from "@/app/components/CoreFlowProgress";
 import { ScreenGuide } from "@/app/components/ScreenGuide";
 import { SCREEN_GUIDES } from "@/app/components/screen-guides";
 import { SpotlightTour, type SpotlightTourStep } from "@/app/components/SpotlightTour";
@@ -1036,6 +1037,7 @@ export function TwelveWeekSystem() {
       />
 
       <div className="space-y-5">
+        <CoreFlowProgress currentStepId="today" onExit={() => navigate("/")} />
         <div className="flex justify-end">
           <ScreenGuide {...SCREEN_GUIDES.twelveWeekSystem} />
         </div>

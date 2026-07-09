@@ -1,9 +1,12 @@
 import { act, renderHook } from "@testing-library/react";
+import fc from "fast-check";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   resolveScreenStateKind,
   SCREEN_DATA_STATE_TIMEOUT_MS,
+  type ScreenLoadStatus,
+  type ScreenStateKind,
   type UseScreenDataStateOptions,
   useScreenDataState,
 } from "./useScreenDataState";
@@ -22,6 +25,40 @@ describe("resolveScreenStateKind", () => {
   it("phân biệt empty và ready khi tải xong", () => {
     expect(resolveScreenStateKind("ready", true, false)).toBe("empty");
     expect(resolveScreenStateKind("ready", false, false)).toBe("ready");
+  });
+
+  // Feature: core-flow-ui-upgrade, Property 1: Máy trạng thái màn hình loại trừ lẫn nhau
+  // Validates: Requirements 5.3, 5.5, 5.6
+  it("luôn trả về đúng một trạng thái theo thứ tự ưu tiên error > loading > empty > ready", () => {
+    const allKinds: ScreenStateKind[] = ["loading", "empty", "error", "ready"];
+    const statusArb = fc.constantFrom<ScreenLoadStatus>("loading", "ready", "error");
+
+    fc.assert(
+      fc.property(statusArb, fc.boolean(), fc.boolean(), (status, isEmpty, timedOut) => {
+        const kind = resolveScreenStateKind(status, isEmpty, timedOut);
+
+        // Kết quả phải là một trong bốn trạng thái hợp lệ (không có trạng thái "rỗng").
+        expect(allKinds).toContain(kind);
+
+        // Trạng thái kỳ vọng suy ra độc lập theo đặc tả (không trùng logic hàm).
+        let expected: ScreenStateKind;
+        if (status === "error" || timedOut) {
+          expected = "error";
+        } else if (status === "loading") {
+          expected = "loading";
+        } else if (isEmpty) {
+          expected = "empty";
+        } else {
+          expected = "ready";
+        }
+        expect(kind).toBe(expected);
+
+        // Loại trừ lẫn nhau: đúng một trạng thái khớp, không có hai trạng thái cùng đúng.
+        const matched = allKinds.filter((candidate) => candidate === kind);
+        expect(matched).toHaveLength(1);
+      }),
+      { numRuns: 100 },
+    );
   });
 });
 
