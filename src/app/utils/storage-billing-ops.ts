@@ -1,8 +1,28 @@
 import { getSubscriptionGraceState } from "./billing-grace-period";
-import type { BillingCycle, EntitlementKey, PricingPlanCode, UserData } from "./storage-types";
+import type { BillingCycle, EntitlementKey, PricingPlanCode, Subscription, UserData } from "./storage-types";
 import { getEntitlementsForPlan, normalizePlanCode } from "./twelve-week-premium";
 
 export const SUBSCRIPTION_GRACE_PERIOD_MS = 3 * 24 * 60 * 60 * 1000;
+
+/**
+ * Loại các mã tham chiếu do server sở hữu (`externalCustomerId`,
+ * `externalSubscriptionId`) khỏi `Subscription` trước khi lưu vào localStorage.
+ *
+ * Đây là surface-reduction: các id này không phải bí mật và không được UI nào
+ * đọc — chúng chỉ được `billingCore` carry-forward và luôn được nạp lại từ
+ * payload provider/entitlement sync khi cần. Vì vậy không lưu chúng ở client
+ * không đổi hành vi entitlement (planCode/status/renewsAt/entitlements vẫn giữ
+ * nguyên), chỉ giảm dữ liệu "giống nhạy cảm" tồn tại trong trình duyệt.
+ *
+ * Hàm thuần: trả về `null` khi input `null`; ngược lại trả về bản sao không có
+ * hai trường external id. Không đột biến input.
+ */
+export function sanitizeSubscriptionForStorage(subscription: Subscription | null): Subscription | null {
+  if (!subscription) return null;
+  const { externalCustomerId: _externalCustomerId, externalSubscriptionId: _externalSubscriptionId, ...rest } =
+    subscription;
+  return rest;
+}
 
 interface LocalPlanOptions {
   startedAt?: string;

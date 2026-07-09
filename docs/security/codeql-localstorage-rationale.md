@@ -43,10 +43,14 @@ None of this is a genuine secret:
   instrument data) in `localStorage`. Because this rule is excluded, such a
   regression would not be caught by CodeQL — it must be caught in review.
 
-## Optional follow-up (not done here)
+## Surface reduction (implemented)
 
-Stop persisting `externalCustomerId` / `externalSubscriptionId` to `localStorage`
-(they are server-owned references re-fetchable via entitlement sync). This is a
-minor surface reduction but touches billing reconciliation in
-`src/app/utils/production/billingCore.ts` (carry-forward of previous ids), so it
-should be scoped as its own change with focused tests before implementing.
+`externalCustomerId` / `externalSubscriptionId` are no longer persisted to
+`localStorage`. `normalizeUserData` (`src/app/utils/storage.ts`) runs on both
+load and save and calls `sanitizeSubscriptionForStorage`
+(`src/app/utils/storage-billing-ops.ts`) to strip these server-owned reference
+ids before persisting, and to clean them out of any pre-existing stored data on
+load (migration). This does not change entitlement behavior — `planCode`,
+`status`, `renewsAt`, `startedAt`, and `entitlements` are preserved — and no UI
+reads these ids; `billingCore` re-derives them from the provider/entitlement-sync
+payload when needed. Covered by `src/app/utils/storage-subscription-sanitize.test.ts`.
