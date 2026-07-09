@@ -1,7 +1,7 @@
 import type { ComponentProps } from "react";
 import "@testing-library/jest-dom/vitest";
 import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { TwelveWeekSystem } from "@/app/utils/storage-types";
 
@@ -77,7 +77,27 @@ function makeProps(overrides: Partial<ProgressTabProps> = {}): ProgressTabProps 
   };
 }
 
+function mockReducedMotion(matches: boolean) {
+  vi.stubGlobal(
+    "matchMedia",
+    vi.fn().mockImplementation((query: string) => ({
+      matches: query === "(prefers-reduced-motion: reduce)" ? matches : false,
+      media: query,
+      onchange: null,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    })),
+  );
+}
+
 describe("TwelveWeekProgressTab", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it("shows average lead score and completed week count separately", () => {
     render(<TwelveWeekProgressTab {...makeProps()} />);
 
@@ -127,6 +147,17 @@ describe("TwelveWeekProgressTab", () => {
     const metricProgress = screen.getByText(longMetricProgress, { selector: "p.break-words" });
     expect(metricProgress).toHaveClass("break-words");
     expect(metricProgress).not.toHaveClass("line-clamp-2");
+  });
+
+  it("removes decorative journey map animation when reduced motion is requested", () => {
+    mockReducedMotion(true);
+
+    render(<TwelveWeekProgressTab {...makeProps()} />);
+
+    const map = screen.getByTestId("zen-journey-map");
+    expect(map.querySelector('[class*="animate-"]')).toBeNull();
+    expect(map.querySelector("animate")).toBeNull();
+    expect(screen.getByRole("img", { name: "Bản đồ hành trình 12 tuần" })).toBeInTheDocument();
   });
 
   it.each([

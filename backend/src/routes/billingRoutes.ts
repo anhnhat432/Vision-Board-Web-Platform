@@ -5,6 +5,7 @@ import {
   createCheckoutSession,
   createCustomerPortal,
   createPublicCheckoutSession,
+  claimPublicOrder,
   getEntitlement,
 } from "../controllers/billingController";
 import {
@@ -52,14 +53,12 @@ billingRoutes.get("/billing/entitlement", billingStatusRateLimiter, asyncHandler
 billingRoutes.post(
   "/billing/checkout-session",
   billingCheckoutRateLimiter,
-  requireEmailVerified,
   validateCheckoutSessionInput,
   asyncHandler(createCheckoutSession),
 );
 billingRoutes.post(
   "/billing/orders",
   billingCheckoutRateLimiter,
-  requireEmailVerified,
   validateCheckoutSessionInput,
   asyncHandler(createCheckoutSession),
 );
@@ -108,6 +107,14 @@ billingRoutes.post(
   validateOrderIdParam,
   validateOptionalJsonObjectBody,
   asyncHandler(createBillingRefundRequest),
+);
+
+billingRoutes.post(
+  "/billing/orders/:orderId/claim",
+  billingCheckoutRateLimiter,
+  requireEmailVerified,
+  validateOrderIdParam,
+  asyncHandler(claimPublicOrder),
 );
 
 export { billingRoutes, publicBillingRoutes };

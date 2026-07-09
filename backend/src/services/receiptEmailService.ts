@@ -42,7 +42,7 @@ function getSupportEmail(): string {
     process.env.BILLING_SUPPORT_EMAIL?.trim() ||
     process.env.EMAIL_REPLY_TO?.trim() ||
     process.env.EMAIL_FROM?.trim() ||
-    "support@dearourfuture.app"
+    "support@dearourfuture.com"
   );
 }
 

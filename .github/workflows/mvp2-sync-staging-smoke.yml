@@ -53,6 +53,11 @@ jobs:
             echo "::error::MVP2_SMOKE_URL is required."
             exit 1
           fi
+          normalized_url="${MVP2_SMOKE_URL%/}"
+          if [[ "${normalized_url}" == *"localhost"* ]] || [[ "${normalized_url}" == *"127.0.0.1"* ]]; then
+            echo "::error::Use a staging or production-like URL for MVP2 sync proof, not localhost."
+            exit 1
+          fi
           if [ "${MVP2_SMOKE_SKIP_AUTH}" != "true" ]; then
             if [ -z "${MVP2_SMOKE_EMAIL}" ] || [ -z "${MVP2_SMOKE_PASSWORD}" ]; then
               echo "::error::Set repository secrets MVP2_SMOKE_EMAIL and MVP2_SMOKE_PASSWORD, or set skip_auth=true."

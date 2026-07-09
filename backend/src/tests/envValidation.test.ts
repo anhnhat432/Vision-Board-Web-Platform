@@ -93,12 +93,13 @@ describe("validateBackendEnv: production core requirements", () => {
     assert.ok(warning, "expected MONGODB_URI localhost warning in production");
   });
 
-  it("warns when BILLING_REPOSITORY=memory in production", () => {
+  it("errors when BILLING_REPOSITORY=memory in production", () => {
     const env = baseProductionEnv();
     env.BILLING_REPOSITORY = "memory";
     const issues = validateBackendEnv(env, { nodeEnv: "production" });
-    const warning = issues.find((issue) => issue.key === "BILLING_REPOSITORY" && issue.level === "warning");
-    assert.ok(warning, "expected BILLING_REPOSITORY=memory warning in production");
+    const error = issues.find((issue) => issue.key === "BILLING_REPOSITORY" && issue.level === "error");
+    assert.ok(error, "expected BILLING_REPOSITORY=memory error in production");
+    assert.match(error.message, /Subscriptions will be lost on restart/);
   });
 
   it("warns when SENTRY_DSN missing in production", () => {

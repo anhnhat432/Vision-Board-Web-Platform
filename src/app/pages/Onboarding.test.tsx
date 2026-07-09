@@ -217,6 +217,7 @@ describe("Onboarding", () => {
     expect(document.querySelector("[data-onboarding-area-grid]")).toHaveClass("grid-cols-2", "sm:grid-cols-4");
     expect(document.querySelector("[data-onboarding-score-grid]")).toHaveClass("grid", "grid-cols-4", "sm:flex");
     expect(document.querySelector("[data-onboarding-bottom-nav]")).toHaveClass("flex-col", "sm:flex-row");
+    expect(screen.getByRole("button", { name: "Chấm 1 điểm" })).toHaveClass("min-h-11", "sm:min-h-[42px]");
     expect(screen.getByRole("button", { name: "Giảm 1 điểm" })).toHaveClass("h-11", "w-11", "sm:h-10", "sm:w-10");
     expect(screen.getByRole("button", { name: "Tăng 1 điểm" })).toHaveClass("h-11", "w-11", "sm:h-10", "sm:w-10");
   });

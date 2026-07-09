@@ -73,7 +73,7 @@ export async function handleWebhook(req: Request, res: Response): Promise<void> 
 
   const adapter = getPaymentProviderAdapter();
 
-  if (!adapter.isConfigured && providerParam !== "mock") {
+  if (!adapter.isConfigured) {
     console.warn(`[webhook] Provider "${providerParam}" is not configured. Rejecting.`);
     res.status(503).json({ success: false, message: "Provider not configured." });
     return;

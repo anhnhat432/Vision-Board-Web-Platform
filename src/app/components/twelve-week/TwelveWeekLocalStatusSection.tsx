@@ -849,7 +849,7 @@ export function TwelveWeekLocalStatusSection({
                 </div>
               </details>
               <p className="text-xs leading-5 text-app-ink-muted">
-                Dữ liệu trên thiết bị vẫn an toàn nếu đồng bộ lỗi; phần này chỉ dành cho kiểm thử nội bộ.
+                Dữ liệu trên thiết bị vẫn an toàn nếu đồng bộ lỗi; phần chi tiết giúp bạn kiểm tra trạng thái khi cần hỗ trợ.
               </p>
               <p className="text-xs leading-5 text-app-ink-muted">
                 {getMutationQueueResultDescription(mutationQueueSyncStatus.lastResult)}

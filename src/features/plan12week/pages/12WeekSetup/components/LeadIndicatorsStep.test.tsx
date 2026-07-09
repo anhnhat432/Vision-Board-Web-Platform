@@ -185,6 +185,33 @@ describe("LeadIndicatorsStep commitment model", () => {
 });
 
 describe("LeadIndicatorsStepLab Phase 1 polish", () => {
+  it("associates empty tactic-name validation with the input", () => {
+    const draft = makeDraft([makeIndicator({ id: "a", name: "" }), makeIndicator({ id: "b", name: "Weekly review" })]);
+
+    render(
+      <LeadIndicatorsStepLab
+        draft={draft}
+        showValidationErrors
+        coreCount={2}
+        optionalCount={0}
+        setupGuideSupport={null}
+        setupGuideTemplate={null}
+        selectedTemplate={null}
+        weekOneTaskPreview={[]}
+        weekOneTaskWarning={null}
+        weekOneTaskGroups={[]}
+        onAddIndicator={vi.fn()}
+        onRemoveIndicator={vi.fn()}
+        onIndicatorChange={vi.fn()}
+      />,
+    );
+
+    const nameInput = screen.getAllByLabelText("Tên việc")[0];
+    expect(nameInput).toHaveAttribute("aria-invalid", "true");
+    expect(nameInput).toHaveAttribute("aria-describedby", "tactic-name-error-0");
+    expect(document.getElementById("tactic-name-error-0")).toHaveAttribute("role", "alert");
+  });
+
   it("opens the first indicator commitment accordion by default and shows all commitment prompts", () => {
     const onSubmit = vi.fn();
 

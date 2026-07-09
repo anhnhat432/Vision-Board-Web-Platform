@@ -4,16 +4,11 @@ import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { apiClient, toAppError } from "@/lib/api/apiClient";
 import { useAuthContext } from "@/lib/auth/AuthContext";
-import { sendVerificationEmail } from "@/lib/auth/firebase";
 import { BillingTrustSignals } from "../components/BillingTrustSignals";
 import { BillingPlusIllustration } from "../components/illustrations";
 import { isPaidCheckoutDisabled } from "../utils/app-mode";
 import { formatVndAmount, PLUS_MONTHLY_PRICE_VND, PLUS_PRICE_CYCLE_LABEL } from "../utils/billing-pricing";
-import {
-  canUpgradeToPlus,
-  getEmailVerificationRequiredMessage,
-  rememberEmailVerificationReturnPath,
-} from "../utils/email-verification-guard";
+import { getEmailVerificationRequiredMessage } from "../utils/email-verification-guard";
 import { getBillingProvider, getBillingProviderStatus } from "../utils/production/billingProvider";
 import { getUserData } from "../utils/storage";
 
@@ -34,6 +29,14 @@ interface CheckoutSessionResponse {
 type CheckoutRedirectTarget = { kind: "internal"; path: string } | { kind: "external"; url: string };
 
 const BILLING_SUPPORT_EMAIL = import.meta.env.VITE_BILLING_SUPPORT_EMAIL?.trim() || "support@dearourfuture.com";
+const GENERIC_CHECKOUT_ERROR_MESSAGE =
+  `Không thể tạo phiên thanh toán lúc này. Vui lòng thử lại sau hoặc liên hệ ${BILLING_SUPPORT_EMAIL}.`;
+
+type CheckoutAppError = ReturnType<typeof toAppError> & {
+  errorCode?: string;
+  isNetworkError?: boolean;
+  rateLimited?: boolean;
+};
 
 function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
@@ -47,6 +50,43 @@ function getPlanName(billingCycle: string): string {
 
 function getAmount(info: CheckoutInfoResponse | null): number {
   return info?.amount && Number.isFinite(info.amount) ? info.amount : PLUS_MONTHLY_PRICE_VND;
+}
+
+function getCheckoutErrorMessage(error: unknown): string {
+  const appError = toAppError(error) as CheckoutAppError;
+
+  if (appError.rateLimited || appError.status === 429) {
+    return "Bạn vừa thử tạo phiên thanh toán quá nhanh. Vui lòng đợi một lát rồi thử lại.";
+  }
+
+  if (appError.errorCode === "EMAIL_NOT_VERIFIED") {
+    return getEmailVerificationRequiredMessage("critical");
+  }
+
+  if (appError.status === 401) {
+    return "Vui lòng đăng nhập lại trước khi tạo phiên thanh toán.";
+  }
+
+  if (appError.status === 403) {
+    return "Tài khoản hiện chưa đủ điều kiện tạo phiên thanh toán. Vui lòng kiểm tra email xác thực hoặc liên hệ hỗ trợ.";
+  }
+
+  if (appError.errorCode === "checkout_disabled") {
+    return (
+      "Thanh toán đang tạm khóa trong lúc hệ thống được hoàn tất. " +
+      `Nếu bạn muốn nâng cấp ngay, liên hệ ${BILLING_SUPPORT_EMAIL} để được hỗ trợ.`
+    );
+  }
+
+  if (appError.errorCode === "invalid_coupon" || appError.errorCode === "invalid_coupon_code") {
+    return "Mã giảm giá không hợp lệ. Vui lòng kiểm tra lại mã hoặc bỏ mã để tiếp tục thanh toán.";
+  }
+
+  if (appError.isNetworkError) {
+    return "Không thể kết nối đến hệ thống thanh toán. Kiểm tra mạng rồi thử lại.";
+  }
+
+  return GENERIC_CHECKOUT_ERROR_MESSAGE;
 }
 
 export function getCheckoutRedirectTarget(
@@ -98,14 +138,15 @@ export function BillingConfirm() {
   const [agreed, setAgreed] = useState(false);
   const [loadingInfo, setLoadingInfo] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [sendingVerification, setSendingVerification] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saleEvent, setSaleEvent] = useState<SaleEventInfo | null>(null);
 
   const paidCheckoutDisabled = isPaidCheckoutDisabled();
+  const billingProviderMode = getBillingProviderStatus().mode;
+  const requiresCheckoutInfo = billingProviderMode === "api_contract";
+  const checkoutInfoReady = !requiresCheckoutInfo || (!loadingInfo && checkoutInfo !== null);
   const userEmail = user?.email?.trim() ?? "";
   const emailVerified = user?.emailVerified === true;
-  const emailVerificationRequired = Boolean(user) && !canUpgradeToPlus(user);
   const canEditEmail = !user || !emailVerified;
   const baseAmount = getAmount(checkoutInfo);
   const saleFinalAmount = saleEvent?.finalAmount ?? (saleEvent?.discountPercent
@@ -117,13 +158,18 @@ export function BillingConfirm() {
   const hasActiveSale = saleEvent !== null && saleFinalAmount !== undefined && saleFinalAmount < baseAmount;
   const planName = getPlanName(checkoutInfo?.billingCycle ?? "monthly");
   const emailInvalid = receiptEmail.trim().length > 0 && !isValidEmail(receiptEmail);
+  const receiptEmailHelpId = "receipt-email-help";
+  const receiptEmailErrorId = "receipt-email-error";
+  const receiptEmailDescription = emailInvalid
+    ? `${receiptEmailHelpId} ${receiptEmailErrorId}`
+    : receiptEmailHelpId;
   const canSubmit =
     !paidCheckoutDisabled &&
     agreed &&
     isValidEmail(receiptEmail) &&
+    checkoutInfoReady &&
     !submitting &&
-    !authLoading &&
-    !emailVerificationRequired;
+    !authLoading;
 
   useEffect(() => {
     if (authLoading) return;
@@ -132,6 +178,11 @@ export function BillingConfirm() {
   }, [authLoading, userEmail]);
 
   useEffect(() => {
+    if (paidCheckoutDisabled) {
+      setLoadingInfo(false);
+      return;
+    }
+
     let cancelled = false;
     apiClient
       .get<CheckoutInfoResponse>("/billing/checkout-info")
@@ -141,7 +192,7 @@ export function BillingConfirm() {
       })
       .catch((err: unknown) => {
         if (cancelled) return;
-        setError(err instanceof Error ? err.message : "Không lấy được thông tin thanh toán.");
+        setError(getCheckoutErrorMessage(err));
       })
       .finally(() => {
         if (!cancelled) setLoadingInfo(false);
@@ -150,11 +201,13 @@ export function BillingConfirm() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [paidCheckoutDisabled]);
 
   // Fetch active sale event so the confirmed amount matches what the user
   // saw on /billing/plan (backend getCheckoutInfo returns base price only).
   useEffect(() => {
+    if (paidCheckoutDisabled) return;
+
     let cancelled = false;
     const params = new URLSearchParams({
       purpose: "plus_subscription",
@@ -179,29 +232,25 @@ export function BillingConfirm() {
       .catch(() => { /* sale event is optional */ });
 
     return () => { cancelled = true; };
-  }, []);
+  }, [paidCheckoutDisabled]);
 
   const submitLabel = useMemo(() => {
     if (paidCheckoutDisabled) return "Tạm khóa thanh toán";
     if (submitting) return "Đang tạo thanh toán...";
-    if (emailVerificationRequired) return "Cần xác thực email trước";
+    if (requiresCheckoutInfo && loadingInfo) return "Đang tải thông tin thanh toán";
+    if (requiresCheckoutInfo && !checkoutInfo) return "Không thể tải thông tin thanh toán";
     if (!agreed) return "Cần đồng ý điều khoản trước";
     if (!isValidEmail(receiptEmail)) return "Nhập email nhận biên nhận";
     return "Xác nhận và tạo thanh toán";
-  }, [agreed, emailVerificationRequired, paidCheckoutDisabled, receiptEmail, submitting]);
-
-  const handleSendVerification = useCallback(async () => {
-    setSendingVerification(true);
-    setError(null);
-    try {
-      rememberEmailVerificationReturnPath("/billing/confirm");
-      await sendVerificationEmail();
-    } catch (err: unknown) {
-      setError(toAppError(err).message || "Không gửi được email xác thực.");
-    } finally {
-      setSendingVerification(false);
-    }
-  }, []);
+  }, [
+    agreed,
+    checkoutInfo,
+    loadingInfo,
+    paidCheckoutDisabled,
+    receiptEmail,
+    requiresCheckoutInfo,
+    submitting,
+  ]);
 
   const handleConfirm = useCallback(async () => {
     if (paidCheckoutDisabled) {
@@ -209,11 +258,6 @@ export function BillingConfirm() {
         "Đang hoàn tất tích hợp hệ thống thanh toán mới — sẵn sàng trong tuần tới. Quyền hiện có không bị ảnh hưởng. " +
           `Nếu bạn muốn nâng cấp ngay, liên hệ ${BILLING_SUPPORT_EMAIL} để mở Plus thủ công.`,
       );
-      return;
-    }
-    if (emailVerificationRequired) {
-      rememberEmailVerificationReturnPath("/billing/confirm");
-      setError(getEmailVerificationRequiredMessage("upgrade"));
       return;
     }
     if (!canSubmit) return;
@@ -268,7 +312,7 @@ export function BillingConfirm() {
 
         setError(checkoutResult.message || "Không thể tạo phiên thanh toán.");
       } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : "Không thể tạo phiên thanh toán.");
+        setError(getCheckoutErrorMessage(err));
       } finally {
         setSubmitting(false);
       }
@@ -277,13 +321,18 @@ export function BillingConfirm() {
 
     // api_contract (real) mode: use the backend checkout-session endpoint directly
     // so we can pass receiptEmail, billingCycle, couponCode, and clientUserId.
+    if (!checkoutInfo) {
+      setError(GENERIC_CHECKOUT_ERROR_MESSAGE);
+      return;
+    }
+
     try {
       const isPublicCheckout = !user;
       const result = await apiClient.post<CheckoutSessionResponse>(
         isPublicCheckout ? "/billing/public-checkout-session" : "/billing/checkout-session",
         {
           planCode: "PLUS",
-          billingCycle: checkoutInfo?.billingCycle ?? "twelve_week",
+          billingCycle: checkoutInfo.billingCycle,
           returnUrl: `${window.location.origin}/billing/checkout/__session_id__`,
           cancelUrl: `${window.location.origin}/billing/plan`,
           receiptEmail: receiptEmail.trim(),
@@ -307,14 +356,13 @@ export function BillingConfirm() {
 
       throw new Error("Không nhận được mã đơn hàng.");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Không thể tạo phiên thanh toán.");
+      setError(getCheckoutErrorMessage(err));
     } finally {
       setSubmitting(false);
     }
   }, [
     canSubmit,
-    checkoutInfo?.billingCycle,
-    emailVerificationRequired,
+    checkoutInfo,
     navigate,
     paidCheckoutDisabled,
     receiptEmail,
@@ -374,20 +422,25 @@ export function BillingConfirm() {
             </label>
             <input
               id="receipt-email"
+              name="receiptEmail"
               type="email"
+              autoComplete="email"
+              inputMode="email"
               value={receiptEmail}
               onChange={(event) => setReceiptEmail(event.target.value)}
               disabled={!canEditEmail}
+              aria-invalid={emailInvalid}
+              aria-describedby={receiptEmailDescription}
               className="mt-3 w-full rounded-[var(--r-control)] border border-app-line bg-app-surface px-3 py-2 text-sm text-app-ink shadow-app-sm outline-none transition focus:border-app-accent focus:ring-2 focus:ring-app-accent/20 disabled:bg-app-bg disabled:text-app-ink-muted"
               placeholder="you@example.com"
             />
-            <p className="mt-2 text-xs leading-5 text-app-ink-soft">
+            <p id={receiptEmailHelpId} className="mt-2 text-xs leading-5 text-app-ink-soft">
               {emailVerified
                 ? "Email tài khoản đã xác minh nên biên nhận sẽ gửi về địa chỉ này."
                 : "Nếu email tài khoản chưa xác minh hoặc bạn chưa đăng nhập, bạn có thể sửa email nhận biên nhận."}
             </p>
             {emailInvalid && (
-              <p className="mt-2 text-xs font-medium text-[color:var(--color-danger-fg)]">
+              <p id={receiptEmailErrorId} role="alert" className="mt-2 text-xs font-medium text-[color:var(--color-danger-fg)]">
                 Email nhận biên nhận chưa đúng định dạng.
               </p>
             )}
@@ -442,26 +495,11 @@ export function BillingConfirm() {
             </div>
           ) : null}
 
-          {emailVerificationRequired ? (
-            <div className="mt-4 rounded-card border border-[color:var(--color-warning-border)] bg-[color:var(--color-warning-bg)] p-4 text-sm text-[color:var(--color-warning-fg)]">
-              <p className="font-semibold">Vui lòng xác thực email trước khi thanh toán.</p>
-              <p className="mt-1 leading-6 text-app-ink-soft">
-                Email là cách chúng tôi gửi biên nhận và liên hệ khi cần hỗ trợ hoàn tiền. Địa chỉ đang chờ xác thực:{" "}
-                {userEmail || "chưa có email"}.
-              </p>
-              <button
-                type="button"
-                onClick={handleSendVerification}
-                disabled={sendingVerification}
-                className="mt-3 rounded-[var(--r-control)] border border-[color:var(--color-warning-border)] bg-app-surface px-3 py-2 text-xs font-semibold text-[color:var(--color-warning-fg)] disabled:opacity-60"
-              >
-                {sendingVerification ? "Đang gửi..." : "Gửi email xác thực"}
-              </button>
-            </div>
-          ) : null}
-
           {error && (
-            <div className="mt-4 rounded-card border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] p-3 text-sm text-[color:var(--color-danger-fg)]">
+            <div
+              role="alert"
+              className="mt-4 rounded-card border border-[color:var(--color-danger-border)] bg-[color:var(--color-danger-bg)] p-3 text-sm text-[color:var(--color-danger-fg)]"
+            >
               {error}
             </div>
           )}

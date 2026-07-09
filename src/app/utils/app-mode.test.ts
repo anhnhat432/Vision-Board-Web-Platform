@@ -9,17 +9,20 @@ describe("app-mode", () => {
     vi.resetModules();
   });
 
-  async function importWithMode(value: string | undefined) {
-    if (value !== undefined) {
-      vi.stubEnv("VITE_APP_MODE", value);
-    } else {
-      // Ensure the key is absent
-      vi.stubEnv("VITE_APP_MODE", "");
-      // stubEnv sets to empty string; we'll test empty-string → "real"
+  async function importWithEnv(env: Record<string, string | undefined>) {
+    for (const [key, value] of Object.entries(env)) {
+      vi.stubEnv(key, value ?? "");
     }
+
     const mod = await import("./app-mode");
     vi.unstubAllEnvs();
     return mod;
+  }
+
+  async function importWithMode(value: string | undefined) {
+    return importWithEnv({
+      VITE_APP_MODE: value,
+    });
   }
 
   it('returns "real" when VITE_APP_MODE is "real"', async () => {
@@ -68,5 +71,31 @@ describe("app-mode", () => {
     expect(mod.getAppMode()).toBe("real");
     expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('Invalid VITE_APP_MODE="staging"'));
     errorSpy.mockRestore();
+  });
+
+  it("does not expose debug UI flags in real mode", async () => {
+    const mod = await importWithEnv({
+      VITE_APP_MODE: "real",
+      VITE_SHOW_BILLING_DEBUG: "true",
+      VITE_SHOW_SYNC_DEBUG: "true",
+      VITE_SHOW_ASSISTANT_DEBUG: "true",
+    });
+
+    expect(mod.shouldShowBillingDebugUi()).toBe(false);
+    expect(mod.shouldShowSyncDebugUi()).toBe(false);
+    expect(mod.shouldShowAssistantDebugUi()).toBe(false);
+  });
+
+  it("keeps debug UI flags available in demo mode", async () => {
+    const mod = await importWithEnv({
+      VITE_APP_MODE: "demo",
+      VITE_SHOW_BILLING_DEBUG: "true",
+      VITE_SHOW_SYNC_DEBUG: "true",
+      VITE_SHOW_ASSISTANT_DEBUG: "true",
+    });
+
+    expect(mod.shouldShowBillingDebugUi()).toBe(true);
+    expect(mod.shouldShowSyncDebugUi()).toBe(true);
+    expect(mod.shouldShowAssistantDebugUi()).toBe(true);
   });
 });

@@ -1,7 +1,8 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { vi } from "vitest";
 
+import { listStoredPendingMutations } from "@/features/plan12week/persistence/mutationQueue";
 import { readGoal, renderAppRoute, resetTestStorage, seedTwelveWeekGoal } from "@/test/app-flow-helpers";
 import { WEEKLY_REVIEW_SNOOZE_STORAGE_KEY } from "./12WeekSystem";
 
@@ -25,21 +26,28 @@ describe("12WeekSystem weekly review banner", () => {
     localStorage.clear();
   });
 
-  it("marks the current weekly review completed and hides the banner", async () => {
+  it("opens the weekly review form without saving an empty review", async () => {
     const user = userEvent.setup();
     const { goalId } = seedTwelveWeekGoal({ reviewDay: getTodayReviewDay() });
 
     renderAppRoute("/12-week-system");
 
-    expect(await screen.findByText(BANNER_TITLE)).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Đã đánh giá xong tuần này" }));
+    const banner = (await screen.findByText(BANNER_TITLE)).closest('[role="alert"]');
+    expect(banner).toBeInstanceOf(HTMLElement);
+    if (!(banner instanceof HTMLElement)) throw new Error("Weekly review banner alert was not rendered.");
+    expect(within(banner).queryByRole("button", { name: "Đã đánh giá xong tuần này" })).not.toBeInTheDocument();
+    await user.click(within(banner).getByRole("button", { name: "Mở review tuần" }));
 
     await waitFor(() => {
-      expect(screen.queryByText(BANNER_TITLE)).not.toBeInTheDocument();
+      expect(screen.getByRole("tab", { name: "Mở tab Tuần" })).toHaveAttribute("aria-selected", "true");
     });
     const review = readGoal(goalId).twelveWeekSystem?.weeklyReviews.find((item) => item.weekNumber === 1);
-    expect(review?.reviewCompleted).toBe(true);
-    expect(Number.isFinite(Date.parse(review?.lastReviewAt ?? ""))).toBe(true);
+    expect(review).toBeUndefined();
+
+    const pendingReviewMutation = listStoredPendingMutations(null).find(
+      (item) => item.kind === "weekly_review_upserted" && item.goalId === goalId,
+    );
+    expect(pendingReviewMutation).toBeUndefined();
   });
 
   it("snoozes the review banner for 24 hours", async () => {
@@ -71,5 +79,24 @@ describe("12WeekSystem weekly review banner", () => {
     renderAppRoute("/12-week-system");
 
     expect(await screen.findByText(BANNER_TITLE)).toBeInTheDocument();
+  });
+
+  it("renders setup success as a keyboard-dismissible dialog", async () => {
+    const user = userEvent.setup();
+    seedTwelveWeekGoal({ title: "Accessible success goal" });
+    localStorage.setItem("show_12week_setup_success", "true");
+
+    renderAppRoute("/12-week-system");
+
+    const dialog = await screen.findByRole("dialog", { name: /Thiết lập kế hoạch thành công/i });
+    expect(dialog).toHaveAttribute("aria-modal", "true");
+    expect(within(dialog).getByText("Accessible success goal")).toBeInTheDocument();
+    expect(within(dialog).getByRole("button", { name: /Bắt đầu hành động hôm nay/i })).toBeInTheDocument();
+
+    await user.keyboard("{Escape}");
+
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog", { name: /Thiết lập kế hoạch thành công/i })).not.toBeInTheDocument();
+    });
   });
 });

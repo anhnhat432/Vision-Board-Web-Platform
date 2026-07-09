@@ -30,7 +30,7 @@ export function MobileActionBar({
   onNext,
   onFinalSecondaryAction,
 }: MobileActionBarProps) {
-  const readinessLabel = isCurrentStepValid ? (isFinalStep ? "Đủ rõ" : "Sẵn sàng") : "Cần thêm";
+  const readinessLabel = isCurrentStepValid ? (isFinalStep ? "Đủ rõ" : "Sẵn sàng") : "Cần hoàn thiện";
 
   return (
     <div

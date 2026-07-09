@@ -28,7 +28,7 @@ vi.mock("@/lib/auth/AuthContext", () => ({
 }));
 
 import * as appMode from "@/app/utils/app-mode";
-import { renderAppRoute, resetTestStorage, seedTwelveWeekGoal } from "@/test/app-flow-helpers";
+import { readGoal, renderAppRoute, resetTestStorage, seedTwelveWeekGoal } from "@/test/app-flow-helpers";
 
 describe("12-week destructive confirmations", () => {
   beforeEach(() => {
@@ -140,5 +140,36 @@ describe("12-week destructive confirmations", () => {
     await waitFor(() => {
       expect(deleteAccountMock).toHaveBeenCalled();
     });
+  });
+
+  it("keeps local 12-week data when account deletion fails", async () => {
+    deleteAccountMock.mockRejectedValueOnce(new Error("Backend account deletion failed"));
+    const { goalId } = seedTwelveWeekGoal({ title: "Keep local 12-week cycle" });
+    const { router } = renderAppRoute("/12-week-system?tab=settings");
+    const user = userEvent.setup();
+
+    const settingsTab = await screen.findByRole("tab", { name: /Cài đặt/i });
+    await user.click(settingsTab);
+    await screen.findByText("Cài đặt mục tiêu");
+
+    const privacySummary = await screen.findByText("Dữ liệu & quyền riêng tư");
+    const detailsEl = privacySummary.closest("details");
+    if (detailsEl) {
+      detailsEl.setAttribute("open", "true");
+    }
+
+    const deleteAccountBtns = await screen.findAllByRole("button", { name: /Xóa tài khoản/i });
+    await user.click(deleteAccountBtns[0]);
+
+    const checkbox = screen.getByLabelText("Tôi hiểu hành động này là không thể rút lại và đồng ý xóa vĩnh viễn.");
+    await user.click(checkbox);
+    await user.type(screen.getByPlaceholderText("XOATAIKHOAN"), "XOATAIKHOAN");
+    await user.click(screen.getByRole("button", { name: "Xóa tài khoản và dữ liệu" }));
+
+    await waitFor(() => {
+      expect(deleteAccountMock).toHaveBeenCalledTimes(1);
+    });
+    expect(readGoal(goalId).title).toBe("Keep local 12-week cycle");
+    expect(router.state.location.pathname).toBe("/12-week-system");
   });
 });

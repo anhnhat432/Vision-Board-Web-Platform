@@ -183,6 +183,8 @@ export function DreamToPlanPreview({ previewData }: DreamToPlanPreviewProps) {
               <img
                 src="/vision_board_detail.png"
                 alt="Bảng tầm nhìn chi tiết"
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover dark:brightness-[0.85] dark:contrast-[1.05]"
               />
               <div className="absolute inset-0 bg-black/5" />

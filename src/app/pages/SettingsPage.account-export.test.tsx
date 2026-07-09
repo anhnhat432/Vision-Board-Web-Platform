@@ -1,10 +1,4 @@
-import {
-  cleanup,
-  render,
-  screen,
-  waitFor,
-  within,
-} from "@testing-library/react";
+import { cleanup, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, useLocation } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -57,6 +51,10 @@ const syncServiceMock = vi.hoisted(() => ({
   deleteCloudWorkspace: vi.fn(),
 }));
 
+const assistantMemoryMock = vi.hoisted(() => ({
+  clearMemory: vi.fn(),
+}));
+
 const toastMock = vi.hoisted(() => ({
   success: vi.fn(),
   error: vi.fn(),
@@ -86,6 +84,10 @@ vi.mock("@/services/syncService", () => ({
   deleteCloudWorkspace: syncServiceMock.deleteCloudWorkspace,
 }));
 
+vi.mock("@/app/features/assistant/assistantMemory", () => ({
+  clearMemory: assistantMemoryMock.clearMemory,
+}));
+
 vi.mock("sonner", () => ({
   toast: toastMock,
 }));
@@ -98,11 +100,7 @@ vi.mock("../components/layout/PageHero", () => ({
   PageHero: ({ title }: { title: string }) => <div>{title}</div>,
 }));
 
-function LocationProbe({
-  onPathnameChange,
-}: {
-  onPathnameChange: (pathname: string) => void;
-}) {
+function LocationProbe({ onPathnameChange }: { onPathnameChange: (pathname: string) => void }) {
   const location = useLocation();
   onPathnameChange(location.pathname);
   return null;
@@ -215,31 +213,21 @@ describe("SettingsPage account lifecycle", () => {
     let downloadedFilename = "";
     vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:account-export");
     vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
-    vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(function (
-      this: HTMLAnchorElement,
-    ) {
+    vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(function (this: HTMLAnchorElement) {
       downloadedFilename = this.download;
     });
 
     const user = userEvent.setup();
     renderPage();
-    expect(
-      await screen.findByTestId("settings-account-export"),
-    ).toBeInTheDocument();
+    expect(await screen.findByTestId("settings-account-export")).toBeInTheDocument();
 
-    await user.click(
-      await screen.findByRole("button", { name: /Xuất dữ liệu tài khoản/i }),
-    );
+    await user.click(await screen.findByRole("button", { name: /Xuất dữ liệu tài khoản/i }));
 
     await waitFor(() => {
       expect(syncServiceMock.exportAccountData).toHaveBeenCalledTimes(1);
     });
-    expect(downloadedFilename).toBe(
-      "dear-our-future-account-export-2026-06-25.json",
-    );
-    expect(toastMock.success).toHaveBeenCalledWith(
-      "Đã tải bản xuất dữ liệu tài khoản.",
-    );
+    expect(downloadedFilename).toBe("dear-our-future-account-export-2026-06-25.json");
+    expect(toastMock.success).toHaveBeenCalledWith("Đã tải bản xuất dữ liệu tài khoản.");
   });
 
   it("hides cloud account actions when auth is unavailable", async () => {
@@ -252,12 +240,26 @@ describe("SettingsPage account lifecycle", () => {
 
     renderPage();
 
-    expect(
-      screen.queryByRole("button", { name: /Xuất dữ liệu tài khoản/i }),
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: "Xóa tài khoản" }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Xuất dữ liệu tài khoản/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Xóa tài khoản" })).not.toBeInTheDocument();
+    expect(screen.getByTestId("settings-sync-status-copy")).toHaveTextContent(
+      /chưa bật đăng nhập nên chưa có sao lưu tài khoản/i,
+    );
+    expect(screen.getByTestId("settings-sync-status-copy")).not.toHaveTextContent(/Sao lưu sẵn sàng/i);
+  });
+
+  it("shows account sync as local-only when the user is signed out", async () => {
+    authContextMock.useAuthContext.mockReturnValue({
+      isConfigured: true,
+      user: null,
+      userProfile: null,
+      logout: authActionsMock.logout,
+    });
+
+    renderPage();
+
+    expect(screen.getByTestId("settings-sync-status-copy")).toHaveTextContent(/Đăng nhập để sao lưu vào tài khoản/i);
+    expect(screen.getByTestId("settings-sync-status-copy")).not.toHaveTextContent(/Sao lưu sẵn sàng/i);
   });
 
   it("keeps local data intact when account export fails", async () => {
@@ -266,28 +268,21 @@ describe("SettingsPage account lifecycle", () => {
       userData: getUserData(),
       reloadUserData: syncedUserDataMock.reloadUserData,
     });
-    syncServiceMock.exportAccountData.mockRejectedValueOnce(
-      new Error("Export unavailable"),
-    );
+    syncServiceMock.exportAccountData.mockRejectedValueOnce(new Error("Export unavailable"));
 
     const user = userEvent.setup();
     renderPage();
-    await user.click(
-      await screen.findByRole("button", { name: /Xuất dữ liệu tài khoản/i }),
-    );
+    await user.click(await screen.findByRole("button", { name: /Xuất dữ liệu tài khoản/i }));
 
     await waitFor(() => {
       expect(syncServiceMock.exportAccountData).toHaveBeenCalledTimes(1);
     });
-    expect(getUserData().aspirationalVision?.summary).toBe(
-      "Keep local vision safe",
-    );
+    expect(getUserData().aspirationalVision?.summary).toBe("Keep local vision safe");
     expect(toastMock.error).toHaveBeenCalledWith("Export unavailable");
   });
 
   it("shows sync status, last sync time, and last result in the data section", async () => {
-    const lastResultMessage =
-      "Đồng bộ gần nhất chưa xong. Dữ liệu trên thiết bị vẫn an toàn để thử lại.";
+    const lastResultMessage = "Đồng bộ gần nhất chưa xong. Dữ liệu trên thiết bị vẫn an toàn để thử lại.";
     autoSyncStateMock.online = false;
     autoSyncStateMock.pendingCount = 2;
     autoSyncStateMock.lastSyncedAt = "2026-06-25T08:15:00.000Z";
@@ -298,9 +293,7 @@ describe("SettingsPage account lifecycle", () => {
 
     renderPage();
 
-    expect(
-      await screen.findByText("Lần cuối: 15:15:00 25/6/2026"),
-    ).toBeInTheDocument();
+    expect(await screen.findByText("Lần cuối: 15:15:00 25/6/2026")).toBeInTheDocument();
     expect(screen.getByText("2 thay đổi chờ đồng bộ")).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -318,23 +311,13 @@ describe("SettingsPage account lifecycle", () => {
 
     renderPage();
 
-    expect(
-      await screen.findByTestId("settings-sync-section"),
-    ).toBeInTheDocument();
-    expect(screen.getByTestId("settings-sync-last-synced")).toHaveTextContent(
-      "L\u1ea7n cu\u1ed1i: 15:15:00 25/6/2026",
-    );
-    expect(
-      screen.getByTestId("settings-sync-pending-count"),
-    ).toHaveTextContent(
+    expect(await screen.findByTestId("settings-sync-section")).toBeInTheDocument();
+    expect(screen.getByTestId("settings-sync-last-synced")).toHaveTextContent("L\u1ea7n cu\u1ed1i: 15:15:00 25/6/2026");
+    expect(screen.getByTestId("settings-sync-pending-count")).toHaveTextContent(
       "Kh\u00f4ng c\u00f3 thay \u0111\u1ed5i ch\u1edd \u0111\u1ed3ng b\u1ed9",
     );
-    expect(screen.getByTestId("settings-sync-status-copy")).toHaveTextContent(
-      /Sao l\u01b0u s\u1eb5n s\u00e0ng\./i,
-    );
-    expect(
-      screen.queryByTestId("settings-sync-last-result"),
-    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("settings-sync-status-copy")).toHaveTextContent(/Sao l\u01b0u s\u1eb5n s\u00e0ng\./i);
+    expect(screen.queryByTestId("settings-sync-last-result")).not.toBeInTheDocument();
   });
 
   it("shows account sync as local-only when outbox sync is blocked by unverified email", async () => {
@@ -345,24 +328,62 @@ describe("SettingsPage account lifecycle", () => {
         status: "email_unverified",
         syncedCount: 0,
         pendingCount: 2,
-        message:
-          "Vui lòng xác thực email trước khi đồng bộ cloud để bảo vệ dữ liệu tài khoản.",
+        message: "Vui lòng xác thực email trước khi đồng bộ cloud để bảo vệ dữ liệu tài khoản.",
       }),
     );
 
     renderPage();
 
-    expect(
-      await screen.findByTestId("settings-sync-email-unverified"),
-    ).toHaveTextContent("Email chưa xác thực, cloud sync đang tạm dừng");
-    expect(
-      screen.getByTestId("settings-sync-email-unverified"),
-    ).toHaveTextContent(
+    expect(await screen.findByTestId("settings-sync-email-unverified")).toHaveTextContent(
+      "Email chưa xác thực, cloud sync đang tạm dừng",
+    );
+    expect(screen.getByTestId("settings-sync-email-unverified")).toHaveTextContent(
       "Vui lòng xác thực email trước khi đồng bộ cloud để bảo vệ dữ liệu tài khoản.",
     );
-    expect(
-      screen.getByText(/chưa thể sao lưu lên tài khoản/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/chưa thể sao lưu lên tài khoản/i)).toBeInTheDocument();
+  });
+
+  it("confirms before clearing assistant memory", async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    await user.click(await screen.findByRole("button", { name: "Xóa bộ nhớ Trợ lý" }));
+
+    const dialog = await screen.findByTestId("settings-clear-assistant-memory-dialog");
+    expect(within(dialog).getByText(/xóa các ghi nhớ cá nhân mà Trợ lý AI đã lưu/i)).toBeInTheDocument();
+    expect(assistantMemoryMock.clearMemory).not.toHaveBeenCalled();
+
+    await user.click(within(dialog).getByRole("button", { name: "Quay lại" }));
+    expect(assistantMemoryMock.clearMemory).not.toHaveBeenCalled();
+
+    await user.click(await screen.findByRole("button", { name: "Xóa bộ nhớ Trợ lý" }));
+    const confirmDialog = await screen.findByTestId("settings-clear-assistant-memory-dialog");
+    await user.click(within(confirmDialog).getByTestId("settings-clear-assistant-memory-confirm"));
+
+    expect(assistantMemoryMock.clearMemory).toHaveBeenCalledTimes(1);
+    expect(assistantMemoryMock.clearMemory).toHaveBeenCalledWith("user_1");
+    expect(toastMock.success).toHaveBeenCalledWith("Đã xóa sạch bộ nhớ của Trợ lý AI.");
+  });
+
+  it("clears only local device data from the local data danger action", async () => {
+    saveLocalVisionSummary("Clear only this device");
+    syncedUserDataMock.useSyncedUserData.mockReturnValue({
+      userData: getUserData(),
+      reloadUserData: syncedUserDataMock.reloadUserData,
+    });
+    const user = userEvent.setup();
+    const page = renderPage();
+
+    await user.click(await screen.findByRole("button", { name: "Xóa tất cả dữ liệu" }));
+    expect(screen.getByText(/Hành động này xóa dữ liệu local/i)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Tôi hiểu, tiếp tục" }));
+    await user.click(screen.getByRole("button", { name: "Xóa tất cả dữ liệu" }));
+
+    expect(syncServiceMock.deleteCloudWorkspace).not.toHaveBeenCalled();
+    expect(syncServiceMock.deleteAccount).not.toHaveBeenCalled();
+    expect(syncedUserDataMock.reloadUserData).toHaveBeenCalledTimes(1);
+    expect(getUserData().aspirationalVision).toBeUndefined();
+    expect(page.getPathname()).toBe("/");
   });
 
   it("deletes account through a two-step AlertDialog without window.confirm", async () => {
@@ -375,29 +396,15 @@ describe("SettingsPage account lifecycle", () => {
     const user = userEvent.setup();
     const page = renderPage();
 
-    await user.click(
-      await screen.findByRole("button", { name: "Xóa tài khoản" }),
-    );
-    const reviewDialog = await screen.findByTestId(
-      "settings-delete-account-dialog",
-    );
-    expect(
-      within(reviewDialog).getByText(/Hành động này xóa dữ liệu tài khoản/),
-    ).toBeInTheDocument();
+    await user.click(await screen.findByRole("button", { name: "Xóa tài khoản" }));
+    const reviewDialog = await screen.findByTestId("settings-delete-account-dialog");
+    expect(within(reviewDialog).getByText(/Hành động này xóa dữ liệu tài khoản/)).toBeInTheDocument();
 
-    await user.click(
-      within(reviewDialog).getByTestId("settings-delete-account-continue"),
-    );
-    const finalDialog = await screen.findByTestId(
-      "settings-delete-account-dialog",
-    );
-    expect(
-      within(finalDialog).getByTestId("settings-delete-account-confirm"),
-    ).toBeVisible();
+    await user.click(within(reviewDialog).getByTestId("settings-delete-account-continue"));
+    const finalDialog = await screen.findByTestId("settings-delete-account-dialog");
+    expect(within(finalDialog).getByTestId("settings-delete-account-confirm")).toBeVisible();
 
-    await user.click(
-      within(finalDialog).getByTestId("settings-delete-account-confirm"),
-    );
+    await user.click(within(finalDialog).getByTestId("settings-delete-account-confirm"));
 
     await waitFor(() => {
       expect(syncServiceMock.deleteAccount).toHaveBeenCalledTimes(1);
@@ -415,39 +422,59 @@ describe("SettingsPage account lifecycle", () => {
       userData: getUserData(),
       reloadUserData: syncedUserDataMock.reloadUserData,
     });
-    syncServiceMock.deleteAccount.mockRejectedValueOnce(
-      new Error("Delete unavailable"),
-    );
+    syncServiceMock.deleteAccount.mockRejectedValueOnce(new Error("Delete unavailable"));
     const user = userEvent.setup();
     const page = renderPage();
 
-    await user.click(
-      await screen.findByRole("button", { name: "Xóa tài khoản" }),
-    );
-    const reviewDialog = await screen.findByTestId(
-      "settings-delete-account-dialog",
-    );
-    await user.click(
-      within(reviewDialog).getByTestId("settings-delete-account-continue"),
-    );
-    const finalDialog = await screen.findByTestId(
-      "settings-delete-account-dialog",
-    );
-    await user.click(
-      within(finalDialog).getByTestId("settings-delete-account-confirm"),
-    );
+    await user.click(await screen.findByRole("button", { name: "Xóa tài khoản" }));
+    const reviewDialog = await screen.findByTestId("settings-delete-account-dialog");
+    await user.click(within(reviewDialog).getByTestId("settings-delete-account-continue"));
+    const finalDialog = await screen.findByTestId("settings-delete-account-dialog");
+    await user.click(within(finalDialog).getByTestId("settings-delete-account-confirm"));
 
     await waitFor(() => {
       expect(syncServiceMock.deleteAccount).toHaveBeenCalledTimes(1);
     });
-    expect(getUserData().aspirationalVision?.summary).toBe(
-      "Keep local data after failed delete",
-    );
+    expect(getUserData().aspirationalVision?.summary).toBe("Keep local data after failed delete");
     expect(authActionsMock.logout).not.toHaveBeenCalled();
     expect(syncedUserDataMock.reloadUserData).not.toHaveBeenCalled();
     expect(page.getPathname()).toBe("/settings");
     expect(toastMock.error).toHaveBeenCalledWith("Delete unavailable", {
       id: "toast-loading",
     });
+  });
+
+  it("clears local data when backend reports Firebase cleanup failed after server data deletion", async () => {
+    saveLocalVisionSummary("Do not re-sync after server delete");
+    syncedUserDataMock.useSyncedUserData.mockReturnValue({
+      userData: getUserData(),
+      reloadUserData: syncedUserDataMock.reloadUserData,
+    });
+    const partialDeleteError = new Error("Account app data was deleted but Firebase cleanup failed.") as Error & {
+      errorCode?: string;
+    };
+    partialDeleteError.errorCode = "firebase_account_delete_failed";
+    syncServiceMock.deleteAccount.mockRejectedValueOnce(partialDeleteError);
+    const user = userEvent.setup();
+    const page = renderPage();
+
+    await user.click(await screen.findByRole("button", { name: "Xóa tài khoản" }));
+    const reviewDialog = await screen.findByTestId("settings-delete-account-dialog");
+    await user.click(within(reviewDialog).getByTestId("settings-delete-account-continue"));
+    const finalDialog = await screen.findByTestId("settings-delete-account-dialog");
+    await user.click(within(finalDialog).getByTestId("settings-delete-account-confirm"));
+
+    await waitFor(() => {
+      expect(syncServiceMock.deleteAccount).toHaveBeenCalledTimes(1);
+    });
+    expect(getUserData().aspirationalVision).toBeUndefined();
+    expect(authActionsMock.logout).toHaveBeenCalledTimes(1);
+    expect(syncedUserDataMock.reloadUserData).toHaveBeenCalledTimes(1);
+    expect(page.getPathname()).toBe("/");
+    expect(toastMock.warning).toHaveBeenCalledWith(
+      "Dữ liệu ứng dụng trên tài khoản đã được xóa khỏi server và thiết bị này. Tài khoản đăng nhập chưa gỡ hoàn toàn; vui lòng đăng nhập lại và thử xóa lần nữa hoặc liên hệ hỗ trợ.",
+      { id: "toast-loading" },
+    );
+    expect(toastMock.error).not.toHaveBeenCalled();
   });
 });

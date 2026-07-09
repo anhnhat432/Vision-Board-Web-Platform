@@ -22,6 +22,11 @@ const CHECKS = [
     label: "GitHub Actions production smoke latest run",
     script: "check-production-smoke-run-readiness.mjs",
   },
+  {
+    key: "staging-runs",
+    label: "GitHub Actions staging proof latest runs",
+    script: "check-staging-proof-run-readiness.mjs",
+  },
 ];
 
 function splitLines(text) {
@@ -91,6 +96,10 @@ function summarizeBlockers(results) {
     phrases.push("latest production-smoke run blocker");
   }
 
+  if (blockedKeys.has("staging-runs")) {
+    phrases.push("staging proof latest-run blockers");
+  }
+
   return joinPhrases(phrases);
 }
 
@@ -128,7 +137,7 @@ function main() {
   }
 
   console.log("Launch proof readiness: PASS");
-  console.log("Secret names, default-branch workflow availability, and latest production-smoke run metadata are ready. This is still not launch proof until the deployed workflows pass and evidence is recorded.");
+  console.log("Secret names, default-branch workflow availability, latest production-smoke run metadata, and staging proof run metadata are ready.");
 }
 
 main();

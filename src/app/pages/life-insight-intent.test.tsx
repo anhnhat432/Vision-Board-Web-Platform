@@ -188,6 +188,7 @@ describe("LifeInsight — intent picker", () => {
 
     const toggle = await screen.findByRole("button", { name: /Mở danh sách lĩnh vực/i });
     expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(screen.queryByRole("button", { name: /Sự nghiệp/i })).not.toBeInTheDocument();
 
     await user.click(toggle);
 
@@ -195,5 +196,6 @@ describe("LifeInsight — intent picker", () => {
       "aria-expanded",
       "true",
     );
+    expect(await screen.findByRole("button", { name: /Sự nghiệp/i })).toBeInTheDocument();
   });
 });

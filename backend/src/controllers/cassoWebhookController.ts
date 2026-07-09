@@ -25,6 +25,8 @@ import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 
 const TWELVE_WEEKS_MS = 12 * 7 * 24 * 60 * 60 * 1000;
 const ORDER_ID_REGEX = /VB[A-Z0-9]{8}/i;
+const CASSO_PROCESSING_CLAIM_STALE_MS = 10 * 60 * 1000;
+const CASSO_PROVIDER = "casso";
 
 function captureCassoWebhookFailure(
   event: string,
@@ -51,18 +53,6 @@ function extractOrderId(description: string): string | null {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
-
-function sortObjectDeep(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(sortObjectDeep);
-  if (!isRecord(value)) return value;
-
-  return Object.keys(value)
-    .sort()
-    .reduce<Record<string, unknown>>((sorted, key) => {
-      sorted[key] = sortObjectDeep(value[key]);
-      return sorted;
-    }, {});
 }
 
 function parseCassoSignatureHeader(value: string): { timestamp?: string; signature: string } | null {
@@ -95,33 +85,117 @@ function getHeaderValue(req: Request, name: string): string {
   return typeof value === "string" ? value : "";
 }
 
-function getRawWebhookPayload(req: Request): unknown {
+function getRawWebhookBody(req: Request): string {
   const rawBody = (req as Request & { rawBody?: Buffer }).rawBody;
-  if (!rawBody || rawBody.length === 0) return req.body;
-
-  try {
-    return JSON.parse(rawBody.toString("utf-8")) as unknown;
-  } catch {
-    return req.body;
-  }
+  if (rawBody && rawBody.length > 0) return rawBody.toString("utf-8");
+  return JSON.stringify(req.body ?? {});
 }
 
-async function claimCassoOrderAsCompleted(
+function toDate(value: unknown): Date | null {
+  if (value instanceof Date && Number.isFinite(value.getTime())) return value;
+  if (typeof value === "string" || typeof value === "number") {
+    const date = new Date(value);
+    return Number.isFinite(date.getTime()) ? date : null;
+  }
+  return null;
+}
+
+function getCassoProcessingStartedAt(order: PaymentOrderDocument): Date | null {
+  const metadata = isRecord(order.metadata) ? order.metadata : {};
+  const casso = isRecord(metadata.casso) ? metadata.casso : {};
+  return toDate(casso.webhookProcessingStartedAt);
+}
+
+function isStaleCassoProcessingClaim(order: PaymentOrderDocument, now: Date): boolean {
+  const staleBeforeMs = now.getTime() - CASSO_PROCESSING_CLAIM_STALE_MS;
+  const processingStartedAt = getCassoProcessingStartedAt(order) ?? toDate(order.updatedAt);
+  return Boolean(
+    order.status === "pending" &&
+    order.cassoTransactionId &&
+    processingStartedAt &&
+    processingStartedAt.getTime() < staleBeforeMs,
+  );
+}
+
+async function claimCassoOrderForProcessing(
+  order: PaymentOrderDocument,
+  cassoTransactionId: string,
+  now: Date,
+): Promise<PaymentOrderDocument | null> {
+  const staleBefore = new Date(now.getTime() - CASSO_PROCESSING_CLAIM_STALE_MS);
+  return PaymentOrderModel.findOneAndUpdate(
+    {
+      _id: order._id,
+      provider: CASSO_PROVIDER,
+      status: "pending",
+      $or: [
+        { cassoTransactionId: { $exists: false } },
+        { cassoTransactionId: null },
+        {
+          cassoTransactionId,
+          "metadata.casso.webhookProcessingStartedAt": { $lt: staleBefore },
+        },
+        {
+          cassoTransactionId,
+          "metadata.casso.webhookProcessingStartedAt": { $exists: false },
+          updatedAt: { $lt: staleBefore },
+        },
+      ],
+    },
+    {
+      $set: {
+        cassoTransactionId,
+        "metadata.casso.webhookProcessingStartedAt": now,
+      },
+    },
+    { new: true },
+  );
+}
+
+async function markCassoOrderAsCompleted(
   order: PaymentOrderDocument,
   cassoTransactionId: string | undefined,
   now: Date,
 ): Promise<PaymentOrderDocument | null> {
   return PaymentOrderModel.findOneAndUpdate(
-    { _id: order._id, status: "pending" },
+    { _id: order._id, provider: CASSO_PROVIDER, status: "pending" },
     {
       $set: {
         status: "completed",
         completedAt: now,
         ...(cassoTransactionId ? { cassoTransactionId } : {}),
       },
+      $unset: {
+        "metadata.casso.webhookProcessingStartedAt": "",
+      },
     },
     { new: true },
   );
+}
+
+async function releaseCassoOrderProcessingClaim(
+  order: PaymentOrderDocument,
+  cassoTransactionId: string,
+): Promise<void> {
+  try {
+    if (order.status !== "pending" || order.cassoTransactionId !== cassoTransactionId) return;
+
+    order.cassoTransactionId = undefined;
+    const metadata = isRecord(order.metadata) ? order.metadata : {};
+    const casso = isRecord(metadata.casso) ? { ...metadata.casso } : {};
+    delete casso.webhookProcessingStartedAt;
+    order.metadata = {
+      ...metadata,
+      casso,
+    };
+    await order.save();
+  } catch (error) {
+    backendMonitoring.captureBillingCriticalException(error, {
+      event: "casso_webhook_processing_claim_release_failed",
+      orderId: order.orderId,
+      status: order.status,
+    });
+  }
 }
 
 async function completePhysicalOrderPayment(
@@ -191,12 +265,21 @@ function verifyCassoWebhookSignature(req: Request, expectedSecret: string): bool
   const cassoSignature = parseCassoSignatureHeader(getHeaderValue(req, "x-casso-signature"));
   if (!cassoSignature) return false;
 
-  const sortedPayload = JSON.stringify(sortObjectDeep(getRawWebhookPayload(req)));
-  const signedPayload = cassoSignature.timestamp ? `${cassoSignature.timestamp}.${sortedPayload}` : sortedPayload;
-  return getCassoSignatureSecrets().some((secret) => {
-    const expectedSignature = createHmac("sha512", secret).update(signedPayload).digest("hex");
-    return safeEqual(cassoSignature.signature, expectedSignature);
-  });
+  const body = getRawWebhookBody(req);
+  const payloadCandidates = new Set([body]);
+  try {
+    payloadCandidates.add(JSON.stringify(JSON.parse(body)));
+  } catch {
+    // Keep the raw body candidate for non-JSON payloads.
+  }
+
+  return getCassoSignatureSecrets().some((secret) =>
+    [...payloadCandidates].some((payload) => {
+      const signedPayload = cassoSignature.timestamp ? `${cassoSignature.timestamp}.${payload}` : payload;
+      const expectedSignature = createHmac("sha512", secret).update(signedPayload).digest("hex");
+      return safeEqual(cassoSignature.signature, expectedSignature);
+    }),
+  );
 }
 
 export async function getCassoWebhookHealth(_req: Request, res: Response): Promise<void> {
@@ -274,25 +357,41 @@ export async function handleCassoWebhook(req: Request, res: Response): Promise<v
 
     const orderId = extractOrderId(description);
     if (!orderId) {
-      console.info(`[casso-webhook] Transaction ${cassoTxId}: no orderId in description "${description}". Skipping.`);
+      console.info({
+        event: "casso_webhook_missing_order_id",
+        message: "Casso transaction skipped because no orderId was found in the transfer description.",
+        transactionId: cassoTxId,
+        descriptionLength: description.length,
+        descriptionHash: createHash("sha256").update(description).digest("hex").slice(0, 12),
+      });
       continue;
     }
 
+    const now = new Date();
+
     // Step 4: Check idempotency (same Casso transaction already processed)
     if (cassoTxId) {
-      const duplicate = await PaymentOrderModel.findOne({ cassoTransactionId: cassoTxId });
+      const duplicate = await PaymentOrderModel.findOne({ provider: CASSO_PROVIDER, cassoTransactionId: cassoTxId });
       if (duplicate?.status === "completed") {
         logCassoWebhookReplayIgnored(cassoTxId, orderId, "completed_order_exists");
         continue;
       }
       if (duplicate) {
-        console.info(`[casso-webhook] Transaction ${cassoTxId}: already linked to non-completed order. Skipping.`);
-        continue;
+        if (duplicate.orderId === orderId && isStaleCassoProcessingClaim(duplicate, now)) {
+          console.warn("[casso-webhook] Retrying stale Casso processing claim.", {
+            transactionId: cassoTxId,
+            orderId,
+          });
+        } else {
+          console.info(`[casso-webhook] Transaction ${cassoTxId}: already linked to non-completed order. Skipping.`);
+          continue;
+        }
       }
     }
 
     // Step 5: Find matching pending PaymentOrder
     const order = await PaymentOrderModel.findOne({
+      provider: CASSO_PROVIDER,
       orderId,
       status: "pending",
     });
@@ -336,9 +435,11 @@ export async function handleCassoWebhook(req: Request, res: Response): Promise<v
       continue;
     }
 
-    // Step 8: Atomically claim the pending order before any side effects.
-    const now = new Date();
-    const claimedOrder = await claimCassoOrderAsCompleted(order, cassoTxId || undefined, now);
+    // Step 8: Claim the pending order before side effects, but do not mark it
+    // completed until the entitlement/physical side effect succeeds.
+    const claimedOrder = cassoTxId
+      ? await claimCassoOrderForProcessing(order, cassoTxId, now)
+      : order;
     if (!claimedOrder) {
       if (cassoTxId) {
         logCassoWebhookReplayIgnored(cassoTxId, orderId, "claim_lost");
@@ -374,6 +475,14 @@ export async function handleCassoWebhook(req: Request, res: Response): Promise<v
         });
       }
 
+      const completedOrder = await markCassoOrderAsCompleted(claimedOrder, cassoTxId || undefined, now);
+      if (!completedOrder) {
+        if (cassoTxId) {
+          logCassoWebhookReplayIgnored(cassoTxId, orderId, "completion_lost");
+        }
+        continue;
+      }
+
       const receiptResult = await deliverReceiptForOrder(orderId);
       if (!receiptResult.sent) {
         console.warn(
@@ -386,20 +495,23 @@ export async function handleCassoWebhook(req: Request, res: Response): Promise<v
         transactionId: cassoTxId,
         accountId: orderId,
         amount,
-        purpose: claimedOrder.purpose,
-        planCode: isPhysicalOrder ? (claimedOrder.planCode ?? null) : "PLUS",
-        userId: claimedOrder.userId,
+        purpose: completedOrder.purpose,
+        planCode: isPhysicalOrder ? (completedOrder.planCode ?? null) : "PLUS",
+        userId: completedOrder.userId,
         ...(isPhysicalOrder ? { physicalOrder: true } : { subscriptionId: orderId }),
       });
       processedCount++;
     } catch (error: unknown) {
+      if (cassoTxId) {
+        await releaseCassoOrderProcessingClaim(claimedOrder, cassoTxId);
+      }
 
       failedCount++;
       const msg = error instanceof Error ? error.message : "Unknown error";
       const context = {
         orderId,
         amount,
-        status: order.status,
+        status: claimedOrder.status,
       };
       console.error("[casso-webhook] Failed to upsert subscription for order.", { ...context, error: msg });
       backendMonitoring.captureBillingCriticalException(error, {

@@ -1,5 +1,5 @@
 import { isDemoMode } from "@/app/utils/app-mode";
-import { getApiBaseUrl, post } from "@/lib/api/apiClient";
+import { getApiBaseUrl, isApiBaseUrlConfigured, post } from "@/lib/api/apiClient";
 import { AuthError, authedFetch } from "@/lib/auth/authedFetch";
 import { mockProvider } from "./assistantEngine";
 import { getSessionId } from "./assistantObservability";
@@ -94,6 +94,21 @@ function createAssistantApiError(
   return error;
 }
 
+function createAssistantBackendNotConfiguredError(): Error & { errorCode?: string; status?: number } {
+  return createAssistantApiError(
+    "Trợ lý AI chưa được cấu hình backend. Vui lòng liên hệ hỗ trợ.",
+    "ASSISTANT_BACKEND_NOT_CONFIGURED",
+  );
+}
+
+function getConfiguredAssistantApiBaseUrl(): string {
+  if (!isApiBaseUrlConfigured()) {
+    throw createAssistantBackendNotConfiguredError();
+  }
+
+  return getApiBaseUrl();
+}
+
 function wrapAssistantFetchError(error: unknown): Error & { errorCode?: string; status?: number } {
   if (isAbortError(error)) {
     return createAbortError();
@@ -157,7 +172,7 @@ async function sendStructuredAssistantJsonFallback(
   onDelta: (text: string) => void,
   signal?: AbortSignal,
 ): Promise<void> {
-  const response = await fetchStructuredAssistant(`${getApiBaseUrl()}/ai/assistant`, body, signal);
+  const response = await fetchStructuredAssistant(`${getConfiguredAssistantApiBaseUrl()}/ai/assistant`, body, signal);
 
   if (!response.ok) {
     throw await createErrorFromResponse(response);
@@ -238,6 +253,10 @@ export async function sendAssistantMessage(request: AssistantChatRequest): Promi
   }
 
   try {
+    if (!isApiBaseUrlConfigured()) {
+      throw createAssistantBackendNotConfiguredError();
+    }
+
     return await post<AssistantChatResponse>("/assistant/chat", {
       message: request.message,
       context: sanitizedContext,
@@ -277,7 +296,11 @@ export async function sendAssistantMessageStream(
     sessionId: getSessionId(),
   };
 
-  const streamResponse = await fetchStructuredAssistant(`${getApiBaseUrl()}/ai/assistant/stream`, body, signal);
+  const streamResponse = await fetchStructuredAssistant(
+    `${getConfiguredAssistantApiBaseUrl()}/ai/assistant/stream`,
+    body,
+    signal,
+  );
 
   if (streamResponse.status === 404 || streamResponse.status === 405) {
     await sendStructuredAssistantJsonFallback(body, onDelta, signal);

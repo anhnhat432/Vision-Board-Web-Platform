@@ -31,6 +31,16 @@ function isPaidCheckoutDisabled(): boolean {
 
 const PAID_CHECKOUT_DISABLED_MESSAGE =
   "Paid checkout is temporarily disabled. Please contact support to upgrade manually.";
+const DEFAULT_SUPPORT_EMAIL = "support@dearourfuture.com";
+
+function getBillingSupportEmail(): string {
+  return (
+    process.env.BILLING_SUPPORT_EMAIL?.trim() ||
+    process.env.SUPPORT_EMAIL?.trim() ||
+    process.env.VITE_BILLING_SUPPORT_EMAIL?.trim() ||
+    DEFAULT_SUPPORT_EMAIL
+  );
+}
 
 function isValidHttpUrl(value: unknown): value is string {
   if (typeof value !== "string" || value.length === 0 || value.length > 2048) return false;
@@ -333,6 +343,14 @@ export async function createPublicCheckoutSession(req: Request, res: Response): 
   if (couponCode !== undefined && couponCode !== null && !normalizedCouponCode) {
     throw new ApiError(400, "Mã giảm giá không hợp lệ.", undefined, "invalid_coupon_code");
   }
+  if (normalizedCouponCode) {
+    throw new ApiError(
+      400,
+      "Bạn cần đăng nhập để sử dụng mã giảm giá.",
+      undefined,
+      "coupon_requires_login",
+    );
+  }
 
   const publicUserId = getPublicCheckoutUserId(clientUserId.trim());
 
@@ -384,6 +402,144 @@ export async function createPublicCheckoutSession(req: Request, res: Response): 
 }
 
 /**
+ * POST /api/billing/orders/:orderId/claim
+ *
+ * Allows a signed-in user to claim a public-checkout order that was paid
+ * while they were not signed in. The authenticated user's email must match
+ * the order's receiptEmail. Transfers the PaymentOrder and any
+ * BillingSubscription from the public: userId to the Firebase uid.
+ *
+ * Auth + verified email required.
+ */
+export async function claimPublicOrder(req: Request, res: Response): Promise<void> {
+  const user = requireAuthUser(req);
+  const { orderId } = req.params;
+
+  if (!orderId || typeof orderId !== "string" || orderId.length < 4) {
+    throw new ApiError(400, "orderId không hợp lệ.", undefined, "invalid_order_id");
+  }
+
+  const { PaymentOrderModel } = await import("../models/PaymentOrderModel");
+  const normalizedOrderId = orderId.trim().toUpperCase();
+
+  const order = await PaymentOrderModel.findOne({ orderId: normalizedOrderId });
+
+  if (!order) {
+    throw new ApiError(404, "Không tìm thấy đơn hàng.", undefined, "order_not_found");
+  }
+
+  const isPublicOrder = order.userId.startsWith("public:");
+  const isAlreadyLinkedToCurrentUser = order.userId === user.uid;
+
+  if (!isPublicOrder && !isAlreadyLinkedToCurrentUser) {
+    throw new ApiError(
+      400,
+      "Đơn hàng này đã được liên kết với một tài khoản hoặc không phải đơn công khai.",
+      undefined,
+      "order_already_claimed",
+    );
+  }
+
+  if (order.status !== "completed") {
+    throw new ApiError(
+      400,
+      "Đơn hàng chưa được thanh toán. Vui lòng hoàn tất thanh toán trước.",
+      undefined,
+      "order_not_completed",
+    );
+  }
+
+  if (order.purpose === "physical_order") {
+    throw new ApiError(
+      400,
+      "Đơn hàng vật lý không hỗ trợ liên kết tự động.",
+      undefined,
+      "physical_order_not_claimable",
+    );
+  }
+
+  const orderEmail = order.receiptEmail?.trim().toLowerCase();
+  if (!orderEmail) {
+    throw new ApiError(
+      400,
+      `Không thể tự động liên kết đơn hàng này vì đơn chưa có email nhận biên lai. Vui lòng liên hệ ${getBillingSupportEmail()} để được hỗ trợ.`,
+      undefined,
+      "claim_email_required",
+    );
+  }
+
+  const userEmail = user.email?.trim().toLowerCase();
+  if (!userEmail || orderEmail !== userEmail) {
+    throw new ApiError(
+      403,
+      "Email tài khoản không khớp với email nhận biên lai của đơn hàng. Vui lòng liên hệ hỗ trợ.",
+      undefined,
+      "email_mismatch",
+    );
+  }
+
+  const oldUserId = order.userId;
+  const newUserId = user.uid;
+
+  if (isAlreadyLinkedToCurrentUser) {
+    const snapshot = await billingService.getCurrentEntitlementForUser(newUserId);
+    res.status(200).json(
+      successResponse({
+        claimed: true,
+        alreadyClaimed: true,
+        orderId: normalizedOrderId,
+        previousUserId: oldUserId,
+        migratedSubscriptions: 0,
+        currentEntitlement: {
+          planCode: snapshot.planCode,
+          status: snapshot.status,
+          entitlements: snapshot.activeKeys,
+        },
+      }),
+    );
+    return;
+  }
+
+  // Migrate the exact subscription created for this payment before relinking the order.
+  const { BillingSubscriptionModel } = await import("../models/BillingSubscriptionModel");
+  const subResult = await BillingSubscriptionModel.updateMany(
+    { provider: order.provider, providerSubscriptionId: normalizedOrderId },
+    { $set: { userId: newUserId } },
+  );
+
+  const matchedSubscriptions = Number(
+    (subResult as { matchedCount?: number; modifiedCount?: number }).matchedCount ?? subResult.modifiedCount ?? 0,
+  );
+  if (matchedSubscriptions < 1) {
+    throw new ApiError(
+      409,
+      "Không tìm thấy gói Plus đã xác nhận cho đơn hàng này. Vui lòng liên hệ hỗ trợ.",
+      undefined,
+      "subscription_not_found",
+    );
+  }
+
+  order.userId = newUserId;
+  await order.save();
+
+  const snapshot = await billingService.getCurrentEntitlementForUser(newUserId);
+
+  res.status(200).json(
+    successResponse({
+      claimed: true,
+      orderId: normalizedOrderId,
+      previousUserId: oldUserId,
+      migratedSubscriptions: subResult.modifiedCount,
+      currentEntitlement: {
+        planCode: snapshot.planCode,
+        status: snapshot.status,
+        entitlements: snapshot.activeKeys,
+      },
+    }),
+  );
+}
+
+/**
  * POST /api/billing/customer-portal
  *
  * Creates a customer portal session via the active payment provider adapter.
@@ -416,14 +572,15 @@ export async function createCustomerPortal(req: Request, res: Response): Promise
 
   // Check if adapter supports customer portal
   if (!adapter.createCustomerPortalSession) {
+    const supportEmail = getBillingSupportEmail();
     res.status(200).json(
       successResponse({
         supported: false,
         provider: adapter.providerId,
         message:
           "Provider hiện tại chưa hỗ trợ cổng quản lý thanh toán tự phục vụ. " +
-          "Vui lòng liên hệ support@visionboard.app để được hỗ trợ.",
-        supportEmail: "support@visionboard.app",
+          `Vui lòng liên hệ ${supportEmail} để được hỗ trợ.`,
+        supportEmail,
       }),
     );
     return;
@@ -437,14 +594,15 @@ export async function createCustomerPortal(req: Request, res: Response): Promise
     });
 
     if (!result) {
+      const supportEmail = getBillingSupportEmail();
       res.status(200).json(
         successResponse({
           supported: false,
           provider: adapter.providerId,
           message:
             "Provider không thể tạo cổng quản lý lúc này. " +
-            "Vui lòng liên hệ support@visionboard.app để được hỗ trợ.",
-          supportEmail: "support@visionboard.app",
+            `Vui lòng liên hệ ${supportEmail} để được hỗ trợ.`,
+          supportEmail,
         }),
       );
       return;

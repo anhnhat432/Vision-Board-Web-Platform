@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import type { AddressInfo } from "node:net";
-import { describe, it } from "node:test";
+import { afterEach, beforeEach, describe, it } from "node:test";
 import express, { type Express } from "express";
 
 import { createAuthMiddleware } from "../middleware/authMiddlewareCore";
@@ -77,12 +77,30 @@ async function requestJson(app: Express, token: string, path = "/api/billing/ord
 }
 
 describe("auth requireEmailVerified", () => {
-  it("returns 403 for unverified email on billing order creation", async () => {
+  const frontendOrigin = "https://app.example.test";
+  let previousFrontendOrigin: string | undefined;
+
+  beforeEach(() => {
+    previousFrontendOrigin = process.env.FRONTEND_ORIGIN;
+    process.env.FRONTEND_ORIGIN = frontendOrigin;
+  });
+
+  afterEach(() => {
+    if (previousFrontendOrigin === undefined) {
+      delete process.env.FRONTEND_ORIGIN;
+    } else {
+      process.env.FRONTEND_ORIGIN = previousFrontendOrigin;
+    }
+  });
+
+  it("allows unverified email on billing checkout creation", async () => {
     const response = await requestJson(createTestApp(), "unverified-token");
 
-    assert.equal(response.status, 403);
-    assert.equal(response.body.success, false);
-    assert.equal(response.body.errorCode, "EMAIL_NOT_VERIFIED");
+    assert.equal(response.status, 200);
+    assert.equal(response.body.success, true);
+    const data = response.body.data as Record<string, unknown>;
+    assert.equal(data.provider, "mock");
+    assert.ok(typeof data.checkoutSessionId === "string");
   });
 
   it("returns 403 for unverified email on billing refund request", async () => {

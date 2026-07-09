@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import { afterEach, describe, it, mock } from "node:test";
 import type { AssistantContext } from "../services/assistantService";
 
 function ensureBackendEnvForProviderImports(): void {
@@ -8,6 +8,7 @@ function ensureBackendEnvForProviderImports(): void {
   process.env.FIREBASE_CLIENT_EMAIL ??= "firebase-admin@example.test";
   process.env.FIREBASE_PRIVATE_KEY ??= "-----BEGIN PRIVATE KEY-----\\ntest\\n-----END PRIVATE KEY-----\\n";
   process.env.FRONTEND_ORIGIN ??= "http://localhost:5173";
+  process.env.GEMINI_API_KEY ??= "gemini_test_key";
 }
 
 const context: AssistantContext = {
@@ -71,6 +72,10 @@ const context: AssistantContext = {
 };
 
 describe("geminiAssistantProvider prompt", () => {
+  afterEach(() => {
+    mock.restoreAll();
+  });
+
   it("requires the stable three-part answer format", async () => {
     ensureBackendEnvForProviderImports();
     const { buildSystemPrompt } = await import("../services/assistantPromptUtils");
@@ -107,5 +112,37 @@ describe("geminiAssistantProvider prompt", () => {
     assert.match(summary, /twelve_week_setup/);
     assert.match(summary, /Dien lead indicator con thieu/);
     assert.match(summary, /Chi co 30 phut moi ngay/);
+  });
+
+  it("redacts provider error details before returning or logging Gemini failures", async () => {
+    ensureBackendEnvForProviderImports();
+    const rawSecret = "AIzaSyAbCdEfGhIjKl123456789";
+    const rawEmail = "buyer@example.test";
+    const consoleErrorMock = mock.method(console, "error", () => undefined);
+    mock.method(
+      globalThis,
+      "fetch",
+      async () =>
+        new Response(
+          JSON.stringify({
+            error: {
+              message: `provider failure api_key: ${rawSecret} for ${rawEmail}`,
+            },
+          }),
+          { status: 500, headers: { "content-type": "application/json" } },
+        ),
+    );
+    const { sendToGemini } = await import("../services/geminiAssistantProvider");
+
+    const result = await sendToGemini("hello", context, []);
+
+    assert.ok("errorCode" in result);
+    assert.equal(result.errorCode, "ASSISTANT_PROVIDER_SERVER_ERROR");
+    assert.doesNotMatch(result.message, new RegExp(rawSecret));
+    assert.doesNotMatch(result.message, new RegExp(rawEmail));
+    assert.equal(consoleErrorMock.mock.callCount(), 1);
+    const logged = JSON.stringify(consoleErrorMock.mock.calls[0].arguments);
+    assert.doesNotMatch(logged, new RegExp(rawSecret));
+    assert.doesNotMatch(logged, new RegExp(rawEmail));
   });
 });

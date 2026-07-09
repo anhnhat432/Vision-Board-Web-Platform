@@ -28,7 +28,7 @@
 4. WHILE entitlement sync is pending, THE system SHALL communicate pending/sync state rather than claiming paid access is final.
 5. WHERE route is demo-only, THE system SHALL not register or render it in real mode.
 6. EVEN IF a checkout-session response includes a non-free `currentEntitlement`, THE frontend SHALL keep local plan/entitlements unchanged until a later entitlement sync confirms access.
-7. WHERE a billing action creates payment or refund side effects, THE backend SHALL require a verified Firebase email before validation, discount, provider, or refund side effects run.
+7. WHERE a billing action creates a refund or account-claim side effect, THE backend SHALL require a verified Firebase email before validation or side effects run; checkout-session creation SHALL remain available to unverified signed-in users.
 8. WHEN a user returns from checkout with a success URL, THE frontend SHALL show confirmed Plus only after entitlement sync returns a non-free server plan; a success URL with still-FREE entitlement remains pending.
 
 ## 5. Data, Storage, and Sync Constraints
@@ -60,7 +60,7 @@
 - [x] webhook completion is idempotent and side effects run only after successful claim.
 - [x] demo mock checkout is not registered in real-mode routes.
 - [x] customer portal / support path remains reachable for PLUS users.
-- [x] unverified Firebase users are blocked from checkout and refund-request side-effect routes.
+- [x] unverified Firebase users can create checkout sessions but remain blocked from refund-request side-effect routes.
 - [x] checkout return polling does not confirm Plus from the URL alone when server entitlement is still FREE.
 
 ## 9. Verification Plan
@@ -88,7 +88,7 @@ Focused evidence:
 
 - Backend checkout authority verified by `backend/src/tests/billingRoutes.test.ts`: checkout-session creation returns provider/order handoff, but `does NOT grant entitlement after checkout session creation` keeps entitlement state `FREE`.
 - Backend webhook authority verified by `backend/src/tests/webhookRoutes.test.ts`: valid provider webhook grants `PLUS`, duplicate webhook is idempotent no-op, `payment_failed` does not grant entitlements, duplicate Casso transaction does not grant `PLUS` twice, low amount / wrong description / expired order do not grant `PLUS`.
-- Backend email-verification side-effect guard verified by `backend/src/tests/auth.requireEmailVerified.test.ts`: unverified Firebase users get `EMAIL_NOT_VERIFIED` before billing order creation or refund request side effects.
+- Backend email-verification side-effect guard verified by `backend/src/tests/auth.requireEmailVerified.test.ts`: unverified Firebase users can create billing checkout sessions, but still get `EMAIL_NOT_VERIFIED` before refund request side effects.
 - Verification passed:
   - `npm.cmd --prefix backend run build`
   - `node --test backend\\dist\\tests\\billingRoutes.test.js backend\\dist\\tests\\webhookRoutes.test.js` (52 tests passed)

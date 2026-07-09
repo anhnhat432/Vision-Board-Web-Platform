@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AutoCloudSyncState } from "@/features/plan12week/hooks/useAutoCloudSync";
 import { activateAuthenticatedUserData, getUserData, resetUserDataCache, saveUserData } from "../utils/storage";
 import { getScopedUserDataStorageKey } from "../utils/storage-auth-scope";
@@ -117,6 +117,10 @@ vi.mock("../utils/production", () => ({
   syncEntitlementsWithProvider: productionMock.syncEntitlementsWithProvider,
   syncPendingOutbox: productionMock.syncPendingOutbox,
 }));
+
+beforeAll(async () => {
+  await import("./root-layout/AppShellLayout");
+});
 
 vi.mock("@/app/features/assistant/AIAssistant", () => ({
   AIAssistant: () => <div data-testid="ai-assistant" />,
@@ -309,6 +313,7 @@ function renderAppShell(initialEntry: string) {
           { path: "smart-goal-setup", element: <div data-testid="smart-goal-setup-page">Smart goal setup page</div> },
           { path: "feasibility", element: <div data-testid="feasibility-page">Feasibility page</div> },
           { path: "12-week-setup", element: <div data-testid="twelve-week-setup-page">12-week setup page</div> },
+          { path: "12-week-system", element: <div data-testid="twelve-week-system-page">12-week system page</div> },
           { path: "goals", element: <div data-testid="goals-page">Goals page</div> },
           { path: "settings", element: <div data-testid="settings-page">Settings page</div> },
           { path: "billing/plan", element: <div data-testid="billing-plan-page">Billing plan page</div> },
@@ -403,8 +408,8 @@ describe("RootLayout onboarding redirect", () => {
   it("lets auth protected routes reach the login gate before onboarding", async () => {
     const { router } = renderAppShell("/order?kit=vision#recipient");
 
+    await waitFor(() => expect(router.state.location.pathname).toBe("/login"));
     expect(await screen.findByTestId("login-page")).toBeInTheDocument();
-    expect(router.state.location.pathname).toBe("/login");
     expect(router.state.location.search).toBe("?next=%2Forder%3Fkit%3Dvision%23recipient");
     expect(router.state.location.state).toMatchObject({ from: "/order?kit=vision#recipient" });
   });
@@ -683,6 +688,14 @@ describe("RootLayout onboarding redirect", () => {
     expect(screen.queryByTestId("ai-assistant")).not.toBeInTheDocument();
   });
 
+  it("lets signed-out real-mode visitors view the public billing plan page", async () => {
+    const { router } = renderAppShell("/billing/plan");
+
+    expect(await screen.findByTestId("billing-plan-page")).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe("/billing/plan");
+    expect(screen.queryByTestId("login-page")).not.toBeInTheDocument();
+  });
+
   it("resets the viewport to the top when the app route changes", async () => {
     const scrollToMock = vi.spyOn(window, "scrollTo").mockImplementation(() => undefined);
     appModeMock.isDemoMode.mockReturnValue(true);
@@ -717,6 +730,8 @@ describe("RootLayout onboarding redirect", () => {
     const { router } = renderAppShell("/");
 
     expect(await screen.findByTestId("home-page")).toBeInTheDocument();
+    const skipLink = document.querySelector<HTMLAnchorElement>('a.skip-to-content[href="#main-content"]');
+    expect(skipLink).toBeInTheDocument();
     expect(screen.queryByText("Đang kiểm tra tài khoản")).not.toBeInTheDocument();
     expect(router.state.location.pathname).toBe("/");
   });
@@ -879,6 +894,15 @@ describe("RootLayout onboarding redirect", () => {
 
     expect(await screen.findByTestId("twelve-week-setup-page")).toBeInTheDocument();
     expect(router.state.location.pathname).toBe("/12-week-setup");
+  });
+
+  it("sends signed-out execution hub visitors to login while preserving the next path", async () => {
+    const { router } = renderAppShell("/12-week-system?tab=today");
+
+    await waitFor(() => expect(router.state.location.pathname).toBe("/login"));
+    expect(await screen.findByTestId("login-page")).toBeInTheDocument();
+    expect(router.state.location.search).toBe("?next=%2F12-week-system%3Ftab%3Dtoday");
+    expect(router.state.location.state).toMatchObject({ from: "/12-week-system?tab=today" });
   });
 
   it("sends signed-in users to onboarding when setup is incomplete", async () => {

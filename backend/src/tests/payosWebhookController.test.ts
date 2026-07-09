@@ -323,6 +323,7 @@ describe("PayOS webhook controller", () => {
     const order = createOrder({ userId: `user_payos_success_${Date.now()}` });
     const persistence = mockOrderPersistence(order);
     const grant = stubGrantSuccess();
+    const infoStub = mock.method(console, "info", () => undefined);
     const receiptStub = mock.method(receiptEmailService, "sendPaymentReceipt", async () => ({
       status: "sent" as const,
       provider: "resend",
@@ -336,11 +337,17 @@ describe("PayOS webhook controller", () => {
     assert.equal(order.status, "completed");
     assert.ok(order.completedAt instanceof Date);
     assert.equal(order.metadata?.payos?.webhookReference, "TF_PAYOS_1");
-    assert.equal(persistence.claimCalls.length, 1);
+    assert.equal(persistence.claimCalls.length, 2);
     assert.equal(grant.events.length, 1);
     assert.equal(grant.events[0]?.provider, "payos");
     assert.equal(grant.events[0]?.providerSubscriptionId, order.orderId);
     assert.equal(receiptStub.mock.callCount(), 1);
+    const loggedEvents = infoStub.mock.calls
+      .map((call) => call.arguments[0])
+      .filter((entry): entry is Record<string, unknown> => Boolean(entry) && typeof entry === "object")
+      .map((entry) => entry.event);
+    assert.ok(loggedEvents.includes("payos_webhook_subscription_order_success"));
+    assert.equal(loggedEvents.includes("payos_webhook_physical_order_success"), false);
   });
 
   it("returns duplicate when webhook arrives for an already-completed order", async () => {
@@ -553,7 +560,7 @@ describe("PayOS webhook controller", () => {
     assert.equal(grant.calls.count, 0);
   });
 
-  it("returns 500 with retry message when billingService upsert throws after a successful claim", async () => {
+  it("keeps the order retryable when billingService upsert throws before completion", async () => {
     configurePayosEnv();
     const order = createOrder();
     mockOrderPersistence(order);
@@ -562,8 +569,30 @@ describe("PayOS webhook controller", () => {
       event: Record<string, unknown>,
     ) => {
       calls(event);
-      throw new Error("downstream upsert exploded");
+      if (calls.mock.callCount() === 1) {
+        throw new Error("downstream upsert exploded");
+      }
+      return {
+        subscription: {
+          id: "sub_payos_retry_after_failure",
+          userId: event.userId,
+          planCode: "PLUS",
+          status: "active",
+          provider: "payos",
+          source: "provider",
+          providerSubscriptionId: event.providerSubscriptionId,
+          entitlements: [],
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        eventStatus: "processed" as const,
+        eventId: "evt_payos_retry_after_failure",
+      };
     };
+    mock.method(receiptEmailService, "sendPaymentReceipt", async () => ({
+      status: "sent" as const,
+      provider: "resend",
+    }));
     const response = createResponse();
 
     await handlePayosWebhook(createRequest(JSON.parse(createWebhookPayload())), response as unknown as Response);
@@ -572,8 +601,17 @@ describe("PayOS webhook controller", () => {
     const body = response.body as Record<string, unknown>;
     assert.equal(body.success, false);
     assert.match(String(body.message), /retried/i);
-    // Order was claimed before throw; status reflects atomic claim
-    assert.equal(order.status, "completed");
+    assert.equal(order.status, "pending");
+    assert.equal(order.completedAt, undefined);
     assert.equal(calls.mock.callCount(), 1);
+
+    const retryResponse = createResponse();
+    await handlePayosWebhook(createRequest(JSON.parse(createWebhookPayload())), retryResponse as unknown as Response);
+
+    assert.equal(retryResponse.statusCode, 200);
+    assert.equal((retryResponse.body as Record<string, unknown>).status, "processed");
+    assert.equal(order.status, "completed");
+    assert.ok(order.completedAt);
+    assert.equal(calls.mock.callCount(), 2);
   });
 });

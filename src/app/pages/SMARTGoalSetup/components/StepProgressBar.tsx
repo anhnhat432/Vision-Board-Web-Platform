@@ -46,11 +46,15 @@ export function StepProgressBar({ steps, stepIndex, onJump }: StepProgressBarPro
           const isActive = index === stepIndex;
           const isDone = index < stepIndex;
           const canJump = index <= stepIndex;
+          const stepLabel = canJump
+            ? `Đi tới bước ${index + 1}: ${smartStep.label}`
+            : `Bước ${index + 1}: ${smartStep.label} chưa khả dụng`;
 
           return (
             <li key={smartStep.key} aria-current={isActive ? "step" : undefined}>
               <motion.button
                 type="button"
+                aria-label={stepLabel}
                 disabled={!canJump}
                 onClick={() => onJump(index)}
                 animate={

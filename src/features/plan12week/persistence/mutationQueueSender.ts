@@ -111,12 +111,16 @@ function isSuccessStatus(status: string | undefined): boolean {
   return status === "accepted" || status === "applied" || status === "noop" || status === "duplicate";
 }
 
+function getBackendFailureCode(result: TwelveWeekMutationResult | null, fallbackCode: string): string {
+  return result?.syncErrorCode ?? result?.reason ?? fallbackCode;
+}
+
 function getFailureInput(result: TwelveWeekMutationResult | null, fallbackMessage: string): MutationFailureInput {
   const status = result?.status;
 
   if (status === "conflict") {
     return {
-      code: result?.reason ?? "sync_conflict",
+      code: getBackendFailureCode(result, "sync_conflict"),
       message: result?.message ?? "Phát hiện xung đột khi đồng bộ. Vui lòng thử lại.",
       httpStatus: 409,
       retryable: false,
@@ -125,7 +129,7 @@ function getFailureInput(result: TwelveWeekMutationResult | null, fallbackMessag
 
   if (status === "failed_validation") {
     return {
-      code: result?.reason ?? "sync_validation_failed",
+      code: getBackendFailureCode(result, "sync_validation_failed"),
       message: result?.message ?? "Dữ liệu gửi đi không hợp lệ, máy chủ từ chối.",
       httpStatus: 400,
       retryable: false,
@@ -133,7 +137,7 @@ function getFailureInput(result: TwelveWeekMutationResult | null, fallbackMessag
   }
 
   return {
-    code: result?.reason ?? "sync_mutation_failed",
+    code: getBackendFailureCode(result, "sync_mutation_failed"),
     message: result?.message ?? fallbackMessage,
     retryable: false,
   };

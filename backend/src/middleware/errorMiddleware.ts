@@ -27,6 +27,48 @@ function deriveErrorCode(statusCode: number, explicitCode?: string): string {
   }
 }
 
+function isSafeBusinessError(error: ApiError): boolean {
+  return error.errorCode === "checkout_disabled";
+}
+
+function shouldCaptureApiError(error: ApiError): boolean {
+  return error.statusCode >= 500 && !isSafeBusinessError(error);
+}
+
+function getSafeApiErrorPayload(error: ApiError, isDevelopment: boolean): { message: string; details?: unknown } {
+  if (isDevelopment || error.statusCode < 500 || isSafeBusinessError(error)) {
+    return {
+      message: error.message,
+      details: error.details,
+    };
+  }
+
+  if (error.statusCode === 503) {
+    return {
+      message: "Dịch vụ tạm thời chưa sẵn sàng. Vui lòng thử lại sau.",
+    };
+  }
+
+  return {
+    message: "Đã xảy ra lỗi hệ thống. Vui lòng thử lại sau.",
+  };
+}
+
+function captureSafeApiError(error: ApiError, req: Request, errorCode: string): void {
+  captureBackendException(new Error(`ApiError ${error.statusCode} ${errorCode}`), {
+    tags: {
+      event: "api_error",
+      errorCode,
+    },
+    extra: {
+      method: req.method,
+      path: req.path,
+      statusCode: error.statusCode,
+      errorCode,
+    },
+  });
+}
+
 export function errorMiddleware(
   error: unknown,
   req: Request,
@@ -36,12 +78,18 @@ export function errorMiddleware(
   const isDevelopment = process.env.NODE_ENV !== "production";
 
   if (error instanceof ApiError) {
+    const errorCode = deriveErrorCode(error.statusCode, error.errorCode);
+    if (shouldCaptureApiError(error)) {
+      captureSafeApiError(error, req, errorCode);
+    }
+
+    const safePayload = getSafeApiErrorPayload(error, isDevelopment);
     const payload = errorResponse(
-      error.message,
-      error.details,
+      safePayload.message,
+      safePayload.details,
       isDevelopment ? error.stack : undefined,
     );
-    (payload as unknown as Record<string, unknown>).errorCode = deriveErrorCode(error.statusCode, error.errorCode);
+    (payload as unknown as Record<string, unknown>).errorCode = errorCode;
     res.status(error.statusCode).json(payload);
     return;
   }
@@ -70,4 +118,3 @@ export function errorMiddleware(
 
   res.status(500).json(payload);
 }
-

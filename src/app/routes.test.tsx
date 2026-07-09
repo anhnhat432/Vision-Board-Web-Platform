@@ -1,7 +1,7 @@
 ﻿import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { createMemoryRouter, RouterProvider } from "react-router";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 const authContextMock = vi.hoisted(() => ({
   useAuthContext: vi.fn(),
@@ -117,8 +117,12 @@ vi.mock("./utils/production", () => ({
   syncPendingOutbox: vi.fn(),
 }));
 
-import { appRoutes } from "./routes";
+import { appRoutes, createAppRoutes } from "./routes";
 import { initializeUserData, saveUserData } from "./utils/storage";
+
+beforeAll(async () => {
+  await import("./components/root-layout/AppShellLayout");
+});
 
 function renderRoute(pathname: string) {
   const router = createMemoryRouter(appRoutes, { initialEntries: [pathname] });
@@ -191,6 +195,7 @@ describe("app routes", () => {
 
   it("resolves /terms through the app route table", async () => {
     const route = renderRoute("/terms");
+    await route.waitForIdle();
 
     expect(
       await screen.findByRole("heading", {
@@ -204,6 +209,7 @@ describe("app routes", () => {
 
   it("resolves /help through the app route table", async () => {
     const route = renderRoute("/help");
+    await route.waitForIdle();
 
     expect(
       await screen.findByRole("heading", {
@@ -217,6 +223,7 @@ describe("app routes", () => {
 
   it("resolves /privacy through the app route table", async () => {
     const route = renderRoute("/privacy");
+    await route.waitForIdle();
 
     expect(
       await screen.findByRole("heading", { name: /Chính sách bảo mật/i }),
@@ -225,8 +232,24 @@ describe("app routes", () => {
     await route.dispose();
   });
 
+  it("resolves /contact through the app route table", async () => {
+    const route = renderRoute("/contact");
+    await route.waitForIdle();
+
+    expect(
+      await screen.findByRole("heading", {
+        level: 1,
+        name: /Liên hệ hỗ trợ/i,
+      }),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Trang này vừa gặp lỗi/i)).not.toBeInTheDocument();
+    expectNoDemoOnlyCopy();
+    await route.dispose();
+  });
+
   it("resolves /billing/faq through the app route table", async () => {
     const route = renderRoute("/billing/faq");
+    await route.waitForIdle();
 
     expect(
       await screen.findByRole("heading", { name: /Câu hỏi thường gặp/i }),
@@ -242,7 +265,7 @@ describe("app routes", () => {
   });
 
   it("does not register demo-only routes in the production route table", () => {
-    const paths = collectRoutePaths(appRoutes);
+    const paths = collectRoutePaths(createAppRoutes("real"));
     const bannedPatterns: ReadonlyArray<RegExp> = [
       /(?:^|\/)mock-/i,
       /(?:^|\/)demo-/i,
@@ -258,6 +281,14 @@ describe("app routes", () => {
       offenders,
       `Production route table contains demo-only routes: ${offenders.join(", ")}`,
     ).toEqual([]);
+  });
+
+  it("registers mock checkout only in the demo route table", () => {
+    const realPaths = collectRoutePaths(createAppRoutes("real"));
+    const demoPaths = collectRoutePaths(createAppRoutes("demo"));
+
+    expect(realPaths).not.toContain("billing/mock-checkout");
+    expect(demoPaths).toContain("billing/mock-checkout");
   });
 
   it("redirects /billing to the billing plan page", async () => {
@@ -281,6 +312,7 @@ describe("app routes", () => {
     saveUserData({ ...userData, onboardingCompleted: true });
 
     const route = renderRoute("/billing");
+    await route.waitForIdle();
 
     expect(await screen.findByText("Đi nhanh")).toBeInTheDocument();
     expectNoDemoOnlyCopy();
@@ -353,6 +385,7 @@ describe("app routes", () => {
     const userData = initializeUserData();
     saveUserData({ ...userData, onboardingCompleted: true });
     const route = renderRoute("/settings");
+    await route.waitForIdle();
 
     expect(
       await screen.findByRole("heading", {
@@ -385,6 +418,7 @@ describe("app routes", () => {
     saveUserData({ ...userData, onboardingCompleted: true });
 
     const route = renderRoute("/vision");
+    await route.waitForIdle();
 
     expect(
       await screen.findByRole("heading", {

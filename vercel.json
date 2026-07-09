@@ -16,12 +16,34 @@
           "value": "strict-origin-when-cross-origin"
         },
         {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=31536000"
+        },
+        {
           "key": "Permissions-Policy",
           "value": "camera=(), microphone=(self), geolocation=()"
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://apis.google.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://img.vietqr.io https://api.vietqr.io https://images.unsplash.com https://picsum.photos https://fastly.picsum.photos https://*.googleusercontent.com https://firebasestorage.googleapis.com https://*.r2.dev https://*.r2.cloudflarestorage.com https://catalog.dearourfuture.io.vn; connect-src 'self' https://*.googleapis.com wss://*.googleapis.com wss://*.google.com https://*.firebaseapp.com https://*.firebase.com https://*.cloudfunctions.net https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://vision-board-web-platform.onrender.com https://api.dearourfuture.io.vn; frame-src 'self' https://*.firebaseapp.com https://*.firebase.com; frame-ancestors 'none'"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://apis.google.com https://static.cloudflareinsights.com https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://img.vietqr.io https://api.vietqr.io https://images.unsplash.com https://picsum.photos https://fastly.picsum.photos https://*.googleusercontent.com https://firebasestorage.googleapis.com https://*.r2.dev https://*.r2.cloudflarestorage.com https://catalog.dearourfuture.io.vn; connect-src 'self' https://*.googleapis.com wss://*.googleapis.com wss://*.google.com https://*.firebaseapp.com https://*.firebase.com https://*.cloudfunctions.net https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://www.google-analytics.com https://vision-board-web-platform.onrender.com https://api.dearourfuture.io.vn; frame-src 'self' https://*.firebaseapp.com https://*.firebase.com; frame-ancestors 'none'"
+        }
+      ]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/sw.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
         }
       ]
     }

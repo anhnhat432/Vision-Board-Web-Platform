@@ -4,12 +4,16 @@ import { adminAuth } from "../config/firebase";
 import { requireAuthUser } from "./controllerHelpers";
 import { BillingEventModel } from "../models/BillingEventModel";
 import { BillingSubscriptionModel } from "../models/BillingSubscriptionModel";
+import { CouponUsageModel } from "../models/CouponUsageModel";
 import { DailyCheckInModel } from "../models/DailyCheckInModel";
+import { FailedReceiptQueueModel } from "../models/FailedReceiptQueueModel";
 import { GoalModel } from "../models/GoalModel";
+import { GoalProgressModel } from "../models/GoalProgressModel";
 import { LeadMetricModel } from "../models/LeadMetricModel";
 import { OrderModel } from "../models/OrderModel";
 import { PaymentOrderModel } from "../models/PaymentOrderModel";
 import { PlanModel } from "../models/PlanModel";
+import { RefundRequestModel } from "../models/refundRequestModel";
 import { SyncMutationLogModel } from "../models/SyncMutationLogModel";
 import { TaskModel } from "../models/TaskModel";
 import { UserModel } from "../models/UserModel";
@@ -23,12 +27,16 @@ import { withoutTombstones } from "../utils/tombstone";
 interface AccountDeleteCounts {
   billingEvents: number;
   billingSubscriptions: number;
+  couponUsages: number;
   dailyCheckIns: number;
+  failedReceiptQueue: number;
   goals: number;
+  goalProgress: number;
   leadMetrics: number;
   orders: number;
   paymentOrders: number;
   plans: number;
+  refundRequests: number;
   syncMutationLogs: number;
   tasks: number;
   users: number;
@@ -40,12 +48,16 @@ interface AccountDeleteCounts {
 interface AccountExportCounts {
   billingEvents: number;
   billingSubscriptions: number;
+  couponUsages: number;
   dailyCheckIns: number;
+  failedReceiptQueue: number;
   goals: number;
+  goalProgress: number;
   leadMetrics: number;
   orders: number;
   paymentOrders: number;
   plans: number;
+  refundRequests: number;
   syncMutationLogs: number;
   tasks: number;
   users: number;
@@ -63,56 +75,55 @@ async function deleteUserCollections(userId: string): Promise<AccountDeleteCount
   const planIds = plans.map((plan) => plan._id);
   const weeks = planIds.length > 0 ? await WeekModel.find({ planId: { $in: planIds } }).select("_id").lean() : [];
   const weekIds = weeks.map((week) => week._id);
+  const paymentOrdersForUser = await PaymentOrderModel.find({ userId }).select("orderId").lean();
+  const paymentOrderIds = paymentOrdersForUser
+    .map((order) => (typeof order.orderId === "string" ? order.orderId.trim() : ""))
+    .filter(Boolean);
 
-  const [
-    billingEvents,
-    billingSubscriptions,
-    dailyCheckIns,
-    goals,
-    leadMetrics,
-    orders,
-    paymentOrders,
-    syncMutationLogs,
-    tasks,
-    visionBoards,
-    weeklyReviews,
-    weeksDeleted,
-    plansDeleted,
-    users,
-  ] = await Promise.all([
-    BillingEventModel.deleteMany({ userId }),
-    BillingSubscriptionModel.deleteMany({ userId }),
-    DailyCheckInModel.deleteMany({ userId }),
-    GoalModel.deleteMany({ userId }),
-    LeadMetricModel.deleteMany({
-      $or: [{ userId }, ...(weekIds.length > 0 ? [{ weekId: { $in: weekIds } }] : [])],
-    }),
-    OrderModel.deleteMany({ userId }),
-    PaymentOrderModel.deleteMany({ userId }),
-    SyncMutationLogModel.deleteMany({ userId }),
-    weekIds.length > 0 ? TaskModel.deleteMany({ weekId: { $in: weekIds } }) : Promise.resolve({ deletedCount: 0 }),
-    VisionBoardModel.deleteMany({ userId }),
-    WeekReviewModel.deleteMany({
-      $or: [
-        { userId },
-        ...(planIds.length > 0 ? [{ planId: { $in: planIds } }] : []),
-        ...(weekIds.length > 0 ? [{ weekId: { $in: weekIds } }] : []),
-      ],
-    }),
-    planIds.length > 0 ? WeekModel.deleteMany({ planId: { $in: planIds } }) : Promise.resolve({ deletedCount: 0 }),
-    PlanModel.deleteMany({ userId }),
-    UserModel.deleteOne({ firebaseUid: userId }),
-  ]);
+  const billingEvents = await BillingEventModel.deleteMany({ userId });
+  const billingSubscriptions = await BillingSubscriptionModel.deleteMany({ userId });
+  const couponUsages = await CouponUsageModel.deleteMany({ userId });
+  const dailyCheckIns = await DailyCheckInModel.deleteMany({ userId });
+  const goalProgress = planIds.length > 0
+    ? await GoalProgressModel.deleteMany({ planId: { $in: planIds } })
+    : { deletedCount: 0 };
+  const goals = await GoalModel.deleteMany({ userId });
+  const leadMetrics = await LeadMetricModel.deleteMany({
+    $or: [{ userId }, ...(weekIds.length > 0 ? [{ weekId: { $in: weekIds } }] : [])],
+  });
+  const refundRequests = await RefundRequestModel.deleteMany({ userId });
+  const syncMutationLogs = await SyncMutationLogModel.deleteMany({ userId });
+  const tasks = weekIds.length > 0 ? await TaskModel.deleteMany({ weekId: { $in: weekIds } }) : { deletedCount: 0 };
+  const visionBoards = await VisionBoardModel.deleteMany({ userId });
+  const weeklyReviews = await WeekReviewModel.deleteMany({
+    $or: [
+      { userId },
+      ...(planIds.length > 0 ? [{ planId: { $in: planIds } }] : []),
+      ...(weekIds.length > 0 ? [{ weekId: { $in: weekIds } }] : []),
+    ],
+  });
+  const failedReceiptQueue = paymentOrderIds.length > 0
+    ? await FailedReceiptQueueModel.deleteMany({ orderId: { $in: paymentOrderIds } })
+    : { deletedCount: 0 };
+  const orders = await OrderModel.deleteMany({ userId });
+  const paymentOrders = await PaymentOrderModel.deleteMany({ userId });
+  const weeksDeleted = planIds.length > 0 ? await WeekModel.deleteMany({ planId: { $in: planIds } }) : { deletedCount: 0 };
+  const plansDeleted = await PlanModel.deleteMany({ userId });
+  const users = await UserModel.deleteOne({ firebaseUid: userId });
 
   return {
     billingEvents: deletedCount(billingEvents),
     billingSubscriptions: deletedCount(billingSubscriptions),
+    couponUsages: deletedCount(couponUsages),
     dailyCheckIns: deletedCount(dailyCheckIns),
+    failedReceiptQueue: deletedCount(failedReceiptQueue),
     goals: deletedCount(goals),
+    goalProgress: deletedCount(goalProgress),
     leadMetrics: deletedCount(leadMetrics),
     orders: deletedCount(orders),
     paymentOrders: deletedCount(paymentOrders),
     plans: deletedCount(plansDeleted),
+    refundRequests: deletedCount(refundRequests),
     syncMutationLogs: deletedCount(syncMutationLogs),
     tasks: deletedCount(tasks),
     users: deletedCount(users),
@@ -134,7 +145,7 @@ async function deleteFirebaseAccount(uid: string): Promise<void> {
     console.error("[accountController] Failed to delete Firebase user during account deletion:", error);
     throw new ApiError(
       502,
-      "Account data was deleted, but Firebase account removal failed. Local data was kept so the user can retry account deletion.",
+      "Account app data was deleted, but Firebase account removal failed. The client must clear local data to prevent re-syncing deleted data.",
       undefined,
       "firebase_account_delete_failed",
     );
@@ -142,7 +153,19 @@ async function deleteFirebaseAccount(uid: string): Promise<void> {
 }
 
 async function getUserAccountExport(userId: string) {
-  const [profile, goals, plans, orders, paymentOrders, billingSubscriptions, billingEvents, syncMutationLogs, visionBoards] =
+  const [
+    profile,
+    goals,
+    plans,
+    orders,
+    paymentOrders,
+    billingSubscriptions,
+    billingEvents,
+    couponUsages,
+    refundRequests,
+    syncMutationLogs,
+    visionBoards,
+  ] =
     await Promise.all([
       UserModel.findOne({ firebaseUid: userId }).select("-__v").lean(),
       GoalModel.find(withoutTombstones({ userId })).select("-__v").sort({ createdAt: 1 }).lean(),
@@ -151,17 +174,22 @@ async function getUserAccountExport(userId: string) {
       PaymentOrderModel.find({ userId }).select("-__v").sort({ createdAt: 1 }).lean(),
       BillingSubscriptionModel.find({ userId }).select("-__v").sort({ createdAt: 1 }).lean(),
       BillingEventModel.find({ userId }).select("-__v").sort({ createdAt: 1 }).lean(),
+      CouponUsageModel.find({ userId }).select("-__v").sort({ usedAt: 1 }).lean(),
+      RefundRequestModel.find({ userId }).select("-__v").sort({ createdAt: 1 }).lean(),
       SyncMutationLogModel.find({ userId }).select("-__v").sort({ createdAt: 1 }).lean(),
       VisionBoardModel.find({ userId }).select("-__v").sort({ createdAt: 1 }).lean(),
     ]);
 
   const planIds = plans.map((plan) => plan._id);
+  const paymentOrderIds = paymentOrders
+    .map((order) => (typeof order.orderId === "string" ? order.orderId.trim() : ""))
+    .filter(Boolean);
   const weeks = planIds.length > 0
     ? await WeekModel.find(withoutTombstones({ planId: { $in: planIds } })).select("-__v").sort({ weekNumber: 1 }).lean()
     : [];
   const weekIds = weeks.map((week) => week._id);
 
-  const [tasks, leadMetrics, dailyCheckIns, weeklyReviews] = await Promise.all([
+  const [tasks, leadMetrics, dailyCheckIns, weeklyReviews, goalProgress, failedReceiptQueue] = await Promise.all([
     weekIds.length > 0 ? TaskModel.find(withoutTombstones({ weekId: { $in: weekIds } })).select("-__v").sort({ createdAt: 1 }).lean() : [],
     LeadMetricModel.find(withoutTombstones({
       $or: [{ userId }, ...(weekIds.length > 0 ? [{ weekId: { $in: weekIds } }] : [])],
@@ -174,17 +202,25 @@ async function getUserAccountExport(userId: string) {
         ...(weekIds.length > 0 ? [{ weekId: { $in: weekIds } }] : []),
       ],
     })).select("-__v").sort({ createdAt: 1 }).lean(),
+    planIds.length > 0 ? GoalProgressModel.find({ planId: { $in: planIds } }).select("-__v").sort({ createdAt: 1 }).lean() : [],
+    paymentOrderIds.length > 0
+      ? FailedReceiptQueueModel.find({ orderId: { $in: paymentOrderIds } }).select("-__v").sort({ createdAt: 1 }).lean()
+      : [],
   ]);
 
   const counts: AccountExportCounts = {
     billingEvents: billingEvents.length,
     billingSubscriptions: billingSubscriptions.length,
+    couponUsages: couponUsages.length,
     dailyCheckIns: dailyCheckIns.length,
+    failedReceiptQueue: failedReceiptQueue.length,
     goals: goals.length,
+    goalProgress: goalProgress.length,
     leadMetrics: leadMetrics.length,
     orders: orders.length,
     paymentOrders: paymentOrders.length,
     plans: plans.length,
+    refundRequests: refundRequests.length,
     syncMutationLogs: syncMutationLogs.length,
     tasks: tasks.length,
     users: profile ? 1 : 0,
@@ -211,7 +247,11 @@ async function getUserAccountExport(userId: string) {
       paymentOrders,
       billingSubscriptions,
       billingEvents,
+      couponUsages,
+      refundRequests,
       syncMutationLogs,
+      goalProgress,
+      failedReceiptQueue,
     },
     counts,
   };

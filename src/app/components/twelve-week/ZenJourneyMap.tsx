@@ -1,6 +1,8 @@
 import { Sparkles } from "lucide-react";
 import { useState } from "react";
 
+import { useReducedMotion } from "../ui/use-reduced-motion";
+
 interface ScoreboardWeek {
   weekNumber: number;
   weeklyScore: number;
@@ -54,6 +56,7 @@ const generateSmoothPath = () => {
 };
 
 export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
+  const prefersReducedMotion = useReducedMotion();
   const [activeWeek, setActiveWeek] = useState<ScoreboardWeek | null>(
     scoreboard.find((w) => w.weekNumber === currentWeek) || null,
   );
@@ -61,13 +64,16 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
   const pathD = generateSmoothPath();
 
   return (
-    <div className="relative w-full rounded-card border border-app-line/50 bg-gradient-to-b from-app-surface via-app-bg/40 to-app-surface p-5 shadow-app-sm pt-8 overflow-hidden">
+    <div
+      className="relative w-full rounded-card border border-app-line/50 bg-gradient-to-b from-app-surface via-app-bg/40 to-app-surface p-5 shadow-app-sm pt-8 overflow-hidden"
+      data-testid="zen-journey-map"
+    >
       <WashiTape className="opacity-60 rotate-[-1deg] -top-3.5" />
       {/* Khung tiêu đề chánh niệm */}
       <div className="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-app-line/40 pb-3 pt-1">
         <div>
           <h3 className="font-serif text-xl font-bold text-app-ink flex items-center gap-1.5">
-            <Sparkles className="h-4.5 w-4.5 text-app-accent animate-pulse" />
+            <Sparkles className={`h-4.5 w-4.5 text-app-accent ${prefersReducedMotion ? "" : "animate-pulse"}`} />
             Bản đồ hành trình Zen Journey
           </h3>
           <p className="text-xs text-app-ink-soft">
@@ -76,7 +82,11 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
         </div>
         <div className="flex flex-wrap gap-3 text-xs text-app-ink-muted font-semibold">
           <span className="flex items-center gap-1">
-            <span className="inline-block h-2.5 w-2.5 rounded-full bg-app-accent animate-pulse" />
+            <span
+              className={`inline-block h-2.5 w-2.5 rounded-full bg-app-accent ${
+                prefersReducedMotion ? "" : "animate-pulse"
+              }`}
+            />
             Đã hoàn thành review
           </span>
           <span className="flex items-center gap-1">
@@ -102,13 +112,34 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
             aria-label="Bản đồ hành trình 12 tuần"
           >
             {/* Constellation backdrops */}
-            <circle cx="100" cy="150" r="1.5" fill="var(--app-accent)" opacity="0.35" className="animate-pulse" />
+            <circle
+              cx="100"
+              cy="150"
+              r="1.5"
+              fill="var(--app-accent)"
+              opacity="0.35"
+              className={prefersReducedMotion ? undefined : "animate-pulse"}
+            />
             <circle cx="300" cy="80" r="1" fill="var(--app-accent)" opacity="0.5" />
-            <circle cx="650" cy="100" r="2" fill="var(--app-warm)" opacity="0.3" className="animate-pulse" />
+            <circle
+              cx="650"
+              cy="100"
+              r="2"
+              fill="var(--app-warm)"
+              opacity="0.3"
+              className={prefersReducedMotion ? undefined : "animate-pulse"}
+            />
             <circle cx="700" cy="400" r="1" fill="var(--app-accent)" opacity="0.45" />
             <circle cx="200" cy="300" r="1.5" fill="var(--app-warm)" opacity="0.35" />
             <circle cx="450" cy="220" r="1" fill="var(--app-accent)" opacity="0.55" />
-            <circle cx="580" cy="90" r="1.5" fill="var(--app-accent)" opacity="0.4" className="animate-pulse" />
+            <circle
+              cx="580"
+              cy="90"
+              r="1.5"
+              fill="var(--app-accent)"
+              opacity="0.4"
+              className={prefersReducedMotion ? undefined : "animate-pulse"}
+            />
 
             {/* 1. ĐƯỜNG ĐI CHÍNH (ĐƯỜNG ẨN HÀNH HƯƠNG TỔNG THỂ) */}
             <path d={pathD} stroke="var(--app-line)" strokeWidth="4" strokeDasharray="8 8" opacity="0.35" />
@@ -123,7 +154,7 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
               // Cắt nhỏ path chỉ hiển thị phần đến tuần hiện tại
               strokeDasharray="4000"
               strokeDashoffset={800 - Math.min(100, (currentWeek / 12) * 100) * 8}
-              className="transition-all duration-500 ease-in-out"
+              className={prefersReducedMotion ? undefined : "transition-all duration-500 ease-in-out"}
             />
 
             {/* 3. VẼ CÁC ĐƯỜNG NỐI VÀ ĐIỂM DỪNG CHÂN */}
@@ -157,7 +188,9 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
                       cy={coord.y}
                       r="22"
                       fill={isCurrent ? "rgba(245, 158, 11, 0.15)" : "rgba(47, 163, 107, 0.1)"}
-                      className={isCurrent ? "animate-[ping_2.5s_infinite]" : "animate-pulse"}
+                      className={
+                        prefersReducedMotion ? undefined : isCurrent ? "animate-[ping_2.5s_infinite]" : "animate-pulse"
+                      }
                     />
                   )}
 
@@ -166,7 +199,7 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
                     cx={coord.x}
                     cy={coord.y}
                     r="14"
-                    className={`transition-all duration-300 stroke-[3px] ${
+                    className={`${prefersReducedMotion ? "" : "transition-all duration-300"} stroke-[3px] ${
                       isCurrent
                         ? "fill-app-energy stroke-app-energy/30"
                         : isDone
@@ -177,7 +210,9 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
                     } ${
                       activeWeek?.weekNumber === week.weekNumber
                         ? "scale-125 stroke-app-ink ring-2 ring-offset-2 ring-app-ink"
-                        : "hover:scale-110"
+                        : prefersReducedMotion
+                          ? ""
+                          : "hover:scale-110"
                     }`}
                   />
 
@@ -210,28 +245,32 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
                         d="M 0 -11 C 3 -6, 5 -3, 5 2 C 5 5, 3 8, 0 8 C -3 8, -5 5, -5 2 C -5 -3, -3 -6, 0 -11 Z"
                         fill="#f59e0b"
                       >
-                        <animate
-                          attributeName="d"
-                          values="M 0 -11 C 3 -6, 5 -3, 5 2 C 5 5, 3 8, 0 8 C -3 8, -5 5, -5 2 C -5 -3, -3 -6, 0 -11 Z;
+                        {prefersReducedMotion ? null : (
+                          <animate
+                            attributeName="d"
+                            values="M 0 -11 C 3 -6, 5 -3, 5 2 C 5 5, 3 8, 0 8 C -3 8, -5 5, -5 2 C -5 -3, -3 -6, 0 -11 Z;
                                   M 0 -13 C 2.5 -7, 6 -4, 6 2 C 6 6, 3 9, 0 9 C -3 9, -6 6, -6 2 C -6 -4, -2.5 -7, 0 -13 Z;
                                   M 0 -11 C 3 -6, 5 -3, 5 2 C 5 5, 3 8, 0 8 C -3 8, -5 5, -5 2 C -5 -3, -3 -6, 0 -11 Z"
-                          dur="0.8s"
-                          repeatCount="indefinite"
-                        />
+                            dur="0.8s"
+                            repeatCount="indefinite"
+                          />
+                        )}
                       </path>
                       {/* Lớp lửa vàng ấm bên trong */}
                       <path
                         d="M 0 -7 C 2 -4, 3 -2, 3 1 C 3 3, 2 5, 0 5 C -2 5, -3 3, -3 1 C -3 -2, -2 -4, 0 -7 Z"
                         fill="#fcd34d"
                       >
-                        <animate
-                          attributeName="d"
-                          values="M 0 -7 C 2 -4, 3 -2, 3 1 C 3 3, 2 5, 0 5 C -2 5, -3 3, -3 1 C -3 -2, -2 -4, 0 -7 Z;
+                        {prefersReducedMotion ? null : (
+                          <animate
+                            attributeName="d"
+                            values="M 0 -7 C 2 -4, 3 -2, 3 1 C 3 3, 2 5, 0 5 C -2 5, -3 3, -3 1 C -3 -2, -2 -4, 0 -7 Z;
                                   M 0 -9 C 1.5 -5, 4 -3, 4 1 C 4 4, 2 6, 0 6 C -2 6, -4 4, -4 1 C -4 -3, -1.5 -5, 0 -9 Z;
                                   M 0 -7 C 2 -4, 3 -2, 3 1 C 3 3, 2 5, 0 5 C -2 5, -3 3, -3 1 C -3 -2, -2 -4, 0 -7 Z"
-                          dur="0.6s"
-                          repeatCount="indefinite"
-                        />
+                            dur="0.6s"
+                            repeatCount="indefinite"
+                          />
+                        )}
                       </path>
                       {/* Gỗ củi đốt mộc mạc bên dưới ngọn lửa */}
                       <path d="M -7 4 L 7 7 M -7 7 L 7 4" stroke="#78350f" strokeWidth="2.5" strokeLinecap="round" />
@@ -281,7 +320,7 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
                       cy={coord.y + Math.cos(week.weekNumber) * 8}
                       r="28"
                       fill="url(#fogGradient)"
-                      className="filter blur-[4px] animate-pulse"
+                      className={`filter blur-[4px] ${prefersReducedMotion ? "" : "animate-pulse"}`}
                     />
                   </g>
                 );
@@ -307,7 +346,11 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
 
       {/* TẤM CARD CHI TIẾT TRẠM DỪNG CHÂN NẰM THÔNG THOÁNG BÊN DƯỚI BẢN ĐỒ */}
       {activeWeek && (
-        <div className="mt-6 rounded-card border border-app-line/60 bg-gradient-to-br from-app-surface via-app-bg-subtle/20 to-app-surface p-5 sm:p-6 shadow-2xs transition-all duration-300 animate-[fadeIn_0.3s_ease-out]">
+        <div
+          className={`mt-6 rounded-card border border-app-line/60 bg-gradient-to-br from-app-surface via-app-bg-subtle/20 to-app-surface p-5 sm:p-6 shadow-2xs ${
+            prefersReducedMotion ? "" : "transition-all duration-300 animate-[fadeIn_0.3s_ease-out]"
+          }`}
+        >
           <div className="flex flex-wrap items-center justify-between gap-3 border-b border-app-line/40 pb-4">
             <div className="flex items-center gap-3">
               <span className="flex h-10 w-10 items-center justify-center rounded-full bg-app-accent-soft text-lg shadow-3xs">
@@ -317,7 +360,11 @@ export function ZenJourneyMap({ scoreboard, currentWeek }: ZenJourneyMapProps) {
                 <h4 className="font-serif text-base font-bold text-app-ink flex items-center gap-2">
                   Trạm dừng chân: Tuần {activeWeek.weekNumber}
                   {activeWeek.weekNumber === currentWeek && (
-                    <span className="text-[9px] font-sans font-bold uppercase tracking-wider text-amber-600 bg-amber-50 dark:bg-amber-950/20 px-2 py-0.5 rounded-full border border-amber-200/50 flex items-center gap-0.5 animate-pulse">
+                    <span
+                      className={`text-[9px] font-sans font-bold uppercase tracking-wider text-amber-600 bg-amber-50 dark:bg-amber-950/20 px-2 py-0.5 rounded-full border border-amber-200/50 flex items-center gap-0.5 ${
+                        prefersReducedMotion ? "" : "animate-pulse"
+                      }`}
+                    >
                       Hiện tại
                     </span>
                   )}

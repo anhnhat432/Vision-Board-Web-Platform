@@ -1395,6 +1395,36 @@ describe("12-week sync mutation route", () => {
     assert.equal(task?.completedAt?.toISOString(), "2026-04-30T00:00:02.000Z");
   });
 
+  it("does not accept task_upsert until task creation persistence exists", async () => {
+    const body = createValidMutation("dmq_task_upsert_not_implemented_1");
+    body.mutations[0].type = "task_upsert";
+    body.mutations[0].payload = {
+      clientPlanId: "goal_local_1:12-week-system",
+      clientWeekId: "goal_local_1:week:1",
+      clientTaskId: "task_local_new",
+      title: "Write the launch task",
+      completed: false,
+    };
+
+    const response = await requestJson(createRouteTestApp(), "POST", "/api/sync/12-week/mutations", {
+      body,
+    });
+    const data = getBatchResult(response);
+    const logs = syncLogFixture?.getLogs() ?? [];
+
+    assert.equal(response.status, 200);
+    assert.equal(data.status, "failed");
+    assert.equal(data.appliedCount, 0);
+    assert.equal(data.failedCount, 1);
+    assert.equal(data.accepted.length, 0);
+    assert.equal(data.failed.length, 1);
+    assert.equal(data.failed[0].mutationId, "dmq_task_upsert_not_implemented_1");
+    assert.equal(data.failed[0].status, "failed");
+    assert.equal(data.failed[0].syncErrorCode, "task_upsert_not_implemented");
+    assert.equal(logs[0]?.status, "failed");
+    assert.equal(logs[0]?.result, "failed");
+  });
+
   it("returns duplicate for a repeated mutation from the same user", async () => {
     const app = createRouteTestApp();
 

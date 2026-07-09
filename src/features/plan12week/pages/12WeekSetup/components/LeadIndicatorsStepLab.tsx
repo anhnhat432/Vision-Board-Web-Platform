@@ -248,6 +248,8 @@ export function LeadIndicatorsStepLab({
                 <Input
                   id={`tactic-name-${index}`}
                   aria-label="Tên việc"
+                  aria-invalid={showNameError(indicator) ? true : undefined}
+                  aria-describedby={showNameError(indicator) ? `tactic-name-error-${index}` : undefined}
                   value={indicator.name}
                   onChange={(event) => onIndicatorChange(index, "name", event.target.value)}
                   placeholder="Ví dụ: Chạy bộ 30 phút, viết bài viết chuyên môn…"
@@ -277,7 +279,7 @@ export function LeadIndicatorsStepLab({
                 </div>
 
                 {showNameError(indicator) && (
-                  <p role="alert" className="text-[10px] font-bold text-app-status-error">
+                  <p id={`tactic-name-error-${index}`} role="alert" className="text-[10px] font-bold text-app-status-error">
                     Vui lòng chọn hoặc nhập mô tả hành động.
                   </p>
                 )}

@@ -374,6 +374,41 @@ describe("mutation queue sender", () => {
     expect(readItem("user_1", "mutation_success").status).toBe("applied");
   });
 
+  it("preserves backend syncErrorCode on failed mutation results", async () => {
+    seedTaskMutation({ mutationId: "mutation_ownership_denied" });
+    const postMutations = vi.fn(async (): Promise<TwelveWeekMutationBatchResponse> => {
+      return {
+        failed: [
+          {
+            mutationId: "mutation_ownership_denied",
+            type: "task_completed_changed",
+            status: "failed_not_found",
+            syncErrorCode: "ownership_denied",
+            message: "Không có quyền ghi task này.",
+          },
+        ],
+      };
+    });
+
+    const result = await sendPending12WeekMutations({
+      ownerUid: "user_1",
+      authenticated: true,
+      featureEnabled: true,
+      realMode: true,
+      apiConfigured: true,
+      storage: localStorage,
+      now: at(2),
+      postMutations,
+    });
+
+    const item = readItem("user_1", "mutation_ownership_denied");
+    expect(result.status).toBe("partial");
+    expect(item.status).toBe("failed_terminal");
+    expect(item.error?.code).toBe("ownership_denied");
+    expect(item.error?.message).toBe("Không có quyền ghi task này.");
+    expect(item.error?.retryable).toBe(false);
+  });
+
   it("sends daily check-in entity client ids with the queued payload", async () => {
     seedDailyCheckInMutation({ mutationId: "daily_success" });
     const postMutations = vi.fn(

@@ -100,7 +100,7 @@ import {
   NAV_ITEMS,
   prefetchRoute,
 } from "./navConfig";
-import { GUIDED_PATHS, getBreadcrumbTrail, getRouteMeta } from "./routeMeta";
+import { GUIDED_PATHS, applyRouteDocumentMetadata, getBreadcrumbTrail, getRouteMeta } from "./routeMeta";
 import { SyncStatusPill } from "./SyncStatusPill";
 import { buildLoginRedirect, isAuthProtectedPath, isPublicCheckoutPath, useWorkspaceGate } from "./useWorkspaceGate";
 
@@ -358,7 +358,7 @@ export function RootLayout() {
       // Note: guideUserData is refreshed by the USER_DATA_UPDATED_EVENT_NAME +
       // BACKEND_PLAN_HYDRATION_EVENT_NAME listeners below. Re-reading on every navigate is
       // redundant and adds a synchronous localStorage parse to each route change.
-      document.title = getRouteMeta(location.pathname).title ?? "Dear Our Future";
+      applyRouteDocumentMetadata(location.pathname);
     }
   }, [location.pathname]);
 
@@ -486,7 +486,7 @@ export function RootLayout() {
     };
   }, [demoMode, user]);
 
-  useWarmPrefetch();
+  useWarmPrefetch(demoMode || Boolean(user));
   usePageViewAnalytics(Boolean(user));
 
   const isActive = (path: string) => isActiveRoute(location.pathname, path);

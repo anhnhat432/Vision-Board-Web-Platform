@@ -59,7 +59,7 @@ const ROUTE_IMPORTS: Record<string, () => Promise<unknown>> = {
   "/billing/plan": () => import("../../pages/BillingPlan"),
 };
 
-export const WARM_PREFETCH_ROUTE_PATHS = ["/12-week-system", "/goals", "/life-balance"] as const;
+export const WARM_PREFETCH_ROUTE_PATHS = ["/goals", "/life-balance"] as const;
 
 const prefetchedRoutes = new Set<string>();
 

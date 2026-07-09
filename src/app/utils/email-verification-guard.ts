@@ -13,8 +13,8 @@ export function canDoCriticalAction(user?: User | null): boolean {
   return getCurrentUser(user)?.emailVerified === true;
 }
 
-export function canUpgradeToPlus(user?: User | null): boolean {
-  return canDoCriticalAction(user);
+export function canUpgradeToPlus(_user?: User | null): boolean {
+  return true;
 }
 
 export function canSyncToCloud(user?: User | null): boolean {
@@ -32,11 +32,8 @@ export function rememberEmailVerificationReturnPath(path?: string): void {
 }
 
 export function getEmailVerificationRequiredMessage(
-  action: "upgrade" | "sync" | "refund" | "critical" = "critical",
+  action: "sync" | "refund" | "critical" = "critical",
 ): string {
-  if (action === "upgrade") {
-    return "Vui lòng xác thực email trước khi thanh toán. Email là cách chúng tôi gửi biên nhận và liên hệ khi cần hỗ trợ hoàn tiền.";
-  }
   if (action === "sync") {
     return "Vui lòng xác thực email trước khi đồng bộ cloud để bảo vệ dữ liệu tài khoản.";
   }

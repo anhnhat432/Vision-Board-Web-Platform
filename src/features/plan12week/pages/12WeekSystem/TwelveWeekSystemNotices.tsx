@@ -18,7 +18,6 @@ interface TwelveWeekSystemNoticesProps {
 
   // Weekly Review Notice
   shouldShowWeeklyReviewBanner: boolean;
-  markWeeklyReviewCompleted: () => void;
   handleSnoozeWeeklyReview: () => void;
 
   // Incomplete Plan Notice
@@ -69,7 +68,7 @@ export function TwelveWeekSystemNotices({
       {shouldShowWeeklyReviewBanner && (
         <TwelveWeekDashboardNotice
           tone="warning"
-          title="Đến hạn đánh giá (Review) tuần"
+          title="Đến lúc chốt review tuần"
           description="Hãy đúc kết bài học thực thi và kết quả tuần này trước khi sang tuần mới."
         >
           <button

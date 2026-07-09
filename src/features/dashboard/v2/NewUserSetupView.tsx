@@ -312,6 +312,8 @@ export function NewUserSetupView({ userData, displayName, onContinue, companion 
                   <img
                     src="/vision_board_detail.png"
                     alt="Bảng tầm nhìn chi tiết mẫu"
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover dark:brightness-[0.85] dark:contrast-[1.05]"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent flex items-end p-4">

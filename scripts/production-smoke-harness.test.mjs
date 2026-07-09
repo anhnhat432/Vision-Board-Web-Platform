@@ -12,6 +12,13 @@ const quickSmokeScript = readFileSync(
 );
 
 describe("production smoke harness guards", () => {
+  it("defaults production smoke scripts to the canonical public domain", () => {
+    for (const script of [smokeScript, quickSmokeScript]) {
+      expect(script).toContain('const PRODUCTION_SMOKE_URL = "https://dearourfuture.io.vn";');
+      expect(script).toContain("process.env.PROD_SMOKE_URL ?? PRODUCTION_SMOKE_URL");
+    }
+  });
+
   it("fails closed without fixed credentials unless generated signup is explicitly allowed", () => {
     expect(smokeScript).toContain(
       'const ALLOW_GENERATED_ACCOUNT = process.env.PROD_SMOKE_ALLOW_GENERATED_ACCOUNT === "1";',
@@ -67,6 +74,13 @@ describe("production smoke harness guards", () => {
     expect(smokeScript).toContain("Paid checkout kill-switch is active; verified locked billing confirm flow instead of creating a checkout QR");
     expect(smokeScript).toContain("Paid checkout lock leaked checkout-session POSTs");
     expect(smokeScript).toContain("await assertPaidCheckoutLocked(page, apiEvents);");
+  });
+
+  it("can require a real checkout proof instead of accepting the paid-checkout lock", () => {
+    expect(smokeScript).toContain('const REQUIRE_CHECKOUT = process.env.PROD_SMOKE_REQUIRE_CHECKOUT === "1";');
+    expect(smokeScript).toContain("PROD_SMOKE_REQUIRE_CHECKOUT=1 requires paid checkout to be enabled");
+    expect(smokeScript).toContain("if (REQUIRE_CHECKOUT) {");
+    expect(smokeScript).toContain("if (SKIP_CHECKOUT && REQUIRE_CHECKOUT) {");
   });
 
   it("submits the billing confirm form before waiting for a checkout session", () => {
@@ -138,7 +152,7 @@ describe("production smoke harness guards", () => {
     expect(smokeScript).toContain("await submitBillingConfirmCheckout(page);");
 
     const checkoutSessionIndex = smokeScript.indexOf('"billing checkout session"');
-    const retryCallbackIndex = smokeScript.indexOf("onRateLimitRetry: async () => {");
+    const retryCallbackIndex = smokeScript.indexOf("onRateLimitRetry: async () => {", checkoutSessionIndex);
     const destinationIndex = smokeScript.indexOf("const checkoutDestination = await waitForCheckoutDestination");
     expect(checkoutSessionIndex).toBeGreaterThan(0);
     expect(retryCallbackIndex).toBeGreaterThan(checkoutSessionIndex);
@@ -221,6 +235,19 @@ describe("production smoke harness guards", () => {
   it("accepts the deployed 12-week mutation endpoint as backend sync proof", () => {
     expect(smokeScript).toContain('sync\\/12-week\\/(?:mutations|pull)(?:\\?|$)');
     expect(smokeScript).toContain('(?:plans|tasks|weeks|metrics)(?:\\/|$)');
+  });
+
+  it("retries rate-limited 12-week backend sync proof instead of failing on the first 429", () => {
+    expect(smokeScript).toContain('"12-week backend sync"');
+    expect(smokeScript).toContain("await waitForApiSuccessWithRateLimitRetry(");
+    expect(smokeScript).toContain('onRateLimitRetry: async () => {');
+    expect(smokeScript).toContain("await triggerManualTwelveWeekAccountSync(page);");
+
+    const syncWaitIndex = smokeScript.indexOf('"12-week backend sync"');
+    const retryIndex = smokeScript.lastIndexOf("await waitForApiSuccessWithRateLimitRetry(", syncWaitIndex);
+    const triggerIndex = smokeScript.indexOf("await triggerManualTwelveWeekAccountSync(page);", syncWaitIndex);
+    expect(retryIndex).toBeGreaterThan(0);
+    expect(triggerIndex).toBeGreaterThan(syncWaitIndex);
   });
 
   it("prints bounded API error response bodies for production smoke failures", () => {

@@ -48,15 +48,29 @@ describe("resolveWorkspaceGateState", () => {
     expect(state.workspaceGateStage).toBe("sync");
   });
 
-  it("redirects to login when no user and path is auth-protected", () => {
+  it.each(["/12-week-system", "/settings", "/journal"])(
+    "redirects signed-out real-mode users from workspace route %s",
+    (pathname) => {
+      const state = resolveWorkspaceGateState({
+        ...baseInput,
+        user: null,
+        pathname,
+      });
+
+      expect(state.shouldRedirectToLogin).toBe(true);
+      expect(state.workspaceGateStage).toBe("redirect-login");
+    },
+  );
+
+  it("lets 12-week setup render its own signed-out real-mode login gate", () => {
     const state = resolveWorkspaceGateState({
       ...baseInput,
       user: null,
-      pathname: "/journal",
+      pathname: "/12-week-setup",
     });
 
-    expect(state.shouldRedirectToLogin).toBe(true);
-    expect(state.workspaceGateStage).toBe("redirect-login");
+    expect(state.shouldRedirectToLogin).toBe(false);
+    expect(state.shouldShowWorkspaceGate).toBe(false);
   });
 
   it("does not redirect to login on public legal page", () => {
@@ -67,6 +81,27 @@ describe("resolveWorkspaceGateState", () => {
     });
 
     expect(state.shouldRedirectToLogin).toBe(false);
+  });
+
+  it("does not redirect to login on the public contact page", () => {
+    const state = resolveWorkspaceGateState({
+      ...baseInput,
+      user: null,
+      pathname: "/contact",
+    });
+
+    expect(state.shouldRedirectToLogin).toBe(false);
+  });
+
+  it("does not redirect signed-out visitors from the public billing plan page", () => {
+    const state = resolveWorkspaceGateState({
+      ...baseInput,
+      user: null,
+      pathname: "/billing/plan",
+    });
+
+    expect(state.shouldRedirectToLogin).toBe(false);
+    expect(state.shouldShowWorkspaceGate).toBe(false);
   });
 
   it("waits for auth while authLoading is true and a user is signed in", () => {

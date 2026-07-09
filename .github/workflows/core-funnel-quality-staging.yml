@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       target_url:
-        description: Staging/preview URL to test
+        description: Accessible demo/staging URL to test
         required: true
 
 permissions:
@@ -40,11 +40,20 @@ jobs:
           fi
 
           normalized="$(printf '%s' "${CORE_QUALITY_URL}" | tr '[:upper:]' '[:lower:]')"
+          normalized="${normalized%/}"
 
           if [[ "${normalized}" == *"localhost"* ]] || [[ "${normalized}" == *"127.0.0.1"* ]]; then
-            echo "::error::Use a staging or production-like URL for deployed core-funnel proof, not localhost."
+            echo "::error::Use an accessible VITE_APP_MODE=demo staging/preview URL for deployed core-funnel proof, not localhost."
             exit 1
           fi
+
+          production_real_mode_urls=("https://vision-board-web-platform.vercel.app" "https://dearourfuture.io.vn")
+          for production_url in "${production_real_mode_urls[@]}"; do
+            if [ "${normalized}" = "${production_url}" ]; then
+              echo "::error::Core quality smoke is local-first/demo-only; use production-smoke-e2e.yml for real-mode production proof."
+              exit 1
+            fi
+          done
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium

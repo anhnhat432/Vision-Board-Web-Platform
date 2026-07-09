@@ -1,5 +1,6 @@
 import { describe, it, beforeEach, afterEach } from "node:test";
 import assert from "node:assert/strict";
+import { createHmac } from "node:crypto";
 
 import { createCassoPaymentAdapter } from "../services/cassoPaymentAdapter";
 import { createMockPaymentAdapter, createMockWebhookBody } from "../services/mockPaymentAdapter";
@@ -375,8 +376,12 @@ describe("PaymentProviderAdapter", () => {
 
 describe("PaymentProviderRegistry", () => {
   const originalEnv = {
+    NODE_ENV: process.env.NODE_ENV,
     BILLING_PROVIDER: process.env.BILLING_PROVIDER,
     CASSO_WEBHOOK_SECRET: process.env.CASSO_WEBHOOK_SECRET,
+    CASSO_WEBHOOK_CHECKSUM_KEY: process.env.CASSO_WEBHOOK_CHECKSUM_KEY,
+    CASSO_CHECKSUM_KEY: process.env.CASSO_CHECKSUM_KEY,
+    CASSO_SECURE_TOKEN: process.env.CASSO_SECURE_TOKEN,
     CASSO_BANK_ACCOUNT: process.env.CASSO_BANK_ACCOUNT,
     CASSO_BANK_NAME: process.env.CASSO_BANK_NAME,
     CASSO_ACCOUNT_NAME: process.env.CASSO_ACCOUNT_NAME,
@@ -413,6 +418,33 @@ describe("PaymentProviderRegistry", () => {
     assert.equal(adapter.providerId, "mock");
   });
 
+  it("returns an unconfigured mock adapter in production even when paid checkout is disabled", async () => {
+    process.env.NODE_ENV = "production";
+    process.env.BILLING_PROVIDER = "mock";
+    process.env.BILLING_PAID_DISABLED = "true";
+    _resetAdapterCacheForTesting();
+
+    const adapter = getPaymentProviderAdapter();
+
+    assert.equal(adapter.providerId, "mock");
+    assert.equal(adapter.isConfigured, false);
+    assert.deepEqual(adapter.verifyWebhookSignature({ rawBody: "{}", headers: {} }), {
+      valid: false,
+      reason: "Mock billing is disabled in production",
+    });
+    await assert.rejects(
+      () =>
+        adapter.createCheckoutSession({
+          userId: "user_1",
+          planCode: "PLUS",
+          billingCycle: "monthly",
+          successUrl: "https://example.com/success",
+          cancelUrl: "https://example.com/cancel",
+        }),
+      /Mock billing provider is disabled in production/,
+    );
+  });
+
   it("returns unconfigured casso adapter when Casso env is missing", () => {
     process.env.BILLING_PROVIDER = "casso";
     delete process.env.CASSO_WEBHOOK_SECRET;
@@ -427,6 +459,21 @@ describe("PaymentProviderRegistry", () => {
   it("returns configured casso adapter when Casso env is present", () => {
     process.env.BILLING_PROVIDER = "casso";
     process.env.CASSO_WEBHOOK_SECRET = "test-secret";
+    process.env.CASSO_BANK_ACCOUNT = "123456789";
+    process.env.CASSO_BANK_NAME = "MB";
+    process.env.CASSO_ACCOUNT_NAME = "VISION BOARD";
+    process.env.PLUS_PRICE_VND = "79000";
+
+    const adapter = getPaymentProviderAdapter();
+    assert.equal(adapter.providerId, "casso");
+    assert.equal(adapter.isConfigured, true);
+    assert.equal(isPaymentProviderReady(), true);
+  });
+
+  it("returns configured casso adapter when a supported webhook alias is present", () => {
+    process.env.BILLING_PROVIDER = "casso";
+    delete process.env.CASSO_WEBHOOK_SECRET;
+    process.env.CASSO_WEBHOOK_CHECKSUM_KEY = "checksum-key";
     process.env.CASSO_BANK_ACCOUNT = "123456789";
     process.env.CASSO_BANK_NAME = "MB";
     process.env.CASSO_ACCOUNT_NAME = "VISION BOARD";
@@ -496,6 +543,9 @@ describe("PaymentProviderRegistry", () => {
 describe("CassoPaymentAdapter", () => {
   const originalEnv = {
     CASSO_WEBHOOK_SECRET: process.env.CASSO_WEBHOOK_SECRET,
+    CASSO_WEBHOOK_CHECKSUM_KEY: process.env.CASSO_WEBHOOK_CHECKSUM_KEY,
+    CASSO_CHECKSUM_KEY: process.env.CASSO_CHECKSUM_KEY,
+    CASSO_SECURE_TOKEN: process.env.CASSO_SECURE_TOKEN,
     CASSO_BANK_ACCOUNT: process.env.CASSO_BANK_ACCOUNT,
     CASSO_BANK_NAME: process.env.CASSO_BANK_NAME,
     CASSO_ACCOUNT_NAME: process.env.CASSO_ACCOUNT_NAME,
@@ -550,6 +600,46 @@ describe("CassoPaymentAdapter", () => {
       headers: { "secure-token": "wrong" },
     });
     assert.equal(invalid.valid, false);
+  });
+
+  it("verifies Casso Secure-Token header with a supported webhook alias", () => {
+    delete process.env.CASSO_WEBHOOK_SECRET;
+    process.env.CASSO_SECURE_TOKEN = "secure-token";
+    process.env.CASSO_BANK_ACCOUNT = "123456789";
+    process.env.CASSO_BANK_NAME = "MB";
+    process.env.CASSO_ACCOUNT_NAME = "VISION BOARD";
+    process.env.PLUS_PRICE_VND = "79000";
+
+    const adapter = createCassoPaymentAdapter();
+    assert.equal(adapter.isConfigured, true);
+
+    const result = adapter.verifyWebhookSignature({
+      rawBody: makeCassoWebhookBody(),
+      headers: { "secure-token": "secure-token" },
+    });
+
+    assert.deepEqual(result, { valid: true });
+  });
+
+  it("verifies Casso HMAC signature with a supported checksum alias", () => {
+    delete process.env.CASSO_WEBHOOK_SECRET;
+    process.env.CASSO_WEBHOOK_CHECKSUM_KEY = "checksum-key";
+    process.env.CASSO_BANK_ACCOUNT = "123456789";
+    process.env.CASSO_BANK_NAME = "MB";
+    process.env.CASSO_ACCOUNT_NAME = "VISION BOARD";
+    process.env.PLUS_PRICE_VND = "79000";
+
+    const rawBody = makeCassoWebhookBody();
+    const signature = createHmac("sha512", "checksum-key").update(rawBody).digest("hex");
+    const adapter = createCassoPaymentAdapter();
+    assert.equal(adapter.isConfigured, true);
+
+    const result = adapter.verifyWebhookSignature({
+      rawBody,
+      headers: { "x-casso-signature": signature },
+    });
+
+    assert.deepEqual(result, { valid: true });
   });
 
   it("rejects checkout creation when Casso env is missing", async () => {

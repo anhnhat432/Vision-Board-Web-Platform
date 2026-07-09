@@ -20,9 +20,14 @@ function AppShellFallback() {
 
 function PublicLandingLayout() {
   return (
-    <main id="main-content" aria-label="Nội dung trang">
-      <Outlet />
-    </main>
+    <>
+      <a href="#main-content" className="skip-to-content">
+        Bỏ qua điều hướng
+      </a>
+      <main id="main-content" aria-label="Nội dung trang">
+        <Outlet />
+      </main>
+    </>
   );
 }
 

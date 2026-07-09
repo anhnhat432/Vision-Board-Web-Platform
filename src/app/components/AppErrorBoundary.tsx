@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, type ComponentType, type LazyExoticComponent } from "react";
+import { type ComponentType, type LazyExoticComponent, lazy, Suspense, useEffect } from "react";
 import { isRouteErrorResponse, useNavigate, useRouteError } from "react-router";
 
 import { captureFrontendException } from "@/lib/monitoring/sentry";
@@ -48,15 +48,30 @@ function DeferredIcon({ icon: Icon, className }: { icon: DeferredIconComponent; 
 
 function getErrorMessage(error: unknown): string {
   if (isRouteErrorResponse(error)) {
-    if (typeof error.data === "string" && error.data.trim()) return error.data;
-    return error.statusText || "Đã có lỗi xảy ra khi tải trang này.";
+    if (error.status === 404) {
+      return "Không tìm thấy trang này. Kiểm tra lại đường dẫn hoặc quay về Trang chính để tiếp tục.";
+    }
+
+    if (error.status === 401) {
+      return "Bạn cần đăng nhập lại để tiếp tục. Nếu vừa đăng nhập, hãy tải lại trang.";
+    }
+
+    if (error.status === 403) {
+      return "Tài khoản này chưa có quyền truy cập trang này. Hãy quay về Trang chính để tiếp tục.";
+    }
+
+    if (error.status >= 500) {
+      return "Trang đang gặp sự cố tạm thời. Hãy tải lại trang hoặc quay về Trang chính; lỗi đã được ghi nhận để xử lý.";
+    }
+
+    return "Yêu cầu này chưa thể hoàn tất. Hãy kiểm tra lại thao tác hoặc quay về Trang chính để tiếp tục.";
   }
 
   if (error instanceof Error) {
-    return error.message || "Trang web vừa gặp lỗi ngoài dự kiến.";
+    return "Trang đang gặp sự cố tạm thời. Hãy tải lại trang hoặc quay về Trang chính để tiếp tục.";
   }
 
-  return "Trang web vừa gặp lỗi ngoài dự kiến.";
+  return "Trang đang gặp sự cố tạm thời. Hãy tải lại trang hoặc quay về Trang chính để tiếp tục.";
 }
 
 function getErrorCode(error: unknown): string | null {

@@ -56,13 +56,6 @@ export async function requireAdmin(
 ): Promise<void> {
   try {
     const authUser = requireAuthUser(req);
-    const claimRole = req.firebaseToken?.role ?? req.user?.role;
-
-    if (claimRole === "admin") {
-      setCachedRole(authUser.uid, "admin");
-      next();
-      return;
-    }
 
     const cachedRole = getCachedRole(authUser.uid);
     if (cachedRole === "admin") {

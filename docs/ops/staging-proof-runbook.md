@@ -38,7 +38,8 @@ Core funnel deployed proof workflow:
 
 - Workflow: `.github/workflows/core-funnel-quality-staging.yml`
 - Required input: `target_url`
-- Target rule: use staging/preview or production-like URL only; the workflow rejects `localhost` and `127.0.0.1`.
+- Target rule: use an accessible demo/staging URL with `VITE_APP_MODE=demo` and no Vercel Deployment Protection.
+- Production rule: do not use `https://vision-board-web-platform.vercel.app`; real-mode production proof belongs to `.github/workflows/production-smoke-e2e.yml`.
 - Behavior: runs `npm run smoke:core-quality` against the supplied deployed URL to cover SMART goal quality, feasibility recommendation, 12-week setup output, Today action, daily check-in, weekly review, and Progress trend.
 
 ## Secret Readiness Snapshot - 2026-06-27
@@ -71,9 +72,13 @@ This aggregate command reports three blocker groups in one pass: required proof
 secret names, default-branch workflow availability, and the latest
 `production-smoke-e2e.yml` run status on default branch.
 
-Current summary on 2026-06-27: `npm run proof:readiness` passes the secret-name
-audit and remains blocked only by unpublished default-branch proof workflows and
-the latest failed production-smoke run.
+Current summary on 2026-07-09: `npm run proof:readiness` passes the secret-name
+audit and default-branch workflow availability, but blocks on latest
+production-smoke metadata. Run `28995039420` failed on `GET /api/weeks/:weekId/metrics`
+with HTTP 429 `rate_limited`. The local smoke harness now retries the 12-week
+backend-sync proof after `Retry-After`, but this is not launch proof until the
+change is deployed, production smoke passes again, and staging workflow evidence
+is recorded.
 
 Repository: `anhnhat432/Vision-Board-Web-Platform` on default branch `main`.
 Only secret names were inspected; values were not read.
@@ -105,11 +110,11 @@ Only workflow metadata was inspected; no workflow was dispatched.
 
 | Gate | Default-branch workflow status | Launch impact |
 | --- | --- | --- |
-| Production smoke | `.github/workflows/production-smoke-e2e.yml` is available and active | Runnable, but latest default-branch scheduled run still fails before billing proof |
-| Core-funnel deployed proof | `.github/workflows/core-funnel-quality-staging.yml` is present in the current worktree but not yet available on default branch | Blocking for GitHub Actions dispatch until this staged batch is committed and pushed |
-| Email verification staging | `.github/workflows/email-verification-e2e-staging.yml` is present in the current worktree but not yet available on default branch | Blocking for GitHub Actions dispatch until this staged batch is committed and pushed |
-| Account deletion staging | `.github/workflows/account-delete-e2e-staging.yml` is present in the current worktree but not yet available on default branch | Blocking for GitHub Actions dispatch until this staged batch is committed and pushed |
-| LWW sync staging | `.github/workflows/lww-e2e-staging.yml` is present in the current worktree but not yet available on default branch | Blocking for GitHub Actions dispatch until this staged batch is committed and pushed |
+| Production smoke | `.github/workflows/production-smoke-e2e.yml` is available and active | Latest default-branch scheduled run `28995039420` failed on commit `6ad15aca67c264cbf8ae544dbc45100b6939db01` because the 12-week backend-sync proof hit HTTP 429 on `GET /api/weeks/:weekId/metrics`; rerun after deploying the local retry fix before D-1 |
+| Core-funnel deployed proof | `.github/workflows/core-funnel-quality-staging.yml` is available and active | Requires an accessible demo/staging target with `VITE_APP_MODE=demo`, no Deployment Protection, and recorded pass evidence |
+| Email verification staging | `.github/workflows/email-verification-e2e-staging.yml` is available and active | Requires staging dispatch with `allow_create=CREATE_TEST_ACCOUNT` and recorded pass evidence |
+| Account deletion staging | `.github/workflows/account-delete-e2e-staging.yml` is available and active | Requires destructive staging dispatch with `allow_delete=DELETE_TEST_ACCOUNT` and recorded pass evidence |
+| LWW sync staging | `.github/workflows/lww-e2e-staging.yml` is available and active | Requires overwrite-safe staging dispatch with `allow_overwrite=OVERWRITE_TEST_WORKSPACE` and recorded pass evidence |
 
 Workflow readiness rule: run `npm run proof:readiness` first. Then use
 `npm run proof:secrets` or `npm run proof:workflows` only when you need the
@@ -167,15 +172,15 @@ Production smoke workflow:
 
 0. Run local core-funnel preflight with `npm run smoke:core-quality` against a local dev server. This catches core-loop UI/storage regressions before spending staging credentials, but it is not D-2 launch evidence.
 1. Run `npm run proof:readiness`.
-2. Run environment checks and confirm staging is real mode.
-3. Run deployed core-funnel quality workflow against staging/preview.
+2. Run environment checks and confirm real-mode staging for auth/sync/destructive workflows.
+3. Run deployed core-funnel quality workflow against an accessible demo/staging target.
 4. Run email verification staging workflow.
 5. Run account-delete staging workflow.
 6. Run LWW e2e staging workflow.
 7. Run quick production smoke against production after deploy and fixed QA credentials are configured.
 8. Run full production smoke after the quick smoke passes.
 
-This order proves the main local-first funnel on a deployed target first, then signup/email guard, destructive lifecycle, cross-device sync, and finally the fast/full production billing trust gates.
+This order proves the main local-first funnel on an accessible deployed demo target first, then signup/email guard, destructive lifecycle, cross-device sync, and finally the fast/full real-mode production billing trust gates.
 
 ## GitHub Actions Command Pack
 
@@ -201,6 +206,7 @@ npm run proof:workflows
 Set operator variables first:
 
 ```powershell
+$env:CORE_QUALITY_URL="https://your-accessible-demo-preview.example"
 $env:STAGING_URL="https://your-staging-url.example"
 $env:PRODUCTION_URL="https://vision-board-web-platform.vercel.app"
 $env:PROOF_REF="main"
@@ -209,7 +215,7 @@ $env:PROOF_REF="main"
 Trigger the staging proof workflows:
 
 ```powershell
-gh workflow run core-funnel-quality-staging.yml --ref $env:PROOF_REF -f target_url=$env:STAGING_URL
+gh workflow run core-funnel-quality-staging.yml --ref $env:PROOF_REF -f target_url=$env:CORE_QUALITY_URL
 ```
 
 ```powershell
@@ -284,14 +290,16 @@ npm run smoke:core-quality
 
 Do not use `vite preview` for this local preflight. In this repo, `.env.production` runs real mode, so a local preview build without backend/auth can redirect protected core routes to `/login` and create a false failure.
 
-This proves the local-first core loop on the current machine only. It does not replace the D-2 staging/production-like core-flow row.
+This proves the local-first core loop on the current machine only. It does not replace the D-2 accessible demo/staging core-flow row.
 
 Deployed core-funnel proof:
 
 ```powershell
-$env:STAGING_URL="https://your-staging-url.example"
-gh workflow run core-funnel-quality-staging.yml --ref $env:PROOF_REF -f target_url=$env:STAGING_URL
+$env:CORE_QUALITY_URL="https://your-accessible-demo-preview.example"
+gh workflow run core-funnel-quality-staging.yml --ref $env:PROOF_REF -f target_url=$env:CORE_QUALITY_URL
 ```
+
+Do not point this workflow at the production main domain or a Vercel-protected preview. The smoke is intentionally local-first/demo-only; use production smoke for real-mode production proof.
 
 Quick production smoke warmup:
 

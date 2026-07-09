@@ -2,13 +2,10 @@ import { CheckCircle2, CreditCard, Crown, LockKeyhole, Sparkles } from "lucide-r
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
-import { useOptionalAuthContext } from "@/lib/auth/AuthContext";
-import { sendVerificationEmail } from "@/lib/auth/firebase";
 import { apiClient } from "@/lib/api/apiClient";
 import * as appMode from "../utils/app-mode";
 import { formatVndAmount, getPlusPriceLabel, PLUS_MONTHLY_PRICE_VND } from "../utils/billing-pricing";
 import { logBillingUiError, toastBillingNetworkError } from "../utils/billing-ui-monitoring";
-import { canUpgradeToPlus, rememberEmailVerificationReturnPath } from "../utils/email-verification-guard";
 import { trackPaywallCtaClicked, trackPaywallViewed } from "../utils/monetization-analytics";
 import { getBillingProviderStatus } from "../utils/production";
 import { BILLING_SUPPORT_EMAIL } from "../utils/production/env";
@@ -20,11 +17,7 @@ import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
 import { FeaturedCard } from "./ui/featured-card";
-import {
-  buildBillingPlanUpgradePath,
-  getCurrentUpgradeOriginPath,
-  type UpgradePaywallDialogProps,
-} from "./UpgradePaywallDialog.utils";
+import type { UpgradePaywallDialogProps } from "./UpgradePaywallDialog.utils";
 
 interface SaleEventInfo {
   name: string;
@@ -60,10 +53,7 @@ export function UpgradePaywallDialog({
 }: UpgradePaywallDialogProps) {
   const navigate = useNavigate();
   const dialogTitleRef = useRef<HTMLHeadingElement>(null);
-  const authContext = useOptionalAuthContext();
-  const user = authContext?.user ?? null;
   const [isUpgrading, setIsUpgrading] = useState(false);
-  const [sendingVerification, setSendingVerification] = useState(false);
   const paywallCopy = useMemo(() => getPaywallCopy(context), [context]);
   const billingProviderStatus = useMemo(() => getBillingProviderStatus(), []);
   const billingDebugUi = appMode.shouldShowBillingDebugUi();
@@ -88,7 +78,6 @@ export function UpgradePaywallDialog({
     ? `${formatVndAmount(saleFinalAmount)} / ${PLUS_MONTHLY_PRICE_VND > 0 ? "tháng" : ""}`
     : getPlusPriceLabel();
   const receiptEmailLabel = BILLING_SUPPORT_EMAIL ? `email ${BILLING_SUPPORT_EMAIL}` : "email tài khoản của bạn";
-  const emailVerificationRequired = Boolean(user) && !canUpgradeToPlus(user);
 
   // Fetch active sale event when dialog opens so the price reflects what
   // the user will actually pay (backend auto-applies it at checkout).
@@ -133,28 +122,11 @@ export function UpgradePaywallDialog({
     });
   }, [context, currentPlan, goalId, open, paywallCopy.recommendedPlan, recommendedPlan, source]);
 
-  const handleSendVerification = async () => {
-    setSendingVerification(true);
-    try {
-      await sendVerificationEmail();
-    } catch (error: unknown) {
-      if (!toastBillingNetworkError(error, { surface: "UpgradePaywallDialog", action: "send_verification_email" })) {
-        logBillingUiError(error, { surface: "UpgradePaywallDialog", action: "send_verification_email" });
-      }
-    } finally {
-      setSendingVerification(false);
-    }
-  };
-
   const handleUpgrade = async (planCode: Exclude<PricingPlanCode, "FREE">) => {
     if (paidCheckoutDisabled) {
       toast.info(
         "Đang hoàn tất tích hợp hệ thống thanh toán mới — sẵn sàng trong tuần tới. Quyền hiện có không bị ảnh hưởng. Nếu bạn muốn nâng cấp ngay, liên hệ support để mở Plus thủ công.",
       );
-      return;
-    }
-    if (emailVerificationRequired) {
-      rememberEmailVerificationReturnPath(buildBillingPlanUpgradePath(getCurrentUpgradeOriginPath()));
       return;
     }
     setIsUpgrading(true);
@@ -305,27 +277,6 @@ export function UpgradePaywallDialog({
                   </p>
                 </div>
               ) : null}
-              {emailVerificationRequired ? (
-                <div className="rounded-card border border-app-warm-border bg-app-warm-soft px-4 py-4 text-app-warm-strong">
-                  <p className="flex items-center gap-2 text-sm font-medium">
-                    <LockKeyhole className="h-4 w-4 text-app-warm" />
-                    Vui lòng xác thực email trước khi thanh toán.
-                  </p>
-                  <p className="mt-2 text-sm leading-6 text-app-ink-soft">
-                    Email là cách chúng tôi gửi biên nhận và liên hệ khi cần hỗ trợ hoàn tiền.
-                    {user?.email ? ` Địa chỉ đang chờ xác thực: ${user.email}.` : ""}
-                  </p>
-                  <Button
-                    className="mt-3 border-app-line bg-app-surface text-app-ink hover:bg-app-bg"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleSendVerification}
-                    disabled={sendingVerification}
-                  >
-                    {sendingVerification ? "Đang gửi..." : "Gửi email xác thực"}
-                  </Button>
-                </div>
-              ) : null}
               {PLAN_DEFINITIONS.filter((plan) => plan.code !== "FREE").map((plan) => {
                 const isRecommended = plan.code === (recommendedPlan ?? paywallCopy.recommendedPlan);
                 const isCurrent = plan.code === currentPlan;
@@ -402,7 +353,7 @@ export function UpgradePaywallDialog({
                           ? "border-app-line bg-app-surface text-app-ink hover:bg-app-bg"
                           : "border-transparent bg-app-accent text-white hover:bg-app-accent/90"
                       }`}
-                      disabled={isUpgrading || emailVerificationRequired || paidCheckoutDisabled}
+                      disabled={isUpgrading || paidCheckoutDisabled}
                       variant="outline"
                       onClick={() => handleUpgrade(plan.code as Exclude<PricingPlanCode, "FREE">)}
                       data-testid={`paywall-upgrade-cta-${plan.code.toLowerCase()}`}
@@ -485,7 +436,7 @@ export function UpgradePaywallDialog({
                           ? "border-app-line bg-app-surface text-app-ink hover:bg-app-bg"
                           : "border-transparent bg-app-accent text-white hover:bg-app-accent/90"
                       }`}
-                      disabled={isUpgrading || emailVerificationRequired || paidCheckoutDisabled}
+                      disabled={isUpgrading || paidCheckoutDisabled}
                       variant="outline"
                       onClick={() => handleUpgrade(plan.code as Exclude<PricingPlanCode, "FREE">)}
                       data-testid={`paywall-upgrade-cta-${plan.code.toLowerCase()}`}

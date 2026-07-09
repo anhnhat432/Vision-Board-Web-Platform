@@ -16,6 +16,7 @@ function normalizeAppMode(value: string | undefined): AppMode {
 const APP_MODE = normalizeAppMode(import.meta.env.VITE_APP_MODE);
 const SHOW_BILLING_DEBUG_UI = import.meta.env.VITE_SHOW_BILLING_DEBUG === "true";
 const SHOW_SYNC_DEBUG_UI = import.meta.env.VITE_SHOW_SYNC_DEBUG === "true";
+const SHOW_ASSISTANT_DEBUG_UI = import.meta.env.VITE_SHOW_ASSISTANT_DEBUG === "true";
 
 function normalizeBoolFlag(value: string | undefined): boolean {
   if (typeof value !== "string") return false;
@@ -47,7 +48,7 @@ export function shouldSeedDemoData(): boolean {
 }
 
 export function shouldShowBillingDebugUi(): boolean {
-  return SHOW_BILLING_DEBUG_UI;
+  return isDemoMode() && SHOW_BILLING_DEBUG_UI;
 }
 
 /**
@@ -67,7 +68,11 @@ export function isPaidCheckoutDisabled(): boolean {
 }
 
 export function shouldShowSyncDebugUi(): boolean {
-  return SHOW_SYNC_DEBUG_UI;
+  return isDemoMode() && SHOW_SYNC_DEBUG_UI;
+}
+
+export function shouldShowAssistantDebugUi(): boolean {
+  return isDemoMode() && (SHOW_ASSISTANT_DEBUG_UI || import.meta.env.DEV);
 }
 
 export function shouldEnable12WeekMutationSync(): boolean {

@@ -81,15 +81,15 @@ const adapterCache = new Map<SupportedProviderId, PaymentProviderAdapter>();
 export function getPaymentProviderAdapter(): PaymentProviderAdapter {
   const providerId = getProviderIdFromEnv();
 
-  if (process.env.NODE_ENV === "production" && !isPaidCheckoutDisabled() && (providerId === "mock" || !process.env.BILLING_PROVIDER)) {
-    const err = () => new Error("[billing] Mock billing provider is disabled in production with paid checkout enabled.");
+  if (process.env.NODE_ENV === "production" && (providerId === "mock" || !process.env.BILLING_PROVIDER)) {
+    const err = () => new Error("[billing] Mock billing provider is disabled in production.");
     return {
       providerId: "mock",
       isConfigured: false,
       createCheckoutSession: () => Promise.reject(err()),
       verifyWebhookSignature: () => ({
         valid: false,
-        reason: "Mock billing is disabled in production with paid checkout enabled",
+        reason: "Mock billing is disabled in production",
       }),
       parseWebhookEvent: () => {
         throw err();

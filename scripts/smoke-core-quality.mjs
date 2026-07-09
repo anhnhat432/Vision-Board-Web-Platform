@@ -16,12 +16,17 @@
  *      with a non-empty next-action narrative
  *
  * The script reuses the agent-browser stack already used by smoke-mvp1.
- * It does not require a backend, Firebase, or payment.
+ * It targets local-first/demo builds and does not require backend, Firebase,
+ * or payment. Real-mode production proof belongs in smoke-production-e2e.mjs.
  */
 
 import { spawn } from "node:child_process";
 
 const BASE_URL = (process.env.CORE_QUALITY_URL ?? process.env.MVP1_SMOKE_URL ?? "http://localhost:5173").replace(/\/$/, "");
+const PRODUCTION_REAL_MODE_URLS = new Set([
+  "https://vision-board-web-platform.vercel.app",
+  "https://dearourfuture.io.vn",
+]);
 const IS_GITHUB_ACTIONS = process.env.GITHUB_ACTIONS === "true";
 const TIMESTAMP = new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
 const SESSION = process.env.CORE_QUALITY_SESSION ?? `core-quality-${TIMESTAMP}`;
@@ -53,7 +58,14 @@ function assertTargetSafeForEnvironment() {
 
   const normalizedUrl = BASE_URL.toLowerCase();
   if (normalizedUrl.includes("localhost") || normalizedUrl.includes("127.0.0.1")) {
-    throw new Error("Refusing to run deployed core-funnel proof against localhost. Use a staging or production-like target URL.");
+    throw new Error(
+      "Refusing to run deployed core-funnel proof against localhost. Use an accessible VITE_APP_MODE=demo staging/preview URL.",
+    );
+  }
+  if (PRODUCTION_REAL_MODE_URLS.has(normalizedUrl)) {
+    throw new Error(
+      "Core quality smoke is local-first/demo-only; do not run it against the production real-mode URL. Use an accessible VITE_APP_MODE=demo staging/preview URL, or production-smoke-e2e.yml for real-mode production proof.",
+    );
   }
 }
 
@@ -194,6 +206,44 @@ async function getPageState() {
   return browserEval(`
     (() => ({ url: location.href, path: location.pathname, text: document.body.innerText }))()
   `);
+}
+
+function describeBlockedCoreQualityTarget(state) {
+  if (!state?.url) return null;
+
+  let currentUrl;
+  try {
+    currentUrl = new URL(state.url);
+  } catch {
+    return null;
+  }
+
+  if (currentUrl.hostname === "vercel.com" && currentUrl.pathname.startsWith("/login")) {
+    return (
+      "Target appears to be behind Vercel Deployment Protection. " +
+      "Use an accessible demo/staging URL with deployment protection disabled, or run the local dev preflight."
+    );
+  }
+
+  const next = currentUrl.searchParams.get("next") ?? "";
+  if (currentUrl.pathname === "/login" && next.includes("/12-week-system")) {
+    return (
+      "Target is real-mode auth-gated for /12-week-system. " +
+      "Core quality smoke expects an accessible local-first/demo target; use production-smoke-e2e.yml for real-mode production proof."
+    );
+  }
+
+  return null;
+}
+
+async function assertCoreQualityTargetAccessible(context) {
+  const state = await getPageState();
+  const blockedReason = describeBlockedCoreQualityTarget(state);
+  if (!blockedReason) return;
+
+  throw new Error(
+    `${blockedReason}\nContext: ${context}\nURL: ${state.url}\nText: ${(state.text ?? "").slice(0, 600)}`,
+  );
 }
 
 async function waitFor(description, source, { timeoutMs = 30_000, intervalMs = 500 } = {}) {
@@ -622,6 +672,7 @@ function assertTwelveWeekPlanQuality(snapshot) {
 
 async function assertTodayPrimaryHero() {
   await openPage("/12-week-system");
+  await assertCoreQualityTargetAccessible("today primary hero");
   await waitFor(
     "Today queue + primary hero",
     `document.querySelector('[data-tour-id="system-today-queue"]') && document.querySelector('[data-testid="today-primary-hero"]')`,
@@ -712,6 +763,7 @@ async function saveWeeklyReview() {
 
 async function assertProgressTrendHero() {
   await openPage("/12-week-system?tab=progress");
+  await assertCoreQualityTargetAccessible("progress trend hero");
   await waitFor(
     "Progress tab trend hero",
     `document.querySelector('[data-testid="progress-trend-hero"]')`,
@@ -748,12 +800,14 @@ async function main() {
     });
     await runStep("Open and clear local storage", async () => {
       await openPage("/");
+      await assertCoreQualityTargetAccessible("open target root");
       await clearBrowserStorage();
     });
     await runStep("Seed deterministic SMART + Feasibility + 12-week system", seedFunnelOutput);
 
     await runStep("Reload to hydrate seeded state", async () => {
       await openPage("/12-week-system");
+      await assertCoreQualityTargetAccessible("hydrate seeded 12-week system");
       await waitFor(
         "12-week system hydrated",
         `location.pathname === "/12-week-system" && document.querySelector('[data-tour-id="system-today-queue"]')`,

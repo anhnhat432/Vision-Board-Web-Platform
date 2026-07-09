@@ -2,6 +2,7 @@
 import { createBrowserRouter, Navigate } from "react-router";
 import { AppErrorBoundary } from "./components/AppErrorBoundary";
 import { RootLayout } from "./components/RootLayout";
+import { getAppMode, type AppMode } from "./utils/app-mode";
 import { loadWithChunkReload } from "./utils/chunkLoad";
 
 function lazyComponent<TModule extends Record<string, unknown>>(
@@ -61,7 +62,8 @@ function RedirectToToday() {
   return <Navigate to="/12-week-system?tab=today" replace />;
 }
 
-export const appRoutes = [
+export function createAppRoutes(appMode: AppMode = getAppMode()) {
+  return [
   {
     path: "/login",
     ...lazyRoute(() => import("./pages/LoginPage"), "LoginPage"),
@@ -83,6 +85,10 @@ export const appRoutes = [
       {
         path: "privacy",
         ...lazyRoute(() => import("./pages/PrivacyPage"), "PrivacyPage"),
+      },
+      {
+        path: "contact",
+        ...lazyRoute(() => import("./pages/ContactPage"), "ContactPage"),
       },
       {
         path: "refund-policy",
@@ -161,6 +167,14 @@ export const appRoutes = [
         path: "billing/faq",
         ...lazyRoute(() => import("./pages/BillingFAQPage"), "BillingFAQPage"),
       },
+      ...(appMode === "demo"
+        ? [
+            {
+              path: "billing/mock-checkout",
+              ...lazyRoute(() => import("./pages/MockBillingCheckout"), "MockBillingCheckout"),
+            },
+          ]
+        : []),
       {
         path: "billing/*",
         Component: RedirectToBillingPlan,
@@ -267,6 +281,9 @@ export const appRoutes = [
       },
     ],
   },
-];
+  ];
+}
+
+export const appRoutes = createAppRoutes();
 
 export const router = createBrowserRouter(appRoutes);

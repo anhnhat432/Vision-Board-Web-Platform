@@ -99,6 +99,7 @@ export function SmartGoalStepShell({
   const shouldReduceMotion = useReducedMotion() ?? false;
   const [showStickyMini, setShowStickyMini] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [isMobilePolaroidOpen, setIsMobilePolaroidOpen] = useState(false);
   const stickyTriggerRef = useRef<HTMLDivElement>(null);
 
   const isFinalStep = stepIndex === totalSteps - 1;
@@ -223,7 +224,7 @@ export function SmartGoalStepShell({
       data-smart-goal-shell
       className={cn(
         "w-full animate-[fade-in_0.3s_ease-out] pb-[calc(10.25rem+env(safe-area-inset-bottom))] motion-reduce:animate-none lg:pb-0",
-        showFinalSecondaryCta && "pb-[calc(10.75rem+env(safe-area-inset-bottom))]",
+        showFinalSecondaryCta && "pb-[calc(11.25rem+env(safe-area-inset-bottom))]",
       )}
     >
       <style>{`
@@ -334,12 +335,43 @@ export function SmartGoalStepShell({
               {children}
 
               <div className="grid gap-3 lg:hidden">
-                <PolaroidCard
-                  smartData={smartData}
-                  smartGoalStarter={smartGoalStarter}
-                  isGoldStandard={isGoldStandard}
-                  isMobile
-                />
+                <div className="grid gap-2">
+                  <button
+                    type="button"
+                    aria-expanded={isMobilePolaroidOpen}
+                    aria-controls="smart-mobile-polaroid-preview"
+                    onClick={() => setIsMobilePolaroidOpen((isOpen) => !isOpen)}
+                    className="flex min-h-11 w-full items-center justify-between gap-3 rounded-[18px] border border-app-line bg-app-surface/90 px-3.5 py-2.5 text-left text-[12px] font-extrabold leading-tight text-app-ink-soft shadow-none transition-colors hover:bg-app-bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/35"
+                  >
+                    <span>Bản phác thảo Polaroid</span>
+                    <ChevronDown
+                      className={cn(
+                        "h-4 w-4 shrink-0 text-app-ink-muted transition-transform duration-200",
+                        isMobilePolaroidOpen && "rotate-180",
+                      )}
+                      aria-hidden="true"
+                    />
+                  </button>
+                  <AnimatePresence initial={false}>
+                    {isMobilePolaroidOpen ? (
+                      <motion.div
+                        id="smart-mobile-polaroid-preview"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: shouldReduceMotion ? 0 : 0.2, ease: "easeOut" }}
+                        className="overflow-hidden"
+                      >
+                        <PolaroidCard
+                          smartData={smartData}
+                          smartGoalStarter={smartGoalStarter}
+                          isGoldStandard={isGoldStandard}
+                          isMobile
+                        />
+                      </motion.div>
+                    ) : null}
+                  </AnimatePresence>
+                </div>
                 <ClarityCompass
                   clarityProgress={clarityProgress}
                   clarityDoneCount={clarityDoneCount}

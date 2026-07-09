@@ -47,6 +47,7 @@ export interface TwelveWeekMutationResult {
   mutationId: string;
   type?: DataMutationKind;
   status: TwelveWeekMutationResultStatus;
+  syncErrorCode?: string;
   message?: string;
   reason?: string;
 }

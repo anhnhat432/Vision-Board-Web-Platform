@@ -216,7 +216,7 @@ function validateBillingRepository(env: NodeJS.ProcessEnv, isProduction: boolean
   }
   if (isProduction && raw === "memory") {
     issues.push({
-      level: "warning",
+      level: "error",
       key: "BILLING_REPOSITORY",
       category: "billing",
       message: 'is "memory" in production. Subscriptions will be lost on restart. Use "mongo".',

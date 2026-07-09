@@ -97,6 +97,8 @@ export function DashboardHero({
           alt="Bảng tầm nhìn"
           width={312}
           height={78}
+          loading="lazy"
+          decoding="async"
           className="mb-3 block h-[78px] w-full rounded-xl object-cover"
         />
 

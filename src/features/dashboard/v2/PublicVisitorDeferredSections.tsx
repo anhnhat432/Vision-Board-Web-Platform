@@ -1,6 +1,6 @@
-import { Facebook, Instagram } from "lucide-react";
 import { type CSSProperties, useEffect, useState } from "react";
 
+import { FacebookIcon, InstagramIcon, TikTokIcon } from "@/app/components/layout/SocialIcons";
 import { EditorialCard, Eyebrow, PillButton, SectionHeader, StatBadge } from "@/app/components/ui/editorial";
 import { LazyMamCompanion } from "@/app/features/pet/LazyMamCompanion";
 
@@ -21,6 +21,12 @@ interface GoalPreview {
 }
 
 const SECTION: CSSProperties = { maxWidth: 1200, margin: "0 auto" };
+const FOOTER_TRUST_LINKS = [
+  { label: "Điều khoản dịch vụ", href: "/terms" },
+  { label: "Chính sách bảo mật", href: "/privacy" },
+  { label: "Chính sách hoàn tiền", href: "/refund-policy" },
+  { label: "Liên hệ", href: "/contact" },
+] as const;
 const scrollAnchor: CSSProperties = { scrollMarginTop: 84 };
 
 const GOAL_PREVIEWS: GoalPreview[] = [
@@ -338,7 +344,7 @@ function BeforeAfterSection() {
               display: "inline-flex",
               alignItems: "center",
               gap: 7,
-              background: "rgba(23,21,15,0.07)",
+              background: "var(--app-bg-subtle)",
               color: "var(--app-ink-soft)",
               padding: "6px 12px",
               borderRadius: 999,
@@ -361,7 +367,7 @@ function BeforeAfterSection() {
                 key={item}
                 style={{ display: "flex", gap: 12, fontSize: 14.5, lineHeight: 1.5, color: "var(--app-ink-soft)" }}
               >
-                <span style={{ color: "#A8A296", fontWeight: 700 }}>✕</span>
+                <span style={{ color: "var(--app-ink-soft)", fontWeight: 700 }}>✕</span>
                 <span>{item}</span>
               </div>
             ))}
@@ -419,9 +425,9 @@ function RoadmapSection() {
           const numColor = dark ? "rgba(255,255,255,0.1)" : amber ? "#F0E4A8" : "#EAE5DA";
           const glyphBg = dark ? "var(--app-highlight)" : amber ? "#E7B400" : "var(--app-accent)";
           const glyphColor = dark ? "var(--app-ink)" : amber ? "#fff" : "var(--app-highlight)";
-          const eyebrowColor = dark ? "var(--app-highlight)" : amber ? "#9A7B00" : "var(--app-accent)";
+          const eyebrowColor = dark ? "var(--app-highlight)" : amber ? "#6B5E2E" : "var(--app-accent)";
           const bodyColor = dark ? "#A8A89C" : amber ? "#6B5E2E" : "var(--app-ink-soft)";
-          const footColor = dark ? "var(--app-highlight)" : amber ? "#9A7B00" : "var(--app-accent)";
+          const footColor = dark ? "var(--app-highlight)" : amber ? "#6B5E2E" : "var(--app-accent)";
           const footBorder = dark
             ? "1px solid rgba(255,255,255,0.1)"
             : amber
@@ -635,7 +641,7 @@ function CtaSection({ onStart, onStartIntent }: Pick<PublicVisitorDeferredSectio
             <p
               style={{
                 fontSize: 12.5,
-                color: "#9CB89A",
+                color: "#D6E4CE",
                 textAlign: "center",
                 margin: 0,
                 display: "flex",
@@ -690,7 +696,21 @@ function FooterSection() {
             Một chỗ tĩnh để lập kế hoạch 12 tuần, nhìn lại tuần sống và sống có chủ đích hơn mỗi ngày.
           </span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <nav
+          aria-label="Liên kết pháp lý và hỗ trợ"
+          style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: "10px 14px" }}
+        >
+          {FOOTER_TRUST_LINKS.map((link) => (
+            <a
+              key={link.label}
+              href={link.href}
+              style={{ fontSize: 12.5, color: "var(--app-ink-soft)", fontWeight: 600, textDecoration: "none" }}
+            >
+              {link.label}
+            </a>
+          ))}
+        </nav>
+        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12 }}>
           <a
             href="https://www.tiktok.com/@dofexe201"
             target="_blank"
@@ -699,9 +719,7 @@ function FooterSection() {
             className="dof-social-link"
           >
             <span className="sr-only">TikTok</span>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-              <path d="M19.5 6.5a5 5 0 0 1-3.5-1.5V15a5 5 0 1 1-5-5v3a2 2 0 1 0 2 2V2h3a5 5 0 0 0 3.5 3.5z" />
-            </svg>
+            <TikTokIcon size={18} />
           </a>
           <a
             href="https://www.instagram.com/dearourfuture"
@@ -711,7 +729,7 @@ function FooterSection() {
             className="dof-social-link"
           >
             <span className="sr-only">Instagram</span>
-            <Instagram size={18} />
+            <InstagramIcon size={18} />
           </a>
           <a
             href="https://www.facebook.com/profile.php?id=61589773962146"
@@ -721,9 +739,11 @@ function FooterSection() {
             className="dof-social-link"
           >
             <span className="sr-only">Facebook</span>
-            <Facebook size={18} />
+            <FacebookIcon size={18} />
           </a>
-          <span style={{ fontSize: 12.5, color: "#A8A296" }}>© 2026 Dear Our Future · local-first 12-Week Year</span>
+          <span style={{ fontSize: 12.5, color: "var(--app-ink-soft)" }}>
+            © 2026 Dear Our Future · local-first 12-Week Year
+          </span>
         </div>
       </div>
     </footer>

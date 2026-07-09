@@ -84,13 +84,14 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Images and fonts: cache-first (these rarely change and are expensive to re-fetch)
-  if (url.pathname.match(/\.(png|jpg|jpeg|svg|woff2?|ico)$/)) {
+  // Images and fonts: stale-while-revalidate.
+  // Public image URLs are not always content-hashed, so refresh cached copies
+  // in the background while still keeping repeat visits fast.
+  if (url.pathname.match(/\.(png|jpg|jpeg|svg|webp|avif|woff2?|ico)$/)) {
     event.respondWith(
-      caches.match(request).then(
-        (cached) =>
-          cached ||
-          fetch(request).then((response) => {
+      caches.match(request).then((cached) => {
+        const networkFetch = fetch(request)
+          .then((response) => {
             if (response.ok) {
               const clone = response.clone();
               caches
@@ -98,8 +99,13 @@ self.addEventListener("fetch", (event) => {
                 .then((cache) => cache.put(request, clone));
             }
             return response;
-          }),
-      ),
+          })
+          .catch((error) => {
+            if (cached) return cached;
+            throw error;
+          });
+        return cached || networkFetch;
+      }),
     );
     return;
   }

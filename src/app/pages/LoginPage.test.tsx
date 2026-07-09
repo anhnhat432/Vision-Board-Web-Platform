@@ -67,10 +67,63 @@ function findByNormalizedText(elements: HTMLElement[], needle: string) {
 
 describe("LoginPage", () => {
   beforeEach(() => {
+    document.title = "Dear Our Future";
     setAuthContext();
     firebaseAuthMock.loginWithGoogle.mockReset();
     firebaseAuthMock.resetPassword.mockReset();
     appModeMock.isDemoMode.mockReturnValue(false);
+  });
+
+  it("applies account-bound login metadata to the browser title", () => {
+    render(
+      <MemoryRouter initialEntries={["/login"]}>
+        <LoginPage />
+      </MemoryRouter>,
+    );
+
+    expect(document.title).toBe("Đăng nhập – Dear Our Future");
+  });
+
+  it("applies sign-up metadata to the browser title when opened from the mode query", () => {
+    render(
+      <MemoryRouter initialEntries={["/login?mode=signup"]}>
+        <LoginPage />
+      </MemoryRouter>,
+    );
+
+    expect(document.title).toBe("Tạo tài khoản – Dear Our Future");
+  });
+
+  it("renders one document h1 while keeping the responsive login hero", () => {
+    const { container } = render(
+      <MemoryRouter initialEntries={["/login"]}>
+        <LoginPage />
+      </MemoryRouter>,
+    );
+
+    expect(container.querySelectorAll("h1")).toHaveLength(1);
+    expect(
+      screen.getByRole("heading", {
+        level: 1,
+        name: "Quay lại với 12 tuần của bạn",
+      }),
+    ).toBeInTheDocument();
+  });
+
+  it("lets mobile trust chips wrap instead of relying on hidden horizontal scroll", () => {
+    render(
+      <MemoryRouter initialEntries={["/login"]}>
+        <LoginPage />
+      </MemoryRouter>,
+    );
+
+    const trustChips = screen.getByTestId("login-mobile-trust-chips");
+    const list = trustChips.querySelector("ul");
+
+    expect(trustChips).not.toHaveClass("-mx-4");
+    expect(trustChips).not.toHaveClass("overflow-x-auto");
+    expect(list).toHaveClass("flex", "flex-wrap", "justify-center", "gap-2");
+    expect(list).not.toHaveClass("w-max");
   });
 
   it("keeps authentication setup errors visible in the form", () => {
@@ -84,6 +137,39 @@ describe("LoginPage", () => {
     );
 
     expect(screen.getByRole("alert")).toHaveTextContent(message);
+  });
+
+  it("exposes stable names and autocomplete metadata for password managers", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter initialEntries={["/login"]}>
+        <LoginPage />
+      </MemoryRouter>,
+    );
+
+    const emailInput = screen.getByLabelText("Email");
+    const passwordInput = screen.getByLabelText("Mật khẩu");
+
+    expect(emailInput).toHaveAttribute("name", "email");
+    expect(emailInput).toHaveAttribute("autocomplete", "email");
+    expect(passwordInput).toHaveAttribute("name", "password");
+    expect(passwordInput).toHaveAttribute("autocomplete", "current-password");
+
+    await user.click(screen.getByRole("link", { name: "Đăng ký" }));
+
+    expect(screen.getByLabelText("Email")).toHaveAttribute("name", "email");
+    expect(screen.getByLabelText("Mật khẩu")).toHaveAttribute("name", "password");
+    expect(screen.getByLabelText("Mật khẩu")).toHaveAttribute("autocomplete", "new-password");
+    expect(screen.getByLabelText("Xác nhận mật khẩu")).toHaveAttribute("name", "confirmPassword");
+    expect(screen.getByLabelText("Xác nhận mật khẩu")).toHaveAttribute("autocomplete", "new-password");
+
+    await user.click(screen.getByRole("link", { name: "Đăng nhập" }));
+    await user.click(screen.getByRole("button", { name: /Quên mật khẩu/i }));
+
+    const resetEmailInput = document.querySelector("#reset-email");
+    expect(resetEmailInput).toHaveAttribute("name", "email");
+    expect(resetEmailInput).toHaveAttribute("autocomplete", "email");
   });
 
   it("keeps specific email auth errors visible in the form", () => {
@@ -148,6 +234,32 @@ describe("LoginPage", () => {
     expect(screen.getByText("Khoảng 30 giây.")).toBeInTheDocument();
   });
 
+  it("preserves the safe next query when switching from sign-in to sign-up", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter initialEntries={["/login?next=%2Forder%3Fkit%3Dvision%23recipient"]}>
+        <Routes>
+          <Route
+            path="/login"
+            element={
+              <>
+                <LoginPage />
+                <DestinationProbe />
+              </>
+            }
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    await user.click(screen.getByRole("link", { name: "Đăng ký" }));
+
+    expect(screen.getByTestId("destination")).toHaveTextContent(
+      "/login?mode=signup&next=%2Forder%3Fkit%3Dvision%23recipient",
+    );
+  });
+
   it("shows two password fields in sign-up mode", () => {
     render(
       <MemoryRouter initialEntries={["/login?mode=signup"]}>
@@ -200,6 +312,32 @@ describe("LoginPage", () => {
     await user.type(screen.getByLabelText("Xác nhận mật khẩu"), "matkhau1");
 
     expect(submitButton).toBeEnabled();
+  });
+
+  it("links confirmation password mismatch copy to the confirmation field", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <MemoryRouter initialEntries={["/login?mode=signup"]}>
+        <LoginPage />
+      </MemoryRouter>,
+    );
+
+    const confirmPasswordInput = screen.getByLabelText("Xác nhận mật khẩu");
+
+    await user.type(screen.getByLabelText("Mật khẩu"), "matkhau1");
+    await user.type(confirmPasswordInput, "matkhau2");
+
+    expect(confirmPasswordInput).toHaveAttribute("aria-invalid", "true");
+    expect(confirmPasswordInput.getAttribute("aria-describedby")).toContain("login-confirm-password-error");
+    expect(screen.getByText("Mật khẩu xác nhận chưa khớp.")).toBeInTheDocument();
+
+    await user.clear(confirmPasswordInput);
+    await user.type(confirmPasswordInput, "matkhau1");
+
+    expect(confirmPasswordInput).not.toHaveAttribute("aria-invalid");
+    expect(confirmPasswordInput).not.toHaveAttribute("aria-describedby");
+    expect(screen.queryByText("Mật khẩu xác nhận chưa khớp.")).not.toBeInTheDocument();
   });
 
   it("toggles sign-up password field visibility", async () => {
@@ -257,7 +395,9 @@ describe("LoginPage", () => {
 
     await user.click(forgotPasswordButton!);
 
-    expect(document.querySelector("#reset-email")).toBeInTheDocument();
+    const resetEmailInput = document.querySelector("#reset-email") as HTMLInputElement | null;
+    expect(resetEmailInput).toBeInTheDocument();
+    expect(resetEmailInput).toHaveFocus();
     expect(findByNormalizedText(screen.getAllByRole("button"), "gui link")).toBeDefined();
 
     const closeButton = findByNormalizedText(screen.getAllByRole("button"), "dong");
@@ -266,6 +406,7 @@ describe("LoginPage", () => {
     await user.click(closeButton!);
 
     expect(document.querySelector("#reset-email")).not.toBeInTheDocument();
+    expect(forgotPasswordButton).toHaveFocus();
   });
 
   it("submits reset-password request and shows success state", async () => {
@@ -293,6 +434,12 @@ describe("LoginPage", () => {
     expect(firebaseAuthMock.resetPassword).toHaveBeenCalledWith("reset@example.test");
     expect(await screen.findByText("Đã gửi email đặt lại mật khẩu")).toBeInTheDocument();
     expect(screen.getByText(/reset@example\.test/i)).toBeInTheDocument();
+    const successStatus = screen.getByRole("status");
+    expect(successStatus).toHaveTextContent("Đã gửi email đặt lại mật khẩu");
+    const backButton = screen.getByRole("button", { name: "Quay lại đăng nhập" });
+    expect(backButton).toHaveFocus();
+    await user.click(backButton);
+    expect(forgotPasswordButton).toHaveFocus();
   });
 
   it("shows actionable missing-account feedback in reset-password card", async () => {

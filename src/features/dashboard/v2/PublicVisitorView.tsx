@@ -329,7 +329,7 @@ export function PublicVisitorView({
 
       <span id="top" />
 
-      <main>
+      <div>
         {/* HERO */}
         <section style={{ ...SECTION, padding: "56px 24px 40px" }}>
           <div
@@ -364,9 +364,9 @@ export function PublicVisitorView({
                 className="dof-display dof-hero-title"
                 style={{ fontWeight: 800, lineHeight: 0.98, letterSpacing: "-0.035em", margin: "0 0 24px" }}
               >
-                Biến ước mơ
+                Biến ước mơ{" "}
                 <br />
-                thành <HighlightMark>kế hoạch</HighlightMark>
+                thành <HighlightMark>kế hoạch</HighlightMark>{" "}
                 <br />
                 <span style={{ color: "var(--app-accent)" }}>12 tuần bền bỉ.</span>
               </h1>
@@ -635,7 +635,7 @@ export function PublicVisitorView({
             />
           </Suspense>
         ) : null}
-      </main>
+      </div>
       {shouldLoadDeferredSections ? (
         <Suspense fallback={null}>
           <PublicVisitorDeferredFooter />

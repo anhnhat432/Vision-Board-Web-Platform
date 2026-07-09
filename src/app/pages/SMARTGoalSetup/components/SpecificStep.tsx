@@ -151,7 +151,7 @@ export function SpecificStep({
     <div className="min-w-0 space-y-4">
       <div className="rounded-[24px] border border-app-line bg-app-surface/85 p-3.5 shadow-[0_18px_55px_-48px_rgba(23,21,15,0.45)] sm:p-4">
         <label htmlFor="smart-specific" className={`${labelClass} text-[12px] text-app-ink-muted`}>
-          Kết quả muốn đạt
+          Mục tiêu cụ thể của bạn
           <span className={requiredMarkerClass} aria-hidden="true">
             *
           </span>
@@ -176,7 +176,7 @@ export function SpecificStep({
         />
 
         <div className="mt-2.5 flex items-center justify-between gap-3 px-1 text-[11px] font-medium text-app-ink-muted select-none">
-          <span id="smart-specific-hint">Viết bằng một câu có kết quả nhìn thấy được.</span>
+          <span id="smart-specific-hint">Viết bằng một câu có kết quả bạn muốn đạt và nhìn thấy được.</span>
           <span
             id="smart-specific-counter"
             className={specificLength >= 10 ? "text-app-accent font-semibold" : "text-app-ink-muted"}

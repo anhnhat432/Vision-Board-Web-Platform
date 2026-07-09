@@ -15,6 +15,31 @@ describe("core funnel quality harness guards", () => {
     const script = readFileSync(path.resolve("scripts", "smoke-core-quality.mjs"), "utf8");
 
     expect(script).toContain('normalizedUrl.includes("localhost") || normalizedUrl.includes("127.0.0.1")');
-    expect(script).toContain("Refusing to run deployed core-funnel proof against localhost. Use a staging or production-like target URL.");
+    expect(script).toContain(
+      "Refusing to run deployed core-funnel proof against localhost. Use an accessible VITE_APP_MODE=demo staging/preview URL.",
+    );
+  });
+
+  it("refuses production real-mode URLs for the local-first core smoke", () => {
+    const script = readFileSync(path.resolve("scripts", "smoke-core-quality.mjs"), "utf8");
+    const workflow = readFileSync(path.resolve(".github", "workflows", "core-funnel-quality-staging.yml"), "utf8");
+
+    expect(script).toContain('const PRODUCTION_REAL_MODE_URLS = new Set([');
+    expect(script).toContain('"https://vision-board-web-platform.vercel.app"');
+    expect(script).toContain('"https://dearourfuture.io.vn"');
+    expect(script).toContain("PRODUCTION_REAL_MODE_URLS.has(normalizedUrl)");
+    expect(script).toContain("Core quality smoke is local-first/demo-only; do not run it against the production real-mode URL.");
+    expect(workflow).toContain("Accessible demo/staging URL to test");
+    expect(workflow).toContain('production_real_mode_urls=("https://vision-board-web-platform.vercel.app" "https://dearourfuture.io.vn")');
+    expect(workflow).toContain("Core quality smoke is local-first/demo-only; use production-smoke-e2e.yml for real-mode production proof.");
+  });
+
+  it("reports auth-gated and Vercel-protected targets instead of timing out", () => {
+    const script = readFileSync(path.resolve("scripts", "smoke-core-quality.mjs"), "utf8");
+
+    expect(script).toContain("function describeBlockedCoreQualityTarget(state)");
+    expect(script).toContain("Target appears to be behind Vercel Deployment Protection.");
+    expect(script).toContain("Target is real-mode auth-gated for /12-week-system.");
+    expect(script).toContain("assertCoreQualityTargetAccessible");
   });
 });

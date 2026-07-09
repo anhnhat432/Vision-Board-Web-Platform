@@ -38,6 +38,22 @@ describe("receiptEmailService", () => {
     assert.equal(rendered.replyTo, "support@example.test");
   });
 
+  it("uses the production support email fallback when no support env is configured", () => {
+    const rendered = renderPaymentReceiptEmail({
+      orderId: "VBRCPT-FALLBACK",
+      userEmail: "buyer@example.test",
+      amount: 99000,
+      currency: "VND",
+      planName: "Plus monthly",
+      paidAt: "2026-05-14T10:00:00.000Z",
+      paymentRef: null,
+    });
+
+    assert.match(rendered.text, /liên hệ support@dearourfuture\.com/);
+    assert.match(rendered.html, /mailto:support@dearourfuture\.com/);
+    assert.equal(rendered.replyTo, "support@dearourfuture.com");
+  });
+
   it("sends the rendered receipt through the configured email provider", async () => {
     process.env.VITE_BILLING_SUPPORT_EMAIL = "billing@example.test";
     const sendEmailMock = mock.method(emailNotificationService, "sendEmail", async () => ({

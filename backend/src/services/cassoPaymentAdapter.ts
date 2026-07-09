@@ -18,7 +18,7 @@
  *   PLUS_PRICE_VND       — price in VND (e.g. "99000")
  */
 
-import { createHash, randomBytes } from "node:crypto";
+import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import type {
   CheckoutSessionResult,
   CreateCheckoutSessionInput,
@@ -64,9 +64,31 @@ const BANK_BIN_MAP: Record<string, string> = {
 
 // ─── Config ─────────────────────────────────────────────────────────────────
 
+const CASSO_SIGNATURE_SECRET_KEYS = [
+  "CASSO_WEBHOOK_CHECKSUM_KEY",
+  "CASSO_CHECKSUM_KEY",
+  "CASSO_WEBHOOK_SECRET",
+] as const;
+
+const CASSO_SECURE_TOKEN_KEYS = [
+  "CASSO_SECURE_TOKEN",
+  "CASSO_WEBHOOK_SECRET",
+] as const;
+
+function getEnvValues(names: readonly string[]): string[] {
+  return names
+    .map((name) => process.env[name]?.trim() ?? "")
+    .filter(Boolean);
+}
+
 function getCassoConfig() {
+  const signatureSecrets = getEnvValues(CASSO_SIGNATURE_SECRET_KEYS);
+  const secureTokens = getEnvValues(CASSO_SECURE_TOKEN_KEYS);
+
   return {
-    webhookSecret: process.env.CASSO_WEBHOOK_SECRET?.trim() ?? "",
+    hasWebhookSecret: signatureSecrets.length > 0 || secureTokens.length > 0,
+    signatureSecrets,
+    secureTokens,
     bankAccount: process.env.CASSO_BANK_ACCOUNT?.trim() ?? "",
     bankName: process.env.CASSO_BANK_NAME?.trim().toUpperCase() ?? "",
     accountName: process.env.CASSO_ACCOUNT_NAME?.trim() ?? "",
@@ -77,7 +99,7 @@ function getCassoConfig() {
 function isCassoConfigured(): boolean {
   const config = getCassoConfig();
   return (
-    config.webhookSecret.length > 0 &&
+    config.hasWebhookSecret &&
     config.bankAccount.length > 0 &&
     config.bankName.length > 0 &&
     config.accountName.length > 0
@@ -91,6 +113,56 @@ const ORDER_ID_LENGTH = 8;
 const ORDER_ID_REGEX = /VB[A-Z0-9]{8}/i;
 const ORDER_EXPIRY_MINUTES = 30;
 const TWELVE_WEEKS_MS = 12 * 7 * 24 * 60 * 60 * 1000;
+
+function safeEqual(a: string, b: string): boolean {
+  const aBuffer = Buffer.from(a);
+  const bBuffer = Buffer.from(b);
+  return aBuffer.length === bBuffer.length && timingSafeEqual(aBuffer, bBuffer);
+}
+
+function parseCassoSignatureHeader(value: string): { timestamp?: string; signature: string } | null {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+
+  const parts = new Map(
+    trimmed.split(",").map((part) => {
+      const [key, ...rest] = part.split("=");
+      return [key?.trim().toLowerCase() ?? "", rest.join("=").trim()];
+    }),
+  );
+  const signature = parts.get("v1") || parts.get("signature");
+  if (signature) {
+    return { timestamp: parts.get("t") || parts.get("timestamp"), signature };
+  }
+
+  return { signature: trimmed };
+}
+
+function verifyCassoHmacSignature(
+  rawBody: Buffer | string,
+  signatureHeader: string,
+  secrets: readonly string[],
+): boolean {
+  const cassoSignature = parseCassoSignatureHeader(signatureHeader);
+  if (!cassoSignature) return false;
+
+  const body = typeof rawBody === "string" ? rawBody : rawBody.toString("utf-8");
+  const payloads = new Set([body]);
+
+  try {
+    payloads.add(JSON.stringify(JSON.parse(body)));
+  } catch {
+    // Keep the raw body candidate for non-JSON payloads.
+  }
+
+  return secrets.some((secret) =>
+    [...payloads].some((payload) => {
+      const signedPayload = cassoSignature.timestamp ? `${cassoSignature.timestamp}.${payload}` : payload;
+      const expectedSignature = createHmac("sha512", secret).update(signedPayload).digest("hex");
+      return safeEqual(cassoSignature.signature, expectedSignature);
+    }),
+  );
+}
 
 function generateOrderId(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -215,7 +287,7 @@ export function createCassoPaymentAdapter(): PaymentProviderAdapter {
       input: WebhookVerificationInput,
     ): WebhookVerificationResult {
       const config = getCassoConfig();
-      if (!config.webhookSecret) {
+      if (!config.hasWebhookSecret) {
         return { valid: false, reason: "CASSO_WEBHOOK_SECRET not configured." };
       }
 
@@ -224,7 +296,16 @@ export function createCassoPaymentAdapter(): PaymentProviderAdapter {
         (input.headers["Secure-Token"] as string) ??
         "";
 
-      if (headerToken === config.webhookSecret) {
+      if (headerToken && config.secureTokens.some((token) => safeEqual(headerToken, token))) {
+        return { valid: true };
+      }
+
+      const signatureHeader =
+        (input.headers["x-casso-signature"] as string) ??
+        (input.headers["X-Casso-Signature"] as string) ??
+        "";
+
+      if (signatureHeader && verifyCassoHmacSignature(input.rawBody, signatureHeader, config.signatureSecrets)) {
         return { valid: true };
       }
 

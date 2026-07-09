@@ -2,7 +2,8 @@
 
 import { chromium } from "playwright";
 
-const BASE_URL = (process.env.PROD_SMOKE_URL ?? "https://vision-board-web-platform.vercel.app").replace(/\/$/, "");
+const PRODUCTION_SMOKE_URL = "https://dearourfuture.io.vn";
+const BASE_URL = (process.env.PROD_SMOKE_URL ?? PRODUCTION_SMOKE_URL).replace(/\/$/, "");
 const TIMESTAMP = new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
 const GENERATED_EMAIL = `codex.qa+quick-smoke-${TIMESTAMP}@example.com`;
 const GENERATED_PASSWORD = `CodexQuickSmoke${TIMESTAMP}!`;

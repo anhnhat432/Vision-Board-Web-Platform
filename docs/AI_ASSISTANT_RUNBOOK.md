@@ -90,7 +90,7 @@ Mục tiêu: thời gian tắt một tính năng AI rủi ro < 15 phút bằng f
 
 ```bash
 # Backend health + env
-node scripts/check-runtime-env.mjs --full-stack
+node scripts/check-runtime-env.mjs --full-stack --mode production
 
 # AI live smoke (cần staging token)
 AI_SMOKE_BASE_URL=https://your-backend.example.com AI_SMOKE_AUTH_TOKEN=<firebase-id-token> npm run smoke:ai

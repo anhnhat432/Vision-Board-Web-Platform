@@ -3,9 +3,9 @@
 ## 1. Context & Goal
 
 - Feature / bug: launch proof now has workflows and a D-2 evidence ledger, but operators still need exact `gh workflow run` commands and result-capture commands.
-- Why now: production readiness depends on running email verification, account deletion, LWW sync, production smoke, and deployed core-flow proof against real-mode staging/production-like targets without guessing workflow inputs.
+- Why now: production readiness depends on running email verification, account deletion, LWW sync, production smoke, and deployed local-first core-flow proof against the correct target class without guessing workflow inputs.
 - User impact: launch owner can execute proof gates consistently and record evidence without pasting secrets or relying on memory.
-- Modes affected: real-mode staging/preview and production smoke only. Demo/local app behavior is out of scope.
+- Modes affected: accessible demo/staging core-flow proof, real-mode staging auth/sync/destructive proof, and production smoke.
 
 ## 2. Surface Classification
 
@@ -28,7 +28,7 @@
 4. WHERE a command uses destructive account deletion, THE runbook SHALL keep the `DELETE_TEST_ACCOUNT` safety input explicit.
 5. WHERE LWW staging proof can overwrite a QA workspace, THE runbook SHALL keep an explicit `OVERWRITE_TEST_WORKSPACE` opt-in visible.
 6. WHERE secrets are required, THE docs SHALL reference secret names only and never include secret values.
-7. WHEN an operator needs deployed core-flow proof, THE runbook SHALL provide a copyable `gh workflow run` command for `.github/workflows/core-funnel-quality-staging.yml` and an evidence-capture command for its run URL/status/SHA.
+7. WHEN an operator needs deployed core-flow proof, THE runbook SHALL provide a copyable `gh workflow run` command for `.github/workflows/core-funnel-quality-staging.yml` using `CORE_QUALITY_URL`, plus an evidence-capture command for its run URL/status/SHA.
 
 ## 5. Data, Storage, and Sync Constraints
 

@@ -5,7 +5,9 @@ import type { NextFunction, Request, Response } from "express";
 import {
   completePaymentOrderManually,
   getAdminPaymentOrders,
+  updateAdminUserRole,
 } from "../controllers/adminController";
+import { clearAdminRoleCache, requireAdmin } from "../middleware/requireAdmin";
 import { PaymentOrderModel, type PaymentOrderStatus } from "../models/PaymentOrderModel";
 import { UserModel } from "../models/UserModel";
 import { billingService } from "../services/billingServiceInstance";
@@ -32,6 +34,7 @@ interface MockPaymentOrder {
   userId: string;
   amount: number;
   status: PaymentOrderStatus;
+  purpose?: "plus_subscription" | "physical_order";
   completedAt?: Date;
   cassoTransactionId?: string;
   manualCompletedBy?: string;
@@ -45,6 +48,7 @@ const originalPaymentOrderFind = PaymentOrderModel.find;
 const originalPaymentOrderFindOne = PaymentOrderModel.findOne;
 const originalPaymentOrderCountDocuments = PaymentOrderModel.countDocuments;
 const originalUserFind = UserModel.find;
+const originalUserFindOne = UserModel.findOne;
 const originalBillingUpsert = billingService.upsertSubscriptionFromProviderEvent;
 
 afterEach(() => {
@@ -52,7 +56,9 @@ afterEach(() => {
   (PaymentOrderModel as unknown as MockableModel).findOne = originalPaymentOrderFindOne;
   (PaymentOrderModel as unknown as MockableModel).countDocuments = originalPaymentOrderCountDocuments;
   (UserModel as unknown as MockableModel).find = originalUserFind;
+  (UserModel as unknown as MockableModel).findOne = originalUserFindOne;
   (billingService as unknown as MockableBillingService).upsertSubscriptionFromProviderEvent = originalBillingUpsert;
+  clearAdminRoleCache();
 });
 
 function createMockResponse(): MockResponse {
@@ -139,6 +145,34 @@ describe("admin payment recovery", () => {
     assert.equal(body.success, true);
     assert.equal(body.data.manualCompletedBy, "admin_uid");
     assert.equal(body.data.manualCompletionNote, "Matched Casso transfer manually.");
+  });
+
+  it("does not manually grant Plus for physical orders", async () => {
+    const order = createMockPaymentOrder({ purpose: "physical_order" });
+    let upsertCount = 0;
+
+    (PaymentOrderModel as unknown as MockableModel).findOne = async () => order;
+    (billingService as unknown as MockableBillingService).upsertSubscriptionFromProviderEvent = async () => {
+      upsertCount += 1;
+      throw new Error("Physical order manual completion should not grant Plus.");
+    };
+
+    const req = {
+      params: { orderId: "vbqa000001" },
+      body: { manualCompletionNote: "Physical order transfer matched manually." },
+      user: { uid: "admin_uid" },
+    } as unknown as Request;
+    const res = createMockResponse();
+    const recorder = createNextRecorder();
+
+    await completePaymentOrderManually(req, res as unknown as Response, recorder.next);
+
+    const error = recorder.getError() as { statusCode?: number; errorCode?: string };
+    assert.equal(error?.statusCode, 400);
+    assert.equal(error?.errorCode, "physical_order_not_claimable");
+    assert.equal(order.status, "pending");
+    assert.equal(order.saveCalls, 0);
+    assert.equal(upsertCount, 0);
   });
 
   it("lists payment orders with status/search filters and user summaries", async () => {
@@ -229,5 +263,87 @@ describe("admin payment recovery", () => {
       role: "user",
       createdAt: new Date("2026-05-01T00:00:00Z"),
     });
+  });
+});
+
+describe("admin user role management", () => {
+  it("invalidates the target user's cached admin role after a role change", async () => {
+    const targetUid = "demoted_admin_uid";
+    let dbRole: "admin" | "user" = "admin";
+    const findOneCalls: unknown[] = [];
+    const userDoc = {
+      firebaseUid: targetUid,
+      email: "demoted-admin@example.test",
+      displayName: "Demoted Admin",
+      role: dbRole,
+      saveCalls: 0,
+      async save() {
+        this.saveCalls++;
+        dbRole = this.role;
+        return this;
+      },
+    };
+
+    (UserModel as unknown as MockableModel).findOne = (query: unknown) => {
+      findOneCalls.push(query);
+      if (findOneCalls.length === 2) {
+        return Promise.resolve(userDoc);
+      }
+
+      const chain = {
+        select() {
+          return chain;
+        },
+        maxTimeMS() {
+          return chain;
+        },
+        async lean() {
+          return { role: dbRole };
+        },
+      };
+      return chain;
+    };
+
+    const firstAdminCheck = createNextRecorder();
+    await requireAdmin(
+      {
+        user: { uid: targetUid, email: "demoted-admin@example.test", role: "admin" },
+        firebaseToken: { uid: targetUid, email: "demoted-admin@example.test", role: "admin" },
+      } as unknown as Request,
+      {} as Response,
+      firstAdminCheck.next,
+    );
+    assert.equal(firstAdminCheck.getError(), undefined);
+    assert.equal(findOneCalls.length, 1);
+
+    const updateResponse = createMockResponse();
+    const updateRecorder = createNextRecorder();
+    await updateAdminUserRole(
+      {
+        params: { uid: targetUid },
+        body: { role: "user" },
+        user: { uid: "different_admin_uid" },
+      } as unknown as Request,
+      updateResponse as unknown as Response,
+      updateRecorder.next,
+    );
+    assert.equal(updateRecorder.getError(), undefined);
+    assert.equal(updateResponse.statusCode, 200);
+    assert.equal(userDoc.saveCalls, 1);
+    assert.equal(dbRole, "user");
+
+    const secondAdminCheck = createNextRecorder();
+    await requireAdmin(
+      {
+        user: { uid: targetUid, email: "demoted-admin@example.test", role: "admin" },
+        firebaseToken: { uid: targetUid, email: "demoted-admin@example.test", role: "admin" },
+      } as unknown as Request,
+      {} as Response,
+      secondAdminCheck.next,
+    );
+
+    const error = secondAdminCheck.getError() as { statusCode?: number };
+    assert.equal(error?.statusCode, 403);
+    assert.equal(findOneCalls.length, 3);
   });
 });
