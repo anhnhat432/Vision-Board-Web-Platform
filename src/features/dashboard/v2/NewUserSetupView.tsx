@@ -5,6 +5,7 @@ import { VisionMapIllustration } from "@/app/components/illustrations";
 import { hasScoredLifeBalance } from "@/app/utils/core-flow-guard";
 import { APP_STORAGE_KEYS, type UserData } from "@/app/utils/storage";
 import { capitalizeVietnameseName } from "@/app/utils/text";
+import type { DashboardNextAction } from "../helpers/dashboardSections";
 import { DreamToPlanPreview } from "./DreamToPlanPreview";
 
 interface NewUserSetupViewProps {
@@ -12,6 +13,13 @@ interface NewUserSetupViewProps {
   displayName: string;
   onContinue: (href: string) => void;
   companion?: ReactNode;
+  /**
+   * Next_Step_Guidance đã phân giải từ Dashboard (`getDashboardNextAction` +
+   * `resolveCoreFlowPosition`, đã guard route đăng ký). Khi có, Primary_CTA
+   * chính điều hướng theo `ctaTarget` này để trỏ đúng bước Core_Flow chưa hoàn
+   * tất đầu tiên (Req 2.1, 2.6). Không có thì dùng route theo bước setup nội bộ.
+   */
+  nextStepGuidance?: DashboardNextAction;
 }
 
 interface SetupStep {
@@ -90,10 +98,19 @@ const getStepTheme = (index: number): CardStepTheme => {
   };
 };
 
-export function NewUserSetupView({ userData, displayName, onContinue, companion }: NewUserSetupViewProps) {
+export function NewUserSetupView({
+  userData,
+  displayName,
+  onContinue,
+  companion,
+  nextStepGuidance,
+}: NewUserSetupViewProps) {
   const [showSamplePlan, setShowSamplePlan] = useState(false);
   const steps = buildSetupSteps(userData);
   const nextStep = steps.find((step) => !step.completed) ?? steps[steps.length - 1];
+  // Primary_CTA chính ưu tiên target đã guard từ Dashboard (bước Core_Flow chưa
+  // hoàn tất đầu tiên, chỉ route đã đăng ký); fallback route theo bước setup.
+  const primaryCtaTarget = nextStepGuidance?.ctaTarget ?? nextStep.href;
   const hasLifeBalance = hasScoredLifeBalance(userData);
 
   const translateArea = (name: string) => {
@@ -181,7 +198,7 @@ export function NewUserSetupView({ userData, displayName, onContinue, companion 
 
           <button
             type="button"
-            onClick={() => onContinue(nextStep.href)}
+            onClick={() => onContinue(primaryCtaTarget)}
             className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-app-accent hover:bg-app-accent-hover px-6 py-2.5 text-xs font-bold text-app-ink-on-accent shadow-md transition-all duration-200 hover:-translate-y-px active:translate-y-0 active:scale-[0.99] cursor-pointer"
           >
             Bắt đầu: {nextStep.title} →

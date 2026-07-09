@@ -10,7 +10,7 @@ import {
   WifiOff,
   X,
 } from "lucide-react";
-import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, type ReactNode, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import {
   buildCurrentWeekExecutionSnapshot,
@@ -20,7 +20,11 @@ import {
   type WeeklyProgressPoint,
 } from "@/features/dashboard/helpers/dashboardInsights";
 import { buildLoginPath } from "@/features/dashboard/helpers/dashboardNavigation";
-import { getDashboardNextAction } from "@/features/dashboard/helpers/dashboardSections";
+import {
+  getDashboardNextAction,
+  resolveDashboardNextStepGuidance,
+} from "@/features/dashboard/helpers/dashboardSections";
+import { type DashboardWidgetId, getDashboardWidgetIds } from "@/features/dashboard/helpers/dashboardWidgetLayout";
 import { useDashboardPlanLink } from "@/features/dashboard/hooks/useDashboardPlanLink";
 import { ActiveGoalsCard } from "@/features/dashboard/v2/ActiveGoalsCard";
 import { BalanceCard } from "@/features/dashboard/v2/BalanceCard";
@@ -47,7 +51,16 @@ import { usePlanEntitlements } from "../hooks/usePlanEntitlements";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { useUpgradeDialog } from "../hooks/useUpgradeDialog";
 import { trackAnalyticsEvent } from "../utils/analytics";
+import type { AppMode } from "../utils/app-mode";
 import { isDemoMode } from "../utils/app-mode";
+import { CORE_FLOW_STEP_ROUTE, deriveCoreFlowCompletion, isRegisteredRoute } from "../utils/core-flow-navigation";
+import {
+  type CoreFlowCompletion,
+  CORE_FLOW_STEP_ORDER,
+  type CoreFlowStepId,
+  resolveCoreFlowPosition,
+} from "../utils/core-flow-position";
+import { resolveModeAwareCopy } from "../utils/demo-copy-guard";
 import { FREE_TIER_LIMITS, getFreeTierUsage } from "../utils/feature-entitlements";
 import {
   trackRescueActionTaken,
@@ -337,6 +350,8 @@ function useDashboardDerivedData({
   hasRealLifeBalance,
   isSignedOut,
   isFreshDemoVisitor,
+  coreFlowCompletion,
+  onboardingCompleted,
 }: {
   visibleGoals: UserData["goals"];
   visibleWheelOfLife: UserData["currentWheelOfLife"];
@@ -347,6 +362,8 @@ function useDashboardDerivedData({
   hasRealLifeBalance: boolean;
   isSignedOut: boolean;
   isFreshDemoVisitor: boolean;
+  coreFlowCompletion: CoreFlowCompletion;
+  onboardingCompleted: boolean;
 }) {
   const recentGoals = visibleGoals.slice(0, 3);
   const recentReflections = sortReflectionsByDateDesc(visibleReflections).slice(0, 2);
@@ -426,7 +443,7 @@ function useDashboardDerivedData({
       ) ||
         effectiveSystem.scoreboard.some((week) => week.weekNumber === activeSystemWeek && week.reviewDone)),
   );
-  const dashboardNextAction = getDashboardNextAction({
+  const baseDashboardNextAction = getDashboardNextAction({
     hasGoal: visibleGoals.length > 0,
     hasTwelveWeekSystem: Boolean(effectiveSystem),
     reviewDueToday,
@@ -435,6 +452,34 @@ function useDashboardDerivedData({
     currentWeek: activeSystemWeek,
     totalWeeks: effectiveSystem?.totalWeeks ?? null,
   });
+  // Nối Next_Step_Guidance với vị trí Core_Flow cho các trạng thái TRƯỚC khi có
+  // hệ thống 12 tuần (gồm khi Onboarding chưa xong): `resolveCoreFlowPosition`
+  // cho biết bước chưa hoàn tất đầu tiên (Req 2.1) và guidance chỉ trỏ tới route
+  // đã đăng ký trong `createAppRoutes` (Req 2.6). `currentStepId` chỉ dùng để
+  // đọc `firstIncompleteStepId` (suy ra từ completion, độc lập currentStepId).
+  //
+  // Khi đã có hệ thống 12 tuần, giữ nguyên guidance gốc của
+  // `getDashboardNextAction` (review/today/chu kỳ) để không đụng tới ctaTarget
+  // mà `reflection_prompt` đang dùng làm reviewHref.
+  //
+  // Người dùng chưa hoàn tất Onboarding: bước `life_balance` được vào qua trình
+  // Onboarding (`/onboarding`) để giữ nguyên phễu hiện có thay vì màn chấm lại
+  // độc lập `/life-balance`; sau khi onboarded thì dùng route Core_Flow chuẩn.
+  const firstIncompleteStepId = resolveCoreFlowPosition(
+    CORE_FLOW_STEP_ORDER[0],
+    coreFlowCompletion,
+  ).firstIncompleteStepId;
+  const dashboardStepRoute: Record<CoreFlowStepId, string> = onboardingCompleted
+    ? CORE_FLOW_STEP_ROUTE
+    : { ...CORE_FLOW_STEP_ROUTE, life_balance: "/onboarding" };
+  const dashboardNextAction = effectiveSystem
+    ? baseDashboardNextAction
+    : resolveDashboardNextStepGuidance({
+        baseAction: baseDashboardNextAction,
+        firstIncompleteStepId,
+        stepRoute: dashboardStepRoute,
+        isRouteRegistered: isRegisteredRoute,
+      });
   const dashboardActiveGoals = visibleActiveTwelveWeekGoal ? [visibleActiveTwelveWeekGoal] : recentGoals;
   const dashboardKpiLeadAverage = activeSystemWeekCompletion?.percent ?? currentWeekExecutionSnapshot.executionScore;
   const dashboardKpiCurrentWeek = activeSystemWeek ?? currentWeekExecutionSnapshot.weekNumber ?? null;
@@ -643,6 +688,17 @@ function DashboardContent({
     void loadPlan(dashboardPlanId);
   }, [dashboardPlanId, loadPlan, plan?.id]);
 
+  // Completion Core_Flow suy từ dữ liệu người dùng đang hiển thị (chỉ đọc, không
+  // đổi Storage_Contract) để nối Next_Step_Guidance với bước chưa hoàn tất.
+  const coreFlowCompletion = useMemo(
+    () =>
+      deriveCoreFlowCompletion({
+        ...userData,
+        goals: visibleGoals,
+        currentWheelOfLife: visibleWheelOfLife,
+      }),
+    [userData, visibleGoals, visibleWheelOfLife],
+  );
   const dashboardData = useDashboardDerivedData({
     visibleGoals,
     visibleWheelOfLife,
@@ -653,6 +709,8 @@ function DashboardContent({
     hasRealLifeBalance,
     isSignedOut,
     isFreshDemoVisitor,
+    coreFlowCompletion,
+    onboardingCompleted: !isSignedOut && userData.onboardingCompleted,
   });
   const dashboardGreeting = getDashboardGreeting();
   const dashboardDisplayName = getDashboardDisplayName(user);
@@ -769,6 +827,7 @@ function DashboardContent({
             displayName={dashboardDisplayName}
             onContinue={(href) => navigate(href)}
             companion={<LazyMamCompanion initialEvent="welcomeBack" />}
+            nextStepGuidance={dashboardData.dashboardNextAction}
           />
         ) : (
           <DashboardActiveLayout
@@ -1057,6 +1116,72 @@ function DashboardActiveLayout({
     return () => window.clearTimeout(timer);
   }, [data.dashboardGoalTitle, data.dashboardOpenTaskCount]);
 
+  // Thứ tự render lấy từ helper thuần `orderDashboardWidgets` (qua
+  // dashboardWidgetLayout): nhóm core_flow luôn đứng trên nhóm secondary, trong
+  // nhóm sắp theo priority. Cột chỉ là phân bổ trình bày giữ nguyên bố cục bento
+  // — không đổi nguồn dữ liệu / điều kiện hiển thị của widget nào (Req 3.1–3.4).
+  const coreLeadIds = getDashboardWidgetIds("core_flow", "lead");
+  const coreStackIds = getDashboardWidgetIds("core_flow", "stack");
+  const secondaryMainIds = getDashboardWidgetIds("secondary", "main");
+  const secondarySideIds = getDashboardWidgetIds("secondary", "side");
+
+  // Registry node theo id. Mỗi widget tự giữ trạng thái rỗng tại chỗ (Today,
+  // ActiveGoals dùng khối dashed nội bộ) nên không widget nào bị loại khỏi
+  // layout khi thiếu dữ liệu (Req 3.5). `reflection_prompt` giữ nguyên điều kiện
+  // hiển thị theo ngày review sẵn có (Req 3.4).
+  const widgetNodes: Record<DashboardWidgetId, ReactNode> = {
+    today: (
+      <TodayMiniCard
+        title={data.todayPreviewTitle}
+        tasks={data.activeSystemTaskPreview}
+        completedCount={data.todayPreviewCompleted}
+        totalCount={data.todayPreviewTotal}
+        companion={<LazyMamCompanion initialEvent={data.dashboardOpenTaskCount > 0 ? "gentleNudge" : "welcomeBack"} />}
+      />
+    ),
+    next_action: <NextBestAction data={data} />,
+    active_goals: (
+      <ActiveGoalsCard goals={data.dashboardActiveGoals} onSelectGoal={onSelectGoal} onAddGoal={onAddGoal} />
+    ),
+    reflection_prompt: data.reviewDueToday ? (
+      <ReflectionPrompt currentWeek={data.dashboardKpiCurrentWeek} reviewHref={data.dashboardNextAction.ctaTarget} />
+    ) : null,
+    week_rhythm: (
+      <WeekRhythmCard
+        system={data.activeSystem}
+        currentWeek={data.dashboardKpiCurrentWeek}
+        totalWeeks={data.dashboardKpiTotalWeeks}
+        completedCount={data.activeSystemWeekCompletion?.completed ?? data.currentWeekExecutionSnapshot.completedTasks}
+        totalCount={data.activeSystemWeekCompletion?.total ?? data.currentWeekExecutionSnapshot.totalTasks}
+        leadAverage={data.dashboardKpiLeadAverage}
+        wheelScore={data.averageLifeScore}
+        streak={data.dashboardKpiStreak}
+      />
+    ),
+    twelve_week_trend: shouldLoadTrendChart ? (
+      <Suspense
+        fallback={<div className="h-[280px] rounded-[18px] border border-app-line bg-app-surface p-5 md:p-6" />}
+      >
+        <TwelveWeekTrendCard points={trendPoints} currentWeek={data.dashboardKpiCurrentWeek} />
+      </Suspense>
+    ) : (
+      <div className="h-[280px] rounded-[18px] border border-app-line bg-app-surface p-5 md:p-6" />
+    ),
+    balance: <BalanceCard rows={balanceRows} />,
+    daily_stoic: <DailyStoicCard />,
+    quote: <QuoteBlock />,
+  };
+
+  const renderWidgetSlot = (ids: DashboardWidgetId[]) =>
+    ids
+      .map((id) => ({ id, node: widgetNodes[id] }))
+      .filter((entry): entry is { id: DashboardWidgetId; node: ReactNode } => entry.node != null)
+      .map((entry, index) => (
+        <div key={entry.id} className="appear-fade-up" style={{ animationDelay: `${index * 75}ms` }}>
+          {entry.node}
+        </div>
+      ));
+
   return (
     <div className="space-y-6">
       <div data-tour-id="dashboard-start-card" className="appear-fade-up" style={{ animationDelay: "0ms" }}>
@@ -1095,45 +1220,13 @@ function DashboardActiveLayout({
         onRetry={onRetryPlanLoad}
       />
 
-      {/* Bento Grid layout for Core Funnel widgets */}
+      {/* Bento Grid layout for Core Funnel widgets (nhóm core_flow, thứ tự từ helper) */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start">
         {/* Left Column: Today Tasks (Primary Focus) */}
-        <div className="space-y-6">
-          <div className="appear-fade-up" style={{ animationDelay: "200ms" }}>
-            <TodayMiniCard
-              title={data.todayPreviewTitle}
-              tasks={data.activeSystemTaskPreview}
-              completedCount={data.todayPreviewCompleted}
-              totalCount={data.todayPreviewTotal}
-              companion={
-                <LazyMamCompanion initialEvent={data.dashboardOpenTaskCount > 0 ? "gentleNudge" : "welcomeBack"} />
-              }
-            />
-          </div>
-        </div>
+        <div className="space-y-6">{renderWidgetSlot(coreLeadIds)}</div>
 
-        {/* Right Column: Next Best Action & Active Goals */}
-        <div className="space-y-6">
-          {/* Next Best Action Banner */}
-          <div className="appear-fade-up animate-delay-100" style={{ animationDelay: "100ms" }}>
-            <NextBestAction data={data} />
-          </div>
-
-          {/* Active Goals Card */}
-          <div className="appear-fade-up" style={{ animationDelay: "300ms" }}>
-            <ActiveGoalsCard goals={data.dashboardActiveGoals} onSelectGoal={onSelectGoal} onAddGoal={onAddGoal} />
-          </div>
-
-          {/* Review prompt (chỉ hiện vào ngày phản tư) */}
-          {data.reviewDueToday ? (
-            <div className="appear-fade-up" style={{ animationDelay: "350ms" }}>
-              <ReflectionPrompt
-                currentWeek={data.dashboardKpiCurrentWeek}
-                reviewHref={data.dashboardNextAction.ctaTarget}
-              />
-            </div>
-          ) : null}
-        </div>
+        {/* Right Column: Next Best Action, Active Goals & Review prompt */}
+        <div className="space-y-6">{renderWidgetSlot(coreStackIds)}</div>
       </div>
 
       <Collapsible open={secondaryInsightsOpen} onOpenChange={handleSecondaryInsightsOpenChange}>
@@ -1169,39 +1262,11 @@ function DashboardActiveLayout({
           </div>
 
           <CollapsibleContent>
+            {/* Nhóm secondary — luôn nằm dưới nhóm core_flow trong thứ tự đọc (Req 3.2, 3.3) */}
             <div ref={secondaryInsightsRef} className="mt-5 grid items-start gap-[18px] lg:grid-cols-[1.5fr_1fr]">
-              <div className="space-y-[18px]">
-                <WeekRhythmCard
-                  system={data.activeSystem}
-                  currentWeek={data.dashboardKpiCurrentWeek}
-                  totalWeeks={data.dashboardKpiTotalWeeks}
-                  completedCount={
-                    data.activeSystemWeekCompletion?.completed ?? data.currentWeekExecutionSnapshot.completedTasks
-                  }
-                  totalCount={data.activeSystemWeekCompletion?.total ?? data.currentWeekExecutionSnapshot.totalTasks}
-                  leadAverage={data.dashboardKpiLeadAverage}
-                  wheelScore={data.averageLifeScore}
-                  streak={data.dashboardKpiStreak}
-                />
+              <div className="space-y-[18px]">{renderWidgetSlot(secondaryMainIds)}</div>
 
-                {shouldLoadTrendChart ? (
-                  <Suspense
-                    fallback={
-                      <div className="h-[280px] rounded-[18px] border border-app-line bg-app-surface p-5 md:p-6" />
-                    }
-                  >
-                    <TwelveWeekTrendCard points={trendPoints} currentWeek={data.dashboardKpiCurrentWeek} />
-                  </Suspense>
-                ) : (
-                  <div className="h-[280px] rounded-[18px] border border-app-line bg-app-surface p-5 md:p-6" />
-                )}
-              </div>
-
-              <div className="space-y-[18px] contain-render-lazy">
-                <BalanceCard rows={balanceRows} />
-                <DailyStoicCard />
-                <QuoteBlock />
-              </div>
+              <div className="space-y-[18px] contain-render-lazy">{renderWidgetSlot(secondarySideIds)}</div>
             </div>
           </CollapsibleContent>
         </section>
@@ -1260,6 +1325,16 @@ function TrialCountdownBanner({
 
   const daysLeft = Math.max(0, Math.ceil((new Date(renewsAt).getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
 
+  // Bọc copy đếm ngược/hạn gói qua resolveModeAwareCopy: real mode luôn demo-free
+  // (không rò rỉ "dùng thử"/"trên trình duyệt này"), demo mode giữ nguyên chuỗi gốc.
+  // Req 8.1, 8.2, 8.3.
+  const appMode: AppMode = demoMode ? "demo" : "real";
+  const titleCopy = resolveModeAwareCopy(demoMode ? "Plus dùng thử:" : "Plus đang trong thời gian ưu đãi:", appMode);
+  const detailCopy = resolveModeAwareCopy(
+    `còn ${daysLeft} ngày ${demoMode ? "trên trình duyệt này" : "trên tài khoản này"}.`,
+    appMode,
+  );
+
   return (
     <section
       className="mb-5 surface-raised rounded-xl border border-app-line bg-app-surface p-4 text-sm text-app-ink-soft"
@@ -1267,10 +1342,7 @@ function TrialCountdownBanner({
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <span>
-          <span className="font-semibold text-app-ink">
-            {demoMode ? "Plus dùng thử:" : "Plus đang trong thời gian ưu đãi:"}
-          </span>{" "}
-          còn {daysLeft} ngày {demoMode ? "trên trình duyệt này" : "trên tài khoản này"}.
+          <span className="font-semibold text-app-ink">{titleCopy}</span> {detailCopy}
         </span>
         <button
           type="button"
