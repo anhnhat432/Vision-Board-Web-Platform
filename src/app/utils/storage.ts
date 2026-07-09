@@ -16,6 +16,7 @@ import {
   getCurrentPlanFromData,
   hasEntitlementInData,
   restorePlanAccessLocallyInData,
+  sanitizeSubscriptionForStorage,
   startTrialLocallyInData,
   upgradePlanLocallyInData,
 } from "./storage-billing-ops";
@@ -360,7 +361,10 @@ function normalizeGoalTasks(goal: Goal): Goal {
 }
 
 function normalizeUserData(data: UserData): UserData {
-  const subscription = data.subscription ?? null;
+  // Surface-reduction: không lưu server-owned reference ids xuống localStorage.
+  // Chạy ở cả load (dọn dữ liệu cũ) lẫn save (ngăn ghi mới). Không đổi hành vi
+  // entitlement — chỉ bỏ hai trường external id không được UI nào đọc.
+  const subscription = sanitizeSubscriptionForStorage(data.subscription ?? null);
   const entitlements = Array.isArray(data.entitlements) ? data.entitlements : [];
   const subscriptionIsActive = subscription?.status === "active" || subscription?.status === "trialing";
   const subscriptionExpired = Boolean(
