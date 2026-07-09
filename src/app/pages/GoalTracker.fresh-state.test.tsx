@@ -209,7 +209,7 @@ describe("GoalTracker fresh workspace state", () => {
 
     renderGoalTracker();
 
-    expect(await screen.findByText("Active 12-week goal")).toBeInTheDocument();
+    expect((await screen.findAllByText("Active 12-week goal")).length).toBeGreaterThan(0);
     expect(screen.queryByText("Hướng dẫn cho người mới")).not.toBeInTheDocument();
   });
 });

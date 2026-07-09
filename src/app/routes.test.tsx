@@ -118,6 +118,7 @@ vi.mock("./utils/production", () => ({
 }));
 
 import { appRoutes, createAppRoutes } from "./routes";
+import { resolveModeAwareCopy } from "./utils/demo-copy-guard";
 import { initializeUserData, saveUserData } from "./utils/storage";
 
 beforeAll(async () => {
@@ -428,5 +429,41 @@ describe("app routes", () => {
     ).toBeInTheDocument();
     expectNoDemoOnlyCopy();
     await route.dispose();
+  });
+});
+
+// Task 9.2: copy đếm ngược/hạn gói theo mode ở cấp helper `resolveModeAwareCopy`.
+// TrialCountdownBanner (src/app/pages/Dashboard.tsx) dựng `detailCopy` qua helper
+// này; test ở cấp helper là cách nhẹ và ổn định nhất để bảo đảm real mode dùng
+// copy gắn với tài khoản, không rò rỉ "trên trình duyệt này".
+// Validates: Requirements 8.3, 8.5, 9.7
+describe("mode-aware countdown copy (Dashboard TrialCountdownBanner)", () => {
+  // Tái hiện đúng cách TrialCountdownBanner dựng detailCopy theo App_Mode.
+  const buildCountdownDetail = (daysLeft: number, demoMode: boolean) =>
+    resolveModeAwareCopy(
+      `còn ${daysLeft} ngày ${demoMode ? "trên trình duyệt này" : "trên tài khoản này"}.`,
+      demoMode ? "demo" : "real",
+    );
+
+  it("uses account-bound countdown copy in real mode", () => {
+    const detail = buildCountdownDetail(7, false);
+
+    expect(detail).toContain("trên tài khoản này");
+    expect(detail).not.toContain("trên trình duyệt này");
+  });
+
+  it("keeps browser-bound countdown copy in demo mode", () => {
+    const detail = buildCountdownDetail(7, true);
+
+    expect(detail).toContain("trên trình duyệt này");
+  });
+
+  it("sanitizes browser-bound countdown copy if it ever reaches real mode", () => {
+    // Ngay cả khi chuỗi Demo_Only_Copy lọt vào real mode, helper phải rewrite
+    // thành copy gắn với tài khoản (Req 8.3).
+    const detail = resolveModeAwareCopy("còn 7 ngày trên trình duyệt này.", "real");
+
+    expect(detail).toContain("trên tài khoản này");
+    expect(detail).not.toContain("trên trình duyệt này");
   });
 });

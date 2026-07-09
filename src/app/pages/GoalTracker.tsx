@@ -1,9 +1,11 @@
 import { Plus, Search, Zap } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
-import { EmptyState } from "@/app/components/states/EmptyState";
 import { SpotlightTour } from "@/app/components/SpotlightTour";
+import { EmptyState } from "@/app/components/states/EmptyState";
+import { ScreenStateView } from "@/app/components/states/ScreenStateView";
+import { useScreenDataState } from "@/app/components/states/useScreenDataState";
 import { UpgradePaywallDialog } from "@/app/components/UpgradePaywallDialog";
 import {
   AlertDialog,
@@ -49,13 +51,13 @@ import {
 } from "../utils/storage";
 import {
   completedGoalStyle,
+  GOALTRACKER_TOUR_STEPS,
   GoalCard,
   GoalFilterChips,
   GoalSummaryStrip,
   GoalTrackerSkeleton,
-  GOALTRACKER_TOUR_STEPS,
-  TodayFocusCard,
   getTodayFocusGoal,
+  TodayFocusCard,
 } from "./GoalTracker/components";
 
 export function GoalTracker() {
@@ -208,6 +210,21 @@ function GoalTrackerContent({
 
   const focusGoal = useMemo(() => getTodayFocusGoal(goalsWithMetadata), [goalsWithMetadata]);
   const hasGoals = effectiveGoals.length > 0;
+
+  // Máy trạng thái loại trừ lẫn nhau cho vùng danh sách mục tiêu (Req 5.1–5.6).
+  // Nguồn dữ liệu là localStorage qua useSyncedUserData; retry chỉ tải lại
+  // (reload) và KHÔNG đụng/xoá dữ liệu local. Loading do skeleton cấp trang
+  // đảm nhận nên vùng này không bao giờ hiển thị empty khi đang tải.
+  const [goalsLoadFailed, setGoalsLoadFailed] = useState(false);
+  const handleGoalsRetry = useCallback(() => {
+    setGoalsLoadFailed(false);
+    reload();
+  }, [reload]);
+  const goalsScreenState = useScreenDataState({
+    status: goalsLoadFailed ? "error" : "ready",
+    isEmpty: !hasGoals,
+    onRetry: handleGoalsRetry,
+  });
   const hasRealLifeBalance =
     viewUserData.onboardingCompleted && viewUserData.currentWheelOfLife.some((area) => area.score > 0);
   const goalFlowStartHref = hasRealLifeBalance ? "/life-insight" : "/onboarding";
@@ -275,9 +292,7 @@ function GoalTrackerContent({
       setLocallyUpdatedSystemGoalIds((current) => new Set(current).add(goalId));
       setViewUserData((current) => ({
         ...current,
-        goals: current.goals.map((item) =>
-          item.id === goalId ? { ...item, twelveWeekSystem: nextSystem } : item,
-        ),
+        goals: current.goals.map((item) => (item.id === goalId ? { ...item, twelveWeekSystem: nextSystem } : item)),
       }));
 
       try {
@@ -464,7 +479,7 @@ function GoalTrackerContent({
   }, [goalsWithMetadata]);
 
   return (
-    <div className="mx-auto max-w-[1100px] px-[26px] pt-[26px] pb-[64px] sm:px-[36px]">
+    <div className="mx-auto max-w-[1100px] px-6 pt-6 pb-16 sm:px-9">
       <style>{completedGoalStyle}</style>
       <UpgradePaywallDialog
         open={isGoalLimitPaywallOpen}
@@ -547,7 +562,8 @@ function GoalTrackerContent({
             <div className="absolute bottom-4 left-4 right-4 rounded-2xl border border-white/35 bg-app-surface/88 p-4 shadow-[0_18px_46px_-32px_rgba(23,21,15,0.55)] backdrop-blur-md dark:border-app-line/60 dark:bg-app-surface/90">
               <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-app-accent">Nhịp hôm nay</p>
               <p className="mt-1 text-sm font-semibold leading-snug text-app-ink">
-                {summary.completedTasks}/{summary.totalTasks || 0} việc đã chốt · {summary.activeSystems} chu kỳ đang chạy
+                {summary.completedTasks}/{summary.totalTasks || 0} việc đã chốt · {summary.activeSystems} chu kỳ đang
+                chạy
               </p>
             </div>
           </div>
@@ -590,31 +606,36 @@ function GoalTrackerContent({
 
         {/* Danh sách mục tiêu */}
         <div data-tour-id="goaltracker-goals" className="space-y-6">
-          {!hasGoals ? (
-            <EmptyState
-              variant="card"
-              illustration={<MountainMoonIllustration className="w-full text-app-ink-muted" />}
-              title="Chưa có mục tiêu"
-              description="Bắt đầu bằng chu kỳ 12 tuần đầu tiên để biến một mục tiêu quan trọng thành hành động cụ thể."
-              actions={
-                <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
-                  <Button
-                    className="bg-app-accent text-white hover:bg-app-accent-hover font-bold shadow-[var(--app-shadow-sm)] hover:scale-[1.01] transition-all px-6 py-2.5 rounded-lg text-sm"
-                    onClick={handleStartGuidedGoalFlow}
-                  >
-                    Bắt đầu chu kỳ 12 tuần
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="border-app-line bg-app-surface text-app-ink hover:bg-app-bg px-6 py-2.5 rounded-lg font-bold text-sm"
-                    onClick={handleStartDirectGoalFlow}
-                  >
-                    Tạo mục tiêu thường
-                  </Button>
-                </div>
-              }
-            />
-          ) : (
+          <ScreenStateView
+            state={goalsScreenState.kind}
+            onRetry={goalsScreenState.retry}
+            errorDescription="Chưa tải được danh sách mục tiêu. Dữ liệu cục bộ của bạn vẫn được giữ nguyên. Hãy thử lại."
+            empty={
+              <EmptyState
+                variant="card"
+                illustration={<MountainMoonIllustration className="w-full text-app-ink-muted" />}
+                title="Chưa có mục tiêu"
+                description="Bắt đầu bằng chu kỳ 12 tuần đầu tiên để biến một mục tiêu quan trọng thành hành động cụ thể."
+                actions={
+                  <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+                    <Button
+                      className="bg-app-accent text-white hover:bg-app-accent-hover font-bold shadow-[var(--app-shadow-sm)] hover:scale-[1.01] transition-all px-6 py-2.5 rounded-lg text-sm"
+                      onClick={handleStartGuidedGoalFlow}
+                    >
+                      Bắt đầu chu kỳ 12 tuần
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="border-app-line bg-app-surface text-app-ink hover:bg-app-bg px-6 py-2.5 rounded-lg font-bold text-sm"
+                      onClick={handleStartDirectGoalFlow}
+                    >
+                      Tạo mục tiêu thường
+                    </Button>
+                  </div>
+                }
+              />
+            }
+          >
             <div className="space-y-6">
               {displayTwelveWeekGoals.length > 0 && (
                 <div className="space-y-4">
@@ -662,7 +683,9 @@ function GoalTrackerContent({
                         <h2 className="font-serif text-[20px] font-bold tracking-normal text-app-ink">
                           Mục tiêu thường
                         </h2>
-                        <p className="mt-0.5 text-[12.5px] text-app-ink-muted">{displayStandardGoals.length} mục tiêu</p>
+                        <p className="mt-0.5 text-[12.5px] text-app-ink-muted">
+                          {displayStandardGoals.length} mục tiêu
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -711,7 +734,7 @@ function GoalTrackerContent({
                 />
               )}
             </div>
-          )}
+          </ScreenStateView>
         </div>
       </div>
       <SpotlightTour
