@@ -19,6 +19,7 @@ backups/
 output/
 tmp/
 /*.png
+docs/specs/**/screenshots/
 .env
 .env.local
 .env.*.local
