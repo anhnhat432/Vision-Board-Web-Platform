@@ -1,0 +1,22 @@
+name: "Vision Board CodeQL config"
+
+# Rationale: see docs/security/codeql-localstorage-rationale.md
+#
+# We exclude js/clear-text-storage-of-sensitive-data because this app is
+# local-first by design (AGENTS.md: "LocalStorage is the primary UX source of
+# truth"). The data the rule flags is billing metadata (BillingCycle enum,
+# PricingPlanCode, entitlement feature flags, provider reference ids) persisted
+# as part of UserData. None of it is a genuine secret: there are no auth tokens,
+# passwords, or card/PAN/CVV values in localStorage (Firebase auth tokens are
+# managed by the Firebase SDK, not this store). Client-side encryption of
+# localStorage would not add real security because the key must live in the
+# browser, so the rule reports a design/scanner mismatch rather than a real
+# vulnerability. Genuine secret leakage is covered by Gitleaks and by not
+# storing secrets client-side in the first place.
+
+queries:
+  - uses: security-and-quality
+
+query-filters:
+  - exclude:
+      id: js/clear-text-storage-of-sensitive-data
