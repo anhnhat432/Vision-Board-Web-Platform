@@ -35,6 +35,19 @@ const TRUST_FEATURES = [
   },
 ];
 
+const LOGIN_REVEAL_ANIMATION = "login-rise 0.65s cubic-bezier(0.22, 0.7, 0.24, 1) both";
+
+const LOGIN_MOTION_CSS = `
+@keyframes login-rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes login-glow-pulse {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.08); }
+}
+`;
+
 function getInitialLoginMode(search: string): LoginMode {
   return new URLSearchParams(search).get("mode") === "signup" ? "signup" : "signin";
 }
@@ -354,17 +367,42 @@ export function LoginPage() {
   const signInSearch = buildLoginModeSearch("signin", location.search);
   const signUpSearch = buildLoginModeSearch("signup", location.search);
 
+  const reveal = (delayMs: number): React.CSSProperties | undefined =>
+    prefersReducedMotion ? undefined : { animation: LOGIN_REVEAL_ANIMATION, animationDelay: `${delayMs}ms` };
+
   return (
-    <div className="flex min-h-screen flex-col overflow-x-hidden bg-app-bg">
+    <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-app-bg">
+      <style>{LOGIN_MOTION_CSS}</style>
+      {/* Ambient background */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
+        <div
+          className="absolute -left-40 -top-40 h-[28rem] w-[28rem] rounded-full opacity-[0.13] blur-3xl"
+          style={{ background: "var(--grad-aspire)" }}
+        />
+        <div
+          className="absolute -bottom-48 -right-32 h-[32rem] w-[32rem] rounded-full opacity-[0.09] blur-3xl"
+          style={{ background: "var(--grad-aspire)" }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--app-ink) 7%, transparent) 1px, transparent 0)",
+            backgroundSize: "24px 24px",
+            maskImage: "radial-gradient(ellipse 85% 55% at 50% 0%, black, transparent 78%)",
+            WebkitMaskImage: "radial-gradient(ellipse 85% 55% at 50% 0%, black, transparent 78%)",
+          }}
+        />
+      </div>
       <a href="#login-main" className="skip-to-content">
         Bỏ qua điều hướng
       </a>
       {/* Top bar */}
-      <header className="flex w-full items-center justify-center px-4 py-6">
-        <div className="flex flex-col items-center gap-1.5">
+      <header className="relative flex w-full items-center justify-center px-4 py-7" style={reveal(0)}>
+        <div className="flex flex-col items-center gap-2">
           <div className="flex items-center gap-2.5">
-            <div className="flex size-10 items-center justify-center rounded-lg bg-app-accent shadow-app-sm ring-1 ring-app-accent/20">
-              <Target className="h-5 w-5 text-white" />
+            <div className="flex size-10 items-center justify-center rounded-xl bg-app-accent text-white shadow-app-sm ring-1 ring-app-accent/25">
+              <Target className="h-5 w-5" />
             </div>
             <span className="text-lg font-semibold tracking-tight text-app-ink">Dear Our Future</span>
           </div>
@@ -375,42 +413,83 @@ export function LoginPage() {
       <main
         id="login-main"
         aria-label="Đăng nhập"
-        className="flex w-full flex-1 items-center justify-center overflow-x-hidden px-4 pb-12"
+        className="relative flex w-full flex-1 items-center justify-center overflow-x-hidden px-4 pb-12"
       >
         <div className="w-full max-w-6xl min-w-0">
           <h1 className="sr-only">{heroTitle}</h1>
           <div className="grid min-w-0 gap-8 lg:grid-cols-[1.1fr_1fr] lg:gap-12">
             {/* Left column - Hero panel (desktop only) */}
-            <div className="hidden lg:block">
-              <div className="rounded-[14px] border border-app-line/15 bg-grad-aspire p-8 text-white">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">{captionText}</p>
-                <p
-                  aria-hidden="true"
-                  className="mt-3 font-serif text-3xl font-medium leading-tight tracking-tight text-white max-w-md"
-                >
-                  {heroTitle}
-                </p>
-                <p className="mt-3 text-sm text-white/80 max-w-md">{heroSubline}</p>
-
-                {/* Trust features */}
-                <div className="mt-8 grid grid-cols-1 gap-3 max-w-sm">
-                  {TRUST_FEATURES.map(({ icon: Icon, title, sub }) => (
-                    <div key={title} className="flex items-start gap-3">
-                      <div className="flex size-9 items-center justify-center rounded-lg bg-app-surface/15 text-white shrink-0">
-                        <Icon className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-white">{title}</p>
-                        <p className="mt-0.5 text-xs text-white/70">{sub}</p>
-                      </div>
-                    </div>
-                  ))}
+            <div className="hidden lg:block" style={reveal(80)}>
+              <div
+                className="relative flex h-full flex-col overflow-hidden rounded-[22px] border border-white/10 p-9 text-white shadow-[0_40px_90px_-50px_rgba(12,55,38,0.85)]"
+                style={{
+                  background:
+                    "linear-gradient(150deg, var(--app-accent-active) 0%, var(--app-accent) 55%, var(--app-accent-hover) 100%)",
+                }}
+              >
+                {/* Decorative orbit rings — evoke the 12-week journey */}
+                <div aria-hidden="true" className="pointer-events-none absolute -right-28 -top-28 h-80 w-80">
+                  <div className="absolute inset-0 rounded-full border border-white/10" />
+                  <div className="absolute inset-8 rounded-full border border-white/10" />
+                  <div className="absolute inset-16 rounded-full border border-white/[0.07]" />
+                  <div className="absolute inset-24 rounded-full border border-white/[0.05]" />
                 </div>
+                {/* Soft breathing glow */}
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute -left-12 bottom-4 h-64 w-64 rounded-full bg-white/10 blur-3xl"
+                  style={prefersReducedMotion ? undefined : { animation: "login-glow-pulse 7s ease-in-out infinite" }}
+                />
+                {/* Grain texture */}
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-0 opacity-[0.10] mix-blend-soft-light"
+                  style={{
+                    backgroundImage:
+                      "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+                  }}
+                />
 
-                {/* Quote */}
-                <blockquote className="mt-10 font-serif italic text-sm text-white/60 max-w-md leading-relaxed">
-                  "Kỷ luật là cây cầu giữa mục tiêu và thành quả." — Jim Rohn
-                </blockquote>
+                <div className="relative flex h-full flex-col">
+                  <div className="inline-flex w-fit items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[11px] font-medium text-white/85 ring-1 ring-inset ring-white/15 backdrop-blur-sm">
+                    <span className="h-1.5 w-1.5 rounded-full bg-white/90" />
+                    Hành trình 12 tuần
+                  </div>
+
+                  <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.28em] text-white/65">
+                    {captionText}
+                  </p>
+                  <p
+                    aria-hidden="true"
+                    className="mt-3 max-w-md font-serif text-[2.1rem] font-medium leading-[1.12] tracking-tight text-white"
+                  >
+                    {heroTitle}
+                  </p>
+                  <p className="mt-4 max-w-md text-[15px] leading-relaxed text-white/75">{heroSubline}</p>
+
+                  {/* Trust features */}
+                  <div className="mt-9 max-w-sm">
+                    {TRUST_FEATURES.map(({ icon: Icon, title, sub }) => (
+                      <div
+                        key={title}
+                        className="flex items-start gap-3.5 border-t border-white/10 py-3.5 first:border-t-0 first:pt-0"
+                      >
+                        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-white/[0.12] text-white ring-1 ring-inset ring-white/15">
+                          <Icon className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-white">{title}</p>
+                          <p className="mt-0.5 text-[13px] text-white/65">{sub}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Quote */}
+                  <blockquote className="mt-auto max-w-md border-l-2 border-white/20 pl-4 pt-10 font-serif text-sm italic leading-relaxed text-white/70">
+                    "Kỷ luật là cây cầu giữa mục tiêu và thành quả." — Jim Rohn
+                  </blockquote>
+                </div>
               </div>
             </div>
 
@@ -418,7 +497,7 @@ export function LoginPage() {
             <div className="w-full min-w-0">
               <div className="mx-auto w-full max-w-full sm:max-w-md lg:mx-0">
                 {/* Mobile hero - simplified */}
-                <div className="lg:hidden mb-6">
+                <div className="lg:hidden mb-6" style={reveal(120)}>
                   <div className="text-center">
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
                       {captionText}
@@ -444,7 +523,10 @@ export function LoginPage() {
                   </div>
                 </div>
 
-                <div className="rounded-[14px] border border-app-line bg-app-surface p-6 md:p-8">
+                <div
+                  className="rounded-[20px] border border-app-line bg-app-surface p-6 shadow-[0_24px_70px_-38px_rgba(15,23,42,0.30)] ring-1 ring-black/[0.02] md:p-8"
+                  style={reveal(180)}
+                >
                   {/* Form header */}
                   <div>
                     <h2 className="font-serif text-2xl font-medium text-app-ink">{formTitle}</h2>
@@ -475,7 +557,7 @@ export function LoginPage() {
                     type="button"
                     onClick={handleGoogleLogin}
                     disabled={googleSubmitting || authLoading}
-                    className="mt-5 flex w-full items-center justify-center gap-2.5 rounded-lg border border-app-line bg-app-surface px-4 py-2.5 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg disabled:cursor-not-allowed disabled:bg-app-line disabled:text-app-ink-muted disabled:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                    className="mt-5 flex w-full items-center justify-center gap-2.5 rounded-xl border border-app-line bg-app-surface px-4 py-3 text-sm font-medium text-app-ink shadow-[0_1px_2px_rgba(15,23,42,0.05)] transition-[background-color,border-color,box-shadow] duration-150 hover:border-app-accent/40 hover:bg-app-bg hover:shadow-[0_4px_12px_-4px_rgba(15,23,42,0.12)] disabled:cursor-not-allowed disabled:bg-app-line disabled:text-app-ink-muted disabled:shadow-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                     aria-label="Tiếp tục với Google"
                   >
                     {googleSubmitting ? (
@@ -777,7 +859,7 @@ export function LoginPage() {
                 ) : null}
 
                 {/* Bottom switch link */}
-                <p className="mt-4 text-center text-sm text-app-ink-soft">
+                <p className="mt-4 text-center text-sm text-app-ink-soft" style={reveal(240)}>
                   {isSignIn ? (
                     <>
                       Chưa có tài khoản?{" "}

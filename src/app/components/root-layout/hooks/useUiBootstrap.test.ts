@@ -17,6 +17,11 @@ describe("useWarmPrefetch", () => {
     vi.useFakeTimers();
     navConfigMock.prefetchRoute.mockReset();
 
+    Object.defineProperty(window.navigator, "hardwareConcurrency", {
+      configurable: true,
+      value: 8,
+    });
+
     Object.defineProperty(window, "requestIdleCallback", {
       configurable: true,
       value: vi.fn((callback: IdleRequestCallback) => {
@@ -35,6 +40,7 @@ describe("useWarmPrefetch", () => {
 
   afterEach(() => {
     vi.useRealTimers();
+    Reflect.deleteProperty(window.navigator, "hardwareConcurrency");
     Reflect.deleteProperty(window, "requestIdleCallback");
     Reflect.deleteProperty(window, "cancelIdleCallback");
   });
