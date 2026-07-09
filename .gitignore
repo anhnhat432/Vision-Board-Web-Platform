@@ -10,8 +10,15 @@ dist/
 codex-backups/
 .codex-test.txt
 artifacts/
+qa-artifacts/
 audit/
 backups/
+.codex-screenshots/
+.playwright-cli/
+.playwright-mcp/
+output/
+tmp/
+/*.png
 .env
 .env.local
 .env.*.local
