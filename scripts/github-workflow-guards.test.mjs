@@ -47,6 +47,8 @@ describe("GitHub workflow safety guards", () => {
     const runbook = readFileSync(path.resolve("docs", "ops", "staging-proof-runbook.md"), "utf8");
     const currentStatus = readFileSync(path.resolve("guidelines", "CURRENT_PROJECT_STATUS.md"), "utf8");
 
+    expect(workflow).toContain("default: https://dearourfuture.io.vn");
+    expect(workflow).toContain("github.event.inputs.target_url || 'https://dearourfuture.io.vn'");
     expect(workflow).toContain("push:");
     expect(workflow).toContain("- main");
     expect(workflow).toContain("github.event_name == 'push'");
@@ -68,6 +70,20 @@ describe("GitHub workflow safety guards", () => {
     expect(currentStatus).toContain("runs `npm run smoke:prod:quick` before `npm run smoke:prod`");
   });
 
+  it("keeps MVP2 sync staging smoke off localhost in GitHub Actions", () => {
+    const workflow = readWorkflow("mvp2-sync-staging-smoke.yml");
+    const script = readFileSync(path.resolve("scripts", "smoke-mvp2-sync-staging.mjs"), "utf8");
+
+    expect(workflow).toContain("Use a staging or production-like URL for MVP2 sync proof, not localhost.");
+    expect(workflow).toContain('normalized_url="${MVP2_SMOKE_URL%/}"');
+    expect(workflow).toContain('"localhost"');
+    expect(workflow).toContain('"127.0.0.1"');
+    expect(script).toContain('const IS_GITHUB_ACTIONS = process.env.GITHUB_ACTIONS === "true";');
+    expect(script).toContain("function assertTargetSafeForEnvironment()");
+    expect(script).toContain("Refusing to run MVP2 sync staging smoke against localhost.");
+    expect(script).toContain("assertTargetSafeForEnvironment();");
+  });
+
   it("keeps CI frontend production-core scoped away from backend dependency install", () => {
     const workflow = readWorkflow("ci.yml");
 
@@ -85,12 +101,16 @@ describe("GitHub workflow safety guards", () => {
 
     expect(workflow).toContain("target_url:");
     expect(workflow).toContain('CORE_QUALITY_URL: ${{ github.event.inputs.target_url }}');
-    expect(workflow).toContain("Use a staging or production-like URL for deployed core-funnel proof, not localhost.");
+    expect(workflow).toContain("Use an accessible VITE_APP_MODE=demo staging/preview URL for deployed core-funnel proof, not localhost.");
+    expect(workflow).toContain("Core quality smoke is local-first/demo-only; use production-smoke-e2e.yml for real-mode production proof.");
     expect(workflow).toContain("npm run smoke:core-quality");
     expect(runbook).toContain("Workflow: `.github/workflows/core-funnel-quality-staging.yml`");
-    expect(runbook).toContain("gh workflow run core-funnel-quality-staging.yml --ref $env:PROOF_REF -f target_url=$env:STAGING_URL");
+    expect(runbook).toContain("Target rule: use an accessible demo/staging URL with `VITE_APP_MODE=demo` and no Vercel Deployment Protection.");
+    expect(runbook).toContain('$env:CORE_QUALITY_URL="https://your-accessible-demo-preview.example"');
+    expect(runbook).toContain("gh workflow run core-funnel-quality-staging.yml --ref $env:PROOF_REF -f target_url=$env:CORE_QUALITY_URL");
     expect(runbook).toContain("gh run list --workflow core-funnel-quality-staging.yml --event workflow_dispatch --limit 1");
     expect(checklist).toContain(".github/workflows/core-funnel-quality-staging.yml");
+    expect(checklist).toContain("accessible demo/staging target");
     expect(currentStatus).toContain("Deployed core-funnel proof workflow now exists at `.github/workflows/core-funnel-quality-staging.yml`");
   });
 

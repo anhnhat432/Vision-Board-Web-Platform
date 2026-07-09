@@ -1,7 +1,7 @@
 import { HelpCircle, LifeBuoy } from "lucide-react";
 import { Link } from "react-router";
 import { AppPublicFooter } from "../components/layout/AppPublicFooter";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader } from "../components/ui/card";
 
 const SUPPORT_EMAIL = import.meta.env.VITE_BILLING_SUPPORT_EMAIL?.trim() || "support@dearourfuture.com";
 
@@ -41,9 +41,9 @@ export function BillingFAQPage() {
             </div>
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-accent">Thanh toán Plus</p>
-              <CardTitle className="mt-2 text-3xl font-semibold tracking-tight text-app-ink">
+              <h1 className="mt-2 font-serif text-3xl font-semibold tracking-tight text-app-ink">
                 Câu hỏi thường gặp
-              </CardTitle>
+              </h1>
               <CardDescription className="mt-2 max-w-2xl text-sm leading-7 text-app-ink-soft">
                 Các câu hỏi hay gặp khi chuyển khoản ngân hàng để nâng cấp Plus.
               </CardDescription>

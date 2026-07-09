@@ -254,6 +254,7 @@ export function BillingCheckoutQR() {
     }
 
     try {
+      await apiClient.post(`/billing/orders/${encodeURIComponent(order.orderId)}/claim`, {});
       const result = await syncEntitlementsWithProvider();
       if (result.ok && result.planCode !== "FREE") {
         setEntitlementSyncStatus("synced");

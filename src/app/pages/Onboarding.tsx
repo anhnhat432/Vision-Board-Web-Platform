@@ -615,7 +615,12 @@ export function Onboarding() {
                 onWedgeClick={(index) => setActiveAreaIndex(index)}
               />
 
-              <div className="mt-4 grid grid-cols-2 gap-2.5 text-left sm:gap-3" role="status" aria-live="polite">
+              <div
+                data-testid="onboarding-assessment-summary"
+                className="mt-4 grid grid-cols-2 gap-2.5 text-left sm:gap-3"
+                role="status"
+                aria-live="polite"
+              >
                 <div className="rounded-control border border-app-line bg-app-bg-subtle px-3 py-2">
                   <span className="text-xs font-semibold uppercase tracking-wide text-app-ink-muted">Điểm trung bình</span>
                   <p className="mt-1 font-serif text-xl font-bold tabular-nums text-app-ink">
@@ -770,7 +775,7 @@ export function Onboarding() {
                           type="button"
                           onClick={() => handleScoreChangeWrapped(index, [scoreVal])}
                           whileTap={prefersReducedMotion ? {} : { scale: 0.9 }}
-                          className="dof-num inline-flex h-[42px] w-full cursor-pointer items-center justify-center rounded-full border font-[inherit] text-[14px] font-bold transition-[transform,background,color] duration-[0.12s] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-[42px]"
+                          className="dof-num inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-full border font-[inherit] text-[14px] font-bold transition-[transform,background,color] duration-[0.12s] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:h-[42px] sm:min-h-[42px] sm:w-[42px]"
                           style={{
                             borderColor: isCurrentScore ? designStyle.accent : "rgba(23,21,15,0.12)",
                             background: isCurrentScore ? designStyle.accent : "#FAF8F3",

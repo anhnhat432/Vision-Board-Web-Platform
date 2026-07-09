@@ -129,7 +129,7 @@
 
 .dof-landing .dof-social-link {
   display: flex;
-  color: #A8A296;
+  color: var(--app-ink-soft);
   transition: color 0.15s ease;
 }
 
@@ -260,16 +260,19 @@
 @media (max-width: 520px) {
   .dof-landing .dof-topbar {
     gap: 10px !important;
+    padding-right: 16px !important;
+    padding-left: 16px !important;
   }
   .dof-landing .dof-brand {
     min-width: 0;
     gap: 8px !important;
   }
   .dof-landing .dof-brand-name {
-    max-width: 126px;
+    max-width: min(140px, 38vw);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-size: 16px !important;
   }
   .dof-landing .dof-nav {
     gap: 10px !important;

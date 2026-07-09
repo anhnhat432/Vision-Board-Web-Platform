@@ -5,6 +5,7 @@ import express, { type Express } from "express";
 
 import { createAuthMiddleware } from "../middleware/authMiddlewareCore";
 import { errorMiddleware } from "../middleware/errorMiddleware";
+import { BillingSubscriptionModel } from "../models/BillingSubscriptionModel";
 import { DiscountModel } from "../models/DiscountModel";
 import { PaymentOrderModel } from "../models/PaymentOrderModel";
 import { billingRoutes, publicBillingRoutes } from "../routes/billingRoutes";
@@ -50,6 +51,8 @@ function createBillingTestApp(): Express {
         if (token === "owner-token") return { uid: ownerUserId, email: "owner@test.com", emailVerified: true };
         if (token === "other-token") return { uid: otherUserId, email: "other@test.com", emailVerified: true };
         if (token === "checkout-token") return { uid: checkoutUserId, email: "checkout@test.com", emailVerified: true };
+        if (token === "unverified-token") return { uid: "user_unverified_claim", email: "owner@test.com", emailVerified: false };
+        if (token === "no-email-token") return { uid: "user_no_email_claim", emailVerified: true };
         throw new Error("Invalid test token");
       },
     }),
@@ -306,7 +309,7 @@ describe("POST /api/billing/checkout-session", () => {
   it("returns 401 when no auth token is provided", async () => {
     const response = await requestJson(createBillingTestApp(), "POST", "/api/billing/checkout-session", {
       token: null,
-      body: validBody,
+        body: { ...validBody, receiptEmail: "buyer@example.test" },
     });
     assert.equal(response.status, 401);
     assert.equal(response.body.success, false);
@@ -363,6 +366,21 @@ describe("POST /api/billing/checkout-session", () => {
     assert.equal(response.status, 200);
     assert.equal(response.body.success, true);
   });
+
+  for (const endpoint of ["/api/billing/checkout-session", "/api/billing/orders"] as const) {
+    it(`creates a checkout session for an unverified signed-in account (${endpoint})`, async () => {
+      const response = await requestJson(createBillingTestApp(), "POST", endpoint, {
+        token: "unverified-token",
+        body: validBody,
+      });
+
+      assert.equal(response.status, 200);
+      assert.equal(response.body.success, true);
+      const data = response.body.data as Record<string, unknown>;
+      assert.equal(data.provider, "mock");
+      assert.ok(typeof data.checkoutSessionId === "string");
+    });
+  }
 
   it("creates a checkout session with mock provider even when sale lookup is unavailable", async () => {
     mockDiscountFindThrows();
@@ -489,7 +507,10 @@ describe("POST /api/billing/public-checkout-session", () => {
 
     const response = await requestJson(createBillingTestApp(), "POST", "/api/billing/public-checkout-session", {
       token: null,
-      body: validBody,
+      body: {
+        ...validBody,
+        receiptEmail: "buyer@example.test",
+      },
     });
 
     assert.equal(response.status, 200);
@@ -501,6 +522,39 @@ describe("POST /api/billing/public-checkout-session", () => {
     assert.equal(data.provider, "mock");
   });
 
+  it("requires a receipt email for public checkout so a completed order can be claimed", async () => {
+    const spy = createCheckoutSpyAdapter("mock");
+    _setAdapterForTesting("mock", spy.adapter);
+
+    const response = await requestJson(createBillingTestApp(), "POST", "/api/billing/public-checkout-session", {
+      token: null,
+      body: validBody,
+    });
+
+    assert.equal(response.status, 400);
+    assert.equal(response.body.success, false);
+    assert.equal(response.body.errorCode, "receipt_email_required");
+    assert.equal(spy.getCheckoutCallCount(), 0);
+  });
+
+  it("requires login for coupon usage on public checkout", async () => {
+    const spy = createCheckoutSpyAdapter("mock");
+    _setAdapterForTesting("mock", spy.adapter);
+
+    const response = await requestJson(createBillingTestApp(), "POST", "/api/billing/public-checkout-session", {
+      token: null,
+      body: {
+        ...validBody,
+        receiptEmail: "buyer@example.test",
+        couponCode: "LAUNCH30",
+      },
+    });
+    assert.equal(response.status, 400);
+    assert.equal(response.body.success, false);
+    assert.equal(response.body.errorCode, "coupon_requires_login");
+    assert.equal(spy.getCheckoutCallCount(), 0);
+  });
+
   it("returns 503 for public checkout when PayOS provider env is missing even if sale lookup is unavailable", async () => {
     mockDiscountFindThrows();
     process.env.BILLING_PROVIDER = "payos";
@@ -510,7 +564,7 @@ describe("POST /api/billing/public-checkout-session", () => {
     delete process.env.PAYOS_CHECKSUM_KEY;
     const response = await requestJson(createBillingTestApp(), "POST", "/api/billing/public-checkout-session", {
       token: null,
-      body: validBody,
+        body: { ...validBody, receiptEmail: "buyer@example.test" },
     });
 
     assert.equal(response.status, 503);
@@ -528,8 +582,8 @@ describe("POST /api/billing/public-checkout-session", () => {
 
       const response = await requestJson(createBillingTestApp(), "POST", "/api/billing/public-checkout-session", {
         token: null,
-        body: validBody,
-      });
+        body: { ...validBody, receiptEmail: "buyer@example.test" },
+    });
 
       assert.equal(response.status, 503);
       assert.equal(response.body.errorCode, "checkout_disabled");
@@ -557,6 +611,316 @@ describe("GET /api/billing/public-order-status/:orderId", () => {
 
     assert.equal(response.status, 400);
     assert.equal(response.body.errorCode, "invalid_order_id");
+  });
+});
+
+describe("POST /api/billing/orders/:orderId/claim", () => {
+  const claimOrderId = "VBCLAIM001";
+
+  type ClaimOrder = {
+    orderId: string;
+    userId: string;
+    status: "pending" | "completed" | "expired" | "failed";
+    purpose: "plus_subscription" | "physical_order";
+    provider: string;
+    receiptEmail?: string | null;
+    save: () => Promise<void>;
+  };
+
+  const paymentOrderModel = PaymentOrderModel as unknown as {
+    findOne: (query: unknown) => Promise<ClaimOrder | null>;
+  };
+  const billingSubscriptionModel = BillingSubscriptionModel as unknown as {
+    updateMany: (filter: unknown, update: unknown) => Promise<{ modifiedCount: number }>;
+  };
+  const billingServiceMock = billingService as unknown as {
+    getCurrentEntitlementForUser: typeof billingService.getCurrentEntitlementForUser;
+  };
+
+  const originalFindOne = paymentOrderModel.findOne;
+  const originalUpdateMany = billingSubscriptionModel.updateMany;
+  const originalGetCurrentEntitlementForUser = billingServiceMock.getCurrentEntitlementForUser;
+
+  afterEach(() => {
+    paymentOrderModel.findOne = originalFindOne;
+    billingSubscriptionModel.updateMany = originalUpdateMany;
+    billingServiceMock.getCurrentEntitlementForUser = originalGetCurrentEntitlementForUser;
+  });
+
+  function createPublicClaimOrder(overrides: Partial<ClaimOrder> = {}): ClaimOrder {
+    return {
+      orderId: claimOrderId,
+      userId: "public:local_browser_user",
+      status: "completed",
+      purpose: "plus_subscription",
+      provider: "payos",
+      receiptEmail: "owner@test.com",
+      save: async () => undefined,
+      ...overrides,
+    };
+  }
+
+  function mockEntitlementSnapshot() {
+    billingServiceMock.getCurrentEntitlementForUser = async (userId) => ({
+      userId,
+      planCode: "PLUS",
+      status: "active",
+      activeKeys: ["premium_templates"],
+      source: "provider",
+      resolvedAt: "2026-07-08T00:00:00.000Z",
+    });
+  }
+
+  it("returns 401 when no auth token is provided", async () => {
+    const response = await requestJson(createBillingTestApp(), "POST", `/api/billing/orders/${claimOrderId}/claim`, {
+      token: null,
+    });
+
+    assert.equal(response.status, 401);
+    assert.equal(response.body.success, false);
+    assert.equal(response.body.errorCode, "unauthorized");
+  });
+
+  it("validates malformed order ids before database lookup", async () => {
+    let lookupCount = 0;
+    paymentOrderModel.findOne = async () => {
+      lookupCount += 1;
+      throw new Error("PaymentOrderModel.findOne should not run for malformed order id.");
+    };
+
+    const response = await requestJson(createBillingTestApp(), "POST", "/api/billing/orders/not-valid/claim", {
+      token: "owner-token",
+    });
+
+    assert.equal(response.status, 400);
+    assert.equal(response.body.errorCode, "invalid_order_id");
+    assert.equal(lookupCount, 0);
+  });
+
+  it("returns 404 when the order does not exist", async () => {
+    paymentOrderModel.findOne = async () => null;
+
+    const response = await requestJson(createBillingTestApp(), "POST", `/api/billing/orders/${claimOrderId}/claim`, {
+      token: "owner-token",
+    });
+
+    assert.equal(response.status, 404);
+    assert.equal(response.body.errorCode, "order_not_found");
+  });
+
+  it("requires a verified account email before database lookup", async () => {
+    let lookupCount = 0;
+    paymentOrderModel.findOne = async () => {
+      lookupCount += 1;
+      throw new Error("PaymentOrderModel.findOne should not run for unverified email.");
+    };
+
+    const response = await requestJson(createBillingTestApp(), "POST", `/api/billing/orders/${claimOrderId}/claim`, {
+      token: "unverified-token",
+    });
+
+    assert.equal(response.status, 403);
+    assert.equal(response.body.errorCode, "EMAIL_NOT_VERIFIED");
+    assert.equal(lookupCount, 0);
+  });
+
+  it("rejects a receipt-email order when the authenticated token has no email", async () => {
+    let saveCount = 0;
+    let subscriptionUpdateCount = 0;
+    const order = createPublicClaimOrder({
+      save: async () => {
+        saveCount += 1;
+      },
+    });
+    paymentOrderModel.findOne = async () => order;
+    billingSubscriptionModel.updateMany = async () => {
+      subscriptionUpdateCount += 1;
+      return { modifiedCount: 0 };
+    };
+    mockEntitlementSnapshot();
+
+    const response = await requestJson(createBillingTestApp(), "POST", `/api/billing/orders/${claimOrderId}/claim`, {
+      token: "no-email-token",
+    });
+
+    assert.equal(response.status, 403);
+    assert.equal(response.body.errorCode, "email_mismatch");
+    assert.equal(order.userId, "public:local_browser_user");
+    assert.equal(saveCount, 0);
+    assert.equal(subscriptionUpdateCount, 0);
+  });
+
+  it("rejects automatic claim when the public order has no receipt email", async () => {
+    let saveCount = 0;
+    let subscriptionUpdateCount = 0;
+    const order = createPublicClaimOrder({
+      receiptEmail: null,
+      save: async () => {
+        saveCount += 1;
+      },
+    });
+    paymentOrderModel.findOne = async () => order;
+    billingSubscriptionModel.updateMany = async () => {
+      subscriptionUpdateCount += 1;
+      return { modifiedCount: 0 };
+    };
+    mockEntitlementSnapshot();
+
+    const response = await requestJson(createBillingTestApp(), "POST", `/api/billing/orders/${claimOrderId}/claim`, {
+      token: "owner-token",
+    });
+
+    assert.equal(response.status, 400);
+    assert.equal(response.body.errorCode, "claim_email_required");
+    assert.equal(order.userId, "public:local_browser_user");
+    assert.equal(saveCount, 0);
+    assert.equal(subscriptionUpdateCount, 0);
+  });
+
+  it("rejects a receipt-email order when the authenticated email does not match", async () => {
+    let saveCount = 0;
+    let subscriptionUpdateCount = 0;
+    const order = createPublicClaimOrder({
+      save: async () => {
+        saveCount += 1;
+      },
+    });
+    paymentOrderModel.findOne = async () => order;
+    billingSubscriptionModel.updateMany = async () => {
+      subscriptionUpdateCount += 1;
+      return { modifiedCount: 0 };
+    };
+    mockEntitlementSnapshot();
+
+    const response = await requestJson(createBillingTestApp(), "POST", `/api/billing/orders/${claimOrderId}/claim`, {
+      token: "other-token",
+    });
+
+    assert.equal(response.status, 403);
+    assert.equal(response.body.errorCode, "email_mismatch");
+    assert.equal(order.userId, "public:local_browser_user");
+    assert.equal(saveCount, 0);
+    assert.equal(subscriptionUpdateCount, 0);
+  });
+
+  it("rejects orders that are not completed", async () => {
+    paymentOrderModel.findOne = async () => createPublicClaimOrder({ status: "pending" });
+
+    const response = await requestJson(createBillingTestApp(), "POST", `/api/billing/orders/${claimOrderId}/claim`, {
+      token: "owner-token",
+    });
+
+    assert.equal(response.status, 400);
+    assert.equal(response.body.errorCode, "order_not_completed");
+  });
+
+  it("rejects physical orders", async () => {
+    paymentOrderModel.findOne = async () => createPublicClaimOrder({ purpose: "physical_order" });
+
+    const response = await requestJson(createBillingTestApp(), "POST", `/api/billing/orders/${claimOrderId}/claim`, {
+      token: "owner-token",
+    });
+
+    assert.equal(response.status, 400);
+    assert.equal(response.body.errorCode, "physical_order_not_claimable");
+  });
+
+  it("rejects orders that are already linked to an account", async () => {
+    paymentOrderModel.findOne = async () => createPublicClaimOrder({ userId: otherUserId });
+
+    const response = await requestJson(createBillingTestApp(), "POST", `/api/billing/orders/${claimOrderId}/claim`, {
+      token: "owner-token",
+    });
+
+    assert.equal(response.status, 400);
+    assert.equal(response.body.errorCode, "order_already_claimed");
+  });
+
+  it("leaves the public order claimable when subscription migration fails", async () => {
+    let saveCount = 0;
+    const order = createPublicClaimOrder({
+      save: async () => {
+        saveCount += 1;
+      },
+    });
+    paymentOrderModel.findOne = async () => order;
+    billingSubscriptionModel.updateMany = async () => {
+      throw new Error("subscription migration failed");
+    };
+    mockEntitlementSnapshot();
+
+    const response = await requestJson(createBillingTestApp(), "POST", `/api/billing/orders/${claimOrderId}/claim`, {
+      token: "owner-token",
+    });
+
+    assert.equal(response.status, 500);
+    assert.equal(order.userId, "public:local_browser_user");
+    assert.equal(saveCount, 0);
+  });
+
+  it("allows the same verified user to retry an already-linked claim", async () => {
+    let subscriptionUpdateCount = 0;
+    const order = createPublicClaimOrder({ userId: ownerUserId });
+    paymentOrderModel.findOne = async () => order;
+    billingSubscriptionModel.updateMany = async () => {
+      subscriptionUpdateCount += 1;
+      return { modifiedCount: 0 };
+    };
+    mockEntitlementSnapshot();
+
+    const response = await requestJson(createBillingTestApp(), "POST", `/api/billing/orders/${claimOrderId}/claim`, {
+      token: "owner-token",
+    });
+
+    assert.equal(response.status, 200);
+    assert.equal(response.body.success, true);
+    assert.equal(subscriptionUpdateCount, 0);
+    const data = response.body.data as Record<string, unknown>;
+    assert.equal(data.alreadyClaimed, true);
+    assert.equal(data.orderId, claimOrderId);
+  });
+
+  it("transfers a completed public order and subscription to the matching verified user", async () => {
+    let saveCount = 0;
+    let subscriptionFilter: unknown;
+    let subscriptionUpdate: unknown;
+    const order = createPublicClaimOrder({
+      save: async () => {
+        saveCount += 1;
+      },
+    });
+    paymentOrderModel.findOne = async (query) => {
+      assert.deepEqual(query, { orderId: claimOrderId });
+      return order;
+    };
+    billingSubscriptionModel.updateMany = async (filter, update) => {
+      subscriptionFilter = filter;
+      subscriptionUpdate = update;
+      return { modifiedCount: 1 };
+    };
+    mockEntitlementSnapshot();
+
+    const response = await requestJson(createBillingTestApp(), "POST", `/api/billing/orders/${claimOrderId}/claim`, {
+      token: "owner-token",
+    });
+
+    assert.equal(response.status, 200);
+    assert.equal(response.body.success, true);
+    assert.equal(order.userId, ownerUserId);
+    assert.equal(saveCount, 1);
+    assert.deepEqual(subscriptionFilter, { provider: "payos", providerSubscriptionId: claimOrderId });
+    assert.deepEqual(subscriptionUpdate, { $set: { userId: ownerUserId } });
+
+    const data = response.body.data as Record<string, unknown>;
+    assert.equal(data.claimed, true);
+    assert.equal(data.orderId, claimOrderId);
+    assert.equal(data.previousUserId, "public:local_browser_user");
+    assert.equal(data.migratedSubscriptions, 1);
+    assert.deepEqual(data.currentEntitlement, {
+      planCode: "PLUS",
+      status: "active",
+      entitlements: ["premium_templates"],
+    });
   });
 });
 
@@ -637,6 +1001,12 @@ describe("GET /api/billing/payment-history", () => {
 describe("POST /api/billing/customer-portal", () => {
   const portalUserId = "user_portal_test";
 
+  afterEach(() => {
+    _resetAdapterCacheForTesting();
+    delete process.env.BILLING_SUPPORT_EMAIL;
+    delete process.env.SUPPORT_EMAIL;
+  });
+
   function createPortalTestApp(): Express {
     const app = express();
     app.use(express.json());
@@ -684,6 +1054,35 @@ describe("POST /api/billing/customer-portal", () => {
     assert.equal(data.supported, true);
     assert.ok(typeof data.portalUrl === "string");
     assert.ok((data.portalUrl as string).length > 0);
+  });
+
+  it("uses the configured support email when customer portal creation is unavailable", async () => {
+    process.env.BILLING_SUPPORT_EMAIL = "billing-support@example.test";
+    _setAdapterForTesting("mock", {
+      providerId: "mock",
+      isConfigured: true,
+      async createCheckoutSession() {
+        throw new Error("Not used in customer portal support email test.");
+      },
+      verifyWebhookSignature: () => ({ valid: false }),
+      parseWebhookEvent: () => {
+        throw new Error("Not used in customer portal support email test.");
+      },
+      mapSubscriptionStatus: () => null,
+      createCustomerPortalSession: async () => null,
+    });
+    await billingService.createMockOrManualEntitlement(portalUserId, "PLUS", "mock");
+
+    const response = await requestJson(createPortalTestApp(), "POST", "/api/billing/customer-portal", {
+      token: "portal-token",
+      body: { returnUrl: "https://example.com/billing" },
+    });
+
+    assert.equal(response.status, 200);
+    const data = response.body.data as Record<string, unknown>;
+    assert.equal(data.supported, false);
+    assert.equal(data.supportEmail, "billing-support@example.test");
+    assert.match(String(data.message), /billing-support@example\.test/);
   });
 });
 

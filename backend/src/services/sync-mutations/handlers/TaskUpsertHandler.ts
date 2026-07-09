@@ -14,9 +14,9 @@ import type { HandlerResult, SyncMutationType } from "../types";
  *   completed?: boolean;
  * }
  *
- * Hiện tại backend chưa có repository method riêng cho task_upsert,
- * nên handler trả về "accepted" để báo rằng mutation đã được ghi nhận
- * nhưng chưa được apply (pending full implementation).
+ * Backend does not yet have a repository method for task_upsert.
+ * Until full persistence exists, this handler must fail explicitly so clients
+ * do not treat non-persisted task creation/update work as synced.
  */
 export class TaskUpsertHandler implements MutationHandlerStrategy {
   readonly mutationType: SyncMutationType = "task_upsert";
@@ -48,14 +48,15 @@ export class TaskUpsertHandler implements MutationHandlerStrategy {
       };
     }
 
-    // ─── Accepted (pending full upsert implementation) ────────
-    // TODO: Implement full task upsert when TaskModel supports createOrUpdate
+    // TODO: Implement full task upsert when TaskModel supports createOrUpdate.
     return {
       mutationId,
       type: "task_upsert",
-      status: "accepted",
+      status: "failed",
       entityType: "task",
-      message: "Task upsert mutation accepted (pending full implementation).",
+      reason: "Task upsert is not implemented on the backend yet.",
+      message: "Task upsert mutation was not applied because backend task persistence is not implemented.",
+      syncErrorCode: "task_upsert_not_implemented",
     };
   }
 }

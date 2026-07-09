@@ -1,5 +1,6 @@
-import { Facebook, Instagram } from "lucide-react";
 import { Link } from "react-router";
+
+import { FacebookIcon, InstagramIcon, TikTokIcon } from "./SocialIcons";
 
 type ProductLink = { label: string; to: string };
 type CompanyLink = { label: string; to?: string; href?: string };
@@ -15,7 +16,7 @@ const PRODUCT_LINKS: ProductLink[] = [
 
 const COMPANY_LINKS: CompanyLink[] = [
   { label: "Về Dear Our Future", to: "/" },
-  { label: "Liên hệ", href: "mailto:dearourfuture123@gmail.com" },
+  { label: "Liên hệ", to: "/contact" },
 ];
 
 const LEGAL_LINKS: LegalLink[] = [
@@ -29,14 +30,6 @@ const TIKTOK_HREF = "https://www.tiktok.com/@dofexe201";
 const INSTAGRAM_HREF = "https://www.instagram.com/dearourfuture";
 const SOCIAL_ICON_CLASS =
   "flex size-9 items-center justify-center rounded-full border border-app-line bg-app-bg text-app-ink-soft transition-colors duration-150 hover:border-app-accent/40 hover:text-app-accent";
-
-function TikTokIcon({ className = "" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M19.5 6.5a5 5 0 0 1-3.5-1.5V15a5 5 0 1 1-5-5v3a2 2 0 1 0 2 2V2h3a5 5 0 0 0 3.5 3.5z" />
-    </svg>
-  );
-}
 
 export function AppPublicFooter() {
   const year = new Date().getFullYear();
@@ -71,7 +64,7 @@ export function AppPublicFooter() {
                 aria-label="Instagram"
                 className={SOCIAL_ICON_CLASS}
               >
-                <Instagram className="h-4 w-4" />
+                <InstagramIcon className="h-4 w-4" />
               </a>
               <a
                 href={FACEBOOK_HREF}
@@ -80,7 +73,7 @@ export function AppPublicFooter() {
                 aria-label="Facebook"
                 className={SOCIAL_ICON_CLASS}
               >
-                <Facebook className="h-4 w-4" />
+                <FacebookIcon className="h-4 w-4" />
               </a>
             </div>
           </div>

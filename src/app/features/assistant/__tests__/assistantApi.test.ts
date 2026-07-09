@@ -3,6 +3,8 @@ import type { AssistantContext } from "../buildAssistantContext";
 
 const mocks = vi.hoisted(() => ({
   authedFetch: vi.fn(),
+  getApiBaseUrl: vi.fn(() => "https://api.test"),
+  isApiBaseUrlConfigured: vi.fn(() => true),
   isDemoMode: vi.fn(() => false),
   post: vi.fn(),
 }));
@@ -12,7 +14,8 @@ vi.mock("@/app/utils/app-mode", () => ({
 }));
 
 vi.mock("@/lib/api/apiClient", () => ({
-  getApiBaseUrl: () => "https://api.test",
+  getApiBaseUrl: mocks.getApiBaseUrl,
+  isApiBaseUrlConfigured: mocks.isApiBaseUrlConfigured,
   post: mocks.post,
 }));
 
@@ -91,7 +94,31 @@ function sseResponse(chunks: string[]): Response {
 describe("assistantApi sendAssistantMessageStream", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.getApiBaseUrl.mockReturnValue("https://api.test");
+    mocks.isApiBaseUrlConfigured.mockReturnValue(true);
     mocks.isDemoMode.mockReturnValue(false);
+  });
+
+  it("fails fast without calling localhost when real-mode API base URL is not configured", async () => {
+    const { sendAssistantMessage, sendAssistantMessageStream } = await import("../assistantApi");
+    mocks.isApiBaseUrlConfigured.mockReturnValue(false);
+    const deltas: string[] = [];
+
+    await expect(
+      sendAssistantMessageStream({ message: "ban la ai", context }, (delta) => deltas.push(delta)),
+    ).rejects.toMatchObject({
+      errorCode: "ASSISTANT_BACKEND_NOT_CONFIGURED",
+      message: expect.stringContaining("chưa được cấu hình"),
+    });
+
+    await expect(sendAssistantMessage({ message: "ban la ai", context })).rejects.toMatchObject({
+      errorCode: "ASSISTANT_BACKEND_NOT_CONFIGURED",
+      message: expect.stringContaining("chưa được cấu hình"),
+    });
+    expect(deltas).toEqual([]);
+    expect(mocks.getApiBaseUrl).not.toHaveBeenCalled();
+    expect(mocks.authedFetch).not.toHaveBeenCalled();
+    expect(mocks.post).not.toHaveBeenCalled();
   });
 
   it("streams structured AI deltas from the Groq SSE endpoint", async () => {

@@ -1,4 +1,16 @@
 import "@testing-library/jest-dom/vitest";
+import { cleanup } from "@testing-library/react";
+import { afterEach } from "vitest";
+
+afterEach(() => {
+  cleanup();
+
+  document.querySelectorAll("[data-radix-focus-guard]").forEach((node) => {
+    node.remove();
+  });
+  document.body.removeAttribute("data-scroll-locked");
+  document.body.style.removeProperty("pointer-events");
+});
 
 // jsdom does not implement AbortSignal used by motion-dom addEventListener
 const _origAddEventListener = EventTarget.prototype.addEventListener;

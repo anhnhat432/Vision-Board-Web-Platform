@@ -2,7 +2,8 @@
 
 import { chromium } from "playwright";
 
-const BASE_URL = (process.env.PROD_SMOKE_URL ?? "https://vision-board-web-platform.vercel.app").replace(/\/$/, "");
+const PRODUCTION_SMOKE_URL = "https://dearourfuture.io.vn";
+const BASE_URL = (process.env.PROD_SMOKE_URL ?? PRODUCTION_SMOKE_URL).replace(/\/$/, "");
 const TIMESTAMP = new Date().toISOString().replace(/[-:.TZ]/g, "").slice(0, 14);
 const GENERATED_EMAIL = `codex.qa+full-smoke-${TIMESTAMP}@example.com`;
 const GENERATED_PASSWORD = `CodexFullSmoke${TIMESTAMP}!`;
@@ -14,6 +15,7 @@ const AUTH_MODE_OVERRIDE = process.env.PROD_SMOKE_AUTH_MODE?.trim().toLowerCase(
 const AUTH_MODE = AUTH_MODE_OVERRIDE || (HAS_PROVIDED_CREDENTIALS ? "signin" : "signup");
 const DEFAULT_TIMEOUT_MS = Number(process.env.PROD_SMOKE_TIMEOUT_MS ?? 90_000);
 const SKIP_CHECKOUT = process.env.PROD_SMOKE_SKIP_CHECKOUT === "1";
+const REQUIRE_CHECKOUT = process.env.PROD_SMOKE_REQUIRE_CHECKOUT === "1";
 
 const GOAL_ID = `goal_full_smoke_${TIMESTAMP}`;
 const GOAL_TITLE = `Full production smoke ${TIMESTAMP}`;
@@ -1856,13 +1858,17 @@ async function exerciseTwelveWeekSaveReloadAndSync(page, apiEvents) {
   });
 
   await triggerManualTwelveWeekAccountSync(page);
-  await waitForApiSuccess(
+  await waitForApiSuccessWithRateLimitRetry(
+    page,
     apiEvents,
     /\/api\/(?:sync\/12-week\/(?:mutations|pull)(?:\?|$)|(?:plans|tasks|weeks|metrics)(?:\/|$))/,
     "12-week backend sync",
     {
       after: syncStartedAt,
       timeoutMs: DEFAULT_TIMEOUT_MS,
+      onRateLimitRetry: async () => {
+        await triggerManualTwelveWeekAccountSync(page);
+      },
     },
   );
   await waitForSyncQueueIdle(page);
@@ -1922,9 +1928,16 @@ async function exerciseBilling(page, apiEvents) {
   await assertNoHorizontalOverflow(page, "billing desktop");
 
   if ((await page.locator('[data-testid="paid-checkout-disabled-banner"]').count()) > 0) {
+    if (REQUIRE_CHECKOUT) {
+      throw new Error("PROD_SMOKE_REQUIRE_CHECKOUT=1 requires paid checkout to be enabled, but the lock banner is visible.");
+    }
     await assertPaidCheckoutLocked(page, apiEvents);
     log("Paid checkout kill-switch is active; verified locked billing confirm flow instead of creating a checkout QR");
     return;
+  }
+
+  if (SKIP_CHECKOUT && REQUIRE_CHECKOUT) {
+    throw new Error("PROD_SMOKE_REQUIRE_CHECKOUT=1 cannot be combined with PROD_SMOKE_SKIP_CHECKOUT=1.");
   }
 
   if (SKIP_CHECKOUT) {

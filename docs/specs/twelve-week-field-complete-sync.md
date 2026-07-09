@@ -36,6 +36,7 @@
 5. WHERE real/demo mode differs, THE system SHALL keep protected pull/import/mutation paths real-mode/auth-only.
 6. WHEN a delta pull returns updated goal, plan, week, or lead metric entities, THE system SHALL merge those supported metadata changes into the existing local 12-week system without clearing local task/check-in/review execution records.
 7. WHEN a pulled cloud entity matches an unresolved pending local mutation, THE system SHALL create a conflict record and classify the winner with LWW/tombstone rules before auto-apply, even when the cloud timestamp is older, so `skipEntities` can protect local-winning work.
+8. WHERE a real-mode visitor is signed out, THE system SHALL let `/12-week-setup` render its own final-step login gate while keeping execution routes such as `/12-week-system` behind the root login redirect.
 
 ## 6. Data, Storage, and Sync Constraints
 
@@ -67,6 +68,7 @@
 - [x] local-winning pending mutations are represented as conflicts before auto-apply so cloud apply can skip those entities.
 - [x] demo/signed-out modes do not call protected pull/import/mutation endpoints.
 - [x] delta pull applies supported goal, plan, week, and lead metric updates without dropping existing local execution records.
+- [x] signed-out real-mode setup and execution route boundaries are documented by root-layout/workspace-gate regression tests.
 
 ## 10. Verification Plan
 

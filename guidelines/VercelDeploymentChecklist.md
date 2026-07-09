@@ -159,6 +159,8 @@ Frontend env on Vercel:
 - `VITE_FIREBASE_APP_ID`
 - `VITE_BILLING_PROVIDER_MODE=api_contract`
 - `VITE_BILLING_PROVIDER_LABEL`
+- `VITE_BILLING_SUPPORT_EMAIL=<support mailbox shown to customers>`
+- `VITE_BILLING_PLUS_MONTHLY_PRICE_VND=99000` (must match backend `PLUS_PRICE_VND`)
 - `VITE_ENABLE_12_WEEK_MUTATION_SYNC=true`
 - `VITE_ENABLE_12_WEEK_PULL_SYNC=true`
 - `VITE_SENTRY_DSN`
@@ -173,9 +175,12 @@ Backend env on Render:
 - `FIREBASE_PROJECT_ID`
 - `FIREBASE_CLIENT_EMAIL`
 - `FIREBASE_PRIVATE_KEY`
-- `FRONTEND_ORIGIN=https://vision-board-web-platform.vercel.app`
+- `FRONTEND_ORIGIN=https://dearourfuture.io.vn`
+  - If the Vercel alias remains publicly usable, include both origins as a comma-separated value:
+    `FRONTEND_ORIGIN=https://dearourfuture.io.vn,https://vision-board-web-platform.vercel.app`
 - `BILLING_PROVIDER=casso`
 - `BILLING_REPOSITORY=mongo`
+- `BILLING_SUPPORT_EMAIL=<same support mailbox as VITE_BILLING_SUPPORT_EMAIL>`
 - `CASSO_WEBHOOK_SECRET`
 - `CASSO_BANK_ACCOUNT`
 - `CASSO_BANK_NAME`
@@ -193,14 +198,15 @@ Run local env checks before deploy:
 
 ```bash
 node scripts/check-runtime-env.mjs
-node scripts/check-runtime-env.mjs --full-stack --casso-billing
+node scripts/check-runtime-env.mjs --full-stack --mode production --casso-billing
 ```
 
 Expected behavior:
 
 - Dev/report mode may warn about missing Sentry and backend env, but must not require Sentry.
-- Full-stack mode fails when MongoDB, Firebase Admin, or required Casso billing env is missing.
-- Full-stack mode warns, but does not fail, when `SENTRY_DSN` or `VITE_SENTRY_DSN` is missing.
+- Full-stack mode fails when MongoDB, Firebase Admin, required real-mode frontend runtime env, or required Casso billing env is missing.
+- Full-stack mode fails when `VITE_SENTRY_DSN` is missing, because frontend production boot/config failures must be observable.
+- Full-stack mode warns, but does not fail, when backend `SENTRY_DSN` is missing.
 
 After Vercel preview deploy, verify HTTP security headers:
 
@@ -213,7 +219,8 @@ Expected headers:
 - `X-Frame-Options: DENY`
 - `X-Content-Type-Options: nosniff`
 - `Referrer-Policy: strict-origin-when-cross-origin`
-- `Permissions-Policy: camera=(), microphone=(), geolocation=()`
+- `Strict-Transport-Security: max-age=31536000` (no `includeSubDomains` / `preload` until subdomain HTTPS readiness is verified)
+- `Permissions-Policy: camera=(), microphone=(self), geolocation=()`
 - `Content-Security-Policy` with `frame-ancestors 'none'`
 
 Sentry smoke check:

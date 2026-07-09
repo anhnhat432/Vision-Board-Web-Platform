@@ -100,6 +100,9 @@ function parseLocalState(rawJson) {
     cachedFiles: Array.isArray(parsed.cachedFiles)
       ? parsed.cachedFiles.filter((value) => typeof value === "string" && value.trim()).map((value) => value.trim())
       : [],
+    changedFiles: Array.isArray(parsed.changedFiles)
+      ? parsed.changedFiles.filter((value) => typeof value === "string" && value.trim()).map((value) => value.trim())
+      : [],
   };
 }
 
@@ -110,6 +113,7 @@ function readLocalState() {
 
   const headSha = readGitText(["rev-parse", "HEAD"]) ?? "unknown";
   const cachedOutput = readGitText(["diff", "--cached", "--name-only", "--", ...RELEVANT_LOCAL_FILES]) ?? "";
+  const changedOutput = readGitText(["diff", "--name-only", "--", ...RELEVANT_LOCAL_FILES]) ?? "";
 
   return {
     headSha,
@@ -117,7 +121,15 @@ function readLocalState() {
       .split(/\r?\n/)
       .map((value) => value.trim())
       .filter(Boolean),
+    changedFiles: changedOutput
+      .split(/\r?\n/)
+      .map((value) => value.trim())
+      .filter(Boolean),
   };
+}
+
+function uniqueValues(values) {
+  return [...new Set(values)];
 }
 
 function formatRunMetadata(run) {
@@ -159,9 +171,11 @@ function main() {
     console.log(
       `FAIL Production smoke latest run: latest run ${latest.id} concluded ${latest.conclusion} event=${latest.event} sha=${latest.sha} createdAt=${latest.createdAt} url=${latest.url}`,
     );
-    if (localState.cachedFiles.length > 0 && latest.sha === localState.headSha) {
+    const localMitigationFiles = uniqueValues([...localState.cachedFiles, ...localState.changedFiles]);
+    if (localMitigationFiles.length > 0 && latest.sha === localState.headSha) {
+      const stateLabel = localState.changedFiles.length > 0 ? "present but unpublished" : "staged but unpublished";
       console.log(
-        `NOTE Production smoke local mitigation is staged but unpublished: ${localState.cachedFiles.join(", ")}. The failed run was on HEAD before these staged changes reached default branch.`,
+        `NOTE Production smoke local mitigation is ${stateLabel}: ${localMitigationFiles.join(", ")}. The failed run was on HEAD before these local changes reached default branch.`,
       );
     }
     process.exitCode = 1;

@@ -437,7 +437,7 @@ $env:EMAIL_VERIFICATION_E2E_ALLOW="CREATE_TEST_ACCOUNT"
 npm run test:e2e:email-verification
 ```
 
-By default this creates a generated disposable `codex.qa+verify-...@example.com` account, confirms the unverified-email banner is visible on `/billing/plan`, checks the resend cooldown, and verifies the paid checkout guard when checkout is otherwise enabled. To use a fixed disposable account, the email must clearly contain `+verify`:
+By default this creates a generated disposable `codex.qa+verify-...@example.com` account, confirms the unverified-email banner is visible on `/billing/plan`, checks the resend cooldown, and verifies the paid checkout path remains available when checkout is otherwise enabled. To use a fixed disposable account, the email must clearly contain `+verify`:
 
 ```powershell
 $env:EMAIL_VERIFICATION_E2E_EMAIL="codex.qa+verify@example.com"
@@ -470,9 +470,10 @@ Environment report:
 ```powershell
 npm run env:check
 npm run env:check:full
+npm run env:check:prod
 ```
 
-`env:check` reports missing env values without failing the local demo path. `env:check:full` is stricter and should pass before testing authenticated backend sync.
+`env:check` reports missing env values without failing the local demo path. `env:check:full` is stricter for authenticated backend sync using the current/default Vite env mode. `env:check:prod` pins `--mode production` and should pass before production deploy/smoke checks.
 
 ## Pre-commit Hooks
 
@@ -642,6 +643,7 @@ API returns `401`:
 
 - this is expected for frontend-only demo mode
 - use `env:check:full` only when running authenticated backend sync
+- use `env:check:prod` for production readiness so `.env.production` is checked instead of the default development mode
 
 Vercel refresh gives 404:
 

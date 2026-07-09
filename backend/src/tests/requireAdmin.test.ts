@@ -93,4 +93,28 @@ describe("requireAdmin", () => {
     assert.equal(error?.statusCode, 403);
     assert.equal(calls.count, 1);
   });
+
+  it("rejects stale Firebase admin claims when the database role is not admin", async () => {
+    const calls = { count: 0 };
+    mockRoleLookup("user", calls);
+    const recorder = createNextRecorder();
+    const req = {
+      user: {
+        uid: "stale_admin_claim_uid",
+        email: "former-admin@example.com",
+        role: "admin",
+      },
+      firebaseToken: {
+        uid: "stale_admin_claim_uid",
+        email: "former-admin@example.com",
+        role: "admin",
+      },
+    } as unknown as Request;
+
+    await requireAdmin(req, {} as Response, recorder.next);
+
+    const error = recorder.getError() as { statusCode?: number };
+    assert.equal(error?.statusCode, 403);
+    assert.equal(calls.count, 1);
+  });
 });

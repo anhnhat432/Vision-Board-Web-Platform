@@ -6,6 +6,7 @@
  */
 
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import type { SMARTData } from "../types";
 import { MeasurableStep } from "./MeasurableStep";
@@ -23,7 +24,8 @@ function makeSmartData(overrides: Partial<SMARTData> = {}): SMARTData {
 }
 
 describe("SpecificStep — archetype examples", () => {
-  it("shows the goal-variant example panel when intentArchetype is concrete", () => {
+  it("shows the goal-variant example panel when intentArchetype is concrete", async () => {
+    const user = userEvent.setup();
     const setSmartData = vi.fn();
     render(
       <SpecificStep
@@ -34,7 +36,9 @@ describe("SpecificStep — archetype examples", () => {
         intentArchetype="exam_study"
       />,
     );
-    const panel = screen.getByTestId("goal-archetype-examples");
+    await user.click(screen.getByRole("button", { name: /Xem ví dụ yếu và mạnh/i }));
+
+    const panel = await screen.findByTestId("goal-archetype-examples");
     expect(panel.getAttribute("data-variant")).toBe("goal");
     expect(panel.getAttribute("data-archetype")).toBe("exam_study");
   });

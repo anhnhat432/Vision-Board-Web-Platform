@@ -1,9 +1,10 @@
 import { AlertCircle, Compass, Eye, EyeOff, Loader2, LogOut, RefreshCw, ShieldCheck, Target } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { isDemoMode } from "@/app/utils/app-mode";
 import { useAuthContext } from "@/lib/auth/AuthContext";
+import { applyRouteDocumentMetadata } from "../components/root-layout/routeMeta";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -12,6 +13,9 @@ import { useReducedMotion } from "../components/ui/use-reduced-motion";
 import { inputClass, labelClass } from "../features/auth/shared/formStyles";
 
 type LoginMode = "signin" | "signup";
+
+const SIGNUP_DOCUMENT_TITLE = "Tạo tài khoản – Dear Our Future";
+const SIGNUP_DOCUMENT_DESCRIPTION = "Tạo tài khoản để lưu kế hoạch 12 tuần và đồng bộ giữa các thiết bị.";
 
 const TRUST_FEATURES = [
   {
@@ -44,6 +48,38 @@ function normalizeRedirectPath(from: unknown): string | null {
   }
 
   return null;
+}
+
+function buildLoginModeSearch(mode: LoginMode, currentSearch: string): string {
+  const currentParams = new URLSearchParams(currentSearch);
+  const safeNext = normalizeRedirectPath(currentParams.get("next"));
+  const nextParams = new URLSearchParams();
+
+  if (mode === "signup") {
+    nextParams.set("mode", "signup");
+  }
+  if (safeNext) {
+    nextParams.set("next", safeNext);
+  }
+
+  const search = nextParams.toString();
+  return search ? `?${search}` : "";
+}
+
+function setMetaContent(selector: string, content: string): void {
+  document.head.querySelector<HTMLMetaElement>(selector)?.setAttribute("content", content);
+}
+
+function applyLoginDocumentMetadata(pathname: string, mode: LoginMode): void {
+  applyRouteDocumentMetadata(pathname);
+  if (mode !== "signup" || typeof document === "undefined") return;
+
+  document.title = SIGNUP_DOCUMENT_TITLE;
+  setMetaContent('meta[name="description"]', SIGNUP_DOCUMENT_DESCRIPTION);
+  setMetaContent('meta[property="og:title"]', SIGNUP_DOCUMENT_TITLE);
+  setMetaContent('meta[property="og:description"]', SIGNUP_DOCUMENT_DESCRIPTION);
+  setMetaContent('meta[name="twitter:title"]', SIGNUP_DOCUMENT_TITLE);
+  setMetaContent('meta[name="twitter:description"]', SIGNUP_DOCUMENT_DESCRIPTION);
 }
 
 export function LoginPage() {
@@ -85,10 +121,17 @@ export function LoginPage() {
   const [resetSubmitting, setResetSubmitting] = useState(false);
   const [resetSent, setResetSent] = useState(false);
   const [resetError, setResetError] = useState<string | null>(null);
+  const forgotPasswordButtonRef = useRef<HTMLButtonElement | null>(null);
+  const resetEmailInputRef = useRef<HTMLInputElement | null>(null);
+  const resetBackButtonRef = useRef<HTMLButtonElement | null>(null);
 
   useEffect(() => {
     setMode(getInitialLoginMode(location.search));
   }, [location.search]);
+
+  useEffect(() => {
+    applyLoginDocumentMetadata(location.pathname, mode);
+  }, [location.pathname, mode]);
 
   useEffect(() => {
     setShowPassword(false);
@@ -97,6 +140,16 @@ export function LoginPage() {
       setShowConfirmPassword(false);
     }
   }, [mode]);
+
+  useEffect(() => {
+    if (!showResetPassword || resetSent) return;
+    resetEmailInputRef.current?.focus();
+  }, [resetSent, showResetPassword]);
+
+  useEffect(() => {
+    if (!showResetPassword || !resetSent) return;
+    resetBackButtonRef.current?.focus();
+  }, [resetSent, showResetPassword]);
 
   const passwordChecks = {
     hasMinimumLength: password.length >= 8,
@@ -111,6 +164,16 @@ export function LoginPage() {
     { label: "Có ít nhất 1 chữ số", passed: passwordChecks.hasNumber },
     { label: "Khớp với mật khẩu xác nhận", passed: passwordChecks.matchesConfirmation },
   ];
+  const confirmPasswordError =
+    mode === "signup" && confirmPassword.length > 0 && !passwordChecks.matchesConfirmation
+      ? "Mật khẩu xác nhận chưa khớp."
+      : null;
+  const confirmPasswordDescriptionIds = [
+    confirmPasswordError ? "login-confirm-password-error" : null,
+    localError ?? authError ? "login-form-error" : null,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   const handleGoogleLogin = useCallback(async () => {
     if (googleSubmitting || authLoading) return;
@@ -226,6 +289,19 @@ export function LoginPage() {
     }
   }
 
+  function openResetPassword() {
+    setShowResetPassword(true);
+    setResetEmail(email);
+    setResetSent(false);
+    setResetError(null);
+  }
+
+  function closeResetPassword() {
+    setShowResetPassword(false);
+    setResetSent(false);
+    forgotPasswordButtonRef.current?.focus();
+  }
+
   async function handleEmailSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!canSubmitSignup) return;
@@ -275,6 +351,8 @@ export function LoginPage() {
   const formTitle = isSignIn ? "Đăng nhập" : "Tạo tài khoản";
   const formDescription = isSignIn ? "Tiếp tục hành trình bạn đã bắt đầu." : "Khoảng 30 giây.";
   const displayError = localError ?? authError;
+  const signInSearch = buildLoginModeSearch("signin", location.search);
+  const signUpSearch = buildLoginModeSearch("signup", location.search);
 
   return (
     <div className="flex min-h-screen flex-col overflow-x-hidden bg-app-bg">
@@ -300,14 +378,18 @@ export function LoginPage() {
         className="flex w-full flex-1 items-center justify-center overflow-x-hidden px-4 pb-12"
       >
         <div className="w-full max-w-6xl min-w-0">
+          <h1 className="sr-only">{heroTitle}</h1>
           <div className="grid min-w-0 gap-8 lg:grid-cols-[1.1fr_1fr] lg:gap-12">
             {/* Left column - Hero panel (desktop only) */}
             <div className="hidden lg:block">
               <div className="rounded-[14px] border border-app-line/15 bg-grad-aspire p-8 text-white">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">{captionText}</p>
-                <h1 className="mt-3 font-serif text-3xl font-medium leading-tight tracking-tight text-white max-w-md">
+                <p
+                  aria-hidden="true"
+                  className="mt-3 font-serif text-3xl font-medium leading-tight tracking-tight text-white max-w-md"
+                >
                   {heroTitle}
-                </h1>
+                </p>
                 <p className="mt-3 text-sm text-white/80 max-w-md">{heroSubline}</p>
 
                 {/* Trust features */}
@@ -341,14 +423,14 @@ export function LoginPage() {
                     <p className="text-xs font-semibold uppercase tracking-[0.18em] text-app-ink-muted">
                       {captionText}
                     </p>
-                    <h1 className="mt-2 font-serif text-2xl font-medium leading-tight text-app-ink">
+                    <p aria-hidden="true" className="mt-2 font-serif text-2xl font-medium leading-tight text-app-ink">
                       {isSignIn ? "Quay lại với 12 tuần của bạn" : "Mở không gian 12 tuần đầu tiên"}
-                    </h1>
+                    </p>
                   </div>
 
-                  {/* 3 trust chip ngang scrollable trên mobile */}
-                  <div className="mt-5 -mx-4 px-4 overflow-x-auto">
-                    <ul className="flex gap-2 w-max">
+                  {/* 3 trust chip trên mobile */}
+                  <div data-testid="login-mobile-trust-chips" className="mt-5">
+                    <ul className="flex flex-wrap justify-center gap-2">
                       {TRUST_FEATURES.map(({ icon: Icon, title }) => (
                         <li
                           key={title}
@@ -372,7 +454,7 @@ export function LoginPage() {
                   {/* Mode switch */}
                   <div className="mt-5 inline-flex w-full gap-1 p-1 rounded-full border border-app-line bg-app-bg">
                     <Link
-                      to={{ pathname: "/login", search: "" }}
+                      to={{ pathname: "/login", search: signInSearch }}
                       className={`flex-1 text-sm font-medium text-center py-1.5 px-4 rounded-full transition-colors duration-150 ${
                         isSignIn ? "bg-app-surface text-app-ink shadow-app-sm" : "text-app-ink-soft hover:text-app-ink"
                       }`}
@@ -380,7 +462,7 @@ export function LoginPage() {
                       Đăng nhập
                     </Link>
                     <Link
-                      to={{ pathname: "/login", search: "?mode=signup" }}
+                      to={{ pathname: "/login", search: signUpSearch }}
                       className={`flex-1 text-sm font-medium text-center py-1.5 px-4 rounded-full transition-colors duration-150 ${
                         !isSignIn ? "bg-app-surface text-app-ink shadow-app-sm" : "text-app-ink-soft hover:text-app-ink"
                       }`}
@@ -435,6 +517,7 @@ export function LoginPage() {
                       </Label>
                       <Input
                         id="login-email"
+                        name="email"
                         type="email"
                         autoComplete="email"
                         autoFocus
@@ -458,13 +541,9 @@ export function LoginPage() {
                         </Label>
                         {isSignIn ? (
                           <button
+                            ref={forgotPasswordButtonRef}
                             type="button"
-                            onClick={() => {
-                              setShowResetPassword(true);
-                              setResetEmail(email);
-                              setResetSent(false);
-                              setResetError(null);
-                            }}
+                            onClick={openResetPassword}
                             className="text-xs text-app-accent hover:underline"
                           >
                             Quên mật khẩu?
@@ -474,13 +553,14 @@ export function LoginPage() {
                       <div className="relative">
                         <Input
                           id="login-password"
+                          name="password"
                           type={showPassword ? "text" : "password"}
                           autoComplete={isSignIn ? "current-password" : "new-password"}
                           placeholder="••••••••"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           disabled={submitting || authLoading}
-                          className={`${inputClass} pr-11`}
+                          className={`${inputClass} pr-14`}
                           required
                           aria-required="true"
                           aria-invalid={displayError ? true : undefined}
@@ -489,7 +569,7 @@ export function LoginPage() {
                         <button
                           type="button"
                           onClick={() => setShowPassword((current) => !current)}
-                          className="absolute right-2 top-1/2 inline-flex min-h-[24px] min-w-[24px] -translate-y-1/2 items-center justify-center rounded-md p-1 text-app-ink-muted hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                          className="absolute right-1 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-md p-2 text-app-ink-muted hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                           disabled={submitting || authLoading}
                           aria-label={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
                         >
@@ -507,28 +587,34 @@ export function LoginPage() {
                         <div className="relative">
                           <Input
                             id="login-confirm-password"
+                            name="confirmPassword"
                             type={showConfirmPassword ? "text" : "password"}
                             autoComplete="new-password"
                             placeholder="••••••••"
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             disabled={submitting || authLoading}
-                            className={`${inputClass} pr-11`}
+                            className={`${inputClass} pr-14`}
                             required
                             aria-required="true"
-                            aria-invalid={displayError ? true : undefined}
-                            aria-describedby={displayError ? "login-form-error" : undefined}
+                            aria-invalid={confirmPasswordError || displayError ? true : undefined}
+                            aria-describedby={confirmPasswordDescriptionIds || undefined}
                           />
                           <button
                             type="button"
                             onClick={() => setShowConfirmPassword((current) => !current)}
-                            className="absolute right-2 top-1/2 inline-flex min-h-[24px] min-w-[24px] -translate-y-1/2 items-center justify-center rounded-md p-1 text-app-ink-muted hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                            className="absolute right-1 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-md p-2 text-app-ink-muted hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                             disabled={submitting || authLoading}
                             aria-label={showConfirmPassword ? "Ẩn mật khẩu xác nhận" : "Hiện mật khẩu xác nhận"}
                           >
                             {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                           </button>
                         </div>
+                        {confirmPasswordError ? (
+                          <p id="login-confirm-password-error" className="text-xs text-[color:var(--color-danger-fg)]">
+                            {confirmPasswordError}
+                          </p>
+                        ) : null}
                         {/* Password requirements */}
                         <div className="mt-3 space-y-1.5" aria-live="polite">
                           {passwordRequirementItems.map((item) => (
@@ -607,7 +693,7 @@ export function LoginPage() {
                 {showResetPassword ? (
                   <div className="mt-4 rounded-[14px] border border-app-line bg-app-surface p-5">
                     {resetSent ? (
-                      <div className="text-center">
+                      <div role="status" aria-live="polite" className="text-center">
                         <div className="mx-auto mb-3 flex size-10 items-center justify-center rounded-full bg-app-accent-soft text-app-accent">
                           <ShieldCheck className="h-5 w-5" />
                         </div>
@@ -617,12 +703,11 @@ export function LoginPage() {
                           tra thư mục spam.
                         </p>
                         <Button
+                          ref={resetBackButtonRef}
+                          type="button"
                           variant="outline"
                           className="mt-3 border-app-line text-app-ink hover:bg-app-bg"
-                          onClick={() => {
-                            setShowResetPassword(false);
-                            setResetSent(false);
-                          }}
+                          onClick={closeResetPassword}
                         >
                           Quay lại đăng nhập
                         </Button>
@@ -640,7 +725,9 @@ export function LoginPage() {
                             Email
                           </Label>
                           <Input
+                            ref={resetEmailInputRef}
                             id="reset-email"
+                            name="email"
                             type="email"
                             autoComplete="email"
                             placeholder="you@example.com"
@@ -679,7 +766,7 @@ export function LoginPage() {
                             type="button"
                             variant="outline"
                             className="border-app-line text-app-ink hover:bg-app-bg"
-                            onClick={() => setShowResetPassword(false)}
+                            onClick={closeResetPassword}
                           >
                             Đóng
                           </Button>
@@ -695,7 +782,7 @@ export function LoginPage() {
                     <>
                       Chưa có tài khoản?{" "}
                       <Link
-                        to={{ pathname: "/login", search: "?mode=signup" }}
+                        to={{ pathname: "/login", search: signUpSearch }}
                         className="font-medium text-app-accent hover:underline"
                       >
                         Tạo mới →
@@ -704,7 +791,10 @@ export function LoginPage() {
                   ) : (
                     <>
                       Đã có tài khoản?{" "}
-                      <Link to={{ pathname: "/login" }} className="font-medium text-app-accent hover:underline">
+                      <Link
+                        to={{ pathname: "/login", search: signInSearch }}
+                        className="font-medium text-app-accent hover:underline"
+                      >
                         Đăng nhập →
                       </Link>
                     </>

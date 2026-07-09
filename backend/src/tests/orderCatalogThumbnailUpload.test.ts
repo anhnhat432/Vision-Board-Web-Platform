@@ -36,12 +36,15 @@ const originalFindOneAndUpdate = OrderCatalogModel.findOneAndUpdate;
 const originalAuditCreate = AuditLogModel.create;
 
 // Mock UserModel.findOne so requireAdmin does not buffer when MongoDB is unavailable.
+// requireAdmin treats MongoDB as role authority, so admin-token needs an admin DB role.
 const originalUserFindOne = UserModel.findOne;
-function createUserModelMock() {
+function createUserModelMock(queryInput?: unknown) {
+  const queryRecord = queryInput && typeof queryInput === "object" ? queryInput as Record<string, unknown> : {};
+  const role = queryRecord.firebaseUid === "admin_uid" ? "admin" : "user";
   const query = {
     select() { return query; },
     maxTimeMS() { return query; },
-    async lean() { return null; },
+    async lean() { return { role }; },
   };
   return query;
 }

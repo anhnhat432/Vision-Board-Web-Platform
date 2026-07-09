@@ -9,9 +9,23 @@ const authContextMock = vi.hoisted(() => ({
   useAuthContext: vi.fn(),
 }));
 
+const appModeMock = vi.hoisted(() => ({
+  isRealMode: vi.fn(() => true),
+  shouldShowAssistantDebugUi: vi.fn(() => false),
+}));
+
 vi.mock("@/lib/auth/AuthContext", () => ({
   useAuthContext: authContextMock.useAuthContext,
 }));
+
+vi.mock("@/app/utils/app-mode", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/app/utils/app-mode")>();
+  return {
+    ...actual,
+    isRealMode: appModeMock.isRealMode,
+    shouldShowAssistantDebugUi: appModeMock.shouldShowAssistantDebugUi,
+  };
+});
 
 vi.mock("../buildAssistantContext", () => ({
   buildAssistantContext: vi.fn(() => ({
@@ -67,6 +81,8 @@ describe("AssistantPanel", () => {
     // Pre-set onboarded flag for anonymous user to skip welcome message
     localStorage.setItem("assistant.onboarded:anon", "1");
     setAuthContext();
+    appModeMock.isRealMode.mockReturnValue(true);
+    appModeMock.shouldShowAssistantDebugUi.mockReturnValue(false);
     resetAssistantSession();
   });
 
@@ -80,6 +96,20 @@ describe("AssistantPanel", () => {
     expect(screen.getByRole("button", { name: "Hôm nay tôi nên làm gì?" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Tóm tắt tuần này" })).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Nhập tin nhắn...")).toBeInTheDocument();
+  });
+
+  it("hides the assistant observability debug entry when app-mode disallows it", () => {
+    render(<AssistantPanel open={true} onClose={mockOnClose} />);
+
+    expect(screen.queryByTitle("Quan sát chất lượng AI")).not.toBeInTheDocument();
+  });
+
+  it("shows the assistant observability debug entry only when app-mode allows it", () => {
+    appModeMock.shouldShowAssistantDebugUi.mockReturnValue(true);
+
+    render(<AssistantPanel open={true} onClose={mockOnClose} />);
+
+    expect(screen.getByTitle("Quan sát chất lượng AI")).toBeInTheDocument();
   });
 
   it("focuses the textarea on mount", () => {
@@ -506,20 +536,20 @@ describe("AssistantPanel", () => {
     const goalProposalLabels = await screen.findAllByText("Tạo mục tiêu: Học tiếng Anh");
     expect(goalProposalLabels.length).toBeGreaterThan(0);
 
-    // Sẽ thấy nút "Từ chối" và "Đồng ý"
-    const rejectBtn = screen.getByRole("button", { name: "Từ chối" });
-    const approveBtn = screen.getByRole("button", { name: "Đồng ý" });
+    // Sẽ thấy nút hủy và xác nhận proposal
+    const rejectBtn = screen.getByRole("button", { name: "Hủy bỏ" });
+    const approveBtn = screen.getByRole("button", { name: "Xác nhận thực hiện" });
 
     expect(rejectBtn).toBeInTheDocument();
     expect(approveBtn).toBeInTheDocument();
 
-    // Click Từ chối
+    // Click hủy
     await userEvent.click(rejectBtn);
 
-    // Trạng thái chuyển thành "Đã từ chối" và các nút biến mất
-    expect(await screen.findByText("Đã từ chối")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Từ chối" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Đồng ý" })).not.toBeInTheDocument();
+    // Workflow được hủy qua pendingWorkflow và các nút biến mất
+    expect(await screen.findByText("Đã hủy bỏ kế hoạch/hành động đang chuẩn bị.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Hủy bỏ" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Xác nhận thực hiện" })).not.toBeInTheDocument();
   });
 
   it("supports executing a twelve-week plan draft proposal and displaying preview", async () => {
@@ -556,9 +586,10 @@ describe("AssistantPanel", () => {
     expect(screen.getByText("Giảm 3kg mỡ thừa")).toBeInTheDocument();
     expect(screen.getByText(/Chạy bộ/)).toBeInTheDocument();
 
-    const approveBtn = screen.getByRole("button", { name: "Đồng ý" });
+    const approveBtn = screen.getByRole("button", { name: "Xác nhận thực hiện" });
     await userEvent.click(approveBtn);
 
-    expect(await screen.findByText("Đã làm")).toBeInTheDocument();
+    expect(await screen.findByText(/Đã thực hiện thành công các hành động/)).toBeInTheDocument();
+    expect(screen.getByText(/Tạo bản nháp kế hoạch 12 tuần/)).toBeInTheDocument();
   });
 });

@@ -6,7 +6,7 @@
 - Why now: account deletion, email verification, and LWW sync are production-critical gates that remain unproven until run against staging/preview.
 - Runtime alignment: `.nvmrc` is `20` and the backend engine target is `20.x`, so staging proof workflows should use the same repository runtime instead of a newer ad hoc Node version.
 - User impact: launch owner can prove auth lifecycle and cross-device sync without guessing which workflow, secret, or safety input to use.
-- Modes affected: real-mode staging/preview primary; local and demo are out of scope.
+- Modes affected: real-mode staging/preview for auth/sync/destructive proof, accessible demo/staging for core-quality local-first proof, and production smoke.
 
 ## 2. Surface Classification
 
@@ -33,7 +33,7 @@
 7. WHERE a staging or production proof workflow installs Node, THE workflow SHALL use `node-version-file: ".nvmrc"` so proof runtime follows the repository production target.
 8. WHERE soft launch go/no-go is reviewed, THE checklist SHALL require per-gate evidence fields instead of a single grouped "staging e2e pass" note.
 9. WHEN code is pushed to `main`, THE production smoke workflow SHALL wait for the matching Vercel production deployment, then run `npm run smoke:prod:quick` before `npm run smoke:prod`.
-10. WHEN D-2 deployed core-flow proof is requested, THE runbook SHALL provide a workflow command that runs `npm run smoke:core-quality` against a supplied staging/preview URL and rejects local-only targets.
+10. WHEN D-2 deployed core-flow proof is requested, THE runbook SHALL provide a workflow command that runs `npm run smoke:core-quality` against a supplied accessible demo/staging URL and rejects local-only, production real-mode, or auth-gated targets.
 
 ## 5. Data, Storage, and Sync Constraints
 
@@ -67,7 +67,7 @@
 - [x] staging/prod proof workflows use `node-version-file: ".nvmrc"` instead of hard-coded Node 22.
 - [x] soft-launch checklist exposes per-gate evidence rows for email verification, account deletion, LWW sync, and production smoke.
 - [x] production smoke workflow auto-runs on `main` push and sequences quick smoke before full smoke.
-- [x] runbook includes a deployed core-funnel workflow path that rejects local-only targets.
+- [x] runbook includes a deployed core-funnel workflow path that rejects local-only and production real-mode targets.
 
 ## 9. Verification Plan
 

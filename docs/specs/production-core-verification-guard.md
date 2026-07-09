@@ -96,7 +96,7 @@ npm.cmd run lint
 ## 8.2. Guard Tightening Evidence - 2026-06-27
 
 - `test:production-core:unit` now includes `src/lib/auth/firebase.test.ts`, so signup verification email and signup-written resend cooldown are protected by the aggregate launch guard.
-- `test:production-core:ui` now includes `src/app/components/UpgradePaywallDialog.unverified.test.tsx`, so unverified real-mode users cannot regain a paid-checkout path without failing the aggregate guard.
+- `test:production-core:ui` now includes `src/app/components/UpgradePaywallDialog.unverified.test.tsx`, so unverified real-mode users cannot lose the paid-checkout path without failing the aggregate guard.
 - `test:production-core:sync` now includes `src/app/utils/production/outboxSync.test.ts`, so the email-unverified local-only outbox pause remains part of sync trust proof.
 - Focused re-verification passed:
   - `npm.cmd run test:run -- src/lib/auth/firebase.test.ts` (4 tests passed).

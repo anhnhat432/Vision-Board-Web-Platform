@@ -613,6 +613,10 @@ function DashboardContent({
   const { plan, loading: planLoading, error: planError, actions: planActions } = usePlan12Week();
   const dashboardPlanId = useDashboardPlanLink(visibleActiveTwelveWeekGoal?.id ?? null);
   const loadPlan = planActions.loadPlan;
+  const handleRetryPlanLoad = () => {
+    if (!dashboardPlanId) return;
+    void loadPlan(dashboardPlanId);
+  };
   const authDestination = `${location.pathname}${location.search}${location.hash}`;
   const handleAuthNavigate = (mode: "signin" | "signup") => {
     navigate(buildLoginPath(mode, authDestination));
@@ -777,6 +781,7 @@ function DashboardContent({
             planLoading={planLoading}
             hasPlan={Boolean(plan)}
             planError={planError}
+            onRetryPlanLoad={dashboardPlanId ? handleRetryPlanLoad : undefined}
             onSelectGoal={(goal) => navigate(getGoalTarget(goal))}
             onAddGoal={() => navigate("/life-insight")}
             onTriggerAction={() => {
@@ -910,7 +915,7 @@ function NextBestAction({ data }: { data: DashboardData }) {
     title = `Đến ngày Phản tư Tuần ${activeSystemWeek}`;
     description = "Hãy dành 5 phút tĩnh lặng để nhìn nhận lại chặng đường 7 ngày qua và đúc rút bài học.";
     ctaLabel = "Viết phản tư";
-    ctaPath = "/12-week-system?tab=review";
+    ctaPath = "/12-week-system?tab=week";
     Icon = Award;
     tone = "review";
   } else if (activeSystemWeekOpenTasks.length > 0) {
@@ -993,6 +998,7 @@ function DashboardActiveLayout({
   planLoading,
   hasPlan,
   planError,
+  onRetryPlanLoad,
   onSelectGoal,
   onAddGoal,
   onTriggerAction,
@@ -1007,6 +1013,7 @@ function DashboardActiveLayout({
   planLoading: boolean;
   hasPlan: boolean;
   planError: ReturnType<typeof usePlan12Week>["error"];
+  onRetryPlanLoad?: () => void;
   onSelectGoal: (goal: Goal) => void;
   onAddGoal: () => void;
   onTriggerAction: () => void;
@@ -1081,7 +1088,12 @@ function DashboardActiveLayout({
         </div>
       ) : null}
 
-      <DashboardPlanStateNotice planLoading={planLoading} hasPlan={hasPlan} planError={planError} />
+      <DashboardPlanStateNotice
+        planLoading={planLoading}
+        hasPlan={hasPlan}
+        planError={planError}
+        onRetry={onRetryPlanLoad}
+      />
 
       {/* Bento Grid layout for Core Funnel widgets */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start">
@@ -1276,10 +1288,12 @@ function DashboardPlanStateNotice({
   planLoading,
   hasPlan,
   planError,
+  onRetry,
 }: {
   planLoading: boolean;
   hasPlan: boolean;
   planError: ReturnType<typeof usePlan12Week>["error"];
+  onRetry?: () => void;
 }) {
   const [dismissed, setDismissed] = useState(false);
 
@@ -1307,6 +1321,16 @@ function DashboardPlanStateNotice({
           <WifiOff className="h-3.5 w-3.5 shrink-0 opacity-70" />
           <span className="truncate">Không tải được kế hoạch từ máy chủ — dữ liệu hiển thị từ bộ nhớ cục bộ.</span>
         </div>
+        {onRetry ? (
+          <button
+            type="button"
+            onClick={onRetry}
+            className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-md border border-app-status-warning/30 px-3 py-1 text-xs font-semibold transition-colors hover:bg-app-status-warning/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-status-warning/40"
+            aria-label="Thử lại tải kế hoạch"
+          >
+            Thử lại
+          </button>
+        ) : null}
         <button
           type="button"
           onClick={() => setDismissed(true)}

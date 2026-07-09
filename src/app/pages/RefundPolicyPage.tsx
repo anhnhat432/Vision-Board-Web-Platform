@@ -115,10 +115,11 @@ export function RefundPolicyPage() {
       <section className="surface-raised space-y-3 rounded-2xl border border-app-line bg-app-surface p-6 sm:p-7">
         <h2 className="font-serif text-xl font-medium text-app-ink">3. Hủy gói và chu kỳ chưa dùng</h2>
         <p className="text-sm leading-7 text-app-ink-soft">
-          Hiện tại Plus không tự động gia hạn, nên không có thao tác hủy auto-renewal qua cổng thanh toán. Nếu bạn không
-          muốn tiếp tục sử dụng, bạn có thể bấm <strong>“Tôi không muốn dùng nữa”</strong> trong trang gói để ghi nhận ý
-          định ngừng dùng. Nếu đơn hàng vẫn còn trong thời hạn hoàn tiền, bạn có thể gửi{" "}
-          <strong>“Yêu cầu hoàn tiền cho chu kỳ chưa dùng”</strong> để đội ngũ hỗ trợ xét duyệt thủ công.
+          Plus chạy theo chu kỳ bạn đã thanh toán. Nếu tài khoản của bạn có lịch gia hạn và bạn không muốn tiếp tục,
+          hãy bấm <strong>“Tôi không muốn dùng nữa”</strong> trong trang gói để đặt kết thúc vào cuối chu kỳ hiện tại;
+          quyền Plus vẫn dùng được đến ngày kết thúc đó. Nếu đơn hàng vẫn còn trong thời hạn hoàn tiền, bạn có thể gửi{" "}
+          <strong>“Yêu cầu hoàn tiền cho chu kỳ chưa dùng”</strong> để đội ngũ hỗ trợ xét duyệt thủ công như một yêu cầu
+          riêng.
         </p>
       </section>
     </article>

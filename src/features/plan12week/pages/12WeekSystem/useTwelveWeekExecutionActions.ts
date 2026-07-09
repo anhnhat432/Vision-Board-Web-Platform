@@ -142,7 +142,7 @@ function enqueueDailyCheckInUpsertedMutation(goalId: string, weekNumber: number,
   }
 }
 
-function enqueueWeeklyReviewUpsertedMutation(
+export function enqueueWeeklyReviewUpsertedMutation(
   goalId: string,
   weekNumber: number,
   review: UniversalWeeklyReview,

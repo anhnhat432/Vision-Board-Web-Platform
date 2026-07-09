@@ -3,6 +3,12 @@ import type { AddressInfo } from "node:net";
 import { afterEach, describe, it, mock } from "node:test";
 import express, { type Express } from "express";
 
+process.env.MONGODB_URI ??= "mongodb://127.0.0.1:27017/audit-log-test";
+process.env.FIREBASE_PROJECT_ID ??= "audit-log-test";
+process.env.FIREBASE_CLIENT_EMAIL ??= "firebase-admin@example.test";
+process.env.FIREBASE_PRIVATE_KEY ??= "-----BEGIN PRIVATE KEY-----\\ntest\\n-----END PRIVATE KEY-----\\n";
+process.env.FRONTEND_ORIGIN ??= "http://localhost:5173";
+
 import { createAuthMiddleware } from "../middleware/authMiddlewareCore";
 import { errorMiddleware } from "../middleware/errorMiddleware";
 import { clearAdminRoleCache } from "../middleware/requireAdmin";
@@ -152,6 +158,7 @@ describe("admin audit logging", () => {
   it("creates an audit log entry when completePaymentOrderManually succeeds", async () => {
     const createdLogs: AuditLogEntity[] = [];
     const order = createMockPaymentOrder();
+    mockUserRole("admin");
 
     (AuditLogModel as unknown as MockableModel).create = async (entry: AuditLogEntity) => {
       createdLogs.push(entry);
@@ -191,6 +198,7 @@ describe("admin audit logging", () => {
 
   it("creates an audit log entry when admin updates physical order status", async () => {
     const createdLogs: AuditLogEntity[] = [];
+    mockUserRole("admin");
 
     (AuditLogModel as unknown as MockableModel).create = async (entry: AuditLogEntity) => {
       createdLogs.push(entry);
@@ -222,6 +230,8 @@ describe("admin audit logging", () => {
   });
 
   it("returns reconciliation last-run status for admins", async () => {
+    mockUserRole("admin");
+
     const response = await requestJson(createAdminTestApp(), "GET", "/api/admin/reconciliation/last-run");
 
     assert.equal(response.status, 200);

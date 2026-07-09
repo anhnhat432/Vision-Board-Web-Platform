@@ -23,7 +23,7 @@ After setting env on the host:
 NODE_ENV=production npm --prefix backend run check:env
 
 # Frontend + backend cross-check
-npm run env:check:full
+npm run env:check:prod
 
 # If using Casso billing
 npm run env:check:casso
@@ -75,8 +75,8 @@ and non-HTTPS origins (other than localhost) are rejected.
 
 | Variable                | Used in                                           | Example (safe)                                                                | Risk if missing/wrong                                                                                                                                                                                                       | Verify                                                                                           |
 | ----------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `BILLING_PROVIDER`      | `backend/src/services/paymentProviderRegistry.ts` | `payos` for PayOS rollout, `casso` for legacy, or `mock` for staging previews | Unknown values silently fall back to `mock`. Must match your real adapter.                                                                                                                                                  | `check:env` prints provider; `GET /api/billing/checkout-info` shows the right `provider`.        |
-| `BILLING_REPOSITORY`    | `backend/src/services/billingServiceInstance.ts`  | `mongo`                                                                       | If `memory` is used in production, paid entitlements vanish on restart. `unset` in production triggers a warning.                                                                                                           | `check:env`; verify a paid user keeps `PLUS` after a forced redeploy.                            |
+| `BILLING_PROVIDER`      | `backend/src/services/paymentProviderRegistry.ts` | `payos` for PayOS rollout, `casso` for legacy, or `mock` only when paid checkout is locked/staging | In production with paid checkout enabled, missing, `mock`, unknown, or recognized-but-unimplemented providers fail closed at boot/env-check. Must match an implemented real adapter (`payos` or `casso`).                    | `check:env` prints provider; `GET /api/billing/checkout-info` shows the right `provider`.        |
+| `BILLING_REPOSITORY`    | `backend/src/services/billingServiceInstance.ts`  | `mongo`                                                                       | In production, `memory` or unset billing repositories are error-level issues because paid entitlements would not persist safely across restarts.                                                                             | `check:env`; verify a paid user keeps `PLUS` after a forced redeploy.                            |
 | `BILLING_PAID_DISABLED` | `backend/src/controllers/billingController.ts`    | `0` (or `1` to kill paid checkout)                                            | Defense-in-depth kill switch. Set to `1` while a payment provider is unavailable to return `503 checkout_disabled` instead of opening unsafe sessions. Always pair with the frontend `VITE_BILLING_PAID_CHECKOUT_DISABLED`. | `POST /api/billing/checkout-session` returns 503 with `errorCode: "checkout_disabled"` when set. |
 
 ---
@@ -94,6 +94,7 @@ and non-HTTPS origins (other than localhost) are rejected.
 | `VITE_BILLING_PROVIDER_MODE`          | `src/app/utils/production/env.ts`   | `api_contract` for real billing, `mock_provider` for previews                | Demo mock copy may surface in production paywall; real checkout silently disabled.                              | Paywall dialog labels match the real provider.                                                                     |
 | `VITE_BILLING_PROVIDER_LABEL`         | Same                                | `PayOS` after rollout, or provider-neutral `Thanh toán bảo mật` while locked | Generic "Mock provider" label leaks in production UI.                                                           | Settings → Billing shows the real/provider-neutral label.                                                          |
 | `VITE_BILLING_SUPPORT_EMAIL`          | `src/lib/billing/...`, refund flows | `support@example.com`                                                        | Customers cannot reach support from refund/cancel screens.                                                      | Click "Liên hệ hỗ trợ" → opens correct mailto.                                                                     |
+| `VITE_SENTRY_DSN`                     | `src/lib/monitoring/sentry.ts`      | `https://public@sentry.example/1`                                             | Production boot/config failures are not observable; full-stack real-mode validation fails.                     | `npm run env:check:prod` does not list `frontend:VITE_SENTRY_DSN`.                                                |
 | `VITE_BILLING_PLUS_MONTHLY_PRICE_VND` | `src/app/utils/billing-pricing.ts`  | `99000`                                                                      | Wrong price displayed to users; UX mismatch with backend `PLUS_PRICE_VND`.                                      | Paywall shows the same price the backend charges.                                                                  |
 | `VITE_BILLING_PAID_CHECKOUT_DISABLED` | `src/app/utils/app-mode.ts`         | `0` (default) or `1` to disable                                              | When paired with backend `BILLING_PAID_DISABLED`, hides "Tiếp tục thanh toán" CTAs and shows support copy.      | Upgrade dialog renders the disabled-state banner when set.                                                         |
 
@@ -221,7 +222,7 @@ curl -s $RENDER_URL/api/health | jq
 
 | Variable                                                                                                                                           | Purpose                           | Notes                                                                                                                           |
 | -------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `SENTRY_DSN` (backend) / `VITE_SENTRY_DSN` (frontend)                                                                                              | Error monitoring                  | Validator warns if missing in production. Strongly recommended.                                                                 |
+| `SENTRY_DSN` (backend)                                                                                                                             | Backend error monitoring          | Validator warns if missing in production. Strongly recommended.                                                                 |
 | `SENTRY_ENVIRONMENT`, `SENTRY_RELEASE`, `SENTRY_TRACES_SAMPLE_RATE`                                                                                | Sentry tagging and sampling       | Backend defaults: env from `NODE_ENV`, sample rate 0.05. Frontend defaults: env from `VITE_APP_MODE`, sample rate 0.02.         |
 | `BILLING_SUPPORT_EMAIL` / `SUPPORT_EMAIL`                                                                                                          | Refund and customer-portal emails | Validator warns if missing in production.                                                                                       |
 | `EMAIL_PROVIDER` (`disabled` / `resend` / `smtp`)                                                                                                  | Receipt and refund emails         | When `disabled`, email-bound flows skip sending without crashing. Set to `resend` or `smtp` for production transactional email. |
@@ -266,8 +267,10 @@ Error: Production environment is not safe to start. 3 error(s):
 Render will surface this in deploy logs and keep the previous healthy
 revision serving traffic.
 
-For warnings (e.g. `BILLING_REPOSITORY` unset), the backend boots but logs
-the report once at startup so on-call sees it without paging.
+For warning-level issues (for example missing optional Sentry release metadata
+or backup settings), the backend boots but logs the report once at startup so
+on-call sees it without paging. Billing persistence issues such as
+`BILLING_REPOSITORY` unset or `memory` in production are error-level issues.
 
 ---
 
@@ -276,7 +279,7 @@ the report once at startup so on-call sees it without paging.
 Use `docs/ops/staging-proof-runbook.md` for the exact staging workflow inputs, repository secrets, safety markers, and evidence fields.
 
 1. `npm --prefix backend run check:env` against the production env (errors = 0).
-2. `npm run env:check:full` from the workstation pointing at the host config
+2. `npm run env:check:prod` from the workstation pointing at the host config
    you exported (no localhost, no `*`, no missing keys).
 3. Casso (if active): `curl /api/billing/webhook/casso/health` → 200.
 4. PayOS (if selected): `curl /api/billing/webhook/payos/health` → 200 and configure the same URL in PayOS dashboard.

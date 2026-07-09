@@ -5,6 +5,8 @@ export interface RouteMeta {
   tagline: string;
 }
 
+const PRODUCTION_SITE_ORIGIN = "https://dearourfuture.io.vn";
+
 export const GUIDED_PATHS = new Set([
   "/onboarding",
   "/life-insight",
@@ -23,6 +25,12 @@ export const ROUTE_META: RouteMeta[] = [
     tagline: "Thấy rõ quỹ đạo phát triển của mình, không chỉ những việc cần làm hôm nay.",
   },
   {
+    match: (pathname: string) => pathname === "/login",
+    label: "Đăng nhập",
+    title: "Đăng nhập – Dear Our Future",
+    tagline: "Đăng nhập hoặc tạo tài khoản để giữ tiến độ 12 tuần gắn với tài khoản của bạn.",
+  },
+  {
     match: (pathname: string) => pathname === "/onboarding",
     label: "Bắt đầu",
     title: "Bắt đầu – Dear Our Future",
@@ -33,6 +41,30 @@ export const ROUTE_META: RouteMeta[] = [
     label: "Trợ giúp",
     title: "Trung tâm trợ giúp – Dear Our Future",
     tagline: "Hướng dẫn ngắn gọn để biến mục tiêu thành kế hoạch 12 tuần rõ ràng.",
+  },
+  {
+    match: (pathname: string) => pathname === "/privacy",
+    label: "Chính sách bảo mật",
+    title: "Chính sách bảo mật – Dear Our Future",
+    tagline: "Cách Dear Our Future bảo vệ dữ liệu, quyền riêng tư và lựa chọn của bạn.",
+  },
+  {
+    match: (pathname: string) => pathname === "/terms",
+    label: "Điều khoản",
+    title: "Điều khoản dịch vụ – Dear Our Future",
+    tagline: "Các điều kiện sử dụng rõ ràng cho tài khoản, dữ liệu và trải nghiệm sản phẩm.",
+  },
+  {
+    match: (pathname: string) => pathname === "/contact",
+    label: "Liên hệ hỗ trợ",
+    title: "Liên hệ hỗ trợ – Dear Our Future",
+    tagline: "Kênh hỗ trợ chính thức cho tài khoản, dữ liệu, thanh toán và trải nghiệm 12 tuần.",
+  },
+  {
+    match: (pathname: string) => pathname === "/refund-policy",
+    label: "Chính sách hoàn tiền",
+    title: "Chính sách hoàn tiền – Dear Our Future",
+    tagline: "Thông tin minh bạch về điều kiện hỗ trợ, xử lý thanh toán và hoàn tiền.",
   },
   {
     match: (pathname: string) => pathname === "/vision",
@@ -119,6 +151,12 @@ export const ROUTE_META: RouteMeta[] = [
     tagline: "Theo dõi trạng thái thanh toán nâng cấp gói Plus.",
   },
   {
+    match: (pathname: string) => pathname.startsWith("/billing/confirm"),
+    label: "Xác nhận thanh toán",
+    title: "Xác nhận thanh toán – Dear Our Future",
+    tagline: "Kiểm tra trạng thái xác nhận sau khi hoàn tất bước thanh toán nâng cấp Plus.",
+  },
+  {
     match: (pathname: string) => pathname.startsWith("/settings"),
     label: "Cài đặt",
     title: "Cài đặt – Dear Our Future",
@@ -127,9 +165,9 @@ export const ROUTE_META: RouteMeta[] = [
   {
     match: (pathname: string) =>
       pathname === "/billing" || pathname.startsWith("/billing/plan") || pathname.startsWith("/account/billing"),
-    label: "Gói & thanh toán",
-    title: "Gói & thanh toán – Dear Our Future",
-    tagline: "Xem gói hiện tại, quyền truy cập và thao tác thanh toán.",
+    label: "Gói Plus & thanh toán",
+    title: "Gói Plus & thanh toán – Dear Our Future",
+    tagline: "Xem gói hiện tại, quyền Plus, lịch sử và thao tác thanh toán.",
   },
   {
     match: (pathname: string) => pathname.startsWith("/admin/dashboard"),
@@ -187,6 +225,37 @@ export function getRouteMeta(pathname: string): RouteMeta {
   const result = ROUTE_META.find((item) => item.match(pathname)) ?? ROUTE_META[0];
   routeMetaCache.set(pathname, result);
   return result;
+}
+
+function normalizeCanonicalPath(pathname: string): string {
+  const pathOnly = (pathname.split(/[?#]/)[0] || "/").replace(/\/+$/, "") || "/";
+  return pathOnly.startsWith("/") ? pathOnly : `/${pathOnly}`;
+}
+
+function getRouteCanonicalUrl(pathname: string): string {
+  return new URL(normalizeCanonicalPath(pathname), PRODUCTION_SITE_ORIGIN).href;
+}
+
+function setMetaContent(selector: string, content: string): void {
+  document.head.querySelector<HTMLMetaElement>(selector)?.setAttribute("content", content);
+}
+
+export function applyRouteDocumentMetadata(pathname: string): void {
+  if (typeof document === "undefined") return;
+
+  const meta = getRouteMeta(pathname);
+  const title = meta.title || "Dear Our Future";
+  const description = meta.tagline;
+  const canonicalUrl = getRouteCanonicalUrl(pathname);
+
+  document.title = title;
+  document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.setAttribute("href", canonicalUrl);
+  setMetaContent('meta[name="description"]', description);
+  setMetaContent('meta[property="og:url"]', canonicalUrl);
+  setMetaContent('meta[property="og:title"]', title);
+  setMetaContent('meta[property="og:description"]', description);
+  setMetaContent('meta[name="twitter:title"]', title);
+  setMetaContent('meta[name="twitter:description"]', description);
 }
 
 export interface BreadcrumbCrumb {

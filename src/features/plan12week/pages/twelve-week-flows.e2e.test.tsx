@@ -267,8 +267,8 @@ describe("12-week core flows", () => {
 
     await screen.findByRole("heading", { name: "Bạn chưa có hệ thống 12 tuần" });
     expect(screen.getByText("Chưa có chu kỳ đang chạy")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Tạo mục tiêu 12 tuần" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Mở mục tiêu đã có" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Tạo mục tiêu 12 tuần" })).toHaveClass("min-h-11");
+    expect(screen.getByRole("button", { name: "Mở mục tiêu đã có" })).toHaveClass("min-h-11");
   });
 
   it("explains what is missing when a 12-week plan has no tasks or metrics", async () => {

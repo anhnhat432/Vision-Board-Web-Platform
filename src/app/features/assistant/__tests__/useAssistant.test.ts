@@ -56,6 +56,7 @@ import {
 } from "../assistantConversationState";
 import { buildAssistantContext } from "../buildAssistantContext";
 import { executeAction } from "../executeAction";
+import { getAssistantEvents } from "../assistantObservability";
 
 const mockedSendAssistantMessageStream = vi.mocked(sendAssistantMessageStream);
 const mockedExecuteAction = vi.mocked(executeAction);
@@ -288,6 +289,49 @@ describe("useAssistant streaming", () => {
       pageType: "SMART_GOAL_SETUP",
       currentStep: "specific",
       hint: "Hãy làm rõ mục tiêu",
+    });
+  });
+
+  it("marks submitted assistant feedback success for backend telemetry", () => {
+    const { result } = renderHook(() => useAssistant());
+
+    act(() => {
+      result.current.setMessages([
+        {
+          id: "user_message_1",
+          role: "user",
+          content: "test feedback",
+          createdAt: Date.now(),
+        },
+        {
+          id: "assistant_message_up",
+          role: "assistant",
+          content: "helpful answer",
+          createdAt: Date.now(),
+          status: "complete",
+        },
+        {
+          id: "assistant_message_down",
+          role: "assistant",
+          content: "not helpful answer",
+          createdAt: Date.now(),
+          status: "complete",
+        },
+      ]);
+    });
+
+    act(() => {
+      result.current.submitFeedback("assistant_message_up", "up");
+      result.current.submitFeedback("assistant_message_down", "down");
+    });
+
+    const feedbackEvents = getAssistantEvents(ANON_USER).filter((event) => event.type === "assistant_feedback_submitted");
+
+    expect(feedbackEvents.find((event) => event.messageId === "assistant_message_up")).toMatchObject({
+      success: true,
+    });
+    expect(feedbackEvents.find((event) => event.messageId === "assistant_message_down")).toMatchObject({
+      success: false,
     });
   });
 

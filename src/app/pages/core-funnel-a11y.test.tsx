@@ -33,6 +33,7 @@ import type { Question, ResultData } from "./FeasibilityCheck/types";
 import { MeasurableStep } from "./SMARTGoalSetup/components/MeasurableStep";
 import { SmartGoalStepShell } from "./SMARTGoalSetup/components/SmartGoalStepShell";
 import { SpecificStep } from "./SMARTGoalSetup/components/SpecificStep";
+import { StepProgressBar } from "./SMARTGoalSetup/components/StepProgressBar";
 import type { SMARTData, SmartStepDefinition } from "./SMARTGoalSetup/types";
 
 function makeSmartData(overrides: Partial<SMARTData> = {}): SMARTData {
@@ -597,6 +598,7 @@ describe("SmartGoalStepShell — a11y", () => {
 
   it("gives the 'Dùng gợi ý' button a step-specific accessible name", async () => {
     setViewportWidth(1024);
+    const user = userEvent.setup();
     const headingRef = createRef<HTMLHeadingElement>();
     const mockStarter = {
       specificGoalStatement: "Statement",
@@ -638,7 +640,9 @@ describe("SmartGoalStepShell — a11y", () => {
       </SmartGoalStepShell>,
     );
 
-    const button = screen.getByRole("button", { name: /Dùng gợi ý cho bước Cụ thể/i });
+    await user.click(screen.getByRole("button", { name: /Cố vấn mục tiêu AI/i }));
+
+    const button = await screen.findByRole("button", { name: /Dùng gợi ý cho bước Cụ thể/i });
     expect(button).toBeInTheDocument();
     expect(button).toHaveClass("min-h-11", "leading-tight");
 
@@ -646,8 +650,9 @@ describe("SmartGoalStepShell — a11y", () => {
       expect(backButton).toHaveClass("min-h-11");
     }
 
-    for (const nextButton of screen.getAllByRole("button", { name: /Lưu mục tiêu cụ thể/i })) {
-      expect(nextButton).toHaveClass("min-h-11", "leading-tight");
+    for (const nextButton of screen.getAllByRole("button", { name: /Tiếp tục: thêm chỉ số/i })) {
+      expect(nextButton).toHaveClass("leading-tight");
+      expect(nextButton.className).toMatch(/min-h-(12|\[52px\])/);
     }
   });
 
@@ -698,14 +703,14 @@ describe("SmartGoalStepShell — a11y", () => {
     const feedback = document.querySelector("[data-smart-step-feedback]");
     const actionBar = document.querySelector("[data-smart-mobile-action-bar]");
 
-    expect(shell).toHaveClass("pb-[calc(8.75rem+env(safe-area-inset-bottom))]", "lg:pb-0");
-    expect(actionBar).toHaveClass("pb-[calc(env(safe-area-inset-bottom)+0.75rem)]", "motion-reduce:transition-none");
+    expect(shell).toHaveClass("pb-[calc(10.25rem+env(safe-area-inset-bottom))]", "lg:pb-0");
+    expect(actionBar).toHaveClass("pb-[calc(env(safe-area-inset-bottom)+0.85rem)]", "motion-reduce:transition-none");
     expect(within(actionBar as HTMLElement).getByText("Bước 1/5")).toBeInTheDocument();
-    expect(within(actionBar as HTMLElement).getByRole("button", { name: /Lưu mục tiêu cụ thể/i })).toHaveClass(
-      "min-h-11",
+    expect(within(actionBar as HTMLElement).getByRole("button", { name: /Tiếp tục: thêm chỉ số/i })).toHaveClass(
+      "min-h-[52px]",
     );
     expect(within(actionBar as HTMLElement).getByRole("button", { name: /Quay lại/i })).toHaveClass("min-h-11");
-    expect(within(actionBar as HTMLElement).getByText("Cần hoàn thiện bước này")).toBeInTheDocument();
+    expect(within(actionBar as HTMLElement).getByText("Cần hoàn thiện")).toBeInTheDocument();
     expect(feedback).not.toBeNull();
     expect(actionBar).not.toBeNull();
     expect(feedback?.compareDocumentPosition(actionBar as Node)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
@@ -828,16 +833,56 @@ describe("SmartGoalStepShell — a11y", () => {
     expect(shell).toHaveClass("pb-[calc(11.25rem+env(safe-area-inset-bottom))]", "lg:pb-0");
     expect(within(actionBar as HTMLElement).getByText("Bước 5/5 · Độ rõ 1/1")).toBeInTheDocument();
     expect(within(actionBar as HTMLElement).getByRole("button", { name: /Tạo kế hoạch nhanh/i })).toHaveClass(
-      "min-h-11",
+      "min-h-[52px]",
     );
     expect(within(actionBar as HTMLElement).getByRole("button", { name: /Kiểm tra khả thi nâng cao/i })).toHaveClass(
       "min-h-11",
     );
-    expect(within(actionBar as HTMLElement).getByText("Sẵn sàng chọn kế hoạch")).toBeInTheDocument();
+    expect(within(actionBar as HTMLElement).getByText("Đủ rõ")).toBeInTheDocument();
     expect(within(actionBar as HTMLElement).getByRole("button", { name: /Tạo kế hoạch nhanh/i })).toBeInTheDocument();
     expect(
       within(actionBar as HTMLElement).getByRole("button", { name: /Kiểm tra khả thi nâng cao/i }),
     ).toBeInTheDocument();
+  });
+});
+
+describe("StepProgressBar — a11y", () => {
+  const steps: SmartStepDefinition[] = [
+    {
+      key: "specific",
+      label: "Cụ thể",
+      title: "Bạn muốn đạt điều gì?",
+      description: "",
+      coaching: "",
+      placeholder: "",
+      completionHint: "",
+    },
+    {
+      key: "measurable",
+      label: "Đo lường",
+      title: "Bạn đo tiến trình bằng gì?",
+      description: "",
+      coaching: "",
+      placeholder: "",
+      completionHint: "",
+    },
+    {
+      key: "achievable",
+      label: "Có thể đạt",
+      title: "Điều gì giúp mục tiêu khả thi?",
+      description: "",
+      coaching: "",
+      placeholder: "",
+      completionHint: "",
+    },
+  ];
+
+  it("exposes full step names for compact mobile SMART step buttons", () => {
+    render(<StepProgressBar steps={steps} stepIndex={1} onJump={() => {}} />);
+
+    expect(screen.getByRole("button", { name: "Đi tới bước 1: Cụ thể" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Đi tới bước 2: Đo lường" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Bước 3: Có thể đạt chưa khả dụng" })).toBeDisabled();
   });
 });
 

@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import type { TwelveWeekSetupDraft } from "../types";
 import { ScheduleStep } from "./ScheduleStep";
@@ -108,5 +109,46 @@ describe("ScheduleStep validation", () => {
     expect(mobileTactic).not.toHaveClass("truncate");
     expect(desktopChip).toHaveClass("break-words", "leading-relaxed");
     expect(desktopChip).not.toHaveClass("truncate");
+  });
+
+  it("exposes pressed state for lab schedule selections", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <ScheduleStepLab
+        draft={makeDraft({
+          dailyTimeBudget: "30min",
+          tacticLoadPreference: "balanced",
+          reviewDay: "Monday",
+          preferredDays: [0],
+          leadIndicators: [
+            {
+              id: "indicator_1",
+              name: "Viet outline",
+              target: "1",
+              unit: "phien",
+              type: "core",
+              cadence: "spread",
+            },
+          ],
+        })}
+        cycleStartDate="2026-05-05"
+        cycleEndDate="2026-07-27"
+        setupGuideSupport={null}
+        setupGuideTemplate={null}
+        hasPreviewTasks
+        weekOneTaskPreview={[]}
+        weekOneTaskWarning={null}
+        onChange={vi.fn()}
+        todayDateKey="2026-05-09"
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: /Đã ghim ưu tiên/i })).toHaveAttribute("aria-pressed", "true");
+
+    await user.click(screen.getByRole("button", { name: /Tùy chỉnh nâng cao/i }));
+
+    expect(screen.getByRole("button", { name: /30 phút/i })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: /Cân bằng/i })).toHaveAttribute("aria-pressed", "true");
   });
 });

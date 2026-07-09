@@ -174,6 +174,7 @@ export function ScheduleStepLab({
           <div className="flex flex-wrap gap-2.5">
             <button
               type="button"
+              aria-pressed={!isCustomDate && draft.startDate === nextMondayKey}
               onClick={() => {
                 soundService.click();
                 setIsCustomDate(false);
@@ -194,6 +195,7 @@ export function ScheduleStepLab({
 
             <button
               type="button"
+              aria-pressed={!isCustomDate && draft.startDate === localTodayDateKey}
               onClick={() => {
                 soundService.click();
                 setIsCustomDate(false);
@@ -212,6 +214,7 @@ export function ScheduleStepLab({
 
             <button
               type="button"
+              aria-pressed={isCustomDate}
               onClick={() => {
                 soundService.click();
                 setIsCustomDate(true);
@@ -321,6 +324,8 @@ export function ScheduleStepLab({
         <div className="border-t border-app-line/40 pt-4">
           <button
             type="button"
+            aria-expanded={isAdvancedOpen}
+            aria-controls="schedule-advanced-options"
             onClick={() => {
               soundService.click();
               setIsAdvancedOpen(!isAdvancedOpen);
@@ -335,7 +340,7 @@ export function ScheduleStepLab({
           </button>
 
           {isAdvancedOpen && (
-            <div className="mt-4 space-y-5 animate-in slide-in-from-top-2 duration-300">
+            <div id="schedule-advanced-options" className="mt-4 space-y-5 animate-in slide-in-from-top-2 duration-300">
               {/* Thời lượng dành cho mục tiêu mỗi ngày (dailyTimeBudget) */}
               <fieldset className="space-y-2">
                 <legend className={cn(labelClass, "font-bold text-app-ink flex items-center gap-1.5 mb-1.5")}>
@@ -358,6 +363,7 @@ export function ScheduleStepLab({
                       <button
                         key={option.value}
                         type="button"
+                        aria-pressed={isActive}
                         onClick={() => {
                           soundService.click();
                           onChange("dailyTimeBudget", option.value);
@@ -394,6 +400,7 @@ export function ScheduleStepLab({
                       <button
                         key={option.value}
                         type="button"
+                        aria-pressed={isActive}
                         onClick={() => {
                           soundService.click();
                           onChange("tacticLoadPreference", option.value);
@@ -451,6 +458,7 @@ export function ScheduleStepLab({
                 <button
                   key={day.key}
                   type="button"
+                  aria-pressed={isSelected}
                   onClick={() => {
                     soundService.click();
                     setSelectedMobileDay(day.index);
@@ -494,6 +502,7 @@ export function ScheduleStepLab({
             {/* Nút Ghim ưu tiên */}
             <button
               type="button"
+              aria-pressed={draft.preferredDays.includes(selectedMobileDay)}
               onClick={() => handleDayClick(selectedMobileDay)}
               className={cn(
                 "w-full min-h-11 rounded-xl px-3 py-2 text-xs font-bold leading-tight transition-all flex items-center justify-center gap-1.5 border active:scale-95 focus-visible:ring-2 focus-visible:ring-app-accent focus:outline-none",
@@ -546,6 +555,7 @@ export function ScheduleStepLab({
                 whileTap={prefersReducedMotion ? undefined : { scale: 0.98 }}
                 key={day.key}
                 type="button"
+                aria-pressed={isPreferredDay}
                 onClick={() => handleDayClick(day.index)}
                 className={cn(
                   "rounded-xl border p-3 flex flex-row sm:flex-col justify-between sm:justify-start gap-2.5 min-h-[85px] transition-all duration-300 hover:scale-102 hover:shadow-xs active:scale-[0.97] cursor-pointer text-left sm:text-center focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-1 focus:outline-none",

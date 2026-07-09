@@ -23,7 +23,7 @@ import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { appRoutes } from "@/app/routes";
+import { createAppRoutes } from "@/app/routes";
 import { TwelveWeekSystemDialogs } from "@/features/plan12week/pages/12WeekSystem/TwelveWeekSystemDialogs";
 import { DEFAULT_REPO_ROOT, resolveCoreFlowFiles } from "./token-scan";
 
@@ -299,7 +299,7 @@ function collectAllRoutePaths(routes: readonly unknown[]): Set<string> {
 
 describe("Task 9.5 — Real-mode route gating (Req 9.2, 9.6)", () => {
   it("appRoutes KHÔNG đăng ký `/billing/mock-checkout` hay biến thể `billing/mock-checkout`", () => {
-    const paths = collectAllRoutePaths(appRoutes);
+    const paths = collectAllRoutePaths(createAppRoutes("real"));
 
     // Không tồn tại path mock-checkout dưới bất kỳ dạng nào (root hoặc nested).
     const offenders = [...paths].filter((p) => /(?:^\/?)(?:billing\/)?mock-checkout/i.test(p));
@@ -307,7 +307,7 @@ describe("Task 9.5 — Real-mode route gating (Req 9.2, 9.6)", () => {
   });
 
   it("appRoutes KHÔNG chứa bất kỳ route demo-only nào trong tập kiểm duyệt (mock-*, demo-seed*, debug-*, seeder)", () => {
-    const paths = collectAllRoutePaths(appRoutes);
+    const paths = collectAllRoutePaths(createAppRoutes("real"));
 
     const BANNED_PATTERNS: ReadonlyArray<RegExp> = [
       /(?:^|\/)mock-/i, // /mock-checkout, billing/mock-*
@@ -322,6 +322,12 @@ describe("Task 9.5 — Real-mode route gating (Req 9.2, 9.6)", () => {
       offenders,
       `Real-mode route table chứa các đường dẫn demo-only sau: ${offenders.join(", ") || "(none)"}`,
     ).toEqual([]);
+  });
+
+  it("demo route table đăng ký `/billing/mock-checkout` để mock provider không tạo dead link", () => {
+    const paths = collectAllRoutePaths(createAppRoutes("demo"));
+
+    expect(paths).toContain("billing/mock-checkout");
   });
 
   it("`appRoutes` được khai báo tĩnh (static) — không phân nhánh theo isRealMode/isDemoMode tại thời điểm đăng ký", () => {
@@ -341,16 +347,17 @@ describe("Task 9.5 — Real-mode route gating (Req 9.2, 9.6)", () => {
     ).toBe(false);
   });
 
-  it("page module `MockBillingCheckout.tsx` tồn tại (cho test/preview), nhưng KHÔNG được wired vào appRoutes", () => {
+  it("page module `MockBillingCheckout.tsx` tồn tại và chỉ được wired qua demo-mode route factory", () => {
     // Module tồn tại trong codebase…
     const mockPagePath = path.resolve(DEFAULT_REPO_ROOT, "src", "app", "pages", "MockBillingCheckout.tsx");
     const mockPageSource = readFileSync(mockPagePath, "utf8");
     expect(mockPageSource).toContain("export function MockBillingCheckout");
 
-    // …nhưng routes.tsx KHÔNG import nó.
+    // …và routes.tsx chỉ đưa vào khi route factory được gọi ở demo mode.
     const routesPath = path.resolve(DEFAULT_REPO_ROOT, "src", "app", "routes.tsx");
     const routesSource = readFileSync(routesPath, "utf8");
-    expect(routesSource).not.toMatch(/MockBillingCheckout/);
-    expect(routesSource).not.toMatch(/mock-checkout/i);
+    expect(routesSource).toMatch(/appMode === "demo"/);
+    expect(routesSource).toMatch(/billing\/mock-checkout/);
+    expect(routesSource).toMatch(/MockBillingCheckout/);
   });
 });

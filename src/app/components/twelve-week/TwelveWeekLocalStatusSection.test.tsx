@@ -541,6 +541,10 @@ describe("TwelveWeekLocalStatusSection", () => {
     expect(screen.getByText(/Bắt đầu đồng bộ gần nhất:/i)).toBeInTheDocument();
     expect(screen.getByText(/Kết thúc đồng bộ gần nhất:/i)).toBeInTheDocument();
     expect(screen.getByText(/Đã gửi việc đang chờ đồng bộ, lấy 1 mục tiêu từ tài khoản/i)).toBeInTheDocument();
+    expect(screen.queryByText(/kiểm thử nội bộ/i)).not.toBeInTheDocument();
+    expect(
+      screen.getByText(/phần chi tiết giúp bạn kiểm tra trạng thái khi cần hỗ trợ/i),
+    ).toBeInTheDocument();
   });
 
   it("keeps manual queue sync disabled when signed out", () => {

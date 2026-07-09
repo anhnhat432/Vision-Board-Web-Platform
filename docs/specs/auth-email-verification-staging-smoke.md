@@ -3,15 +3,15 @@
 ## 1. Context & Goal
 
 - Feature / bug: local tests cover signup verification email and banner cooldown, but launch still lacks an opt-in staging smoke for the deployed auth path.
-- Why now: production users must understand email verification before paid checkout or cloud sync actions.
-- User impact: a disposable staging signup can prove the deployed app shows the unverified-email banner, restores resend cooldown, and blocks paid checkout for unverified users when checkout is available.
+- Why now: production users must understand email verification for cloud sync and account-trust actions, while paid checkout remains available with a receipt email.
+- User impact: a disposable staging signup can prove the deployed app shows the unverified-email banner, restores resend cooldown, and still lets unverified users enter paid checkout when checkout is available.
 - Modes affected: real-mode staging/production only; local/default runs must skip unless explicitly enabled.
 
 ## 2. Surface Classification
 
 - Type: Core.
-- Touched domains: Firebase signup, email verification banner, billing upgrade guard, Playwright staging smoke.
-- Existing invariants that must not break: no real customer accounts; no hardcoded credentials; no localStorage app data shape changes; paid checkout remains blocked for unverified email.
+- Touched domains: Firebase signup, email verification banner, billing upgrade availability, Playwright staging smoke.
+- Existing invariants that must not break: no real customer accounts; no hardcoded credentials; no localStorage app data shape changes; paid checkout remains available for unverified email unless the global checkout kill-switch is active.
 
 ## 3. Actors & Entry Points
 
@@ -26,7 +26,7 @@
 3. WHEN fixed staging credentials are configured, THE workflow SHALL require both email and password or neither before account creation starts.
 4. WHEN signup succeeds, THE test SHALL land on `/billing/plan` and see the persistent unverified-email banner.
 5. WHEN the initial verification email cooldown was written, THE test SHALL see the banner resend button disabled.
-6. WHEN paid checkout is available and the upgrade dialog can open, THE test SHALL verify the checkout CTA is disabled for the unverified user.
+6. WHEN paid checkout is available and the upgrade dialog can open, THE test SHALL verify the checkout CTA remains enabled for the unverified user.
 7. WHEN paid checkout is globally disabled, THE test SHALL report that state without treating it as email-guard proof.
 8. WHERE the workflow target is for deployed launch proof, THE workflow SHALL reject `localhost` and `127.0.0.1` so local-only URLs cannot satisfy staging evidence.
 
@@ -59,7 +59,7 @@
 - [x] fixed staging email/password secrets must be configured as a complete pair.
 - [x] smoke proves deployed signup reaches billing plan with unverified banner.
 - [x] smoke proves resend starts disabled from the signup-written cooldown.
-- [x] smoke verifies paid checkout is blocked for unverified email when checkout is otherwise available.
+- [x] smoke verifies paid checkout remains available for unverified email when checkout is otherwise available.
 - [x] workflow rejects `localhost` / `127.0.0.1` targets for deployed proof.
 - [x] launch and pre-deploy checklists include the email-verification staging workflow as a required proof gate.
 
@@ -79,7 +79,7 @@ npm.cmd run build
 - Staging smoke harness verified by `e2e/email-verification.spec.ts`: default run skips unless `EMAIL_VERIFICATION_E2E_URL` and `EMAIL_VERIFICATION_E2E_ALLOW=CREATE_TEST_ACCOUNT` are present, and custom emails must contain a verification marker such as `+verify`.
 - Manual staging workflow added in `.github/workflows/email-verification-e2e-staging.yml`: requires `allow_create=CREATE_TEST_ACCOUNT` and rejects any configured `EMAIL_VERIFICATION_E2E_EMAIL` secret that lacks a verification marker before Playwright starts.
 - Persistent banner cooldown verified by `src/app/components/root-layout/EmailVerificationBanner.persistent.test.tsx`: resend cooldown survives refresh, signup-written cooldown disables resend initially, the banner stays visible for unverified email, and sync-triggered verification reason appears.
-- Paid checkout guard verified by `src/app/components/UpgradePaywallDialog.unverified.test.tsx`: unverified real-mode user sees verification-before-payment copy, can request verification email, and cannot continue checkout.
+- Paid checkout availability verified by `src/app/components/UpgradePaywallDialog.unverified.test.tsx`: unverified real-mode user does not see verification-before-payment copy and can continue checkout.
 - Verification passed:
   - `npm.cmd run test:e2e:email-verification` (1 test skipped by safety guard)
   - `npm.cmd run test:ui -- src/app/components/root-layout/EmailVerificationBanner.persistent.test.tsx src/app/components/UpgradePaywallDialog.unverified.test.tsx` (6 tests passed)
@@ -98,7 +98,7 @@ npm.cmd run build
 
 ## 10.2. Batch Evidence - 2026-06-27
 
-- `src/app/components/UpgradePaywallDialog.unverified.test.tsx` is now included in `npm run test:production-core:ui`, so PR/main local proof fails if an unverified real-mode user can continue paid checkout again.
+- `src/app/components/UpgradePaywallDialog.unverified.test.tsx` is now included in `npm run test:production-core:ui`, so PR/main local proof fails if an unverified real-mode user is blocked from paid checkout again.
 - `src/lib/auth/firebase.test.ts` is now included in `npm run test:production-core:unit`, so signup-written verification email and cooldown proof stay attached to the production-core aggregate instead of only targeted auth runs.
 - `src/app/utils/production/outboxSync.test.ts` is now included in `npm run test:production-core:sync`, so the local-only outbox pause for `email_unverified` remains part of the launch sync guard.
 

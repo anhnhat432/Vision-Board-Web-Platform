@@ -358,6 +358,10 @@ export const validatePublicCheckoutSessionInput: RequestHandler = (req, _res, ne
     couponCode: normalizeOptionalCouponCode(body.couponCode),
   };
 
+  if (!req.body.receiptEmail) {
+    throw new ApiError(400, "receiptEmail is required for public checkout.", undefined, "receipt_email_required");
+  }
+
   next();
 };
 

@@ -66,6 +66,6 @@ describe("check-github-workflow-readiness", () => {
     expect(runbook).toContain("Workflow Availability Snapshot");
     expect(checklist).toContain("npm run proof:workflows");
     expect(currentStatus).toContain("npm run proof:workflows");
-    expect(currentStatus).toContain("not yet available on the default branch");
+    expect(currentStatus).toContain("all proof workflows active on the default branch");
   });
 });

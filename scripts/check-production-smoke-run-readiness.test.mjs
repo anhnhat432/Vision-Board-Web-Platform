@@ -81,6 +81,30 @@ describe("check-production-smoke-run-readiness", () => {
     expect(result.stdout).toContain(".github/workflows/production-smoke-e2e.yml");
   });
 
+  it("notes unpublished unstaged mitigation when the failed run matches HEAD", () => {
+    const result = runSmokeReadiness(
+      JSON.stringify([
+        {
+          databaseId: 28995039420,
+          status: "completed",
+          conclusion: "failure",
+          event: "schedule",
+          headSha: "6ad15aca67c264cbf8ae544dbc45100b6939db01",
+          createdAt: "2026-07-09T04:54:41Z",
+          url: "https://github.com/anhnhat432/Vision-Board-Web-Platform/actions/runs/28995039420",
+        },
+      ]),
+      JSON.stringify({
+        headSha: "6ad15aca67c264cbf8ae544dbc45100b6939db01",
+        changedFiles: ["scripts/smoke-production-e2e.mjs"],
+      }),
+    );
+
+    expect(result.status).toBe(1);
+    expect(result.stdout).toContain("NOTE Production smoke local mitigation is present but unpublished");
+    expect(result.stdout).toContain("scripts/smoke-production-e2e.mjs");
+  });
+
   it("blocks when the latest production smoke run is still in progress", () => {
     const result = runSmokeReadiness(
       JSON.stringify([

@@ -23,6 +23,12 @@ const requiredFrontendForBackendSync = [
   "VITE_FIREBASE_APP_ID",
 ];
 
+const requiredFrontendRuntimeKeys = [
+  "VITE_BILLING_PROVIDER_MODE",
+  "VITE_BILLING_SUPPORT_EMAIL",
+  "VITE_SENTRY_DSN",
+];
+
 const optionalFrontendFirebaseKeys = [
   "VITE_FIREBASE_STORAGE_BUCKET",
   "VITE_FIREBASE_MESSAGING_SENDER_ID",
@@ -30,7 +36,6 @@ const optionalFrontendFirebaseKeys = [
 ];
 
 const optionalFrontendMonitoringKeys = [
-  "VITE_SENTRY_DSN",
   "VITE_SENTRY_ENVIRONMENT",
   "VITE_SENTRY_RELEASE",
   "VITE_SENTRY_TRACES_SAMPLE_RATE",
@@ -54,6 +59,17 @@ const cassoBillingKeys = [
   "CASSO_ACCOUNT_NAME",
   "PLUS_PRICE_VND",
 ];
+
+const cassoWebhookSecretAliases = [
+  "CASSO_WEBHOOK_SECRET",
+  "CASSO_WEBHOOK_CHECKSUM_KEY",
+  "CASSO_CHECKSUM_KEY",
+  "CASSO_SECURE_TOKEN",
+];
+
+const requirementAliases = {
+  CASSO_WEBHOOK_SECRET: cassoWebhookSecretAliases,
+};
 
 const payosBillingKeys = [
   "BILLING_PROVIDER",
@@ -159,6 +175,11 @@ function hasValue(values, key) {
   return typeof values[key] === "string" && values[key].trim().length > 0;
 }
 
+function hasRequiredValue(values, key) {
+  const aliases = requirementAliases[key] ?? [key];
+  return aliases.some((alias) => hasValue(values, alias));
+}
+
 function normalizeFrontendAppMode(value) {
   const trimmed = value?.trim().toLowerCase();
   if (trimmed === "demo" || trimmed === "real") {
@@ -171,18 +192,19 @@ function normalizeFrontendAppMode(value) {
 function printKeyStatus(label, keys, values) {
   console.log(label);
   for (const key of keys) {
-    console.log(`  ${hasValue(values, key) ? "OK     " : "MISSING"} ${key}`);
+    console.log(`  ${hasRequiredValue(values, key) ? "OK     " : "MISSING"} ${key}`);
   }
 }
 
 function collectMissing(keys, values) {
-  return keys.filter((key) => !hasValue(values, key));
+  return keys.filter((key) => !hasRequiredValue(values, key));
 }
 
 async function checkApiHealth(baseUrl) {
   if (!baseUrl) return { status: "skipped", message: "VITE_API_BASE_URL is missing." };
 
   const url = `${baseUrl.replace(/\/$/, "")}/health`;
+  const healthTarget = `${url} (timeout ${healthTimeoutMs}ms via ENV_CHECK_HEALTH_TIMEOUT_MS=${healthTimeoutMs})`;
 
   try {
     const response = await fetch(url, { signal: AbortSignal.timeout(healthTimeoutMs) });
@@ -190,12 +212,14 @@ async function checkApiHealth(baseUrl) {
 
     return {
       status: response.ok ? "ok" : "failed",
-      message: `HTTP ${response.status}${body ? ` - ${body.slice(0, 160)}` : ""}`,
+      message: response.ok
+        ? `HTTP ${response.status}${body ? ` - ${body.slice(0, 160)}` : ""}`
+        : `${healthTarget}: HTTP ${response.status}${body ? ` - ${body.slice(0, 160)}` : ""}`,
     };
   } catch (error) {
     return {
       status: "failed",
-      message: error instanceof Error ? error.message : String(error),
+      message: `${healthTarget}: ${error instanceof Error ? error.message : String(error)}`,
     };
   }
 }
@@ -205,8 +229,12 @@ const backendEnv = parseEnvFile(backendEnvFile);
 const frontendAppModeResult = normalizeFrontendAppMode(frontendEnv.values.VITE_APP_MODE);
 const frontendAppMode = frontendAppModeResult.mode;
 const shouldRequireBackendSyncEnv = fullStack || frontendAppMode === "real";
+const backendBillingProvider = backendEnv.values.BILLING_PROVIDER?.trim().toLowerCase();
 const frontendMissing = shouldRequireBackendSyncEnv
   ? collectMissing(requiredFrontendForBackendSync, frontendEnv.values)
+  : [];
+const frontendRuntimeMissing = shouldRequireBackendSyncEnv
+  ? collectMissing(requiredFrontendRuntimeKeys, frontendEnv.values)
   : [];
 const backendMissing = backendEnv.exists ? collectMissing(requiredBackendKeys, backendEnv.values) : requiredBackendKeys;
 
@@ -221,13 +249,19 @@ console.log("");
 
 printKeyStatus("Frontend backend-sync requirements", requiredFrontendForBackendSync, frontendEnv.values);
 console.log("");
+printKeyStatus("Frontend real-mode runtime requirements", requiredFrontendRuntimeKeys, frontendEnv.values);
+console.log("");
 printKeyStatus("Optional Firebase client keys", optionalFrontendFirebaseKeys, frontendEnv.values);
 console.log("");
 printKeyStatus("Optional frontend error monitoring", optionalFrontendMonitoringKeys, frontendEnv.values);
 console.log("");
 printKeyStatus("Backend local API requirements", requiredBackendKeys, backendEnv.values);
 console.log("");
-printKeyStatus("Casso + VietQR billing requirements (BILLING_PROVIDER=casso or --casso-billing)", cassoBillingKeys, backendEnv.values);
+if (backendBillingProvider === "payos" && !requireCassoBilling) {
+  printKeyStatus("PayOS billing requirements (BILLING_PROVIDER=payos)", payosBillingKeys, backendEnv.values);
+} else {
+  printKeyStatus("Casso + VietQR billing requirements (BILLING_PROVIDER=casso or --casso-billing)", cassoBillingKeys, backendEnv.values);
+}
 console.log("");
 printKeyStatus("Optional backend error monitoring", optionalBackendMonitoringKeys, backendEnv.values);
 console.log("");
@@ -269,6 +303,7 @@ console.log(`API health: ${healthResult.status.toUpperCase()} ${healthResult.mes
 
 const fullStackFailures = [
   ...frontendMissing.map((key) => `frontend:${key}`),
+  ...frontendRuntimeMissing.map((key) => `frontend:${key}`),
   ...(shouldRequireBackendSyncEnv ? backendMissing.map((key) => `backend:${key}`) : []),
 ];
 
@@ -277,7 +312,6 @@ function isPaidCheckoutDisabled(env) {
   return raw === "1" || raw === "true" || raw === "yes" || raw === "on";
 }
 
-const backendBillingProvider = backendEnv.values.BILLING_PROVIDER?.trim().toLowerCase();
 const paidCheckoutDisabled = isPaidCheckoutDisabled(backendEnv.values);
 
 if (shouldRequireBackendSyncEnv) {
@@ -331,8 +365,8 @@ if (fullStack && fullStackFailures.length > 0) {
   console.log("");
   console.log("Full-stack backend sync is not ready.");
   console.log(`Missing or failing checks: ${fullStackFailures.join(", ")}`);
-  process.exit(1);
+  process.exitCode = 1;
+} else {
+  console.log("");
+  console.log(fullStackFailures.length > 0 ? "Report complete with warnings." : "Runtime env looks ready.");
 }
-
-console.log("");
-console.log(fullStackFailures.length > 0 ? "Report complete with warnings." : "Runtime env looks ready.");

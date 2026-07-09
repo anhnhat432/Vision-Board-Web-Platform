@@ -188,6 +188,7 @@ export function BillingPlan() {
   const returnStatus = searchParams.get("status");
   const isCheckoutReturn = returnStatus === "success" && realMode;
   const signedInUserId = authContext?.user?.uid ?? null;
+  const authLoading = authContext?.authLoading ?? false;
   const emailNeedsVerification = authContext?.user ? !canRequestRefund(authContext.user) : false;
   const canLoadPaymentHistory = realMode && signedInUserId !== null && !emailNeedsVerification;
 
@@ -220,8 +221,14 @@ export function BillingPlan() {
   const graceState = useMemo(() => getSubscriptionGraceState(userData), [userData]);
 
   const [saleEvent, setSaleEvent] = useState<SaleEventInfo | null>(null);
+  const canLoadSaleEvent = !realMode || (!authLoading && signedInUserId !== null);
 
   useEffect(() => {
+    if (!canLoadSaleEvent) {
+      setSaleEvent(null);
+      return;
+    }
+
     let cancelled = false;
     const params = new URLSearchParams({
       purpose: "plus_subscription",
@@ -246,7 +253,7 @@ export function BillingPlan() {
       }
     }).catch(() => { /* sale event is optional */ });
     return () => { cancelled = true; };
-  }, []);
+  }, [canLoadSaleEvent]);
 
   const lastEntitlementSync = useMemo(() => getLastEntitlementSyncSnapshot(), []);
   const lastRestoreAccess = useMemo(() => getLastRestoreAccessSnapshot(), []);
@@ -591,6 +598,12 @@ export function BillingPlan() {
     : undefined;
   const displayFinalAmount = activeDiscount?.finalAmount ?? (displayDiscountAmount ? Math.max(PLUS_MONTHLY_PRICE_VND - displayDiscountAmount, 1000) : undefined);
   const hasActiveDiscount = activeDiscount !== null || effectiveSaleEvent !== null;
+  const couponInputId = "billing-coupon-code";
+  const couponHelpId = "billing-coupon-help";
+  const couponErrorId = "billing-coupon-error";
+  const couponDescribedBy = couponStatus === "invalid" && couponError
+    ? `${couponHelpId} ${couponErrorId}`
+    : couponHelpId;
 
   return (
     <main className="mx-auto flex max-w-[1000px] flex-col gap-[18px] px-4 pb-16 pt-4 sm:px-6 lg:px-9">
@@ -649,15 +662,6 @@ export function BillingPlan() {
         returnUrl={billingReturnUrl}
         onCheckoutComplete={handleCheckoutComplete}
       />
-
-      {/* ===== CÁCH DÙNG MÀN NÀY PILL ===== */}
-      <div className="flex justify-end">
-        <button type="button" className="relative inline-flex items-center gap-2 rounded-full border border-app-line bg-white px-[15px] py-[9px] text-[12.5px] font-semibold text-app-ink-soft">
-          <span className="absolute -right-[3px] -top-[3px] h-[9px] w-[9px] rounded-full bg-app-accent" />
-          <LifeBuoy className="h-[15px] w-[15px]" aria-hidden="true" />
-          Cách dùng màn này
-        </button>
-      </div>
 
       {/* ===== HERO ===== */}
       <section className="relative grid items-center gap-7 overflow-hidden rounded-[22px] border border-app-line bg-white px-8 py-8 sm:px-[34px] sm:py-[34px] lg:grid-cols-[1fr_280px]">
@@ -1154,13 +1158,25 @@ export function BillingPlan() {
           )}
 
           {/* Coupon input */}
+          <p id={couponHelpId} className="sr-only">
+            Nhập mã giảm giá nếu bạn có ưu đãi.
+          </p>
           <div className="mb-3 flex gap-[11px]">
+            <label htmlFor={couponInputId} className="sr-only">
+              Nhập mã giảm giá
+            </label>
             <input
+              id={couponInputId}
+              name="couponCode"
               type="text"
               placeholder="NHẬP MÃ GIẢM GIÁ"
               value={couponCode}
               onChange={(e) => setCouponCode(e.target.value)}
-              className="h-11 flex-1 rounded-[11px] border border-app-line bg-white px-[14px] font-mono text-[12.5px] tracking-[0.04em] text-app-ink outline-none transition-[border-color,box-shadow] focus:border-app-accent focus:shadow-[0_0_0_3px_rgba(12,94,58,0.1)]"
+              autoComplete="off"
+              autoCapitalize="characters"
+              aria-invalid={couponStatus === "invalid"}
+              aria-describedby={couponDescribedBy}
+              className="h-11 flex-1 rounded-[11px] border border-app-line bg-white px-[14px] font-mono text-base tracking-[0.04em] text-app-ink outline-none transition-[border-color,box-shadow] focus:border-app-accent focus:shadow-[0_0_0_3px_rgba(12,94,58,0.1)] aria-invalid:border-app-status-error aria-invalid:shadow-[0_0_0_3px_rgba(220,38,38,0.1)] sm:text-[12.5px]"
             />
             {couponStatus === "valid" || activeDiscount ? (
               <button type="button" onClick={() => { setCouponCode(""); resetCoupon(); handleCouponChange(null); }} className="shrink-0 rounded-[11px] bg-[#5C7A5C] px-[22px] text-[13px] font-bold text-white">
@@ -1173,7 +1189,9 @@ export function BillingPlan() {
             )}
           </div>
           {couponStatus === "invalid" && couponError && (
-            <p className="mb-3 text-xs text-app-status-error">{couponError}</p>
+            <p id={couponErrorId} className="mb-3 text-xs text-app-status-error" aria-live="polite">
+              {couponError}
+            </p>
           )}
 
           {/* Final price display */}

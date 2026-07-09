@@ -26,9 +26,11 @@
 2. WHERE a route is mock/demo-only, THE system SHALL register it only when demo mode allows it.
 3. WHERE copy refers to trials, THE system SHALL use account-bound wording in real mode and browser/demo wording only in demo mode.
 4. WHILE demo mode is active, THE system SHALL avoid protected backend sync and real payment assumptions.
-5. WHEN real mode is active, THE system SHALL avoid mock checkout, mock unlock, and demo-only debug UIs unless explicitly gated by safe env flags.
+5. WHEN real mode is active, THE system SHALL avoid mock checkout, mock unlock, and demo-only debug UIs even if debug env flags are accidentally enabled.
 6. WHERE app routes are registered, THE system SHALL prove by recursive route-table test that demo-only billing/debug/seeder paths are statically omitted from production routes.
 7. WHEN a production user opens a legacy demo-only billing URL directly, THE system SHALL route to a production-safe real-mode surface without rendering mock/demo checkout copy or the app error boundary.
+8. WHEN real mode boots with missing or unsafe production-critical frontend env, THE system SHALL report a sanitized runtime readiness issue without exposing env values.
+9. WHEN real-mode assistant API calls cannot find a configured backend API base URL, THE system SHALL fail fast with a configuration error instead of calling a localhost fallback.
 
 ## 5. Data, Storage, and Sync Constraints
 
@@ -61,6 +63,9 @@
 - [x] deployment checklist names VITE_APP_MODE=real as required for production.
 - [x] runtime env checker treats missing/malformed VITE_APP_MODE as production-safe real fallback and flags malformed values in full-stack checks.
 - [x] direct legacy demo-only billing URLs redirect to a safe real-mode surface without registering the demo route.
+- [x] debug UI env flags only render debug panels in demo mode, never in real mode.
+- [x] real-mode runtime boot reports missing or unsafe production-critical frontend env through sanitized console/monitoring evidence.
+- [x] real-mode assistant chat and telemetry do not call localhost fallback when `VITE_API_BASE_URL` is missing.
 
 ## 9. Verification Plan
 
@@ -68,6 +73,8 @@ Focused automated evidence:
 
 ```bash
 npm run test:run -- src/app/utils/app-mode.test.ts src/app/utils/production/billingCore.test.ts src/test/ux-ui-upgrade/property-8-demo-copy.test.ts
+npm run test:run -- src/app/utils/production-runtime-env.test.ts
+npm run test:run -- src/app/features/assistant/__tests__/assistantApi.test.ts src/app/features/assistant/__tests__/assistantTelemetryClient.test.ts
 npm run test:ui -- src/app/routes.test.tsx src/test/ux-ui-upgrade/destructive-dialog-realmode-gating.test.tsx
 npm run test:sync -- src/features/plan12week/persistence/mutationQueueOffline.test.ts src/features/plan12week/persistence/mutationQueueSender.test.ts src/features/plan12week/hooks/useAutoCloudSync.test.ts
 npx vitest run scripts/check-runtime-env.test.mjs
@@ -130,6 +137,48 @@ npm run smoke:prod
   - `npm.cmd run test:run -- src/app/utils/app-mode.test.ts` (8 tests passed)
   - `npm.cmd run typecheck`
   - `npm.cmd run lint`
+
+## 11.1 Frontend Runtime Env Boot Evidence - 2026-07-08
+
+- `src/app/utils/production-runtime-env.ts` reports missing or unsafe real-mode frontend env at app boot without blocking the app or exposing env values.
+- Demo mode returns no runtime readiness issues, preserving preview/demo deployments without Firebase/backend requirements.
+- Real-mode readiness covers the backend API base URL, Firebase client keys, billing provider mode/support email, and frontend Sentry DSN.
+- Production builds also flag localhost API targets and non-`api_contract` billing provider mode as unsafe.
+- Verification passed:
+  - `npm.cmd run test:run -- src/app/utils/production-runtime-env.test.ts`
+  - `npm.cmd run test:run -- src/app/utils/production-runtime-env.test.ts src/app/utils/app-mode.test.ts`
+  - `npm.cmd run typecheck`
+  - `npm.cmd run lint`
+  - `npm.cmd run test:run`
+  - `npm.cmd run build`
+  - `npm.cmd run env:check -- --skip-health`
+
+## 11.1.1 Full-Stack Runtime Env Gate Evidence - 2026-07-08
+
+- `scripts/check-runtime-env.mjs` now prints the frontend real-mode runtime requirements used by `src/app/utils/production-runtime-env.ts`: `VITE_BILLING_PROVIDER_MODE`, `VITE_BILLING_SUPPORT_EMAIL`, and `VITE_SENTRY_DSN`.
+- Full-stack real-mode checks fail when any of those keys are missing, so production deployments catch missing billing/support/monitoring configuration before launch.
+- Demo/report mode still reports the keys without failing, preserving preview/demo deployments.
+- Verification passed:
+  - `npx.cmd vitest run scripts/check-runtime-env.test.mjs`
+  - `npm.cmd run test:ops`
+  - `npm.cmd run typecheck`
+  - `npm.cmd run lint`
+  - `npm.cmd run build`
+  - `npm.cmd run env:check -- --skip-health`
+
+## 11.2 Assistant API Base URL Guard Evidence - 2026-07-08
+
+- Real-mode assistant streaming/chat fails fast with `ASSISTANT_BACKEND_NOT_CONFIGURED` when `VITE_API_BASE_URL` is missing instead of calling the localhost fallback from `apiClient`.
+- Assistant telemetry forwarding now requires both real mode and a configured API base URL, so observability events are not sent to localhost when production env is incomplete.
+- Demo assistant behavior remains unchanged because demo mode still uses the local mock provider.
+- Verification passed:
+  - `npm.cmd run test:run -- src/app/features/assistant/__tests__/assistantApi.test.ts`
+  - `npm.cmd run test:run -- src/app/features/assistant/__tests__/assistantTelemetryClient.test.ts`
+  - `npm.cmd run test:run -- src/app/utils/production-runtime-env.test.ts src/app/utils/app-mode.test.ts src/app/features/assistant/__tests__/assistantApi.test.ts src/app/features/assistant/__tests__/assistantTelemetryClient.test.ts`
+  - `npm.cmd run typecheck`
+  - `npm.cmd run lint`
+  - `npm.cmd run test:run`
+  - `npm.cmd run build`
 
 ## 12. Open Questions / Follow-ups
 

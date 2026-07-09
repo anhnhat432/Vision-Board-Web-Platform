@@ -25,6 +25,27 @@ export function getRequiredEnvInProduction(name: string): string | undefined {
   return getRequiredEnv(name);
 }
 
+function getOptionalEnvFrom(names: readonly string[]): string | undefined {
+  for (const name of names) {
+    const value = getOptionalEnv(name);
+    if (value) return value;
+  }
+
+  return undefined;
+}
+
+export function getRequiredAnyEnvInProduction(names: readonly string[]): string | undefined {
+  const nodeEnv = process.env.NODE_ENV ?? "development";
+  if (nodeEnv !== "production") return getOptionalEnvFrom(names);
+
+  const value = getOptionalEnvFrom(names);
+  if (value) return value;
+
+  const primaryName = names[0] ?? "UNKNOWN_ENV";
+  const aliases = names.length > 1 ? ` (accepted aliases: ${names.join(", ")})` : "";
+  throw new Error(`Missing required environment variable: ${primaryName}${aliases}`);
+}
+
 export function getBooleanEnv(name: string, defaultValue = false): boolean {
   const value = getOptionalEnv(name)?.toLowerCase();
   if (value === undefined) return defaultValue;
@@ -50,6 +71,12 @@ function parsePort(rawPort: string | undefined): number {
 }
 
 const nodeEnv = process.env.NODE_ENV ?? "development";
+const cassoWebhookSecretKeys = [
+  "CASSO_WEBHOOK_SECRET",
+  "CASSO_WEBHOOK_CHECKSUM_KEY",
+  "CASSO_CHECKSUM_KEY",
+  "CASSO_SECURE_TOKEN",
+] as const;
 
 // Fail-fast production validation. Aggregates every problem so operators
 // see the full report instead of patching one issue at a time. Skipped
@@ -102,7 +129,9 @@ export const env = {
   FRONTEND_ORIGIN: getRequiredEnv("FRONTEND_ORIGIN"),
   SENTRY_DSN: getOptionalEnv("SENTRY_DSN"),
   CASSO_WEBHOOK_SECRET:
-    billingProvider === "casso" ? getRequiredEnvInProduction("CASSO_WEBHOOK_SECRET") : getOptionalEnv("CASSO_WEBHOOK_SECRET"),
+    billingProvider === "casso"
+      ? getRequiredAnyEnvInProduction(cassoWebhookSecretKeys)
+      : getOptionalEnvFrom(cassoWebhookSecretKeys),
   ASSISTANT_PROVIDER: resolvedAssistantProvider,
   GEMINI_API_KEY: geminiApiKey,
   GEMINI_MODEL: geminiModel,

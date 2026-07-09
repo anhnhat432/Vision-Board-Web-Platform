@@ -91,6 +91,13 @@ export function MeasurableStep({
   const showMetricNameError = metricNameMissing && (blurredFields.metricName || currentStepHasDraftContent);
   const showTargetError = targetInvalid && (blurredFields.targetValue || currentStepHasDraftContent);
   const activeMetricUnit = metricUnitInput.trim();
+  const metricNameDescriptionIds = [
+    showMetricNameError ? "smart-metric-name-error" : null,
+    "smart-metric-name-hint",
+    intentMetricHint ? "smart-metric-intent-hint" : null,
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   const unitSuggestions = (() => {
     if (focusArea === "Career") return ["dự án", "giờ/tuần", "nhiệm vụ"];
@@ -259,11 +266,14 @@ export function MeasurableStep({
             onBlur={() => setBlurredFields((previous) => ({ ...previous, metricName: true }))}
             className={inputClass}
             aria-invalid={showMetricNameError}
-            aria-describedby="smart-metric-name-hint"
+            aria-describedby={metricNameDescriptionIds}
           />
           <p id="smart-metric-name-hint" className={helperTextClass}>
             Con số để đo tiến trình mỗi tuần.
           </p>
+          {showMetricNameError ? (
+            <FieldError id="smart-metric-name-error" message="Chọn một chỉ số cụ thể để bắt đầu đo lường." role="alert" />
+          ) : null}
         </div>
         <div>
           <label htmlFor="smart-metric-unit" className={labelClass}>
@@ -324,6 +334,7 @@ export function MeasurableStep({
               }
               className={cn(inputClass, activeMetricUnit ? "pr-24 sm:pr-28" : undefined)}
               aria-invalid={baselineInvalid}
+              aria-describedby={baselineInvalid ? "smart-baseline-error smart-baseline-hint" : "smart-baseline-hint"}
             />
             {activeMetricUnit ? (
               <span className="pointer-events-none absolute right-2 top-1/2 max-w-[7.5rem] -translate-y-1/2 truncate rounded-full bg-app-bg-subtle px-2.5 py-0.5 text-[11px] font-semibold text-app-ink-muted">
@@ -363,6 +374,11 @@ export function MeasurableStep({
               onBlur={() => setBlurredFields((previous) => ({ ...previous, targetValue: true }))}
               className={cn(inputClass, activeMetricUnit ? "pr-24 sm:pr-28" : undefined)}
               aria-invalid={showTargetError}
+              aria-describedby={
+                showTargetError
+                  ? `${targetNotAboveBaseline ? "smart-target-error" : "smart-target-required-error"} smart-target-hint`
+                  : "smart-target-hint"
+              }
             />
             {activeMetricUnit ? (
               <span className="pointer-events-none absolute right-2 top-1/2 max-w-[7.5rem] -translate-y-1/2 truncate rounded-full bg-app-bg-subtle px-2.5 py-0.5 text-[11px] font-semibold text-app-ink-muted">
@@ -492,7 +508,7 @@ export function MeasurableStep({
         >
           <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
           <span>
-            <span className="font-medium text-app-ink">Gợi ý:</span> {intentMetricHint}
+            <span className="font-medium text-app-ink">Gợi ý đo lường:</span> {intentMetricHint}
           </span>
         </div>
       )}

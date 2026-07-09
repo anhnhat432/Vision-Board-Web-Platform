@@ -1,5 +1,6 @@
 import { env } from "../config/env";
 import { VALID_ACTION_TYPES } from "../shared/assistantActionSchema";
+import { redactSensitive } from "../shared/assistantRedaction";
 import type { AssistantContext } from "./assistantService";
 import { buildSystemPrompt, summarizeContext } from "./assistantPromptUtils";
 
@@ -125,6 +126,38 @@ interface GroqErrorBody {
   error?: { message?: string; type?: string; code?: string };
 }
 
+function redactProviderText(value: string, maxLength: number): string {
+  return redactSensitive(value).slice(0, maxLength);
+}
+
+function getRedactedProviderMessage(message: string | undefined): string | undefined {
+  const redacted = message ? redactProviderText(message, 200).trim() : "";
+  return redacted || undefined;
+}
+
+function stringifyRedactedProviderPayload(value: unknown, maxLength = 500): string {
+  try {
+    return redactProviderText(JSON.stringify(value), maxLength);
+  } catch {
+    return "[unserializable_provider_payload]";
+  }
+}
+
+function getSafeErrorLogMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return `${error.name}: ${redactProviderText(error.message, 300)}`;
+  }
+  return redactProviderText(String(error), 300);
+}
+
+function toSafeError(error: unknown, fallbackMessage: string): Error {
+  if (error instanceof Error) {
+    const redactedMessage = redactProviderText(error.message, 300);
+    return redactedMessage === error.message ? error : new Error(redactedMessage);
+  }
+  return new Error(fallbackMessage);
+}
+
 async function extractGroqErrorDetails(response: Response): Promise<{ status: number; body: string; parsed?: GroqErrorBody }> {
   const status = response.status;
   let body = "";
@@ -133,11 +166,11 @@ async function extractGroqErrorDetails(response: Response): Promise<{ status: nu
     body = await response.text();
     parsed = JSON.parse(body) as GroqErrorBody;
   } catch {}
-  return { status, body: body.slice(0, 500), parsed };
+  return { status, body: redactProviderText(body, 500), parsed };
 }
 
 function getGroqErrorMessage(status: number, parsed?: GroqErrorBody): { message: string; errorCode: string } {
-  const providerMsg = parsed?.error?.message?.slice(0, 200);
+  const providerMsg = getRedactedProviderMessage(parsed?.error?.message);
   if (status === 429) {
     return {
       message: "Trợ lý AI đang quá tải (rate limit). Vui lòng đợi vài giây rồi thử lại.",
@@ -515,16 +548,18 @@ export async function transcribeAudio(
 
       if (!response.ok) {
         const errorData = await response.json() as any;
-        console.error("[Gemini Transcribe] API error:", response.status, errorData);
-        throw new Error(errorData.error?.message || `API transcription failed: ${response.status}`);
+        const providerMessage = getRedactedProviderMessage(errorData.error?.message);
+        console.error("[Gemini Transcribe] API error:", response.status, stringifyRedactedProviderPayload(errorData));
+        throw new Error(providerMessage || `API transcription failed: ${response.status}`);
       }
 
       const data = await response.json() as any;
       const text = data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? "";
       return text;
     } catch (error: any) {
-      console.error("[Gemini Transcribe] Error:", error);
-      throw error;
+      const safeError = toSafeError(error, "Gemini transcription failed.");
+      console.error("[Gemini Transcribe] Error:", getSafeErrorLogMessage(safeError));
+      throw safeError;
     }
   }
 
@@ -553,14 +588,15 @@ export async function transcribeAudio(
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("[Groq Transcribe] API error:", response.status, errorText);
+      console.error("[Groq Transcribe] API error:", response.status, redactProviderText(errorText, 500));
       throw new Error(`API transcription failed: ${response.status}`);
     }
 
     const data = await response.json() as { text: string };
     return data.text || "";
   } catch (error: any) {
-    console.error("[Groq Transcribe] Error:", error);
-    throw error;
+    const safeError = toSafeError(error, "Groq transcription failed.");
+    console.error("[Groq Transcribe] Error:", getSafeErrorLogMessage(safeError));
+    throw safeError;
   }
 }

@@ -187,6 +187,10 @@ export function useTwelveWeekSystemSnapshot() {
 
   useEffect(() => {
     const nextTab = new URLSearchParams(location.search).get("tab");
+    if (nextTab === "review") {
+      setActiveTab("week");
+      return;
+    }
     if (nextTab === "today" || nextTab === "week" || nextTab === "progress" || nextTab === "settings") {
       setActiveTab(nextTab);
     }

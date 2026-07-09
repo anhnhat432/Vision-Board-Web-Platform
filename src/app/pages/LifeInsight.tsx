@@ -185,6 +185,10 @@ function getPendingSmartGoalStatement(): string {
   return "";
 }
 
+function isLargeViewport() {
+  return typeof window !== "undefined" && window.innerWidth >= 1024;
+}
+
 export function LifeInsight() {
   const navigate = useNavigate();
   const { userData } = useSyncedUserData();
@@ -194,10 +198,21 @@ export function LifeInsight() {
   const [isAreasGridOpen, setIsAreasGridOpen] = useState(false);
   const [selectedIntent, setSelectedIntent] = useState<UserIntentId | null>(null);
   const [pendingFocusAreaName, setPendingFocusAreaName] = useState<string | null>(null);
+  const [isDesktopLayout, setIsDesktopLayout] = useState(isLargeViewport);
   const pageTopRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setSelectedIntent(getUserIntentId());
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const handleResize = () => setIsDesktopLayout(isLargeViewport());
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // Reset scroll on mount (page navigation)
@@ -344,6 +359,7 @@ export function LifeInsight() {
   };
 
   const isCustomSelection = selectedAreaName !== null && selectedAreaName !== lowestArea.name;
+  const shouldHideAreasGrid = !isDesktopLayout && !isAreasGridOpen;
   const focusAreaLabel = getLifeAreaLabel(focusArea.name);
   const FocusAreaIcon = getLifeAreaIcon(focusArea.name);
   const colorConfig = getAreaColorConfig(focusArea.name);
@@ -545,6 +561,7 @@ export function LifeInsight() {
                 </div>
                 <div
                   id="life-insight-areas-grid"
+                  aria-hidden={shouldHideAreasGrid ? true : undefined}
                   className={cn(
                     "mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 transition-all duration-200 overflow-hidden",
                     !isAreasGridOpen && "max-h-0 lg:max-h-none opacity-0 lg:opacity-100",
@@ -559,6 +576,7 @@ export function LifeInsight() {
                         key={area.name}
                         type="button"
                         aria-pressed={isSelected}
+                        tabIndex={shouldHideAreasGrid ? -1 : undefined}
                         onClick={() => setSelectedAreaName(area.name === lowestArea.name ? null : area.name)}
                         className={cn(
                           "group min-h-12 rounded-xl border p-2.5 text-left transition-all duration-200 outline-none cursor-pointer select-none",

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -13,6 +13,15 @@ const authContextMock = vi.hoisted(() => ({
 
 const planHookMock = vi.hoisted(() => ({
   loadPlan: vi.fn(),
+  state: {
+    plan: null,
+    loading: false,
+    error: null as Error | null,
+  },
+}));
+
+const dashboardPlanLinkMock = vi.hoisted(() => ({
+  planId: null as string | null,
 }));
 
 vi.mock("@/lib/auth/AuthContext", () => ({
@@ -30,14 +39,14 @@ vi.mock("../utils/app-mode", () => ({
 }));
 
 vi.mock("@/features/dashboard/hooks/useDashboardPlanLink", () => ({
-  useDashboardPlanLink: () => null,
+  useDashboardPlanLink: () => dashboardPlanLinkMock.planId,
 }));
 
 vi.mock("@/features/plan12week/hooks", () => ({
   usePlan12Week: () => ({
-    plan: null,
-    loading: false,
-    error: null,
+    plan: planHookMock.state.plan,
+    loading: planHookMock.state.loading,
+    error: planHookMock.state.error,
     actions: {
       loadPlan: planHookMock.loadPlan,
     },
@@ -177,6 +186,10 @@ describe("Dashboard active 12-week system UX", () => {
   beforeEach(() => {
     localStorage.clear();
     planHookMock.loadPlan.mockReset();
+    planHookMock.state.plan = null;
+    planHookMock.state.loading = false;
+    planHookMock.state.error = null;
+    dashboardPlanLinkMock.planId = null;
     setAuthContext();
     setViewportWidth(1024);
   });
@@ -190,7 +203,6 @@ describe("Dashboard active 12-week system UX", () => {
     const todayHeading = screen.getByRole("heading", { name: "Việc hôm nay" });
     const secondaryTitle = screen.getByText("Phân tích & nhịp độ");
     const rhythmHeading = screen.getByRole("heading", { name: "Nhịp tuần 1" });
-    const trendHeading = screen.getByRole("heading", { name: "Đường 12 tuần" });
 
     expect(hero).toHaveTextContent("Tuần 1 / 12");
     expect(screen.getByRole("button", { name: /Thu gọn/ })).toBeInTheDocument();
@@ -198,7 +210,6 @@ describe("Dashboard active 12-week system UX", () => {
     expect((todayHeading as HTMLElement).compareDocumentPosition(goalsHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     expect(goalsHeading.compareDocumentPosition(secondaryTitle)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     expect(secondaryTitle.compareDocumentPosition(rhythmHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    expect(rhythmHeading.compareDocumentPosition(trendHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
   it("collapses secondary insights by default on mobile and remembers the disclosure state", async () => {
@@ -224,7 +235,6 @@ describe("Dashboard active 12-week system UX", () => {
     expect(localStorage.getItem(SECONDARY_INSIGHTS_OPEN_KEY)).toBe("true");
     const kpiRow = await screen.findByTestId("dashboard-kpi-row");
     expect(screen.getByRole("heading", { name: "Nhịp tuần 1" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Đường 12 tuần" })).toBeInTheDocument();
     expect(goalsHeading.compareDocumentPosition(kpiRow)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
 
     fireEvent.click(screen.getByRole("button", { name: /Thu gọn/ }));
@@ -255,5 +265,27 @@ describe("Dashboard active 12-week system UX", () => {
     expect(screen.getByText("Sức khoẻ")).toBeInTheDocument();
     expect(screen.queryByTestId("dashboard-radar-deferred")).not.toBeInTheDocument();
     expect(screen.queryByTestId("dashboard-radar-chart")).not.toBeInTheDocument();
+  });
+
+  it("lets users retry a failed backend plan load without hiding the local dashboard", async () => {
+    dashboardPlanLinkMock.planId = "507f1f77bcf86cd799439011";
+    planHookMock.state.error = new Error("Backend temporarily unavailable");
+    seedActiveDashboard();
+    renderDashboard();
+
+    expect(
+      await screen.findByText("Không tải được kế hoạch từ máy chủ — dữ liệu hiển thị từ bộ nhớ cục bộ."),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Việc hôm nay" })).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(planHookMock.loadPlan).toHaveBeenCalledWith("507f1f77bcf86cd799439011");
+    });
+    planHookMock.loadPlan.mockClear();
+
+    fireEvent.click(screen.getByRole("button", { name: "Thử lại tải kế hoạch" }));
+
+    expect(planHookMock.loadPlan).toHaveBeenCalledTimes(1);
+    expect(planHookMock.loadPlan).toHaveBeenCalledWith("507f1f77bcf86cd799439011");
   });
 });

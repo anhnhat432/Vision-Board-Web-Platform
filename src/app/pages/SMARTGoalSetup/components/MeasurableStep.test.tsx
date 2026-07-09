@@ -62,8 +62,34 @@ describe("MeasurableStep — intent metric hint", () => {
       />,
     );
 
-    expect(screen.getByLabelText(/Mức đích cần đạt/i)).toHaveAttribute("aria-invalid", "true");
+    const targetInput = screen.getByLabelText(/Mức đích/i);
+    expect(targetInput).toHaveAttribute("aria-invalid", "true");
+    expect(targetInput.getAttribute("aria-describedby")).toContain("smart-target-error");
+    expect(targetInput.getAttribute("aria-describedby")).toContain("smart-target-hint");
     expect(screen.getByText("Mục tiêu cần lớn hơn mốc hiện tại")).toBeInTheDocument();
+  });
+
+  it("connects invalid baseline copy to the baseline field", () => {
+    const setSmartData = vi.fn();
+    render(
+      <MeasurableStep
+        smartData={makeSmartData({
+          measurable: {
+            metric_name: "Số bài viết",
+            baseline_value: "abc",
+            target_value: "12",
+          },
+        })}
+        setSmartData={setSmartData}
+        currentStepHasDraftContent
+      />,
+    );
+
+    const baselineInput = screen.getByLabelText(/Mức xuất phát/i);
+    expect(baselineInput).toHaveAttribute("aria-invalid", "true");
+    expect(baselineInput.getAttribute("aria-describedby")).toContain("smart-baseline-error");
+    expect(baselineInput.getAttribute("aria-describedby")).toContain("smart-baseline-hint");
+    expect(screen.getByText("Nhập con số hợp lệ.")).toBeInTheDocument();
   });
 
   it("shows required hints after first blur without waiting for submit", async () => {

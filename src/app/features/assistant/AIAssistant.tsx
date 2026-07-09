@@ -1,15 +1,22 @@
-import { useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router";
+import { loadWithChunkReload } from "@/app/utils/chunkLoad";
 import { AssistantMascot } from "./AssistantMascot";
-import { AssistantPanel } from "./AssistantPanel";
 import { MascotBubble } from "./MascotBubble";
 import { useBubblePeek } from "./useBubblePeek";
 import { useDraggableMascot } from "./useDraggableMascot";
 import { useProactiveNudge } from "./useProactiveNudge";
 
+const AssistantPanel = lazy(() =>
+  loadWithChunkReload(async () => ({
+    default: (await import("./AssistantPanel")).AssistantPanel,
+  })),
+);
+
 export function AIAssistant() {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const [hasOpenedPanel, setHasOpenedPanel] = useState(false);
   const { position, isDragging, handlePointerDown, wasDragged } = useDraggableMascot();
   const { nudge, dismissNudge, actOnNudge } = useProactiveNudge(isOpen);
   const { peek, resetPeekCount, dismissPeek, pauseAutoHide, resumeAutoHide } = useBubblePeek({
@@ -19,6 +26,7 @@ export function AIAssistant() {
 
   useEffect(() => {
     if (!previousOpenRef.current && isOpen) {
+      setHasOpenedPanel(true);
       dismissNudge();
       resetPeekCount();
     }
@@ -47,7 +55,11 @@ export function AIAssistant() {
         onHoverStart={pauseAutoHide}
         onHoverEnd={resumeAutoHide}
       />
-      <AssistantPanel open={isOpen} onClose={() => setIsOpen(false)} route={location.pathname} />
+      {hasOpenedPanel ? (
+        <Suspense fallback={null}>
+          <AssistantPanel open={isOpen} onClose={() => setIsOpen(false)} route={location.pathname} />
+        </Suspense>
+      ) : null}
     </>
   );
 }

@@ -21,9 +21,19 @@ const BANNED_DEMO_COPY = [
   "demo",
 ] as const;
 
+const BANNED_REFUND_RENEWAL_COPY = [
+  "không tự động gia hạn",
+  "không có thao tác hủy auto-renewal",
+] as const;
+
 function findDemoOnlyCopy(source: string) {
   const lowerSource = source.toLocaleLowerCase("vi-VN");
   return BANNED_DEMO_COPY.filter((phrase) => lowerSource.includes(phrase));
+}
+
+function findRefundRenewalMismatch(source: string) {
+  const lowerSource = source.toLocaleLowerCase("vi-VN");
+  return BANNED_REFUND_RENEWAL_COPY.filter((phrase) => lowerSource.includes(phrase));
 }
 
 describe("public/legal real-mode copy boundary", () => {
@@ -44,6 +54,18 @@ describe("public/legal real-mode copy boundary", () => {
     expect(
       violations,
       `Public/legal pages contain demo-only copy: ${JSON.stringify(violations)}`,
+    ).toEqual([]);
+  });
+
+  it("keeps refund policy cancellation copy aligned with paid subscription behavior", () => {
+    const relativePath = "src/app/pages/RefundPolicyPage.tsx";
+    const filePath = path.join(DEFAULT_REPO_ROOT, relativePath);
+    expect(existsSync(filePath), `${relativePath} must exist`).toBe(true);
+
+    const source = readFileSync(filePath, "utf8");
+    expect(
+      findRefundRenewalMismatch(source),
+      "Refund policy must not claim there is no renewal/cancel path when Plus supports cancel-at-period-end.",
     ).toEqual([]);
   });
 });

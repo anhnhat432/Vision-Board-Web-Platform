@@ -24,11 +24,7 @@ import {
 import { Input } from "../ui/input";
 
 const RESEND_COOLDOWN_MS = 60_000;
-type EmailVerificationRequiredAction =
-  | "upgrade"
-  | "sync"
-  | "refund"
-  | "critical";
+type EmailVerificationRequiredAction = "sync" | "refund" | "critical";
 
 function formatSentAt(timestamp: number | null): string | null {
   if (!timestamp) return null;

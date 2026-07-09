@@ -541,6 +541,7 @@ function GoalTrackerContent({
               alt="Bản đồ tầm nhìn và mục tiêu"
               className="absolute inset-0 h-full w-full object-cover opacity-90 saturate-[0.92] dark:brightness-[0.82] dark:contrast-[1.05]"
               loading="lazy"
+              decoding="async"
             />
             <div className="absolute inset-0 bg-gradient-to-br from-app-surface/15 via-transparent to-app-accent/10" />
             <div className="absolute bottom-4 left-4 right-4 rounded-2xl border border-white/35 bg-app-surface/88 p-4 shadow-[0_18px_46px_-32px_rgba(23,21,15,0.55)] backdrop-blur-md dark:border-app-line/60 dark:bg-app-surface/90">

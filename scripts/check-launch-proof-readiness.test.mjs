@@ -34,7 +34,54 @@ const successfulProductionSmokeRun = JSON.stringify([
   },
 ]);
 
-function runReadinessCheck({ secretJson, workflowJson, smokeRunJson, smokeLocalStateJson }) {
+const successfulStagingRuns = JSON.stringify({
+  "core-funnel-quality-staging.yml": [
+    {
+      databaseId: 31000000001,
+      status: "completed",
+      conclusion: "success",
+      event: "workflow_dispatch",
+      headSha: "abc123",
+      createdAt: "2026-07-09T05:00:00Z",
+      url: "https://github.com/example/repo/actions/runs/31000000001",
+    },
+  ],
+  "email-verification-e2e-staging.yml": [
+    {
+      databaseId: 31000000002,
+      status: "completed",
+      conclusion: "success",
+      event: "workflow_dispatch",
+      headSha: "abc123",
+      createdAt: "2026-07-09T05:00:00Z",
+      url: "https://github.com/example/repo/actions/runs/31000000002",
+    },
+  ],
+  "account-delete-e2e-staging.yml": [
+    {
+      databaseId: 31000000003,
+      status: "completed",
+      conclusion: "success",
+      event: "workflow_dispatch",
+      headSha: "abc123",
+      createdAt: "2026-07-09T05:00:00Z",
+      url: "https://github.com/example/repo/actions/runs/31000000003",
+    },
+  ],
+  "lww-e2e-staging.yml": [
+    {
+      databaseId: 31000000004,
+      status: "completed",
+      conclusion: "success",
+      event: "workflow_dispatch",
+      headSha: "abc123",
+      createdAt: "2026-07-09T05:00:00Z",
+      url: "https://github.com/example/repo/actions/runs/31000000004",
+    },
+  ],
+});
+
+function runReadinessCheck({ secretJson, workflowJson, smokeRunJson, smokeLocalStateJson, stagingRunsJson = successfulStagingRuns }) {
   return spawnSync(process.execPath, [scriptPath], {
     encoding: "utf8",
     env: {
@@ -43,6 +90,7 @@ function runReadinessCheck({ secretJson, workflowJson, smokeRunJson, smokeLocalS
       GITHUB_WORKFLOW_READINESS_JSON: workflowJson,
       GITHUB_PRODUCTION_SMOKE_RUN_JSON: smokeRunJson,
       GITHUB_PRODUCTION_SMOKE_LOCAL_STATE_JSON: smokeLocalStateJson,
+      GITHUB_STAGING_PROOF_RUNS_JSON: stagingRunsJson,
     },
   });
 }
@@ -60,6 +108,7 @@ describe("check-launch-proof-readiness", () => {
     expect(result.stdout).toContain("RESULT GitHub Actions secret readiness: PASS");
     expect(result.stdout).toContain("RESULT GitHub Actions workflow availability: PASS");
     expect(result.stdout).toContain("RESULT GitHub Actions production smoke latest run: PASS");
+    expect(result.stdout).toContain("RESULT GitHub Actions staging proof latest runs: PASS");
     expect(result.stdout).toContain("Launch proof readiness: PASS");
   });
 
@@ -85,6 +134,12 @@ describe("check-launch-proof-readiness", () => {
         headSha: "4fbdb3b6088e5c944554af90857b58c7205cf30d",
         cachedFiles: ["scripts/smoke-production-e2e.mjs"],
       }),
+      stagingRunsJson: JSON.stringify({
+        "core-funnel-quality-staging.yml": [],
+        "email-verification-e2e-staging.yml": [],
+        "account-delete-e2e-staging.yml": [],
+        "lww-e2e-staging.yml": [],
+      }),
     });
 
     expect(result.status).toBe(1);
@@ -95,11 +150,13 @@ describe("check-launch-proof-readiness", () => {
     expect(result.stdout).toContain("RESULT GitHub Actions secret readiness: BLOCKED");
     expect(result.stdout).toContain("RESULT GitHub Actions workflow availability: BLOCKED");
     expect(result.stdout).toContain("RESULT GitHub Actions production smoke latest run: BLOCKED");
+    expect(result.stdout).toContain("RESULT GitHub Actions staging proof latest runs: BLOCKED");
     expect(result.stdout).toContain("FAIL Production smoke latest run: latest run 28218523067 concluded failure");
     expect(result.stdout).toContain("NOTE Production smoke local mitigation is staged but unpublished");
+    expect(result.stdout).toContain("FAIL Core funnel deployed proof: no workflow_dispatch run found");
     expect(result.stdout).toContain("Launch proof readiness: BLOCKED");
     expect(result.stdout).toContain(
-      "Resolve the missing required proof secrets, default-branch workflow availability blockers, or latest production-smoke run blocker before dispatching staging proof workflows.",
+      "Resolve the missing required proof secrets, default-branch workflow availability blockers, latest production-smoke run blocker, or staging proof latest-run blockers before dispatching staging proof workflows.",
     );
   });
 
@@ -128,6 +185,7 @@ describe("check-launch-proof-readiness", () => {
     expect(result.stdout).toContain("RESULT GitHub Actions secret readiness: PASS");
     expect(result.stdout).toContain("RESULT GitHub Actions workflow availability: BLOCKED");
     expect(result.stdout).toContain("RESULT GitHub Actions production smoke latest run: BLOCKED");
+    expect(result.stdout).toContain("RESULT GitHub Actions staging proof latest runs: PASS");
     expect(result.stdout).toContain(
       "Resolve the default-branch workflow availability blockers or latest production-smoke run blocker before dispatching staging proof workflows.",
     );
@@ -145,6 +203,7 @@ describe("check-launch-proof-readiness", () => {
     expect(result.stdout).toContain("RESULT GitHub Actions secret readiness: ERROR");
     expect(result.stdout).toContain("RESULT GitHub Actions workflow availability: PASS");
     expect(result.stdout).toContain("RESULT GitHub Actions production smoke latest run: PASS");
+    expect(result.stdout).toContain("RESULT GitHub Actions staging proof latest runs: PASS");
     expect(result.stdout).toContain("Launch proof readiness: ERROR");
   });
 

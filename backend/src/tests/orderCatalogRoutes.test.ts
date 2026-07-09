@@ -3,6 +3,12 @@ import type { AddressInfo } from "node:net";
 import { afterEach, beforeEach, describe, it } from "node:test";
 import express, { type Express } from "express";
 
+process.env.MONGODB_URI ??= "mongodb://127.0.0.1:27017/order-catalog-test";
+process.env.FIREBASE_PROJECT_ID ??= "order-catalog-test";
+process.env.FIREBASE_CLIENT_EMAIL ??= "firebase-admin@example.test";
+process.env.FIREBASE_PRIVATE_KEY ??= "-----BEGIN PRIVATE KEY-----\\ntest\\n-----END PRIVATE KEY-----\\n";
+process.env.FRONTEND_ORIGIN ??= "http://localhost:5173";
+
 import { createAuthMiddleware } from "../middleware/authMiddlewareCore";
 import { errorMiddleware } from "../middleware/errorMiddleware";
 import { clearAdminRoleCache } from "../middleware/requireAdmin";
@@ -49,13 +55,15 @@ const originalAuditCreate = AuditLogModel.create;
 (AuditLogModel as unknown as { create: unknown }).create = async () => null;
 
 // Mock UserModel.findOne so requireAdmin does not buffer when MongoDB is unavailable.
-// Returns null (user not found) → non-admin → 403.
+// requireAdmin treats MongoDB as role authority, so admin-token needs an admin DB role.
 const originalUserFindOne = UserModel.findOne;
-function createUserModelMock() {
+function createUserModelMock(queryInput?: unknown) {
+  const queryRecord = queryInput && typeof queryInput === "object" ? queryInput as Record<string, unknown> : {};
+  const role = queryRecord.firebaseUid === "admin_uid" ? "admin" : "user";
   const query = {
     select() { return query; },
     maxTimeMS() { return query; },
-    async lean() { return null; },
+    async lean() { return { role }; },
   };
   return query;
 }

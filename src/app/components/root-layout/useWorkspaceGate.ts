@@ -37,10 +37,15 @@ export function isPublicLegalPath(pathname: string): boolean {
   return (
     pathname === "/terms" ||
     pathname === "/privacy" ||
+    pathname === "/contact" ||
     pathname === "/refund-policy" ||
     pathname === "/billing/faq" ||
     pathname === "/help"
   );
+}
+
+export function isPublicBillingPlanPath(pathname: string): boolean {
+  return pathname === "/billing" || pathname === "/billing/plan";
 }
 
 export function buildLoginRedirect(pathname: string, search: string, hash: string) {
@@ -63,7 +68,11 @@ export function resolveWorkspaceGateState({
 }: UseWorkspaceGateOptions): WorkspaceGateState {
   const isPublicHome = isPublicHomePath(pathname);
   const canRenderWhileSignedOut =
-    isPublicHome || isPublicLegalPath(pathname) || isAuthProtectedPath(pathname) || isPublicCheckoutPath(pathname);
+    isPublicHome ||
+    isPublicLegalPath(pathname) ||
+    isPublicBillingPlanPath(pathname) ||
+    isAuthProtectedPath(pathname) ||
+    isPublicCheckoutPath(pathname);
   const hasUser = Boolean(user);
   const shouldRedirectToLogin = !demoMode && !authLoading && !hasUser && !canRenderWhileSignedOut;
   const shouldWaitForAuth = !demoMode && (!isPublicHome || hasUser) && authLoading;

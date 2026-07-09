@@ -51,6 +51,9 @@ export interface PaymentOrderEntity {
   metadata?: {
     userConfirmedTransferAt?: Date | null;
     physicalOrderId?: string | null;
+    casso?: {
+      webhookProcessingStartedAt?: Date;
+    } | null;
     payos?: {
       orderCode?: number;
       paymentLinkId?: string;
@@ -61,6 +64,8 @@ export interface PaymentOrderEntity {
       webhookCode?: string;
       webhookDescription?: string;
       transactionDateTime?: string;
+      webhookProcessingEventId?: string;
+      webhookProcessingStartedAt?: Date;
     } | null;
     [key: string]: unknown;
   } | null;
@@ -265,6 +270,9 @@ export type PaymentOrderDocument = Document & {
   metadata?: {
     userConfirmedTransferAt?: Date | null;
     physicalOrderId?: string | null;
+    casso?: {
+      webhookProcessingStartedAt?: Date;
+    } | null;
     payos?: {
       orderCode?: number;
       paymentLinkId?: string;
@@ -275,6 +283,8 @@ export type PaymentOrderDocument = Document & {
       webhookCode?: string;
       webhookDescription?: string;
       transactionDateTime?: string;
+      webhookProcessingEventId?: string;
+      webhookProcessingStartedAt?: Date;
     } | null;
     [key: string]: unknown;
   } | null;

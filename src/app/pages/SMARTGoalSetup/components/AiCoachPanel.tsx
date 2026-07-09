@@ -52,6 +52,7 @@ export function AiCoachPanel({
         onClick={() => setIsAiCoachExpanded(!isAiCoachExpanded)}
         aria-expanded={isAiCoachExpanded}
         aria-controls="smart-ai-coach-panel"
+        aria-label={`Cố vấn mục tiêu AI - Mở gợi ý thêm: ${TONE_LABELS[selectedTone]}`}
         className="flex min-h-11 w-full items-center justify-between gap-2 px-3.5 py-2.5 text-left transition-colors hover:bg-app-bg-subtle/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/35 focus-visible:ring-inset"
       >
         <div className="flex items-center gap-2">
@@ -140,7 +141,7 @@ export function AiCoachPanel({
                   e.stopPropagation();
                   onApplyStarter(coreTextToApply);
                 }}
-                className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-app-accent/20 bg-app-bg-subtle px-3.5 py-1.5 text-[12px] font-bold leading-tight text-app-accent transition-all duration-150 active:scale-[0.98] cursor-pointer hover:bg-app-line/30 focus-visible:ring-2 focus-visible:ring-app-accent/50 focus-visible:outline-none dark:bg-app-bg-subtle/60 dark:text-app-accent"
+                className="inline-flex min-h-11 items-center gap-1.5 rounded-full border border-app-accent/20 bg-app-bg-subtle px-3.5 py-1.5 text-[12px] font-bold leading-tight text-app-accent transition-all duration-150 active:scale-[0.98] cursor-pointer hover:bg-app-line/30 focus-visible:ring-2 focus-visible:ring-app-accent/50 focus-visible:outline-none dark:bg-app-bg-subtle/60 dark:text-app-accent"
                 aria-label={`Dùng gợi ý cho bước ${step.label}`}
               >
                 <Check className="h-3 w-3" aria-hidden="true" />

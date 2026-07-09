@@ -197,6 +197,23 @@ describe("production billing surfaces", () => {
     });
   });
 
+  it("renders the billing FAQ title as the page-level heading", async () => {
+    const { BillingFAQPage } = await import("./BillingFAQPage");
+
+    render(
+      <MemoryRouter>
+        <BillingFAQPage />
+      </MemoryRouter>,
+    );
+
+    expect(
+      screen.getByRole("heading", {
+        level: 1,
+        name: "Câu hỏi thường gặp",
+      }),
+    ).toBeInTheDocument();
+  });
+
   it("renders a visible PayOS QR on the internal checkout page when a PayOS order is opened directly", async () => {
     const apiClient = stubRealBillingEnv("payos");
     stubAuthContext(null);
@@ -251,6 +268,78 @@ describe("production billing surfaces", () => {
     expect(
       screen.getByRole("button", { name: /Mở PayOS nếu quét không được/i }),
     ).toBeInTheDocument();
+  });
+
+  it("claims a completed public checkout order before syncing signed-in entitlements", async () => {
+    const apiClient = stubRealBillingEnv("payos", {
+      planCode: "PLUS",
+      status: "active",
+      entitlements: ["premium_templates"],
+      currentPeriodEnd: "2099-06-01T00:00:00.000Z",
+      cancelAtPeriodEnd: false,
+    });
+    stubAuthContext({ email: "buyer@example.test", uid: "firebase-buyer" });
+    apiClient.get.mockImplementation((path: string) => {
+      if (path === "/billing/order-status/VBPUBLIC01") {
+        return Promise.resolve({
+          orderId: "VBPUBLIC01",
+          status: "completed",
+          amount: 99000,
+          currency: "VND",
+          provider: "payos",
+          checkoutUrl: "https://pay.payos.vn/web/pay/payos_link_created",
+          bankAccount: "payos",
+          bankName: "970422",
+          accountName: "VISION BOARD",
+          qrDataUrl: "00020101021238540010A000000727012400069704220110PAYOSRAW",
+          expiresAt: "2099-05-10T10:30:00.000Z",
+          completedAt: "2026-05-10T10:05:00.000Z",
+          createdAt: "2026-05-10T10:00:00.000Z",
+        });
+      }
+
+      if (path === "/billing/entitlement") {
+        return Promise.resolve({
+          planCode: "PLUS",
+          status: "active",
+          entitlements: ["premium_templates"],
+          currentPeriodEnd: "2099-06-01T00:00:00.000Z",
+          cancelAtPeriodEnd: false,
+        });
+      }
+
+      return Promise.resolve({ orders: [] });
+    });
+    apiClient.post.mockResolvedValue({
+      claimed: true,
+      orderId: "VBPUBLIC01",
+      currentEntitlement: {
+        planCode: "PLUS",
+        status: "active",
+        entitlements: ["premium_templates"],
+      },
+    });
+
+    const { BillingCheckoutQR } = await import("./BillingCheckoutQR");
+    const router = createMemoryRouter(
+      [{ path: "/billing/checkout/:orderId", element: <BillingCheckoutQR /> }],
+      {
+        initialEntries: ["/billing/checkout/VBPUBLIC01"],
+      },
+    );
+
+    render(<RouterProvider router={router} />);
+
+    expect(await screen.findByText("Thanh toán thành công!")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(apiClient.post).toHaveBeenCalledWith(
+        "/billing/orders/VBPUBLIC01/claim",
+        {},
+      );
+    });
+    await waitFor(() => {
+      expect(apiClient.get).toHaveBeenCalledWith("/billing/entitlement");
+    });
   });
 
   it(
@@ -591,7 +680,7 @@ describe("production billing surfaces", () => {
   });
 
   it(
-    "does not request protected payment history before a user signs in",
+    "does not request protected billing data or optional sale events before a user signs in",
     async () => {
       const apiClient = stubRealBillingEnv("casso");
       stubAuthContext(null);
@@ -619,7 +708,41 @@ describe("production billing surfaces", () => {
         expect(apiClient.get).not.toHaveBeenCalledWith(
           "/billing/payment-history",
         );
+        expect(
+          apiClient.get.mock.calls.some(
+            ([path]) =>
+              typeof path === "string" &&
+              path.startsWith("/billing/active-sale-event"),
+          ),
+        ).toBe(false);
       });
+    },
+    UI_TEST_TIMEOUT_MS,
+  );
+
+  it(
+    "keeps billing help and coupon controls accessible",
+    async () => {
+      stubRealBillingEnv("casso");
+      stubAuthContext({ email: "billing-user@example.test" });
+      const { BillingPlan } = await import("./BillingPlan");
+
+      const router = createMemoryRouter(
+        [{ path: "/billing/plan", element: <BillingPlan /> }],
+        {
+          initialEntries: ["/billing/plan"],
+        },
+      );
+      render(<RouterProvider router={router} />);
+
+      await screen.findByRole("heading", { name: "Chọn gói phù hợp với bạn" });
+      expect(screen.queryByRole("button", { name: "Cách dùng màn này" })).not.toBeInTheDocument();
+
+      const couponInput = screen.getByLabelText("Nhập mã giảm giá");
+      expect(couponInput).toHaveAttribute("id", "billing-coupon-code");
+      expect(couponInput).toHaveAttribute("name", "couponCode");
+      expect(couponInput).toHaveAttribute("aria-describedby", "billing-coupon-help");
+      expect(couponInput).toHaveAttribute("aria-invalid", "false");
     },
     UI_TEST_TIMEOUT_MS,
   );
@@ -895,6 +1018,46 @@ describe("production billing surfaces", () => {
   );
 
   it(
+    "keeps receipt email input mobile-friendly and tied to its validation copy",
+    async () => {
+      stubRealBillingEnv("casso");
+      vi.doMock("@/lib/auth/AuthContext", () => ({
+        useAuthContext: () => ({
+          user: null,
+          authLoading: false,
+        }),
+      }));
+      const { BillingConfirm } = await import("./BillingConfirm");
+
+      const router = createMemoryRouter(
+        [{ path: "/billing/confirm", element: <BillingConfirm /> }],
+        {
+          initialEntries: ["/billing/confirm"],
+        },
+      );
+      render(<RouterProvider router={router} />);
+
+      expect(
+        await screen.findByRole("heading", { name: "Bạn đang mua gì?" }),
+      ).toBeInTheDocument();
+
+      const receiptEmailInput = screen.getByLabelText(/Email sẽ nhận biên nhận/i);
+      expect(receiptEmailInput).toHaveAttribute("name", "receiptEmail");
+      expect(receiptEmailInput).toHaveAttribute("autocomplete", "email");
+      expect(receiptEmailInput).toHaveAttribute("inputmode", "email");
+      expect(receiptEmailInput).toHaveAttribute("aria-invalid", "false");
+      expect(receiptEmailInput.getAttribute("aria-describedby")).toContain("receipt-email-help");
+
+      await userEvent.type(receiptEmailInput, "not-an-email");
+
+      expect(receiptEmailInput).toHaveAttribute("aria-invalid", "true");
+      expect(receiptEmailInput.getAttribute("aria-describedby")).toContain("receipt-email-error");
+      expect(screen.getByRole("alert")).toHaveTextContent("Email nhận biên nhận chưa đúng định dạng.");
+    },
+    UI_TEST_TIMEOUT_MS,
+  );
+
+  it(
     "creates a public payment session only after confirmation",
     async () => {
       const apiClient = stubRealBillingEnv("casso");
@@ -953,6 +1116,180 @@ describe("production billing surfaces", () => {
       expect(
         await screen.findByTestId("payment-checkout-page"),
       ).toBeInTheDocument();
+    },
+    UI_TEST_TIMEOUT_MS,
+  );
+
+  it(
+    "creates a signed-in payment session before email verification",
+    async () => {
+      const apiClient = stubRealBillingEnv("casso");
+      stubAuthContext({
+        uid: "user_unverified_checkout",
+        email: "buyer@example.test",
+        emailVerified: false,
+      });
+      const { BillingConfirm } = await import("./BillingConfirm");
+
+      const router = createMemoryRouter(
+        [
+          { path: "/billing/confirm", element: <BillingConfirm /> },
+          {
+            path: "/billing/checkout/:orderId",
+            element: (
+              <div data-testid="payment-checkout-page">Payment checkout</div>
+            ),
+          },
+        ],
+        {
+          initialEntries: ["/billing/confirm"],
+        },
+      );
+      render(<RouterProvider router={router} />);
+
+      expect(
+        await screen.findByRole("heading", { name: "Bạn đang mua gì?" }),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByText("Vui lòng xác thực email trước khi thanh toán."),
+      ).not.toBeInTheDocument();
+
+      await userEvent.click(screen.getByRole("checkbox"));
+      await userEvent.click(
+        screen.getByRole("button", { name: /Xác nhận và tạo thanh toán/i }),
+      );
+
+      await waitFor(() => {
+        expect(apiClient.post).toHaveBeenCalledWith(
+          "/billing/checkout-session",
+          expect.objectContaining({
+            planCode: "PLUS",
+            receiptEmail: "buyer@example.test",
+            returnUrl: "http://localhost:3000/billing/checkout/__session_id__",
+          }),
+        );
+      });
+      await waitFor(() => {
+        expect(router.state.location.pathname).toBe(
+          "/billing/checkout/checkout_test",
+        );
+      });
+      expect(
+        await screen.findByTestId("payment-checkout-page"),
+      ).toBeInTheDocument();
+    },
+    UI_TEST_TIMEOUT_MS,
+  );
+
+  it(
+    "hides raw checkout-session errors behind a safe alert",
+    async () => {
+      const apiClient = stubRealBillingEnv("casso");
+      vi.stubEnv("VITE_BILLING_SUPPORT_EMAIL", "billing-support@example.test");
+      vi.doMock("@/lib/auth/AuthContext", () => ({
+        useAuthContext: () => ({
+          user: null,
+          authLoading: false,
+        }),
+      }));
+      apiClient.post.mockImplementation((path: string) => {
+        if (path === "/billing/public-checkout-session") {
+          return Promise.reject(
+            new Error(
+              "MongoServerError: E11000 duplicate key at backend/src/controllers/billingController.ts",
+            ),
+          );
+        }
+
+        return Promise.resolve({
+          checkoutSessionId: "checkout_test",
+          checkoutUrl: "https://checkout.example.test/session",
+          provider: "casso",
+        });
+      });
+      const { BillingConfirm } = await import("./BillingConfirm");
+
+      const router = createMemoryRouter(
+        [{ path: "/billing/confirm", element: <BillingConfirm /> }],
+        {
+          initialEntries: ["/billing/confirm"],
+        },
+      );
+      render(<RouterProvider router={router} />);
+
+      expect(
+        await screen.findByRole("heading", { name: "Bạn đang mua gì?" }),
+      ).toBeInTheDocument();
+      await userEvent.type(
+        screen.getByLabelText(/Email sẽ nhận biên nhận/i),
+        "buyer@example.test",
+      );
+      await userEvent.click(screen.getByRole("checkbox"));
+      await userEvent.click(
+        screen.getByRole("button", { name: /Xác nhận và tạo thanh toán/i }),
+      );
+
+      const alert = await screen.findByRole("alert");
+      expect(alert).toHaveTextContent(
+        "Không thể tạo phiên thanh toán lúc này. Vui lòng thử lại sau hoặc liên hệ billing-support@example.test.",
+      );
+      expect(alert).not.toHaveTextContent(/MongoServerError|E11000|backend/i);
+      expect(router.state.location.pathname).toBe("/billing/confirm");
+    },
+    UI_TEST_TIMEOUT_MS,
+  );
+
+  it(
+    "hides raw checkout-info errors behind a safe alert",
+    async () => {
+      const apiClient = stubRealBillingEnv("casso");
+      vi.stubEnv("VITE_BILLING_SUPPORT_EMAIL", "billing-support@example.test");
+      vi.doMock("@/lib/auth/AuthContext", () => ({
+        useAuthContext: () => ({
+          user: null,
+          authLoading: false,
+        }),
+      }));
+      const originalGet = apiClient.get.getMockImplementation();
+      apiClient.get.mockImplementation(
+        (path: string, options?: { signal?: AbortSignal }) => {
+          if (path === "/billing/checkout-info") {
+            return Promise.reject(
+              new Error(
+                "PrismaClientKnownRequestError: checkout_info failed at backend/src/controllers/billingController.ts",
+              ),
+            );
+          }
+
+          return originalGet?.(path, options) ?? Promise.resolve({ orders: [] });
+        },
+      );
+      const { BillingConfirm } = await import("./BillingConfirm");
+
+      const router = createMemoryRouter(
+        [{ path: "/billing/confirm", element: <BillingConfirm /> }],
+        {
+          initialEntries: ["/billing/confirm"],
+        },
+      );
+      render(<RouterProvider router={router} />);
+
+      const alert = await screen.findByRole("alert");
+      expect(alert).toHaveTextContent(
+        "Không thể tạo phiên thanh toán lúc này. Vui lòng thử lại sau hoặc liên hệ billing-support@example.test.",
+      );
+      expect(alert).not.toHaveTextContent(/PrismaClientKnownRequestError|backend/i);
+      await userEvent.type(
+        screen.getByLabelText(/Email sẽ nhận biên nhận/i),
+        "buyer@example.test",
+      );
+      await userEvent.click(screen.getByRole("checkbox"));
+      expect(
+        screen.getByRole("button", {
+          name: /Xác nhận và tạo thanh toán|Không thể tải thông tin thanh toán/i,
+        }),
+      ).toBeDisabled();
+      expect(apiClient.post).not.toHaveBeenCalled();
     },
     UI_TEST_TIMEOUT_MS,
   );

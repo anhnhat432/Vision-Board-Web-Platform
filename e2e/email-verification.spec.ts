@@ -46,7 +46,7 @@ test.describe("staging email verification", () => {
     }
   });
 
-  test("signs up a disposable user and blocks paid checkout while email is unverified", async ({ page }) => {
+  test("signs up a disposable user and keeps paid checkout available while email is unverified", async ({ page }) => {
     await signupDisposableAccount(page);
 
     await expect(page.getByTestId("email-verification-banner")).toBeVisible({ timeout: 20_000 });
@@ -68,7 +68,10 @@ test.describe("staging email verification", () => {
     await upgradeCta.click();
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
-    await expect(dialog.getByText(/xác thực email trước khi thanh toán/i)).toBeVisible();
-    await expect(page.getByTestId("paywall-upgrade-cta-plus")).toBeDisabled();
+    await expect(dialog.getByText(/xác thực email trước khi thanh toán/i)).toHaveCount(0);
+    const dialogCta = page.getByTestId("paywall-upgrade-cta-plus");
+    await expect(dialogCta).toBeEnabled();
+    await dialogCta.click();
+    await expect(page).toHaveURL(/\/billing\/confirm/);
   });
 });

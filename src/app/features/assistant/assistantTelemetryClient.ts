@@ -1,5 +1,5 @@
 import { isRealMode } from "@/app/utils/app-mode";
-import { getApiBaseUrl } from "@/lib/api/apiClient";
+import { getApiBaseUrl, isApiBaseUrlConfigured } from "@/lib/api/apiClient";
 import { authedFetch } from "@/lib/auth/authedFetch";
 import { type AssistantEvent, type AssistantEventType, setAssistantEventSink } from "./assistantObservability";
 
@@ -57,7 +57,7 @@ function isOnline(): boolean {
 }
 
 function canForward(): boolean {
-  return isRealMode();
+  return isRealMode() && isApiBaseUrlConfigured();
 }
 
 /**

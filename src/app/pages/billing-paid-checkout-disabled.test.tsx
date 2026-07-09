@@ -212,6 +212,11 @@ describe("paid checkout kill-switch", () => {
         expect(router.state.location.pathname).toBe("/billing/confirm");
         expect(screen.queryByText("Checkout")).not.toBeInTheDocument();
 
+        expect(apiClient.get).not.toHaveBeenCalledWith("/billing/checkout-info");
+        expect(apiClient.get.mock.calls.some(([path]) => String(path).startsWith("/billing/active-sale-event"))).toBe(
+          false,
+        );
+
         // No POST should have been issued.
         expect(apiClient.post).not.toHaveBeenCalled();
       },

@@ -1257,6 +1257,7 @@ Bạn cứ thoải mái hỏi mình bất cứ gì về kế hoạch của bạn
             userId,
             route,
             messageId,
+            success: rating === "up",
             metadata: {
               rating,
               reason: options?.reason,

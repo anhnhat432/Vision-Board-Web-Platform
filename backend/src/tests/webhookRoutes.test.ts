@@ -266,6 +266,42 @@ describe("POST /api/billing/webhook/:provider", () => {
     assert.ok(snapshot.activeKeys.includes("premium_templates"));
   });
 
+  it("rejects mock webhooks in production even when paid checkout is disabled", async () => {
+    const previousNodeEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = "production";
+    process.env.BILLING_PROVIDER = "mock";
+    process.env.BILLING_PAID_DISABLED = "true";
+    _resetAdapterCacheForTesting();
+
+    try {
+      const userId = "user_webhook_prod_mock_rejected";
+      const body = createMockWebhookBody({
+        userId,
+        planCode: "PLUS",
+        status: "active",
+        eventType: "checkout_completed",
+        eventId: uniqueEventId(),
+        subscriptionId: uniqueSubId(),
+      });
+
+      const response = await postWebhook(createWebhookTestApp(), "mock", body);
+
+      assert.equal(response.status, 503);
+      assert.equal(response.body.success, false);
+
+      const snapshot = await billingService.getCurrentEntitlementForUser(userId);
+      assert.equal(snapshot.planCode, "FREE");
+      assert.deepEqual(snapshot.activeKeys, []);
+    } finally {
+      if (previousNodeEnv === undefined) {
+        delete process.env.NODE_ENV;
+      } else {
+        process.env.NODE_ENV = previousNodeEnv;
+      }
+      _resetAdapterCacheForTesting();
+    }
+  });
+
   it("returns 200 no-op for duplicate event (idempotent)", async () => {
     const eventId = uniqueEventId();
     const subId = uniqueSubId();

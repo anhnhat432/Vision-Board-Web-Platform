@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { useNavigate } from "react-router";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/app/components/ui/dialog";
 import { Skeleton } from "@/app/components/ui/skeleton";
 import { ScreenGuide } from "@/app/components/ScreenGuide";
 import { SCREEN_GUIDES } from "@/app/components/screen-guides";
@@ -38,7 +39,7 @@ import {
   isTwelveWeekCycleReviewPhase,
   syncWeeklyPlans,
 } from "@/app/utils/storage-twelve-week";
-import type { TwelveWeekSystem as TwelveWeekSystemModel, UniversalWeeklyReview } from "@/app/utils/storage-types";
+import type { TwelveWeekSystem as TwelveWeekSystemModel } from "@/app/utils/storage-types";
 import { toastSuccess } from "@/app/utils/toast";
 import { usePlanExecutionSync } from "@/features/plan12week/hooks";
 import { useBackendSyncIssueState } from "@/features/plan12week/hooks/useBackendSyncIssueState";
@@ -449,58 +450,6 @@ export function TwelveWeekSystem() {
     loadGoalData(activeGoal.id);
     refreshSnapshotMeta();
     toastSuccess("Đã đổi tên mục tiêu.");
-  };
-
-  const markWeeklyReviewCompleted = () => {
-    if (!system) return;
-
-    const nowIso = new Date().toISOString();
-    const scoreFromCompletion = Math.max(5, Math.round(weekCompletion.percent / 20));
-    const fallbackReview: UniversalWeeklyReview = {
-      weekNumber: currentWeek,
-      leadCompletionPercent: weekCompletion.percent,
-      lagProgressValue: currentLagMetricValue,
-      biggestOutputThisWeek: "",
-      mainObstacle: "",
-      nextWeekPriority: "",
-      workloadDecision: "keep same",
-      reviewCompleted: true,
-      progressScore: scoreFromCompletion,
-      disciplineScore: scoreFromCompletion,
-      focusScore: weekCompletion.percent >= 70 ? 8 : 6,
-      improvementScore: 6,
-      outputQualityScore: 6,
-      completedLeadIndicators: weekCompletion.completed,
-      commitmentsKept: [],
-      commitmentsMissed: [],
-      insights: "",
-      nextWeekCommitments: [],
-      executionScore: weekCompletion.percent,
-      lastReviewAt: nowIso,
-      reflection: "",
-      adjustments: "",
-    };
-    const nextReview: UniversalWeeklyReview = {
-      ...fallbackReview,
-      ...(currentReview ?? {}),
-      weekNumber: currentWeek,
-      leadCompletionPercent: currentReview?.leadCompletionPercent ?? weekCompletion.percent,
-      lagProgressValue: currentReview?.lagProgressValue ?? currentLagMetricValue,
-      workloadDecision: currentReview?.workloadDecision || "keep same",
-      reviewCompleted: true,
-      completedLeadIndicators: currentReview?.completedLeadIndicators ?? weekCompletion.completed,
-      executionScore: currentReview?.executionScore ?? weekCompletion.percent,
-      lastReviewAt: nowIso,
-    };
-    const updatedReviews = [
-      ...system.weeklyReviews.filter((review) => review.weekNumber !== currentWeek),
-      nextReview,
-    ].sort((left, right) => left.weekNumber - right.weekNumber);
-
-    commitSystemUpdate({
-      ...system,
-      weeklyReviews: updatedReviews,
-    });
   };
 
   const handleSnoozeWeeklyReview = () => {
@@ -1038,14 +987,14 @@ export function TwelveWeekSystem() {
         <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
           <button
             type="button"
-            className="inline-flex w-full items-center justify-center rounded-lg bg-app-accent px-5 py-2.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-app-accent px-5 py-2.5 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
             onClick={() => navigate("/life-insight")}
           >
             Tạo mục tiêu 12 tuần
           </button>
           <button
             type="button"
-            className="inline-flex w-full items-center justify-center rounded-lg border border-app-line bg-app-surface px-5 py-2.5 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-app-line bg-app-surface px-5 py-2.5 text-sm font-medium text-app-ink transition-colors duration-150 hover:bg-app-bg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto"
             onClick={() => navigate("/goals")}
           >
             Mở mục tiêu đã có
@@ -1122,7 +1071,6 @@ export function TwelveWeekSystem() {
           setActiveTab={setActiveTab}
           activePlanCode={activePlanCode}
           shouldShowWeeklyReviewBanner={shouldShowWeeklyReviewBanner}
-          markWeeklyReviewCompleted={markWeeklyReviewCompleted}
           handleSnoozeWeeklyReview={handleSnoozeWeeklyReview}
           hasIncompletePlanStructure={hasIncompletePlanStructure}
           planHasNoLeadMetrics={planHasNoLeadMetrics}
@@ -1285,10 +1233,12 @@ export function TwelveWeekSystem() {
         handleOpenBillingPortal={handleOpenBillingPortal}
       />
 
-      {/* Success Overlay */}
-      {showSuccessOverlay && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-app-ink/40 backdrop-blur-md p-4 animate-fade-in">
-          <div className="bg-app-surface border border-app-line rounded-2xl max-w-md w-full p-6 text-center shadow-app-xl relative overflow-hidden animate-scale-up">
+      <Dialog open={showSuccessOverlay} onOpenChange={setShowSuccessOverlay}>
+        <DialogContent
+          aria-modal="true"
+          overlayClassName="bg-app-ink/40 backdrop-blur-md"
+          className="max-w-md overflow-hidden rounded-2xl border-app-line bg-app-surface p-6 text-center shadow-app-xl sm:max-w-md sm:p-6"
+        >
             {/* Decorative soft gradient blobs inside the card */}
             <div className="absolute -top-10 -right-10 w-24 h-24 bg-app-accent-soft/20 rounded-full blur-xl pointer-events-none" />
             <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-app-status-warning/10 rounded-full blur-xl pointer-events-none" />
@@ -1303,12 +1253,14 @@ export function TwelveWeekSystem() {
               </span>
             </div>
 
-            <h2 className="font-serif text-2xl font-semibold leading-tight text-app-ink">
-              Thiết lập kế hoạch thành công!
-            </h2>
-            <p className="mt-2 text-xs font-semibold uppercase tracking-[0.15em] text-app-accent">
-              12 TUẦN HÀNH ĐỘNG BẮT ĐẦU TỪ HÔM NAY
-            </p>
+            <DialogHeader className="text-center">
+              <DialogTitle className="font-serif text-2xl font-semibold leading-tight text-app-ink">
+                Thiết lập kế hoạch thành công!
+              </DialogTitle>
+              <DialogDescription className="mt-2 text-xs font-semibold uppercase tracking-[0.15em] text-app-accent">
+                12 TUẦN HÀNH ĐỘNG BẮT ĐẦU TỪ HÔM NAY
+              </DialogDescription>
+            </DialogHeader>
 
             <div className="my-4 p-3 rounded-xl bg-app-bg-subtle/50 border border-app-line/40 text-left">
               <p className="text-[9px] font-bold text-app-ink-muted uppercase tracking-[0.12em]">Mục tiêu của bạn:</p>
@@ -1385,9 +1337,8 @@ export function TwelveWeekSystem() {
             >
               Bắt đầu hành động hôm nay 🚀
             </button>
-          </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       <SpotlightTour
         open={isTourOpen}

@@ -18,6 +18,7 @@ import {
 } from "../services/payosPaymentAdapter";
 
 const TWELVE_WEEKS_MS = 12 * 7 * 24 * 60 * 60 * 1000;
+const PAYOS_PROCESSING_CLAIM_STALE_MS = 10 * 60 * 1000;
 
 type PayosOrderLookup = {
   provider: "payos";
@@ -95,16 +96,45 @@ function hasProviderIdentifierMismatch(order: PaymentOrderDocument, data: PayosW
 }
 
 /**
- * Atomically transition a pending PayOS order to completed.
+ * Atomically claim a pending PayOS order for this webhook.
  *
  * Returns the updated document if this caller won the race, or `null` if
- * a concurrent webhook already moved the order out of `pending`. Grant of
- * entitlements happens after the claim — billingService dedups by
- * providerEventId, so a brief completed-without-entitlement window is
- * resolved by the reconciliation job rather than by re-running the grant
- * inside this handler.
+ * a concurrent webhook already moved the order out of `pending`.
  */
-async function claimPayosOrderAsCompleted(
+async function claimPayosOrderForProcessing(
+  order: PaymentOrderDocument,
+  data: PayosWebhookData,
+  eventId: string,
+  now: Date,
+): Promise<PaymentOrderDocument | null> {
+  const staleBefore = new Date(now.getTime() - PAYOS_PROCESSING_CLAIM_STALE_MS);
+  return PaymentOrderModel.findOneAndUpdate(
+    {
+      _id: order._id,
+      status: "pending",
+      $or: [
+        { "metadata.payos.webhookProcessingEventId": { $exists: false } },
+        { "metadata.payos.webhookProcessingEventId": null },
+        { "metadata.payos.webhookProcessingStartedAt": { $lt: staleBefore } },
+      ],
+    },
+    {
+      $set: {
+        "metadata.payos.orderCode": data.orderCode,
+        "metadata.payos.paymentLinkId": data.paymentLinkId,
+        "metadata.payos.webhookReference": data.reference,
+        "metadata.payos.webhookCode": data.code,
+        "metadata.payos.webhookDescription": data.desc,
+        "metadata.payos.transactionDateTime": data.transactionDateTime,
+        "metadata.payos.webhookProcessingEventId": eventId,
+        "metadata.payos.webhookProcessingStartedAt": now,
+      },
+    },
+    { new: true },
+  );
+}
+
+async function markPayosOrderAsCompleted(
   order: PaymentOrderDocument,
   data: PayosWebhookData,
   now: Date,
@@ -122,9 +152,40 @@ async function claimPayosOrderAsCompleted(
         "metadata.payos.webhookDescription": data.desc,
         "metadata.payos.transactionDateTime": data.transactionDateTime,
       },
+      $unset: {
+        "metadata.payos.webhookProcessingEventId": "",
+        "metadata.payos.webhookProcessingStartedAt": "",
+      },
     },
     { new: true },
   );
+}
+
+async function releasePayosOrderProcessingClaim(
+  order: PaymentOrderDocument,
+  eventId: string,
+): Promise<void> {
+  try {
+    const metadata = order.metadata && typeof order.metadata === "object" ? order.metadata : {};
+    const payos = metadata.payos && typeof metadata.payos === "object" ? metadata.payos : {};
+    if (order.status !== "pending" || payos.webhookProcessingEventId !== eventId) return;
+
+    order.metadata = {
+      ...metadata,
+      payos: {
+        ...payos,
+        webhookProcessingEventId: undefined,
+        webhookProcessingStartedAt: undefined,
+      },
+    };
+    await order.save();
+  } catch (error) {
+    backendMonitoring.captureBillingCriticalException(error, {
+      event: "payos_webhook_processing_claim_release_failed",
+      orderId: order.orderId,
+      status: order.status,
+    });
+  }
 }
 
 function respondIgnored(res: Response, message: string, extra: Record<string, unknown> = {}): void {
@@ -323,7 +384,7 @@ export async function handlePayosWebhook(req: Request, res: Response): Promise<v
 
   const now = new Date();
 
-  const claimedOrder = await claimPayosOrderAsCompleted(order, data, now);
+  const claimedOrder = await claimPayosOrderForProcessing(order, data, eventId, now);
   if (!claimedOrder) {
     console.info({
       event: "payos_webhook_replay_ignored",
@@ -371,21 +432,34 @@ export async function handlePayosWebhook(req: Request, res: Response): Promise<v
       });
     }
 
-    const receiptResult = await deliverReceiptForOrder(claimedOrder.orderId);
+    const completedOrder = await markPayosOrderAsCompleted(claimedOrder, data, now);
+    if (!completedOrder) {
+      console.info({
+        event: "payos_webhook_replay_ignored",
+        message: "concurrent webhook already completed order",
+        eventId,
+        orderId: claimedOrder.orderId,
+        reason: "completion_lost_race",
+      });
+      res.status(200).json({ success: true, status: "duplicate", eventId, orderId: claimedOrder.orderId });
+      return;
+    }
+
+    const receiptResult = await deliverReceiptForOrder(completedOrder.orderId);
     if (!receiptResult.sent) {
       console.warn(
-        `[payos-webhook] Payment receipt email queued for retry for order "${claimedOrder.orderId}": ${receiptResult.reason ?? "unknown"}`,
+        `[payos-webhook] Payment receipt email queued for retry for order "${completedOrder.orderId}": ${receiptResult.reason ?? "unknown"}`,
       );
     }
 
     if (!isPhysicalOrder) {
       console.info({
-        event: "payos_webhook_physical_order_success",
+        event: "payos_webhook_subscription_order_success",
         eventId,
-        orderId: claimedOrder.orderId,
+        orderId: completedOrder.orderId,
         amount: data.amount,
-        purpose: claimedOrder.purpose,
-        userId: claimedOrder.userId,
+        purpose: completedOrder.purpose,
+        userId: completedOrder.userId,
       });
     }
 
@@ -393,9 +467,10 @@ export async function handlePayosWebhook(req: Request, res: Response): Promise<v
       success: true,
       status: isPhysicalOrder ? "completed" : "processed",
       eventId,
-      orderId: claimedOrder.orderId,
+      orderId: completedOrder.orderId,
     });
   } catch (error) {
+    await releasePayosOrderProcessingClaim(claimedOrder, eventId);
     const message = error instanceof Error ? error.message : "Unknown error";
     console.error("[payos-webhook] Failed to upsert subscription for order.", {
       eventId,

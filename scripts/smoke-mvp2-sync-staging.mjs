@@ -27,6 +27,7 @@ const EMAIL = process.env.MVP2_SMOKE_EMAIL?.trim();
 const PASSWORD = process.env.MVP2_SMOKE_PASSWORD;
 const SKIP_AUTH = process.env.MVP2_SMOKE_SKIP_AUTH === "true";
 const CLEANUP = process.env.MVP2_SMOKE_CLEANUP !== "false";
+const IS_GITHUB_ACTIONS = process.env.GITHUB_ACTIONS === "true";
 const TIMESTAMP = new Date()
   .toISOString()
   .replace(/[-:.TZ]/g, "")
@@ -48,6 +49,17 @@ const seenApiResources = new Set();
 
 function log(message) {
   console.log(`[mvp2-sync] ${message}`);
+}
+
+function assertTargetSafeForEnvironment() {
+  if (!IS_GITHUB_ACTIONS || !BASE_URL) return;
+
+  const normalizedUrl = BASE_URL.toLowerCase();
+  if (normalizedUrl.includes("localhost") || normalizedUrl.includes("127.0.0.1")) {
+    throw new Error(
+      "Refusing to run MVP2 sync staging smoke against localhost. Use a staging or production-like URL.",
+    );
+  }
 }
 
 function sleep(ms) {
@@ -726,6 +738,7 @@ async function main() {
     process.exitCode = 0;
     return;
   }
+  assertTargetSafeForEnvironment();
   if (!SKIP_AUTH && (!EMAIL || !PASSWORD)) {
     console.error(
       "[mvp2-sync] SKIP: MVP2_SMOKE_EMAIL and MVP2_SMOKE_PASSWORD required (or set MVP2_SMOKE_SKIP_AUTH=true).",

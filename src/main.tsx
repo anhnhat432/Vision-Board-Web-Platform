@@ -2,12 +2,14 @@ import { createRoot } from "react-dom/client";
 import { cleanupLegacyAssistantHistory } from "./app/features/assistant/cleanupLegacyHistory";
 import { getAppMode } from "./app/utils/app-mode";
 import { installChunkLoadRecovery } from "./app/utils/chunkLoad";
+import { reportProductionRuntimeEnvReadiness } from "./app/utils/production-runtime-env";
 import { installFrontendMonitoring } from "./lib/monitoring/sentry";
 import App from "./app/App.tsx";
 import "./styles/index.css";
 
 installChunkLoadRecovery();
 installFrontendMonitoring({ deferUntilIdle: true });
+reportProductionRuntimeEnvReadiness();
 
 function scheduleIdleTask(task: () => void, timeout = 3_000): void {
   const requestIdleCallback = window.requestIdleCallback;

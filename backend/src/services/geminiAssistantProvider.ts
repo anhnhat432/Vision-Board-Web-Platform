@@ -1,4 +1,5 @@
 import { env } from "../config/env";
+import { redactSensitive } from "../shared/assistantRedaction";
 import type { AssistantContext } from "./assistantService";
 import { buildSystemPrompt, summarizeContext } from "./assistantPromptUtils";
 
@@ -44,6 +45,15 @@ interface GeminiErrorBody {
   error?: { message?: string; status?: string; code?: number };
 }
 
+function redactProviderText(value: string, maxLength: number): string {
+  return redactSensitive(value).slice(0, maxLength);
+}
+
+function getRedactedProviderMessage(message: string | undefined): string | undefined {
+  const redacted = message ? redactProviderText(message, 200).trim() : "";
+  return redacted || undefined;
+}
+
 async function extractGeminiErrorDetails(response: Response): Promise<{ status: number; body: string; parsed?: GeminiErrorBody }> {
   const status = response.status;
   let body = "";
@@ -52,7 +62,7 @@ async function extractGeminiErrorDetails(response: Response): Promise<{ status: 
     body = await response.text();
     parsed = JSON.parse(body) as GeminiErrorBody;
   } catch {}
-  return { status, body: body.slice(0, 500), parsed };
+  return { status, body: redactProviderText(body, 500), parsed };
 }
 
 function isGeminiAuthError(status: number, parsed?: GeminiErrorBody): boolean {
@@ -69,7 +79,7 @@ function isGeminiAuthError(status: number, parsed?: GeminiErrorBody): boolean {
 }
 
 function getGeminiErrorMessage(status: number, parsed?: GeminiErrorBody): AssistantProviderError {
-  const providerMsg = parsed?.error?.message?.slice(0, 200);
+  const providerMsg = getRedactedProviderMessage(parsed?.error?.message);
   if (status === 429) {
     return {
       message: "Trợ lý AI đang quá tải (rate limit). Vui lòng đợi vài giây rồi thử lại.",

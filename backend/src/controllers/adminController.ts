@@ -20,6 +20,7 @@ import {
 import { ApiError } from "../utils/apiError";
 import { getLastPaymentReconciliationRun } from "../jobs/reconciliationJob";
 import { successResponse } from "../utils/apiResponse";
+import { clearAdminRoleCache } from "../middleware/requireAdmin";
 
 const DEFAULT_EXPIRING_REMINDER_DAYS = 7;
 const MAX_EXPIRING_REMINDER_DAYS = 30;
@@ -526,6 +527,15 @@ export async function completePaymentOrderManually(req: Request, res: Response, 
     if (order.status !== "pending" && order.status !== "expired" && order.status !== "failed") {
       throw new ApiError(409, "Payment order cannot be manually completed.", undefined, "invalid_payment_order_status");
     }
+    if (order.purpose === "physical_order") {
+      throw new ApiError(
+        400,
+        "Không thể mở Plus thủ công cho đơn hàng vật lý. Đơn này chỉ dành cho sản phẩm giao hàng.",
+        undefined,
+        "physical_order_not_claimable",
+      );
+    }
+
 
     const now = new Date();
     const currentPeriodEnd = new Date(now.getTime() + TWELVE_WEEKS_MS);
@@ -819,6 +829,7 @@ export async function updateAdminUserRole(req: Request, res: Response, next: Nex
 
     user.role = newRole;
     await user.save();
+    clearAdminRoleCache(uid);
 
     res.status(200).json(
       successResponse(

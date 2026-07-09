@@ -22,7 +22,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { isRealMode } from "@/app/utils/app-mode";
+import { isRealMode, shouldShowAssistantDebugUi } from "@/app/utils/app-mode";
 import { useOptionalAutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import {
@@ -129,6 +129,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
   >({});
   const syncState = useOptionalAutoCloudSyncContext();
   const realMode = isRealMode();
+  const showAssistantDebugUi = shouldShowAssistantDebugUi();
 
   const [showSyncSuccess, setShowSyncSuccess] = useState(false);
   const prevSyncingRef = useRef(false);
@@ -460,7 +461,7 @@ export function AssistantPanel({ open, onClose, route }: AssistantPanelProps) {
             </div>
           </div>
           <div className="flex-1" />
-          {(import.meta.env.VITE_SHOW_ASSISTANT_DEBUG === "true" || (!realMode && import.meta.env.DEV)) && (
+          {showAssistantDebugUi && (
             <button
               type="button"
               onClick={() => setShowDebugPanel(!showDebugPanel)}

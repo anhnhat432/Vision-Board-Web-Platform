@@ -28,13 +28,15 @@ export function useCommandPaletteHotkey(setOpen: (toggle: (open: boolean) => boo
 /**
  * Sau khi RootLayout mount, prefetch các heavy route để tránh spinner đầu tiên.
  */
-export function useWarmPrefetch(): void {
+export function useWarmPrefetch(enabled = true): void {
   useEffect(() => {
+    if (!enabled) return;
     if (typeof window === "undefined") return;
 
     const connection = (window.navigator as NavigatorWithConnection).connection;
     if (connection?.saveData) return;
     if (connection?.effectiveType === "slow-2g" || connection?.effectiveType === "2g") return;
+    if (window.navigator.hardwareConcurrency <= 4) return;
 
     const warmPrimaryHeavyRoutes = () => {
       for (const path of WARM_PREFETCH_ROUTE_PATHS) {
@@ -58,5 +60,5 @@ export function useWarmPrefetch(): void {
         window.cancelIdleCallback(idleHandle);
       }
     };
-  }, []);
+  }, [enabled]);
 }

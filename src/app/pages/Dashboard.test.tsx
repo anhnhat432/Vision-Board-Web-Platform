@@ -73,6 +73,15 @@ describe("Dashboard public visitor state", () => {
         name: /Biến ước mơ.*kế hoạch.*12 tuần bền bỉ/i,
       }),
     ).toBeInTheDocument();
+    expect(
+      screen
+        .getByRole("heading", {
+          level: 1,
+          name: "Biến ước mơ thành kế hoạch 12 tuần bền bỉ.",
+        })
+        .textContent?.replace(/\s+/g, " ")
+        .trim(),
+    ).toBe("Biến ước mơ thành kế hoạch 12 tuần bền bỉ.");
 
     // Header của landing phải có hành động đăng nhập/đăng ký cho khách.
     expect(screen.getByRole("button", { name: "Đăng nhập" })).toBeInTheDocument();
