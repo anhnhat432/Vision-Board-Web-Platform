@@ -1,4 +1,5 @@
 import {
+  AlertTriangle,
   Calendar,
   Edit,
   Eye,
@@ -47,10 +48,15 @@ import {
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
-import { InteractiveSurface } from "../components/ui/interactive-surface";
 import { Skeleton } from "../components/ui/skeleton";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { deleteVisionBoard, getUserData, saveUserData, type VisionBoard } from "../utils/storage";
+import {
+  computeGalleryStats,
+  filterAndSortBoards,
+  groupBoardsByYear,
+  resolveGroupedByYear,
+} from "./vision-board-gallery/gallerySelectors";
 import { formatDisplayDate } from "../utils/storage-date-utils";
 import { generateId } from "../utils/storage-types";
 import { cn } from "../components/ui/utils";
@@ -78,60 +84,6 @@ function BoardPreviewIcon({ content }: { content: string }) {
   );
 }
 
-// Mockup 3D nghệ thuật ở góc PageHero thay thế ảnh tĩnh
-function Gallery3DHeroMockup() {
-  return (
-    <div className="relative flex items-center justify-center h-[180px] w-full max-w-[340px] mx-auto [perspective:1000px] py-4 select-none">
-      {/* Background glow orb */}
-      <div className="absolute inset-0 bg-gradient-to-tr from-app-accent/15 to-app-warm/20 rounded-full blur-2xl opacity-60 scale-90" />
-      
-      {/* Left Frame */}
-      <div className="absolute w-[130px] h-[160px] rounded-lg border border-app-line bg-app-surface p-2 shadow-md origin-bottom-left transition-all duration-500 hover:z-20 hover:scale-110 hover:shadow-lg [transform:translateX(-48px)_translateY(8px)_rotate(-15deg)_translateZ(-20px)] cursor-pointer group/left">
-        <div className="w-full h-[100px] rounded bg-gradient-to-br from-purple-500/20 to-pink-500/20 relative overflow-hidden flex items-center justify-center">
-          <span className="text-[2rem] filter drop-shadow">🏔️</span>
-          <div className="absolute inset-0 bg-black/5 group-hover/left:bg-transparent transition-colors" />
-        </div>
-        <div className="mt-2 space-y-1.5">
-          <div className="h-2 w-12 rounded bg-app-line" />
-          <div className="h-1.5 w-16 rounded bg-app-line/60" />
-        </div>
-        {/* Tape effect */}
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-10 h-4 bg-white/40 backdrop-blur-[2px] border border-white/20 rotate-[-5deg] shadow-[0_1px_2px_rgba(0,0,0,0.05)]" />
-      </div>
-
-      {/* Right Frame */}
-      <div className="absolute w-[130px] h-[160px] rounded-lg border border-app-line bg-app-surface p-2 shadow-md origin-bottom-right transition-all duration-500 hover:z-20 hover:scale-110 hover:shadow-lg [transform:translateX(48px)_translateY(8px)_rotate(15deg)_translateZ(-20px)] cursor-pointer group/right">
-        <div className="w-full h-[100px] rounded bg-gradient-to-br from-teal-500/20 to-emerald-500/20 relative overflow-hidden flex items-center justify-center">
-          <span className="text-[2rem] filter drop-shadow">🌊</span>
-          <div className="absolute inset-0 bg-black/5 group-hover/right:bg-transparent transition-colors" />
-        </div>
-        <div className="mt-2 space-y-1.5">
-          <div className="h-2 w-10 rounded bg-app-line" />
-          <div className="h-1.5 w-14 rounded bg-app-line/60" />
-        </div>
-        {/* Tape effect */}
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-10 h-4 bg-white/40 backdrop-blur-[2px] border border-white/20 rotate-[12deg] shadow-[0_1px_2px_rgba(0,0,0,0.05)]" />
-      </div>
-
-      {/* Center Frame */}
-      <div className="absolute w-[140px] h-[170px] rounded-lg border-2 border-app-accent-soft bg-app-surface p-2.5 shadow-xl transition-all duration-500 hover:scale-110 hover:-translate-y-2 hover:shadow-2xl z-10 [transform:rotate(-2deg)] cursor-pointer group/center">
-        <div className="w-full h-[105px] rounded bg-gradient-to-br from-amber-500/20 to-orange-500/20 relative overflow-hidden flex items-center justify-center">
-          <span className="text-[2.2rem] filter drop-shadow">✨</span>
-          <div className="absolute inset-0 bg-black/3 group-hover/center:bg-transparent transition-colors" />
-          {/* Subtle internal grid */}
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:10px_10px]" />
-        </div>
-        <div className="mt-2.5 space-y-1.5">
-          <div className="h-2.5 w-16 rounded bg-app-accent opacity-75" />
-          <div className="h-1.5 w-20 rounded bg-app-line" />
-        </div>
-        {/* Tape effect */}
-        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-12 h-4.5 bg-app-accent-soft/80 backdrop-blur-[2px] border border-app-accent/10 rotate-[-1deg] shadow-[0_1px_2px_rgba(0,0,0,0.05)]" />
-      </div>
-    </div>
-  );
-}
-
 // Bố cục Scrapbook Polaroid Preview cho thẻ Vision Board
 function BoardCollagePreview({ board }: { board: VisionBoard }) {
   const images = useMemo(() => board.items.filter((item) => item.type === "image"), [board.items]);
@@ -143,7 +95,7 @@ function BoardCollagePreview({ board }: { board: VisionBoard }) {
   if (!hasImages) {
     const firstQuote = quotes[0]?.content;
     return (
-      <div className="w-full h-full relative overflow-hidden bg-gradient-to-tr from-app-accent-subtle/80 to-amber-50/50 flex flex-col items-center justify-center p-4">
+      <div className="w-full h-full relative overflow-hidden bg-app-bg-subtle flex flex-col items-center justify-center p-4">
         {/* Subtle grid pattern */}
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(var(--app-line)_1px,transparent_1px)] bg-[size:16px_16px] opacity-25" />
         <div className="text-center max-w-[85%] z-10 space-y-2">
@@ -174,7 +126,7 @@ function BoardCollagePreview({ board }: { board: VisionBoard }) {
       {/* Polaroid 1 (Dưới cùng bên trái) */}
       {images[1] && (
         <div 
-          className="absolute rounded bg-white dark:bg-zinc-150 p-1 pb-3 shadow-md border border-white/60 dark:border-zinc-800/40 overflow-hidden transform -rotate-6 transition-transform duration-300 group-hover:scale-105"
+          className="absolute rounded bg-app-surface p-1 pb-3 shadow-app-sm border border-app-line overflow-hidden"
           style={{
             left: "8%",
             top: "16%",
@@ -190,7 +142,7 @@ function BoardCollagePreview({ board }: { board: VisionBoard }) {
       {/* Polaroid 2 (Dưới cùng bên phải) */}
       {images[2] && (
         <div 
-          className="absolute rounded bg-white dark:bg-zinc-150 p-1 pb-3 shadow-md border border-white/60 dark:border-zinc-800/40 overflow-hidden transform rotate-6 transition-transform duration-300 group-hover:scale-105"
+          className="absolute rounded bg-app-surface p-1 pb-3 shadow-app-sm border border-app-line overflow-hidden"
           style={{
             right: "8%",
             top: "22%",
@@ -207,7 +159,7 @@ function BoardCollagePreview({ board }: { board: VisionBoard }) {
       {images[0] && (
         <div 
           className={cn(
-            "absolute rounded bg-white dark:bg-zinc-150 p-1.5 pb-4 shadow-lg border border-white/60 dark:border-zinc-800/40 overflow-hidden transform -rotate-1 transition-transform duration-300 group-hover:scale-105 z-10",
+            "absolute rounded bg-app-surface p-1.5 pb-4 shadow-app-md border border-app-line overflow-hidden z-10",
             images.length === 1 ? "left-[28%] top-[12%] w-[44%]" : "left-[26%] top-[10%] w-[46%]"
           )}
         >
@@ -220,15 +172,10 @@ function BoardCollagePreview({ board }: { board: VisionBoard }) {
         </div>
       )}
 
-      {/* Tape effect on center Polaroid */}
-      {images[0] && (
-        <div className="absolute left-1/2 -translate-x-1/2 top-[5%] w-10 h-3 bg-amber-200/40 backdrop-blur-[1px] border border-amber-300/10 rotate-[-3deg] shadow-[0_1px_2px_rgba(0,0,0,0.02)] z-20" />
-      )}
-
       {/* Ribbon Quote Overlaid (Nếu có quote) */}
       {quotes[0] && (
         <div 
-          className="absolute bottom-[6%] left-1/2 -translate-x-1/2 w-[78%] bg-white/90 backdrop-blur-[2px] border border-app-line/80 px-2 py-1 rounded shadow-sm text-center z-15 transform rotate-1"
+          className="absolute bottom-[6%] left-1/2 -translate-x-1/2 w-[78%] bg-app-surface border border-app-line px-2 py-1 rounded shadow-app-sm text-center z-15"
         >
           <p className="font-serif italic text-[10px] leading-tight text-app-ink-soft truncate">
             "{quotes[0].content}"
@@ -238,7 +185,7 @@ function BoardCollagePreview({ board }: { board: VisionBoard }) {
 
       {/* Floating icon */}
       {icons[0] && (
-        <div className="absolute right-[12%] top-[8%] z-15 scale-90 transform rotate-12 transition-transform duration-300 group-hover:scale-100">
+        <div className="absolute right-[12%] top-[8%] z-15">
           <BoardPreviewIcon content={icons[0].content} />
         </div>
       )}
@@ -318,7 +265,7 @@ function BoardListView({ boards, navigate, onDeleteClick }: { boards: VisionBoar
                           <span className="hidden md:inline">Đã đồng bộ</span>
                         </div>
                       ) : (
-                        <div className="flex items-center gap-1.5 text-xs text-amber-600 font-medium" title="Chỉ lưu ở trình duyệt này">
+                        <div className="flex items-center gap-1.5 text-xs text-app-status-warning font-medium" title="Chỉ lưu ở trình duyệt này">
                           <CloudOff className="h-3.5 w-3.5" />
                           <span className="hidden md:inline">Chỉ lưu cục bộ</span>
                         </div>
@@ -338,6 +285,7 @@ function BoardListView({ boards, navigate, onDeleteClick }: { boards: VisionBoar
                         className="h-8 w-8 p-0 text-app-ink-soft hover:text-app-accent hover:bg-app-accent-soft/50"
                         onClick={() => navigate(`/vision-board/${board.id}`)}
                         title="Xem chi tiết"
+                        aria-label={`Xem chi tiết bảng ${board.name}`}
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
@@ -347,6 +295,7 @@ function BoardListView({ boards, navigate, onDeleteClick }: { boards: VisionBoar
                         className="h-8 w-8 p-0 text-app-ink-soft hover:text-app-accent hover:bg-app-accent-soft/50"
                         onClick={() => navigate(`/vision-board/${board.id}`)}
                         title="Chỉnh sửa"
+                        aria-label={`Chỉnh sửa bảng ${board.name}`}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -356,6 +305,7 @@ function BoardListView({ boards, navigate, onDeleteClick }: { boards: VisionBoar
                         className="h-8 w-8 p-0 text-app-status-error hover:text-app-status-error hover:bg-app-status-error/10"
                         onClick={() => onDeleteClick(board.id)}
                         title="Xóa"
+                        aria-label={`Xóa bảng ${board.name}`}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -371,12 +321,123 @@ function BoardListView({ boards, navigate, onDeleteClick }: { boards: VisionBoar
   );
 }
 
+// Thẻ board dạng lưới (tĩnh, không InteractiveSurface/3D)
+function BoardGridCard({
+  board,
+  isSpotlight,
+  user,
+  navigate,
+  onDeleteClick,
+}: {
+  board: VisionBoard;
+  isSpotlight: boolean;
+  user: ReturnType<typeof useAuthContext>["user"];
+  navigate: NavigateFunction;
+  onDeleteClick: (id: string) => void;
+}) {
+  const backendId = getBackendVisionBoardId(board.id);
+  const isSynced = Boolean(backendId);
+
+  return (
+    <div className="relative group">
+      <Card
+        className={cn(
+          "w-full h-full flex flex-col justify-between overflow-hidden rounded-card-lg border border-app-line bg-app-surface transition-shadow duration-300 hover:shadow-app-lg",
+          isSpotlight ? "ring-2 ring-app-accent shadow-app-lg" : "",
+        )}
+      >
+        {/* Top Card Header */}
+        <CardHeader className="p-4 pb-2">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <CardTitle className="text-base font-bold text-app-ink truncate">{board.name}</CardTitle>
+                {isSpotlight && (
+                  <Badge className="bg-app-accent text-[var(--app-ink-on-accent)] border-0 text-[9px] px-2 py-0.5 rounded-[var(--r-pill)]">
+                    Vừa lưu
+                  </Badge>
+                )}
+              </div>
+              <CardDescription className="text-xs text-app-ink-muted mt-0.5">
+                {formatDisplayDate(board.createdAt)} • {board.items.length} phần tử
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-1">
+              {user &&
+                (isSynced ? (
+                  <span title="Đã đồng bộ lên Cloud">
+                    <Cloud className="h-4 w-4 text-app-status-success" />
+                  </span>
+                ) : (
+                  <span title="Chỉ lưu trữ cục bộ">
+                    <CloudOff className="h-4 w-4 text-app-ink-muted/50" />
+                  </span>
+                ))}
+              <Badge variant="outline" className="border-app-line bg-app-bg-subtle text-[10px] text-app-ink-soft font-semibold px-2 py-0.5 rounded-[var(--r-pill)]">
+                {board.year}
+              </Badge>
+            </div>
+          </div>
+        </CardHeader>
+
+        {/* Central Scrapbook Collage Preview */}
+        <CardContent className="p-3 pt-0 flex-1 flex flex-col justify-end">
+          <div
+            className="relative overflow-hidden rounded-card border border-app-line bg-app-bg-subtle"
+            style={{ aspectRatio: "16/10" }}
+          >
+            {/* Scrapbook view */}
+            <BoardCollagePreview board={board} />
+
+            {/* Hover/Focus Action Overlay (tĩnh: chỉ đổi opacity) */}
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-app-surface/85 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-within:opacity-100">
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="rounded-control text-xs font-semibold h-9 px-3.5"
+                  onClick={() => navigate(`/vision-board/${board.id}`)}
+                  aria-label={`Mở xem bảng ${board.name}`}
+                >
+                  <Eye className="h-3.5 w-3.5 mr-1" /> Mở xem
+                </Button>
+                <Button
+                  size="sm"
+                  className="rounded-control text-xs font-semibold h-9 px-3.5"
+                  onClick={() => navigate(`/vision-board/${board.id}`)}
+                  aria-label={`Thiết kế bảng ${board.name}`}
+                >
+                  <Edit className="h-3.5 w-3.5 mr-1" /> Thiết kế
+                </Button>
+              </div>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="absolute top-2 right-2 h-8 w-8 p-0 rounded-full text-app-status-error hover:text-app-status-error hover:bg-app-status-error/10"
+                onClick={() => onDeleteClick(board.id)}
+                title="Xóa"
+                aria-label={`Xóa bảng ${board.name}`}
+              >
+                <Trash2 className="h-4.5 w-4.5" />
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
 export function VisionBoardGallery() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuthContext();
   const { userData, reloadUserData } = useSyncedUserData();
   const [boardToDelete, setBoardToDelete] = useState<string | null>(null);
+  // Nhánh lỗi tải ở mức trình bày (Req 7.5). Không đổi Data_Behavior: chỉ dò đọc
+  // an toàn qua getUserData() để quyết định hiển thị. Nếu đọc dữ liệu ném lỗi thì
+  // hiển thị trạng thái lỗi + "Thử lại" thay cho skeleton.
+  const [loadError, setLoadError] = useState(false);
 
   // States cho bộ lọc & Toolbar
   const [searchTerm, setSearchTerm] = useState("");
@@ -431,6 +492,27 @@ export function VisionBoardGallery() {
       });
   }, [user, reloadUserData]);
 
+  // Dò đọc an toàn ở mức trình bày: khi dữ liệu chưa sẵn sàng, thử đọc getUserData()
+  // trong try/catch. Nếu ném lỗi -> bật nhánh lỗi tải; nếu đọc được -> tắt cờ lỗi.
+  // Không ghi/không reset dữ liệu, giữ nguyên Data_Behavior.
+  useEffect(() => {
+    if (userData) {
+      setLoadError(false);
+      return;
+    }
+    try {
+      getUserData();
+      setLoadError(false);
+    } catch {
+      setLoadError(true);
+    }
+  }, [userData]);
+
+  const handleRetryLoad = () => {
+    setLoadError(false);
+    reloadUserData();
+  };
+
   const handleDeleteBoard = (boardId: string) => {
     setBoardToDelete(boardId);
   };
@@ -460,92 +542,40 @@ export function VisionBoardGallery() {
   // Bộ lọc & Sắp xếp dữ liệu (Danh sách phẳng)
   const filteredAndSortedBoards = useMemo(() => {
     if (!userData) return [];
-    
-    let result = [...userData.visionBoards];
-    
-    // 1. Tìm kiếm theo tên
-    if (searchTerm.trim() !== "") {
-      const term = searchTerm.toLowerCase();
-      result = result.filter(board => board.name.toLowerCase().includes(term));
-    }
-    
-    // 2. Lọc theo năm
-    if (selectedYear !== "all") {
-      result = result.filter(board => board.year === selectedYear);
-    }
-    
-    // 3. Sắp xếp
-    result.sort((a, b) => {
-      if (sortBy === "newest") {
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      }
-      if (sortBy === "oldest") {
-        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-      }
-      if (sortBy === "name") {
-        return a.name.localeCompare(b.name);
-      }
-      if (sortBy === "items") {
-        return b.items.length - a.items.length;
-      }
-      return 0;
-    });
-    
-    return result;
+    return filterAndSortBoards(userData.visionBoards, searchTerm, selectedYear, sortBy);
   }, [userData, searchTerm, selectedYear, sortBy]);
 
   // Gom nhóm dữ liệu lọc được theo năm nếu dùng Group view
-  const isGroupedByYear = viewMode === "grid" && !searchTerm && sortBy === "newest";
+  const isGroupedByYear = resolveGroupedByYear(viewMode, searchTerm, sortBy);
 
   const boardsByYear = useMemo(() => {
-    return filteredAndSortedBoards.reduce(
-      (acc, board) => {
-        if (!acc[board.year]) acc[board.year] = [];
-        acc[board.year].push(board);
-        return acc;
-      },
-      {} as Record<string, VisionBoard[]>,
-    );
+    return groupBoardsByYear(filteredAndSortedBoards);
   }, [filteredAndSortedBoards]);
 
   const activeYears = useMemo(() => {
     return Object.keys(boardsByYear).sort((a, b) => parseInt(b, 10) - parseInt(a, 10));
   }, [boardsByYear]);
 
-  // Bento Stats calculations
-  const totalItems = useMemo(() => {
-    if (!userData) return 0;
-    return userData.visionBoards.reduce((sum, board) => sum + board.items.length, 0);
-  }, [userData]);
-
+  // Bento Stats calculations (giữ nguyên hành vi: tính trên toàn bộ visionBoards)
   const stats = useMemo(() => {
     if (!userData) return { total: 0, yearsCount: 0, totalItemsCount: 0, avgItems: 0, distribution: { image: 0, quote: 0, icon: 0 } };
-    const boards = userData.visionBoards;
-    const total = boards.length;
-    
-    let imgCount = 0;
-    let quoteCount = 0;
-    let iconCount = 0;
-    boards.forEach(b => {
-      b.items.forEach(item => {
-        if (item.type === "image") imgCount++;
-        else if (item.type === "quote") quoteCount++;
-        else if (item.type === "icon") iconCount++;
-      });
-    });
+    return computeGalleryStats(userData.visionBoards);
+  }, [userData]);
 
-    return {
-      total,
-      yearsCount: originalYears.length,
-      totalItemsCount: totalItems,
-      avgItems: total ? Math.round(totalItems / total) : 0,
-      distribution: {
-        image: totalItems ? Math.round((imgCount / totalItems) * 100) : 0,
-        quote: totalItems ? Math.round((quoteCount / totalItems) * 100) : 0,
-        icon: totalItems ? Math.round((iconCount / totalItems) * 100) : 0,
-      }
-    };
-  }, [userData, totalItems, originalYears]);
+  // Nhánh lỗi tải (Req 7.5): thay skeleton bằng trạng thái lỗi + hành động thử lại.
+  // Không giữ skeleton sau khi vào lỗi.
+  if (loadError) {
+    return (
+      <div className="stack-section mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
+        <EmptyState
+          icon={<AlertTriangle className="h-10 w-10 text-app-status-error" />}
+          title="Không tải được dữ liệu thư viện"
+          description="Đã xảy ra sự cố khi đọc dữ liệu thư viện trên thiết bị này. Vui lòng thử lại."
+          actions={<Button onClick={handleRetryLoad}>Thử lại</Button>}
+        />
+      </div>
+    );
+  }
 
   if (!userData) return <VisionBoardGallerySkeleton />;
 
@@ -555,15 +585,8 @@ export function VisionBoardGallery() {
       : undefined;
 
   return (
-    <div className="stack-section mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8 bg-gradient-to-br from-app-bg via-app-bg-subtle/50 to-app-accent-subtle/30 dark:from-app-bg dark:via-app-bg-subtle/95 dark:to-app-warm-subtle/10 rounded-[var(--r-soft)] border border-app-line/40 shadow-app-sm overflow-hidden relative min-h-[600px] animate-fade-in">
-      {/* Background Aurora Orbs */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none rounded-[var(--r-soft)] z-0">
-        <div className="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] rounded-full bg-app-accent/5 dark:bg-app-accent/8 blur-[120px]" />
-        <div className="absolute -bottom-[10%] -right-[10%] w-[50%] h-[50%] rounded-full bg-app-warm/5 dark:bg-app-warm/8 blur-[120px]" />
-      </div>
-      
-      <div className="relative z-10">
-        <ScreenGuide {...SCREEN_GUIDES.visionBoardGallery} className="mb-4" />
+    <div className="stack-section mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
+      <ScreenGuide {...SCREEN_GUIDES.visionBoardGallery} className="mb-4" />
       <AlertDialog
         open={Boolean(boardToDelete)}
         onOpenChange={(open) => {
@@ -592,17 +615,17 @@ export function VisionBoardGallery() {
       {/* Page Hero */}
       <PageHero
         serif
-        className="page-enter shadow-app-md border border-app-line/60 bg-gradient-to-r from-app-surface to-app-bg-subtle/20"
+        className="page-enter shadow-app-md border border-app-line/60 bg-app-surface"
         eyebrow="Thư viện Bản vẽ Tương lai"
         eyebrowIcon={<Images className="h-3.5 w-3.5 text-app-accent" />}
         title={
           <>
-            Đắm mình trong <span className="bg-gradient-to-r from-app-accent via-emerald-600 to-app-warm bg-clip-text text-transparent dark:from-emerald-400 dark:via-teal-300 dark:to-app-warm">ước mơ</span> lớn của chính bạn.
+            Đắm mình trong <span className="text-app-accent">ước mơ</span> lớn của chính bạn.
           </>
         }
         description="Lưu giữ các vision board qua từng năm, nhìn lại hành trình lớn và tiếp tục cập nhật các mục tiêu mới."
         primaryCta={
-          <Button onClick={() => navigate("/vision-board")} className="shadow-md shadow-app-accent/15 group-hover:scale-105 transition-transform duration-300">
+          <Button onClick={() => navigate("/vision-board")} className="shadow-md shadow-app-accent/15">
             <Plus className="h-4 w-4" />
             Tạo bảng mới
           </Button>
@@ -612,32 +635,35 @@ export function VisionBoardGallery() {
             Trang chủ
           </Button>
         }
-        aside={<Gallery3DHeroMockup />}
+        aside={
+          <div aria-hidden="true">
+            <VisionMapIllustration className="mx-auto h-auto w-full max-w-[340px] text-app-accent" />
+          </div>
+        }
       />
 
       {/* Bento Stats Grid */}
       {userData.visionBoards.length > 0 && (
         <div className="grid grid-cols-1 gap-5 md:grid-cols-3 lg:grid-cols-4 mt-6">
           {/* Card 1: Tổng số Board */}
-          <Card className="relative overflow-hidden md:col-span-2 rounded-card shadow-app-sm border border-app-line/60 bg-gradient-to-br from-app-accent-subtle/80 to-app-surface group/bento transition-all duration-300 hover:shadow-md hover:border-app-accent/20">
-            <div className="absolute inset-0 bg-gradient-to-r from-app-accent/5 to-transparent opacity-0 group-hover/bento:opacity-100 transition-opacity duration-500" />
-            <CardHeader className="relative flex flex-row items-center justify-between pb-2">
+          <Card className="md:col-span-2 rounded-card border border-app-line bg-app-surface shadow-app-sm transition-shadow duration-300 hover:shadow-app-md">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
               <div>
                 <CardDescription className="text-xs uppercase tracking-wider text-app-ink-muted">Tâm điểm Tầm nhìn</CardDescription>
                 <CardTitle className="mt-1 text-3xl font-bold font-serif text-app-ink">{stats.total} bảng hiện có</CardTitle>
               </div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-app-accent text-white shadow-md shadow-app-accent/10 transition-transform duration-300 group-hover/bento:scale-110">
+              <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] bg-app-accent text-[var(--app-ink-on-accent)] shadow-app-sm">
                 <Images className="h-5 w-5" />
               </div>
             </CardHeader>
-            <CardContent className="relative pt-2 pb-5">
+            <CardContent className="pt-2 pb-5">
               <p className="text-sm text-app-ink-soft">
                 Mỗi bảng là một mốc thời gian chánh niệm, chứa đựng những tầm nhìn sống động định hình tương lai.
               </p>
               <div className="mt-4">
                 <Button 
                   size="sm" 
-                  className="h-8 rounded-control bg-app-accent text-white hover:bg-app-accent-hover text-xs font-semibold"
+                  className="h-8 rounded-control bg-app-accent text-[var(--app-ink-on-accent)] hover:bg-app-accent-hover text-xs font-semibold"
                   onClick={() => navigate("/vision-board")}
                 >
                   <Plus className="h-3.5 w-3.5 mr-1" /> Kiến tạo tương lai
@@ -647,13 +673,13 @@ export function VisionBoardGallery() {
           </Card>
 
           {/* Card 2: Số năm bao quát */}
-          <Card className="relative overflow-hidden rounded-card shadow-app-sm border border-app-line/60 bg-gradient-to-br from-app-warm-subtle/80 to-app-surface dark:from-app-warm-soft/10 dark:to-app-surface group/bento-year transition-all duration-300 hover:shadow-md hover:border-app-warm/20">
+          <Card className="rounded-card border border-app-line bg-app-surface shadow-app-sm transition-shadow duration-300 hover:shadow-app-md">
             <CardHeader className="flex flex-row items-start justify-between pb-2">
               <div className="space-y-1">
                 <CardDescription className="text-xs uppercase tracking-wider text-app-ink-muted">Trải qua</CardDescription>
                 <CardTitle className="text-3xl font-bold font-serif text-app-warm">{stats.yearsCount}</CardTitle>
               </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-[var(--r-tile)] bg-app-warm-soft text-app-warm transition-transform duration-300 group-hover/bento-year:rotate-12">
+              <div className="flex h-10 w-10 items-center justify-center rounded-[var(--r-tile)] bg-app-warm-soft text-app-warm">
                 <Calendar className="h-5 w-5" />
               </div>
             </CardHeader>
@@ -668,14 +694,14 @@ export function VisionBoardGallery() {
           </Card>
 
           {/* Card 3: Tổng phần tử */}
-          <Card className="relative overflow-hidden rounded-card shadow-app-sm border border-app-line/60 bg-gradient-to-br from-blue-50/60 to-app-surface dark:from-blue-900/10 dark:to-app-surface group/bento-el transition-all duration-300 hover:shadow-md hover:border-blue-500/20">
+          <Card className="rounded-card border border-app-line bg-app-surface shadow-app-sm transition-shadow duration-300 hover:shadow-app-md">
             <CardHeader className="flex flex-row items-start justify-between pb-2">
               <div className="space-y-1">
                 <CardDescription className="text-xs uppercase tracking-wider text-app-ink-muted">Tích lũy</CardDescription>
-                <CardTitle className="text-3xl font-bold font-serif text-blue-600 dark:text-blue-400">{stats.totalItemsCount}</CardTitle>
+                <CardTitle className="text-3xl font-bold font-serif text-app-accent">{stats.totalItemsCount}</CardTitle>
               </div>
-              <div className="flex h-10 w-10 items-center justify-center rounded-[var(--r-tile)] bg-blue-50 dark:bg-blue-950 text-blue-600 dark:text-blue-400 transition-transform duration-300 group-hover/bento-el:scale-110">
-                <Sparkles className="h-5 w-5 animate-pulse" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-[var(--r-tile)] bg-app-accent-soft text-app-accent">
+                <Sparkles className="h-5 w-5" />
               </div>
             </CardHeader>
             <CardContent className="pt-2 pb-5">
@@ -686,7 +712,7 @@ export function VisionBoardGallery() {
           </Card>
 
           {/* Card 4: Tỷ lệ phân bổ sáng tạo */}
-          <Card className="relative overflow-hidden md:col-span-3 lg:col-span-4 rounded-card shadow-app-sm border border-app-line/60 bg-app-surface group/bento-dist transition-all duration-300 hover:shadow-md">
+          <Card className="md:col-span-3 lg:col-span-4 rounded-card border border-app-line bg-app-surface shadow-app-sm transition-shadow duration-300 hover:shadow-app-md">
             <CardHeader className="pb-1 pt-4 flex flex-row items-center justify-between">
               <div className="space-y-0.5">
                 <CardDescription className="text-xs uppercase tracking-wider text-app-ink-muted">Phong cách Sáng tạo</CardDescription>
@@ -697,10 +723,10 @@ export function VisionBoardGallery() {
               </Badge>
             </CardHeader>
             <CardContent className="pt-2 pb-4 space-y-3">
-              <div className="h-2 w-full rounded-full bg-app-line/45 overflow-hidden flex shadow-inner">
-                <div style={{ width: `${stats.distribution.image}%` }} className="h-full bg-app-accent transition-all duration-500" title={`Hình ảnh: ${stats.distribution.image}%`} />
-                <div style={{ width: `${stats.distribution.quote}%` }} className="h-full bg-amber-500 transition-all duration-500" title={`Câu nói: ${stats.distribution.quote}%`} />
-                <div style={{ width: `${stats.distribution.icon}%` }} className="h-full bg-indigo-500 transition-all duration-500" title={`Biểu tượng: ${stats.distribution.icon}%`} />
+              <div className="h-2 w-full rounded-full bg-app-line/45 overflow-hidden flex">
+                <div style={{ width: `${stats.distribution.image}%` }} className="h-full bg-app-accent transition-all duration-300" title={`Hình ảnh: ${stats.distribution.image}%`} />
+                <div style={{ width: `${stats.distribution.quote}%` }} className="h-full bg-app-warm transition-all duration-300" title={`Câu nói: ${stats.distribution.quote}%`} />
+                <div style={{ width: `${stats.distribution.icon}%` }} className="h-full bg-app-status-info transition-all duration-300" title={`Biểu tượng: ${stats.distribution.icon}%`} />
               </div>
               <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-app-ink-soft font-medium">
                 <div className="flex items-center gap-1.5">
@@ -708,11 +734,11 @@ export function VisionBoardGallery() {
                   <span>Hình ảnh ({stats.distribution.image}%)</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-amber-500" />
+                  <span className="h-2 w-2 rounded-full bg-app-warm" />
                   <span>Câu truyền cảm hứng ({stats.distribution.quote}%)</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full bg-indigo-500" />
+                  <span className="h-2 w-2 rounded-full bg-app-status-info" />
                   <span>Biểu tượng cảm xúc ({stats.distribution.icon}%)</span>
                 </div>
               </div>
@@ -730,6 +756,7 @@ export function VisionBoardGallery() {
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted" />
               <input
                 type="text"
+                aria-label="Tìm bảng tầm nhìn theo tên"
                 placeholder="Tìm tên bảng tầm nhìn..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -741,6 +768,7 @@ export function VisionBoardGallery() {
             <div className="flex items-center gap-2">
               <SlidersHorizontal className="h-3.5 w-3.5 text-app-ink-muted hidden md:inline" />
               <select
+                aria-label="Lọc bảng theo năm"
                 value={selectedYear}
                 onChange={(e) => setSelectedYear(e.target.value)}
                 className="rounded-[var(--r-input)] border border-app-line bg-app-surface px-3 py-2 text-sm font-semibold text-app-ink-soft focus:border-app-accent/40 focus:ring-2 focus:ring-app-accent/14 outline-none transition-all"
@@ -755,6 +783,7 @@ export function VisionBoardGallery() {
             {/* Sort selector */}
             <div className="flex items-center gap-2">
               <select
+                aria-label="Sắp xếp danh sách bảng"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as VisionBoardSort)}
                 className="rounded-[var(--r-input)] border border-app-line bg-app-surface px-3 py-2 text-sm font-semibold text-app-ink-soft focus:border-app-accent/40 focus:ring-2 focus:ring-app-accent/14 outline-none transition-all"
@@ -778,6 +807,8 @@ export function VisionBoardGallery() {
                   ? "bg-app-surface text-app-accent shadow-sm border border-app-line/20" 
                   : "text-app-ink-muted hover:text-app-ink"
               )}
+              aria-label="Xem dạng lưới"
+              aria-pressed={viewMode === "grid"}
               onClick={() => setViewMode("grid")}
             >
               <LayoutGrid className="h-3.5 w-3.5 mr-1" /> Lưới
@@ -791,6 +822,8 @@ export function VisionBoardGallery() {
                   ? "bg-app-surface text-app-accent shadow-sm border border-app-line/20" 
                   : "text-app-ink-muted hover:text-app-ink"
               )}
+              aria-label="Xem dạng danh sách"
+              aria-pressed={viewMode === "list"}
               onClick={() => setViewMode("list")}
             >
               <ListIcon className="h-3.5 w-3.5 mr-1" /> Danh sách
@@ -844,101 +877,16 @@ export function VisionBoardGallery() {
               </div>
 
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {boardsByYear[year].map((board) => {
-                  const isSpotlight = spotlightBoardId === board.id;
-                  const backendId = getBackendVisionBoardId(board.id);
-                  const isSynced = Boolean(backendId);
-
-                  return (
-                    <div key={board.id} className="relative group">
-                      <InteractiveSurface
-                        className="w-full rounded-card-lg overflow-hidden transition-all duration-300 hover:shadow-app-xl"
-                        intensity={4}
-                        translate={8}
-                        shine={false}
-                      >
-                        <Card className={cn(
-                          "border border-app-line bg-app-surface h-full flex flex-col justify-between overflow-hidden",
-                          isSpotlight ? "ring-2 ring-app-accent shadow-app-lg" : ""
-                        )}>
-                          {/* Top Card Header */}
-                          <CardHeader className="p-4 pb-2">
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="min-w-0">
-                                <div className="flex items-center gap-1.5 flex-wrap">
-                                  <CardTitle className="text-base font-bold text-app-ink truncate">{board.name}</CardTitle>
-                                  {isSpotlight && (
-                                    <Badge className="bg-app-accent text-white border-0 text-[9px] px-2 py-0.5 rounded-[var(--r-pill)]">
-                                      Vừa lưu
-                                    </Badge>
-                                  )}
-                                </div>
-                                <CardDescription className="text-xs text-app-ink-muted mt-0.5">
-                                  {formatDisplayDate(board.createdAt)} • {board.items.length} phần tử
-                                </CardDescription>
-                              </div>
-                              <div className="flex items-center gap-1">
-                                {user && (
-                                  isSynced ? (
-                                    <span title="Đã đồng bộ lên Cloud">
-                                      <Cloud className="h-4 w-4 text-app-status-success" />
-                                    </span>
-                                  ) : (
-                                    <span title="Chỉ lưu trữ cục bộ">
-                                      <CloudOff className="h-4 w-4 text-app-ink-muted/50" />
-                                    </span>
-                                  )
-                                )}
-                                <Badge variant="outline" className="border-app-line bg-app-bg-subtle text-[10px] text-app-ink-soft font-semibold px-2 py-0.5 rounded-[var(--r-pill)]">
-                                  {board.year}
-                                </Badge>
-                              </div>
-                            </div>
-                          </CardHeader>
-
-                          {/* Central Scrapbook Collage Preview */}
-                          <CardContent className="p-3 pt-0 flex-1 flex flex-col justify-end">
-                            <div 
-                              className="relative overflow-hidden rounded-card border border-app-line bg-app-bg-subtle group-hover:shadow-inner"
-                              style={{ aspectRatio: "16/10" }}
-                            >
-                              {/* Scrapbook view */}
-                              <BoardCollagePreview board={board} />
-
-                              {/* Hover Action Overlay */}
-                              <div className="absolute inset-0 bg-black/40 backdrop-blur-[3px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-3 z-20">
-                                <div className="flex gap-2 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                                  <Button
-                                    size="sm"
-                                    className="bg-white text-app-accent hover:bg-white/95 shadow-md rounded-control text-xs font-semibold h-9 px-3.5"
-                                    onClick={() => navigate(`/vision-board/${board.id}`)}
-                                  >
-                                    <Eye className="h-3.5 w-3.5 mr-1" /> Mở xem
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    className="bg-app-accent text-white hover:bg-app-accent-hover shadow-md rounded-control text-xs font-semibold h-9 px-3.5"
-                                    onClick={() => navigate(`/vision-board/${board.id}`)}
-                                  >
-                                    <Edit className="h-3.5 w-3.5 mr-1" /> Thiết kế
-                                  </Button>
-                                </div>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="absolute top-2 right-2 text-white/70 hover:text-white hover:bg-white/15 h-8 w-8 p-0 rounded-full"
-                                  onClick={() => handleDeleteBoard(board.id)}
-                                >
-                                  <Trash2 className="h-4.5 w-4.5" />
-                                </Button>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </InteractiveSurface>
-                    </div>
-                  );
-                })}
+                {boardsByYear[year].map((board) => (
+                  <BoardGridCard
+                    key={board.id}
+                    board={board}
+                    isSpotlight={spotlightBoardId === board.id}
+                    user={user}
+                    navigate={navigate}
+                    onDeleteClick={handleDeleteBoard}
+                  />
+                ))}
               </div>
             </section>
           ))}
@@ -946,104 +894,18 @@ export function VisionBoardGallery() {
       ) : (
         /* Phẳng - Không gom nhóm (Khi Search/Sort được áp dụng) */
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 mt-6">
-          {filteredAndSortedBoards.map((board) => {
-            const isSpotlight = spotlightBoardId === board.id;
-            const backendId = getBackendVisionBoardId(board.id);
-            const isSynced = Boolean(backendId);
-
-            return (
-              <div key={board.id} className="relative group">
-                <InteractiveSurface
-                  className="w-full rounded-card-lg overflow-hidden transition-all duration-300 hover:shadow-app-xl"
-                  intensity={4}
-                  translate={8}
-                  shine={false}
-                >
-                  <Card className={cn(
-                    "border border-app-line bg-app-surface h-full flex flex-col justify-between overflow-hidden",
-                    isSpotlight ? "ring-2 ring-app-accent shadow-app-lg" : ""
-                  )}>
-                    {/* Top Card Header */}
-                    <CardHeader className="p-4 pb-2">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <CardTitle className="text-base font-bold text-app-ink truncate">{board.name}</CardTitle>
-                            {isSpotlight && (
-                              <Badge className="bg-app-accent text-white border-0 text-[9px] px-2 py-0.5 rounded-[var(--r-pill)]">
-                                Vừa lưu
-                              </Badge>
-                            )}
-                          </div>
-                          <CardDescription className="text-xs text-app-ink-muted mt-0.5">
-                            {formatDisplayDate(board.createdAt)} • {board.items.length} phần tử
-                          </CardDescription>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          {user && (
-                            isSynced ? (
-                              <span title="Đã đồng bộ lên Cloud">
-                                <Cloud className="h-4 w-4 text-app-status-success" />
-                              </span>
-                            ) : (
-                              <span title="Chỉ lưu trữ cục bộ">
-                                <CloudOff className="h-4 w-4 text-app-ink-muted/50" />
-                              </span>
-                            )
-                          )}
-                          <Badge variant="outline" className="border-app-line bg-app-bg-subtle text-[10px] text-app-ink-soft font-semibold px-2 py-0.5 rounded-[var(--r-pill)]">
-                            {board.year}
-                          </Badge>
-                        </div>
-                      </div>
-                    </CardHeader>
-
-                    {/* Central Scrapbook Collage Preview */}
-                    <CardContent className="p-3 pt-0 flex-1 flex flex-col justify-end">
-                      <div 
-                        className="relative overflow-hidden rounded-card border border-app-line bg-app-bg-subtle group-hover:shadow-inner"
-                        style={{ aspectRatio: "16/10" }}
-                      >
-                        {/* Scrapbook view */}
-                        <BoardCollagePreview board={board} />
-
-                        {/* Hover Action Overlay */}
-                        <div className="absolute inset-0 bg-black/40 backdrop-blur-[3px] opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-3 z-20">
-                          <div className="flex gap-2 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                            <Button
-                              size="sm"
-                              className="bg-white text-app-accent hover:bg-white/95 shadow-md rounded-control text-xs font-semibold h-9 px-3.5"
-                              onClick={() => navigate(`/vision-board/${board.id}`)}
-                            >
-                              <Eye className="h-3.5 w-3.5 mr-1" /> Mở xem
-                            </Button>
-                            <Button
-                              size="sm"
-                              className="bg-app-accent text-white hover:bg-app-accent-hover shadow-md rounded-control text-xs font-semibold h-9 px-3.5"
-                              onClick={() => navigate(`/vision-board/${board.id}`)}
-                            >
-                              <Edit className="h-3.5 w-3.5 mr-1" /> Thiết kế
-                            </Button>
-                          </div>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="absolute top-2 right-2 text-white/70 hover:text-white hover:bg-white/15 h-8 w-8 p-0 rounded-full"
-                            onClick={() => handleDeleteBoard(board.id)}
-                          >
-                            <Trash2 className="h-4.5 w-4.5" />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </InteractiveSurface>
-              </div>
-            );
-          })}
+          {filteredAndSortedBoards.map((board) => (
+            <BoardGridCard
+              key={board.id}
+              board={board}
+              isSpotlight={spotlightBoardId === board.id}
+              user={user}
+              navigate={navigate}
+              onDeleteClick={handleDeleteBoard}
+            />
+          ))}
         </div>
       )}
-      </div>
     </div>
   );
 }
@@ -1057,17 +919,21 @@ function VisionBoardGallerySkeleton() {
       aria-busy="true"
     >
       <span className="sr-only">Đang tải bộ sưu tập tầm nhìn...</span>
+
+      {/* Vùng hero: đúng một nhóm skeleton */}
       <Skeleton className="h-44 rounded-card-lg bg-app-line/60" />
-      
-      {/* Skeleton Bento stats */}
+
+      {/* Vùng thống kê (bento): đúng một nhóm skeleton */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-4">
         <Skeleton className="h-32 md:col-span-2 rounded-card bg-app-line/40" />
         <Skeleton className="h-32 rounded-card bg-app-line/40" />
         <Skeleton className="h-32 rounded-card bg-app-line/40" />
       </div>
 
+      {/* Vùng toolbar: đúng một nhóm skeleton */}
       <Skeleton className="h-12 rounded-card bg-app-line/40" />
 
+      {/* Vùng lưới thẻ: đúng một nhóm skeleton */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {[0, 1, 2, 3, 4, 5].map((index) => (
           <Skeleton key={index} className="aspect-[16/11] rounded-card bg-app-line/50" />
