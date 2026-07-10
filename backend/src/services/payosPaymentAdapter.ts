@@ -25,6 +25,7 @@ import {
 
 import { PaymentOrderModel } from "../models/PaymentOrderModel";
 import type { BillingSubscriptionStatus } from "./billingService";
+import type { PayosPaymentLinkClient } from "./payosPayerReconciliation";
 import type {
   CheckoutSessionResult,
   CreateCheckoutSessionInput,
@@ -111,13 +112,21 @@ export function extractPayosOrderIdFromDescription(description: string | undefin
   return match ? match[0].toUpperCase() : null;
 }
 
-function createPayosClient(config: PayosConfig): PayosClientLike {
+function createPayosClient(config: PayosConfig): PayosClientLike & PayosPaymentLinkClient {
   return new PayOS({
     clientId: config.clientId,
     apiKey: config.apiKey,
     checksumKey: config.checksumKey,
     logLevel: "warn",
   });
+}
+
+export function getPayosPaymentLinkClient(): PayosPaymentLinkClient {
+  const config = getPayosConfig();
+  if (!isPayosConfigured()) {
+    throw new PaymentProviderNotConfiguredError("payos");
+  }
+  return createPayosClient(config);
 }
 
 function parseRawBody(rawBody: Buffer | string): string {

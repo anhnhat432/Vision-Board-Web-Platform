@@ -1,16 +1,19 @@
 import assert from "node:assert/strict";
-import { afterEach, describe, it } from "node:test";
+import { afterEach, describe, it, mock } from "node:test";
 import type { NextFunction, Request, Response } from "express";
 
 import {
   completePaymentOrderManually,
   getAdminPaymentOrders,
+  reconcileAdminPaymentOrderPayerSource,
   updateAdminUserRole,
 } from "../controllers/adminController";
 import { clearAdminRoleCache, requireAdmin } from "../middleware/requireAdmin";
 import { PaymentOrderModel, type PaymentOrderStatus } from "../models/PaymentOrderModel";
 import { UserModel } from "../models/UserModel";
 import { billingService } from "../services/billingServiceInstance";
+import * as payosPaymentAdapter from "../services/payosPaymentAdapter";
+import * as payosPayerReconciliation from "../services/payosPayerReconciliation";
 
 type MockableModel = {
   find: unknown;
@@ -34,6 +37,8 @@ interface MockPaymentOrder {
   userId: string;
   amount: number;
   status: PaymentOrderStatus;
+  provider?: string;
+  metadata?: Record<string, unknown>;
   purpose?: "plus_subscription" | "physical_order";
   completedAt?: Date;
   cassoTransactionId?: string;
@@ -52,6 +57,7 @@ const originalUserFindOne = UserModel.findOne;
 const originalBillingUpsert = billingService.upsertSubscriptionFromProviderEvent;
 
 afterEach(() => {
+  mock.restoreAll();
   (PaymentOrderModel as unknown as MockableModel).find = originalPaymentOrderFind;
   (PaymentOrderModel as unknown as MockableModel).findOne = originalPaymentOrderFindOne;
   (PaymentOrderModel as unknown as MockableModel).countDocuments = originalPaymentOrderCountDocuments;
@@ -103,6 +109,53 @@ function createMockPaymentOrder(overrides: Partial<MockPaymentOrder> = {}): Mock
 }
 
 describe("admin payment recovery", () => {
+  it("reconciles a completed PayOS order without changing its payment or entitlement state", async () => {
+    const order = createMockPaymentOrder({
+      status: "completed",
+      provider: "payos",
+      metadata: { payos: { paymentLinkId: "payos_link_123", orderCode: 10_000_000_001 } },
+    });
+    const originalStatus = order.status;
+    const originalSaveCalls = order.saveCalls;
+
+    (PaymentOrderModel as unknown as MockableModel).findOne = async () => order;
+    mock.method(payosPaymentAdapter, "getPayosPaymentLinkClient", () => ({ paymentRequests: { get: async () => { throw new Error("not used"); } } }));
+    mock.method(payosPayerReconciliation, "reconcilePayosPayerSource", async () => ({
+      payer: {
+        classification: "external" as const,
+        accountHash: "a".repeat(64),
+        accountLast4: "6789",
+        accountNameMasked: "N*** V*** A***",
+        bankName: "MB Bank",
+      },
+      transactionReference: "TF_PAYOS_1",
+      transactionDateTime: "2026-07-10 10:00:00",
+    }));
+
+    const response = createMockResponse();
+    const recorder = createNextRecorder();
+    await reconcileAdminPaymentOrderPayerSource(
+      { params: { orderId: "vbqa000001" }, user: { uid: "admin_uid" } } as unknown as Request,
+      response as unknown as Response,
+      recorder.next,
+    );
+
+    assert.equal(recorder.getError(), undefined);
+    assert.equal(response.statusCode, 200);
+    assert.equal(order.status, originalStatus);
+    assert.equal(order.saveCalls, originalSaveCalls + 1);
+    assert.deepEqual((order.metadata?.payos as Record<string, unknown>).payer, {
+      classification: "external",
+      accountHash: "a".repeat(64),
+      accountLast4: "6789",
+      accountNameMasked: "N*** V*** A***",
+      bankName: "MB Bank",
+      source: "reconciliation",
+      observedAt: (order.metadata?.payos as { payer: { observedAt: Date } }).payer.observedAt,
+    });
+    assert.equal((response.payload as { data: { payer: { accountLast4: string } } }).data.payer.accountLast4, "6789");
+  });
+
   it("completes a payment order manually and stores audit metadata", async () => {
     const order = createMockPaymentOrder();
     let capturedEvent: Record<string, unknown> | undefined;

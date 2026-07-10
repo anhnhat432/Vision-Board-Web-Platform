@@ -6,6 +6,7 @@ import { PaymentOrderModel, type PaymentOrderDocument } from "../models/PaymentO
 import { OrderModel } from "../models/OrderModel";
 import { billingService } from "../services/billingServiceInstance";
 import { deliverReceiptForOrder } from "../services/paymentReceiptDeliveryService";
+import { classifyPayosPayerSource, type PaymentPayerSourceSummary } from "../services/paymentPayerSource";
 import {
   createPayosProviderEventId,
   extractPayosOrderIdFromDescription,
@@ -25,8 +26,25 @@ type PayosOrderLookup = {
   $or: Array<Record<string, unknown>>;
 };
 
+type PayosPayerMetadata = PaymentPayerSourceSummary & {
+  source: "webhook";
+  observedAt: Date;
+};
+
 function getPayosChecksumKey(): string {
   return process.env.PAYOS_CHECKSUM_KEY?.trim() ?? "";
+}
+
+function createPayosPayerMetadata(data: PayosWebhookData, observedAt: Date): PayosPayerMetadata {
+  return {
+    ...classifyPayosPayerSource({
+      accountNumber: data.counterAccountNumber,
+      accountName: data.counterAccountName,
+      bankName: data.counterAccountBankName,
+    }),
+    source: "webhook",
+    observedAt,
+  };
 }
 
 function getRawWebhookBody(req: Request): Buffer | string {
@@ -106,6 +124,7 @@ async function claimPayosOrderForProcessing(
   data: PayosWebhookData,
   eventId: string,
   now: Date,
+  payer: PayosPayerMetadata,
 ): Promise<PaymentOrderDocument | null> {
   const staleBefore = new Date(now.getTime() - PAYOS_PROCESSING_CLAIM_STALE_MS);
   return PaymentOrderModel.findOneAndUpdate(
@@ -126,6 +145,7 @@ async function claimPayosOrderForProcessing(
         "metadata.payos.webhookCode": data.code,
         "metadata.payos.webhookDescription": data.desc,
         "metadata.payos.transactionDateTime": data.transactionDateTime,
+        "metadata.payos.payer": payer,
         "metadata.payos.webhookProcessingEventId": eventId,
         "metadata.payos.webhookProcessingStartedAt": now,
       },
@@ -138,6 +158,7 @@ async function markPayosOrderAsCompleted(
   order: PaymentOrderDocument,
   data: PayosWebhookData,
   now: Date,
+  payer: PayosPayerMetadata,
 ): Promise<PaymentOrderDocument | null> {
   return PaymentOrderModel.findOneAndUpdate(
     { _id: order._id, status: "pending" },
@@ -151,6 +172,7 @@ async function markPayosOrderAsCompleted(
         "metadata.payos.webhookCode": data.code,
         "metadata.payos.webhookDescription": data.desc,
         "metadata.payos.transactionDateTime": data.transactionDateTime,
+        "metadata.payos.payer": payer,
       },
       $unset: {
         "metadata.payos.webhookProcessingEventId": "",
@@ -383,8 +405,9 @@ export async function handlePayosWebhook(req: Request, res: Response): Promise<v
   }
 
   const now = new Date();
+  const payer = createPayosPayerMetadata(data, now);
 
-  const claimedOrder = await claimPayosOrderForProcessing(order, data, eventId, now);
+  const claimedOrder = await claimPayosOrderForProcessing(order, data, eventId, now, payer);
   if (!claimedOrder) {
     console.info({
       event: "payos_webhook_replay_ignored",
@@ -432,7 +455,7 @@ export async function handlePayosWebhook(req: Request, res: Response): Promise<v
       });
     }
 
-    const completedOrder = await markPayosOrderAsCompleted(claimedOrder, data, now);
+    const completedOrder = await markPayosOrderAsCompleted(claimedOrder, data, now, payer);
     if (!completedOrder) {
       console.info({
         event: "payos_webhook_replay_ignored",

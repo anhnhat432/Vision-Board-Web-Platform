@@ -17,6 +17,9 @@ import {
   hashEmailPayload,
   sendBillingExpirationReminderEmail,
 } from "../services/emailNotificationService";
+import { getPaymentPayerSourceConfig, type PaymentPayerSourceClassification } from "../services/paymentPayerSource";
+import * as payosPaymentAdapter from "../services/payosPaymentAdapter";
+import * as payosPayerReconciliation from "../services/payosPayerReconciliation";
 import { ApiError } from "../utils/apiError";
 import { getLastPaymentReconciliationRun } from "../jobs/reconciliationJob";
 import { successResponse } from "../utils/apiResponse";
@@ -74,6 +77,16 @@ interface LeanPaymentOrderSummary {
   completedAt?: Date;
   expiresAt?: Date;
   updatedAt?: Date;
+  metadata?: PaymentOrderDocument["metadata"];
+}
+
+interface AdminPaymentPayerSummary {
+  classification: PaymentPayerSourceClassification;
+  accountLast4?: string;
+  accountNameMasked?: string;
+  bankName?: string;
+  source: "webhook" | "reconciliation";
+  observedAt: Date;
 }
 
 function parseDaysAhead(value: unknown): number {
@@ -156,7 +169,20 @@ function serializeUserSummary(user: LeanUserSummary | undefined) {
   };
 }
 
+function serializePaymentPayer(payer: AdminPaymentPayerSummary | undefined) {
+  if (!payer) return null;
+  return {
+    classification: payer.classification,
+    accountLast4: payer.accountLast4,
+    accountNameMasked: payer.accountNameMasked,
+    bankName: payer.bankName,
+    source: payer.source,
+    observedAt: payer.observedAt,
+  };
+}
+
 function serializePaymentOrder(order: LeanPaymentOrderSummary, userById: Map<string, LeanUserSummary>) {
+  const payer = order.metadata?.payos?.payer as AdminPaymentPayerSummary | undefined;
   return {
     orderId: order.orderId,
     userId: order.userId,
@@ -178,6 +204,7 @@ function serializePaymentOrder(order: LeanPaymentOrderSummary, userById: Map<str
     completedAt: order.completedAt,
     expiresAt: order.expiresAt,
     updatedAt: order.updatedAt,
+    payer: serializePaymentPayer(payer),
     user: serializeUserSummary(userById.get(order.userId)),
   };
 }
@@ -277,7 +304,7 @@ export async function getAdminOverview(_req: Request, res: Response, next: NextF
         .lean<LeanUserSummary[]>(),
       PaymentOrderModel.find()
         .select(
-          "orderId userId planCode billingCycle amount currency status provider bankAccount bankName accountName description cassoTransactionId manualCompletedBy manualCompletedAt manualCompletionNote createdAt completedAt expiresAt updatedAt",
+          "orderId userId planCode billingCycle amount currency status provider bankAccount bankName accountName description cassoTransactionId manualCompletedBy manualCompletedAt manualCompletionNote metadata.payos.orderCode metadata.payos.paymentLinkId metadata.payos.payer createdAt completedAt expiresAt updatedAt",
         )
         .sort({ createdAt: -1 })
         .limit(12)
@@ -352,7 +379,7 @@ export async function getAdminPaymentOrders(req: Request, res: Response, next: N
       PaymentOrderModel.countDocuments(filter),
       PaymentOrderModel.find(filter)
         .select(
-          "orderId userId planCode billingCycle amount currency status provider bankAccount bankName accountName description cassoTransactionId manualCompletedBy manualCompletedAt manualCompletionNote createdAt completedAt expiresAt updatedAt",
+          "orderId userId planCode billingCycle amount currency status provider bankAccount bankName accountName description cassoTransactionId manualCompletedBy manualCompletedAt manualCompletionNote metadata.payos.orderCode metadata.payos.paymentLinkId metadata.payos.payer createdAt completedAt expiresAt updatedAt",
         )
         .sort({ createdAt: -1 })
         .limit(limit)
@@ -371,6 +398,70 @@ export async function getAdminPaymentOrders(req: Request, res: Response, next: N
           items: orders.map((order) => serializePaymentOrder(order, userById)),
         },
         "Admin payment orders loaded.",
+      ),
+    );
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function reconcileAdminPaymentOrderPayerSource(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const orderId = req.params.orderId?.trim().toUpperCase();
+    const order = await PaymentOrderModel.findOne({ orderId });
+    if (!order) {
+      throw new ApiError(404, "Payment order not found.", undefined, "payment_order_not_found");
+    }
+
+    const payos = order.metadata?.payos;
+    let result: payosPayerReconciliation.PayosPayerReconciliationResult;
+    try {
+      result = await payosPayerReconciliation.reconcilePayosPayerSource({
+        order: {
+          orderId: order.orderId,
+          amount: order.amount,
+          provider: order.provider,
+          status: order.status,
+          paymentLinkId: payos?.paymentLinkId,
+          orderCode: payos?.orderCode,
+        },
+        client: payosPaymentAdapter.getPayosPaymentLinkClient(),
+        payerSourceConfig: getPaymentPayerSourceConfig(),
+      });
+    } catch {
+      throw new ApiError(
+        422,
+        "Không thể đối chiếu nguồn tiền của đơn này từ PayOS.",
+        undefined,
+        "payos_payer_reconciliation_failed",
+      );
+    }
+
+    const observedAt = new Date();
+    order.metadata = {
+      ...(order.metadata ?? {}),
+      payos: {
+        ...(payos ?? {}),
+        payer: {
+          ...result.payer,
+          source: "reconciliation",
+          observedAt,
+        },
+      },
+    };
+    await order.save();
+
+    res.status(200).json(
+      successResponse(
+        {
+          orderId: order.orderId,
+          payer: serializePaymentPayer({
+            ...result.payer,
+            source: "reconciliation",
+            observedAt,
+          }),
+        },
+        "PayOS payer source reconciled.",
       ),
     );
   } catch (error) {

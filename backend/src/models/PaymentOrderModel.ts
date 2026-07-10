@@ -1,4 +1,5 @@
 import { Schema, model, type Document } from "mongoose";
+import type { PaymentPayerSourceClassification } from "../services/paymentPayerSource";
 
 /**
  * PaymentOrder — tracks a pending bank transfer checkout.
@@ -66,6 +67,15 @@ export interface PaymentOrderEntity {
       transactionDateTime?: string;
       webhookProcessingEventId?: string;
       webhookProcessingStartedAt?: Date;
+      payer?: {
+        classification: PaymentPayerSourceClassification;
+        accountHash?: string;
+        accountLast4?: string;
+        accountNameMasked?: string;
+        bankName?: string;
+        source: "webhook" | "reconciliation";
+        observedAt: Date;
+      };
     } | null;
     [key: string]: unknown;
   } | null;
@@ -285,6 +295,15 @@ export type PaymentOrderDocument = Document & {
       transactionDateTime?: string;
       webhookProcessingEventId?: string;
       webhookProcessingStartedAt?: Date;
+      payer?: {
+        classification: PaymentPayerSourceClassification;
+        accountHash?: string;
+        accountLast4?: string;
+        accountNameMasked?: string;
+        bankName?: string;
+        source: "webhook" | "reconciliation";
+        observedAt: Date;
+      };
     } | null;
     [key: string]: unknown;
   } | null;

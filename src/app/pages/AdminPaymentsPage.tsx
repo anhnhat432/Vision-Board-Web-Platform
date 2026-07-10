@@ -6,6 +6,7 @@ import {
   type AdminPaymentOrderSummary,
   adminCompletePaymentOrderManually,
   adminListPaymentOrders,
+  adminReconcilePaymentOrderPayerSource,
 } from "@/services/adminService";
 import { AdminEmptyState } from "../components/admin/AdminEmptyState";
 import { AdminPageHeader } from "../components/admin/AdminPageHeader";
@@ -35,8 +36,32 @@ import { Textarea } from "../components/ui/textarea";
 
 const SEARCH_DEBOUNCE_MS = 350;
 
+const PAYER_SOURCE_LABELS = {
+  internal: "Nội bộ",
+  external: "Nguồn ngoài",
+  unknown: "Chưa xác định",
+} as const;
+
+const PAYER_SOURCE_CLASS_NAMES = {
+  internal: "text-amber-700 dark:text-amber-300",
+  external: "text-emerald-700 dark:text-emerald-300",
+  unknown: "text-app-ink-muted",
+} as const;
+
 function getPaymentOwnerLabel(payment: AdminPaymentOrderSummary): string {
   return payment.user?.email || payment.user?.displayName || payment.userId;
+}
+
+function getPayerIdentityLabel(payment: AdminPaymentOrderSummary): string | null {
+  const payer = payment.payer;
+  if (!payer) return null;
+
+  const parts = [
+    payer.accountNameMasked,
+    payer.accountLast4 ? `****${payer.accountLast4}` : undefined,
+  ].filter((part): part is string => Boolean(part));
+
+  return parts.length > 0 ? parts.join(" · ") : null;
 }
 
 export function AdminPaymentsPage() {
@@ -142,6 +167,21 @@ export function AdminPaymentsPage() {
       void loadPayments(query, statusFilter);
     } catch (err) {
       toast.error(getErrorMessage(err, "Không thể hoàn tất đơn thanh toán."));
+    } finally {
+      setBusyOrderId(null);
+    }
+  };
+
+  const handleReconcilePayerSource = async (orderId: string) => {
+    setBusyOrderId(orderId);
+    try {
+      const result = await adminReconcilePaymentOrderPayerSource(orderId);
+      setItems((currentItems) =>
+        currentItems.map((payment) => (payment.orderId === result.orderId ? { ...payment, payer: result.payer } : payment)),
+      );
+      toast.success(`Đã đối chiếu nguồn tiền của đơn ${result.orderId}.`);
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Không thể đối chiếu nguồn tiền từ PayOS."));
     } finally {
       setBusyOrderId(null);
     }
@@ -261,6 +301,7 @@ export function AdminPaymentsPage() {
               <TableHead className="text-app-ink-muted">Người dùng</TableHead>
               <TableHead className="text-app-ink-muted">Số tiền</TableHead>
               <TableHead className="text-app-ink-muted">Trạng thái</TableHead>
+              <TableHead className="text-app-ink-muted">Nguồn tiền</TableHead>
               <TableHead className="text-app-ink-muted">Tạo lúc</TableHead>
               <TableHead className="text-right text-app-ink-muted">Hành động</TableHead>
             </TableRow>
@@ -269,6 +310,9 @@ export function AdminPaymentsPage() {
             {items.map((payment) => {
               const canComplete =
                 payment.status === "pending" || payment.status === "expired" || payment.status === "failed";
+              const canReconcilePayerSource = payment.status === "completed" && payment.provider.toLowerCase() === "payos";
+              const payerSource = payment.payer?.classification ?? "unknown";
+              const payerIdentityLabel = getPayerIdentityLabel(payment);
               return (
                 <TableRow key={payment.orderId} className="border-app-line hover:bg-app-bg-subtle">
                   <TableCell className="font-mono text-xs text-app-ink">
@@ -293,22 +337,47 @@ export function AdminPaymentsPage() {
                       <p className="mt-2 text-xs text-app-ink-muted">Manual: {payment.manualCompletedBy}</p>
                     ) : null}
                   </TableCell>
+                  <TableCell>
+                    <p className={`text-xs font-semibold ${PAYER_SOURCE_CLASS_NAMES[payerSource]}`}>
+                      {PAYER_SOURCE_LABELS[payerSource]}
+                    </p>
+                    {payerIdentityLabel ? <p className="mt-1 text-xs text-app-ink-muted">{payerIdentityLabel}</p> : null}
+                    {payment.payer?.bankName ? (
+                      <p className="mt-1 text-xs text-app-ink-muted">{payment.payer.bankName}</p>
+                    ) : null}
+                  </TableCell>
                   <TableCell className="text-xs text-app-ink-muted">{formatDate(payment.createdAt)}</TableCell>
                   <TableCell className="text-right">
-                    {canComplete ? (
-                      <Button
-                        type="button"
-                        size="sm"
-                        className="bg-app-accent text-app-ink hover:bg-app-accent-hover"
-                        disabled={busyOrderId === payment.orderId}
-                        onClick={() => handleManualComplete(payment.orderId)}
-                      >
-                        {busyOrderId === payment.orderId ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : null}
-                        Mở Plus thủ công
-                      </Button>
-                    ) : (
-                      <span className="text-xs text-app-ink-muted">Đã xử lý</span>
-                    )}
+                    <div className="flex justify-end gap-2">
+                      {canComplete ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="bg-app-accent text-app-ink hover:bg-app-accent-hover"
+                          disabled={busyOrderId === payment.orderId}
+                          onClick={() => handleManualComplete(payment.orderId)}
+                        >
+                          {busyOrderId === payment.orderId ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : null}
+                          Mở Plus thủ công
+                        </Button>
+                      ) : null}
+                      {canReconcilePayerSource ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="outline"
+                          className="border-app-line bg-app-bg-subtle text-app-ink hover:bg-app-accent-soft hover:text-app-ink"
+                          disabled={busyOrderId === payment.orderId}
+                          onClick={() => void handleReconcilePayerSource(payment.orderId)}
+                        >
+                          {busyOrderId === payment.orderId ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : null}
+                          Đối chiếu PayOS
+                        </Button>
+                      ) : null}
+                      {!canComplete && !canReconcilePayerSource ? (
+                        <span className="text-xs text-app-ink-muted">Đã xử lý</span>
+                      ) : null}
+                    </div>
                   </TableCell>
                 </TableRow>
               );

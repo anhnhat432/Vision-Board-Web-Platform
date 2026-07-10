@@ -47,6 +47,15 @@ interface MockPayosPaymentOrder {
       webhookCode?: string;
       webhookDescription?: string;
       transactionDateTime?: string;
+      payer?: {
+        classification: "internal" | "external" | "unknown";
+        accountHash?: string;
+        accountLast4?: string;
+        accountNameMasked?: string;
+        bankName?: string;
+        source: "webhook" | "reconciliation";
+        observedAt: Date;
+      };
     };
   };
   saveCalls: number;
@@ -68,6 +77,8 @@ const originalEnv = {
   PAYOS_CLIENT_ID: process.env.PAYOS_CLIENT_ID,
   PAYOS_API_KEY: process.env.PAYOS_API_KEY,
   PAYOS_CHECKSUM_KEY: process.env.PAYOS_CHECKSUM_KEY,
+  PAYMENT_PAYER_HASH_KEY: process.env.PAYMENT_PAYER_HASH_KEY,
+  INTERNAL_PAYER_ACCOUNT_NUMBERS: process.env.INTERNAL_PAYER_ACCOUNT_NUMBERS,
   PLUS_PRICE_VND: process.env.PLUS_PRICE_VND,
 };
 const originalPaymentOrderFindOne = PaymentOrderModel.findOne;
@@ -89,6 +100,8 @@ function configurePayosEnv(): void {
   process.env.PAYOS_CLIENT_ID = "payos_client_id_test";
   process.env.PAYOS_API_KEY = "payos_api_key_test";
   process.env.PAYOS_CHECKSUM_KEY = "payos_checksum_key_test";
+  process.env.PAYMENT_PAYER_HASH_KEY = "payer_hash_key_test";
+  process.env.INTERNAL_PAYER_ACCOUNT_NUMBERS = "0123456789";
   process.env.PLUS_PRICE_VND = "99000";
 }
 
@@ -226,6 +239,17 @@ function mockOrderPersistence(
         webhookCode: $set["metadata.payos.webhookCode"] as string | undefined,
         webhookDescription: $set["metadata.payos.webhookDescription"] as string | undefined,
         transactionDateTime: $set["metadata.payos.transactionDateTime"] as string | undefined,
+        payer: $set["metadata.payos.payer"] as
+          | {
+              classification: "internal" | "external" | "unknown";
+              accountHash?: string;
+              accountLast4?: string;
+              accountNameMasked?: string;
+              bankName?: string;
+              source: "webhook" | "reconciliation";
+              observedAt: Date;
+            }
+          | undefined,
       },
     };
     return order;
@@ -330,13 +354,28 @@ describe("PayOS webhook controller", () => {
     }));
 
     const response = createResponse();
-    await handlePayosWebhook(createRequest(JSON.parse(createWebhookPayload())), response as unknown as Response);
+    await handlePayosWebhook(
+      createRequest(
+        JSON.parse(
+          createWebhookPayload({
+            counterAccountBankName: "MB Bank",
+            counterAccountName: "NGUYEN VAN A",
+            counterAccountNumber: "0123456789",
+          }),
+        ),
+      ),
+      response as unknown as Response,
+    );
 
     assert.equal(response.statusCode, 200);
     assert.equal((response.body as Record<string, unknown>).status, "processed");
     assert.equal(order.status, "completed");
     assert.ok(order.completedAt instanceof Date);
     assert.equal(order.metadata?.payos?.webhookReference, "TF_PAYOS_1");
+    assert.equal(order.metadata?.payos?.payer?.classification, "internal");
+    assert.equal(order.metadata?.payos?.payer?.accountLast4, "6789");
+    assert.equal(order.metadata?.payos?.payer?.accountNameMasked, "N*** V*** A***");
+    assert.equal(JSON.stringify(order.metadata?.payos?.payer).includes("0123456789"), false);
     assert.equal(persistence.claimCalls.length, 2);
     assert.equal(grant.events.length, 1);
     assert.equal(grant.events[0]?.provider, "payos");

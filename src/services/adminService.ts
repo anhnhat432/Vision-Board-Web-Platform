@@ -44,6 +44,7 @@ export interface AdminPaymentOrderSummary {
   completedAt?: string;
   expiresAt?: string;
   updatedAt?: string;
+  payer: AdminPaymentPayerSource | null;
   user: {
     firebaseUid: string;
     email: string;
@@ -51,6 +52,15 @@ export interface AdminPaymentOrderSummary {
     role: "user" | "admin";
     createdAt?: string;
   } | null;
+}
+
+export interface AdminPaymentPayerSource {
+  classification: "internal" | "external" | "unknown";
+  accountLast4?: string;
+  accountNameMasked?: string;
+  bankName?: string;
+  source: "webhook" | "reconciliation";
+  observedAt: string;
 }
 
 export type AdminRefundRequestStatus = "pending" | "completed" | "rejected";
@@ -149,6 +159,11 @@ export interface AdminManualCompletePaymentResult {
   eventStatus: "processed" | "duplicate" | "failed" | "already_completed";
 }
 
+export interface AdminReconcilePaymentOrderPayerSourceResult {
+  orderId: string;
+  payer: AdminPaymentPayerSource;
+}
+
 export function adminGetOverview(): Promise<AdminOverview> {
   return get<AdminOverview>("/admin/overview");
 }
@@ -205,6 +220,14 @@ export function adminCompletePaymentOrderManually(
   return post<AdminManualCompletePaymentResult, AdminManualCompletePaymentPayload>(
     `/admin/billing/payment-orders/${orderId}/complete`,
     payload,
+  );
+}
+
+export function adminReconcilePaymentOrderPayerSource(
+  orderId: string,
+): Promise<AdminReconcilePaymentOrderPayerSourceResult> {
+  return post<AdminReconcilePaymentOrderPayerSourceResult>(
+    `/admin/billing/payment-orders/${orderId}/reconcile-payer-source`,
   );
 }
 

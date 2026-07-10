@@ -11,6 +11,7 @@ import {
   getAdminUserDetail,
   getAdminUsers,
   getReconciliationLastRun,
+  reconcileAdminPaymentOrderPayerSource,
   sendExpiringBillingReminders,
   updateAdminUserRole,
   updateAdminUserSubscription,
@@ -185,6 +186,16 @@ adminRoutes.post(
   }),
 );
 adminRoutes.get("/admin/billing/payment-orders", asyncHandler(requireAdmin), asyncHandler(getAdminPaymentOrders));
+adminRoutes.post(
+  "/admin/billing/payment-orders/:orderId/reconcile-payer-source",
+  auditedAdminAction({
+    action: "reconcilePayosPayerSource",
+    target: "payment_order",
+    getTargetId: (req) => req.params.orderId?.trim().toUpperCase(),
+    validators: [validateOrderIdParam, validateOptionalJsonObjectBody],
+    handler: reconcileAdminPaymentOrderPayerSource,
+  }),
+);
 adminRoutes.post(
   "/admin/cache/clear-role/:uid",
   auditedAdminAction({
