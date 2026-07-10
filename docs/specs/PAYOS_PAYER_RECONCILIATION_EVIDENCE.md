@@ -53,8 +53,8 @@
 
 ## 8. Acceptance Criteria
 
-- [ ] A successful PayOS reconciliation immediately shows a dialog with the safe evidence profile.
-- [ ] A reconciled order can reopen the same evidence profile after reload.
+- [x] A successful PayOS reconciliation immediately shows a dialog with the safe evidence profile.
+- [x] A reconciled order can reopen the same evidence profile after reload.
 - [ ] An account with sufficient length is shown as `123****6789`, never in full.
 - [ ] `internal`, `external`, and `unknown` explain their exact comparison meaning without claiming identity proof.
 - [ ] Old records missing evidence fields remain readable and do not change billing state.
