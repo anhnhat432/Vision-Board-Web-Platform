@@ -26,7 +26,10 @@ type PayosOrderLookup = {
   $or: Array<Record<string, unknown>>;
 };
 
-type PayosPayerMetadata = PaymentPayerSourceSummary & {
+type PayosPayerMetadata = Pick<
+  PaymentPayerSourceSummary,
+  "classification" | "accountLast4" | "accountMasked" | "accountNameMasked" | "bankName"
+> & {
   source: "webhook";
   observedAt: Date;
 };
@@ -35,16 +38,27 @@ function getPayosChecksumKey(): string {
   return process.env.PAYOS_CHECKSUM_KEY?.trim() ?? "";
 }
 
-function createPayosPayerMetadata(data: PayosWebhookData, observedAt: Date): PayosPayerMetadata {
+function createSafeWebhookPayerEvidence(payer: PaymentPayerSourceSummary, observedAt: Date): PayosPayerMetadata {
   return {
-    ...classifyPayosPayerSource({
+    classification: payer.classification,
+    accountLast4: payer.accountLast4,
+    accountMasked: payer.accountMasked,
+    accountNameMasked: payer.accountNameMasked,
+    bankName: payer.bankName,
+    source: "webhook",
+    observedAt,
+  };
+}
+
+function createPayosPayerMetadata(data: PayosWebhookData, observedAt: Date): PayosPayerMetadata {
+  return createSafeWebhookPayerEvidence(
+    classifyPayosPayerSource({
       accountNumber: data.counterAccountNumber,
       accountName: data.counterAccountName,
       bankName: data.counterAccountBankName,
     }),
-    source: "webhook",
     observedAt,
-  };
+  );
 }
 
 function getRawWebhookBody(req: Request): Buffer | string {

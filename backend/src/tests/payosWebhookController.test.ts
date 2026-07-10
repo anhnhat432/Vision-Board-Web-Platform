@@ -49,8 +49,8 @@ interface MockPayosPaymentOrder {
       transactionDateTime?: string;
       payer?: {
         classification: "internal" | "external" | "unknown";
-        accountHash?: string;
         accountLast4?: string;
+        accountMasked?: string;
         accountNameMasked?: string;
         bankName?: string;
         source: "webhook" | "reconciliation";
@@ -242,8 +242,8 @@ function mockOrderPersistence(
         payer: $set["metadata.payos.payer"] as
           | {
               classification: "internal" | "external" | "unknown";
-              accountHash?: string;
               accountLast4?: string;
+              accountMasked?: string;
               accountNameMasked?: string;
               bankName?: string;
               source: "webhook" | "reconciliation";
@@ -342,7 +342,7 @@ describe("PayOS webhook controller", () => {
     assert.equal(persistence.claimCalls.length, 0);
   });
 
-  it("processes a valid success webhook, atomically completes order, grants Plus", async () => {
+  it("persists only safe payer evidence when a valid success webhook completes an order", async () => {
     configurePayosEnv();
     const order = createOrder({ userId: `user_payos_success_${Date.now()}` });
     const persistence = mockOrderPersistence(order);
@@ -372,10 +372,19 @@ describe("PayOS webhook controller", () => {
     assert.equal(order.status, "completed");
     assert.ok(order.completedAt instanceof Date);
     assert.equal(order.metadata?.payos?.webhookReference, "TF_PAYOS_1");
-    assert.equal(order.metadata?.payos?.payer?.classification, "internal");
-    assert.equal(order.metadata?.payos?.payer?.accountLast4, "6789");
-    assert.equal(order.metadata?.payos?.payer?.accountNameMasked, "N*** V*** A***");
-    assert.equal(JSON.stringify(order.metadata?.payos?.payer).includes("0123456789"), false);
+    const payer = order.metadata?.payos?.payer;
+    assert.ok(payer?.observedAt instanceof Date);
+    assert.deepEqual(payer, {
+      classification: "internal",
+      accountLast4: "6789",
+      accountMasked: "012****6789",
+      accountNameMasked: "N*** V*** A***",
+      bankName: "MB Bank",
+      source: "webhook",
+      observedAt: payer.observedAt,
+    });
+    assert.equal(JSON.stringify(payer).includes("0123456789"), false);
+    assert.equal("accountHash" in payer, false);
     assert.equal(persistence.claimCalls.length, 2);
     assert.equal(grant.events.length, 1);
     assert.equal(grant.events[0]?.provider, "payos");
