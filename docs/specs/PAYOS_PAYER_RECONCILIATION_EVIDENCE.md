@@ -59,6 +59,7 @@
 - [ ] `internal`, `external`, and `unknown` explain their exact comparison meaning without claiming identity proof.
 - [ ] Old records missing evidence fields remain readable and do not change billing state.
 - [ ] The protected evidence API remains unavailable to non-admin users and demo mode does not expose the flow.
+- [ ] Production acceptance: the real-mode Render backend has been deployed and an administrator has completed one real PayOS reconciliation. This repository evidence does not mark or claim the flow as production-verified.
 
 ## 9. Verification Plan
 

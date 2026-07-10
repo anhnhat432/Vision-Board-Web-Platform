@@ -3,6 +3,9 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+const RAW_ACCOUNT_SENTINEL = "RAW_ACCOUNT_SENTINEL_012345678901234";
+const RAW_HASH_SENTINEL = "RAW_HASH_SENTINEL_a1b2c3d4e5f6";
+
 const authContextMock = vi.hoisted(() => ({
   useAuthContext: vi.fn(),
 }));
@@ -105,6 +108,9 @@ function seedMocks() {
       transactionDateTime: "2026-07-10T09:30:00.000Z",
       source: "reconciliation",
       observedAt: new Date().toISOString(),
+      // Runtime payloads must never cause unallowlisted raw values to render.
+      accountNumber: RAW_ACCOUNT_SENTINEL,
+      transactionHash: RAW_HASH_SENTINEL,
     },
   });
 }
@@ -165,7 +171,20 @@ describe("AdminPaymentsPage payment dialogs", () => {
           currency: "VND",
           status: "completed",
           provider: "payos",
-          payer: null,
+          payer: {
+            classification: "unknown",
+            accountLast4: "6789",
+            accountNameMasked: "N*** V*** A***",
+            accountMasked: "012****6789",
+            bankName: "MB Bank",
+            transactionReference: "TF_PAYOS_1",
+            transactionDateTime: "2026-07-10T09:30:00.000Z",
+            source: "reconciliation",
+            observedAt: new Date().toISOString(),
+            // Simulates unexpected sensitive fields returned at runtime.
+            accountNumber: RAW_ACCOUNT_SENTINEL,
+            transactionHash: RAW_HASH_SENTINEL,
+          },
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           user: {
@@ -198,12 +217,17 @@ describe("AdminPaymentsPage payment dialogs", () => {
     expect(within(evidenceDialog).getByText("012****6789")).toBeInTheDocument();
     expect(within(evidenceDialog).getByText("MB Bank")).toBeInTheDocument();
     expect(within(evidenceDialog).getByText("TF_PAYOS_1")).toBeInTheDocument();
+    expect(within(evidenceDialog).queryByText(RAW_ACCOUNT_SENTINEL)).not.toBeInTheDocument();
+    expect(within(evidenceDialog).queryByText(RAW_HASH_SENTINEL)).not.toBeInTheDocument();
     expect(
       within(evidenceDialog).getByText(
         "Kết quả chỉ so sánh với danh sách tài khoản nội bộ đã cấu hình, không chứng minh danh tính người chuyển tiền hoặc KYC.",
       ),
     ).toBeInTheDocument();
     expect(screen.getByText("N*** V*** A*** · ****6789")).toBeInTheDocument();
+    const updatedRow = screen.getByText("VBPAY00001").closest("tr");
+    expect(updatedRow).not.toHaveTextContent(RAW_ACCOUNT_SENTINEL);
+    expect(updatedRow).not.toHaveTextContent(RAW_HASH_SENTINEL);
     expect(toastMock.success).toHaveBeenCalledWith("Đối chiếu xong: Nguồn ngoài.", {
       description: "Tài khoản chuyển tiền không nằm trong danh sách nội bộ đã cấu hình.",
     });
