@@ -17,6 +17,7 @@ export interface PaymentPayerSourceSummary {
   classification: PaymentPayerSourceClassification;
   accountHash?: string;
   accountLast4?: string;
+  accountMasked?: string;
   accountNameMasked?: string;
   bankName?: string;
 }
@@ -34,6 +35,11 @@ function normalizeAccountNumber(value: string | null | undefined): string | null
     .toUpperCase()
     .replace(/[^A-Z0-9]/g, "");
   return normalized.length >= 4 ? normalized : null;
+}
+
+function maskAccountNumber(value: string): string {
+  if (value.length < 8) return `****${value.slice(-4)}`;
+  return `${value.slice(0, 3)}****${value.slice(-4)}`;
 }
 
 function maskAccountName(value: string | null | undefined): string | undefined {
@@ -80,6 +86,7 @@ export function classifyPayosPayerSource(
     classification: internalAccountHashes.has(accountHash) ? "internal" : "external",
     accountHash,
     accountLast4: accountNumber.slice(-4),
+    accountMasked: maskAccountNumber(accountNumber),
     accountNameMasked: maskAccountName(input.accountName),
     bankName: normalizeBankName(input.bankName),
   };

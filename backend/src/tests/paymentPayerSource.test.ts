@@ -19,6 +19,7 @@ test("classifies a configured team account without retaining its full number", (
   assert.equal(result.classification, "internal");
   assert.match(result.accountHash ?? "", /^[a-f0-9]{64}$/);
   assert.equal(result.accountLast4, "6789");
+  assert.equal(result.accountMasked, "012****6789");
   assert.equal(result.accountNameMasked, "N*** V*** A***");
   assert.equal(result.bankName, "MB Bank");
   assert.equal(JSON.stringify(result).includes("0123456789"), false);
@@ -33,6 +34,16 @@ test("classifies a non-team payer account as external", () => {
   assert.equal(result.classification, "external");
   assert.equal(result.accountLast4, "3210");
   assert.equal(result.accountNameMasked, "T*** T*** B***");
+});
+
+test("masks short payer accounts without retaining their full number", () => {
+  const result = classifyPayosPayerSource(
+    { accountNumber: "1234567" },
+    { hashKey: "test-hash-key", internalAccountNumbers: "1234567" },
+  );
+
+  assert.equal(result.accountMasked, "****4567");
+  assert.equal(JSON.stringify(result).includes("1234567"), false);
 });
 
 test("keeps the classification unknown when PayOS omits the payer account or the hash key is unavailable", () => {
