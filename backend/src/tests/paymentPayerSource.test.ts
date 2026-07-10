@@ -70,28 +70,38 @@ test("does not expose a four-character payer account", () => {
   assert.equal(JSON.stringify(result).includes(accountNumber), false);
 });
 
-test("keeps the classification unknown when PayOS omits the payer account or the hash key is unavailable", () => {
+test("keeps safe partial evidence when PayOS omits the payer account", () => {
   assert.deepEqual(
     classifyPayosPayerSource(
       { accountNumber: null, accountName: "TRAN THI B", bankName: "ACB" },
       { hashKey: "test-hash-key", internalAccountNumbers: "0123456789" },
     ),
-    { classification: "unknown" },
+    {
+      classification: "unknown",
+      accountNameMasked: "T*** T*** B***",
+      bankName: "ACB",
+    },
+  );
+});
+
+test("keeps masked evidence when the internal-account comparison is not configured", () => {
+  const accountNumber = "9876543210";
+  const missingHashKey = classifyPayosPayerSource(
+    { accountNumber, accountName: "TRAN THI B", bankName: "ACB" },
+    { hashKey: "", internalAccountNumbers: "0123456789" },
+  );
+  const missingInternalAccounts = classifyPayosPayerSource(
+    { accountNumber, accountName: "TRAN THI B", bankName: "ACB" },
+    { hashKey: "test-hash-key", internalAccountNumbers: "" },
   );
 
-  assert.deepEqual(
-    classifyPayosPayerSource(
-      { accountNumber: "9876543210", accountName: "TRAN THI B", bankName: "ACB" },
-      { hashKey: "", internalAccountNumbers: "0123456789" },
-    ),
-    { classification: "unknown" },
-  );
-
-  assert.deepEqual(
-    classifyPayosPayerSource(
-      { accountNumber: "9876543210", accountName: "TRAN THI B", bankName: "ACB" },
-      { hashKey: "test-hash-key", internalAccountNumbers: "" },
-    ),
-    { classification: "unknown" },
-  );
+  for (const result of [missingHashKey, missingInternalAccounts]) {
+    assert.equal(result.classification, "unknown");
+    assert.equal(result.accountHash, undefined);
+    assert.equal(result.accountLast4, "3210");
+    assert.equal(result.accountMasked, "987****3210");
+    assert.equal(result.accountNameMasked, "T*** T*** B***");
+    assert.equal(result.bankName, "ACB");
+    assert.equal(JSON.stringify(result).includes(accountNumber), false);
+  }
 });

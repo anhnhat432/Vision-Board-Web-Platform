@@ -73,11 +73,19 @@ export function classifyPayosPayerSource(
   config: PaymentPayerSourceConfig = getPaymentPayerSourceConfig(),
 ): PaymentPayerSourceSummary {
   const accountNumber = normalizeAccountNumber(input.accountNumber);
+  const accountNameMasked = maskAccountName(input.accountName);
+  const bankName = normalizeBankName(input.bankName);
+  const safeEvidence = {
+    ...(accountNumber?.length && accountNumber.length > 4 ? { accountLast4: accountNumber.slice(-4) } : {}),
+    ...(accountNumber ? { accountMasked: maskAccountNumber(accountNumber) } : {}),
+    ...(accountNameMasked ? { accountNameMasked } : {}),
+    ...(bankName ? { bankName } : {}),
+  };
   const hashKey = config.hashKey?.trim() ?? "";
   const internalAccountNumbers = getInternalAccountNumbers(config.internalAccountNumbers);
 
   if (!accountNumber || !hashKey || internalAccountNumbers.length === 0) {
-    return { classification: "unknown" };
+    return { classification: "unknown", ...safeEvidence };
   }
 
   const accountHash = createAccountHash(accountNumber, hashKey);
@@ -86,9 +94,6 @@ export function classifyPayosPayerSource(
   return {
     classification: internalAccountHashes.has(accountHash) ? "internal" : "external",
     accountHash,
-    ...(accountNumber.length > 4 ? { accountLast4: accountNumber.slice(-4) } : {}),
-    accountMasked: maskAccountNumber(accountNumber),
-    accountNameMasked: maskAccountName(input.accountName),
-    bankName: normalizeBankName(input.bankName),
+    ...safeEvidence,
   };
 }

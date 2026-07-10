@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import {
   type AdminPaymentOrderSummary,
+  type AdminPaymentPayerSource,
   adminCompletePaymentOrderManually,
   adminListPaymentOrders,
   adminReconcilePaymentOrderPayerSource,
@@ -76,6 +77,19 @@ function getPayerIdentityLabel(payment: AdminPaymentOrderSummary): string | null
   ].filter((part): part is string => Boolean(part));
 
   return parts.length > 0 ? parts.join(" · ") : null;
+}
+
+function getPayerEvidenceDescription(payer: AdminPaymentPayerSource): string {
+  if (payer.classification !== "unknown") {
+    return PAYER_SOURCE_RECONCILIATION_DESCRIPTIONS[payer.classification];
+  }
+  if (payer.accountMasked || payer.accountLast4) {
+    return "PayOS đã cung cấp dữ liệu người chuyển, nhưng chưa thể so sánh. Hãy kiểm tra PAYMENT_PAYER_HASH_KEY và INTERNAL_PAYER_ACCOUNT_NUMBERS trên Render.";
+  }
+  if (payer.accountNameMasked || payer.bankName) {
+    return "PayOS chỉ cung cấp một phần thông tin người chuyển nên chưa thể phân loại nguồn tiền.";
+  }
+  return "PayOS không cung cấp thông tin tài khoản người chuyển cho giao dịch này. Khả năng cung cấp phụ thuộc ngân hàng liên kết với PayOS.";
 }
 
 export function AdminPaymentsPage() {
@@ -199,7 +213,7 @@ export function AdminPaymentsPage() {
         setEvidencePayment({ ...reconciledPayment, payer: result.payer });
       }
       toast.success(`Đối chiếu xong: ${PAYER_SOURCE_LABELS[result.payer.classification]}.`, {
-        description: PAYER_SOURCE_RECONCILIATION_DESCRIPTIONS[result.payer.classification],
+        description: getPayerEvidenceDescription(result.payer),
       });
     } catch (err) {
       toast.error(getErrorMessage(err, "Không thể đối chiếu nguồn tiền từ PayOS."));
@@ -228,15 +242,25 @@ export function AdminPaymentsPage() {
   const evidenceRows: Array<[string, string]> = evidencePayer
     ? [
         ["Kết quả", PAYER_SOURCE_LABELS[evidencePayer.classification]],
-        ["Chủ tài khoản", evidencePayer.accountNameMasked ?? "Không có dữ liệu"],
-        [
-          "Số tài khoản",
-          evidencePayer.accountMasked ??
-            (evidencePayer.accountLast4 ? `****${evidencePayer.accountLast4}` : "Không có dữ liệu"),
-        ],
-        ["Ngân hàng", evidencePayer.bankName ?? "Không có dữ liệu"],
-        ["Mã giao dịch PayOS", evidencePayer.transactionReference ?? "Không có dữ liệu"],
-        ["Thời gian PayOS xác nhận", evidencePayer.transactionDateTime ?? "Không có dữ liệu"],
+        ["Dữ liệu người chuyển", getPayerEvidenceDescription(evidencePayer)],
+        ...(evidencePayer.accountNameMasked
+          ? ([["Chủ tài khoản", evidencePayer.accountNameMasked]] as Array<[string, string]>)
+          : []),
+        ...(evidencePayer.accountMasked || evidencePayer.accountLast4
+          ? ([
+              [
+                "Số tài khoản",
+                evidencePayer.accountMasked ?? `****${evidencePayer.accountLast4}`,
+              ],
+            ] as Array<[string, string]>)
+          : []),
+        ...(evidencePayer.bankName ? ([["Ngân hàng", evidencePayer.bankName]] as Array<[string, string]>) : []),
+        ...(evidencePayer.transactionReference
+          ? ([["Mã giao dịch PayOS", evidencePayer.transactionReference]] as Array<[string, string]>)
+          : []),
+        ...(evidencePayer.transactionDateTime
+          ? ([["Thời gian PayOS xác nhận", evidencePayer.transactionDateTime]] as Array<[string, string]>)
+          : []),
       ]
     : [];
 

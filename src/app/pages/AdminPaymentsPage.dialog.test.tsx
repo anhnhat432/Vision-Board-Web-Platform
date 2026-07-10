@@ -234,10 +234,31 @@ describe("AdminPaymentsPage payment dialogs", () => {
 
     await user.click(within(evidenceDialog).getByRole("button", { name: "Đóng" }));
     await user.click(screen.getByRole("button", { name: "Xem chứng cứ" }));
-    expect(await screen.findByRole("dialog", { name: "Hồ sơ đối chiếu PayOS" })).toBeInTheDocument();
+    const reopenedDialog = await screen.findByRole("dialog", { name: "Hồ sơ đối chiếu PayOS" });
+    expect(reopenedDialog).toBeInTheDocument();
+
+    await user.click(within(reopenedDialog).getByRole("button", { name: "Đóng" }));
+    adminServiceMock.adminReconcilePaymentOrderPayerSource.mockResolvedValueOnce({
+      orderId: "VBPAY00001",
+      payer: {
+        classification: "unknown",
+        accountLast4: "6789",
+        source: "reconciliation",
+        observedAt: new Date().toISOString(),
+      },
+    });
+    await user.click(screen.getByRole("button", { name: "Đối chiếu PayOS" }));
+    await waitFor(() => {
+      expect(toastMock.success).toHaveBeenLastCalledWith("Đối chiếu xong: Chưa xác định.", {
+        description:
+          "PayOS đã cung cấp dữ liệu người chuyển, nhưng chưa thể so sánh. Hãy kiểm tra PAYMENT_PAYER_HASH_KEY và INTERNAL_PAYER_ACCOUNT_NUMBERS trên Render.",
+      });
+    });
+    const partialEvidenceDialog = await screen.findByRole("dialog", { name: "Hồ sơ đối chiếu PayOS" });
+    expect(within(partialEvidenceDialog).getByText("****6789")).toBeInTheDocument();
   });
 
-  it("shows fallback values when reopening legacy reconciliation evidence with missing fields", async () => {
+  it("explains when PayOS confirms a transaction without payer-account details", async () => {
     adminServiceMock.adminListPaymentOrders.mockResolvedValue({
       generatedAt: new Date().toISOString(),
       query: "",
@@ -256,6 +277,8 @@ describe("AdminPaymentsPage payment dialogs", () => {
           provider: "payos",
           payer: {
             classification: "unknown",
+            transactionReference: "FT26191MM81T",
+            transactionDateTime: "2026-07-10T21:20:00+07:00",
             source: "reconciliation",
             observedAt: new Date().toISOString(),
           },
@@ -276,7 +299,17 @@ describe("AdminPaymentsPage payment dialogs", () => {
 
     await user.click(await screen.findByRole("button", { name: "Xem chứng cứ" }));
     const evidenceDialog = await screen.findByRole("dialog", { name: "Hồ sơ đối chiếu PayOS" });
-    expect(within(evidenceDialog).getAllByText("Không có dữ liệu")).toHaveLength(5);
+    expect(
+      within(evidenceDialog).getByText(
+        "PayOS không cung cấp thông tin tài khoản người chuyển cho giao dịch này. Khả năng cung cấp phụ thuộc ngân hàng liên kết với PayOS.",
+      ),
+    ).toBeInTheDocument();
+    expect(within(evidenceDialog).getByText("FT26191MM81T")).toBeInTheDocument();
+    expect(within(evidenceDialog).getByText("2026-07-10T21:20:00+07:00")).toBeInTheDocument();
+    expect(within(evidenceDialog).queryByText("Không có dữ liệu")).not.toBeInTheDocument();
+    expect(within(evidenceDialog).queryByText("Chủ tài khoản")).not.toBeInTheDocument();
+    expect(within(evidenceDialog).queryByText("Số tài khoản")).not.toBeInTheDocument();
+    expect(within(evidenceDialog).queryByText("Ngân hàng")).not.toBeInTheDocument();
   });
 
   it("does not expose evidence controls for webhook-only payer data", async () => {

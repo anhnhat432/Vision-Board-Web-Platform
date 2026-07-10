@@ -27,9 +27,11 @@
 
 1. WHEN an administrator successfully reconciles a completed PayOS order, THE system SHALL return and persist a safe evidence profile containing the source classification, masked payer name, masked account number, payer bank name, provider transaction reference, provider transaction time, and observation time.
 2. WHERE the normalized payer account has at least eight characters, THE system SHALL show only the first three and final four characters in the account mask, for example `123****6789`; WHERE it has fewer than eight characters, THE system SHALL show only the final four characters, for example `****6789`.
-3. WHEN the source classification is `internal`, THE UI SHALL state that the account matches the configured internal-account list; WHEN it is `external`, THE UI SHALL state that the account is not in that list; WHEN it is `unknown`, THE UI SHALL state that PayOS did not provide enough data to decide.
+3. WHEN the source classification is `internal`, THE UI SHALL state that the account matches the configured internal-account list; WHEN it is `external`, THE UI SHALL state that the account is not in that list; WHEN it is `unknown`, THE UI SHALL distinguish incomplete comparison configuration from missing PayOS payer data and retain every available safe evidence field.
 4. WHEN an administrator opens evidence for a reconciled order, THE UI SHALL show a non-destructive dialog with the safe profile and the classification explanation.
 5. WHILE older orders lack any newly added evidence field, THE UI SHALL render the available values and identify unavailable fields without retrying or changing the order.
+6. WHEN PayOS returns only part of the payer profile, THE system SHALL retain and show every safe masked field that is available even if the source classification remains `unknown`.
+7. WHEN PayOS omits all counter-account identity fields, THE UI SHALL explain that the provider did not supply payer-account details for that transaction and SHALL NOT fabricate or relabel the receiving account as the payer account.
 
 ## 5. Data, Storage, and Sync Constraints
 
@@ -58,6 +60,8 @@
 - [ ] An account with sufficient length is shown as `123****6789`, never in full.
 - [ ] `internal`, `external`, and `unknown` explain their exact comparison meaning without claiming identity proof.
 - [ ] Old records missing evidence fields remain readable and do not change billing state.
+- [ ] Partial PayOS payer details remain visible in masked form even when comparison configuration is incomplete.
+- [ ] A transaction with no PayOS counter-account details shows a provider-data limitation instead of repeated empty identity rows.
 - [ ] The protected evidence API remains unavailable to non-admin users and demo mode does not expose the flow.
 - [ ] Production acceptance: the real-mode Render backend has been deployed and an administrator has completed one real PayOS reconciliation. This repository evidence does not mark or claim the flow as production-verified.
 
@@ -73,4 +77,5 @@ npm.cmd run build
 
 ## 10. Open Questions / Follow-ups
 
-- None. The agreed account display format is `123****6789` where the account length permits it.
+- The agreed account display format is `123****6789` where the account length permits it.
+- Production source classification also requires `INTERNAL_PAYER_ACCOUNT_NUMBERS` in Render. `PAYMENT_PAYER_HASH_KEY` alone cannot distinguish an internal payer account from an external one.
