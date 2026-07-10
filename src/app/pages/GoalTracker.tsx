@@ -522,7 +522,7 @@ function GoalTrackerContent({
           data-tour-id="goaltracker-hero"
           className="relative grid overflow-hidden rounded-[var(--app-radius-card-lg)] border border-app-line/70 bg-app-surface shadow-[var(--app-shadow-card)] lg:grid-cols-[minmax(0,1fr)_280px] dark:border-app-line/70 dark:bg-app-surface"
         >
-          <div className="min-w-0 px-6 py-7 sm:px-8 sm:py-8 lg:px-9 lg:py-9">
+          <div className="relative min-w-0 bg-gradient-to-br from-app-accent-subtle/25 via-transparent to-transparent px-6 py-7 sm:px-8 sm:py-8 lg:px-9 lg:py-9">
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-app-accent/15 bg-app-accent-soft/45 px-3 py-1 text-[10px] font-extrabold uppercase tracking-[0.14em] text-app-accent">
               <span className="h-1.5 w-1.5 rounded-full bg-app-accent" />
               Core loop
@@ -535,7 +535,7 @@ function GoalTrackerContent({
             </p>
             <div className="mt-6 flex flex-col flex-wrap gap-2.5 sm:flex-row">
               <Button
-                className="inline-flex h-auto items-center justify-center gap-[9px] rounded-full bg-app-accent px-5 py-3 text-[13.5px] font-bold text-white shadow-[var(--app-shadow-sm)] transition-all duration-200 hover:bg-app-accent-hover sm:w-auto"
+                className="inline-flex h-auto items-center justify-center gap-[9px] rounded-full bg-app-accent px-5 py-3 text-[13.5px] font-bold text-white shadow-[var(--app-shadow-sm)] transition-all duration-200 hover:bg-app-accent-hover hover:shadow-[var(--app-shadow-md)] hover:scale-[1.02] motion-reduce:transition-none motion-reduce:hover:scale-100 sm:w-auto"
                 onClick={handleStartGuidedGoalFlow}
               >
                 <Zap className="h-4 w-4" />
@@ -543,7 +543,7 @@ function GoalTrackerContent({
               </Button>
               <Button
                 variant="outline"
-                className="inline-flex h-auto items-center justify-center gap-2 rounded-full border border-app-line bg-app-surface px-5 py-3 text-[13.5px] font-semibold text-app-ink shadow-none transition-all duration-200 hover:bg-app-bg sm:w-auto dark:border-app-line dark:bg-app-surface"
+                className="inline-flex h-auto items-center justify-center gap-2 rounded-full border border-app-line bg-app-surface px-5 py-3 text-[13.5px] font-semibold text-app-ink shadow-none transition-all duration-200 hover:bg-app-bg hover:border-app-accent/10 hover:scale-[1.02] motion-reduce:transition-none motion-reduce:hover:scale-100 sm:w-auto dark:border-app-line dark:bg-app-surface"
                 onClick={handleStartDirectGoalFlow}
               >
                 <Plus className="h-4 w-4" aria-hidden="true" />
@@ -559,7 +559,7 @@ function GoalTrackerContent({
               loading="lazy"
               decoding="async"
             />
-            <div className="absolute inset-0 bg-gradient-to-br from-app-surface/15 via-transparent to-app-accent/10" />
+            <div className="absolute inset-0 bg-gradient-to-br from-app-accent/15 via-transparent to-app-accent/25 lg:bg-gradient-to-l lg:from-transparent lg:via-transparent lg:to-app-surface/40" />
             <div className="absolute bottom-4 left-4 right-4 rounded-2xl border border-white/35 bg-app-surface/88 p-4 shadow-[0_18px_46px_-32px_rgba(23,21,15,0.55)] backdrop-blur-md dark:border-app-line/60 dark:bg-app-surface/90">
               <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-app-accent">Nhịp hôm nay</p>
               <p className="mt-1 text-sm font-semibold leading-snug text-app-ink">
@@ -601,7 +601,7 @@ function GoalTrackerContent({
               placeholder="Tìm theo tên hoặc mô tả mục tiêu…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-[46px] w-full rounded-[13px] border border-app-line bg-app-surface pl-11 pr-4 text-[13.5px] text-app-ink placeholder:text-app-ink-muted focus:outline-none focus:ring-2 focus:ring-app-accent/20 focus:border-app-accent transition-all duration-200"
+              className="h-[50px] w-full rounded-full border border-app-line bg-app-surface pl-12 pr-4 text-[13.5px] text-app-ink shadow-[var(--app-shadow-sm)] placeholder:text-app-ink-muted focus:outline-none focus:ring-2 focus:ring-app-accent/25 focus:border-app-accent transition-all duration-200"
             />
           </div>
 
@@ -624,7 +624,7 @@ function GoalTrackerContent({
                 actions={
                   <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
                     <Button
-                      className="bg-app-accent text-white hover:bg-app-accent-hover font-bold shadow-[var(--app-shadow-sm)] hover:scale-[1.01] transition-all px-6 py-2.5 rounded-lg text-sm"
+                      className="bg-app-accent text-white hover:bg-app-accent-hover font-bold shadow-[var(--app-shadow-sm)] transition-colors px-6 py-2.5 rounded-full text-sm"
                       onClick={handleStartGuidedGoalFlow}
                     >
                       Bắt đầu chu kỳ 12 tuần
@@ -644,19 +644,18 @@ function GoalTrackerContent({
             <div className="space-y-6">
               {displayTwelveWeekGoals.length > 0 && (
                 <div className="space-y-4">
-                  <div className="mx-1 mb-1 mt-2">
-                    <div className="flex items-baseline justify-between gap-3">
-                      <div>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted mb-1">
-                          Chu kỳ 12 tuần
-                        </p>
-                        <h2 className="font-serif text-[20px] font-bold tracking-normal text-app-ink">
-                          Mục tiêu đang chạy
-                        </h2>
-                        <p className="mt-0.5 text-[12.5px] text-app-ink-muted">
-                          {displayTwelveWeekGoals.length} mục tiêu
-                        </p>
-                      </div>
+                  <div className="mx-1 mb-1 mt-2 flex items-center gap-3">
+                    <span className="h-9 w-1.5 shrink-0 rounded-full bg-app-accent" aria-hidden="true" />
+                    <div>
+                      <p className="mb-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-app-accent">
+                        Chu kỳ 12 tuần
+                      </p>
+                      <h2 className="font-serif text-[21px] font-bold tracking-normal text-app-ink">
+                        Mục tiêu đang chạy
+                        <span className="ml-2 align-middle text-[13px] font-semibold text-app-ink-muted">
+                          {displayTwelveWeekGoals.length}
+                        </span>
+                      </h2>
                     </div>
                   </div>
                   <div className="space-y-5">
@@ -682,16 +681,18 @@ function GoalTrackerContent({
 
               {displayStandardGoals.length > 0 && (
                 <div className="space-y-4">
-                  <div className="mx-1 mb-1 mt-2">
-                    <div className="flex items-baseline justify-between gap-3">
-                      <div>
-                        <h2 className="font-serif text-[20px] font-bold tracking-normal text-app-ink">
-                          Mục tiêu thường
-                        </h2>
-                        <p className="mt-0.5 text-[12.5px] text-app-ink-muted">
-                          {displayStandardGoals.length} mục tiêu
-                        </p>
-                      </div>
+                  <div className="mx-1 mb-1 mt-2 flex items-center gap-3">
+                    <span className="h-9 w-1.5 shrink-0 rounded-full bg-app-ink-muted/40" aria-hidden="true" />
+                    <div>
+                      <p className="mb-0.5 text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">
+                        Mục tiêu đơn
+                      </p>
+                      <h2 className="font-serif text-[21px] font-bold tracking-normal text-app-ink">
+                        Mục tiêu thường
+                        <span className="ml-2 align-middle text-[13px] font-semibold text-app-ink-muted">
+                          {displayStandardGoals.length}
+                        </span>
+                      </h2>
                     </div>
                   </div>
                   <div className="space-y-5">
