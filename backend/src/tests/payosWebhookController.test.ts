@@ -229,28 +229,31 @@ function mockOrderPersistence(
     if ($set.completedAt instanceof Date) order.completedAt = $set.completedAt;
     const metadata = order.metadata ?? {};
     const payos = metadata.payos ?? {};
+    const nextPayos = {
+      ...payos,
+      orderCode: $set["metadata.payos.orderCode"] as number | undefined,
+      paymentLinkId: $set["metadata.payos.paymentLinkId"] as string | undefined,
+      webhookReference: $set["metadata.payos.webhookReference"] as string | undefined,
+      webhookCode: $set["metadata.payos.webhookCode"] as string | undefined,
+      transactionDateTime: $set["metadata.payos.transactionDateTime"] as string | undefined,
+      payer: $set["metadata.payos.payer"] as
+        | {
+            classification: "internal" | "external" | "unknown";
+            accountLast4?: string;
+            accountMasked?: string;
+            accountNameMasked?: string;
+            bankName?: string;
+            source: "webhook" | "reconciliation";
+            observedAt: Date;
+          }
+        | undefined,
+    };
+    if ("metadata.payos.webhookDescription" in $set) {
+      nextPayos.webhookDescription = $set["metadata.payos.webhookDescription"] as string | undefined;
+    }
     order.metadata = {
       ...metadata,
-      payos: {
-        ...payos,
-        orderCode: $set["metadata.payos.orderCode"] as number | undefined,
-        paymentLinkId: $set["metadata.payos.paymentLinkId"] as string | undefined,
-        webhookReference: $set["metadata.payos.webhookReference"] as string | undefined,
-        webhookCode: $set["metadata.payos.webhookCode"] as string | undefined,
-        webhookDescription: $set["metadata.payos.webhookDescription"] as string | undefined,
-        transactionDateTime: $set["metadata.payos.transactionDateTime"] as string | undefined,
-        payer: $set["metadata.payos.payer"] as
-          | {
-              classification: "internal" | "external" | "unknown";
-              accountLast4?: string;
-              accountMasked?: string;
-              accountNameMasked?: string;
-              bankName?: string;
-              source: "webhook" | "reconciliation";
-              observedAt: Date;
-            }
-          | undefined,
-      },
+      payos: nextPayos,
     };
     return order;
   };
@@ -361,6 +364,7 @@ describe("PayOS webhook controller", () => {
             counterAccountBankName: "MB Bank",
             counterAccountName: "NGUYEN VAN A",
             counterAccountNumber: "0123456789",
+            desc: "RAW_PAYOS_WEBHOOK_DESCRIPTION_SENTINEL",
           }),
         ),
       ),
@@ -385,6 +389,8 @@ describe("PayOS webhook controller", () => {
     });
     assert.equal(JSON.stringify(payer).includes("0123456789"), false);
     assert.equal("accountHash" in payer, false);
+    assert.equal("webhookDescription" in (order.metadata?.payos ?? {}), false);
+    assert.equal(JSON.stringify(order).includes("RAW_PAYOS_WEBHOOK_DESCRIPTION_SENTINEL"), false);
     assert.equal(persistence.claimCalls.length, 2);
     assert.equal(grant.events.length, 1);
     assert.equal(grant.events[0]?.provider, "payos");

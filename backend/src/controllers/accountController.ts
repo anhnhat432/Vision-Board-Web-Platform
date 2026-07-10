@@ -70,6 +70,72 @@ function deletedCount(result: { deletedCount?: number }): number {
   return result.deletedCount ?? 0;
 }
 
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : null;
+}
+
+function copySafeString(
+  source: Record<string, unknown>,
+  target: Record<string, unknown>,
+  key: string,
+): void {
+  if (typeof source[key] === "string") target[key] = source[key];
+}
+
+function serializePayosPayerForAccountExport(value: unknown): Record<string, unknown> | null {
+  const payer = asRecord(value);
+  if (!payer) return null;
+
+  const safePayer: Record<string, unknown> = {};
+  copySafeString(payer, safePayer, "classification");
+  copySafeString(payer, safePayer, "accountLast4");
+  copySafeString(payer, safePayer, "accountMasked");
+  copySafeString(payer, safePayer, "accountNameMasked");
+  copySafeString(payer, safePayer, "bankName");
+  copySafeString(payer, safePayer, "transactionReference");
+  copySafeString(payer, safePayer, "transactionDateTime");
+  copySafeString(payer, safePayer, "source");
+  if (payer.observedAt instanceof Date || typeof payer.observedAt === "string") {
+    safePayer.observedAt = payer.observedAt;
+  }
+
+  return Object.keys(safePayer).length > 0 ? safePayer : null;
+}
+
+function serializePayosMetadataForAccountExport(value: unknown): Record<string, unknown> | null {
+  const payos = asRecord(value);
+  if (!payos) return null;
+
+  const safePayos: Record<string, unknown> = {};
+  if (typeof payos.orderCode === "number" && Number.isFinite(payos.orderCode)) {
+    safePayos.orderCode = payos.orderCode;
+  }
+  copySafeString(payos, safePayos, "paymentLinkId");
+  copySafeString(payos, safePayos, "status");
+  copySafeString(payos, safePayos, "webhookReference");
+  copySafeString(payos, safePayos, "webhookCode");
+  copySafeString(payos, safePayos, "transactionDateTime");
+
+  const payer = serializePayosPayerForAccountExport(payos.payer);
+  if (payer) safePayos.payer = payer;
+
+  return Object.keys(safePayos).length > 0 ? safePayos : null;
+}
+
+function serializePaymentOrderForAccountExport<T extends { metadata?: unknown }>(paymentOrder: T): T {
+  const metadata = asRecord(paymentOrder.metadata);
+  if (!metadata) return paymentOrder;
+
+  const { payos: _, ...otherMetadata } = metadata;
+  const safePayos = serializePayosMetadataForAccountExport(metadata.payos);
+  const safeMetadata = safePayos ? { ...otherMetadata, payos: safePayos } : otherMetadata;
+
+  return {
+    ...paymentOrder,
+    metadata: Object.keys(safeMetadata).length > 0 ? safeMetadata : undefined,
+  } as T;
+}
+
 async function deleteUserCollections(userId: string): Promise<AccountDeleteCounts> {
   const plans = await PlanModel.find({ userId }).select("_id").lean();
   const planIds = plans.map((plan) => plan._id);
@@ -180,6 +246,7 @@ async function getUserAccountExport(userId: string) {
       VisionBoardModel.find({ userId }).select("-__v").sort({ createdAt: 1 }).lean(),
     ]);
 
+  const exportedPaymentOrders = paymentOrders.map(serializePaymentOrderForAccountExport);
   const planIds = plans.map((plan) => plan._id);
   const paymentOrderIds = paymentOrders
     .map((order) => (typeof order.orderId === "string" ? order.orderId.trim() : ""))
@@ -244,7 +311,7 @@ async function getUserAccountExport(userId: string) {
       weeklyReviews,
       visionBoards,
       orders,
-      paymentOrders,
+      paymentOrders: exportedPaymentOrders,
       billingSubscriptions,
       billingEvents,
       couponUsages,

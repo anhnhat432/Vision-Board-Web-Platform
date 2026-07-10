@@ -266,7 +266,37 @@ function mockAccountExportModels(): void {
     { _id: "order_owner_1", userId: ownerUserId },
   ]);
   mockFindMany(PaymentOrderModel as unknown as MockableModel, "paymentOrders", [
-    { _id: "payment_order_owner_1", userId: ownerUserId, orderId: ownerPaymentOrderId },
+    {
+      _id: "payment_order_owner_1",
+      userId: ownerUserId,
+      orderId: ownerPaymentOrderId,
+      description: ownerPaymentOrderId,
+      metadata: {
+        payos: {
+          orderCode: 123456,
+          paymentLinkId: "payos_link_safe",
+          status: "PAID",
+          webhookReference: "TF_PAYOS_SAFE",
+          webhookCode: "00",
+          transactionDateTime: "2026-07-10 09:00:00",
+          accountHash: "LEGACY_PAYOS_ACCOUNT_HASH_SENTINEL",
+          accountNumber: "998877665544",
+          webhookDescription: "LEGACY_RAW_PAYOS_WEBHOOK_TEXT_SENTINEL",
+          payer: {
+            classification: "internal",
+            accountLast4: "5544",
+            accountMasked: "9988****5544",
+            accountNameMasked: "N*** V*** A***",
+            bankName: "MB Bank",
+            transactionReference: "TF_PAYOS_SAFE",
+            transactionDateTime: "2026-07-10 09:00:00",
+            source: "webhook",
+            observedAt: new Date("2026-07-10T02:00:00.000Z"),
+            accountHash: "LEGACY_NESTED_PAYOS_ACCOUNT_HASH_SENTINEL",
+          },
+        },
+      },
+    },
   ]);
   mockFindMany(PlanModel as unknown as MockableModel, "plans", [
     { _id: ownerPlanId, userId: ownerUserId },
@@ -406,6 +436,34 @@ describe("GET /api/account/export", () => {
     assert.deepEqual(exportFilters.couponUsages, [{ userId: ownerUserId }]);
     assert.deepEqual(exportFilters.refundRequests, [{ userId: ownerUserId }]);
     assert.deepEqual(exportFilters.failedReceiptQueue, [{ orderId: { $in: [ownerPaymentOrderId] } }]);
+    const exportedPaymentOrder = (response.body.data?.data as { paymentOrders?: Array<Record<string, unknown>> })
+      .paymentOrders?.[0];
+    assert.deepEqual(exportedPaymentOrder?.metadata, {
+      payos: {
+        orderCode: 123456,
+        paymentLinkId: "payos_link_safe",
+        status: "PAID",
+        webhookReference: "TF_PAYOS_SAFE",
+        webhookCode: "00",
+        transactionDateTime: "2026-07-10 09:00:00",
+        payer: {
+          classification: "internal",
+          accountLast4: "5544",
+          accountMasked: "9988****5544",
+          accountNameMasked: "N*** V*** A***",
+          bankName: "MB Bank",
+          transactionReference: "TF_PAYOS_SAFE",
+          transactionDateTime: "2026-07-10 09:00:00",
+          source: "webhook",
+          observedAt: "2026-07-10T02:00:00.000Z",
+        },
+      },
+    });
+    assert.equal(JSON.stringify(response.body).includes("LEGACY_PAYOS_ACCOUNT_HASH_SENTINEL"), false);
+    assert.equal(JSON.stringify(response.body).includes("998877665544"), false);
+    assert.equal(JSON.stringify(response.body).includes("LEGACY_RAW_PAYOS_WEBHOOK_TEXT_SENTINEL"), false);
+    assert.equal(JSON.stringify(response.body).includes("9988****5544"), true);
+    assert.equal(exportedPaymentOrder?.description, ownerPaymentOrderId);
   });
 });
 

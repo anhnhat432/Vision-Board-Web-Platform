@@ -63,7 +63,6 @@ export interface PaymentOrderEntity {
       status?: string;
       webhookReference?: string;
       webhookCode?: string;
-      webhookDescription?: string;
       transactionDateTime?: string;
       webhookProcessingEventId?: string;
       webhookProcessingStartedAt?: Date;
@@ -293,7 +292,6 @@ export type PaymentOrderDocument = Document & {
       status?: string;
       webhookReference?: string;
       webhookCode?: string;
-      webhookDescription?: string;
       transactionDateTime?: string;
       webhookProcessingEventId?: string;
       webhookProcessingStartedAt?: Date;
