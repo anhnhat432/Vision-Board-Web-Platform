@@ -38,6 +38,7 @@ function normalizeAccountNumber(value: string | null | undefined): string | null
 }
 
 function maskAccountNumber(value: string): string {
+  if (value.length <= 4) return "****";
   if (value.length < 8) return `****${value.slice(-4)}`;
   return `${value.slice(0, 3)}****${value.slice(-4)}`;
 }
@@ -85,7 +86,7 @@ export function classifyPayosPayerSource(
   return {
     classification: internalAccountHashes.has(accountHash) ? "internal" : "external",
     accountHash,
-    accountLast4: accountNumber.slice(-4),
+    ...(accountNumber.length > 4 ? { accountLast4: accountNumber.slice(-4) } : {}),
     accountMasked: maskAccountNumber(accountNumber),
     accountNameMasked: maskAccountName(input.accountName),
     bankName: normalizeBankName(input.bankName),
