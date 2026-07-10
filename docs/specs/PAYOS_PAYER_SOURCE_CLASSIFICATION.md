@@ -28,7 +28,7 @@
 1. WHEN a verified successful PayOS webhook includes a payer account, THE system SHALL store only a keyed account hash, masked name, last four account characters, payer bank name, source classification, source origin, and observation time.
 2. WHEN the normalized payer account matches a server-configured internal payer account, THE system SHALL classify the order as `internal`; WHEN it does not match, THE system SHALL classify it as `external`.
 3. WHERE PayOS omits payer account data or the payer hash key is not configured, THE system SHALL classify the order as `unknown` and SHALL not infer a result.
-4. WHEN an administrator reconciles a completed PayOS order, THE system SHALL retrieve the historical payment link by stored `paymentLinkId` or `orderCode`, update only payer-source metadata, and return a safe summary.
+4. WHEN an administrator reconciles a completed PayOS order, THE system SHALL retrieve the historical payment link by stored `paymentLinkId` or `orderCode`, match one paid transaction by amount and the local order ID token in its description, update only payer-source metadata, and return a safe summary.
 5. WHILE reconciling an order from another provider, a non-completed order, or a PayOS link without one unambiguous paid transaction, THE system SHALL reject the action without changing the order.
 
 ## 5. Data, Storage, and Sync Constraints

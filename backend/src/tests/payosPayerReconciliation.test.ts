@@ -52,6 +52,43 @@ test("retrieves a completed historical PayOS link and returns only safe payer me
   assert.equal(JSON.stringify(result).includes("0123456789"), false);
 });
 
+test("reconciles a completed PayOS transaction whose transfer description has a PayOS prefix", async () => {
+  const result = await reconcilePayosPayerSource({
+    order: {
+      orderId: "VB59LKRUWQ",
+      amount: 69300,
+      provider: "payos",
+      status: "completed",
+      paymentLinkId: "payos_link_prefixed",
+    },
+    client: {
+      paymentRequests: {
+        async get() {
+          return {
+            status: "PAID",
+            amount: 69300,
+            transactions: [
+              {
+                reference: "TF_PAYOS_PREFIXED",
+                amount: 69300,
+                description: "CS585NU2ZK2 VB59LKRUWQ",
+                counterAccountNumber: "0123456789",
+              },
+            ],
+          };
+        },
+      },
+    },
+    payerSourceConfig: {
+      hashKey: "test-hash-key",
+      internalAccountNumbers: "0123456789",
+    },
+  });
+
+  assert.equal(result.payer.classification, "internal");
+  assert.equal(result.transactionReference, "TF_PAYOS_PREFIXED");
+});
+
 test("rejects incomplete, non-PayOS, or ambiguous historical orders without inferring a payer", async () => {
   const client = {
     paymentRequests: {

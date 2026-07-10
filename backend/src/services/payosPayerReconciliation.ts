@@ -29,6 +29,15 @@ interface PayosHistoricalPaymentLink {
   transactions: PayosHistoricalTransaction[];
 }
 
+function transactionDescriptionContainsOrderId(description: string | null | undefined, orderId: string): boolean {
+  const normalizedOrderId = orderId.trim().toUpperCase();
+  return String(description ?? "")
+    .trim()
+    .toUpperCase()
+    .split(/[^A-Z0-9]+/)
+    .includes(normalizedOrderId);
+}
+
 export interface PayosPaymentLinkClient {
   paymentRequests: {
     get(identifier: string | number): Promise<PayosHistoricalPaymentLink>;
@@ -56,7 +65,8 @@ function selectHistoricalTransaction(
   }
 
   const matchingTransactions = paymentLink.transactions.filter(
-    (transaction) => transaction.amount === order.amount && transaction.description?.trim() === order.orderId,
+    (transaction) =>
+      transaction.amount === order.amount && transactionDescriptionContainsOrderId(transaction.description, order.orderId),
   );
   if (matchingTransactions.length !== 1) {
     throw new Error("PayOS payment link does not have one unambiguous paid transaction.");
