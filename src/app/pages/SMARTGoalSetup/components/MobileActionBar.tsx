@@ -61,7 +61,7 @@ export function MobileActionBar({
         </div>
         <button
           type="button"
-          className="inline-flex min-h-[52px] w-full cursor-pointer items-center justify-center gap-2 rounded-[18px] bg-app-accent px-5 py-3 text-[15px] font-extrabold leading-tight text-white shadow-app-md transition-all duration-200 hover:bg-app-accent-hover active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/35 focus-visible:ring-offset-2"
+          className="inline-flex min-h-[52px] w-full cursor-pointer items-center justify-center gap-2 rounded-card bg-app-accent px-5 py-3 text-[15px] font-extrabold leading-tight text-white shadow-app-md transition-all duration-200 hover:bg-app-accent-hover active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/35 focus-visible:ring-offset-2"
           onClick={onNext}
         >
           {primaryCtaLabel}

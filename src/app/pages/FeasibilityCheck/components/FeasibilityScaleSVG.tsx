@@ -52,7 +52,7 @@ export function FeasibilityScaleSVG({
         style={{
           transform: `rotate(${tiltAngle}deg)`,
           transformOrigin: "150px 60px",
-          transition: "transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)",
+          transition: "transform 0.8s var(--ease-overshoot)",
         }}
       >
         {/* Thanh đòn ngang chính */}
@@ -92,7 +92,7 @@ export function FeasibilityScaleSVG({
           style={{
             transform: `rotate(${-tiltAngle}deg)`,
             transformOrigin: "60px 60px",
-            transition: "transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)",
+            transition: "transform 0.8s var(--ease-overshoot)",
           }}
         >
           {/* Dây treo đĩa trái (tam giác ngược nối xuống đĩa) */}
@@ -163,7 +163,7 @@ export function FeasibilityScaleSVG({
           style={{
             transform: `rotate(${-tiltAngle}deg)`,
             transformOrigin: "240px 60px",
-            transition: "transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)",
+            transition: "transform 0.8s var(--ease-overshoot)",
           }}
         >
           {/* Dây treo đĩa phải */}

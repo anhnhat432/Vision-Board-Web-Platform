@@ -20,7 +20,7 @@ interface SecondaryPanelProps {
  *
  * Usage:
  * <SecondaryPanel
- *   icon={<Lightbulb className="text-violet-500" />}
+ *   icon={<Lightbulb className="text-app-accent" />}
  *   title="Gợi ý điền nhanh"
  *   collapsible
  * >

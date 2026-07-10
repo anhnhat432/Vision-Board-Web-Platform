@@ -433,7 +433,7 @@ export function TwelveWeekTodayTab({
       {/* ── Status chips (nhịp hôm nay) — bổ sung cho bảng tiến độ ở header, không lặp lại ── */}
       <div
         data-testid="today-dashboard-cards"
-        className="order-0 grid grid-cols-2 gap-2 rounded-[18px] border border-app-line/70 bg-app-surface/78 p-1.5 shadow-[var(--app-shadow-sm)] sm:flex sm:flex-wrap sm:gap-2.5"
+        className="order-0 grid grid-cols-2 gap-2 rounded-card border border-app-line/70 bg-app-surface/78 p-1.5 shadow-[var(--app-shadow-sm)] sm:flex sm:flex-wrap sm:gap-2.5"
       >
         <span className="inline-flex min-w-0 items-center gap-2 rounded-full border border-app-accent/20 bg-app-accent-soft/45 px-3 py-1.5 text-[11px] font-semibold text-app-accent sm:px-3.5 sm:text-xs">
           <CheckCircle2 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
@@ -487,7 +487,7 @@ export function TwelveWeekTodayTab({
           <h2 className="m-0 mb-2 font-serif text-xl font-bold tracking-[-0.01em] text-app-ink sm:text-[23px]">
             {nextActionState.title}
           </h2>
-          <p className="m-0 mb-4 max-w-[62ch] text-[13px] leading-[1.6] text-app-ink-soft sm:mb-[18px] sm:text-[13.5px]">
+          <p className="m-0 mb-4 max-w-[62ch] text-[13px] leading-[var(--text-base--line-height)] text-app-ink-soft sm:mb-[18px] sm:text-[13.5px]">
             {nextActionState.description}
           </p>
           {nextActionState.onAction && nextActionState.actionLabel ? (
@@ -688,7 +688,7 @@ export function TwelveWeekTodayTab({
         <div className={fadeInClassName}>
           <Card
             data-tour-id="system-today-queue"
-            className="min-h-[360px] min-w-0 overflow-hidden rounded-[22px] border border-app-line/70 bg-app-surface p-4 shadow-[var(--app-shadow-card)] dark:border-app-line dark:bg-app-surface sm:min-h-[420px] sm:p-6 lg:h-full"
+            className="min-h-[360px] min-w-0 overflow-hidden rounded-card-lg border border-app-line/70 bg-app-surface p-4 shadow-[var(--app-shadow-card)] dark:border-app-line dark:bg-app-surface sm:min-h-[420px] sm:p-6 lg:h-full"
           >
             <CardHeader className="min-w-0 [&>*+*]:mt-0 px-0 pt-0 pb-0">
               <div className="flex min-w-0 flex-wrap items-end justify-between gap-3">
@@ -781,14 +781,14 @@ export function TwelveWeekTodayTab({
                         <Checkbox
                           aria-label={`Hoàn thành việc: ${task.title}`}
                           checked={taskCompleted}
-                          className="mt-0.5 h-11 w-11 shrink-0 rounded-[10px] border-2 sm:h-8 sm:w-8"
+                          className="mt-0.5 h-11 w-11 shrink-0 rounded-input border-2 sm:h-8 sm:w-8"
                           onCheckedChange={(checked) => handleTaskCompletionChange(task.id, checked === true)}
                         />
                         <div className="min-w-0 flex-1">
                           <div className="flex min-w-0 flex-wrap items-start justify-between gap-3">
                             <div className="min-w-0 flex-1">
                               <p
-                                className={`min-w-0 max-w-full break-words text-[14.5px] font-semibold leading-[1.4] ${
+                                className={`min-w-0 max-w-full break-words text-[14.5px] font-semibold leading-[var(--text-xl--line-height)] ${
                                   taskCompleted ? "text-app-ink-muted/50 line-through" : "text-app-ink"
                                 }`}
                               >
@@ -959,7 +959,7 @@ export function TwelveWeekTodayTab({
           className={fadeInClassName}
           style={{ animationDelay: "0.06s" }}
         >
-          <Card className="scroll-mt-24 min-w-0 overflow-hidden rounded-[22px] border border-app-line/70 bg-app-surface p-4 shadow-[var(--app-shadow-card)] dark:border-app-line dark:bg-app-surface sm:p-6 lg:h-full">
+          <Card className="scroll-mt-24 min-w-0 overflow-hidden rounded-card-lg border border-app-line/70 bg-app-surface p-4 shadow-[var(--app-shadow-card)] dark:border-app-line dark:bg-app-surface sm:p-6 lg:h-full">
             <div className="min-w-0">
               <div className="flex min-w-0 items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -1038,12 +1038,12 @@ export function TwelveWeekTodayTab({
                   value={dailyNote}
                   onChange={(event) => onDailyNoteChange(event.target.value)}
                   placeholder="Bài học nhỏ hay cảm nhận hôm nay..."
-                  className="border-app-line dark:border-app-line bg-app-bg-subtle text-app-ink placeholder:text-app-ink-muted/50 focus:border-app-accent/30 focus:ring-1 focus:ring-app-accent/10 rounded-[12px] shadow-none text-[13px] transition-all duration-150 p-[12px_14px] h-[84px] mb-4"
+                  className="border-app-line dark:border-app-line bg-app-bg-subtle text-app-ink placeholder:text-app-ink-muted/50 focus:border-app-accent/30 focus:ring-1 focus:ring-app-accent/10 rounded-control shadow-none text-[13px] transition-all duration-150 p-[12px_14px] h-[84px] mb-4"
                 />
               </div>
               <Button
                 variant="default"
-                className="w-full bg-app-accent hover:bg-app-accent-hover text-white font-bold text-[13.5px] py-[13px] rounded-[12px] mb-[14px] transition-all active:scale-[0.98]"
+                className="w-full bg-app-accent hover:bg-app-accent-hover text-white font-bold text-[13.5px] py-[13px] rounded-control mb-[14px] transition-all active:scale-[0.98]"
                 onClick={handleSaveCheckInClick}
                 disabled={isSavingCheckIn}
                 aria-busy={isSavingCheckIn}
@@ -1088,7 +1088,7 @@ export function TwelveWeekTodayTab({
                 {latestCheckIn && (
                   <div
                     aria-live="polite"
-                    className="rounded-[12px] border border-app-line/60 dark:border-app-line bg-app-bg-subtle p-[13px_16px] text-[11px] text-app-ink-muted leading-relaxed"
+                    className="rounded-control border border-app-line/60 dark:border-app-line bg-app-bg-subtle p-[13px_16px] text-[11px] text-app-ink-muted leading-relaxed"
                   >
                     Gần nhất: {formatCalendarDate(latestCheckIn.date)} ·{" "}
                     <span className="font-semibold text-app-ink">

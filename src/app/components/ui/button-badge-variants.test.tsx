@@ -28,18 +28,20 @@ describe("UI primitive visual hierarchy", () => {
 
   it("applies the four-state interaction pattern across button variants", () => {
     const primary = buttonVariants({ variant: "default" });
-    expect(primary).toContain("hover:bg-app-accent/95");
-    expect(primary).toContain("active:scale-[0.98]");
+    // Hover uses the semantic accent-hover token (not a raw opacity of the accent).
+    expect(primary).toContain("hover:bg-app-accent-hover");
+    expect(primary).toContain("active:scale-[0.97]");
+    // Keyboard focus ring uses the app accent focus-ring token (Execution context).
     expect(primary).toContain("focus-visible:ring-app-accent/40");
     expect(primary).toContain("disabled:opacity-50");
 
     const ghost = buttonVariants({ variant: "ghost" });
     expect(ghost).toContain("hover:bg-app-ink/5");
-    expect(ghost).toContain("active:scale-[0.98]");
+    expect(ghost).toContain("active:scale-[0.97]");
 
     const outline = buttonVariants({ variant: "outline" });
-    expect(outline).toContain("hover:border-app-accent/40");
-    expect(outline).toContain("hover:bg-app-accent-soft/30");
+    expect(outline).toContain("hover:border-app-accent/50");
+    expect(outline).toContain("hover:bg-app-accent-soft/20");
 
     const link = buttonVariants({ variant: "link" });
     expect(link).toContain("text-app-accent");
@@ -80,7 +82,7 @@ describe("UI primitive visual hierarchy", () => {
     expect(document.querySelector('[data-testid="card"]')?.className).toContain("rounded-card");
 
     render(<Input aria-label="Name" />);
-    expect(document.querySelector('[data-slot="input"]')?.className).toContain("rounded-lg");
+    expect(document.querySelector('[data-slot="input"]')?.className).toContain("rounded-xl");
 
     render(
       <Dialog open>

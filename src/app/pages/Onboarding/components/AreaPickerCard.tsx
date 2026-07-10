@@ -37,14 +37,14 @@ export function AreaPickerCard({
         isSelected ? "ring-2" : "hover:-translate-y-0.5",
       )}
       style={{
-        border: `1.5px solid ${isSelected ? accent : "rgba(23,21,15,0.08)"}`,
+        border: `1.5px solid ${isSelected ? accent : "var(--app-line)"}`,
         background: isSelected ? bg : "#fff",
       }}
       aria-pressed={isSelected}
     >
       <div className="flex items-start gap-3">
         <span
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] sm:h-10 sm:w-10 sm:rounded-[11px]"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-input sm:h-10 sm:w-10 sm:rounded-[11px]"
           style={{ background: bg, color: accent }}
         >
           <AreaIcon className="h-4 w-4 sm:h-[18px] sm:w-[18px]" aria-hidden="true" />

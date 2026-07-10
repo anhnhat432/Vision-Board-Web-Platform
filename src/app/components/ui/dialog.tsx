@@ -63,7 +63,7 @@ const DialogContent = React.forwardRef<
         {...props}
       >
         {children}
-        <DialogPrimitive.Close className="ring-offset-background focus:ring-ring data-[state=open]:bg-[color:var(--muted)] data-[state=open]:text-foreground absolute top-4 right-4 inline-flex h-8 w-8 items-center justify-center rounded-[var(--r-control)] text-muted-foreground transition-colors transition-opacity hover:bg-[color:var(--muted)] hover:text-foreground focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
+        <DialogPrimitive.Close className="ring-offset-background focus:ring-app-accent/40 data-[state=open]:bg-[color:var(--muted)] data-[state=open]:text-foreground absolute top-4 right-4 inline-flex h-8 w-8 items-center justify-center rounded-[var(--r-control)] text-muted-foreground transition-colors transition-opacity hover:bg-[color:var(--muted)] hover:text-foreground focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4">
           <XIcon />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>

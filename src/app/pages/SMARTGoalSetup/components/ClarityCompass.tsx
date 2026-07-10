@@ -63,7 +63,7 @@ export function ClarityCompass({
         <button
           type="button"
           onClick={() => onJumpToStep(nextItem.stepKey)}
-          className="mt-4 flex w-full items-start justify-between gap-3 rounded-[18px] border border-app-accent/15 bg-app-accent-subtle/55 p-3 text-left transition-colors hover:bg-app-accent-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/35"
+          className="mt-4 flex w-full items-start justify-between gap-3 rounded-card border border-app-accent/15 bg-app-accent-subtle/55 p-3 text-left transition-colors hover:bg-app-accent-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/35"
         >
           <span>
             <span className="block text-xs font-extrabold text-app-accent">Việc kế tiếp</span>
@@ -72,7 +72,7 @@ export function ClarityCompass({
           </span>
         </button>
       ) : (
-        <div className="mt-4 rounded-[18px] border border-app-accent/15 bg-app-accent-subtle/60 p-3 text-sm font-bold text-app-accent">
+        <div className="mt-4 rounded-card border border-app-accent/15 bg-app-accent-subtle/60 p-3 text-sm font-bold text-app-accent">
           Đủ rõ để chọn bước tiếp theo.
         </div>
       )}

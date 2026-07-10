@@ -85,7 +85,7 @@ export function FeasibilityBalanceScale({ answers }: FeasibilityBalanceScaleProp
   const handleMouseLeave = () => {
     setTiltStyle({
       transform: "perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)",
-      transition: "transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
+      transition: "transform 0.5s var(--ease-overshoot)",
     });
   };
 

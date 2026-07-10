@@ -24,7 +24,7 @@ function PreviewSegment({
   return (
     <motion.span
       className={cn(
-        "inline rounded-[10px] px-1.5 py-0.5 transition-colors duration-300",
+        "inline rounded-input px-1.5 py-0.5 transition-colors duration-300",
         state === "filled"
           ? "bg-app-accent-subtle font-extrabold text-app-accent"
           : "border-b border-dashed border-app-ink-muted/50 text-app-ink-muted",
@@ -100,7 +100,7 @@ export function PolaroidCard({
         </span>
       </div>
 
-      <div className="mt-4 rounded-[22px] border border-app-line bg-app-surface/75 p-4 text-[14px] leading-8 text-app-ink sm:text-[15px] sm:leading-9">
+      <div className="mt-4 rounded-card-lg border border-app-line bg-app-surface/75 p-4 text-[14px] leading-8 text-app-ink sm:text-[15px] sm:leading-9">
         Tôi sẽ{" "}
         <PreviewSegment state={specText ? "filled" : "empty"}>
           {specText || smartGoalStarter.specificGoalStatement || "viết rõ kết quả muốn đạt"}

@@ -314,7 +314,7 @@ export function SmartGoalStepShell({
             </div>
 
             {starterPreview && step.key !== "specific" ? (
-              <p className="max-w-[64ch] rounded-[18px] border border-app-line bg-app-surface/80 px-3.5 py-2.5 text-xs font-medium leading-5 text-app-ink-soft">
+              <p className="max-w-[64ch] rounded-card border border-app-line bg-app-surface/80 px-3.5 py-2.5 text-xs font-medium leading-5 text-app-ink-soft">
                 <span className="font-bold text-app-ink">Gợi ý gần ô nhập: </span>
                 {starterPreview}
               </p>
@@ -341,7 +341,7 @@ export function SmartGoalStepShell({
                     aria-expanded={isMobilePolaroidOpen}
                     aria-controls="smart-mobile-polaroid-preview"
                     onClick={() => setIsMobilePolaroidOpen((isOpen) => !isOpen)}
-                    className="flex min-h-11 w-full items-center justify-between gap-3 rounded-[18px] border border-app-line bg-app-surface/90 px-3.5 py-2.5 text-left text-[12px] font-extrabold leading-tight text-app-ink-soft shadow-none transition-colors hover:bg-app-bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/35"
+                    className="flex min-h-11 w-full items-center justify-between gap-3 rounded-card border border-app-line bg-app-surface/90 px-3.5 py-2.5 text-left text-[12px] font-extrabold leading-tight text-app-ink-soft shadow-none transition-colors hover:bg-app-bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/35"
                   >
                     <span>Bản phác thảo Polaroid</span>
                     <ChevronDown
@@ -396,7 +396,7 @@ export function SmartGoalStepShell({
 
                   {currentStepSoftWarning && (
                     <div
-                      className="rounded-[18px] border border-app-line bg-app-surface/80 p-4 text-app-ink-soft animate-[fade-in_0.3s_ease-out]"
+                      className="rounded-card border border-app-line bg-app-surface/80 p-4 text-app-ink-soft animate-[fade-in_0.3s_ease-out]"
                       role="note"
                     >
                       <div className="flex items-start gap-2.5">
@@ -451,7 +451,7 @@ export function SmartGoalStepShell({
                   whileHover={{ scale: 1.015, y: -2 }}
                   whileTap={{ scale: 0.985 }}
                   type="button"
-                  className="ml-auto inline-flex min-h-12 min-w-[220px] items-center justify-center gap-2 rounded-[18px] bg-app-accent px-6 py-3 text-[14px] font-extrabold leading-tight text-white shadow-app-md transition-all duration-200 cursor-pointer hover:bg-app-accent-hover active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/35 focus-visible:ring-offset-2"
+                  className="ml-auto inline-flex min-h-12 min-w-[220px] items-center justify-center gap-2 rounded-card bg-app-accent px-6 py-3 text-[14px] font-extrabold leading-tight text-white shadow-app-md transition-all duration-200 cursor-pointer hover:bg-app-accent-hover active:scale-[0.97] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/35 focus-visible:ring-offset-2"
                   onClick={handleNextClick}
                 >
                   {primaryCtaLabel}

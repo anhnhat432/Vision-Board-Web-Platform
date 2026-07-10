@@ -24,10 +24,10 @@ const SUPPORT_TOPICS = [
 
 export function ContactPage() {
   return (
-    <article className="mx-auto max-w-4xl space-y-8 px-4 py-8 sm:px-6">
-      <header className="surface-raised overflow-hidden rounded-2xl border border-app-line bg-app-surface p-6 sm:p-7">
+    <article className="mx-auto max-w-4xl space-y-section px-4 py-8 sm:px-6">
+      <header className="surface-raised overflow-hidden rounded-card border border-app-line bg-app-surface p-card-pad sm:p-7">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-app-accent-soft text-app-accent">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-pill bg-app-accent-soft text-app-accent">
             <Mail className="h-6 w-6" />
           </div>
           <div className="min-w-0 space-y-3">
@@ -43,7 +43,7 @@ export function ContactPage() {
             </div>
             <a
               href={SUPPORT_MAILTO}
-              className="inline-flex items-center justify-center gap-2 rounded-[var(--r-control)] bg-app-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40"
+              className="inline-flex items-center justify-center gap-2 rounded-control bg-app-accent px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40"
             >
               <Mail className="h-4 w-4" />
               Gửi email hỗ trợ
@@ -54,7 +54,7 @@ export function ContactPage() {
 
       <section className="grid gap-4 md:grid-cols-3" aria-label="Các nhóm hỗ trợ">
         {SUPPORT_TOPICS.map(({ description, icon: Icon, title }) => (
-          <div key={title} className="surface-raised rounded-2xl border border-app-line bg-app-surface p-5">
+          <div key={title} className="surface-raised rounded-card border border-app-line bg-app-surface p-5">
             <div className="flex h-10 w-10 items-center justify-center rounded-[var(--r-tile)] bg-app-accent-soft text-app-accent">
               <Icon className="h-5 w-5" />
             </div>
@@ -64,7 +64,7 @@ export function ContactPage() {
         ))}
       </section>
 
-      <section className="surface-raised rounded-2xl border border-app-line bg-app-surface p-6 sm:p-7">
+      <section className="surface-raised rounded-card border border-app-line bg-app-surface p-card-pad sm:p-7">
         <div className="grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(240px,320px)]">
           <div className="space-y-3">
             <h2 className="font-serif text-xl font-medium text-app-ink">Thông tin nên gửi kèm</h2>
@@ -75,7 +75,7 @@ export function ContactPage() {
               <li>Ảnh chụp màn hình nếu lỗi chỉ xuất hiện trong một bước cụ thể.</li>
             </ul>
           </div>
-          <aside className="rounded-2xl border border-app-line bg-app-bg p-5">
+          <aside className="rounded-card border border-app-line bg-app-bg p-5">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-[var(--r-tile)] bg-app-accent-soft text-app-accent">
                 <Clock3 className="h-5 w-5" />

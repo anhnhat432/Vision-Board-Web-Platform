@@ -131,13 +131,13 @@ export function GoalCard({
                 </div>
 
                 {system && (
-                  <div className="space-y-3 rounded-[18px] border border-app-line/60 bg-app-surface/72 p-4">
+                  <div className="space-y-3 rounded-card border border-app-line/60 bg-app-surface/72 p-4">
                     <StreakHeatmap system={system} />
                     <WeeklyQuestLine system={system} />
                   </div>
                 )}
 
-                <div className="space-y-2.5 rounded-[18px] border border-app-line/60 bg-app-bg-subtle/45 p-4">
+                <div className="space-y-2.5 rounded-card border border-app-line/60 bg-app-bg-subtle/45 p-4">
                   <div className="flex items-end justify-between gap-3">
                     <div>
                       <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-app-ink-muted">Tiến độ</span>

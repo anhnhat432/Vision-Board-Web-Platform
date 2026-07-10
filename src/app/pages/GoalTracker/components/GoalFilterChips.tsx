@@ -24,7 +24,7 @@ export function GoalFilterChips({ activeFilter, setActiveFilter, counts }: GoalF
   ] as const;
 
   return (
-    <div className="flex gap-2 overflow-x-auto rounded-[18px] border border-app-line/70 bg-app-surface/80 p-1.5 shadow-[var(--app-shadow-sm)] scrollbar-none sm:flex-wrap sm:overflow-visible">
+    <div className="flex gap-2 overflow-x-auto rounded-card border border-app-line/70 bg-app-surface/80 p-1.5 shadow-[var(--app-shadow-sm)] scrollbar-none sm:flex-wrap sm:overflow-visible">
       {chips.map((chip) => {
         const isActive = activeFilter === chip.id;
         return (

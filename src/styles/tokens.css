@@ -2,11 +2,17 @@
  * DESIGN TOKENS — Vision Board Platform
  * 3-layer system: Primitive → Semantic → Component
  *
- * QUYỀN TẮC:
+ * QUY TẮC:
  *   1. Không dùng Primitive token trực tiếp trong component.
  *   2. Luôn dùng Semantic hoặc Component token.
  *   3. warm/* tokens CHỈ dùng trong Reflection context.
  *   4. Không trộn accent và warm trong cùng 1 component.
+ *
+ * HƯỚNG THAM CHIẾU (bất biến 3 lớp):
+ *   - Semantic  → {Primitive, Semantic}
+ *   - Component → {Primitive, Semantic}
+ *   - Không token nào tham chiếu Component (Component là lớp đỉnh).
+ *   - Đồ thị var() acyclic; mọi chuỗi var() kết thúc tại literal Primitive.
  * ============================================================ */
 
 /* ─────────────────────────────────────────────────────────────
@@ -50,7 +56,12 @@
   --color-family-accent: #0e9f8e;
   --color-personal-growth-accent: #ea7a2b;
   --color-leisure-accent: #2ba8e0;
-  /* Status palette */
+  /* Status palette (light) — sắc độ chọn để icon/status affordance ≥3:1 vs nền
+   * liền kề (bg/bg-subtle/surface) và text ≥4.5:1 vs surface:
+   *   green #3A7D5E → 4.27:1 vs bg, 4.91:1 vs surface
+   *   amber #9A6308 → 4.39:1 vs bg, 5.05:1 vs surface (deeper amber giữ ≥4.5:1 vs white)
+   *   red   #B84040 → 4.75:1 vs bg, 5.46:1 vs surface
+   *   blue  #3A6B9E → 4.84:1 vs bg, 5.56:1 vs surface */
   --status-green: #3a7d5e;
   --status-amber: #9a6308; /* deeper amber — ≥4.5:1 vs white */
   --status-red: #b84040;
@@ -70,12 +81,15 @@
   --app-font-mono:
     "JetBrains Mono", ui-monospace, "SFMono-Regular", "Menlo", monospace;
 
-  /* — Spacing & shape — */
-  --app-radius-card: 18px;
+  /* — Spacing & shape —
+   * NGUỒN SỰ THẬT cho radius: mọi bridge/tài liệu (tailwind.config.js…) phải
+   * khớp đúng các giá trị dưới đây, không dùng giá trị lịch sử (card 14px,
+   * control 11px). Đổi giá trị chỉ tại đây, GIỮ NGUYÊN tên token. */
+  --app-radius-card: 18px; /* canonical card radius = 18px (không phải 14px) */
   --app-radius-card-lg: 22px; /* Match reference: hero card 22px */
   --app-radius-pill: 9999px;
   --app-radius-input: 10px;
-  --app-radius-control: 12px;
+  --app-radius-control: 12px; /* canonical control radius = 12px (không phải 11px) */
   --app-section-gap: 24px;
   --app-section-gap-compact: 20px;
   --app-card-padding: 24px;
@@ -87,14 +101,19 @@
   --app-surface: #ffffff; /* card, panel, modal */
   --app-overlay: rgba(26, 26, 26, 0.4); /* modal backdrop */
 
-  /* — Text — */
-  --app-ink: #17150f; /* body, label chính */
-  --app-ink-soft: #5c574b; /* description, sub-label */
-  --app-ink-muted: var(--neutral-500); /* placeholder, caption (AA contrast) */
+  /* — Text —
+   * Sắc độ ink chọn để body text ≥4.5:1 trên mọi nền sáng (bg/bg-subtle/surface):
+   *   ink #17150F   → vs bg 15.87:1 (near-black warm, tối đa độ đọc)
+   *   ink-soft #5C574B → vs bg 6.26:1 (taupe trầm, vẫn ≥4.5:1)
+   *   ink-muted neutral-500 #6B6B6B → vs bg 4.64:1 (mức tối thiểu cho placeholder/caption;
+   *     không làm sáng hơn để giữ ≥4.5:1). */
+  --app-ink: #17150f; /* body, label chính — ≥4.5:1 trên bg/surface */
+  --app-ink-soft: #5c574b; /* description, sub-label — 6.26:1 vs bg */
+  --app-ink-muted: var(--neutral-500); /* placeholder, caption — 4.64:1 vs bg (đủ AA 4.5:1) */
   --app-ink-disabled: var(--neutral-300); /* input/button disabled */
   --app-ink-on-accent: var(--neutral-000); /* text trên nền accent */
   --app-ink-on-warm: var(--neutral-000); /* text trên nền warm */
-  --app-ink-link: #0c5e3a; /* link inline */
+  --app-ink-link: #0c5e3a; /* link inline — 6.82:1 vs bg (forest green trầm) */
 
   /* — Border / Divider — */
   --app-line: rgba(23, 21, 15, 0.08); /* border mặc định (decorative) */
@@ -229,7 +248,12 @@ html.dark {
   --app-warm-strong: #f8d5c2;
   --app-warm-border: #5c3a2e;
 
-  /* — Status (dark mode brighter để ≥4.5:1 vs surface tối) — */
+  /* — Status (dark mode brighter để ≥4.5:1 vs surface tối) —
+   * Đo trên nền tối liền kề (bg #1C1A15 / surface #26231D):
+   *   success #6BB58A → 7.12:1 vs bg, 6.42:1 vs surface
+   *   warning #D9A45A → 7.79:1 vs bg, 7.02:1 vs surface
+   *   error   #E07878 → 5.90:1 vs bg, 5.32:1 vs surface
+   *   info    #7AA8D9 → 6.98:1 vs bg, 6.29:1 vs surface */
   --app-status-success: #6bb58a;
   --app-status-warning: #d9a45a;
   --app-status-error: #e07878;
@@ -247,6 +271,13 @@ html.dark {
     0 16px 40px rgba(0, 0, 0, 0.44), 0 8px 16px rgba(0, 0, 0, 0.24);
 
   --app-shadow-card: 0 14px 32px -20px rgba(0, 0, 0, 0.48);
+
+  /* Focus rail shadow (dark mode) — pure black, opacity cao hơn để nổi trên nền tối */
+  --app-shadow-focus-rail: 0 16px 36px -28px rgba(0, 0, 0, 0.55);
+
+  /* — Glassmorphism (dark mode) — nền kính tối theo surface, border sáng-tinted để nhìn thấy trên nền tối */
+  --app-glass-bg: rgba(38, 35, 29, 0.85);
+  --app-glass-border: rgba(242, 237, 229, 0.1);
 
   /* — Highlight & Energy (dark mode) — sáng hơn để nổi trên nền tối */
   --app-highlight: #c6f24e;
@@ -373,9 +404,6 @@ html.dark {
   --color-app-accent-hover: var(--app-accent-hover);
   --color-app-accent-soft: var(--app-accent-soft);
   --color-app-accent-subtle: var(--app-accent-subtle);
-
-  --color-app-highlight: var(--app-highlight);
-  --color-app-energy: var(--app-energy);
 
   --color-app-highlight: var(--app-highlight);
   --color-app-energy: var(--app-energy);
