@@ -58,7 +58,10 @@ export interface AdminPaymentPayerSource {
   classification: "internal" | "external" | "unknown";
   accountLast4?: string;
   accountNameMasked?: string;
+  accountMasked?: string;
   bankName?: string;
+  transactionReference?: string;
+  transactionDateTime?: string;
   source: "webhook" | "reconciliation";
   observedAt: string;
 }

@@ -31,6 +31,14 @@ import {
   AlertDialogTitle,
 } from "../components/ui/alert-dialog";
 import { Button } from "../components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 import { Textarea } from "../components/ui/textarea";
 
@@ -41,6 +49,12 @@ const PAYER_SOURCE_LABELS = {
   external: "Nguồn ngoài",
   unknown: "Chưa xác định",
 } as const;
+
+const PAYER_SOURCE_RECONCILIATION_DESCRIPTIONS: Record<keyof typeof PAYER_SOURCE_LABELS, string> = {
+  internal: "Tài khoản chuyển tiền trùng danh sách nội bộ đã cấu hình.",
+  external: "Tài khoản chuyển tiền không nằm trong danh sách nội bộ đã cấu hình.",
+  unknown: "PayOS không trả đủ dữ liệu tài khoản để kết luận.",
+};
 
 const PAYER_SOURCE_CLASS_NAMES = {
   internal: "text-amber-700 dark:text-amber-300",
@@ -80,6 +94,7 @@ export function AdminPaymentsPage() {
 
   const [pendingOrderId, setPendingOrderId] = useState<string | null>(null);
   const [manualNote, setManualNote] = useState("Đã đối chiếu giao dịch tiền vào trong cổng thanh toán/app ngân hàng.");
+  const [evidencePayment, setEvidencePayment] = useState<AdminPaymentOrderSummary | null>(null);
 
   const handleSearchChange = useCallback((next: string) => setQuery(next), []);
   useAdminSearch(query, handleSearchChange, "Tìm mã đơn, email, mã giao dịch");
@@ -176,10 +191,16 @@ export function AdminPaymentsPage() {
     setBusyOrderId(orderId);
     try {
       const result = await adminReconcilePaymentOrderPayerSource(orderId);
+      const reconciledPayment = items.find((payment) => payment.orderId === result.orderId);
       setItems((currentItems) =>
         currentItems.map((payment) => (payment.orderId === result.orderId ? { ...payment, payer: result.payer } : payment)),
       );
-      toast.success(`Đã đối chiếu nguồn tiền của đơn ${result.orderId}.`);
+      if (reconciledPayment && result.payer.source === "reconciliation") {
+        setEvidencePayment({ ...reconciledPayment, payer: result.payer });
+      }
+      toast.success(`Đối chiếu xong: ${PAYER_SOURCE_LABELS[result.payer.classification]}.`, {
+        description: PAYER_SOURCE_RECONCILIATION_DESCRIPTIONS[result.payer.classification],
+      });
     } catch (err) {
       toast.error(getErrorMessage(err, "Không thể đối chiếu nguồn tiền từ PayOS."));
     } finally {
@@ -202,6 +223,22 @@ export function AdminPaymentsPage() {
     downloadCsv(`payments-${new Date().toISOString().slice(0, 10)}`, headers, rows);
     toast.success(`Đã xuất ${items.length} đơn thanh toán.`);
   };
+
+  const evidencePayer = evidencePayment?.payer;
+  const evidenceRows: Array<[string, string]> = evidencePayer
+    ? [
+        ["Kết quả", PAYER_SOURCE_LABELS[evidencePayer.classification]],
+        ["Chủ tài khoản", evidencePayer.accountNameMasked ?? "Không có dữ liệu"],
+        [
+          "Số tài khoản",
+          evidencePayer.accountMasked ??
+            (evidencePayer.accountLast4 ? `****${evidencePayer.accountLast4}` : "Không có dữ liệu"),
+        ],
+        ["Ngân hàng", evidencePayer.bankName ?? "Không có dữ liệu"],
+        ["Mã giao dịch PayOS", evidencePayer.transactionReference ?? "Không có dữ liệu"],
+        ["Thời gian PayOS xác nhận", evidencePayer.transactionDateTime ?? "Không có dữ liệu"],
+      ]
+    : [];
 
   return (
     <div className="space-y-6">
@@ -345,6 +382,17 @@ export function AdminPaymentsPage() {
                     {payment.payer?.bankName ? (
                       <p className="mt-1 text-xs text-app-ink-muted">{payment.payer.bankName}</p>
                     ) : null}
+                    {payment.payer?.source === "reconciliation" ? (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="mt-2 border-app-line bg-app-surface text-app-ink hover:bg-app-accent-soft hover:text-app-ink"
+                        onClick={() => setEvidencePayment(payment)}
+                      >
+                        Xem chứng cứ
+                      </Button>
+                    ) : null}
                   </TableCell>
                   <TableCell className="text-xs text-app-ink-muted">{formatDate(payment.createdAt)}</TableCell>
                   <TableCell className="text-right">
@@ -427,6 +475,31 @@ export function AdminPaymentsPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={evidencePayment !== null} onOpenChange={(open) => !open && setEvidencePayment(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Hồ sơ đối chiếu PayOS</DialogTitle>
+            <DialogDescription>
+              Kết quả chỉ so sánh với danh sách tài khoản nội bộ đã cấu hình, không chứng minh danh tính người chuyển tiền
+              hoặc KYC.
+            </DialogDescription>
+          </DialogHeader>
+          <dl className="divide-y divide-app-line rounded-[var(--r-card)] border border-app-line bg-app-bg-subtle">
+            {evidenceRows.map(([label, value]) => (
+              <div key={label} className="grid gap-1 px-4 py-3 sm:grid-cols-[11rem_1fr] sm:gap-4">
+                <dt className="text-sm font-medium text-app-ink-muted">{label}</dt>
+                <dd className="break-words text-sm text-app-ink">{value}</dd>
+              </div>
+            ))}
+          </dl>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setEvidencePayment(null)}>
+              Đóng
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

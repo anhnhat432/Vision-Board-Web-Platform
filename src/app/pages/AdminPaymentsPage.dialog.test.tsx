@@ -13,8 +13,17 @@ const adminServiceMock = vi.hoisted(() => ({
   adminReconcilePaymentOrderPayerSource: vi.fn(),
 }));
 
+const toastMock = vi.hoisted(() => ({
+  error: vi.fn(),
+  success: vi.fn(),
+}));
+
 vi.mock("@/lib/auth/AuthContext", () => ({
   useAuthContext: authContextMock.useAuthContext,
+}));
+
+vi.mock("sonner", () => ({
+  toast: toastMock,
 }));
 
 vi.mock("@/services/adminService", () => ({
@@ -24,6 +33,8 @@ vi.mock("@/services/adminService", () => ({
 }));
 
 function seedMocks() {
+  toastMock.error.mockReset();
+  toastMock.success.mockReset();
   authContextMock.useAuthContext.mockReturnValue({
     authLoading: false,
     refreshUserProfile: vi.fn(),
@@ -88,14 +99,17 @@ function seedMocks() {
       classification: "external",
       accountLast4: "6789",
       accountNameMasked: "N*** V*** A***",
+      accountMasked: "012****6789",
       bankName: "MB Bank",
+      transactionReference: "TF_PAYOS_1",
+      transactionDateTime: "2026-07-10T09:30:00.000Z",
       source: "reconciliation",
       observedAt: new Date().toISOString(),
     },
   });
 }
 
-describe("AdminPaymentsPage manual-complete dialog", () => {
+describe("AdminPaymentsPage payment dialogs", () => {
   beforeEach(() => {
     vi.resetModules();
     seedMocks();
@@ -134,7 +148,7 @@ describe("AdminPaymentsPage manual-complete dialog", () => {
     expect(promptSpy).not.toHaveBeenCalled();
   });
 
-  it("shows an unknown PayOS source and lets an admin reconcile the completed historical order", async () => {
+  it("opens and reopens safe PayOS evidence after reconciling a completed historical order", async () => {
     adminServiceMock.adminListPaymentOrders.mockResolvedValue({
       generatedAt: new Date().toISOString(),
       query: "",
@@ -179,7 +193,106 @@ describe("AdminPaymentsPage manual-complete dialog", () => {
     await waitFor(() => {
       expect(adminServiceMock.adminReconcilePaymentOrderPayerSource).toHaveBeenCalledWith("VBPAY00001");
     });
-    expect(await screen.findByText("Nguồn ngoài")).toBeInTheDocument();
+    const evidenceDialog = await screen.findByRole("dialog", { name: "Hồ sơ đối chiếu PayOS" });
+    expect(within(evidenceDialog).getByText("Nguồn ngoài")).toBeInTheDocument();
+    expect(within(evidenceDialog).getByText("012****6789")).toBeInTheDocument();
+    expect(within(evidenceDialog).getByText("MB Bank")).toBeInTheDocument();
+    expect(within(evidenceDialog).getByText("TF_PAYOS_1")).toBeInTheDocument();
+    expect(
+      within(evidenceDialog).getByText(
+        "Kết quả chỉ so sánh với danh sách tài khoản nội bộ đã cấu hình, không chứng minh danh tính người chuyển tiền hoặc KYC.",
+      ),
+    ).toBeInTheDocument();
     expect(screen.getByText("N*** V*** A*** · ****6789")).toBeInTheDocument();
+    expect(toastMock.success).toHaveBeenCalledWith("Đối chiếu xong: Nguồn ngoài.", {
+      description: "Tài khoản chuyển tiền không nằm trong danh sách nội bộ đã cấu hình.",
+    });
+
+    await user.click(within(evidenceDialog).getByRole("button", { name: "Đóng" }));
+    await user.click(screen.getByRole("button", { name: "Xem chứng cứ" }));
+    expect(await screen.findByRole("dialog", { name: "Hồ sơ đối chiếu PayOS" })).toBeInTheDocument();
+  });
+
+  it("shows fallback values when reopening legacy reconciliation evidence with missing fields", async () => {
+    adminServiceMock.adminListPaymentOrders.mockResolvedValue({
+      generatedAt: new Date().toISOString(),
+      query: "",
+      status: "all",
+      limit: 50,
+      total: 1,
+      items: [
+        {
+          orderId: "VBPAY_LEGACY",
+          userId: "user_legacy",
+          planCode: "PLUS",
+          billingCycle: "twelve_week",
+          amount: 99000,
+          currency: "VND",
+          status: "completed",
+          provider: "payos",
+          payer: {
+            classification: "unknown",
+            source: "reconciliation",
+            observedAt: new Date().toISOString(),
+          },
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          user: null,
+        },
+      ],
+    });
+    const user = userEvent.setup();
+    const { AdminPaymentsPage } = await import("./AdminPaymentsPage");
+
+    render(
+      <MemoryRouter>
+        <AdminPaymentsPage />
+      </MemoryRouter>,
+    );
+
+    await user.click(await screen.findByRole("button", { name: "Xem chứng cứ" }));
+    const evidenceDialog = await screen.findByRole("dialog", { name: "Hồ sơ đối chiếu PayOS" });
+    expect(within(evidenceDialog).getAllByText("Không có dữ liệu")).toHaveLength(5);
+  });
+
+  it("does not expose evidence controls for webhook-only payer data", async () => {
+    adminServiceMock.adminListPaymentOrders.mockResolvedValue({
+      generatedAt: new Date().toISOString(),
+      query: "",
+      status: "all",
+      limit: 50,
+      total: 1,
+      items: [
+        {
+          orderId: "VBPAY_WEBHOOK",
+          userId: "user_webhook",
+          planCode: "PLUS",
+          billingCycle: "twelve_week",
+          amount: 99000,
+          currency: "VND",
+          status: "completed",
+          provider: "payos",
+          payer: {
+            classification: "external",
+            accountLast4: "6789",
+            source: "webhook",
+            observedAt: new Date().toISOString(),
+          },
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          user: null,
+        },
+      ],
+    });
+    const { AdminPaymentsPage } = await import("./AdminPaymentsPage");
+
+    render(
+      <MemoryRouter>
+        <AdminPaymentsPage />
+      </MemoryRouter>,
+    );
+
+    await screen.findByText("Nguồn ngoài");
+    expect(screen.queryByRole("button", { name: "Xem chứng cứ" })).not.toBeInTheDocument();
   });
 });
