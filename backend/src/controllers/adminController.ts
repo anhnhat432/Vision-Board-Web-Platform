@@ -83,8 +83,11 @@ interface LeanPaymentOrderSummary {
 interface AdminPaymentPayerSummary {
   classification: PaymentPayerSourceClassification;
   accountLast4?: string;
+  accountMasked?: string;
   accountNameMasked?: string;
   bankName?: string;
+  transactionReference?: string;
+  transactionDateTime?: string;
   source: "webhook" | "reconciliation";
   observedAt: Date;
 }
@@ -174,10 +177,30 @@ function serializePaymentPayer(payer: AdminPaymentPayerSummary | undefined) {
   return {
     classification: payer.classification,
     accountLast4: payer.accountLast4,
+    accountMasked: payer.accountMasked,
     accountNameMasked: payer.accountNameMasked,
     bankName: payer.bankName,
+    transactionReference: payer.transactionReference,
+    transactionDateTime: payer.transactionDateTime,
     source: payer.source,
     observedAt: payer.observedAt,
+  };
+}
+
+function createReconciledPaymentPayerEvidence(
+  result: payosPayerReconciliation.PayosPayerReconciliationResult,
+  observedAt: Date,
+): AdminPaymentPayerSummary {
+  return {
+    classification: result.payer.classification,
+    accountLast4: result.payer.accountLast4,
+    accountMasked: result.payer.accountMasked,
+    accountNameMasked: result.payer.accountNameMasked,
+    bankName: result.payer.bankName,
+    transactionReference: result.transactionReference,
+    transactionDateTime: result.transactionDateTime,
+    source: "reconciliation",
+    observedAt,
   };
 }
 
@@ -438,15 +461,12 @@ export async function reconcileAdminPaymentOrderPayerSource(req: Request, res: R
     }
 
     const observedAt = new Date();
+    const payer = createReconciledPaymentPayerEvidence(result, observedAt);
     order.metadata = {
       ...(order.metadata ?? {}),
       payos: {
         ...(payos ?? {}),
-        payer: {
-          ...result.payer,
-          source: "reconciliation",
-          observedAt,
-        },
+        payer,
       },
     };
     await order.save();
@@ -455,11 +475,7 @@ export async function reconcileAdminPaymentOrderPayerSource(req: Request, res: R
       successResponse(
         {
           orderId: order.orderId,
-          payer: serializePaymentPayer({
-            ...result.payer,
-            source: "reconciliation",
-            observedAt,
-          }),
+          payer: serializePaymentPayer(payer),
         },
         "PayOS payer source reconciled.",
       ),

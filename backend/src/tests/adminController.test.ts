@@ -41,6 +41,8 @@ interface MockPaymentOrder {
   metadata?: Record<string, unknown>;
   purpose?: "plus_subscription" | "physical_order";
   completedAt?: Date;
+  receiptSentAt?: Date;
+  receiptLastError?: string;
   cassoTransactionId?: string;
   manualCompletedBy?: string;
   manualCompletedAt?: Date;
@@ -113,9 +115,16 @@ describe("admin payment recovery", () => {
     const order = createMockPaymentOrder({
       status: "completed",
       provider: "payos",
+      amount: 2000,
+      receiptSentAt: new Date("2026-07-10T09:30:00.000Z"),
+      receiptLastError: "previous receipt error",
       metadata: { payos: { paymentLinkId: "payos_link_123", orderCode: 10_000_000_001 } },
     });
     const originalStatus = order.status;
+    const originalAmount = order.amount;
+    const originalProvider = order.provider;
+    const originalReceiptSentAt = order.receiptSentAt;
+    const originalReceiptLastError = order.receiptLastError;
     const originalSaveCalls = order.saveCalls;
 
     (PaymentOrderModel as unknown as MockableModel).findOne = async () => order;
@@ -125,6 +134,7 @@ describe("admin payment recovery", () => {
         classification: "external" as const,
         accountHash: "a".repeat(64),
         accountLast4: "6789",
+        accountMasked: "012****6789",
         accountNameMasked: "N*** V*** A***",
         bankName: "MB Bank",
       },
@@ -143,17 +153,38 @@ describe("admin payment recovery", () => {
     assert.equal(recorder.getError(), undefined);
     assert.equal(response.statusCode, 200);
     assert.equal(order.status, originalStatus);
+    assert.equal(order.amount, originalAmount);
+    assert.equal(order.provider, originalProvider);
+    assert.equal(order.receiptSentAt, originalReceiptSentAt);
+    assert.equal(order.receiptLastError, originalReceiptLastError);
     assert.equal(order.saveCalls, originalSaveCalls + 1);
-    assert.deepEqual((order.metadata?.payos as Record<string, unknown>).payer, {
+    const savedPayer = (order.metadata?.payos as { payer: { observedAt: Date } }).payer;
+    assert.ok(savedPayer.observedAt instanceof Date);
+    assert.deepEqual(savedPayer, {
       classification: "external",
-      accountHash: "a".repeat(64),
       accountLast4: "6789",
+      accountMasked: "012****6789",
       accountNameMasked: "N*** V*** A***",
       bankName: "MB Bank",
+      transactionReference: "TF_PAYOS_1",
+      transactionDateTime: "2026-07-10 10:00:00",
       source: "reconciliation",
-      observedAt: (order.metadata?.payos as { payer: { observedAt: Date } }).payer.observedAt,
+      observedAt: savedPayer.observedAt,
     });
-    assert.equal((response.payload as { data: { payer: { accountLast4: string } } }).data.payer.accountLast4, "6789");
+    assert.equal(JSON.stringify(order.metadata).includes("0123456789"), false);
+    assert.equal(JSON.stringify(order.metadata).includes("a".repeat(64)), false);
+
+    assert.deepEqual((response.payload as { data: { payer: unknown } }).data.payer, {
+      classification: "external",
+      accountLast4: "6789",
+      accountMasked: "012****6789",
+      accountNameMasked: "N*** V*** A***",
+      bankName: "MB Bank",
+      transactionReference: "TF_PAYOS_1",
+      transactionDateTime: "2026-07-10 10:00:00",
+      source: "reconciliation",
+      observedAt: savedPayer.observedAt,
+    });
   });
 
   it("completes a payment order manually and stores audit metadata", async () => {

@@ -69,10 +69,12 @@ export interface PaymentOrderEntity {
       webhookProcessingStartedAt?: Date;
       payer?: {
         classification: PaymentPayerSourceClassification;
-        accountHash?: string;
         accountLast4?: string;
+        accountMasked?: string;
         accountNameMasked?: string;
         bankName?: string;
+        transactionReference?: string;
+        transactionDateTime?: string;
         source: "webhook" | "reconciliation";
         observedAt: Date;
       };
@@ -297,10 +299,12 @@ export type PaymentOrderDocument = Document & {
       webhookProcessingStartedAt?: Date;
       payer?: {
         classification: PaymentPayerSourceClassification;
-        accountHash?: string;
         accountLast4?: string;
+        accountMasked?: string;
         accountNameMasked?: string;
         bankName?: string;
+        transactionReference?: string;
+        transactionDateTime?: string;
         source: "webhook" | "reconciliation";
         observedAt: Date;
       };
