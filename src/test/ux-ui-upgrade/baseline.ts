@@ -1,29 +1,49 @@
 /**
- * Baseline snapshot cho đợt nâng cấp UX/UI (task 1.2).
+ * Baseline snapshot cho đợt nâng cấp UX/UI (task 1.2) và `global-ui-upgrade`
+ * (task 1.1).
  *
  * Mục tiêu: chụp lại trạng thái HIỆN TẠI (trước khi tinh chỉnh `Token_Value`)
- * để các task sau (Property 1 — task 2.3, và Requirement 9.2 — task 9.2) đối
- * chiếu "không hồi quy":
+ * để các task sau đối chiếu "không hồi quy":
  *
  *   1. `tokenNames`        — toàn bộ `Token_Name` Semantic + Component đang có
  *                            trong `src/styles/tokens.css` (đọc qua token-parser).
- *                            Dùng để khẳng định tập token sau nâng cấp là SUPERSET.
+ *                            Dùng để khẳng định tập token sau nâng cấp là SUPERSET
+ *                            (Property 1 — ux-ui-upgrade task 2.3, và
+ *                            global-ui-upgrade Property 1 — task 2.2).
  *   2. `appModeBranching`  — chữ ký nhánh `isRealMode()` / `isDemoMode()` (và các
  *                            hàm quyết định mode) trong `src/app/utils/app-mode.ts`.
  *                            Dùng để khẳng định hành vi phân nhánh real/demo giữ
- *                            nguyên sau đợt nâng cấp.
+ *                            nguyên sau đợt nâng cấp (Requirement 9.2).
+ *   3. `storageKeys`       — toàn bộ tên storage key production quan sát tĩnh được
+ *                            từ `src/**` (re-derive qua `storage-keys-scan.ts`).
+ *                            Dùng để khẳng định tập storage key sau nâng cấp là
+ *                            SUPERSET của baseline — không đổi tên, không xóa key
+ *                            (global-ui-upgrade Property 11 — task 1.2,
+ *                            Requirement 9.4).
+ *
+ * Nguyên tắc task 1.1: KHÔNG đổi tên bất kỳ Design_Token hay storage key nào;
+ * baseline chỉ GHI NHẬN trạng thái hiện tại làm mốc bất biến. Module này TÁI SỬ
+ * DỤNG hạ tầng scan có sẵn (`token-parser.ts`, `storage-keys-scan.ts`) thay vì
+ * dựng công cụ mới, và persist storage-key baseline qua `storage-keys-scan.ts`
+ * để giữ MỘT nguồn sự thật cho tập storage key.
  *
  * Module THUẦN, chỉ ĐỌC file ở test-time và (khi được gọi tường minh) GHI snapshot
  * JSON. KHÔNG đụng product code, route, storage hay giá trị token.
  *
  * Tham chiếu Data Models trong design.md → `UpgradeBaseline`.
  *
- * _Requirements: 1.1, 9.2_
+ * _Requirements: 1.1, 1.3, 9.2, 9.4_
  */
 
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  collectStorageKeys,
+  readStorageKeysBaseline,
+  type StorageKeysBaselineSnapshot,
+  writeStorageKeysBaseline,
+} from "./storage-keys-scan";
 import { loadTokenSet, parseTokens, type TokenSet } from "./token-parser";
 
 // ─────────────────────────────────────────────────────────────
@@ -35,6 +55,11 @@ export interface UpgradeBaseline {
   tokenNames: ReadonlySet<string>;
   /** Chữ ký nhánh isRealMode()/isDemoMode() (để so khớp Requirement 9.2). */
   appModeBranching: ReadonlySet<string>;
+  /**
+   * Tên storage key production trước nâng cấp (để so khớp Requirement 9.4 —
+   * global-ui-upgrade Property 11). Re-derive qua `storage-keys-scan.ts`.
+   */
+  storageKeys: ReadonlySet<string>;
 }
 
 /** Hình dạng JSON snapshot persist trên đĩa. */
@@ -47,6 +72,19 @@ export interface UpgradeBaselineSnapshot {
   tokenNames: string[];
   /** Chữ ký nhánh app-mode, sort tăng dần. */
   appModeBranching: string[];
+}
+
+/**
+ * Baseline hợp nhất cho `global-ui-upgrade` — gộp mốc bất biến của cả hai bề
+ * mặt kiểm chứng (token names cho Property 1, storage keys cho Property 11) đọc
+ * từ hai snapshot đã commit. Đây là điểm truy cập DUY NHẤT mà các property test
+ * global-ui-upgrade nên dùng để lấy mốc superset.
+ */
+export interface UnifiedBaselineSnapshot {
+  /** Snapshot tên token + chữ ký app-mode (`token-names.baseline.json`). */
+  tokens: UpgradeBaselineSnapshot;
+  /** Snapshot tập storage key (`storage-keys.baseline.json`). */
+  storageKeys: StorageKeysBaselineSnapshot;
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -193,6 +231,19 @@ export function captureAppModeBranching(repoRoot: string = DEFAULT_REPO_ROOT): S
 }
 
 // ─────────────────────────────────────────────────────────────
+// Storage keys (re-derive qua storage-keys-scan — MỘT nguồn sự thật)
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * Chụp tập tên storage key production hiện có bằng cách tái sử dụng
+ * `collectStorageKeys()` từ `storage-keys-scan.ts` (3 pattern: call site, const
+ * literal, named-export array/record). KHÔNG đổi tên/khóa nào — chỉ ghi nhận.
+ */
+export function captureStorageKeys(repoRoot: string = DEFAULT_REPO_ROOT): Set<string> {
+  return collectStorageKeys({ repoRoot });
+}
+
+// ─────────────────────────────────────────────────────────────
 // Capture baseline + persist snapshot
 // ─────────────────────────────────────────────────────────────
 
@@ -201,6 +252,7 @@ export function captureBaseline(repoRoot: string = DEFAULT_REPO_ROOT): UpgradeBa
   return {
     tokenNames: captureTokenNames(repoRoot),
     appModeBranching: captureAppModeBranching(repoRoot),
+    storageKeys: captureStorageKeys(repoRoot),
   };
 }
 
@@ -233,4 +285,37 @@ export function writeBaselineSnapshot(repoRoot: string = DEFAULT_REPO_ROOT): Upg
   mkdirSync(path.dirname(outPath), { recursive: true });
   writeFileSync(outPath, `${JSON.stringify(snapshot, null, 2)}\n`, "utf8");
   return snapshot;
+}
+
+// ─────────────────────────────────────────────────────────────
+// Baseline hợp nhất cho global-ui-upgrade (token names + storage keys)
+// ─────────────────────────────────────────────────────────────
+
+/**
+ * Đọc baseline hợp nhất đã commit cho `global-ui-upgrade`: gộp snapshot tên
+ * token (`token-names.baseline.json`) và snapshot storage key
+ * (`storage-keys.baseline.json`). Đây là mốc bất biến cho superset check của
+ * Property 1 (token names) và Property 11 (storage keys). Ném lỗi nếu một trong
+ * hai snapshot chưa tồn tại.
+ */
+export function readUnifiedBaseline(repoRoot: string = DEFAULT_REPO_ROOT): UnifiedBaselineSnapshot {
+  return {
+    tokens: readBaselineSnapshot(repoRoot),
+    storageKeys: readStorageKeysBaseline(repoRoot),
+  };
+}
+
+/**
+ * Ghi CẢ HAI snapshot baseline (token names + storage keys) từ trạng thái hiện
+ * tại của repo. Chỉ nên gọi MỘT LẦN khi cần tạo/regenerate mốc baseline có chủ
+ * ý (task 1.1). Trả về baseline hợp nhất đã ghi.
+ *
+ * Lưu ý: hàm tái sử dụng `writeStorageKeysBaseline()` để giữ MỘT nguồn sự thật
+ * cho tập storage key (`storage-keys.baseline.json`), tránh nhân bản dữ liệu.
+ */
+export function writeUnifiedBaseline(repoRoot: string = DEFAULT_REPO_ROOT): UnifiedBaselineSnapshot {
+  return {
+    tokens: writeBaselineSnapshot(repoRoot),
+    storageKeys: writeStorageKeysBaseline(repoRoot),
+  };
 }

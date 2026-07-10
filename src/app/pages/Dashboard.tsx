@@ -315,11 +315,11 @@ export function Dashboard() {
       <div className="min-h-screen bg-app-bg text-app-ink">
         <div className="mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
           <div className="space-y-6">
-            <Skeleton className="h-14 rounded-[18px] bg-app-surface" />
-            <Skeleton className="h-56 rounded-[18px] bg-app-surface" />
+            <Skeleton className="h-14 rounded-card bg-app-surface" />
+            <Skeleton className="h-56 rounded-card bg-app-surface" />
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              <Skeleton className="h-48 rounded-[18px] bg-app-surface lg:col-span-2" />
-              <Skeleton className="h-48 rounded-[18px] bg-app-surface" />
+              <Skeleton className="h-48 rounded-card bg-app-surface lg:col-span-2" />
+              <Skeleton className="h-48 rounded-card bg-app-surface" />
             </div>
           </div>
         </div>
@@ -1017,7 +1017,7 @@ function NextBestAction({ data }: { data: DashboardData }) {
 
   return (
     <section
-      className={`flex flex-col gap-4 rounded-[18px] border p-4.5 px-5 sm:flex-row sm:items-center sm:justify-between ${toneStyles.card} select-none`}
+      className={`flex flex-col gap-4 rounded-card border p-4.5 px-5 sm:flex-row sm:items-center sm:justify-between ${toneStyles.card} select-none`}
       aria-label="Hành động đề xuất tiếp theo"
     >
       <div className="flex items-center gap-3.5">
@@ -1160,12 +1160,12 @@ function DashboardActiveLayout({
     ),
     twelve_week_trend: shouldLoadTrendChart ? (
       <Suspense
-        fallback={<div className="h-[280px] rounded-[18px] border border-app-line bg-app-surface p-5 md:p-6" />}
+        fallback={<div className="h-[280px] rounded-card border border-app-line bg-app-surface p-5 md:p-6" />}
       >
         <TwelveWeekTrendCard points={trendPoints} currentWeek={data.dashboardKpiCurrentWeek} />
       </Suspense>
     ) : (
-      <div className="h-[280px] rounded-[18px] border border-app-line bg-app-surface p-5 md:p-6" />
+      <div className="h-[280px] rounded-card border border-app-line bg-app-surface p-5 md:p-6" />
     ),
     balance: <BalanceCard rows={balanceRows} />,
     daily_stoic: <DailyStoicCard />,
@@ -1203,7 +1203,7 @@ function DashboardActiveLayout({
       </div>
 
       {topTrigger ? (
-        <div className="appear-fade-up" style={{ animationDelay: "150ms" }}>
+        <div className="appear-fade-up" style={{ animationDelay: "var(--duration-instant)" }}>
           <RescueAlert
             trigger={topTrigger}
             ctaLabel={topTrigger.kind === "trial_ending" ? "Mở Plus" : "Xem ngay"}

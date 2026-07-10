@@ -73,12 +73,12 @@ export function AppSidebar({
         <button
           type="button"
           onClick={() => onNavigate("/")}
-          className="-mx-1 flex items-center gap-3 rounded-lg px-1 py-1 text-left transition-colors duration-[180ms] ease-[cubic-bezier(0.4,0,0.2,1)] hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C6F24E]/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#17150F]"
+          className="-mx-1 flex items-center gap-3 rounded-lg px-1 py-1 text-left transition-colors duration-[var(--duration-fast)] ease-[var(--ease-standard)] hover:bg-white/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-highlight/40 focus-visible:ring-offset-2 focus-visible:ring-offset-[#17150F]"
           aria-label="Về trang chủ Dear Our Future"
         >
           <span
             aria-hidden="true"
-            className="flex size-[38px] shrink-0 -rotate-6 items-center justify-center rounded-[11px] bg-[#0C5E3A] font-serif text-[19px] font-extrabold text-[#C6F24E]"
+            className="flex size-[38px] shrink-0 -rotate-6 items-center justify-center rounded-[11px] bg-[#0C5E3A] font-serif text-[19px] font-extrabold text-app-highlight"
           >
             D
           </span>
@@ -103,7 +103,7 @@ export function AppSidebar({
               <li key={item.path} className="relative">
                 <span
                   aria-hidden="true"
-                  className={`absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-[#C6F24E] transition-all duration-200 ${
+                  className={`absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-app-highlight transition-all duration-200 ${
                     active ? "opacity-100" : "opacity-0"
                   }`}
                 />
@@ -112,15 +112,15 @@ export function AppSidebar({
                   aria-current={active ? "page" : undefined}
                   onClick={() => onNavigate(item.path)}
                   onPointerEnter={() => onPrefetch(item.path)}
-                  className={`group flex w-full items-center gap-3 rounded-[11px] px-3 py-2.5 text-[13.5px] tracking-tight transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C6F24E]/30 ${
+                  className={`group flex w-full items-center gap-3 rounded-[11px] px-3 py-2.5 text-[13.5px] tracking-tight transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-highlight/30 ${
                     active
-                      ? "bg-[#C6F24E]/10 font-semibold text-white"
+                      ? "bg-app-highlight/10 font-semibold text-white"
                       : "font-medium text-[#B5B1A6] hover:bg-white/[0.06] hover:text-white"
                   }`}
                 >
                   <Icon
                     className={`h-[17px] w-[17px] shrink-0 transition-transform duration-200 group-hover:scale-110 ${
-                      active ? "text-[#C6F24E]" : "text-[#8C887C] group-hover:text-[#E4E2DB]"
+                      active ? "text-app-highlight" : "text-[#8C887C] group-hover:text-[#E4E2DB]"
                     }`}
                     strokeWidth={2}
                   />
@@ -142,7 +142,7 @@ export function AppSidebar({
                   <li key={item.path} className="relative">
                     <span
                       aria-hidden="true"
-                      className={`absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-[#C6F24E] transition-all duration-200 ${
+                      className={`absolute left-0 top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-full bg-app-highlight transition-all duration-200 ${
                         active ? "opacity-100" : "opacity-0"
                       }`}
                     />
@@ -151,15 +151,15 @@ export function AppSidebar({
                       aria-current={active ? "page" : undefined}
                       onClick={() => onNavigate(item.path)}
                       onPointerEnter={() => onPrefetch(item.path)}
-                      className={`group flex w-full items-center gap-3 rounded-[11px] px-3 py-2.5 text-[13.5px] tracking-tight transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C6F24E]/30 ${
+                      className={`group flex w-full items-center gap-3 rounded-[11px] px-3 py-2.5 text-[13.5px] tracking-tight transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-highlight/30 ${
                         active
-                          ? "bg-[#C6F24E]/10 font-semibold text-white"
+                          ? "bg-app-highlight/10 font-semibold text-white"
                           : "font-medium text-[#B5B1A6] hover:bg-white/[0.06] hover:text-white"
                       }`}
                     >
                       <Icon
                         className={`h-[17px] w-[17px] shrink-0 transition-transform duration-200 group-hover:scale-110 ${
-                          active ? "text-[#C6F24E]" : "text-[#8C887C] group-hover:text-[#E4E2DB]"
+                          active ? "text-app-highlight" : "text-[#8C887C] group-hover:text-[#E4E2DB]"
                         }`}
                         strokeWidth={2}
                       />
@@ -178,11 +178,11 @@ export function AppSidebar({
           <button
             type="button"
             onClick={onToggleTheme}
-            className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-[11px] border border-white/10 bg-white/[0.06] px-3 text-[12.5px] font-semibold text-[#E4E2DB] transition-all duration-200 hover:bg-white/[0.1] active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C6F24E]/30"
+            className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-[11px] border border-white/10 bg-white/[0.06] px-3 text-[12.5px] font-semibold text-[#E4E2DB] transition-all duration-200 hover:bg-white/[0.1] active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-highlight/30"
             aria-label={resolvedTheme === "dark" ? "Chuyển sang chế độ sáng" : "Chuyển sang chế độ tối"}
           >
             {resolvedTheme === "dark" ? (
-              <Sun className="h-[15px] w-[15px] text-[#C6F24E]" />
+              <Sun className="h-[15px] w-[15px] text-app-highlight" />
             ) : (
               <Moon className="h-[15px] w-[15px]" />
             )}
@@ -191,7 +191,7 @@ export function AppSidebar({
           <button
             type="button"
             onClick={onOpenGuide}
-            className="flex size-11 items-center justify-center rounded-[11px] border border-white/10 bg-white/[0.06] text-[#E4E2DB] transition-all duration-200 hover:bg-white/[0.1] active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C6F24E]/30"
+            className="flex size-11 items-center justify-center rounded-[11px] border border-white/10 bg-white/[0.06] text-[#E4E2DB] transition-all duration-200 hover:bg-white/[0.1] active:scale-[0.96] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-highlight/30"
             aria-label="Mở hướng dẫn sử dụng"
             title="Hướng dẫn"
           >
@@ -204,10 +204,10 @@ export function AppSidebar({
             <DropdownMenuTrigger asChild>
               <button
                 type="button"
-                className="flex w-full items-center gap-2.5 rounded-[11px] p-1.5 text-left transition-all duration-200 hover:bg-white/[0.06] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C6F24E]/30"
+                className="flex w-full items-center gap-2.5 rounded-[11px] p-1.5 text-left transition-all duration-200 hover:bg-white/[0.06] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-highlight/30"
               >
                 <div
-                  className="flex size-[34px] shrink-0 items-center justify-center rounded-full bg-[#C6F24E] font-serif text-[15px] font-extrabold text-[#17150F]"
+                  className="flex size-[34px] shrink-0 items-center justify-center rounded-full bg-app-highlight font-serif text-[15px] font-extrabold text-[#17150F]"
                   aria-hidden="true"
                 >
                   {user.avatarLetter}
@@ -216,7 +216,7 @@ export function AppSidebar({
                   <p className="truncate text-[13px] font-semibold text-white leading-tight">
                     {user.displayName ?? user.email ?? "Tài khoản"}
                   </p>
-                  <p className="truncate text-[10px] font-bold text-[#C6F24E] uppercase tracking-[0.08em] mt-0.5">
+                  <p className="truncate text-[10px] font-bold text-app-highlight uppercase tracking-[0.08em] mt-0.5">
                     {user.planLabel}
                   </p>
                 </div>
@@ -280,7 +280,7 @@ export function AppSidebar({
             <Button
               variant="ghost"
               size="sm"
-              className="h-10 w-full rounded-xl bg-[#C6F24E] text-sm font-semibold text-[#17150F] transition-all duration-200 hover:bg-[#d4f76e] hover:scale-[1.01] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C6F24E]/40"
+              className="h-10 w-full rounded-xl bg-app-highlight text-sm font-semibold text-[#17150F] transition-all duration-200 hover:bg-[#d4f76e] hover:scale-[1.01] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-highlight/40"
               onClick={() => onAuthNavigate("signup")}
             >
               Đăng ký
@@ -288,7 +288,7 @@ export function AppSidebar({
             <Button
               variant="ghost"
               size="sm"
-              className="h-10 w-full rounded-xl border border-white/10 bg-white/[0.06] text-sm font-semibold text-[#E4E2DB] transition-all duration-200 hover:bg-white/[0.1] hover:scale-[1.01] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C6F24E]/30"
+              className="h-10 w-full rounded-xl border border-white/10 bg-white/[0.06] text-sm font-semibold text-[#E4E2DB] transition-all duration-200 hover:bg-white/[0.1] hover:scale-[1.01] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-highlight/30"
               onClick={() => onAuthNavigate("signin")}
             >
               Đăng nhập

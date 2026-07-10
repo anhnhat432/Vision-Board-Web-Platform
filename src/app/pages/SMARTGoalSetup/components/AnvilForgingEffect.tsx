@@ -126,13 +126,15 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
     const lights: LightParticle[] = [];
     const rings: RingParticle[] = [];
 
+    // Forest Green brand palette (Execution context — không dùng warm/terracotta).
+    // Thay drift indigo/violet/lavender bằng các sắc độ xanh rừng để giữ bản sắc.
     const LIGHT_COLORS = [
       "rgba(16, 185, 129, 0.9)", // emerald
       "rgba(52, 211, 153, 0.85)", // emerald lighter
-      "rgba(99, 102, 241, 0.8)", // indigo
-      "rgba(139, 92, 246, 0.7)", // violet
+      "rgba(58, 114, 97, 0.8)", // forest (green-600)
+      "rgba(42, 84, 71, 0.7)", // deep forest (green-700)
       "rgba(255, 255, 255, 0.9)", // white
-      "rgba(167, 139, 250, 0.6)", // lavender
+      "rgba(91, 165, 144, 0.6)", // mint (accent light)
       "rgba(45, 212, 191, 0.75)", // teal
     ];
 
@@ -189,8 +191,8 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
       const glowRadius = 80 + eased * 120;
       const centralGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowRadius);
       centralGlow.addColorStop(0, `rgba(16, 185, 129, ${glowAlpha})`);
-      centralGlow.addColorStop(0.3, `rgba(99, 102, 241, ${glowAlpha * 0.5})`);
-      centralGlow.addColorStop(0.6, `rgba(139, 92, 246, ${glowAlpha * 0.2})`);
+      centralGlow.addColorStop(0.3, `rgba(58, 114, 97, ${glowAlpha * 0.5})`);
+      centralGlow.addColorStop(0.6, `rgba(42, 84, 71, ${glowAlpha * 0.2})`);
       centralGlow.addColorStop(1, "rgba(0, 0, 0, 0)");
       ctx.fillStyle = centralGlow;
       ctx.fillRect(0, 0, W, H);
@@ -339,13 +341,13 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
             ${
               phase === "crystallized"
                 ? "border-app-accent/40 bg-app-accent/15 text-app-accent shadow-app-accent/20"
-                : "border-indigo-400/30 bg-indigo-500/10 text-indigo-300 shadow-indigo-500/10"
+                : "border-app-accent/25 bg-app-accent/8 text-app-accent-hover shadow-app-accent/10"
             }
           `}
         >
           <Sparkles
             className={`h-3.5 w-3.5 transition-colors duration-500 ${
-              phase === "crystallized" ? "text-app-accent" : "text-indigo-400"
+              phase === "crystallized" ? "text-app-accent" : "text-app-accent-hover"
             }`}
           />
           {phase === "gathering" ? "KẾT TINH MỤC TIÊU" : "MỤC TIÊU ĐÃ THÀNH HÌNH"}
@@ -359,7 +361,7 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
             ${
               phase === "crystallized"
                 ? "text-app-accent drop-shadow-[0_0_20px_var(--color-app-accent)]"
-                : "text-app-ink drop-shadow-[0_0_10px_rgba(99,102,241,0.2)]"
+                : "text-app-ink drop-shadow-[0_0_10px_rgba(12,94,58,0.2)]"
             }
           `}
         >
@@ -382,7 +384,7 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
         <p
           className={`
             text-xs uppercase tracking-[0.2em] font-semibold transition-all duration-500
-            ${phase === "crystallized" ? "text-app-accent/80" : "text-indigo-400/60"}
+            ${phase === "crystallized" ? "text-app-accent/80" : "text-app-accent/60"}
           `}
         >
           {phase === "gathering" ? "Thu thập năng lượng từ mục tiêu của bạn" : "Chuyển sang đánh giá tính khả thi"}
@@ -396,7 +398,7 @@ export function AnvilForgingEffect({ onComplete, goalStatement }: AnvilForgingEf
               ${
                 phase === "crystallized"
                   ? "bg-gradient-to-r from-app-accent via-app-accent-hover to-app-accent shadow-app-sm"
-                  : "bg-gradient-to-r from-indigo-500 via-violet-400 to-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.3)]"
+                  : "bg-gradient-to-r from-app-accent-hover via-app-accent to-app-accent-hover shadow-[0_0_8px_rgba(12,94,58,0.3)]"
               }
             `}
             style={{

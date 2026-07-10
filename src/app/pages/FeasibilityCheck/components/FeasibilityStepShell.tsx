@@ -112,7 +112,7 @@ export function FeasibilityStepShell({
                 </h2>
                 <p
                   id={`feasibility-question-${currentQuestion.id}-helper`}
-                  className="mt-1.5 break-words text-[12.5px] font-medium leading-[1.45] text-app-ink-soft sm:mt-2 sm:text-sm sm:leading-relaxed"
+                  className="mt-1.5 break-words text-[12.5px] font-medium leading-[var(--text-xs--line-height)] text-app-ink-soft sm:mt-2 sm:text-sm sm:leading-relaxed"
                 >
                   {currentQuestion.helper}
                 </p>

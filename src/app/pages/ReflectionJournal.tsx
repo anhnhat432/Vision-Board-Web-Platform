@@ -396,7 +396,7 @@ function ReflectionJournalContent() {
       {/* Hero Section */}
       <section
         data-reflection-journal-hero
-        className="relative grid grid-cols-[1fr_88px] items-start gap-4 overflow-hidden rounded-[22px] border border-app-line bg-app-surface p-5 page-enter sm:gap-7 sm:p-9 md:grid-cols-[1fr_360px] md:items-center"
+        className="relative grid grid-cols-[1fr_88px] items-start gap-4 overflow-hidden rounded-card-lg border border-app-line bg-app-surface p-5 page-enter sm:gap-7 sm:p-9 md:grid-cols-[1fr_360px] md:items-center"
       >
         <div className="min-w-0">
           <div className="flex min-w-0 items-center gap-2 mb-3.5 break-words text-[10px] font-extrabold uppercase tracking-[0.14em] text-app-warm">
@@ -431,7 +431,7 @@ function ReflectionJournalContent() {
             </Button>
           </div>
         </div>
-        <div className="relative h-24 w-24 overflow-hidden rounded-[18px] self-start shadow-[0_18px_34px_-24px_rgba(23,21,15,0.5)] animate-[float_5s_ease-in-out_infinite] motion-reduce:animate-none md:h-auto md:w-auto md:self-stretch md:min-h-[210px] md:shadow-[0_24px_48px_-28px_rgba(23,21,15,0.5)]">
+        <div className="relative h-24 w-24 overflow-hidden rounded-card self-start shadow-[0_18px_34px_-24px_rgba(23,21,15,0.5)] animate-[float_5s_ease-in-out_infinite] motion-reduce:animate-none md:h-auto md:w-auto md:self-stretch md:min-h-[210px] md:shadow-[0_24px_48px_-28px_rgba(23,21,15,0.5)]">
           <img
             src="/reflection_journal.png"
             alt="Nhật ký phản tư"
@@ -458,7 +458,7 @@ function ReflectionJournalContent() {
         </header>
 
         {/* Search + Filters */}
-        <div className="rounded-[18px] border border-app-line bg-app-surface p-3.5 shadow-3xs sm:p-4">
+        <div className="rounded-card border border-app-line bg-app-surface p-3.5 shadow-3xs sm:p-4">
           <div className="relative">
             <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#A8A296]" aria-hidden="true" />
             <Input
@@ -737,6 +737,10 @@ function ReflectionJournalContent() {
                       {
                         title: "Điều tôi học được",
                         hint: "Một bài học hoặc nhận ra hôm nay.",
+                        // Palette icon prompt trang trí (3 tông green/warm/gold cho biến
+                        // thể trực quan); giữ literal có chủ đích — Reflection context chỉ
+                        // dùng token warm, nên cặp green này để dạng màu trang trí (xem
+                        // allowlist Property 2 / quy tắc color-context zoning).
                         iconBg: "#EDF7E0",
                         iconColor: "#0C5E3A",
                         prompt: "Điều gì hôm nay khiến bạn tự hào về bản thân?",
@@ -768,7 +772,7 @@ function ReflectionJournalContent() {
                         }));
                         saveDraft(item.prompt);
                       }}
-                      className="min-h-28 text-left bg-[#FAF8F3] dark:bg-app-bg border border-app-line rounded-[14px] p-4 cursor-pointer transition-all duration-150 hover:border-app-warm/50 hover:bg-[#FBF5EF] dark:hover:bg-app-warm-soft/20 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm focus-visible:ring-offset-2"
+                      className="min-h-28 text-left bg-app-bg-subtle dark:bg-app-bg border border-app-line rounded-[14px] p-4 cursor-pointer transition-all duration-150 hover:border-app-warm/50 hover:bg-[#FBF5EF] dark:hover:bg-app-warm-soft/20 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm focus-visible:ring-offset-2"
                     >
                       <span
                         className="flex w-[30px] h-[30px] rounded-[9px] items-center justify-center mb-2.5"

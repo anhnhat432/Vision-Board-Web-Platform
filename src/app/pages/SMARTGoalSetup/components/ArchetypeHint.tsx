@@ -66,14 +66,14 @@ export function ArchetypeHint({ archetype, variant, showArchetypeTag = true }: A
         variant === "antiPattern"
           ? "border-[#D6B228]/30 bg-[#FFF8DE] dark:bg-[#2A2410] text-[#7A5C00] dark:text-[#E7B400]"
           : variant === "metric"
-            ? "border-[rgba(12,94,58,0.18)] bg-[#EDF7E0] text-[#0C5E3A]"
-            : "border-[rgba(12,94,58,0.18)] bg-[#EDF7E0] text-[#0C5E3A]",
+            ? "border-[rgba(12,94,58,0.18)] bg-app-accent-subtle text-app-accent"
+            : "border-[rgba(12,94,58,0.18)] bg-app-accent-subtle text-app-accent",
       )}
       data-archetype={archetype}
       data-archetype-hint-variant={variant}
     >
       {showArchetypeTag ? (
-        <p className="mb-2.5 text-[11px] font-bold text-[#5C574B]">
+        <p className="mb-2.5 text-[11px] font-bold text-app-ink-soft">
           Loại mục tiêu: {archetypeLabel}
         </p>
       ) : null}
@@ -84,15 +84,15 @@ export function ArchetypeHint({ archetype, variant, showArchetypeTag = true }: A
             variant === "antiPattern"
               ? "border-[#D6B228]/40 bg-[#FFF8DE] dark:bg-[#2A2410] text-[#9A7B00] dark:text-[#E7B400]"
               : variant === "metric"
-                ? "border-[#0C5E3A]/30 bg-[#EDF7E0] text-[#0C5E3A]"
-                : "border-[#0C5E3A]/30 bg-[#EDF7E0] text-[#0C5E3A]",
+                ? "border-app-accent/30 bg-app-accent-subtle text-app-accent"
+                : "border-app-accent/30 bg-app-accent-subtle text-app-accent",
           )}
         >
           <Icon className="h-4 w-4" aria-hidden="true" />
         </div>
-        <div className="min-w-0 text-[13px] leading-relaxed text-[#5C574B]">
-          <p className="font-bold text-[#17150F]">{VARIANT_TITLE[variant]}</p>
-          <div className="mt-2 text-[#5C574B]">{body}</div>
+        <div className="min-w-0 text-[13px] leading-relaxed text-app-ink-soft">
+          <p className="font-bold text-app-ink">{VARIANT_TITLE[variant]}</p>
+          <div className="mt-2 text-app-ink-soft">{body}</div>
         </div>
       </div>
     </div>

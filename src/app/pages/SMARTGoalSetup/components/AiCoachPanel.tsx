@@ -46,7 +46,7 @@ export function AiCoachPanel({
   );
 
   return (
-    <div className="relative overflow-hidden rounded-[18px] border border-app-line bg-app-surface/70">
+    <div className="relative overflow-hidden rounded-card border border-app-line bg-app-surface/70">
       <button
         type="button"
         onClick={() => setIsAiCoachExpanded(!isAiCoachExpanded)}

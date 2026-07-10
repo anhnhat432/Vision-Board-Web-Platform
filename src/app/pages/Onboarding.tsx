@@ -118,7 +118,7 @@ const AREA_DESIGN_ICON_STYLES: Array<{ accent: string; bg: string; border: strin
 ];
 
 function getDesignIconStyle(index: number) {
-  return AREA_DESIGN_ICON_STYLES[index] ?? { accent: "#A8A296", bg: "#F2EFE6", border: "rgba(23,21,15,0.1)" };
+  return AREA_DESIGN_ICON_STYLES[index] ?? { accent: "#A8A296", bg: "var(--app-bg)", border: "rgba(23,21,15,0.1)" };
 }
 
 function getCalmLifeAreaIcon(areaName: string): LucideIcon {
@@ -206,10 +206,10 @@ function createOnboardingDraft(
 }
 
 function getScoreFeedback(score: number): { emoji: string; text: string; color: string } {
-  if (score <= 2) return { emoji: "🌱", text: "Không sao, đây là điểm bắt đầu", color: "#B84040" };
-  if (score <= 4) return { emoji: "🌿", text: "Còn nhiều chỗ để phát triển", color: "#9A6308" };
-  if (score <= 6) return { emoji: "🍀", text: "Tạm ổn, có thể tốt hơn", color: "#9A6308" };
-  if (score <= 8) return { emoji: "🌳", text: "Khá tốt, giữ vững nhé", color: "#3A7D5E" };
+  if (score <= 2) return { emoji: "🌱", text: "Không sao, đây là điểm bắt đầu", color: "var(--app-status-error)" };
+  if (score <= 4) return { emoji: "🌿", text: "Còn nhiều chỗ để phát triển", color: "var(--app-status-warning)" };
+  if (score <= 6) return { emoji: "🍀", text: "Tạm ổn, có thể tốt hơn", color: "var(--app-status-warning)" };
+  if (score <= 8) return { emoji: "🌳", text: "Khá tốt, giữ vững nhé", color: "var(--app-status-success)" };
   return { emoji: "✨", text: "Tuyệt vời!", color: "#16A34A" };
 }
 
@@ -506,24 +506,24 @@ export function Onboarding() {
           ) : (
             <>
               {isReturning ? (
-                <div className="flex items-start gap-3 rounded-[14px] border border-[rgba(12,94,58,0.18)] bg-[#EDF7E0] px-4 py-3.5 sm:items-center sm:px-[18px]">
+                <div className="flex items-start gap-3 rounded-[14px] border border-app-accent/20 bg-app-accent-subtle px-4 py-3.5 sm:items-center sm:px-[18px]">
                   <svg
                     width="18"
                     height="18"
                     viewBox="0 0 24 24"
                     fill="none"
-                    stroke="#0C5E3A"
+                    stroke="currentColor"
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="shrink-0"
+                    className="shrink-0 text-app-accent"
                     aria-hidden="true"
                   >
                     <path d="M21.801 10A10 10 0 1 1 17 3.335" />
                     <path d="m9 11 3 3L22 4" />
                   </svg>
                   <span className="text-[13px] leading-relaxed text-[#3F4A3F]">
-                    <strong className="font-semibold text-[#0C5E3A]">Cập nhật điểm hiện tại.</strong> Điểm cũ đã được
+                    <strong className="font-semibold text-app-accent">Cập nhật điểm hiện tại.</strong> Điểm cũ đã được
                     tải sẵn, bạn chỉ điều chỉnh phần thay đổi, không tạo lại từ đầu.
                   </span>
                 </div>
@@ -579,14 +579,14 @@ export function Onboarding() {
           <h1 className="font-serif text-[28px] font-semibold leading-tight text-app-ink sm:text-4xl">
             Rà 8 lĩnh vực để mở Life Insight
           </h1>
-          <p className="max-w-2xl text-[13px] leading-[1.55] text-app-ink-soft sm:text-base sm:leading-6">
+          <p className="max-w-2xl text-[13px] leading-[var(--text-sm--line-height)] text-app-ink-soft sm:text-base sm:leading-6">
             Chấm theo cảm nhận hiện tại. Bản đồ bên cạnh sẽ chỉ ra vùng mạnh và vùng cần chăm sóc đầu tiên.
           </p>
         </header>
 
         <div className="grid grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_390px] lg:items-start">
           <aside className="order-2 lg:sticky lg:top-6 lg:order-2">
-            <div className="rounded-[22px] border border-app-line bg-app-surface p-4 shadow-app-md sm:p-6">
+            <div className="rounded-card-lg border border-app-line bg-app-surface p-4 shadow-app-md sm:p-6">
               <div className="mb-4 flex items-start justify-between gap-3">
                 <div>
                   <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-app-accent">Atlas gấp mở</p>
@@ -644,7 +644,7 @@ export function Onboarding() {
           </aside>
 
           <div className="order-1 min-w-0 space-y-4 sm:space-y-[18px] lg:order-1">
-            <div className="rounded-[18px] border border-app-line/60 bg-white px-4 py-4 sm:rounded-[20px] sm:px-6 sm:py-[22px]">
+            <div className="rounded-card border border-app-line/60 bg-white px-4 py-4 sm:rounded-[20px] sm:px-6 sm:py-[22px]">
               <p className="mb-3 text-[10px] font-extrabold uppercase tracking-[0.1em] text-app-ink-muted sm:mb-[14px]">
                 Chọn lĩnh vực đang rà
               </p>
@@ -693,12 +693,12 @@ export function Onboarding() {
                   initial={prefersReducedMotion ? {} : { opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.25, ease: "easeOut" }}
-                  className="rounded-[18px] border border-app-line/60 bg-white px-4 py-5 sm:rounded-[20px] sm:px-[26px] sm:py-6"
+                  className="rounded-card border border-app-line/60 bg-white px-4 py-5 sm:rounded-[20px] sm:px-[26px] sm:py-6"
                 >
                   <div className="mb-4 flex items-start justify-between gap-3 sm:mb-5 sm:items-center sm:gap-4">
                     <div className="flex min-w-0 items-center gap-3 sm:gap-[14px]">
                       <span
-                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[12px] sm:h-12 sm:w-12 sm:rounded-[13px]"
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-control sm:h-12 sm:w-12 sm:rounded-[13px]"
                         style={{ background: designStyle.bg, color: designStyle.accent }}
                       >
                         <AreaIcon className="h-5 w-5 sm:h-[22px] sm:w-[22px]" aria-hidden="true" />
@@ -718,8 +718,8 @@ export function Onboarding() {
                       </div>
                     </div>
                     <div
-                      className="shrink-0 rounded-[12px] border border-app-line/60 px-3 py-[9px] text-right sm:rounded-[13px] sm:px-4 sm:py-[11px]"
-                      style={{ background: "#FAF8F3" }}
+                      className="shrink-0 rounded-control border border-app-line/60 px-3 py-[9px] text-right sm:rounded-[13px] sm:px-4 sm:py-[11px]"
+                      style={{ background: "var(--app-bg-subtle)" }}
                     >
                       <p className="mb-[3px] text-[9.5px] font-bold uppercase tracking-[0.08em] text-app-ink-muted">
                         Điểm hiện tại
@@ -738,15 +738,15 @@ export function Onboarding() {
                     <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.1em] text-app-ink-muted sm:mb-[9px]">
                       Câu hỏi đánh giá
                     </p>
-                    <p className="mb-1.5 text-[14px] font-bold leading-[1.45] text-app-ink sm:mb-[6px] sm:text-[15px] sm:leading-[1.4]">
+                    <p className="mb-1.5 text-[14px] font-bold leading-[var(--text-xs--line-height)] text-app-ink sm:mb-[6px] sm:text-[15px] sm:leading-[var(--text-xl--line-height)]">
                       {LIFE_AREA_QUESTIONS[area.name] ?? "Bạn hài lòng bao nhiêu với khía cạnh này?"}
                     </p>
-                    <p className="text-[12.5px] leading-[1.5] text-app-ink-muted">
+                    <p className="text-[12.5px] leading-[var(--text-lg--line-height)] text-app-ink-muted">
                       {LIFE_AREA_DETAILS[area.name] ?? "Một phần quan trọng trong cuộc sống của bạn."}
                     </p>
                   </div>
 
-                  <div className="mb-4 flex items-center justify-between rounded-[12px] border border-app-line/40 bg-app-bg-subtle p-3 sm:p-4">
+                  <div className="mb-4 flex items-center justify-between rounded-control border border-app-line/40 bg-app-bg-subtle p-3 sm:p-4">
                     <span className="text-2xl" aria-hidden="true">
                       {feedback.emoji}
                     </span>
@@ -771,8 +771,8 @@ export function Onboarding() {
                           className="dof-num inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-full border font-[inherit] text-[14px] font-bold transition-[transform,background,color] duration-[0.12s] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:h-[42px] sm:min-h-[42px] sm:w-[42px]"
                           style={{
                             borderColor: isCurrentScore ? designStyle.accent : "rgba(23,21,15,0.12)",
-                            background: isCurrentScore ? designStyle.accent : "#FAF8F3",
-                            color: isCurrentScore ? "#fff" : "#5C574B",
+                            background: isCurrentScore ? designStyle.accent : "var(--app-bg-subtle)",
+                            color: isCurrentScore ? "#fff" : "var(--app-ink-soft)",
                             boxShadow: isCurrentScore ? `0 8px 18px -8px ${designStyle.accent}b3` : "none",
                           }}
                           aria-label={`Chấm ${scoreVal} điểm`}
@@ -832,14 +832,14 @@ export function Onboarding() {
                             key={anchor.range}
                             className="flex items-center gap-[11px] rounded-[11px] border p-[11px_14px]"
                             style={{
-                              borderColor: isActive ? "rgba(12,94,58,0.3)" : "rgba(23,21,15,0.08)",
-                              background: isActive ? "#EDF7E0" : "#fff",
+                              borderColor: isActive ? "var(--app-accent-border, rgba(12,94,58,0.3))" : "var(--app-line)",
+                              background: isActive ? "var(--app-accent-subtle)" : "#fff",
                             }}
                           >
                             <span
                               className="shrink-0 rounded-[7px] px-[9px] py-[3px] font-mono text-[11.5px] font-bold"
                               style={{
-                                background: isActive ? "#0C5E3A" : "#F2EFE6",
+                                background: isActive ? "var(--app-accent)" : "var(--app-bg)",
                                 color: isActive ? "#fff" : "#8C887C",
                               }}
                             >
@@ -848,7 +848,7 @@ export function Onboarding() {
                             <div className="min-w-0">
                               <span
                                 className="text-[13px] font-bold"
-                                style={{ color: isActive ? "#0C5E3A" : "#17150F" }}
+                                style={{ color: isActive ? "var(--app-accent)" : "var(--app-ink)" }}
                               >
                                 {anchor.label}
                               </span>
@@ -974,18 +974,18 @@ export function Onboarding() {
                   height="16"
                   viewBox="0 0 24 24"
                   fill="none"
-                  stroke="#0C5E3A"
+                  stroke="currentColor"
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="mt-0.5 shrink-0"
+                  className="mt-0.5 shrink-0 text-app-accent"
                   aria-hidden="true"
                 >
                   <circle cx="12" cy="12" r="10" />
                   <path d="M12 16v-4" />
                   <path d="M12 8h.01" />
                 </svg>
-                <p className="text-[13px] font-medium leading-[1.5] text-[#3F4A3F]">
+                <p className="text-[13px] font-medium leading-[var(--text-lg--line-height)] text-[#3F4A3F]">
                   Còn <strong className="font-semibold text-app-accent">{remainingAreaCount} khía cạnh</strong> chưa
                   chấm. Bạn có thể chọn trọng tâm với điểm mặc định 5 cho phần còn lại.
                 </p>
@@ -996,7 +996,7 @@ export function Onboarding() {
 
         <footer
           data-onboarding-bottom-nav
-          className="sticky bottom-0 z-10 -mx-4 flex flex-col gap-3 border-t border-app-line/60 bg-app-bg/80 px-4 py-4 backdrop-blur-sm sm:mx-0 sm:flex-row sm:items-center sm:justify-between sm:gap-[14px] sm:rounded-t-[18px] sm:bg-white/80 sm:px-6"
+          className="sticky bottom-0 z-10 -mx-4 flex flex-col gap-3 border-t border-app-line/60 bg-app-bg/80 px-4 py-4 backdrop-blur-sm sm:mx-0 sm:flex-row sm:items-center sm:justify-between sm:gap-[14px] sm:rounded-t-card sm:bg-white/80 sm:px-6"
         >
           <div className="flex w-full flex-col gap-2.5 sm:w-auto sm:flex-row sm:items-center sm:gap-4">
             <button

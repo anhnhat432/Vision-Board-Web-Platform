@@ -421,7 +421,7 @@ export function LoginPage() {
             {/* Left column - Hero panel (desktop only) */}
             <div className="hidden lg:block" style={reveal(80)}>
               <div
-                className="relative flex h-full flex-col overflow-hidden rounded-[22px] border border-white/10 p-9 text-white shadow-[0_40px_90px_-50px_rgba(12,55,38,0.85)]"
+                className="relative flex h-full flex-col overflow-hidden rounded-card-lg border border-white/10 p-9 text-white shadow-[0_40px_90px_-50px_rgba(12,55,38,0.85)]"
                 style={{
                   background:
                     "linear-gradient(150deg, var(--app-accent-active) 0%, var(--app-accent) 55%, var(--app-accent-hover) 100%)",

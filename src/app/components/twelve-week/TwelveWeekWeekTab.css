@@ -487,7 +487,7 @@ html.dark .weekly-editorial-insights {
   border-radius: 50%;
   font-size: 11px;
   font-weight: 700;
-  transition: all 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: all var(--duration-base, 240ms) var(--ease-emphasized, cubic-bezier(0.22, 1, 0.36, 1));
   flex-shrink: 0;
   position: relative;
   z-index: 2;

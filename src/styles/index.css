@@ -3,3 +3,37 @@
 @import './tailwind.css';
 @import './tokens.css';
 @import './theme.css';
+
+/* ─────────────────────────────────────────────────────────────
+ * Global reduced-motion catch-all (Requirement 7.4)
+ *
+ * `index.css` là điểm vào style toàn cục (import ở `src/main.tsx`) và nạp
+ * SAU tất cả các stylesheet khác (fonts → order-theme → tailwind → tokens →
+ * theme). Block dưới đây là lớp an toàn cuối cùng ở tầng global: khi người
+ * dùng bật `prefers-reduced-motion: reduce`, mọi animation/transition không
+ * thiết yếu bị rút về mức tức thời (0.01ms) trên toàn bộ phần tử, kể cả các
+ * stylesheet component nạp sau này.
+ *
+ * Nguyên tắc:
+ *   - Dùng selector phổ quát `*` (specificity 0,0,0). Motion THIẾT YẾU trong
+ *     `theme.css` (overlay/dialog/tooltip dùng `var(--duration-instant)`) khai
+ *     báo qua selector attribute có specificity cao hơn nên KHÔNG bị block này
+ *     ghi đè — motion thiết yếu vẫn ≤ 200ms như thiết kế.
+ *   - Không dùng `animation: none` phủ đầu trên `*` để tránh triệt tiêu các
+ *     chuyển opacity tức thời; chỉ ép duration về tức thời — component không
+ *     thể "tự bật" animation kéo dài bỏ qua media query.
+ * ───────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

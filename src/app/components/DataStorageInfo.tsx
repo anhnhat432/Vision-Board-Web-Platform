@@ -24,14 +24,14 @@ export function DataStorageInfo({ variant = "card", showSyncHint = false, classN
   if (variant === "banner") {
     return (
       <div
-        className={`flex items-start gap-3 rounded-[var(--r-card)] border border-sky-200 bg-sky-50/80 px-4 py-3 ${className}`}
+        className={`flex items-start gap-3 rounded-[var(--r-card)] border border-app-line bg-app-bg-subtle px-4 py-3 ${className}`}
       >
-        <Info className="mt-0.5 h-4 w-4 shrink-0 text-sky-600" />
+        <Info className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" />
         <div className="min-w-0">
-          <p className="text-sm font-medium text-sky-900">
+          <p className="text-sm font-medium text-app-ink">
             {demoMode ? "Dữ liệu được lưu trên thiết bị này" : "Dữ liệu được gắn với tài khoản của bạn"}
           </p>
-          <p className="mt-0.5 text-sm text-sky-700">
+          <p className="mt-0.5 text-sm text-app-ink-soft">
             {demoMode
               ? "Nếu đổi thiết bị hoặc xóa dữ liệu trình duyệt, tiến độ sẽ bị mất. Hãy tải bản dự phòng nếu muốn giữ lại."
               : "Ứng dụng vẫn giữ một bản trên thiết bị để thao tác nhanh và sao lưu lại khi tài khoản sẵn sàng."}

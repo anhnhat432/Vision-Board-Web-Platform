@@ -204,7 +204,7 @@ export function SpecificStep({
         ) : null}
       </div>
 
-      <div className="rounded-[22px] border border-app-line bg-app-bg-subtle/70 p-3.5">
+      <div className="rounded-card-lg border border-app-line bg-app-bg-subtle/70 p-3.5">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             <p className="text-xs font-extrabold text-app-accent">Câu mẫu gần ô nhập</p>
@@ -229,7 +229,7 @@ export function SpecificStep({
 
         {secondarySuggestions.length > 0 ? (
           <details className="group mt-3 border-t border-app-line/60 pt-3">
-            <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-3 rounded-[12px] text-[12px] font-bold text-app-ink-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/35 [&::-webkit-details-marker]:hidden">
+            <summary className="flex min-h-10 cursor-pointer list-none items-center justify-between gap-3 rounded-control text-[12px] font-bold text-app-ink-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/35 [&::-webkit-details-marker]:hidden">
               <span>Xem thêm câu mở đầu</span>
               <ChevronDown className="h-4 w-4 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" aria-hidden="true" />
             </summary>
@@ -258,7 +258,7 @@ export function SpecificStep({
           <button
             type="button"
             onClick={() => setShowTips(!showTips)}
-            className="inline-flex min-h-10 items-center gap-1.5 rounded-[12px] text-[12px] font-bold text-app-ink-muted transition-colors hover:text-app-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40"
+            className="inline-flex min-h-10 items-center gap-1.5 rounded-control text-[12px] font-bold text-app-ink-muted transition-colors hover:text-app-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40"
           >
             <Lightbulb className="h-3.5 w-3.5" aria-hidden="true" />
             {showTips ? "Thu gọn gợi ý viết mục tiêu" : "Mẹo viết mục tiêu hay"}
@@ -294,7 +294,7 @@ export function SpecificStep({
         </div>
       </div>
 
-      <details className="group rounded-[18px] border border-app-line bg-app-surface/75 p-3.5">
+      <details className="group rounded-card border border-app-line bg-app-surface/75 p-3.5">
         <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 text-[12px] font-bold text-app-ink-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/35 [&::-webkit-details-marker]:hidden">
           <span>Tùy chỉnh loại mục tiêu</span>
           <ChevronDown

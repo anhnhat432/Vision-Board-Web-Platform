@@ -8,7 +8,7 @@ import { Button } from "../ui/button";
 
 interface TwelveWeekRescueNudgeProps {
   status: RescueModeStatus;
-  /** Variant: 'today' uses violet accent, 'week' uses amber accent. */
+  /** Variant: 'today' uses the accent (Forest Green) tone, 'week' uses the warm (Terracotta) tone. */
   variant?: "today" | "week";
   /** Optional callbacks; suggestion IDs that have a callback render as a button. */
   onPickTinyTask?: () => void;

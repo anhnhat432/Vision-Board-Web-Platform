@@ -83,10 +83,10 @@ export default {
       },
 
       borderRadius: {
-        card:    "var(--app-radius-card)",    /* 14px — card, panel */
+        card:    "var(--app-radius-card)",    /* 18px — card, panel */
         pill:    "var(--app-radius-pill)",    /* 9999px — tag, badge */
         input:   "var(--app-radius-input)",   /* 10px — input, select */
-        control: "var(--app-radius-control)", /* 11px — checkbox, toggle */
+        control: "var(--app-radius-control)", /* 12px — checkbox, toggle */
       },
 
       boxShadow: {

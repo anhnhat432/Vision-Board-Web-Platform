@@ -584,11 +584,11 @@ export function FeasibilityCheck() {
           </p>
           <h1
             id="feasibility-title"
-            className="mt-2 break-words font-serif text-[27px] font-medium leading-[1.08] tracking-[-0.02em] text-app-ink sm:mt-3 sm:text-4xl sm:leading-tight"
+            className="mt-2 break-words font-serif text-[27px] font-medium leading-[var(--text-5xl--line-height)] tracking-[-0.02em] text-app-ink sm:mt-3 sm:text-4xl sm:leading-tight"
           >
             Hiệu chuẩn cán cân khả thi
           </h1>
-          <p className="mt-1.5 max-w-2xl break-words text-[13px] leading-[1.55] text-app-ink-soft sm:mt-2 sm:text-sm sm:leading-6">
+          <p className="mt-1.5 max-w-2xl break-words text-[13px] leading-[var(--text-sm--line-height)] text-app-ink-soft sm:mt-2 sm:text-sm sm:leading-6">
             Cùng chuẩn bị hành trang phù hợp để đảm bảo kế hoạch 12 tuần của bạn chắc thắng.
           </p>
 
@@ -599,7 +599,7 @@ export function FeasibilityCheck() {
                   <p className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-app-ink-muted sm:mb-2 sm:text-xs">
                     Mục tiêu của bạn
                   </p>
-                  <p className="break-words text-[13px] font-bold leading-[1.55] text-app-ink sm:text-sm sm:leading-relaxed">
+                  <p className="break-words text-[13px] font-bold leading-[var(--text-sm--line-height)] text-app-ink sm:text-sm sm:leading-relaxed">
                     {pendingGoal.specific}
                   </p>
                 </div>
@@ -664,7 +664,7 @@ export function FeasibilityCheck() {
                   <p className="text-xs font-bold uppercase tracking-[0.18em] text-app-ink-muted">
                     Mặc định 3 câu cốt lõi
                   </p>
-                  <p className="hidden text-[13.5px] leading-[1.6] text-app-ink-soft sm:block sm:text-sm sm:leading-6">
+                  <p className="hidden text-[13.5px] leading-[var(--text-base--line-height)] text-app-ink-soft sm:block sm:text-sm sm:leading-6">
                     Time, Energy và Confidence là đủ để tạo kết quả khả thi. Mở phần nâng cao nếu bạn muốn tinh chỉnh
                     thêm Clarity, Obstacle, Routine và Resources.
                   </p>

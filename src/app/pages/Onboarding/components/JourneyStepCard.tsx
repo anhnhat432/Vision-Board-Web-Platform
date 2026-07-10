@@ -21,7 +21,7 @@ export function JourneyStepCard({
   const content = (
     <div
       className={cn(
-        "group relative overflow-hidden rounded-[18px] border border-app-line/60 bg-white p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-app-accent/30 hover:shadow-app-sm sm:p-5",
+        "group relative overflow-hidden rounded-card border border-app-line/60 bg-white p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-app-accent/30 hover:shadow-app-sm sm:p-5",
         className,
       )}
     >

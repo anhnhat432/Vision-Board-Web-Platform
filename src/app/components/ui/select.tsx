@@ -38,8 +38,8 @@ const SelectTrigger = React.forwardRef<
       data-slot="select-trigger"
       data-size={size}
       className={cn(
-        "border border-app-line bg-app-surface text-app-ink data-[placeholder]:text-app-ink-muted [&_svg:not([class*='text-'])]:text-app-ink-muted flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-base leading-6 font-normal tracking-tight whitespace-nowrap shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-[color,box-shadow,border-color] outline-none data-[size=default]:h-11 data-[size=sm]:h-9 md:text-sm",
-        "disabled:cursor-not-allowed disabled:bg-app-bg/50 disabled:text-app-ink-muted disabled:opacity-100",
+        "border border-app-line bg-app-surface text-app-ink data-[placeholder]:text-app-ink-muted [&_svg:not([class*='text-'])]:text-app-ink-muted flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-base leading-6 font-normal tracking-tight whitespace-nowrap shadow-app-sm transition-[color,box-shadow,border-color] duration-[var(--duration-fast)] ease-[var(--ease-standard)] outline-none data-[size=default]:h-11 data-[size=sm]:h-9 md:text-sm",
+        "disabled:cursor-not-allowed disabled:bg-app-bg/50 disabled:text-app-ink-disabled disabled:opacity-100",
         "hover:border-app-line",
         "focus-visible:border-app-accent focus-visible:ring-2 focus-visible:ring-app-accent/20",
         "aria-invalid:ring-2 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",

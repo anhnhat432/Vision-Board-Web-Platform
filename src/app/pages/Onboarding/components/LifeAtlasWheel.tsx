@@ -76,7 +76,7 @@ export function LifeAtlasWheel({
 
   return (
     <div className={className}>
-      <div className="relative mx-auto aspect-square w-full max-w-[320px] rounded-[18px] border border-app-line bg-app-bg-subtle p-3 shadow-app-sm sm:max-w-[360px] sm:p-4">
+      <div className="relative mx-auto aspect-square w-full max-w-[320px] rounded-card border border-app-line bg-app-bg-subtle p-3 shadow-app-sm sm:max-w-[360px] sm:p-4">
         <svg
           role="img"
           aria-label={`Atlas cuộc sống gồm ${areaCount} vùng`}

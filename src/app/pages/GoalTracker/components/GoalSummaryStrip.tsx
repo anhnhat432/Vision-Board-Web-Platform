@@ -50,7 +50,7 @@ export function GoalSummaryStrip({
       value: needsAttention,
       note: "quá hạn / review",
       icon: AlertTriangle,
-      iconBg: "bg-[#FFEDE8] text-[#FF5C3E]",
+      iconBg: "bg-[#FFEDE8] text-app-energy",
       attention: true,
     },
   ];
@@ -70,15 +70,15 @@ export function GoalSummaryStrip({
           <div
             key={item.title}
             className={cn(
-              "h-full rounded-[18px] border px-5 py-[18px] flex flex-col transition-all duration-300",
+              "h-full rounded-card border px-5 py-[18px] flex flex-col transition-all duration-300",
               isAttention && needsAttention > 0
                 ? "border-app-status-error/40 bg-app-status-error/[0.04] hover:border-app-status-error/60 hover:shadow-[var(--app-shadow-md)]"
-                : "border-[rgba(23,21,15,0.08)] bg-app-surface hover:border-app-accent/20 hover:shadow-[var(--app-shadow-md)]",
+                : "border-app-line bg-app-surface hover:border-app-accent/20 hover:shadow-[var(--app-shadow-md)]",
             )}
           >
             <div
               className={cn(
-                "flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[10px] mb-3",
+                "flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-input mb-3",
                 item.iconBg,
               )}
             >

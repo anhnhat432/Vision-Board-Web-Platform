@@ -1,4 +1,4 @@
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { useReducedMotion } from "motion/react";
 import type { ReactNode } from "react";
 
 interface MotionPageTransitionProps {
@@ -11,21 +11,15 @@ export function MotionPageTransition({ children, pageKey }: MotionPageTransition
 
   if (reduceMotion) return <>{children}</>;
 
-  // Default sync mode (no `mode="wait"`): exit and enter overlap, so navigating to a new
-  // page is not blocked by the previous page's 200ms exit animation. Duration trimmed to
-  // 120ms so the fade still reads but doesn't feel sluggish.
+  // Token-based page enter: the `.page-enter` class drives the enter animation via the
+  // Design_System motion tokens (`--duration-medium` / `--ease-emphasized`) instead of
+  // hard-coded literals, so navigating into a Product_Page stays consistent with the rest
+  // of the motion system. Keying the wrapper on the route path remounts it on navigation,
+  // which replays the CSS animation for each page. `.page-enter` is already disabled under
+  // `prefers-reduced-motion: reduce` by the global media query.
   return (
-    <AnimatePresence initial={false}>
-      <motion.div
-        key={pageKey}
-        className="page-transition-shell"
-        initial={{ opacity: 0, y: 6 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -4 }}
-        transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
-      >
-        {children}
-      </motion.div>
-    </AnimatePresence>
+    <div key={pageKey} className="page-transition-shell page-enter">
+      {children}
+    </div>
   );
 }

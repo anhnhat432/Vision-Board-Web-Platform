@@ -1,5 +1,4 @@
 import type { TwelveWeekImportValidationReport } from "@/services/syncService";
-import { getRouteTone as getFallbackRouteTone } from "./routeMeta";
 
 export function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
@@ -44,25 +43,4 @@ export function createCloudImportId(): string {
   return `cloud_import_${Date.now().toString(36)}`;
 }
 
-export function getRouteTone(pathname: string): string | undefined {
-  if (pathname.startsWith("/login")) return "onboarding";
-  if (pathname.startsWith("/onboarding")) return "onboarding";
-  if (pathname === "/") return "dashboard";
-  if (pathname.startsWith("/12-week-setup")) return "setup";
-  if (pathname.startsWith("/12-week-system")) return "system";
-  if (pathname.startsWith("/smart-goal-setup")) return "setup";
-  if (pathname.startsWith("/feasibility")) return "setup";
-  if (pathname.startsWith("/life-insight")) return "setup";
-  if (pathname.startsWith("/life-balance")) return "balance";
-  if (pathname.startsWith("/vision")) return "vision";
-  if (pathname.startsWith("/journal")) return "journal";
-  if (pathname.startsWith("/achievements")) return "achievements";
-  if (pathname.startsWith("/billing")) return "billing";
-  if (pathname.startsWith("/settings")) return "settings";
-  if (pathname.startsWith("/gallery")) return "vision";
-  if (pathname.startsWith("/vision-board")) return "vision";
-  if (pathname.startsWith("/goals")) return "system";
 
-  const fallbackTone = getFallbackRouteTone(pathname);
-  return fallbackTone === "default" ? undefined : fallbackTone;
-}

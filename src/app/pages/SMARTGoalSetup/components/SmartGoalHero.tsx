@@ -66,14 +66,14 @@ export function SmartGoalHero({
           </div>
 
           {draftTitle ? (
-            <p className="mt-3 max-w-3xl rounded-[18px] border border-app-line bg-app-surface/70 px-3.5 py-2.5 text-sm leading-6 text-app-ink-soft">
+            <p className="mt-3 max-w-3xl rounded-card border border-app-line bg-app-surface/70 px-3.5 py-2.5 text-sm leading-6 text-app-ink-soft">
               <span className="font-semibold text-app-ink">Bản nháp: </span>
               <span className="break-words">{draftTitle}</span>
             </p>
           ) : null}
         </div>
 
-        <div className="rounded-[22px] border border-app-line bg-app-surface/75 p-4">
+        <div className="rounded-card-lg border border-app-line bg-app-surface/75 p-4">
           <div className="flex items-baseline justify-between gap-3">
             <span className="text-xs font-extrabold text-app-ink-muted">Độ rõ</span>
             <span className="text-base font-extrabold text-app-ink">{completedCount}/{totalSteps}</span>
