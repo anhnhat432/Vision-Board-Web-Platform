@@ -1,7 +1,7 @@
 # Goals Editorial Journey Design
 
-**Date:** 2026-07-11  
-**Status:** Awaiting user review  
+**Date:** 2026-07-11
+**Status:** Awaiting user review
 **Surface classification:** Shell
 
 ## Context
