@@ -412,3 +412,293 @@ npm run build
 ```
 
 Với thay đổi ảnh hưởng public demo, cân nhắc `npm run smoke:prod` (báo rõ nếu không chạy được do thiếu credentials/deployment).
+
+---
+
+# Bổ sung thiết kế cho R12–R15
+
+Phần này mở rộng thiết kế cho bốn Requirement mới được thêm vào `requirements.md`: **R12 Accessibility chuyên sâu**, **R13 Giảm friction cho form Core_Flow**, **R14 Loading skeleton**, và **R15 Nâng cấp bề mặt Reflection/Review**. Toàn bộ nội dung R1–R11 phía trên giữ nguyên; phần này **kế thừa** các nguyên tắc đã nêu (tái sử dụng thay vì tạo mới, Core contract bất biến, local-first, quy trình kiểm chứng) và chỉ mô tả phần tăng thêm.
+
+## Overview (R12–R15)
+
+Bốn Requirement này tiếp tục là công việc **Shell/Mixed**: hầu hết là trình bày (a11y wiring, inline validation UI, skeleton, layout Reflection), một phần chạm ranh giới Mixed vì đọc/ghi qua Storage_Contract (form save, reflection). Nguyên tắc quyết định:
+
+1. **R12 dựa trên Radix primitives.** Codebase đã dùng `@/app/components/ui/dialog` (Radix `Dialog`) và `@/app/components/ui/alert-dialog` (Radix `AlertDialog`) — các primitive này **đã** cung cấp focus trap, Escape-to-close, và focus return sẵn có. Vì vậy R12 là công việc **audit + wiring** (đảm bảo mọi modal Core_Flow dùng đúng primitive, mọi control có nhãn ARIA, focus ring đạt tương phản), **không** xây modal system mới. Contrast được kiểm chứng bằng một helper thuần chỉ dùng trong test.
+2. **R13 tái sử dụng form component hiện có** (`Input`, `Label`, `Textarea`, `Button`) và copy `SAVE_STATUS` sẵn có trong `user-facing-copy.ts`. Thêm hai helper thuần mỏng, testable: `resolveFieldValidationState` (trạng thái hợp lệ + thông báo cụ thể) và `resolveSaveStatus` (máy trạng thái lưu loại trừ lẫn nhau). **Không** đổi Storage_Contract.
+3. **R14 tái sử dụng `Skeleton`/`FormSkeleton`** đã có trong `src/app/components/ui/skeleton.tsx` và máy trạng thái `useScreenDataState`/`ScreenStateView` (nhánh `loading`). Skeleton là **lớp trình bày thuần** — không đọc/ghi dữ liệu. Bổ sung các component skeleton per-screen ánh xạ 1:1 vùng nội dung, cắm vào slot `loadingFallback` của `ScreenStateView`.
+4. **R15 tái sử dụng `EmptyState`, `useScreenDataState`, `ScreenStateView`, `CoreFlowProgress`** cho `ReflectionJournal` — vốn **đã** dùng các mảnh này. Công việc là chuẩn hoá layout thành hai section (prompt phản tư vs dữ liệu tiến độ), khẳng định đúng một Primary_CTA, và siết hợp đồng empty-state (mô tả 1–200 ký tự, một Primary_CTA trỏ route hiện có). **Không** đổi Storage_Contract cho reflection.
+
+## Architecture (R12–R15)
+
+```mermaid
+flowchart TD
+    subgraph A11y["R12 — Accessibility (audit + wiring)"]
+        RadixDialog["Radix Dialog / AlertDialog\n(focus trap, Escape, focus return — CÓ SẴN)"]
+        AriaAudit["ARIA label/role audit\n(control không có nhãn hiển thị)"]
+        FocusOrder["Focus order = thứ tự đọc\n(DOM order, không tabindex dương)"]
+        Contrast["contrast helper (TEST-ONLY)\nkiểm 4.5:1 / 3:1"]
+    end
+
+    subgraph Forms["R13 — Form friction"]
+        FieldState["resolveFieldValidationState()\n(pure)"]
+        SaveState["resolveSaveStatus()\n(pure)"]
+        FormUI["Input / Label / Textarea / Button\n(reuse) + inline error slot"]
+        FieldState --> FormUI
+        SaveState --> FormUI
+    end
+
+    subgraph Skeleton["R14 — Loading skeleton"]
+        ScreenState["useScreenDataState().kind === loading\n(CÓ SẴN)"]
+        SkeletonCmp["Skeleton / FormSkeleton (reuse)\n+ per-screen skeleton 1:1 vùng nội dung"]
+        ScreenStateView["ScreenStateView loadingFallback slot\n(CÓ SẴN)"]
+        ScreenState --> ScreenStateView --> SkeletonCmp
+    end
+
+    subgraph Reflect["R15 — Reflection/Review polish"]
+        TwoSections["2 section: prompt phản tư | dữ liệu tiến độ"]
+        OnePrimary["đúng 1 Primary_CTA + secondary"]
+        ReuseStates["EmptyState / ScreenStateView / CoreFlowProgress (reuse)"]
+    end
+
+    subgraph Core["Core contract — ĐÓNG BĂNG (không đổi ở R12–R15)"]
+        Storage[(Storage_Contract\nreflections / userData)]
+        Entitlement[Entitlement_Authority]
+        Sync[sync semantics]
+        Mode["isRealMode()/isDemoMode()"]
+    end
+
+    FormUI --> Storage
+    ReuseStates --> Storage
+    A11y -. "không đổi" .-> Core
+    Skeleton -. "không đổi" .-> Core
+```
+
+### Ranh giới Shell / Mixed cho R12–R15
+
+| Requirement | Phân loại | Được phép sửa | Bị đóng băng |
+|-------------|-----------|---------------|--------------|
+| R12 Accessibility | Mixed (đa số Shell) | ARIA attrs, focus order (DOM order), focus ring class, wiring modal về Radix | Storage_Contract, Entitlement_Authority, sync semantics, billing route, mode branching |
+| R13 Form friction | Mixed | inline validation UI, save-status UI, helper thuần | Storage keys/shape, thời điểm & API ghi dữ liệu |
+| R14 Skeleton | Shell | thành phần skeleton trình bày, cắm vào `loadingFallback` | nguồn dữ liệu, cách đọc/ghi |
+| R15 Reflection polish | Mixed | layout/hierarchy, section headers, CTA marking, empty-state copy | Storage_Contract cho reflection |
+
+## Components and Interfaces (R12–R15)
+
+Không tạo modal system, form library, hay skeleton framework mới. Bảng dưới nêu rõ reuse vs bổ sung.
+
+### R12 — Accessibility
+
+- **Reuse Radix `Dialog`** (`src/app/components/ui/dialog.tsx`) và **`AlertDialog`** (`src/app/components/ui/alert-dialog.tsx`): đã cung cấp `focus trap`, `Escape` → `onOpenChange(false)`, và **focus return** về trigger (Req 12.6, 12.7, 12.8). Thiết kế R12 = **audit** rằng mọi modal/dialog trong Core_Flow (ví dụ dialog "Viết nhật ký mới" và các `AlertDialog` phá hủy trong `ReflectionJournal`/`12WeekSystemSettings`) đều đi qua các primitive này, không tự dựng overlay bằng `div` + state.
+- **ARIA audit (Req 12.4)**: mọi control chỉ có icon (ví dụ nút `MoreVertical`, nút đóng) phải có `aria-label` mô tả chức năng. Trong `ReflectionJournal` các nút icon đã có `aria-label` — thiết kế chuẩn hoá quy ước này cho toàn Core_Flow.
+- **Focus order (Req 12.2)**: giữ thứ tự DOM khớp thứ tự đọc; **không** dùng `tabindex` dương. Đây là ràng buộc cấu trúc JSX, không phải component mới.
+- **Focus indicator (Req 12.3)**: dùng đúng cụm class focus ring hiện có — `focus-visible:ring-app-accent` (Execution) / `focus-visible:ring-app-warm` (Reflection), độ dày ≥ 2px, tương phản ≥ 3:1 so với nền.
+- **Keyboard activation (Req 12.9)**: dùng phần tử `<button>` gốc (Enter/Space kích hoạt native) thay vì `div onClick`; Radix trigger đã hỗ trợ Enter/Space.
+- **Bổ sung helper thuần (TEST-ONLY)** `computeContrastRatio` để kiểm chứng Req 12.3/12.5. Helper này **không** vào bundle sản phẩm — chỉ nằm trong test util, tái sử dụng cách tính đã có ở `src/test/ux-ui-upgrade/property-2-contrast.test.ts` (WCAG 2.1 relative luminance + alpha-composite).
+
+```typescript
+// test-only helper (không đưa vào bundle) — src/test/ux-ui-upgrade/contrast.ts
+export interface RGB { r: number; g: number; b: number; }
+/** Relative luminance + contrast ratio theo WCAG 2.1: (L1+0.05)/(L2+0.05). */
+export function computeContrastRatio(fg: RGB, bg: RGB): number;
+/** true nếu ratio đạt ngưỡng danh mục: normalText 4.5, largeText/affordance/focusRing 3.0. */
+export function meetsContrastThreshold(ratio: number, category: ContrastCategory): boolean;
+```
+
+### R13 — Form friction
+
+- **Reuse** `Input`, `Label`, `Textarea`, `Button` và copy `SAVE_STATUS` (`{ saved: "Đã lưu cục bộ", saving: "Đang lưu...", error: "Lưu không được", ... }`).
+- **Bổ sung helper thuần** `resolveFieldValidationState` — phân giải trạng thái hợp lệ của một field và sinh thông báo cụ thể (bắt buộc / định dạng / độ dài). Dùng chung cho Onboarding, SMART Goal Setup, Feasibility Check.
+
+```typescript
+// src/app/utils/form-validation-state.ts (mới, pure)
+export type FieldRule =
+  | { kind: "required" }
+  | { kind: "minLength"; value: number }
+  | { kind: "maxLength"; value: number }
+  | { kind: "pattern"; regex: RegExp; label: string };
+
+export interface FieldValidationState {
+  valid: boolean;
+  /** null khi hợp lệ; ngược lại thông báo nêu rõ điều kiện field cần đạt (Req 13.2). */
+  message: string | null;
+  /** Rule đầu tiên bị vi phạm (để test/telemetry), null khi hợp lệ. */
+  violated: FieldRule["kind"] | null;
+}
+
+/**
+ * Đánh giá `value` theo `rules` theo thứ tự; trả về đúng một trạng thái
+ * loại trừ lẫn nhau: hợp lệ (message=null) hoặc không hợp lệ kèm thông báo
+ * cụ thể theo rule đầu tiên bị vi phạm (Req 13.1, 13.2, 13.3). Thuần, không
+ * side-effect, không đọc storage.
+ */
+export function resolveFieldValidationState(value: string, rules: readonly FieldRule[]): FieldValidationState;
+```
+
+- **Bổ sung helper thuần** `resolveSaveStatus` — máy trạng thái trình bày cho thao tác lưu, loại trừ lẫn nhau `idle | saving | saved | error`. Timing (300ms hiển thị "đang lưu", tối thiểu 2s giữ "đã lưu") do lớp UI điều khiển bằng timer; helper chỉ phân giải trạng thái từ input đã tính.
+
+```typescript
+// src/app/utils/save-status.ts (mới, pure)
+export type SaveStatus = "idle" | "saving" | "saved" | "error";
+
+export interface SaveStatusInput {
+  saving: boolean;          // thao tác lưu đang diễn ra
+  errored: boolean;         // lần lưu gần nhất thất bại (Req 13.7)
+  savedHoldActive: boolean; // đang trong cửa sổ giữ "đã lưu" tối thiểu 2s (Req 13.5)
+}
+
+/**
+ * Trả về đúng một trạng thái theo thứ tự ưu tiên loại trừ lẫn nhau
+ * error > saving > saved > idle. `error` khi errored; ngược lại `saving`
+ * khi saving; ngược lại `saved` khi còn trong cửa sổ giữ; ngược lại `idle`.
+ */
+export function resolveSaveStatus(input: SaveStatusInput): SaveStatus;
+```
+
+- **Inline error slot (Req 13.1, 13.3)**: mỗi field render thông báo lỗi cạnh field, cập nhật trên `onBlur`/`onChange` trong ≤ 500ms (thực tế đồng bộ trong cùng React event, dưới ngưỡng), gỡ lỗi khi field trở nên hợp lệ.
+- **Không mất dữ liệu (Req 13.6, 13.7)**: validation và save-status **không** reset state form. Giá trị đã nhập được giữ trong React state của form; lỗi validation/lưu chỉ đổi hiển thị, không xoá giá trị. Storage_Contract giữ nguyên (Req 13.8) — vẫn ghi qua API storage hiện có.
+
+### R14 — Loading skeleton
+
+- **Reuse `Skeleton`/`FormSkeleton`** (`src/app/components/ui/skeleton.tsx`) và slot `loadingFallback` của `ScreenStateView`. `FormSkeleton` đã có `data-slot="form-skeleton"` + `aria-busy` cho form; các màn hình list/card dùng `Skeleton` khối.
+- **Bổ sung skeleton per-screen (trình bày thuần)**: mỗi màn hình Core_Flow định nghĩa một skeleton ánh xạ **1:1** các vùng nội dung thật (vùng tiêu đề, vùng list/card, vùng hành động) — ví dụ `ReflectionJournalSkeleton` hiện có đã ánh xạ hero + hàng thẻ + danh sách. Thiết kế chuẩn hoá pattern này và cắm vào `ScreenStateView loadingFallback` để cùng máy trạng thái quản lý.
+- **Ràng buộc trình bày**:
+  - Không tràn viewport: skeleton dùng cùng container `min-w-0`/`max-w`/grid như nội dung thật → `scrollWidth ≤ clientWidth` trên Mobile (Req 14.2), không phần tử tràn container trên Desktop (Req 14.3).
+  - Tôn trọng R10 (Req 14.4): không motion > 300ms, không loop/autoplay, không glow. Lưu ý `skeleton-shimmer` và `animate-pulse` là affordance chức năng; thiết kế yêu cầu shimmer là hiệu ứng tĩnh/ngắn tuân R10, và scanner calm-style loại trừ có chủ đích các class này.
+  - Xuất hiện ≤ 100ms khi vào `loading` (Req 14.5): skeleton render đồng bộ trong nhánh `loading` của `ScreenStateView` — không có delay/timer chèn vào.
+  - Thay thế hoàn toàn khi `ready` (Req 14.6) và fallback lỗi khi `error` (Req 14.7): do máy trạng thái loại trừ lẫn nhau của `useScreenDataState` đảm bảo — chỉ một nhánh render tại một thời điểm; không còn phần tử skeleton nào tồn tại ở nhánh `ready`/`error`.
+- **Không đổi dữ liệu (Req 14.8)**: skeleton không đọc/ghi storage; nguồn dữ liệu và Storage_Contract giữ nguyên.
+
+### R15 — Reflection/Review polish
+
+- **Reuse** `EmptyState`, `useScreenDataState`, `ScreenStateView` (đã dùng trong `ReflectionJournal.tsx`), `CoreFlowProgress`, và `AlertDialog`/`Dialog` Radix.
+- **Hai section tách biệt (Req 15.1)**: chuẩn hoá màn hình thành đúng hai khối có tiêu đề riêng và ranh giới rõ:
+  1. **Prompt phản tư** — khối gợi ý/viết reflection (hero + prompt cards + nút "Viết entry").
+  2. **Dữ liệu tiến độ** — khối tổng kết tuần/tiến độ (`weekCompletion`, streak, `CoreFlowProgress`).
+  Mỗi khối là một `<section>` với heading (`h2`) riêng, phân tách bằng spacing token và/hoặc `border`.
+- **Đúng một Primary_CTA (Req 15.2)**: chỉ một hành động được đánh dấu chính (ví dụ "Viết entry mới" dùng `Button` warm nổi bật); các điều hướng khác ("Dòng thời gian", "Mở chu kỳ liên quan") là `variant="outline"`/secondary. Quy ước Primary_CTA nhất quán với R2.
+- **Loading / Empty / Error (Req 15.3, 15.4, 15.6)**: dùng `ScreenStateView` với `journalScreenState.kind`:
+  - `loading` → skeleton (R14), không hiển thị empty/Primary_CTA của empty (Req 15.3).
+  - `empty` → `EmptyState` gồm title + mô tả (siết **1–200 ký tự**) + đúng một Primary_CTA trỏ route hiện có (Req 15.4, 15.5).
+  - `error` → khối lỗi + "Thử lại", giữ nguyên dữ liệu reflection đã lưu (Req 15.6).
+- **Không đổi Storage_Contract (Req 15.7)**: đọc/ghi reflection vẫn qua `addReflection`/`deleteReflection`/`getUserData`/`saveUserData`; không đổi key/shape.
+
+## Data Models (R12–R15)
+
+Không thêm/đổi data shape lưu trữ. Các kiểu dưới là **view/logic tại runtime** (R12–R13) hoặc **test-only** (R12 contrast), không serialize vào localStorage.
+
+```typescript
+// R12 (test-only)
+type ContrastCategory = "normalText" | "largeText" | "controlAffordance" | "focusRing";
+
+// R13 (runtime, không persist)
+type FieldRule =
+  | { kind: "required" }
+  | { kind: "minLength"; value: number }
+  | { kind: "maxLength"; value: number }
+  | { kind: "pattern"; regex: RegExp; label: string };
+interface FieldValidationState { valid: boolean; message: string | null; violated: FieldRule["kind"] | null; }
+type SaveStatus = "idle" | "saving" | "saved" | "error";
+
+// R14 (trình bày thuần, tái dùng ScreenStateKind hiện có)
+type ScreenStateKind = "loading" | "empty" | "error" | "ready";
+```
+
+Reflection (R15) tiếp tục dùng shape `Reflection` hiện có trong `storage-types.ts` (đọc-only đối với thiết kế này): không đổi trường, không đổi key `reflections` trong `UserData`.
+
+## Correctness Properties (R12–R15)
+
+*Một property là đặc tính/hành vi phải đúng trên mọi lần thực thi hợp lệ của hệ thống — một phát biểu hình thức về việc phần mềm phải làm gì.*
+
+Phần lớn tiêu chí của R12–R15 là công việc **Shell/UI** (a11y wiring qua Radix, focus order, ARIA, skeleton layout, hierarchy Reflection) — kiểm chứng bằng component test, DOM assertion, static scan và integration. Sau prework, chỉ **ba** lớp logic thuần mới là phổ quát theo input và phù hợp property-based testing; ba property dưới đây **không** trùng với Property 1–5 đã có. Đặc biệt các tiêu chí về loại trừ lẫn nhau của máy trạng thái tải (Req 14.6, 14.7, 15.3) đã được **Property 1** (`resolveScreenStateKind`) phủ ở tầng logic — R14/R15 tái sử dụng, không thêm property mới.
+
+### Property 6: Tương phản màu Core_Flow đạt ngưỡng WCAG cho mọi cặp màu
+
+*For any* `ThemeMode ∈ {light, dark}` và *for any* cặp `(foreground, effective background, category)` trong ma trận token của Core_Flow — bao gồm text thường, text lớn, viền/biểu tượng chức năng của control, và **focus indicator** (Req 12.3) — `Contrast_Ratio` (công thức WCAG 2.1 trên nền hiệu dụng sau alpha-composite) đạt tối thiểu ngưỡng theo category: **4.5:1** cho text thường, **3:1** cho text lớn, viền/biểu tượng control và focus ring. Các cặp thuộc control `disabled` được loại khỏi tập kiểm tra.
+
+**Validates: Requirements 12.3, 12.5**
+
+### Property 7: Trạng thái hợp lệ của field loại trừ lẫn nhau và thông báo nêu đúng điều kiện
+
+*For any* chuỗi `value` và *for any* danh sách `rules`, `resolveFieldValidationState(value, rules)` trả về **đúng một** trạng thái loại trừ lẫn nhau: khi `value` thoả toàn bộ `rules` thì `valid === true` và `message === null` (gỡ lỗi — Req 13.3); khi `value` vi phạm ít nhất một rule thì `valid === false`, `message` khác rỗng và nêu rõ điều kiện của **rule đầu tiên bị vi phạm** (`violated` khớp `kind` của rule đó — bắt buộc / định dạng / độ dài, Req 13.2), không tồn tại input cho ra trạng thái vừa hợp lệ vừa có message.
+
+**Validates: Requirements 13.1, 13.2, 13.3**
+
+### Property 8: Trạng thái lưu form phân giải duy nhất theo đúng thứ tự ưu tiên
+
+*For any* `SaveStatusInput`, `resolveSaveStatus(input)` trả về **đúng một** giá trị trong `{idle, saving, saved, error}` theo thứ tự ưu tiên loại trừ lẫn nhau `error > saving > saved > idle`: `error` khi `errored`; ngược lại `saving` khi `saving`; ngược lại `saved` khi `savedHoldActive` (còn trong cửa sổ giữ tối thiểu 2s — Req 13.5); ngược lại `idle`. Không tồn tại input cho ra hai trạng thái hoặc không trạng thái nào.
+
+**Validates: Requirements 13.4, 13.5**
+
+## Error Handling (R12–R15)
+
+### Hành động bàn phím thất bại (Req 12.10)
+
+- Khi một hành động kích hoạt bằng Enter/Space/keyboard thất bại (handler ném lỗi hoặc trả lỗi), Core_Flow_UI hiển thị thông báo lỗi (`InlineStatusMessage tone="error"` hoặc `toast`), **giữ tiêu điểm** ở control liên quan (không blur/di chuyển focus), và **giữ nguyên** trạng thái dữ liệu (không ghi một phần, không xoá input).
+
+### Lỗi validation & lỗi lưu form (Req 13.6, 13.7)
+
+- Validation thất bại: chỉ đổi hiển thị (message cạnh field), **không** reset/clear giá trị đã nhập trong React state của form (Req 13.6).
+- Lưu thất bại: `resolveSaveStatus` trả `error`, hiển thị copy `SAVE_STATUS.error` ("Lưu không được"), và **giữ nguyên** toàn bộ dữ liệu đã nhập để người dùng thử lại (Req 13.7). Storage_Contract không đổi; ghi vẫn qua API storage hiện có, không ghi đè bằng giá trị rỗng.
+
+### Tải thất bại màn hình có skeleton (Req 14.7)
+
+- Khi máy trạng thái chuyển sang `error`, `ScreenStateView` thay **toàn bộ** skeleton bằng khối lỗi + control "Thử lại"; không còn phần tử skeleton nào tồn tại (đảm bảo bởi tính loại trừ lẫn nhau của `resolveScreenStateKind` — Property 1). `retry()` chỉ tải lại, không đụng dữ liệu local.
+
+### Tải thất bại Reflection/Review (Req 15.6)
+
+- `journalScreenState.kind === "error"` → khối lỗi + "Thử lại"; dữ liệu reflection đã lưu (`userData.reflections`) **không** bị thay đổi/xoá. `retry()` gọi `reloadUserData()`.
+
+### Bất biến contract khi cải thiện a11y/form/skeleton (Req 12.11, 13.8, 14.8, 15.7)
+
+- Mọi thay đổi R12–R15 giữ nguyên: storage keys/shape, Entitlement_Authority, sync semantics, billing route behavior, branching `isRealMode()`/`isDemoMode()`. Skeleton và helper validation/save-status là thuần trình bày/logic, không mở đường ghi mới vào storage.
+
+## Testing Strategy (R12–R15)
+
+### Cách tiếp cận
+
+- **Property-based tests**: 3 property mới (Property 6–8) cho lớp logic thuần (contrast, field validation, save status).
+- **Component/example tests**: a11y wiring (keyboard nav, focus order, ARIA, focus trap/return/Escape, Enter/Space), inline validation UI + timing, skeleton mapping, Reflection layout/CTA/empty-state contract.
+- **Integration/DOM tests**: skeleton mobile/desktop overflow, không mất dữ liệu khi validation/lưu thất bại.
+- **Static scan**: calm-style scan cho skeleton (Req 14.4), regression storage keys (Req 12.11, 13.8, 14.8, 15.7).
+
+### Property-based testing (R12–R15)
+
+- **Thư viện**: **fast-check** + Vitest (không tự viết PBT).
+- **Số vòng tối thiểu**: mỗi property test chạy ≥ **100** iteration (`{ numRuns: 100 }`).
+- **Tag**: `// Feature: core-flow-ui-upgrade, Property {number}: {property_text}`.
+- **Ánh xạ test → property** (mỗi property triển khai bằng MỘT property test):
+  - Property 6 → `src/test/ux-ui-upgrade/core-flow-contrast.test.ts` (mới) — sinh ngẫu nhiên `(themeMode, pair)` từ ma trận cặp màu Core_Flow (bao gồm focus ring); tái sử dụng helper WCAG thuần **test-only** (`computeContrastRatio`) theo cách đã có trong `property-2-contrast.test.ts`. Không render DOM, không import product code.
+  - Property 7 → `src/app/utils/form-validation-state.test.ts` (mới) — sinh `value` (kèm chuỗi rỗng/whitespace/quá dài) và tổ hợp `rules`; assert loại trừ lẫn nhau valid↔message và `violated` khớp rule đầu tiên bị vi phạm.
+  - Property 8 → `src/app/utils/save-status.test.ts` (mới) — sinh `SaveStatusInput` ngẫu nhiên; assert đúng một trạng thái theo thứ tự ưu tiên `error > saving > saved > idle`.
+
+### Component / example tests (R12–R15)
+
+- **A11y keyboard & focus (Req 12.1, 12.2, 12.6, 12.7, 12.8, 12.9)**: dùng Testing Library `userEvent` — Tab/Shift+Tab kiểm focus order khớp DOM (không tabindex dương), mở modal Radix rồi Tab kiểm focus trap, Escape đóng + focus return về trigger, Enter/Space kích hoạt Primary_CTA. Mở rộng `focus-keyboard.test.tsx` hiện có.
+- **ARIA labels (Req 12.4)**: render Core_Flow, assert mọi icon-only control có `aria-label`/`role` mô tả; hoặc static scan.
+- **Focus indicator hiển thị (Req 12.3, phần "nhìn thấy")**: assert control nhận focus có class ring đúng ngữ cảnh (`ring-app-accent`/`ring-app-warm`), độ dày ≥ 2px (phần tương phản do Property 6 phủ).
+- **Keyboard action fail (Req 12.10)**: handler ném lỗi → assert thông báo lỗi + focus giữ ở control + dữ liệu không đổi.
+- **Inline validation UI & timing (Req 13.1, 13.3)**: nhập giá trị không hợp lệ, blur/change → lỗi hiện cạnh field (≤ 500ms, kiểm bằng fake timers); sửa thành hợp lệ → lỗi gỡ (≤ 500ms).
+- **Save status timing (Req 13.4, 13.5)**: fake timers — "đang lưu" hiện trong 300ms và duy trì tới khi xong; "đã lưu" giữ tối thiểu 2s.
+- **Không mất dữ liệu (Req 13.6, 13.7)**: nhập dữ liệu, gây validation fail / save reject → assert input values không đổi.
+- **Skeleton mapping (Req 14.1, 14.5)**: render nhánh `loading` của mỗi màn hình Core_Flow → assert các vùng skeleton (header/list/action) ánh xạ 1:1 vùng nội dung thật và hiển thị đồng bộ (không timer chèn). Mở rộng `core-flow-states.test.tsx`.
+- **Skeleton thay thế/lỗi (Req 14.6, 14.7)**: đổi state `ready`/`error` → assert không còn phần tử skeleton; nhánh error có "Thử lại" (logic loại trừ lẫn nhau đã được Property 1 phủ).
+- **Reflection layout & CTA (Req 15.1, 15.2)**: assert hai `<section>` có heading riêng + ranh giới; đúng một Primary_CTA, các nav còn lại secondary.
+- **Reflection empty-state contract (Req 15.3, 15.4, 15.5)**: state `empty` → assert title tồn tại, độ dài mô tả trong `[1, 200]`, đúng một Primary_CTA với target ∈ route đã đăng ký; click → navigate đúng; state `loading` → không render empty/Primary_CTA-empty.
+
+### Integration / DOM tests (R12–R15)
+
+- **Skeleton overflow (Req 14.2, 14.3)**: render nhánh loading ở Mobile 320–767px → `document.scrollWidth ≤ clientWidth`; ở Desktop ≥ 1024px → không phần tử skeleton tràn container. Mở rộng `mobile-safety-touch-target.test.tsx`.
+
+### Static scan / regression (R12–R15)
+
+- **Skeleton calm-style (Req 14.4)**: `calm-style-scan` trên markup skeleton — không motion > 300ms, không loop/autoplay, không glow (ngoài allowlist shimmer đã kiểm duyệt).
+- **Contract regression (Req 12.11, 13.8, 14.8, 15.7)**: tái dùng `property-9-storage-keys.test.ts`/`storage-keys-scan.ts` để khẳng định storage keys/shape không đổi; assert component skeleton và helper không import storage write API; route table không đổi.
+
+### Lệnh kiểm chứng
+
+```bash
+npm run typecheck
+npm run lint
+npm run test:run
+npm run build
+```

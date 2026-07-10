@@ -54,6 +54,7 @@ import {
   GOALTRACKER_TOUR_STEPS,
   GoalCard,
   GoalFilterChips,
+  GoalListSkeleton,
   GoalSummaryStrip,
   GoalTrackerSkeleton,
   getTodayFocusGoal,
@@ -545,7 +546,7 @@ function GoalTrackerContent({
                 className="inline-flex h-auto items-center justify-center gap-2 rounded-full border border-app-line bg-app-surface px-5 py-3 text-[13.5px] font-semibold text-app-ink shadow-none transition-all duration-200 hover:bg-app-bg sm:w-auto dark:border-app-line dark:bg-app-surface"
                 onClick={handleStartDirectGoalFlow}
               >
-                <Plus className="h-4 w-4" />
+                <Plus className="h-4 w-4" aria-hidden="true" />
                 Tạo nhanh mục tiêu
               </Button>
             </div>
@@ -590,7 +591,10 @@ function GoalTrackerContent({
         {/* Search + Filter */}
         <div className="flex flex-col gap-3.5">
           <div className="relative w-full">
-            <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted" />
+            <Search
+              className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted"
+              aria-hidden="true"
+            />
             <input
               type="search"
               aria-label="Tìm kiếm mục tiêu"
@@ -610,6 +614,7 @@ function GoalTrackerContent({
             state={goalsScreenState.kind}
             onRetry={goalsScreenState.retry}
             errorDescription="Chưa tải được danh sách mục tiêu. Dữ liệu cục bộ của bạn vẫn được giữ nguyên. Hãy thử lại."
+            loadingFallback={<GoalListSkeleton />}
             empty={
               <EmptyState
                 variant="card"

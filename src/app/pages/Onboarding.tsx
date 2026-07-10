@@ -19,6 +19,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
+import { AutoSaveIndicator } from "../components/AutoSaveIndicator";
 import { CoreFlowProgress } from "../components/CoreFlowProgress";
 import { PageShell } from "../components/PageShell";
 import { ScreenGuide } from "../components/ScreenGuide";
@@ -27,6 +28,7 @@ import { InlineStatusMessage } from "../components/states/InlineStatusMessage";
 import { useIsMobile } from "../components/ui/use-mobile";
 import { cn } from "../components/ui/utils";
 import { useDirtyFormGuard } from "../hooks/useDirtyFormGuard";
+import { useSaveStatus } from "../hooks/useSaveStatus";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import { hasRealLifeBalance } from "../utils/core-flow-guard";
@@ -219,8 +221,8 @@ export function Onboarding() {
   const [reviewedAreaIndices, setReviewedAreaIndices] = useState<Set<number>>(new Set());
   const [isDirty, setIsDirty] = useState(false);
   const [availableDraft, setAvailableDraft] = useState<OnboardingDraft | null>(null);
-  const [_lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
-  const [_autoSaveStatus, setAutoSaveStatus] = useState<AutoSaveDraftStatus>("saved");
+  const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<AutoSaveDraftStatus>("saved");
   const flowTopRef = useRef<HTMLDivElement | null>(null);
   const activeAreaHeadingRef = useRef<HTMLHeadingElement | null>(null);
   const didFocusActiveAreaRef = useRef(false);
@@ -433,6 +435,15 @@ export function Onboarding() {
     navigate("/");
   };
 
+  // Save-status UI cho autosave bản nháp: phân giải qua resolveSaveStatus, giữ
+  // "đã lưu" tối thiểu 2s ở lớp UI (Req 13.4, 13.5). Khi chưa có lần lưu nào
+  // (mới vào màn hình) hiển thị mặc định "đã lưu cục bộ" như trước.
+  const draftSaveStatus = useSaveStatus({
+    saving: autoSaveStatus === "saving",
+    lastSavedAt,
+  });
+  const saveBadgeStatus = draftSaveStatus === "idle" ? "saved" : draftSaveStatus;
+
   const progressHeader = (
     <div>
       <CoreFlowProgress
@@ -443,25 +454,7 @@ export function Onboarding() {
           }
           navigate("/");
         }}
-        saveBadge={
-          <span className="inline-flex items-center gap-1.5 rounded-[999px] border border-[rgba(23,21,15,0.1)] bg-white px-3 py-1.5 text-[11.5px] font-medium text-[#7A6E5E]">
-            <svg
-              width="13"
-              height="13"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#16A34A"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M21.801 10A10 10 0 1 1 17 3.335" />
-              <path d="m9 11 3 3L22 4" />
-            </svg>
-            Đã lưu cục bộ
-          </span>
-        }
+        saveBadge={<AutoSaveIndicator status={saveBadgeStatus} lastSavedAt={lastSavedAt} variant="default" />}
         className="mb-0"
       />
     </div>

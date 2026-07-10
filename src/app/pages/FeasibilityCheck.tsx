@@ -20,6 +20,7 @@ import { ScreenGuide } from "../components/ScreenGuide";
 import { SCREEN_GUIDES } from "../components/screen-guides";
 import { cn } from "../components/ui/utils";
 import { useDirtyFormGuard } from "../hooks/useDirtyFormGuard";
+import { useSaveStatus } from "../hooks/useSaveStatus";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import { getScoredLifeArea, hasRealLifeBalance } from "../utils/core-flow-guard";
@@ -282,6 +283,14 @@ export function FeasibilityCheck() {
 
   useDirtyFormGuard(isDirty, () => debouncedSaveRef.current?.flush());
 
+  // Save-status UI: phân giải qua resolveSaveStatus, giữ "đã lưu" tối thiểu 2s
+  // ở lớp UI (Req 13.4, 13.5). Không đổi Storage_Contract.
+  const saveStatus = useSaveStatus({
+    saving: autoSaveStatus === "saving",
+    lastSavedAt,
+    dirty: isDirty,
+  });
+
   const activeQuestions = showAdvancedQuestions ? QUESTIONS : CORE_QUESTIONS;
 
   useEffect(() => {
@@ -522,7 +531,7 @@ export function FeasibilityCheck() {
     setCurrentStep(nextStep >= 0 ? nextStep : Math.min(currentStep, nextQuestions.length - 1));
   };
 
-  const autoSave = <AutoSaveIndicator status={isDirty ? autoSaveStatus : "saved"} lastSavedAt={lastSavedAt} />;
+  const autoSave = <AutoSaveIndicator status={saveStatus} lastSavedAt={lastSavedAt} />;
   const resultAnswers = buildFeasibilityAnswersWithDefaults(answers);
 
   if (result) {

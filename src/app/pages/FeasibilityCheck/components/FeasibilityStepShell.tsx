@@ -2,6 +2,7 @@ import { ArrowLeft, ArrowRight, CheckCircle2, Lightbulb, Target } from "lucide-r
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState, type Ref } from "react";
 import { soundService } from "@/app/services/soundService";
+import { resolveFieldErrorDisplay } from "../../../utils/field-error-display";
 import { Label } from "../../../components/ui/label";
 import { Progress } from "../../../components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "../../../components/ui/radio-group";
@@ -44,6 +45,13 @@ export function FeasibilityStepShell({
 
   // Lấy dữ liệu của đáp án đang chọn để hiển thị box phân tích tĩnh bên dưới
   const selectedOptionData = currentQuestion.options.find((opt) => opt.value === selectedAnswer);
+
+  // Inline validation cho lựa chọn bắt buộc: phân giải qua resolveFieldValidationState
+  // (Req 13.1, 13.2). Cập nhật ngay khi đổi lựa chọn, gỡ lỗi khi đã chọn hợp lệ.
+  const answerError = resolveFieldErrorDisplay(selectedAnswer ?? "", [{ kind: "required" }], {
+    forceShow: true,
+    messages: { required: "Chọn một lựa chọn phù hợp để tiếp tục hành trình." },
+  });
   const [showMobileActionBar, setShowMobileActionBar] = useState(false);
   const mobileProgressLabel = `Câu ${currentStep + 1}/${totalSteps}`;
   const mobileAnswerStatus = selectedAnswer ? "Đã chọn" : "Cần chọn đáp án";
@@ -219,7 +227,7 @@ export function FeasibilityStepShell({
               )}
             </AnimatePresence>
 
-            {!selectedAnswer ? (
+            {answerError.showError ? (
               <p
                 data-feasibility-step-feedback
                 id={`feasibility-question-${currentQuestion.id}-next-hint`}
@@ -227,7 +235,7 @@ export function FeasibilityStepShell({
                 className="mt-1 flex items-center gap-1.5 text-[12.5px] font-semibold leading-snug text-app-accent sm:mt-3 sm:text-[13px]"
               >
                 <Lightbulb className="h-4 w-4 shrink-0" aria-hidden="true" />
-                <span>Chọn một lựa chọn phù hợp để tiếp tục hành trình.</span>
+                <span>{answerError.message}</span>
               </p>
             ) : null}
           </motion.div>

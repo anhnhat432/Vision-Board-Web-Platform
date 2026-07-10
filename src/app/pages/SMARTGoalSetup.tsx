@@ -21,6 +21,7 @@ import { UpgradePaywallDialog } from "../components/UpgradePaywallDialog";
 import { FormSkeleton } from "../components/ui/skeleton";
 import { useSetAssistantPageContext } from "../features/assistant/AssistantPageContextProvider";
 import { useDirtyFormGuard } from "../hooks/useDirtyFormGuard";
+import { useSaveStatus } from "../hooks/useSaveStatus";
 import { useScrollToTopOnChange } from "../hooks/useScrollToTopOnChange";
 import { trackAnalyticsEvent } from "../utils/analytics";
 import { getScoredLifeArea, hasRealLifeBalance } from "../utils/core-flow-guard";
@@ -291,6 +292,14 @@ export function SMARTGoalSetup() {
   }, [currentSnapshot, hasAnyDraftContent, isDirty, setupState]);
 
   useDirtyFormGuard(isDirty, () => debouncedSaveRef.current?.flush());
+
+  // Save-status UI: phân giải qua resolveSaveStatus, giữ "đã lưu" tối thiểu 2s
+  // ở lớp UI (Req 13.4, 13.5). Không đổi Storage_Contract.
+  const saveStatus = useSaveStatus({
+    saving: autoSaveStatus === "saving",
+    lastSavedAt,
+    dirty: isDirty,
+  });
 
   useScrollToTopOnChange(currentStep, {
     targetRef: stepTopRef,
@@ -599,13 +608,7 @@ export function SMARTGoalSetup() {
           currentStepId="smart_goal"
           onExit={() => navigate("/")}
           compactOnMobile
-          saveBadge={
-            <AutoSaveIndicator
-              status={isDirty ? autoSaveStatus : "saved"}
-              lastSavedAt={lastSavedAt}
-              variant="default"
-            />
-          }
+          saveBadge={<AutoSaveIndicator status={saveStatus} lastSavedAt={lastSavedAt} variant="default" />}
         />
 
         {!isVisionPromptDismissed ? (

@@ -5,6 +5,7 @@ import type { GoalArchetype } from "@/lib/smart-goal/goalArchetypes";
 import { FieldError } from "../../../components/ui/field-error";
 import { Input } from "../../../components/ui/input";
 import { Textarea } from "../../../components/ui/textarea";
+import { resolveFieldErrorDisplay } from "../../../utils/field-error-display";
 import { FOCUS_AREA_EXAMPLES } from "../constants";
 import type { SMARTData } from "../types";
 import { helperTextClass, inputClass, labelClass, requiredMarkerClass, textareaClass } from "./formStyles";
@@ -26,8 +27,21 @@ export function RelevantStep({
 }: RelevantStepProps) {
   const [hasBlurredMotivation, setHasBlurredMotivation] = useState(false);
   const [showTips, setShowTips] = useState(false);
-  const motivationInvalid = smartData.relevant.motivation_reason.trim().length < 15;
-  const showMotivationError = motivationInvalid && (hasBlurredMotivation || currentStepHasDraftContent);
+  // Inline validation cho lý do (bắt buộc + tối thiểu 15 ký tự) phân giải qua
+  // resolveFieldValidationState (Req 13.1–13.3).
+  const motivationError = resolveFieldErrorDisplay(
+    smartData.relevant.motivation_reason.trim(),
+    [{ kind: "required" }, { kind: "minLength", value: 15 }],
+    {
+      touched: hasBlurredMotivation,
+      hasContent: currentStepHasDraftContent,
+      messages: {
+        required: "Hãy viết chi tiết hơn một chút (tối thiểu 15 ký tự) để làm rõ động lực cốt lõi.",
+        minLength: "Hãy viết chi tiết hơn một chút (tối thiểu 15 ký tự) để làm rõ động lực cốt lõi.",
+      },
+    },
+  );
+  const showMotivationError = motivationError.showError;
 
   const archetypeSuggestions = () => {
     switch (archetype) {
@@ -148,11 +162,7 @@ export function RelevantStep({
         />
 
         {showMotivationError ? (
-          <FieldError
-            id="smart-relevant-reason-error"
-            message="Hãy viết chi tiết hơn một chút (tối thiểu 15 ký tự) để làm rõ động lực cốt lõi."
-            role="alert"
-          />
+          <FieldError id="smart-relevant-reason-error" message={motivationError.message} role="alert" />
         ) : null}
       </div>
 

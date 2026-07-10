@@ -128,7 +128,7 @@ export function TodayFocusCard({
           className="h-auto rounded-full bg-app-accent px-[22px] py-[13px] text-[13.5px] font-bold text-white shadow-none transition-all duration-200 hover:bg-app-accent-hover sm:shrink-0"
         >
           {ctaLabel}
-          <ArrowRight className="h-4 w-4" />
+          <ArrowRight className="h-4 w-4" aria-hidden="true" />
         </Button>
       </div>
     </div>

@@ -519,7 +519,10 @@ export function SmartGoalStepShell({
           <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 rounded-lg p-2 text-[13px] font-semibold leading-tight text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 [&::-webkit-details-marker]:hidden">
             <p className="flex items-center gap-2 font-semibold">
               Xem chi tiết nội dung đang viết
-              <ChevronDown className="h-4 w-4 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
+              <ChevronDown
+                className="h-4 w-4 text-app-ink-muted transition-transform duration-200 group-open:rotate-180"
+                aria-hidden="true"
+              />
             </p>
           </summary>
           <div className="mt-4 grid gap-3 border-t border-app-line pt-4 sm:grid-cols-2 lg:grid-cols-3">

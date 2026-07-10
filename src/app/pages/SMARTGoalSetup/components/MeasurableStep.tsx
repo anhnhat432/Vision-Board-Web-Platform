@@ -9,6 +9,7 @@ import { parseNumberInput } from "@/lib/smart-goal";
 import { GoalArchetypeExamples } from "../../../components/GoalArchetypeExamples";
 import { FieldError } from "../../../components/ui/field-error";
 import { Input } from "../../../components/ui/input";
+import { resolveFieldErrorDisplay } from "../../../utils/field-error-display";
 import { FOCUS_AREA_EXAMPLES } from "../constants";
 import type { SMARTData } from "../types";
 import { ArchetypeHint } from "./ArchetypeHint";
@@ -83,12 +84,18 @@ export function MeasurableStep({
   const activeArchetype = archetype ?? intentArchetype ?? "other";
   const parsedBaselineValue = parseNumberInput(smartData.measurable.baseline_value);
   const parsedTargetValue = parseNumberInput(smartData.measurable.target_value);
-  const metricNameMissing = smartData.measurable.metric_name.trim().length === 0;
+  // Inline validation cho tên chỉ số (bắt buộc) phân giải qua
+  // resolveFieldValidationState (Req 13.1, 13.2).
+  const metricNameError = resolveFieldErrorDisplay(smartData.measurable.metric_name, [{ kind: "required" }], {
+    touched: blurredFields.metricName,
+    hasContent: currentStepHasDraftContent,
+    messages: { required: "Chọn một chỉ số cụ thể để bắt đầu đo lường." },
+  });
   const baselineInvalid = smartData.measurable.baseline_value.trim().length > 0 && parsedBaselineValue === undefined;
   const targetNotAboveBaseline =
     parsedBaselineValue !== undefined && parsedTargetValue !== undefined && parsedTargetValue <= parsedBaselineValue;
   const targetInvalid = parsedTargetValue === undefined || targetNotAboveBaseline;
-  const showMetricNameError = metricNameMissing && (blurredFields.metricName || currentStepHasDraftContent);
+  const showMetricNameError = metricNameError.showError;
   const showTargetError = targetInvalid && (blurredFields.targetValue || currentStepHasDraftContent);
   const activeMetricUnit = metricUnitInput.trim();
   const metricNameDescriptionIds = [
@@ -272,7 +279,7 @@ export function MeasurableStep({
             Con số để đo tiến trình mỗi tuần.
           </p>
           {showMetricNameError ? (
-            <FieldError id="smart-metric-name-error" message="Chọn một chỉ số cụ thể để bắt đầu đo lường." role="alert" />
+            <FieldError id="smart-metric-name-error" message={metricNameError.message} role="alert" />
           ) : null}
         </div>
         <div>

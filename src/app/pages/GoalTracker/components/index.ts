@@ -6,6 +6,7 @@ export { GoalSummaryStrip } from "./GoalSummaryStrip";
 export { GoalFilterChips } from "./GoalFilterChips";
 export { WeeklyQuestLine } from "./WeeklyQuestLine";
 export { GoalTrackerSkeleton } from "./GoalTrackerSkeleton";
+export { GoalListSkeleton } from "./GoalListSkeleton";
 export * from "./types";
 export * from "./helpers";
 export * from "./constants";

@@ -163,7 +163,7 @@ export function GoalCard({
                       onClick={() => openTwelveWeekCenter(goal.id)}
                     >
                       Tiếp tục chu kỳ
-                      <ArrowRight className="h-3.5 w-3.5" />
+                      <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
                     </Button>
                   )}
                   {system ? <FutureSelfLetter goalId={goal.id} progress={progress} system={system} /> : null}
@@ -251,7 +251,10 @@ export function GoalCard({
                     onClick={() => openTwelveWeekCenter(goal.id)}
                   >
                     <span>Xem toàn bộ chu kỳ</span>
-                    <ArrowRight className="h-3.5 w-3.5 transform transition-transform duration-200 group-hover/more:translate-x-0.5" />
+                    <ArrowRight
+                      className="h-3.5 w-3.5 transform transition-transform duration-200 group-hover/more:translate-x-0.5"
+                      aria-hidden="true"
+                    />
                   </button>
                 )}
               </div>
@@ -321,7 +324,7 @@ export function GoalCard({
                   onClick={() => openTwelveWeekCenter(goal.id)}
                 >
                   Tiếp tục chu kỳ
-                  <ArrowRight className="h-3.5 w-3.5" />
+                  <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
                 </Button>
               )}
             </div>

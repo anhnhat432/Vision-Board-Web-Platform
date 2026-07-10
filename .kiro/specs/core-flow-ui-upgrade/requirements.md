@@ -178,3 +178,65 @@ Phạm vi bao gồm cả bước audit và chụp baseline (before/after, deskto
 4. IF không thể thực thi được một lệnh kiểm chứng do thiếu dependency, thiếu script, hoặc thiếu biến môi trường, THEN THE Core_Flow_UI process SHALL báo cáo tên lệnh không chạy được, nguyên nhân cụ thể, và các bước setup cần thiết để chạy lại lệnh đó.
 5. WHEN bước kiểm chứng kết thúc, THE Core_Flow_UI process SHALL báo cáo danh sách file đã đổi, giải thích thay đổi, các lệnh đã chạy kèm exit code và kết quả, và rủi ro/TODO còn lại.
 6. WHERE thay đổi có ảnh hưởng đến UI, THE Core_Flow_UI process SHALL cung cấp screenshots before và after cho bề mặt UI bị ảnh hưởng.
+
+### Requirement 12: Accessibility (a11y) chuyên sâu cho Core_Flow
+
+**User Story:** Là người dùng thao tác bằng bàn phím hoặc trình đọc màn hình, tôi muốn dùng được toàn bộ Core_Flow mà không cần chuột, để tôi tiếp cận sản phẩm một cách bình đẳng và tin cậy.
+
+#### Acceptance Criteria
+
+1. THE Core_Flow_UI SHALL cho phép mọi hành động chính trong Core_Flow (điều hướng bước, kích hoạt Primary_CTA, nhập liệu, đóng/mở overlay) được thực hiện đầy đủ bằng bàn phím mà không yêu cầu thao tác chuột, và SHALL cho phép di chuyển tiêu điểm ra khỏi mọi phần tử chỉ bằng bàn phím (không keyboard trap), loại trừ focus trap chủ đích của modal.
+2. WHEN người dùng dùng phím Tab để di chuyển tiêu điểm trong một màn hình Core_Flow, THE Core_Flow_UI SHALL đặt thứ tự tiêu điểm (focus order) khớp với thứ tự đọc trực quan từ trên xuống và từ trái sang phải của màn hình đó.
+3. WHILE một phần tử tương tác đang nhận tiêu điểm bàn phím, THE Core_Flow_UI SHALL hiển thị chỉ báo tiêu điểm (focus indicator) nhìn thấy được với độ tương phản so với nền đạt tối thiểu 3:1.
+4. WHERE một control không có nhãn văn bản hiển thị rõ ràng, THE Core_Flow_UI SHALL cung cấp ARIA label hoặc ARIA role mô tả chức năng của control đó cho công nghệ trợ giúp.
+5. THE Core_Flow_UI SHALL trình bày văn bản thường với tỉ lệ tương phản màu chữ trên nền đạt tối thiểu 4.5:1, và văn bản lớn (từ 18.66px đậm hoặc từ 24px thường trở lên) cùng các thành phần giao diện (đường viền control, biểu tượng mang thông tin) đạt tối thiểu 3:1.
+6. WHEN một modal hoặc dialog được mở, THE Core_Flow_UI SHALL giữ tiêu điểm bàn phím bên trong modal hoặc dialog đó (focus trap) cho tới khi nó được đóng.
+7. WHEN một modal hoặc dialog được đóng, THE Core_Flow_UI SHALL trả tiêu điểm về phần tử đã kích hoạt việc mở modal hoặc dialog đó.
+8. WHEN một modal hoặc dialog đang mở và người dùng nhấn Escape, THE Core_Flow_UI SHALL đóng modal/dialog đó và trả tiêu điểm về phần tử đã kích hoạt mở nó.
+9. WHEN người dùng kích hoạt Primary_CTA hoặc control bằng phím Enter hoặc Space, THE Core_Flow_UI SHALL thực hiện hành động tương ứng trong vòng 1 giây.
+10. IF một hành động thực hiện bằng bàn phím thất bại, THEN THE Core_Flow_UI SHALL hiển thị thông báo lỗi, giữ tiêu điểm ở control liên quan, và giữ nguyên trạng thái dữ liệu.
+11. THE Core_Flow_UI SHALL giữ nguyên Storage_Contract, Entitlement_Authority, sync semantics, billing route behavior, và branching `isRealMode()` / `isDemoMode()` khi áp dụng các cải thiện accessibility.
+
+### Requirement 13: Giảm friction cho form Core_Flow
+
+**User Story:** Là người dùng đang điền form trong Core_Flow (Onboarding, SMART Goal Setup, Feasibility Check), tôi muốn được báo lỗi ngay tại chỗ và không bị mất dữ liệu đã nhập, để tôi hoàn tất form nhanh và ít bực bội.
+
+#### Acceptance Criteria
+
+1. WHEN một field trong form Core_Flow (Onboarding, SMART Goal Setup, Feasibility Check) mất tiêu điểm (blur) hoặc có giá trị thay đổi và không đạt điều kiện hợp lệ, THE Core_Flow_UI SHALL hiển thị thông báo lỗi cạnh chính field liên quan trong vòng 500ms, thay vì chỉ hiển thị lỗi tại thời điểm submit.
+2. WHEN Core_Flow_UI hiển thị một thông báo lỗi hợp lệ của form, THE Core_Flow_UI SHALL nêu rõ điều kiện hợp lệ cụ thể mà field cần đạt (giá trị bắt buộc, định dạng hợp lệ, hoặc độ dài cho phép).
+3. WHEN người dùng sửa một field không hợp lệ thành hợp lệ, THE Core_Flow_UI SHALL gỡ bỏ thông báo lỗi của field đó trong vòng 500ms.
+4. WHILE một thao tác lưu dữ liệu của form đang diễn ra, THE Core_Flow_UI SHALL hiển thị trạng thái "đang lưu" trong vòng 300ms kể từ khi thao tác lưu bắt đầu và duy trì cho đến khi thao tác lưu kết thúc.
+5. WHEN một thao tác lưu dữ liệu của form hoàn tất thành công, THE Core_Flow_UI SHALL hiển thị trạng thái "đã lưu" trong tối thiểu 2 giây.
+6. IF việc kiểm tra hợp lệ của form thất bại, THEN THE Core_Flow_UI SHALL giữ nguyên toàn bộ dữ liệu người dùng đã nhập trong form và SHALL NOT xóa hoặc reset các giá trị đã nhập.
+7. IF thao tác lưu dữ liệu form thất bại, THEN THE Core_Flow_UI SHALL hiển thị trạng thái lỗi lưu và giữ nguyên toàn bộ dữ liệu người dùng đã nhập.
+8. THE Core_Flow_UI SHALL giữ nguyên Storage_Contract và data shape của dữ liệu đã lưu khi áp dụng inline validation và hiển thị trạng thái lưu.
+
+### Requirement 14: Loading skeleton cho màn hình Core_Flow đang tải dữ liệu
+
+**User Story:** Là người dùng đang chờ một màn hình Core_Flow tải dữ liệu, tôi muốn thấy khung nội dung sắp hiển thị thay vì màn hình trống, để tôi cảm nhận ứng dụng phản hồi nhanh và biết nội dung nào sắp xuất hiện.
+
+#### Acceptance Criteria
+
+1. WHILE một màn hình Core_Flow đang ở trạng thái loading theo state machine hiện có, THE Core_Flow_UI SHALL hiển thị skeleton placeholder gồm các khối placeholder tương ứng một-một với các vùng nội dung chính của màn hình sắp hiển thị (vùng tiêu đề, vùng danh sách hoặc thẻ nội dung, và vùng hành động nếu có), thay vì spinner đơn thuần hoặc màn hình trống.
+2. WHILE hiển thị skeleton ở Mobile_Viewport có chiều rộng từ 320 CSS pixel đến 767 CSS pixel, THE Core_Flow_UI SHALL trình bày skeleton sao cho chiều rộng cuộn (scrollWidth) của tài liệu không vượt quá chiều rộng viewport (clientWidth).
+3. WHILE hiển thị skeleton ở Desktop_Viewport có chiều rộng từ 1024 CSS pixel trở lên, THE Core_Flow_UI SHALL trình bày skeleton sao cho không có phần tử skeleton nào tràn ra ngoài vùng nhìn thấy của container chứa nó.
+4. THE Core_Flow_UI SHALL trình bày skeleton không dùng hiệu ứng chuyển động có thời lượng vượt quá 300ms, không dùng hiệu ứng lặp lại hoặc tự động phát liên tục, và không dùng hiệu ứng glow.
+5. WHEN màn hình Core_Flow chuyển sang trạng thái loading theo state machine hiện có, THE Core_Flow_UI SHALL hiển thị skeleton trong vòng 100ms kể từ thời điểm chuyển trạng thái.
+6. WHEN màn hình Core_Flow chuyển từ trạng thái loading sang trạng thái ready, THE Core_Flow_UI SHALL thay toàn bộ skeleton bằng nội dung thật của màn hình và SHALL không giữ lại bất kỳ phần tử skeleton nào sau khi nội dung thật đã hiển thị.
+7. IF màn hình Core_Flow chuyển sang trạng thái tải thất bại theo state machine hiện có, THEN THE Core_Flow_UI SHALL thay skeleton bằng trạng thái lỗi có thông báo cho biết việc tải dữ liệu thất bại kèm tùy chọn thử lại, và SHALL không tiếp tục hiển thị skeleton.
+8. THE Core_Flow_UI SHALL giữ skeleton là lớp trình bày và SHALL giữ nguyên nguồn dữ liệu cùng Storage_Contract, không thay đổi cách đọc hay ghi dữ liệu của màn hình.
+
+### Requirement 15: Nâng cấp bề mặt Reflection/Review
+
+**User Story:** Là người dùng đến màn hình cuối của Core_Flow (Reflection/Review), tôi muốn phân biệt rõ phần phản tư với dữ liệu tiến độ và biết hành động chính là gì, để tôi hoàn tất chu kỳ một cách mạch lạc.
+
+#### Acceptance Criteria
+
+1. WHEN màn hình Reflection/Review hiển thị, THE Core_Flow_UI SHALL trình bày hai section tách biệt là phần prompt phản tư và phần dữ liệu tiến độ, trong đó mỗi khối có tiêu đề riêng và ranh giới phân tách rõ giữa hai phần.
+2. THE Core_Flow_UI SHALL hiển thị đúng một Primary_CTA được đánh dấu là hành động chính trên màn hình Reflection/Review, đánh dấu các phần tử điều hướng còn lại là hành động phụ (secondary), và không có phần tử điều hướng nào khác được đánh dấu là hành động chính.
+3. WHILE màn hình Reflection/Review đang tải dữ liệu, THE Core_Flow_UI SHALL hiển thị trạng thái đang tải và SHALL NOT hiển thị empty state hoặc Primary_CTA của empty state.
+4. WHEN màn hình Reflection/Review hoàn tất tải dữ liệu và chưa có bản ghi reflection nào, THE Core_Flow_UI SHALL hiển thị một empty state gồm: một tiêu đề, một đoạn mô tả dài từ 1 đến 200 ký tự, và đúng một Primary_CTA trỏ tới route hiện có.
+5. WHEN người dùng kích hoạt Primary_CTA của empty state trên màn hình Reflection/Review, THE Core_Flow_UI SHALL điều hướng tới route hiện có tương ứng với hành động tạo reflection và SHALL NOT tạo route mới hoặc thay đổi route availability.
+6. IF việc tải dữ liệu màn hình Reflection/Review thất bại, THEN THE Core_Flow_UI SHALL hiển thị trạng thái lỗi kèm tùy chọn thử lại và SHALL giữ nguyên dữ liệu reflection/review đã lưu.
+7. THE Core_Flow_UI SHALL giữ nguyên Storage_Contract cho dữ liệu reflection và review, không đổi tên khóa lưu trữ và không đổi data shape đã lưu.

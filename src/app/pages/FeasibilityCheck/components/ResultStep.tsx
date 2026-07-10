@@ -423,7 +423,7 @@ export function ResultStep({
                 <Info className="h-4.5 w-4.5 shrink-0 text-app-accent" aria-hidden="true" />
                 <span className="min-w-0 break-words">Xem phân tích chi tiết & 7 khía cạnh</span>
               </span>
-              <ChevronDown className="h-5 w-5 text-app-ink-muted transition-transform duration-200" />
+              <ChevronDown className="h-5 w-5 text-app-ink-muted transition-transform duration-200" aria-hidden="true" />
             </button>
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-5 space-y-6 data-[state=closed]:hidden">

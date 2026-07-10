@@ -5,6 +5,7 @@ import type { GoalArchetype } from "@/lib/smart-goal";
 import { GoalArchetypeExamples } from "../../../components/GoalArchetypeExamples";
 import { FieldError } from "../../../components/ui/field-error";
 import { Textarea } from "../../../components/ui/textarea";
+import { resolveFieldErrorDisplay } from "../../../utils/field-error-display";
 import { FOCUS_AREA_EXAMPLES } from "../constants";
 import type { SMARTData } from "../types";
 import { ArchetypeHint } from "./ArchetypeHint";
@@ -48,8 +49,21 @@ export function SpecificStep({
   const [showGoalExamples, setShowGoalExamples] = useState(false);
   const specificLength = smartData.specific.goal_statement.trim().length;
   const activeArchetype = archetype ?? intentArchetype ?? "other";
-  const goalStatementInvalid = specificLength < 10;
-  const showInlineError = goalStatementInvalid && (hasBlurredGoalStatement || showError || specificLength > 0);
+  // Inline validation phân giải qua resolveFieldValidationState (Req 13.1–13.3).
+  const specificError = resolveFieldErrorDisplay(
+    smartData.specific.goal_statement.trim(),
+    [{ kind: "required" }, { kind: "minLength", value: 10 }],
+    {
+      touched: hasBlurredGoalStatement,
+      hasContent: specificLength > 0,
+      forceShow: showError,
+      messages: {
+        required: "Mục tiêu cụ thể cần ít nhất 10 ký tự có nghĩa.",
+        minLength: "Mục tiêu cụ thể cần ít nhất 10 ký tự có nghĩa.",
+      },
+    },
+  );
+  const showInlineError = specificError.showError;
   const specificDescribedBy = [
     "smart-specific-hint",
     "smart-specific-counter",
@@ -186,7 +200,7 @@ export function SpecificStep({
         </div>
 
         {showInlineError ? (
-          <FieldError id="smart-specific-error" message="Mục tiêu cụ thể cần ít nhất 10 ký tự có nghĩa." role="alert" />
+          <FieldError id="smart-specific-error" message={specificError.message} role="alert" />
         ) : null}
       </div>
 
@@ -283,7 +297,10 @@ export function SpecificStep({
       <details className="group rounded-[18px] border border-app-line bg-app-surface/75 p-3.5">
         <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 text-[12px] font-bold text-app-ink-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/35 [&::-webkit-details-marker]:hidden">
           <span>Tùy chỉnh loại mục tiêu</span>
-          <ChevronDown className="h-4 w-4 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
+          <ChevronDown
+            className="h-4 w-4 text-app-ink-muted transition-transform duration-200 group-open:rotate-180"
+            aria-hidden="true"
+          />
         </summary>
         <div className="mt-3 space-y-3 border-t border-app-line pt-3">
           <ArchetypePicker

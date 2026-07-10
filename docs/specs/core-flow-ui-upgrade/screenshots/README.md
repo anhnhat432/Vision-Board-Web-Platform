@@ -20,6 +20,21 @@ bề mặt UI bị ảnh hưởng của Core_Flow + Dashboard, phục vụ so s�
 - Kết quả lần chụp gần nhất: 10 màn hình × 2 viewport = **20/20 ảnh After chụp thành công** (exit code 0).
 - Baseline hiện có: **20/20 ảnh** trong `screenshots/baseline/`.
 
+### Chụp lại cho R12–R15 (task 21.1)
+
+Sau khi hoàn tất R12–R15 (a11y audit, inline validation + save-status cho form, skeleton loading,
+Reflection/Review polish), đã chụp lại After_Screenshot cho các màn hình bị ảnh hưởng:
+
+- `onboarding`, `smart-goal-setup`, `feasibility` — form friction (R13) + a11y (R12).
+- `goals` (GoalTracker) — skeleton loading per-screen (R14).
+- `journal` (ReflectionJournal) — layout/CTA/states polish (R15) + skeleton (R14).
+
+Kết quả: 5 màn hình × 2 viewport = **10/10 ảnh After chụp lại thành công** (mỗi lần `exit code 0`),
+dev server Vite (mặc định `http://localhost:5173`; lần chạy gần nhất dùng `http://localhost:5174` do 5173 đang bận,
+override qua `BASELINE_BASE_URL`), Desktop `1440x900` + Mobile `390x844`. Các màn hình Core_Flow còn lại
+(`life-balance`, `life-insight`, `12-week-setup`, `12-week-system`, `dashboard`) giữ nguyên ảnh After từ
+task 13.1 vì không nằm trong phạm vi sửa R12–R15.
+
 ## Bảng before/after theo màn hình
 
 Mỗi màn hình có 2 viewport. Đường dẫn tương đối tính từ thư mục này.
@@ -84,6 +99,43 @@ và mobile-safety theo Requirements 2, 4, 10.
 | SMARTGoalSetup | `/smart-goal-setup` | `baseline/smart-goal-setup_desktop.png` / `baseline/smart-goal-setup_mobile.png` | `after/smart-goal-setup_desktop.png` / `after/smart-goal-setup_mobile.png` |
 | FeasibilityCheck | `/feasibility` | `baseline/feasibility_desktop.png` / `baseline/feasibility_mobile.png` | `after/feasibility_desktop.png` / `after/feasibility_mobile.png` |
 | 12WeekSetup | `/12-week-setup` | `baseline/12-week-setup_desktop.png` / `baseline/12-week-setup_mobile.png` | `after/12-week-setup_desktop.png` / `after/12-week-setup_mobile.png` |
+
+## Thay đổi R12–R15 theo bề mặt (task 15–21)
+
+### Forms — Onboarding / SMARTGoalSetup / FeasibilityCheck (R12 + R13)
+
+Thay đổi chính: inline validation cạnh field (cập nhật `onBlur`/`onChange` ≤ 500ms, thông báo nêu rõ điều kiện),
+save-status UI ("đang lưu" hiện trong 300ms, "đã lưu" giữ tối thiểu 2s), validation/lưu thất bại không reset giá trị
+đã nhập; a11y (Radix `Dialog`/`AlertDialog`, `aria-label`/`role` cho control icon-only, focus ring ≥ 2px, focus order
+theo DOM). Giữ nguyên Storage_Contract (ghi qua API storage hiện có).
+
+| Màn hình | Route | Baseline (desktop / mobile) | After (desktop / mobile) |
+| --- | --- | --- | --- |
+| Onboarding | `/onboarding` | `baseline/onboarding_desktop.png` / `baseline/onboarding_mobile.png` | `after/onboarding_desktop.png` / `after/onboarding_mobile.png` |
+| SMARTGoalSetup | `/smart-goal-setup` | `baseline/smart-goal-setup_desktop.png` / `baseline/smart-goal-setup_mobile.png` | `after/smart-goal-setup_desktop.png` / `after/smart-goal-setup_mobile.png` |
+| FeasibilityCheck | `/feasibility` | `baseline/feasibility_desktop.png` / `baseline/feasibility_mobile.png` | `after/feasibility_desktop.png` / `after/feasibility_mobile.png` |
+
+### Skeleton loading (R14)
+
+Thay đổi chính: skeleton per-screen cắm vào slot `loadingFallback` của `ScreenStateView`, ánh xạ 1:1 vùng nội dung thật
+(tiêu đề / list-card / hành động), dùng cùng container `min-w-0`/`max-w`/grid, không tràn viewport, tôn trọng R10
+(không motion > 300ms, không loop/glow). Nhánh `ready` thay thế hoàn toàn skeleton; nhánh `error` có "Thử lại".
+Áp dụng cho các màn hình Core_Flow đang tải dữ liệu, gồm `goals` (GoalTracker) và `journal` (ReflectionJournal).
+
+| Màn hình | Route | Baseline (desktop / mobile) | After (desktop / mobile) |
+| --- | --- | --- | --- |
+| GoalTracker | `/goals` | `baseline/goals_desktop.png` / `baseline/goals_mobile.png` | `after/goals_desktop.png` / `after/goals_mobile.png` |
+| ReflectionJournal | `/journal` | `baseline/journal_desktop.png` / `baseline/journal_mobile.png` | `after/journal_desktop.png` / `after/journal_mobile.png` |
+
+### ReflectionJournal polish (R15)
+
+Thay đổi chính: chuẩn hoá thành đúng hai `<section>` có heading `h2` riêng + ranh giới (prompt phản tư | dữ liệu tiến độ),
+đúng một Primary_CTA (các điều hướng còn lại `variant="outline"`), states loading/empty/error qua `ScreenStateView`
+(loading → skeleton; empty → `EmptyState` title + mô tả 1–200 ký tự + 1 Primary_CTA trỏ route hiện có; error → khối lỗi + "Thử lại").
+Giữ nguyên Storage_Contract reflection (`addReflection`/`deleteReflection`/`getUserData`/`saveUserData`). Ảnh After: xem `journal_*` ở trên.
+
+> Ghi chú: ảnh After chụp ở trạng thái có dữ liệu seed (không phải trạng thái `empty`/`loading`); skeleton và
+> empty-state được kiểm chứng qua component/DOM test (task 16.2, 19.2) thay vì ảnh tĩnh.
 
 ## Bề mặt chung (không có màn hình riêng)
 

@@ -401,7 +401,10 @@ export function AchievableStep({
           <span className="flex items-center gap-1.5">
             <Lightbulb className="h-3.5 w-3.5 text-app-accent" aria-hidden="true" /> Mẹo chọn nguồn lực thực tế
           </span>
-          <ChevronDown className="h-4 w-4 text-app-ink-muted transition-transform duration-200 group-open:rotate-180" />
+          <ChevronDown
+            className="h-4 w-4 text-app-ink-muted transition-transform duration-200 group-open:rotate-180"
+            aria-hidden="true"
+          />
         </summary>
         <div className="mt-3 grid gap-2.5 border-t border-app-line pt-3 sm:grid-cols-2">
           <div className="rounded-xl border border-app-accent/10 bg-app-accent-soft/40 p-3 flex items-start gap-2.5 text-xs leading-relaxed">
