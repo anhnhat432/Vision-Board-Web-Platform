@@ -220,6 +220,7 @@ interface RawSalesRow {
   user?: { email?: string; displayName?: string } | null;
   payer?: RawSalesPayer | null;
   refund?: { resolvedAt?: Date | null } | null;
+  isRefunded?: boolean;
   reporting?: {
     kpiStatus?: PaymentReportingKpiStatus;
     exclusionReason?: PaymentReportingExclusionReason | null;
@@ -278,6 +279,7 @@ function serializePayer(value: RawSalesPayer | null | undefined): AdminSalesRepo
 }
 
 function serializeSalesRow(row: RawSalesRow): AdminSalesReportRow {
+  const isRefunded = Boolean(row.isRefunded);
   const refundCompletedAt = toIso(row.refund?.resolvedAt);
   const status = row.reporting?.kpiStatus ?? "pending";
   return {
@@ -292,8 +294,8 @@ function serializeSalesRow(row: RawSalesRow): AdminSalesReportRow {
     isManualCompletion: Boolean(row.manualCompletedAt),
     payer: serializePayer(row.payer),
     refund: {
-      status: refundCompletedAt ? "completed" : "none",
-      amountVnd: refundCompletedAt ? row.amount : 0,
+      status: isRefunded ? "completed" : "none",
+      amountVnd: isRefunded ? row.amount : 0,
       completedAt: refundCompletedAt,
     },
     reporting: {

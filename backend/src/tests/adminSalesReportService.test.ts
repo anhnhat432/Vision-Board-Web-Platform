@@ -145,6 +145,7 @@ describe("admin sales report aggregation", () => {
             observedAt: new Date("2026-07-10T03:01:00.000Z"),
           },
           refund: { resolvedAt: new Date("2026-07-11T03:00:00.000Z") },
+          isRefunded: true,
           reporting: { kpiStatus: "included", reviewedAt: new Date("2026-07-11T02:00:00.000Z") },
           manualCompletedAt: null,
           cassoTransactionId: null,
@@ -169,6 +170,51 @@ describe("admin sales report aggregation", () => {
     assert.equal(JSON.stringify(report).includes("userId"), false);
     assert.equal(JSON.stringify(capturedPipeline).includes("plus_subscription"), true);
     assert.equal(JSON.stringify(capturedPipeline).includes("Asia/Ho_Chi_Minh"), true);
+  });
+
+  it("serializes a completed refund marker when resolvedAt is null or missing", async () => {
+    (PaymentOrderModel as unknown as { aggregate: (pipeline: unknown[]) => Promise<unknown[]> }).aggregate = async () => [{
+      rowCount: [{ count: 2 }],
+      rows: [
+        {
+          orderId: "VBREFUNDNULL",
+          amount: 99000,
+          currency: "VND",
+          provider: "payos",
+          completedAt: new Date("2026-07-10T03:00:00.000Z"),
+          payer: null,
+          refund: { resolvedAt: null },
+          isRefunded: true,
+          reporting: null,
+          manualCompletedAt: null,
+          cassoTransactionId: null,
+        },
+        {
+          orderId: "VBREFUNDMISSING",
+          amount: 199000,
+          currency: "VND",
+          provider: "casso",
+          completedAt: new Date("2026-07-10T03:00:00.000Z"),
+          payer: null,
+          refund: {},
+          isRefunded: true,
+          reporting: null,
+          manualCompletedAt: null,
+          cassoTransactionId: null,
+        },
+      ],
+    }];
+
+    const report = await getAdminSalesReport({
+      from: "2026-07-01",
+      to: "2026-07-11",
+      kpiStatus: "included",
+    });
+
+    assert.deepEqual(report.items.map((item) => item.refund), [
+      { status: "completed", amountVnd: 99000, completedAt: null },
+      { status: "completed", amountVnd: 199000, completedAt: null },
+    ]);
   });
 
   it("exports all filtered rows and neutralizes spreadsheet formulas", async () => {
