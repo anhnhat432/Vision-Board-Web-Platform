@@ -125,8 +125,16 @@ describe("admin sales report routes", () => {
     const unauthenticated = await request(app, "GET", "/api/admin/reports/sales");
     assert.equal(unauthenticated.status, 401);
 
+    const unauthenticatedExport = await request(app, "GET", "/api/admin/reports/sales/export");
+    assert.equal(unauthenticatedExport.status, 401);
+    assert.equal(unauthenticatedExport.headers.get("content-disposition"), null);
+
     const forbidden = await request(app, "GET", "/api/admin/reports/sales", "non-admin-token");
     assert.equal(forbidden.status, 403);
+
+    const forbiddenExport = await request(app, "GET", "/api/admin/reports/sales/export", "non-admin-token");
+    assert.equal(forbiddenExport.status, 403);
+    assert.equal(forbiddenExport.headers.get("content-disposition"), null);
 
     const allowed = await request(app, "GET", "/api/admin/reports/sales", "admin-token");
     assert.equal(allowed.status, 200);
@@ -142,17 +150,18 @@ describe("admin sales report routes", () => {
     assert.match(exported.text, /"Order ID"/);
   });
 
-  it("rejects invalid report queries without download headers", async () => {
+  it("rejects invalid export queries without download headers", async () => {
     mockEmptyReport();
     mockUserRoles();
     const app = createAdminTestApp();
 
-    for (const path of [
-      "/api/admin/reports/sales?from=not-a-date",
-      "/api/admin/reports/sales?to=2026-02-30",
-      "/api/admin/reports/sales?provider=mock",
-      "/api/admin/reports/sales/export?kpiStatus=unknown",
+    for (const [query, value] of [
+      ["from", "not-a-date"],
+      ["to", "2026-02-30"],
+      ["provider", "mock"],
+      ["kpiStatus", "unknown"],
     ]) {
+      const path = `/api/admin/reports/sales/export?${query}=${value}`;
       const response = await request(app, "GET", path, "admin-token");
       assert.equal(response.status, 400, path);
       assert.equal(response.headers.get("content-disposition"), null, path);
