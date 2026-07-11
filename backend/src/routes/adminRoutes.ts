@@ -29,6 +29,10 @@ import {
   getAdminRefundRequests,
   rejectAdminRefundRequest,
 } from "../controllers/refundController";
+import {
+  exportAdminSalesReportController,
+  getAdminSalesReportController,
+} from "../controllers/adminSalesReportController";
 import { clearAdminRoleCache, requireAdmin } from "../middleware/requireAdmin";
 import { validateOptionalJsonObjectBody, validateOrderIdParam } from "../middleware/requestValidation";
 import { logAdminAction } from "../services/auditLogService";
@@ -139,6 +143,16 @@ async function clearRoleCacheHandler(req: Request, res: Response): Promise<void>
 }
 
 adminRoutes.get("/admin/overview", asyncHandler(requireAdmin), asyncHandler(getAdminOverview));
+adminRoutes.get(
+  "/admin/reports/sales",
+  asyncHandler(requireAdmin),
+  asyncHandler(getAdminSalesReportController),
+);
+adminRoutes.get(
+  "/admin/reports/sales/export",
+  asyncHandler(requireAdmin),
+  asyncHandler(exportAdminSalesReportController),
+);
 adminRoutes.get("/admin/reconciliation/last-run", asyncHandler(requireAdmin), asyncHandler(getReconciliationLastRun));
 adminRoutes.get("/admin/audit-logs", asyncHandler(requireAdmin), asyncHandler(getAdminAuditLogs));
 adminRoutes.get("/admin/order-catalog", asyncHandler(requireAdmin), asyncHandler(listAllCatalog));
