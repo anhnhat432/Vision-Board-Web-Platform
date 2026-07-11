@@ -23,6 +23,16 @@ import type { PaymentPayerSourceClassification } from "../services/paymentPayerS
 
 export type PaymentOrderStatus = "pending" | "completed" | "expired" | "failed";
 export type PaymentOrderPurpose = "plus_subscription" | "physical_order";
+export type PaymentReportingKpiStatus = "pending" | "included" | "excluded";
+export type PaymentReportingExclusionReason = "internal_team" | "test" | "duplicate" | "other";
+
+export interface PaymentOrderReporting {
+  kpiStatus: PaymentReportingKpiStatus;
+  exclusionReason?: PaymentReportingExclusionReason | null;
+  reviewNote?: string | null;
+  reviewedBy?: string | null;
+  reviewedAt?: Date | null;
+}
 
 export interface PaymentOrderEntity {
   id: string;
@@ -49,6 +59,7 @@ export interface PaymentOrderEntity {
   reconciliationStatus?: "matched" | "amount_mismatch" | null;
   reconciliationLastCheckedAt?: Date | null;
   reconciliationLastError?: string | null;
+  reporting?: PaymentOrderReporting | null;
   metadata?: {
     userConfirmedTransferAt?: Date | null;
     physicalOrderId?: string | null;
@@ -87,6 +98,38 @@ export interface PaymentOrderEntity {
   createdAt: Date;
   updatedAt: Date;
 }
+
+const paymentOrderReportingSchema = new Schema(
+  {
+    kpiStatus: {
+      type: String,
+      required: true,
+      enum: ["pending", "included", "excluded"],
+    },
+    exclusionReason: {
+      type: String,
+      required: false,
+      enum: ["internal_team", "test", "duplicate", "other"],
+    },
+    reviewNote: {
+      type: String,
+      required: false,
+      trim: true,
+      maxlength: 500,
+    },
+    reviewedBy: {
+      type: String,
+      required: false,
+      trim: true,
+      maxlength: 128,
+    },
+    reviewedAt: {
+      type: Date,
+      required: false,
+    },
+  },
+  { _id: false },
+);
 
 const paymentOrderSchema = new Schema(
   {
@@ -214,6 +257,11 @@ const paymentOrderSchema = new Schema(
       trim: true,
       maxlength: 500,
     },
+    reporting: {
+      type: paymentOrderReportingSchema,
+      required: false,
+      default: undefined,
+    },
     metadata: {
       type: Schema.Types.Mixed,
       required: false,
@@ -252,6 +300,8 @@ paymentOrderSchema.index({ userId: 1, createdAt: -1 });
 // PayOS webhook lookup by metadata identifiers (sparse — only PayOS orders carry these)
 paymentOrderSchema.index({ provider: 1, "metadata.payos.orderCode": 1 }, { sparse: true });
 paymentOrderSchema.index({ provider: 1, "metadata.payos.paymentLinkId": 1 }, { sparse: true });
+paymentOrderSchema.index({ status: 1, purpose: 1, provider: 1, completedAt: -1 });
+paymentOrderSchema.index({ "reporting.kpiStatus": 1, completedAt: -1 });
 export const PaymentOrderModel = model("PaymentOrder", paymentOrderSchema);
 
 export type PaymentOrderDocument = Document & {
@@ -278,6 +328,7 @@ export type PaymentOrderDocument = Document & {
   reconciliationStatus?: "matched" | "amount_mismatch" | null;
   reconciliationLastCheckedAt?: Date | null;
   reconciliationLastError?: string | null;
+  reporting?: PaymentOrderReporting | null;
   metadata?: {
     userConfirmedTransferAt?: Date | null;
     physicalOrderId?: string | null;
