@@ -2,6 +2,7 @@ import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { AdminPaymentPayerEvidenceDialog } from "../components/admin/AdminPaymentPayerEvidenceDialog";
 
 const RAW_ACCOUNT_SENTINEL = "RAW_ACCOUNT_SENTINEL_012345678901234";
 const RAW_HASH_SENTINEL = "RAW_HASH_SENTINEL_a1b2c3d4e5f6";
@@ -123,6 +124,26 @@ describe("AdminPaymentsPage payment dialogs", () => {
 
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  it("renders only allowlisted payer evidence fields", () => {
+    render(
+      <AdminPaymentPayerEvidenceDialog
+        open
+        onOpenChange={vi.fn()}
+        payer={{
+          classification: "external",
+          accountLast4: "6789",
+          source: "reconciliation",
+          observedAt: new Date().toISOString(),
+          accountHash: RAW_HASH_SENTINEL,
+        }}
+      />,
+    );
+
+    const evidenceDialog = screen.getByRole("dialog", { name: "Hồ sơ đối chiếu PayOS" });
+    expect(within(evidenceDialog).getByText("****6789")).toBeInTheDocument();
+    expect(within(evidenceDialog).queryByText(RAW_HASH_SENTINEL)).not.toBeInTheDocument();
   });
 
   it("uses in-app dialog for manual payment note and never calls window.prompt", async () => {
