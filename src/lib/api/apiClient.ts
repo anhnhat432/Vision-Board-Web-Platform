@@ -285,6 +285,57 @@ async function request<TResponse, TBody = unknown>(
   return payload as TResponse;
 }
 
+function parseDownloadFilename(value: string | null): string | null {
+  if (!value) return null;
+
+  const utf8 = value.match(/filename\*=UTF-8''([^;]+)/i)?.[1];
+  if (utf8) {
+    try {
+      return decodeURIComponent(utf8).replace(/[\\/]/g, "-");
+    } catch {
+      return null;
+    }
+  }
+
+  const basic = value.match(/filename="?([^";]+)"?/i)?.[1]?.trim();
+  return basic ? basic.replace(/[\\/]/g, "-") : null;
+}
+
+export async function getFile(
+  path: string,
+  options?: ApiRequestOptions,
+): Promise<{ blob: Blob; filename: string | null }> {
+  if (isDemoMode()) {
+    throw new Error("Các yêu cầu máy chủ bị tắt trong chế độ thử.");
+  }
+
+  let response: Response;
+  try {
+    response = await authedFetch(buildApiUrl(path), { ...options, method: "GET" });
+  } catch (networkError) {
+    const apiError = toApiClientError(networkError);
+    await runResponseErrorInterceptors(apiError);
+    throw apiError;
+  }
+
+  if (!response.ok) {
+    const payload = await parseResponseBody(response);
+    const apiError = createApiClientError({
+      message: getErrorMessageFromPayload(payload) ?? `Yêu cầu không thành công (mã ${response.status}).`,
+      status: response.status,
+      details: payload,
+      errorCode: getErrorCodeFromPayload(payload),
+    });
+    await runResponseErrorInterceptors(apiError);
+    throw apiError;
+  }
+
+  return {
+    blob: await response.blob(),
+    filename: parseDownloadFilename(response.headers.get("Content-Disposition")),
+  };
+}
+
 export function get<TResponse>(path: string, options?: ApiRequestOptions): Promise<TResponse> {
   return request<TResponse>("GET", path, undefined, options);
 }

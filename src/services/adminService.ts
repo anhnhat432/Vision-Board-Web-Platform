@@ -1,4 +1,4 @@
-import { delete as apiDelete, get, patch, post, put } from "@/lib/api/apiClient";
+import { delete as apiDelete, get, getFile, patch, post, put } from "@/lib/api/apiClient";
 
 export interface AdminEmailStatus {
   provider: string;
@@ -64,6 +64,112 @@ export interface AdminPaymentPayerSource {
   transactionDateTime?: string;
   source: "webhook" | "reconciliation";
   observedAt: string;
+}
+
+export type AdminSalesProvider = "payos" | "casso";
+export type AdminSalesKpiStatus = "pending" | "included" | "excluded";
+export type AdminSalesExclusionReason = "internal_team" | "test" | "duplicate" | "other";
+
+export interface AdminSalesReportRow {
+  orderId: string;
+  customerLabelMasked: string;
+  customerEmailMasked: string;
+  provider: AdminSalesProvider;
+  providerReference: string | null;
+  amountVnd: number;
+  currency: "VND";
+  completedAt: string;
+  isManualCompletion: boolean;
+  payer: AdminPaymentPayerSource | null;
+  refund: {
+    status: "none" | "completed";
+    amountVnd: number;
+    completedAt: string | null;
+  };
+  reporting: {
+    kpiStatus: AdminSalesKpiStatus;
+    exclusionReason: AdminSalesExclusionReason | null;
+    reviewedAt: string | null;
+  };
+}
+
+export interface AdminSalesReportResult {
+  generatedAt: string;
+  filters: {
+    from: string;
+    to: string;
+    provider: "all" | AdminSalesProvider;
+    kpiStatus: AdminSalesKpiStatus;
+    timezone: "Asia/Ho_Chi_Minh";
+  };
+  availableProviders: AdminSalesProvider[];
+  summary: {
+    successfulTransactions: number;
+    uniquePaidUsers: number;
+    grossRevenueVnd: number;
+    refundedAmountVnd: number;
+    netRevenueVnd: number;
+    pendingReviews: number;
+  };
+  tabCounts: Record<AdminSalesKpiStatus, number>;
+  dailyBuckets: Array<{
+    date: string;
+    transactions: number;
+    grossRevenueVnd: number;
+    refundedAmountVnd: number;
+    netRevenueVnd: number;
+  }>;
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  items: AdminSalesReportRow[];
+}
+
+export interface AdminSalesReportParams {
+  from: string;
+  to: string;
+  provider?: "all" | AdminSalesProvider;
+  kpiStatus: AdminSalesKpiStatus;
+  page?: number;
+  limit?: number;
+}
+
+export interface AdminReviewSalesOrderPayload {
+  kpiStatus: "included" | "excluded";
+  exclusionReason?: AdminSalesExclusionReason;
+  reviewNote?: string;
+}
+
+function buildSalesReportQuery(params: AdminSalesReportParams, includePagination: boolean): string {
+  const searchParams = new URLSearchParams();
+  searchParams.set("from", params.from);
+  searchParams.set("to", params.to);
+  if (params.provider && params.provider !== "all") searchParams.set("provider", params.provider);
+  searchParams.set("kpiStatus", params.kpiStatus);
+  if (includePagination && params.page) searchParams.set("page", String(params.page));
+  if (includePagination && params.limit) searchParams.set("limit", String(params.limit));
+  return searchParams.toString();
+}
+
+export function adminGetSalesReport(params: AdminSalesReportParams): Promise<AdminSalesReportResult> {
+  return get<AdminSalesReportResult>(`/admin/reports/sales?${buildSalesReportQuery(params, true)}`);
+}
+
+export function adminReviewSalesOrder(
+  orderId: string,
+  payload: AdminReviewSalesOrderPayload,
+): Promise<{ item: AdminSalesReportRow }> {
+  return patch<{ item: AdminSalesReportRow }, AdminReviewSalesOrderPayload>(
+    `/admin/reports/sales/${encodeURIComponent(orderId)}/review`,
+    payload,
+  );
+}
+
+export function adminExportSalesReport(
+  params: AdminSalesReportParams,
+): Promise<{ blob: Blob; filename: string | null }> {
+  return getFile(`/admin/reports/sales/export?${buildSalesReportQuery(params, false)}`);
 }
 
 export type AdminRefundRequestStatus = "pending" | "completed" | "rejected";
