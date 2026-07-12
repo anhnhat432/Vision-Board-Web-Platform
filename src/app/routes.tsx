@@ -221,6 +221,12 @@ export function createAppRoutes(appMode: AppMode = getAppMode()) {
             path: "payments",
             ...lazyRoute(() => import("./pages/AdminPaymentsPage"), "AdminPaymentsPage"),
           },
+          ...(appMode === "real"
+            ? [{
+                path: "reports/sales",
+                ...lazyRoute(() => import("./pages/AdminSalesReportPage"), "AdminSalesReportPage"),
+              }]
+            : []),
           {
             path: "refunds",
             ...lazyRoute(() => import("./pages/AdminRefundsPage"), "AdminRefundsPage"),

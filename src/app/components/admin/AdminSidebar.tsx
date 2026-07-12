@@ -1,4 +1,5 @@
 import {
+  ChartNoAxesCombined,
   ClipboardList,
   CreditCard,
   FileText,
@@ -16,6 +17,7 @@ import { NavLink } from "react-router";
 
 import { Button } from "../ui/button";
 import { cn } from "../ui/utils";
+import { getAppMode, type AppMode } from "../../utils/app-mode";
 
 export interface AdminNavItem {
   to: string;
@@ -25,19 +27,26 @@ export interface AdminNavItem {
   badge?: number;
 }
 
-export const ADMIN_NAV_ITEMS: AdminNavItem[] = [
-  { to: "/admin/dashboard", label: "Tổng quan", icon: LayoutDashboard },
-  { to: "/admin/users", label: "Người dùng", icon: Users },
-  { to: "/admin/orders", label: "Đơn hàng", icon: ClipboardList },
-  { to: "/admin/subscriptions", label: "Subscription", icon: CreditCard },
-  { to: "/admin/payments", label: "Thanh toán", icon: WalletCards },
-  { to: "/admin/refunds", label: "Hoàn tiền", icon: FileText },
-  { to: "/admin/discounts", label: "Giảm giá", icon: Percent },
-  { to: "/admin/catalog", label: "Catalog", icon: Package },
-  { to: "/admin/email-history", label: "Email", icon: Mail },
-  { to: "/admin/settings", label: "Cài đặt", icon: Settings },
-  { to: "/admin/audit-logs", label: "Audit Logs", icon: FileText },
-];
+export function getAdminNavItems(appMode: AppMode = getAppMode()): AdminNavItem[] {
+  return [
+    { to: "/admin/dashboard", label: "Tổng quan", icon: LayoutDashboard },
+    { to: "/admin/users", label: "Người dùng", icon: Users },
+    { to: "/admin/orders", label: "Đơn hàng", icon: ClipboardList },
+    { to: "/admin/subscriptions", label: "Subscription", icon: CreditCard },
+    { to: "/admin/payments", label: "Thanh toán", icon: WalletCards },
+    ...(appMode === "real"
+      ? [{ to: "/admin/reports/sales", label: "Báo cáo kinh doanh", icon: ChartNoAxesCombined }]
+      : []),
+    { to: "/admin/refunds", label: "Hoàn tiền", icon: FileText },
+    { to: "/admin/discounts", label: "Giảm giá", icon: Percent },
+    { to: "/admin/catalog", label: "Catalog", icon: Package },
+    { to: "/admin/email-history", label: "Email", icon: Mail },
+    { to: "/admin/settings", label: "Cài đặt", icon: Settings },
+    { to: "/admin/audit-logs", label: "Audit Logs", icon: FileText },
+  ];
+}
+
+export const ADMIN_NAV_ITEMS = getAdminNavItems();
 
 interface AdminSidebarProps {
   email: string;
