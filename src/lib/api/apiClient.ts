@@ -195,6 +195,24 @@ function getErrorCodeFromPayload(payload: unknown): string | undefined {
   return typeof errorCode === "string" ? errorCode : undefined;
 }
 
+async function throwNetworkApiClientError(networkError: unknown): Promise<never> {
+  const apiError =
+    networkError instanceof AuthError
+      ? createApiClientError({
+          message: networkError.message,
+          status: networkError.status,
+          errorCode: networkError.code,
+          details: networkError,
+        })
+      : createApiClientError({
+          message: "Lỗi kết nối mạng. Kiểm tra mạng rồi thử lại.",
+          isNetworkError: true,
+          details: networkError,
+        });
+  await runResponseErrorInterceptors(apiError);
+  throw apiError;
+}
+
 async function request<TResponse, TBody = unknown>(
   method: HttpMethod,
   path: string,
@@ -221,24 +239,15 @@ async function request<TResponse, TBody = unknown>(
       body: body === undefined ? undefined : isFormData ? (body as BodyInit) : JSON.stringify(body),
     });
   } catch (networkError) {
-    const apiError =
-      networkError instanceof AuthError
-        ? createApiClientError({
-            message: networkError.message,
-            status: networkError.status,
-            errorCode: networkError.code,
-            details: networkError,
-          })
-        : createApiClientError({
-            message: "Lỗi kết nối mạng. Kiểm tra mạng rồi thử lại.",
-            isNetworkError: true,
-            details: networkError,
-          });
-    await runResponseErrorInterceptors(apiError);
-    throw apiError;
+    return throwNetworkApiClientError(networkError);
   }
 
-  const payload = await parseResponseBody(response);
+  let payload: unknown;
+  try {
+    payload = await parseResponseBody(response);
+  } catch (responseBodyError) {
+    return throwNetworkApiClientError(responseBodyError);
+  }
 
   if (!response.ok) {
     const isConflict = response.status === 409;
@@ -313,13 +322,16 @@ export async function getFile(
   try {
     response = await authedFetch(buildApiUrl(path), { ...options, method: "GET" });
   } catch (networkError) {
-    const apiError = toApiClientError(networkError);
-    await runResponseErrorInterceptors(apiError);
-    throw apiError;
+    return throwNetworkApiClientError(networkError);
   }
 
   if (!response.ok) {
-    const payload = await parseResponseBody(response);
+    let payload: unknown;
+    try {
+      payload = await parseResponseBody(response);
+    } catch (responseBodyError) {
+      return throwNetworkApiClientError(responseBodyError);
+    }
     const apiError = createApiClientError({
       message: getErrorMessageFromPayload(payload) ?? `Yêu cầu không thành công (mã ${response.status}).`,
       status: response.status,
@@ -330,8 +342,15 @@ export async function getFile(
     throw apiError;
   }
 
+  let blob: Blob;
+  try {
+    blob = await response.blob();
+  } catch (blobError) {
+    return throwNetworkApiClientError(blobError);
+  }
+
   return {
-    blob: await response.blob(),
+    blob,
     filename: parseDownloadFilename(response.headers.get("Content-Disposition")),
   };
 }

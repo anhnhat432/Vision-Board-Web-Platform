@@ -17,7 +17,7 @@ vi.mock("@/lib/auth/authedFetch", () => ({
   authedFetch: mocks.authedFetch,
 }));
 
-import { addResponseErrorInterceptor, getFile } from "./apiClient";
+import { addResponseErrorInterceptor, get, getFile } from "./apiClient";
 
 describe("apiClient getFile", () => {
   beforeEach(() => {
@@ -69,5 +69,101 @@ describe("apiClient getFile", () => {
 
     expect(blob).not.toHaveBeenCalled();
     expect(interceptor).toHaveBeenCalledWith(expect.objectContaining({ status: 500 }));
+  });
+
+  it("normalizes authedFetch rejections as network errors and runs shared interceptors", async () => {
+    const networkError = new Error("connection reset");
+    const interceptor = vi.fn();
+    const removeInterceptor = addResponseErrorInterceptor(interceptor);
+    mocks.authedFetch.mockRejectedValueOnce(networkError);
+
+    try {
+      await expect(getFile("/admin/reports/sales/export")).rejects.toMatchObject({
+        message: "Lỗi kết nối mạng. Kiểm tra mạng rồi thử lại.",
+        isNetworkError: true,
+        details: networkError,
+      });
+    } finally {
+      removeInterceptor();
+    }
+
+    expect(interceptor).toHaveBeenCalledWith(
+      expect.objectContaining({ isNetworkError: true, details: networkError }),
+    );
+  });
+
+  it("normalizes Blob read rejections as network errors and runs shared interceptors", async () => {
+    const blobError = new Error("download stream interrupted");
+    const interceptor = vi.fn();
+    const removeInterceptor = addResponseErrorInterceptor(interceptor);
+    mocks.authedFetch.mockResolvedValueOnce({
+      ok: true,
+      blob: vi.fn().mockRejectedValue(blobError),
+      headers: new Headers(),
+    } as unknown as Response);
+
+    try {
+      await expect(getFile("/admin/reports/sales/export")).rejects.toMatchObject({
+        message: "Lỗi kết nối mạng. Kiểm tra mạng rồi thử lại.",
+        isNetworkError: true,
+        details: blobError,
+      });
+    } finally {
+      removeInterceptor();
+    }
+
+    expect(interceptor).toHaveBeenCalledWith(
+      expect.objectContaining({ isNetworkError: true, details: blobError }),
+    );
+  });
+
+  it("normalizes failed-response body read errors for file downloads", async () => {
+    const bodyReadError = new Error("response body unavailable");
+    const interceptor = vi.fn();
+    const removeInterceptor = addResponseErrorInterceptor(interceptor);
+    mocks.authedFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 502,
+      text: vi.fn().mockRejectedValue(bodyReadError),
+    } as unknown as Response);
+
+    try {
+      await expect(getFile("/admin/reports/sales/export")).rejects.toMatchObject({
+        message: "Lỗi kết nối mạng. Kiểm tra mạng rồi thử lại.",
+        isNetworkError: true,
+        details: bodyReadError,
+      });
+    } finally {
+      removeInterceptor();
+    }
+
+    expect(interceptor).toHaveBeenCalledWith(
+      expect.objectContaining({ isNetworkError: true, details: bodyReadError }),
+    );
+  });
+
+  it("normalizes failed-response body read errors for the shared JSON client", async () => {
+    const bodyReadError = new Error("response body unavailable");
+    const interceptor = vi.fn();
+    const removeInterceptor = addResponseErrorInterceptor(interceptor);
+    mocks.authedFetch.mockResolvedValueOnce({
+      ok: false,
+      status: 502,
+      text: vi.fn().mockRejectedValue(bodyReadError),
+    } as unknown as Response);
+
+    try {
+      await expect(get("/admin/reports/sales")).rejects.toMatchObject({
+        message: "Lỗi kết nối mạng. Kiểm tra mạng rồi thử lại.",
+        isNetworkError: true,
+        details: bodyReadError,
+      });
+    } finally {
+      removeInterceptor();
+    }
+
+    expect(interceptor).toHaveBeenCalledWith(
+      expect.objectContaining({ isNetworkError: true, details: bodyReadError }),
+    );
   });
 });
