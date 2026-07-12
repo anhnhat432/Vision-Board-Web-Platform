@@ -1,19 +1,24 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mocks = vi.hoisted(() => ({
-  authedFetch: vi.fn(),
-  isDemoMode: vi.fn(() => false),
-}));
+const mocks = vi.hoisted(() => {
+  class AuthError extends Error {
+    public readonly status = 401;
+    public readonly code = "AUTH_FORCE_LOGOUT";
+  }
+
+  return {
+    AuthError,
+    authedFetch: vi.fn(),
+    isDemoMode: vi.fn(() => false),
+  };
+});
 
 vi.mock("@/app/utils/app-mode", () => ({
   isDemoMode: mocks.isDemoMode,
 }));
 
 vi.mock("@/lib/auth/authedFetch", () => ({
-  AuthError: class AuthError extends Error {
-    public readonly status = 401;
-    public readonly code = "AUTH_FORCE_LOGOUT";
-  },
+  AuthError: mocks.AuthError,
   authedFetch: mocks.authedFetch,
 }));
 
@@ -45,6 +50,21 @@ describe("apiClient getFile", () => {
       "http://localhost:4000/api/admin/reports/sales/export",
       expect.objectContaining({ method: "GET" }),
     );
+  });
+
+  it("returns the Blob when a malformed UTF-8 filename header cannot be decoded", async () => {
+    const expectedBlob = new Blob(["sales report"], { type: "text/csv" });
+    mocks.authedFetch.mockResolvedValueOnce({
+      ok: true,
+      blob: vi.fn().mockResolvedValue(expectedBlob),
+      headers: new Headers({
+        "Content-Disposition": "attachment; filename*=UTF-8''%ZZ",
+      }),
+    } as unknown as Response);
+
+    const result = await getFile("/admin/reports/sales/export");
+
+    expect(result).toEqual({ blob: expectedBlob, filename: null });
   });
 
   it("runs shared error interceptors and never materializes an error response as a Blob", async () => {
@@ -90,6 +110,31 @@ describe("apiClient getFile", () => {
     expect(interceptor).toHaveBeenCalledWith(
       expect.objectContaining({ isNetworkError: true, details: networkError }),
     );
+  });
+
+  it("preserves AuthError identity fields without marking it as a network error", async () => {
+    const authError = new mocks.AuthError("Phiên đăng nhập đã hết hạn.");
+    const interceptor = vi.fn();
+    const removeInterceptor = addResponseErrorInterceptor(interceptor);
+    mocks.authedFetch.mockRejectedValueOnce(authError);
+    let caughtError: unknown;
+
+    try {
+      await getFile("/admin/reports/sales/export");
+    } catch (error) {
+      caughtError = error;
+    } finally {
+      removeInterceptor();
+    }
+
+    expect(caughtError).toMatchObject({
+      message: "Phiên đăng nhập đã hết hạn.",
+      status: 401,
+      errorCode: "AUTH_FORCE_LOGOUT",
+      details: authError,
+      isNetworkError: undefined,
+    });
+    expect(interceptor).toHaveBeenCalledWith(caughtError);
   });
 
   it("normalizes Blob read rejections as network errors and runs shared interceptors", async () => {
