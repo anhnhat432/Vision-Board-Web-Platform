@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { AdminPaymentPayerEvidenceDialog } from "../components/admin/AdminPaymentPayerEvidenceDialog";
+import type { AdminPaymentPayerSource } from "@/services/adminService";
 
 const RAW_ACCOUNT_SENTINEL = "RAW_ACCOUNT_SENTINEL_012345678901234";
 const RAW_HASH_SENTINEL = "RAW_HASH_SENTINEL_a1b2c3d4e5f6";
@@ -127,17 +128,19 @@ describe("AdminPaymentsPage payment dialogs", () => {
   });
 
   it("renders only allowlisted payer evidence fields", () => {
+    const payerWithUnexpectedSensitiveField: AdminPaymentPayerSource & { accountHash: string } = {
+      classification: "external",
+      accountLast4: "6789",
+      source: "reconciliation",
+      observedAt: new Date().toISOString(),
+      accountHash: RAW_HASH_SENTINEL,
+    };
+
     render(
       <AdminPaymentPayerEvidenceDialog
         open
         onOpenChange={vi.fn()}
-        payer={{
-          classification: "external",
-          accountLast4: "6789",
-          source: "reconciliation",
-          observedAt: new Date().toISOString(),
-          accountHash: RAW_HASH_SENTINEL,
-        }}
+        payer={payerWithUnexpectedSensitiveField}
       />,
     );
 
