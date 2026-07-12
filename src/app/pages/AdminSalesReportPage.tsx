@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router";
 
 import {
@@ -37,6 +37,7 @@ export function AdminSalesReportPage() {
   const [report, setReport] = useState<AdminSalesReportResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const requestGeneration = useRef(0);
   const state = useMemo(() => parseSalesReportUrlState(searchParams), [searchParams]);
   const validationError = validateSalesReportUrlState(state);
   const activeParams = useMemo<AdminSalesReportParams>(() => ({
@@ -49,19 +50,27 @@ export function AdminSalesReportPage() {
   }), [state]);
 
   const loadReport = useCallback(async (params: AdminSalesReportParams) => {
+    const generation = ++requestGeneration.current;
     setLoading(true);
     setLoadError(null);
+    setReport(null);
     try {
-      setReport(await adminGetSalesReport(params));
+      const nextReport = await adminGetSalesReport(params);
+      if (generation !== requestGeneration.current) return;
+      setReport(nextReport);
     } catch (error) {
+      if (generation !== requestGeneration.current) return;
       setLoadError(getErrorMessage(error, "Không thể tải báo cáo kinh doanh. Thử lại."));
     } finally {
-      setLoading(false);
+      if (generation === requestGeneration.current) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
     if (validationError) {
+      requestGeneration.current += 1;
+      setReport(null);
+      setLoadError(null);
       setLoading(false);
       return;
     }

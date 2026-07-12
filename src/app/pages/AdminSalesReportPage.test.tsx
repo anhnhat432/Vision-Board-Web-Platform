@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -75,6 +75,16 @@ const report = {
   ],
 };
 
+function createDeferred<T>() {
+  let resolve: (value: T) => void;
+  let reject: (reason?: unknown) => void;
+  const promise = new Promise<T>((resolvePromise, rejectPromise) => {
+    resolve = resolvePromise;
+    reject = rejectPromise;
+  });
+  return { promise, resolve: resolve!, reject: reject! };
+}
+
 function renderPage(entry = "/admin/reports/sales") {
   return render(
     <MemoryRouter initialEntries={[entry]}>
@@ -122,7 +132,10 @@ describe("AdminSalesReportPage", () => {
     expect(screen.getByText("Chờ duyệt")).toBeInTheDocument();
     expect(screen.getByTestId("sales-report-desktop-table")).toBeInTheDocument();
     expect(screen.getByTestId("sales-report-mobile-list")).toBeInTheDocument();
-    expect(screen.getByText("2026-07-10")).toBeInTheDocument();
+    const chartTable = screen.getByRole("table", { name: "Doanh thu theo ngày" });
+    expect(within(chartTable).getByText("2026-07-10")).toBeInTheDocument();
+    expect(within(chartTable).getAllByText("198.000đ")).toHaveLength(2);
+    expect(within(chartTable).getByText("0đ")).toBeInTheDocument();
   });
 
   it("preserves a URL-selected 7-day range", async () => {
@@ -190,5 +203,55 @@ describe("AdminSalesReportPage", () => {
     expect(screen.getByLabelText("Provider")).toHaveValue("payos");
     await user.click(screen.getByRole("button", { name: "Thử lại" }));
     await waitFor(() => expect(adminServiceMock.adminGetSalesReport).toHaveBeenCalledTimes(2));
+  });
+
+  it("keeps the newest filter response when an earlier request resolves last", async () => {
+    const user = userEvent.setup();
+    const earlierRequest = createDeferred<typeof report>();
+    const newestRequest = createDeferred<typeof report>();
+    adminServiceMock.adminGetSalesReport
+      .mockImplementationOnce(() => earlierRequest.promise)
+      .mockImplementationOnce(() => newestRequest.promise);
+
+    renderPage("/admin/reports/sales?range=7d");
+    await waitFor(() => expect(adminServiceMock.adminGetSalesReport).toHaveBeenCalledTimes(1));
+
+    await user.selectOptions(screen.getByLabelText("Provider"), "payos");
+    await waitFor(() => expect(adminServiceMock.adminGetSalesReport).toHaveBeenCalledTimes(2));
+
+    await act(async () => {
+      newestRequest.resolve({
+        ...report,
+        summary: { ...report.summary, successfulTransactions: 9 },
+        items: [{ ...report.items[0], customerLabelMasked: "Báo cáo mới" }],
+      });
+    });
+    expect(screen.getAllByText("Báo cáo mới")).toHaveLength(2);
+
+    await act(async () => {
+      earlierRequest.resolve({
+        ...report,
+        summary: { ...report.summary, successfulTransactions: 1 },
+        items: [{ ...report.items[0], customerLabelMasked: "Báo cáo cũ" }],
+      });
+    });
+    expect(screen.queryAllByText("Báo cáo cũ")).toHaveLength(0);
+    expect(screen.getAllByText("Báo cáo mới")).toHaveLength(2);
+  });
+
+  it("hides a previous report when the active filter request fails", async () => {
+    const user = userEvent.setup();
+    adminServiceMock.adminGetSalesReport
+      .mockResolvedValueOnce(report)
+      .mockRejectedValueOnce(new Error("Không thể tải provider PayOS"));
+
+    renderPage("/admin/reports/sales?range=7d");
+    expect(await screen.findAllByText("N*** A***")).toHaveLength(2);
+
+    await user.selectOptions(screen.getByLabelText("Provider"), "payos");
+    expect(await screen.findByRole("alert")).toHaveTextContent("Không thể tải provider PayOS");
+    expect(screen.getByLabelText("Provider")).toHaveValue("payos");
+    expect(screen.queryAllByText("N*** A***")).toHaveLength(0);
+    expect(screen.queryByTestId("sales-report-desktop-table")).not.toBeInTheDocument();
   });
 });
