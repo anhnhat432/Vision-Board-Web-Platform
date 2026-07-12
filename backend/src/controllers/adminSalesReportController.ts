@@ -4,7 +4,9 @@ import {
   buildAdminSalesReportCsv,
   getAdminSalesReport,
   getAdminSalesReportExport,
+  reviewAdminSalesOrder,
 } from "../services/adminSalesReportService";
+import { ApiError } from "../utils/apiError";
 import { successResponse } from "../utils/apiResponse";
 
 export async function getAdminSalesReportController(req: Request, res: Response): Promise<void> {
@@ -23,4 +25,18 @@ export async function exportAdminSalesReportController(req: Request, res: Respon
       "Cache-Control": "no-store",
     })
     .send(csv);
+}
+
+export async function reviewAdminSalesOrderController(req: Request, res: Response): Promise<void> {
+  const reviewerUid = req.user?.uid?.trim();
+  if (!reviewerUid) throw new ApiError(401, "Authentication required.");
+  const result = await reviewAdminSalesOrder({
+    orderId: req.params.orderId ?? "",
+    reviewerUid,
+    kpiStatus: req.body?.kpiStatus,
+    exclusionReason: req.body?.exclusionReason,
+    reviewNote: req.body?.reviewNote,
+  });
+  res.locals.adminSalesReviewAudit = result.audit;
+  res.status(200).json(successResponse({ item: result.item }));
 }

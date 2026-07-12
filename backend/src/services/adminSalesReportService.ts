@@ -502,6 +502,128 @@ export async function getAdminSalesReportExport(input: AdminSalesReportQueryInpu
   return { report, filename: `sales-report-${filters.fromDate}-to-${filters.toDate}.csv` };
 }
 
+export interface ReviewAdminSalesOrderInput {
+  orderId: string;
+  reviewerUid: string;
+  kpiStatus: unknown;
+  exclusionReason?: unknown;
+  reviewNote?: unknown;
+}
+
+export interface AdminSalesReviewAudit {
+  previousStatus: PaymentReportingKpiStatus;
+  newStatus: "included" | "excluded";
+  exclusionReason?: PaymentReportingExclusionReason;
+  noteProvided: boolean;
+}
+
+function normalizeReviewInput(input: ReviewAdminSalesOrderInput) {
+  const orderId = input.orderId.trim().toUpperCase();
+  const reviewerUid = input.reviewerUid.trim();
+  const reviewNote = typeof input.reviewNote === "string" ? input.reviewNote.trim().slice(0, 500) || undefined : undefined;
+  if (input.kpiStatus !== "included" && input.kpiStatus !== "excluded") {
+    throw new ApiError(400, "KPI status must be included or excluded.", undefined, "invalid_sales_review_status");
+  }
+  const kpiStatus = input.kpiStatus as "included" | "excluded";
+
+  const allowedReasons: PaymentReportingExclusionReason[] = ["internal_team", "test", "duplicate", "other"];
+  if (input.kpiStatus === "excluded" && !allowedReasons.includes(input.exclusionReason as PaymentReportingExclusionReason)) {
+    throw new ApiError(400, "An exclusion reason is required.", undefined, "sales_exclusion_reason_required");
+  }
+  if (input.kpiStatus === "included" && input.exclusionReason) {
+    throw new ApiError(400, "Included sales cannot have an exclusion reason.", undefined, "invalid_sales_exclusion_reason");
+  }
+  if (input.exclusionReason === "other" && !reviewNote) {
+    throw new ApiError(400, "A review note is required for other exclusions.", undefined, "sales_review_note_required");
+  }
+
+  return {
+    orderId,
+    reviewerUid,
+    kpiStatus,
+    exclusionReason: input.exclusionReason as PaymentReportingExclusionReason | undefined,
+    reviewNote,
+  };
+}
+
+export async function reviewAdminSalesOrder(input: ReviewAdminSalesOrderInput): Promise<{
+  item: AdminSalesReportRow;
+  audit: AdminSalesReviewAudit;
+}> {
+  const normalized = normalizeReviewInput(input);
+  const existing = await PaymentOrderModel.findOne({
+    orderId: normalized.orderId,
+    status: "completed",
+    purpose: "plus_subscription",
+    currency: "VND",
+    provider: { $in: [...REAL_PROVIDERS] },
+  })
+    .select("_id orderId amount currency provider completedAt cassoTransactionId metadata.payos.payer manualCompletedAt reporting updatedAt userId")
+    .lean();
+  if (!existing) {
+    throw new ApiError(404, "Qualifying sales order not found.", undefined, "sales_order_not_found");
+  }
+  if (normalized.kpiStatus === "included" && existing.manualCompletedAt && !normalized.reviewNote) {
+    throw new ApiError(400, "Manual completions require a review note.", undefined, "manual_sales_review_note_required");
+  }
+
+  const previousStatus = existing.reporting?.kpiStatus ?? "pending";
+  const reviewedAt = new Date();
+  const setFields: Record<string, unknown> = {
+    "reporting.kpiStatus": normalized.kpiStatus,
+    "reporting.reviewedBy": normalized.reviewerUid,
+    "reporting.reviewedAt": reviewedAt,
+    "reporting.reviewNote": normalized.reviewNote ?? null,
+  };
+  if (normalized.kpiStatus === "excluded") {
+    setFields["reporting.exclusionReason"] = normalized.exclusionReason;
+  }
+  const stateFilter = existing.reporting?.kpiStatus
+    ? { "reporting.kpiStatus": existing.reporting.kpiStatus }
+    : { $or: [{ reporting: { $exists: false } }, { "reporting.kpiStatus": { $exists: false } }] };
+  const update = normalized.kpiStatus === "included"
+    ? { $set: setFields, $unset: { "reporting.exclusionReason": "" } }
+    : { $set: setFields };
+  const updated = await PaymentOrderModel.findOneAndUpdate(
+    {
+      _id: existing._id,
+      orderId: normalized.orderId,
+      status: "completed",
+      purpose: "plus_subscription",
+      currency: "VND",
+      provider: { $in: [...REAL_PROVIDERS] },
+      updatedAt: existing.updatedAt,
+      ...stateFilter,
+    },
+    update,
+    { new: true, runValidators: true },
+  ).lean();
+  if (!updated) {
+    throw new ApiError(409, "This sales review changed elsewhere. Reload and retry.", undefined, "sales_review_conflict");
+  }
+
+  const user = await UserModel.findOne({ firebaseUid: updated.userId }).select("email displayName").lean();
+  const refund = await RefundRequestModel.findOne({ orderId: updated.orderId, status: "completed" })
+    .select("resolvedAt")
+    .sort({ resolvedAt: -1 })
+    .lean();
+  return {
+    item: serializeSalesRow({
+      ...updated,
+      user,
+      refund,
+      isRefunded: Boolean(refund),
+      payer: updated.metadata?.payos?.payer ?? null,
+    } as RawSalesRow),
+    audit: {
+      previousStatus,
+      newStatus: normalized.kpiStatus,
+      ...(normalized.exclusionReason ? { exclusionReason: normalized.exclusionReason } : {}),
+      noteProvided: Boolean(normalized.reviewNote),
+    },
+  };
+}
+
 function csvCell(value: unknown): string {
   let text = String(value ?? "");
   if (/^[=+\-@]/.test(text)) text = `'${text}`;

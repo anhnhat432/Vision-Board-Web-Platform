@@ -4,6 +4,7 @@ import { afterEach, describe, it } from "node:test";
 import { PaymentOrderModel } from "../models/PaymentOrderModel";
 import { RefundRequestModel } from "../models/refundRequestModel";
 import { UserModel } from "../models/UserModel";
+import * as adminSalesReportService from "../services/adminSalesReportService";
 import {
   buildAdminSalesReportCsv,
   buildAdminSalesReportPipeline,
@@ -19,6 +20,36 @@ const originalFindOne = PaymentOrderModel.findOne;
 const originalFindOneAndUpdate = PaymentOrderModel.findOneAndUpdate;
 const originalRefundFindOne = RefundRequestModel.findOne;
 const originalUserFindOne = UserModel.findOne;
+
+type ReviewResult = {
+  item: Record<string, unknown>;
+  audit: Record<string, unknown>;
+};
+
+function reviewAdminSalesOrder(input: unknown): Promise<ReviewResult> {
+  const review = (adminSalesReportService as unknown as {
+    reviewAdminSalesOrder?: (reviewInput: unknown) => Promise<ReviewResult>;
+  }).reviewAdminSalesOrder;
+  if (typeof review !== "function") {
+    assert.fail("reviewAdminSalesOrder must be exported");
+  }
+  return review(input);
+}
+
+function createLeanResult<T>(value: T) {
+  const chain = {
+    select() {
+      return chain;
+    },
+    sort() {
+      return chain;
+    },
+    async lean() {
+      return value;
+    },
+  };
+  return chain;
+}
 
 afterEach(() => {
   (PaymentOrderModel as unknown as { aggregate: unknown }).aggregate = originalAggregate;
@@ -256,6 +287,161 @@ describe("admin sales report aggregation", () => {
     await assert.rejects(
       getAdminSalesReportExport({ from: "2026-07-01", to: "2026-07-11", kpiStatus: "included" }),
       (error: unknown) => error instanceof ApiError && error.errorCode === "sales_export_too_large",
+    );
+  });
+});
+
+describe("admin sales KPI review", () => {
+  it("requires reasons and notes, then atomically includes a manual completion without changing billing fields", async () => {
+    const original = {
+      _id: "order_doc_1",
+      orderId: "VBREVIEW01",
+      userId: "customer_uid",
+      status: "completed",
+      purpose: "plus_subscription",
+      currency: "VND",
+      provider: "payos",
+      amount: 99000,
+      completedAt: new Date("2026-07-10T03:00:00.000Z"),
+      manualCompletedAt: new Date("2026-07-10T03:05:00.000Z"),
+      reporting: undefined,
+      updatedAt: new Date("2026-07-10T03:06:00.000Z"),
+    };
+
+    (PaymentOrderModel as unknown as { findOne: unknown }).findOne = () => createLeanResult(original);
+
+    await assert.rejects(
+      reviewAdminSalesOrder({
+        orderId: original.orderId,
+        reviewerUid: "admin_uid",
+        kpiStatus: "included",
+      }),
+      (error: unknown) => error instanceof ApiError && error.errorCode === "manual_sales_review_note_required",
+    );
+
+    let update: Record<string, unknown> | undefined;
+    let filter: Record<string, unknown> | undefined;
+    (PaymentOrderModel as unknown as { findOneAndUpdate: unknown }).findOneAndUpdate = (
+      nextFilter: Record<string, unknown>,
+      nextUpdate: Record<string, unknown>,
+    ) => {
+      filter = nextFilter;
+      update = nextUpdate;
+      return createLeanResult({
+        ...original,
+        reporting: {
+          kpiStatus: "included",
+          reviewNote: "Da doi chieu anh chuyen khoan va PayOS.",
+          reviewedBy: "admin_uid",
+          reviewedAt: new Date("2026-07-11T02:00:00.000Z"),
+        },
+      });
+    };
+    (UserModel as unknown as { findOne: unknown }).findOne = () => createLeanResult({
+      email: "customer@example.com",
+      displayName: "Customer Example",
+    });
+    (RefundRequestModel as unknown as { findOne: unknown }).findOne = () => createLeanResult(null);
+
+    const result = await reviewAdminSalesOrder({
+      orderId: original.orderId,
+      reviewerUid: "admin_uid",
+      kpiStatus: "included",
+      reviewNote: "Da doi chieu anh chuyen khoan va PayOS.",
+    });
+
+    assert.equal(result.audit.previousStatus, "pending");
+    assert.equal(result.audit.newStatus, "included");
+    assert.equal(result.audit.noteProvided, true);
+    assert.equal((update?.$set as Record<string, unknown>)["reporting.kpiStatus"], "included");
+    assert.equal((filter?.updatedAt as Date).toISOString(), original.updatedAt.toISOString());
+    assert.equal(JSON.stringify(update).includes("amount"), false);
+    assert.equal(JSON.stringify(update).includes("provider"), false);
+    assert.equal(JSON.stringify(update).includes("receipt"), false);
+    assert.equal(JSON.stringify(result.item).includes("reviewNote"), false);
+    assert.equal(JSON.stringify(result.item).includes("customer@example.com"), false);
+  });
+
+  it("rejects excluded reviews without a reason, other exclusions without a note, and client pending status", async () => {
+    const invalidInputs = [
+      { kpiStatus: "excluded" },
+      { kpiStatus: "excluded", exclusionReason: "other" },
+      { kpiStatus: "pending" },
+    ];
+
+    for (const input of invalidInputs) {
+      await assert.rejects(
+        reviewAdminSalesOrder({ orderId: "VBREVIEW01", reviewerUid: "admin_uid", ...input }),
+        (error: unknown) => error instanceof ApiError && error.statusCode === 400,
+      );
+    }
+  });
+
+  it("clears the exclusion reason when an existing review is included", async () => {
+    const existing = {
+      _id: "order_doc_2",
+      orderId: "VBREVIEW02",
+      userId: "customer_uid",
+      status: "completed",
+      purpose: "plus_subscription",
+      currency: "VND",
+      provider: "casso",
+      amount: 99000,
+      completedAt: new Date("2026-07-10T03:00:00.000Z"),
+      reporting: { kpiStatus: "excluded" as const, exclusionReason: "test" as const },
+      updatedAt: new Date("2026-07-10T03:06:00.000Z"),
+    };
+    let update: Record<string, unknown> | undefined;
+    (PaymentOrderModel as unknown as { findOne: unknown }).findOne = () => createLeanResult(existing);
+    (PaymentOrderModel as unknown as { findOneAndUpdate: unknown }).findOneAndUpdate = (
+      _filter: unknown,
+      nextUpdate: Record<string, unknown>,
+    ) => {
+      update = nextUpdate;
+      return createLeanResult({
+        ...existing,
+        reporting: { kpiStatus: "included", reviewedAt: new Date("2026-07-11T02:00:00.000Z") },
+      });
+    };
+    (UserModel as unknown as { findOne: unknown }).findOne = () => createLeanResult(null);
+    (RefundRequestModel as unknown as { findOne: unknown }).findOne = () => createLeanResult({ resolvedAt: null });
+
+    const result = await reviewAdminSalesOrder({
+      orderId: existing.orderId,
+      reviewerUid: "admin_uid",
+      kpiStatus: "included",
+    });
+
+    assert.deepEqual(update?.$unset, { "reporting.exclusionReason": "" });
+    assert.equal(result.item.reporting instanceof Object, true);
+    assert.equal((result.item.refund as { status?: string }).status, "completed");
+  });
+
+  it("returns a conflict when the optimistic match is stale", async () => {
+    const existing = {
+      _id: "order_doc_3",
+      orderId: "VBREVIEW03",
+      userId: "customer_uid",
+      status: "completed",
+      purpose: "plus_subscription",
+      currency: "VND",
+      provider: "payos",
+      amount: 99000,
+      completedAt: new Date("2026-07-10T03:00:00.000Z"),
+      reporting: undefined,
+      updatedAt: new Date("2026-07-10T03:06:00.000Z"),
+    };
+    (PaymentOrderModel as unknown as { findOne: unknown }).findOne = () => createLeanResult(existing);
+    (PaymentOrderModel as unknown as { findOneAndUpdate: unknown }).findOneAndUpdate = () => createLeanResult(null);
+
+    await assert.rejects(
+      reviewAdminSalesOrder({
+        orderId: existing.orderId,
+        reviewerUid: "admin_uid",
+        kpiStatus: "excluded",
+        exclusionReason: "test",
+      }),
+      (error: unknown) => error instanceof ApiError && error.errorCode === "sales_review_conflict" && error.statusCode === 409,
     );
   });
 });

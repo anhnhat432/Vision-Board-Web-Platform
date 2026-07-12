@@ -12,13 +12,17 @@ process.env.FRONTEND_ORIGIN ??= "http://localhost:5173";
 import { createAuthMiddleware } from "../middleware/authMiddlewareCore";
 import { errorMiddleware } from "../middleware/errorMiddleware";
 import { clearAdminRoleCache } from "../middleware/requireAdmin";
+import { AuditLogModel } from "../models/auditLogModel";
 import { PaymentOrderModel } from "../models/PaymentOrderModel";
+import { RefundRequestModel } from "../models/refundRequestModel";
 import { UserModel } from "../models/UserModel";
 import { adminRoutes } from "../routes/adminRoutes";
 
 type MockableModel = {
   aggregate: unknown;
   findOne: unknown;
+  findOneAndUpdate: unknown;
+  create: unknown;
 };
 
 interface TestResponse {
@@ -29,10 +33,15 @@ interface TestResponse {
 }
 
 const originalAggregate = (PaymentOrderModel as unknown as MockableModel).aggregate;
+const originalPaymentOrderFindOne = (PaymentOrderModel as unknown as MockableModel).findOne;
+const originalPaymentOrderFindOneAndUpdate = (PaymentOrderModel as unknown as MockableModel).findOneAndUpdate;
+const originalRefundFindOne = (RefundRequestModel as unknown as MockableModel).findOne;
 const originalUserFindOne = (UserModel as unknown as MockableModel).findOne;
+const originalAuditCreate = (AuditLogModel as unknown as MockableModel).create;
 
 function createAdminTestApp(): Express {
   const app = express();
+  app.use(express.json());
   app.use(
     "/api",
     createAuthMiddleware({
@@ -81,7 +90,13 @@ function mockEmptyReport(): void {
   }];
 }
 
-async function request(app: Express, method: string, path: string, token?: string): Promise<TestResponse> {
+async function request(
+  app: Express,
+  method: string,
+  path: string,
+  token?: string,
+  body?: unknown,
+): Promise<TestResponse> {
   const server = app.listen(0);
   await new Promise<void>((resolve) => {
     server.once("listening", resolve);
@@ -91,7 +106,11 @@ async function request(app: Express, method: string, path: string, token?: strin
   try {
     const response = await fetch(`http://127.0.0.1:${address.port}${path}`, {
       method,
-      headers: token ? { authorization: `Bearer ${token}` } : undefined,
+      headers: {
+        ...(token ? { authorization: `Bearer ${token}` } : {}),
+        ...(body === undefined ? {} : { "content-type": "application/json" }),
+      },
+      body: body === undefined ? undefined : JSON.stringify(body),
     });
     const text = await response.text();
     return {
@@ -112,7 +131,11 @@ async function request(app: Express, method: string, path: string, token?: strin
 
 afterEach(() => {
   (PaymentOrderModel as unknown as MockableModel).aggregate = originalAggregate;
+  (PaymentOrderModel as unknown as MockableModel).findOne = originalPaymentOrderFindOne;
+  (PaymentOrderModel as unknown as MockableModel).findOneAndUpdate = originalPaymentOrderFindOneAndUpdate;
+  (RefundRequestModel as unknown as MockableModel).findOne = originalRefundFindOne;
   (UserModel as unknown as MockableModel).findOne = originalUserFindOne;
+  (AuditLogModel as unknown as MockableModel).create = originalAuditCreate;
   clearAdminRoleCache();
 });
 
@@ -167,5 +190,66 @@ describe("admin sales report routes", () => {
       assert.equal(response.headers.get("content-disposition"), null, path);
       assert.equal(response.headers.get("content-type")?.includes("text/csv"), false, path);
     }
+  });
+
+  it("reviews a qualifying order through the protected route and rejects invalid review input without an update", async () => {
+    mockUserRoles();
+    (AuditLogModel as unknown as MockableModel).create = async () => null;
+    const original = {
+      _id: "order_doc_1",
+      orderId: "VBREVIEW01",
+      userId: "customer_uid",
+      status: "completed",
+      purpose: "plus_subscription",
+      currency: "VND",
+      provider: "payos",
+      amount: 99000,
+      completedAt: new Date("2026-07-10T03:00:00.000Z"),
+      reporting: undefined,
+      updatedAt: new Date("2026-07-10T03:06:00.000Z"),
+    };
+    const createLeanResult = <T,>(value: T) => {
+      const chain = {
+        select() {
+          return chain;
+        },
+        sort() {
+          return chain;
+        },
+        async lean() {
+          return value;
+        },
+      };
+      return chain;
+    };
+    let updates = 0;
+    (PaymentOrderModel as unknown as MockableModel).findOne = () => createLeanResult(original);
+    (PaymentOrderModel as unknown as MockableModel).findOneAndUpdate = () => {
+      updates += 1;
+      return createLeanResult({
+        ...original,
+        reporting: { kpiStatus: "excluded", exclusionReason: "test", reviewedAt: new Date("2026-07-11T02:00:00.000Z") },
+      });
+    };
+    (RefundRequestModel as unknown as MockableModel).findOne = () => createLeanResult(null);
+    const app = createAdminTestApp();
+
+    const successful = await request(app, "PATCH", "/api/admin/reports/sales/VBREVIEW01/review", "admin-token", {
+      kpiStatus: "excluded",
+      exclusionReason: "test",
+      reviewNote: "raw private review note",
+    });
+    assert.equal(successful.status, 200);
+    const item = (successful.json.data as Record<string, unknown>).item as Record<string, unknown>;
+    assert.equal((item.reporting as Record<string, unknown>).kpiStatus, "excluded");
+    assert.equal(JSON.stringify(item).includes("raw private review note"), false);
+    assert.equal(updates, 1);
+
+    const invalid = await request(app, "PATCH", "/api/admin/reports/sales/VBREVIEW01/review", "admin-token", {
+      kpiStatus: "pending",
+    });
+    assert.equal(invalid.status, 400);
+    assert.equal(invalid.json.errorCode, "invalid_sales_review_status");
+    assert.equal(updates, 1);
   });
 });

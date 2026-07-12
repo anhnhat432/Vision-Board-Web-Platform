@@ -32,6 +32,7 @@ import {
 import {
   exportAdminSalesReportController,
   getAdminSalesReportController,
+  reviewAdminSalesOrderController,
 } from "../controllers/adminSalesReportController";
 import { clearAdminRoleCache, requireAdmin } from "../middleware/requireAdmin";
 import { validateOptionalJsonObjectBody, validateOrderIdParam } from "../middleware/requestValidation";
@@ -73,6 +74,7 @@ interface AuditedAdminActionOptions {
   action: string;
   target: string;
   getTargetId?: (req: Request) => string | null | undefined;
+  getAuditPayload?: (req: Request, res: Response) => unknown;
   validators?: RequestHandler[];
   handler: AdminHandler;
 }
@@ -119,7 +121,7 @@ export function auditedAdminAction(options: AuditedAdminActionOptions): RequestH
         action: options.action,
         target: options.target,
         targetId,
-        payload: req.body,
+        payload: options.getAuditPayload?.(req, res) ?? req.body,
         success: true,
       });
     } catch (error) {
@@ -128,7 +130,7 @@ export function auditedAdminAction(options: AuditedAdminActionOptions): RequestH
         action: options.action,
         target: options.target,
         targetId,
-        payload: req.body,
+        payload: options.getAuditPayload?.(req, res) ?? req.body,
         success: false,
       });
       next(error);
@@ -152,6 +154,22 @@ adminRoutes.get(
   "/admin/reports/sales/export",
   asyncHandler(requireAdmin),
   asyncHandler(exportAdminSalesReportController),
+);
+adminRoutes.patch(
+  "/admin/reports/sales/:orderId/review",
+  auditedAdminAction({
+    action: "reviewAdminSalesOrder",
+    target: "payment_order_sales_reporting",
+    getTargetId: (req) => req.params.orderId?.trim().toUpperCase(),
+    getAuditPayload: (req, res) =>
+      res.locals.adminSalesReviewAudit ?? {
+        newStatus: req.body?.kpiStatus,
+        exclusionReason: req.body?.exclusionReason,
+        noteProvided: Boolean(req.body?.reviewNote),
+      },
+    validators: [validateOrderIdParam, validateOptionalJsonObjectBody],
+    handler: reviewAdminSalesOrderController,
+  }),
 );
 adminRoutes.get("/admin/reconciliation/last-run", asyncHandler(requireAdmin), asyncHandler(getReconciliationLastRun));
 adminRoutes.get("/admin/audit-logs", asyncHandler(requireAdmin), asyncHandler(getAdminAuditLogs));

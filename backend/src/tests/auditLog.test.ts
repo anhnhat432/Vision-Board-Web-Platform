@@ -14,6 +14,7 @@ import { errorMiddleware } from "../middleware/errorMiddleware";
 import { clearAdminRoleCache } from "../middleware/requireAdmin";
 import { AuditLogModel, type AuditLogEntity } from "../models/auditLogModel";
 import { PaymentOrderModel, type PaymentOrderStatus } from "../models/PaymentOrderModel";
+import { RefundRequestModel } from "../models/refundRequestModel";
 import { UserModel } from "../models/UserModel";
 import { adminRoutes } from "../routes/adminRoutes";
 import { orderRoutes } from "../routes/orderRoutes";
@@ -23,6 +24,7 @@ import { orderService } from "../services/orderService";
 type MockableModel = {
   create: unknown;
   findOne: unknown;
+  findOneAndUpdate: unknown;
 };
 
 type MockableBillingService = {
@@ -49,6 +51,8 @@ interface MockPaymentOrder {
 
 const originalAuditCreate = AuditLogModel.create;
 const originalPaymentOrderFindOne = PaymentOrderModel.findOne;
+const originalPaymentOrderFindOneAndUpdate = PaymentOrderModel.findOneAndUpdate;
+const originalRefundFindOne = RefundRequestModel.findOne;
 const originalUserFindOne = UserModel.findOne;
 const originalBillingUpsert = billingService.upsertSubscriptionFromProviderEvent;
 
@@ -149,6 +153,8 @@ afterEach(() => {
   mock.restoreAll();
   (AuditLogModel as unknown as MockableModel).create = originalAuditCreate;
   (PaymentOrderModel as unknown as MockableModel).findOne = originalPaymentOrderFindOne;
+  (PaymentOrderModel as unknown as MockableModel).findOneAndUpdate = originalPaymentOrderFindOneAndUpdate;
+  (RefundRequestModel as unknown as MockableModel).findOne = originalRefundFindOne;
   (UserModel as unknown as MockableModel).findOne = originalUserFindOne;
   (billingService as unknown as MockableBillingService).upsertSubscriptionFromProviderEvent = originalBillingUpsert;
   clearAdminRoleCache();
@@ -277,5 +283,74 @@ describe("admin audit logging", () => {
     assert.equal("userId" in (createdLogs[0]?.payload ?? {}), false);
     assert.equal(JSON.stringify(createdLogs[0]).includes("customer@example.com"), false);
     assert.equal(JSON.stringify(createdLogs[0]).includes("customer_uid_should_not_log"), false);
+  });
+
+  it("records only safe sales review facts on success and failure", async () => {
+    const createdLogs: AuditLogEntity[] = [];
+    const original = {
+      _id: "order_doc_1",
+      orderId: "VBREVIEW01",
+      userId: "customer_uid",
+      status: "completed",
+      purpose: "plus_subscription",
+      currency: "VND",
+      provider: "payos",
+      amount: 99000,
+      completedAt: new Date("2026-07-10T03:00:00.000Z"),
+      reporting: undefined,
+      updatedAt: new Date("2026-07-10T03:06:00.000Z"),
+    };
+    const createLeanResult = <T,>(value: T) => {
+      const chain = {
+        select() {
+          return chain;
+        },
+        sort() {
+          return chain;
+        },
+        async lean() {
+          return value;
+        },
+      };
+      return chain;
+    };
+    mockUserRole("admin");
+    (AuditLogModel as unknown as MockableModel).create = async (entry: AuditLogEntity) => {
+      createdLogs.push(entry);
+      return entry;
+    };
+    (PaymentOrderModel as unknown as MockableModel).findOne = () => createLeanResult(original);
+    (PaymentOrderModel as unknown as MockableModel).findOneAndUpdate = () => createLeanResult({
+      ...original,
+      reporting: { kpiStatus: "excluded", exclusionReason: "test", reviewedAt: new Date("2026-07-11T02:00:00.000Z") },
+    });
+    (RefundRequestModel as unknown as MockableModel).findOne = () => createLeanResult(null);
+
+    const success = await requestJson(createAdminTestApp(), "PATCH", "/api/admin/reports/sales/VBREVIEW01/review", {
+      body: {
+        kpiStatus: "excluded",
+        exclusionReason: "test",
+        reviewNote: "raw private review note",
+      },
+    });
+    assert.equal(success.status, 200);
+    const capturedAudit = createdLogs[0];
+    assert.deepEqual(capturedAudit?.payload, {
+      previousStatus: "pending",
+      newStatus: "excluded",
+      exclusionReason: "test",
+      noteProvided: true,
+    });
+    assert.equal(capturedAudit?.actorUid, "admin_uid");
+    assert.equal(capturedAudit?.targetId, "VBREVIEW01");
+    assert.equal(JSON.stringify(capturedAudit).includes("raw private review note"), false);
+    assert.equal(JSON.stringify(capturedAudit).includes("customer@example.com"), false);
+
+    const failed = await requestJson(createAdminTestApp(), "PATCH", "/api/admin/reports/sales/VBREVIEW01/review", {
+      body: { kpiStatus: "pending", reviewNote: "raw private review note" },
+    });
+    assert.equal(failed.status, 400);
+    assert.deepEqual(createdLogs[1]?.payload, { newStatus: "pending", noteProvided: true });
+    assert.equal(JSON.stringify(createdLogs[1]).includes("raw private review note"), false);
   });
 });
