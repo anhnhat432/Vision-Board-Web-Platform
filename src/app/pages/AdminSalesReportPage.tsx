@@ -1,10 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router";
+import { toast } from "sonner";
 
 import {
+  type AdminReviewSalesOrderPayload,
+  type AdminSalesReportRow,
   type AdminSalesReportParams,
   type AdminSalesReportResult,
+  adminExportSalesReport,
   adminGetSalesReport,
+  adminReconcilePaymentOrderPayerSource,
+  adminReviewSalesOrder,
 } from "@/services/adminService";
 
 import {
@@ -15,9 +21,11 @@ import {
 } from "../components/admin/sales/AdminSalesReportFilters";
 import { AdminSalesKpiGrid } from "../components/admin/sales/AdminSalesKpiGrid";
 import { AdminSalesReportList } from "../components/admin/sales/AdminSalesReportList";
+import { AdminSalesReviewDialog } from "../components/admin/sales/AdminSalesReviewDialog";
 import { AdminSalesRevenueChart } from "../components/admin/sales/AdminSalesRevenueChart";
 import { AdminEmptyState } from "../components/admin/AdminEmptyState";
 import { AdminPageHeader } from "../components/admin/AdminPageHeader";
+import { AdminPaymentPayerEvidenceDialog } from "../components/admin/AdminPaymentPayerEvidenceDialog";
 import { getErrorMessage } from "../components/admin/utils";
 import { Button } from "../components/ui/button";
 
@@ -37,6 +45,13 @@ export function AdminSalesReportPage() {
   const [report, setReport] = useState<AdminSalesReportResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [reviewItem, setReviewItem] = useState<AdminSalesReportRow | null>(null);
+  const [reviewBusy, setReviewBusy] = useState(false);
+  const [reviewError, setReviewError] = useState<string | null>(null);
+  const [busyOrderId, setBusyOrderId] = useState<string | null>(null);
+  const [evidenceItem, setEvidenceItem] = useState<AdminSalesReportRow | null>(null);
+  const [exportBusy, setExportBusy] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
   const requestGeneration = useRef(0);
   const state = useMemo(() => parseSalesReportUrlState(searchParams), [searchParams]);
   const validationError = validateSalesReportUrlState(state);
@@ -78,6 +93,59 @@ export function AdminSalesReportPage() {
   }, [activeParams, loadReport, validationError]);
 
   const updateState = (next: SalesReportUrlState) => setSearchParams(toSearchParams(next), { replace: true });
+  const handleReview = async (payload: AdminReviewSalesOrderPayload) => {
+    if (!reviewItem) return;
+    try {
+      setReviewBusy(true);
+      setReviewError(null);
+      await adminReviewSalesOrder(reviewItem.orderId, payload);
+      await loadReport(activeParams);
+      setReviewItem(null);
+      toast.success("Đã cập nhật trạng thái KPI.");
+    } catch (error) {
+      setReviewError(getErrorMessage(error, "Không thể lưu duyệt KPI. Thử lại."));
+    } finally {
+      setReviewBusy(false);
+    }
+  };
+  const handleReconcile = async (orderId: string) => {
+    setBusyOrderId(orderId);
+    try {
+      const result = await adminReconcilePaymentOrderPayerSource(orderId);
+      setReport((current) => current ? {
+        ...current,
+        items: current.items.map((item) => item.orderId === orderId ? { ...item, payer: result.payer } : item),
+      } : current);
+      if (result.payer.source === "reconciliation") {
+        const item = report?.items.find((candidate) => candidate.orderId === orderId);
+        if (item) setEvidenceItem({ ...item, payer: result.payer });
+      }
+      toast.success("Đã đối chiếu PayOS.");
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Không thể đối chiếu PayOS. Thử lại."));
+    } finally {
+      setBusyOrderId(null);
+    }
+  };
+  const handleExport = async () => {
+    setExportBusy(true);
+    setExportError(null);
+    try {
+      const exported = await adminExportSalesReport(activeParams);
+      const url = URL.createObjectURL(exported.blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = exported.filename || `sales-report-${activeParams.from}-to-${activeParams.to}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      setExportError(getErrorMessage(error, "Không thể xuất báo cáo. Thử lại."));
+    } finally {
+      setExportBusy(false);
+    }
+  };
   const noQualifyingSales = report
     ? report.tabCounts.pending + report.tabCounts.included + report.tabCounts.excluded === 0
     : false;
@@ -89,7 +157,11 @@ export function AdminSalesReportPage() {
 
   return (
     <div className="space-y-6">
-      <AdminPageHeader title="Báo cáo kinh doanh" description="Đối soát giao dịch Plus thực, duyệt KPI và xuất bằng chứng đã ẩn thông tin nhạy cảm." />
+      <AdminPageHeader
+        title="Báo cáo kinh doanh"
+        description="Đối soát giao dịch Plus thực, duyệt KPI và xuất bằng chứng đã ẩn thông tin nhạy cảm."
+        actions={<Button type="button" variant="outline" disabled={exportBusy} onClick={() => void handleExport()}>{exportBusy ? "Đang xuất..." : "Xuất CSV"}</Button>}
+      />
       <AdminSalesReportFilters
         value={state}
         availableProviders={report?.availableProviders ?? ["payos", "casso"]}
@@ -102,6 +174,7 @@ export function AdminSalesReportPage() {
           <Button type="button" variant="outline" onClick={() => void loadReport(activeParams)}>Thử lại</Button>
         </div>
       ) : null}
+      {exportError ? <p role="alert" className="text-sm text-rose-600">{exportError}</p> : null}
       {loading && !report ? <p role="status">Đang tải báo cáo kinh doanh…</p> : null}
       {report ? (
         <>
@@ -126,7 +199,13 @@ export function AdminSalesReportPage() {
           ) : report.total === 0 ? (
             <AdminEmptyState title="Không có giao dịch trong trạng thái này" description="Đổi tab hoặc bộ lọc để xem các giao dịch khác." />
           ) : (
-            <AdminSalesReportList items={report.items} />
+            <AdminSalesReportList
+              items={report.items}
+              busyOrderId={busyOrderId}
+              onReview={(item) => { setReviewError(null); setReviewItem(item); }}
+              onReconcile={(orderId) => void handleReconcile(orderId)}
+              onViewEvidence={setEvidenceItem}
+            />
           )}
           <div className="flex items-center justify-between">
             <p className="text-sm text-app-ink-muted">Trang {report.page}/{report.totalPages}</p>
@@ -137,6 +216,18 @@ export function AdminSalesReportPage() {
           </div>
         </>
       ) : null}
+      <AdminSalesReviewDialog
+        item={reviewItem}
+        busy={reviewBusy}
+        error={reviewError}
+        onOpenChange={(open) => { if (!open && !reviewBusy) setReviewItem(null); }}
+        onConfirm={handleReview}
+      />
+      <AdminPaymentPayerEvidenceDialog
+        open={evidenceItem !== null}
+        payer={evidenceItem?.payer ?? null}
+        onOpenChange={(open) => { if (!open) setEvidenceItem(null); }}
+      />
     </div>
   );
 }

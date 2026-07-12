@@ -1,9 +1,41 @@
 import type { AdminSalesReportRow } from "@/services/adminService";
 
+import { Button } from "../../ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../ui/table";
 import { formatDate, formatVnd } from "../utils";
 
-export function AdminSalesReportList({ items }: { items: AdminSalesReportRow[] }) {
+interface AdminSalesReportListProps {
+  items: AdminSalesReportRow[];
+  busyOrderId: string | null;
+  onReview(item: AdminSalesReportRow): void;
+  onReconcile(orderId: string): void;
+  onViewEvidence(item: AdminSalesReportRow): void;
+}
+
+function SalesActions({ item, busyOrderId, onReview, onReconcile, onViewEvidence }: Omit<AdminSalesReportListProps, "items"> & { item: AdminSalesReportRow }) {
+  const hasEvidence = item.payer?.source === "reconciliation";
+  const canReconcile = item.provider === "payos" && !hasEvidence;
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      <Button type="button" size="sm" variant="outline" onClick={() => onReview(item)} disabled={busyOrderId !== null}>
+        Duyệt KPI {item.orderId}
+      </Button>
+      {canReconcile ? (
+        <Button type="button" size="sm" variant="outline" onClick={() => onReconcile(item.orderId)} disabled={busyOrderId !== null}>
+          {busyOrderId === item.orderId ? "Đang đối chiếu..." : "Đối chiếu PayOS"}
+        </Button>
+      ) : null}
+      {hasEvidence ? (
+        <Button type="button" size="sm" variant="outline" onClick={() => onViewEvidence(item)} disabled={busyOrderId !== null}>
+          Xem chứng cứ
+        </Button>
+      ) : null}
+    </div>
+  );
+}
+
+export function AdminSalesReportList({ items, busyOrderId, onReview, onReconcile, onViewEvidence }: AdminSalesReportListProps) {
   return (
     <>
       <div className="hidden md:block" data-testid="sales-report-desktop-table">
@@ -15,6 +47,7 @@ export function AdminSalesReportList({ items }: { items: AdminSalesReportRow[] }
               <TableHead>Số tiền</TableHead>
               <TableHead>Đối chiếu</TableHead>
               <TableHead>Trạng thái KPI</TableHead>
+              <TableHead>Hành động</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -35,6 +68,7 @@ export function AdminSalesReportList({ items }: { items: AdminSalesReportRow[] }
                   <p className="text-xs text-app-ink-muted">{item.refund.status === "completed" ? "Đã hoàn tiền" : "Chưa hoàn tiền"}</p>
                 </TableCell>
                 <TableCell>{item.reporting.kpiStatus}</TableCell>
+                <TableCell><SalesActions item={item} busyOrderId={busyOrderId} onReview={onReview} onReconcile={onReconcile} onViewEvidence={onViewEvidence} /></TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -59,6 +93,7 @@ export function AdminSalesReportList({ items }: { items: AdminSalesReportRow[] }
               <dt className="text-app-ink-muted">Hoàn tiền</dt><dd className="text-right">{item.refund.status === "completed" ? "Đã hoàn tiền" : "Chưa hoàn tiền"}</dd>
               <dt className="text-app-ink-muted">KPI</dt><dd className="text-right">{item.reporting.kpiStatus}</dd>
             </dl>
+            <div className="mt-4"><SalesActions item={item} busyOrderId={busyOrderId} onReview={onReview} onReconcile={onReconcile} onViewEvidence={onViewEvidence} /></div>
           </li>
         ))}
       </ul>

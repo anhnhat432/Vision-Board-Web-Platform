@@ -11,6 +11,14 @@ const authContextMock = vi.hoisted(() => ({
 
 const adminServiceMock = vi.hoisted(() => ({
   adminGetSalesReport: vi.fn(),
+  adminReviewSalesOrder: vi.fn(),
+  adminReconcilePaymentOrderPayerSource: vi.fn(),
+  adminExportSalesReport: vi.fn(),
+}));
+
+const toastMock = vi.hoisted(() => ({
+  success: vi.fn(),
+  error: vi.fn(),
 }));
 
 vi.mock("@/lib/auth/AuthContext", () => ({
@@ -19,7 +27,12 @@ vi.mock("@/lib/auth/AuthContext", () => ({
 
 vi.mock("@/services/adminService", () => ({
   adminGetSalesReport: adminServiceMock.adminGetSalesReport,
+  adminReviewSalesOrder: adminServiceMock.adminReviewSalesOrder,
+  adminReconcilePaymentOrderPayerSource: adminServiceMock.adminReconcilePaymentOrderPayerSource,
+  adminExportSalesReport: adminServiceMock.adminExportSalesReport,
 }));
+
+vi.mock("sonner", () => ({ toast: toastMock }));
 
 const report = {
   generatedAt: "2026-07-12T04:00:00.000Z",
@@ -101,6 +114,24 @@ function seedMocks() {
     userProfileLoading: false,
   });
   adminServiceMock.adminGetSalesReport.mockResolvedValue(report);
+  adminServiceMock.adminReviewSalesOrder.mockResolvedValue({ item: report.items[0] });
+  adminServiceMock.adminReconcilePaymentOrderPayerSource.mockResolvedValue({
+    orderId: report.items[0].orderId,
+    payer: {
+      classification: "external",
+      accountNameMasked: "N*** A***",
+      accountLast4: "6789",
+      bankName: "Ngân hàng kiểm thử",
+      transactionReference: "PAYOS-001",
+      transactionDateTime: "2026-07-10T09:30:00.000Z",
+      source: "reconciliation",
+      observedAt: "2026-07-10T09:30:00.000Z",
+    },
+  });
+  adminServiceMock.adminExportSalesReport.mockResolvedValue({
+    blob: new Blob(["orderId"], { type: "text/csv" }),
+    filename: "sales-report.csv",
+  });
 }
 
 describe("AdminSalesReportPage", () => {
@@ -253,5 +284,104 @@ describe("AdminSalesReportPage", () => {
     expect(screen.getByLabelText("Provider")).toHaveValue("payos");
     expect(screen.queryAllByText("N*** A***")).toHaveLength(0);
     expect(screen.queryByTestId("sales-report-desktop-table")).not.toBeInTheDocument();
+  });
+
+  it("validates manual inclusions and excluded orders before enabling confirmation", async () => {
+    const user = userEvent.setup();
+    adminServiceMock.adminGetSalesReport.mockResolvedValue({
+      ...report,
+      items: [{ ...report.items[0], isManualCompletion: true }],
+    });
+    renderPage();
+
+    await user.click((await screen.findAllByRole("button", { name: "Duyệt KPI VBPAY00001" }))[0]);
+    expect(screen.getByRole("button", { name: "Xác nhận duyệt" })).toBeDisabled();
+
+    await user.click(screen.getByLabelText("Không tính KPI"));
+    expect(screen.getByText("Chọn lý do loại khỏi KPI.")).toBeInTheDocument();
+    await user.selectOptions(screen.getByLabelText("Lý do loại khỏi KPI"), "other");
+    expect(screen.getByText("Nhập ghi chú cho lý do khác.")).toBeInTheDocument();
+    await user.type(screen.getByLabelText("Ghi chú duyệt"), "Không phải giao dịch doanh thu.");
+    expect(screen.getByRole("button", { name: "Xác nhận duyệt" })).toBeEnabled();
+  });
+
+  it("sends the review payload then reloads the active report without an optimistic update", async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    await user.click((await screen.findAllByRole("button", { name: "Duyệt KPI VBPAY00001" }))[0]);
+    await user.click(screen.getByLabelText("Được tính KPI"));
+    await user.type(screen.getByLabelText("Ghi chú duyệt"), "Đã đối chiếu PayOS và giao dịch ngân hàng.");
+    await user.click(screen.getByRole("button", { name: "Xác nhận duyệt" }));
+
+    await waitFor(() => expect(adminServiceMock.adminReviewSalesOrder).toHaveBeenCalledWith("VBPAY00001", {
+      kpiStatus: "included",
+      reviewNote: "Đã đối chiếu PayOS và giao dịch ngân hàng.",
+    }));
+    await waitFor(() => expect(adminServiceMock.adminGetSalesReport).toHaveBeenCalledTimes(2));
+  });
+
+  it("keeps review dialog open with a retryable error when PATCH fails", async () => {
+    const user = userEvent.setup();
+    adminServiceMock.adminReviewSalesOrder.mockRejectedValueOnce(new Error("timeout"));
+    renderPage();
+
+    await user.click((await screen.findAllByRole("button", { name: "Duyệt KPI VBPAY00001" }))[0]);
+    await user.click(screen.getByLabelText("Được tính KPI"));
+    await user.click(screen.getByRole("button", { name: "Xác nhận duyệt" }));
+
+    expect(await screen.findByText("timeout")).toBeInTheDocument();
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+    expect(adminServiceMock.adminGetSalesReport).toHaveBeenCalledTimes(1);
+  });
+
+  it("reconciles only the matching PayOS row and opens shared safe evidence", async () => {
+    const user = userEvent.setup();
+    const otherItem = { ...report.items[0], orderId: "VBPAY00002", customerLabelMasked: "M*** B***" };
+    adminServiceMock.adminGetSalesReport.mockResolvedValue({ ...report, items: [report.items[0], otherItem], total: 2 });
+    renderPage();
+
+    await user.click((await screen.findAllByRole("button", { name: "Đối chiếu PayOS" }))[0]);
+    await waitFor(() => expect(adminServiceMock.adminReconcilePaymentOrderPayerSource).toHaveBeenCalledWith("VBPAY00001"));
+
+    const evidence = await screen.findByRole("dialog", { name: "Hồ sơ đối chiếu PayOS" });
+    expect(within(evidence).getByText("Nguồn ngoài")).toBeInTheDocument();
+    expect(within(evidence).queryByText("M*** B***")).not.toBeInTheDocument();
+  });
+
+  it("exports using active filters only after the server responds", async () => {
+    const user = userEvent.setup();
+    const createObjectUrl = vi.fn(() => "blob:report");
+    const revokeObjectUrl = vi.fn();
+    Object.defineProperty(URL, "createObjectURL", { configurable: true, value: createObjectUrl });
+    Object.defineProperty(URL, "revokeObjectURL", { configurable: true, value: revokeObjectUrl });
+    vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+    renderPage("/admin/reports/sales?range=custom&from=2026-07-01&to=2026-07-12&provider=payos&status=included");
+
+    await screen.findByText("Giao dịch thành công");
+    await user.click(screen.getByRole("button", { name: "Xuất CSV" }));
+
+    await waitFor(() => expect(adminServiceMock.adminExportSalesReport).toHaveBeenCalledWith(expect.objectContaining({
+      from: "2026-07-01",
+      to: "2026-07-12",
+      provider: "payos",
+      kpiStatus: "included",
+    })));
+    expect(createObjectUrl).toHaveBeenCalledTimes(1);
+    expect(revokeObjectUrl).toHaveBeenCalledWith("blob:report");
+  });
+
+  it("shows a retryable export error without creating a blob URL", async () => {
+    const user = userEvent.setup();
+    const createObjectUrl = vi.fn(() => "blob:report");
+    Object.defineProperty(URL, "createObjectURL", { configurable: true, value: createObjectUrl });
+    adminServiceMock.adminExportSalesReport.mockRejectedValueOnce(new Error("timeout"));
+    renderPage();
+
+    await screen.findByText("Giao dịch thành công");
+    await user.click(screen.getByRole("button", { name: "Xuất CSV" }));
+
+    expect(await screen.findByText("timeout")).toBeInTheDocument();
+    expect(createObjectUrl).not.toHaveBeenCalled();
   });
 });
