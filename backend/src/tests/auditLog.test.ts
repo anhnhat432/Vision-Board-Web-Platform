@@ -347,10 +347,17 @@ describe("admin audit logging", () => {
     assert.equal(JSON.stringify(capturedAudit).includes("customer@example.com"), false);
 
     const failed = await requestJson(createAdminTestApp(), "PATCH", "/api/admin/reports/sales/VBREVIEW01/review", {
-      body: { kpiStatus: "pending", reviewNote: "raw private review note" },
+      body: {
+        kpiStatus: "customer@example.com",
+        exclusionReason: "customer_uid_should_not_log",
+        reviewNote: "raw private review note",
+      },
     });
     assert.equal(failed.status, 400);
-    assert.deepEqual(createdLogs[1]?.payload, { newStatus: "pending", noteProvided: true });
+    assert.equal(failed.body.errorCode, "invalid_sales_review_status");
+    assert.deepEqual(createdLogs[1]?.payload, { noteProvided: true });
     assert.equal(JSON.stringify(createdLogs[1]).includes("raw private review note"), false);
+    assert.equal(JSON.stringify(createdLogs[1]).includes("customer@example.com"), false);
+    assert.equal(JSON.stringify(createdLogs[1]).includes("customer_uid_should_not_log"), false);
   });
 });

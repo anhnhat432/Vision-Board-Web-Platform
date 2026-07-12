@@ -44,6 +44,8 @@ import { asyncHandler } from "../utils/asyncHandler";
 const adminRoutes = Router();
 
 const MAX_THUMBNAIL_BYTES = 2 * 1024 * 1024;
+const SALES_REVIEW_KPI_STATUSES = new Set(["pending", "included", "excluded"]);
+const SALES_REVIEW_EXCLUSION_REASONS = new Set(["internal_team", "test", "duplicate", "other"]);
 
 const thumbnailUpload = multer({
   storage: multer.memoryStorage(),
@@ -77,6 +79,20 @@ interface AuditedAdminActionOptions {
   getAuditPayload?: (req: Request, res: Response) => unknown;
   validators?: RequestHandler[];
   handler: AdminHandler;
+}
+
+function getSalesReviewAuditFallbackPayload(body: unknown): Record<string, unknown> {
+  const input = body && typeof body === "object" && !Array.isArray(body)
+    ? body as Record<string, unknown>
+    : {};
+  const payload: Record<string, unknown> = { noteProvided: Boolean(input.reviewNote) };
+  if (typeof input.kpiStatus === "string" && SALES_REVIEW_KPI_STATUSES.has(input.kpiStatus)) {
+    payload.newStatus = input.kpiStatus;
+  }
+  if (typeof input.exclusionReason === "string" && SALES_REVIEW_EXCLUSION_REASONS.has(input.exclusionReason)) {
+    payload.exclusionReason = input.exclusionReason;
+  }
+  return payload;
 }
 
 function runMiddleware(handler: RequestHandler, req: Request, res: Response): Promise<void> {
@@ -162,11 +178,7 @@ adminRoutes.patch(
     target: "payment_order_sales_reporting",
     getTargetId: (req) => req.params.orderId?.trim().toUpperCase(),
     getAuditPayload: (req, res) =>
-      res.locals.adminSalesReviewAudit ?? {
-        newStatus: req.body?.kpiStatus,
-        exclusionReason: req.body?.exclusionReason,
-        noteProvided: Boolean(req.body?.reviewNote),
-      },
+      res.locals.adminSalesReviewAudit ?? getSalesReviewAuditFallbackPayload(req.body),
     validators: [validateOrderIdParam, validateOptionalJsonObjectBody],
     handler: reviewAdminSalesOrderController,
   }),

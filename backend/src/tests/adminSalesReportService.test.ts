@@ -355,6 +355,10 @@ describe("admin sales KPI review", () => {
     assert.equal(result.audit.noteProvided, true);
     assert.equal((update?.$set as Record<string, unknown>)["reporting.kpiStatus"], "included");
     assert.equal((filter?.updatedAt as Date).toISOString(), original.updatedAt.toISOString());
+    assert.deepEqual(filter?.$or, [
+      { reporting: { $exists: false } },
+      { "reporting.kpiStatus": { $exists: false } },
+    ]);
     assert.equal(JSON.stringify(update).includes("amount"), false);
     assert.equal(JSON.stringify(update).includes("provider"), false);
     assert.equal(JSON.stringify(update).includes("receipt"), false);
@@ -393,10 +397,12 @@ describe("admin sales KPI review", () => {
     };
     let update: Record<string, unknown> | undefined;
     (PaymentOrderModel as unknown as { findOne: unknown }).findOne = () => createLeanResult(existing);
+    let filter: Record<string, unknown> | undefined;
     (PaymentOrderModel as unknown as { findOneAndUpdate: unknown }).findOneAndUpdate = (
-      _filter: unknown,
+      nextFilter: Record<string, unknown>,
       nextUpdate: Record<string, unknown>,
     ) => {
+      filter = nextFilter;
       update = nextUpdate;
       return createLeanResult({
         ...existing,
@@ -413,6 +419,8 @@ describe("admin sales KPI review", () => {
     });
 
     assert.deepEqual(update?.$unset, { "reporting.exclusionReason": "" });
+    assert.equal(filter?.["reporting.kpiStatus"], "excluded");
+    assert.equal((filter?.updatedAt as Date).toISOString(), existing.updatedAt.toISOString());
     assert.equal(result.item.reporting instanceof Object, true);
     assert.equal((result.item.refund as { status?: string }).status, "completed");
   });
