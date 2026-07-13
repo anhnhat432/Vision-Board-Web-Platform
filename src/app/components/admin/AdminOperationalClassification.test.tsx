@@ -88,4 +88,27 @@ describe("admin operational classification primitives", () => {
 
     expect(screen.getByRole("textbox", { name: "Ghi chú" })).toHaveValue("Ghi chú gốc");
   });
+
+  it("keeps a pending dialog open when Escape requests dismissal", async () => {
+    const user = userEvent.setup();
+    const onOpenChange = vi.fn();
+    render(
+      <AdminOperationalClassificationDialog
+        open
+        targetType="physical_order"
+        targetLabel="507f1f77bcf86cd799439011"
+        initialCategory="real"
+        pending
+        onOpenChange={onOpenChange}
+        onConfirm={() => undefined}
+      />,
+    );
+
+    screen.getByRole("alertdialog").focus();
+    await user.keyboard("{Escape}");
+
+    expect(onOpenChange).not.toHaveBeenCalledWith(false);
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Hủy" })).toBeDisabled();
+  });
 });

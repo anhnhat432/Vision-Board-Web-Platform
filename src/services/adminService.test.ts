@@ -21,7 +21,18 @@ import {
   adminListUsers,
   adminReviewSalesOrder,
   type AdminSalesReportRow,
+  type AdminSubscriptionListResponse,
 } from "./adminService";
+
+const backendSubscriptionListResponse = {
+  page: 1,
+  limit: 30,
+  total: 0,
+  totalPages: 0,
+  items: [],
+} satisfies AdminSubscriptionListResponse;
+
+const requiredSubscriptionListResponse: AdminSubscriptionListResponse = backendSubscriptionListResponse;
 
 describe("adminService sales reporting", () => {
   beforeEach(() => {
@@ -120,5 +131,11 @@ describe("adminService operational classification", () => {
       "/admin/billing/payment-orders/VB%20TEST%2F1/operational-classification",
       payload,
     );
+  });
+});
+
+describe("adminService subscription contracts", () => {
+  it("does not require an operational scope absent from the backend response", () => {
+    expect(backendSubscriptionListResponse.items).toEqual([]);
   });
 });

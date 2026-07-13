@@ -96,6 +96,7 @@ export function AdminOperationalClassificationDialog({
   }, [open, initialCategory, initialReason, initialNote]);
 
   const handleOpenChange = (nextOpen: boolean) => {
+    if (pending && !nextOpen) return;
     if (!nextOpen) {
       setDraft(resetDraft());
       setValidationError(undefined);
@@ -144,7 +145,11 @@ export function AdminOperationalClassificationDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={handleOpenChange}>
-      <AlertDialogContent>
+      <AlertDialogContent
+        onEscapeKeyDown={(event) => {
+          if (pending) event.preventDefault();
+        }}
+      >
         <AlertDialogHeader>
           <AlertDialogTitle>Phân loại dữ liệu vận hành</AlertDialogTitle>
           <AlertDialogDescription>

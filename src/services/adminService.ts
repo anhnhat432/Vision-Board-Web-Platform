@@ -675,7 +675,6 @@ export interface AdminSubscriptionListResponse {
   limit: number;
   total: number;
   totalPages: number;
-  operationalScope: AdminOperationalScope;
   items: AdminSubscriptionListItem[];
 }
 
