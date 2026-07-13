@@ -7,8 +7,12 @@ import {
   AdminAuditOutboxModel,
   type AdminAuditOutboxErrorCode,
   type AdminAuditOutboxEntity,
+  type AdminAuditOutboxInsert,
+  type AdminOperationalClassificationAuditPayload,
+  type AdminOperationalClassificationAuditTarget,
 } from "../models/AdminAuditOutboxModel";
 import { AuditLogModel, type AuditLogEntity } from "../models/auditLogModel";
+import type { OperationalCategory, OperationalClassificationReason } from "../models/OperationalClassification";
 import { ApiError } from "../utils/apiError";
 
 export interface AdminSalesReviewAuditIdentityInput {
@@ -20,14 +24,33 @@ export interface AdminSalesReviewAuditIdentityInput {
   reviewNote?: string;
 }
 
-export interface AdminSalesReviewAuditIdentity {
+export interface AdminAuditIdentity {
   eventId: string;
-  reviewRequestId: string;
   actorUid: string;
-  target: "payment_order_sales_reporting";
+  target: "payment_order_sales_reporting" | AdminOperationalClassificationAuditTarget;
   targetId: string;
   commandFingerprint: string;
   commandFingerprintVersion: "v1";
+}
+
+export interface AdminSalesReviewAuditIdentity extends AdminAuditIdentity {
+  reviewRequestId: string;
+  target: "payment_order_sales_reporting";
+}
+
+export interface AdminOperationalClassificationAuditIdentityInput {
+  requestId: string;
+  actorUid: string;
+  target: AdminOperationalClassificationAuditTarget;
+  targetId: string;
+  newCategory: OperationalCategory;
+  reason: OperationalClassificationReason;
+  note?: string;
+}
+
+export interface AdminOperationalClassificationAuditIdentity extends AdminAuditIdentity {
+  requestId: string;
+  target: AdminOperationalClassificationAuditTarget;
 }
 
 export type AdminAuditDispatchStatus = "not_available" | "completed" | "retry_scheduled" | "lease_lost";
@@ -53,12 +76,15 @@ function createUnavailableError(): ApiError {
   return new ApiError(503, "Admin audit storage is unavailable. Retry later.", undefined, "admin_audit_unavailable");
 }
 
+export function requireAdminAuditFingerprintSecret(): string {
+  const secret = env.ADMIN_AUDIT_FINGERPRINT_SECRET;
+  if (!secret || Buffer.byteLength(secret, "utf8") < 32) throw createUnavailableError();
+  return secret;
+}
+
 export function buildAdminSalesReviewAuditIdentity(
   input: AdminSalesReviewAuditIdentityInput,
 ): AdminSalesReviewAuditIdentity {
-  const secret = env.ADMIN_AUDIT_FINGERPRINT_SECRET;
-  if (!secret || Buffer.byteLength(secret, "utf8") < 32) throw createUnavailableError();
-
   const normalizedNote = input.reviewNote?.trim().slice(0, 500) || null;
   const canonicalCommand = JSON.stringify({
     version: "v1",
@@ -70,7 +96,7 @@ export function buildAdminSalesReviewAuditIdentity(
     exclusionReason: input.exclusionReason ?? null,
     reviewNote: normalizedNote,
   });
-  const commandFingerprint = createHmac("sha256", secret).update(canonicalCommand).digest("hex");
+  const commandFingerprint = createHmac("sha256", requireAdminAuditFingerprintSecret()).update(canonicalCommand).digest("hex");
 
   return {
     eventId: `admin_sales_reviewed:${input.reviewRequestId}`,
@@ -83,8 +109,61 @@ export function buildAdminSalesReviewAuditIdentity(
   };
 }
 
+export function buildAdminOperationalClassificationAuditIdentity(
+  input: AdminOperationalClassificationAuditIdentityInput,
+): AdminOperationalClassificationAuditIdentity {
+  const canonicalCommand = JSON.stringify({
+    version: "v1",
+    requestId: input.requestId,
+    actorUid: input.actorUid,
+    target: input.target,
+    targetId: input.targetId,
+    newCategory: input.newCategory,
+    reason: input.reason,
+    note: input.note?.trim().slice(0, 200) || null,
+  });
+  return {
+    eventId: `admin_operational_classification_changed:${input.requestId}`,
+    actorUid: input.actorUid,
+    target: input.target,
+    targetId: input.targetId,
+    requestId: input.requestId,
+    commandFingerprint: createHmac("sha256", requireAdminAuditFingerprintSecret()).update(canonicalCommand).digest("hex"),
+    commandFingerprintVersion: "v1",
+  };
+}
+
+export function buildAdminOperationalClassificationAuditEvent(input: {
+  identity: AdminOperationalClassificationAuditIdentity;
+  requestId: string;
+  previousCategory: OperationalCategory;
+  newCategory: OperationalCategory;
+  reason: OperationalClassificationReason;
+  note?: string;
+  changedAt: Date;
+}): AdminAuditOutboxInsert {
+  const note = input.note?.trim().slice(0, 200) || undefined;
+  const payload: AdminOperationalClassificationAuditPayload = {
+    previousCategory: input.previousCategory,
+    newCategory: input.newCategory,
+    reason: input.reason,
+    ...(note ? { note } : {}),
+    changedAt: input.changedAt.toISOString(),
+  };
+  return {
+    ...input.identity,
+    requestId: input.requestId,
+    eventType: "admin_operational_classification_changed",
+    payload,
+    occurredAt: input.changedAt,
+    status: "pending",
+    attempts: 0,
+    availableAt: input.changedAt,
+  };
+}
+
 export async function resolveAdminAuditIdempotency(
-  identity: AdminSalesReviewAuditIdentity,
+  identity: AdminAuditIdentity,
 ): Promise<"missing" | "match" | "conflict"> {
   try {
     const [outbox, audit] = await Promise.all([
@@ -108,6 +187,12 @@ export async function resolveAdminAuditIdempotency(
   } catch {
     throw createUnavailableError();
   }
+}
+
+function getAuditAction(event: AdminAuditOutboxEntity): string {
+  return event.eventType === "admin_sales_reviewed"
+    ? "reviewAdminSalesOrder"
+    : "changeAdminOperationalClassification";
 }
 
 export function isDuplicateAdminAuditEventIdError(error: unknown): boolean {
@@ -139,7 +224,7 @@ function canonicalAuditMatches(event: AdminAuditOutboxEntity, audit: AuditLogEnt
     audit.targetId === event.targetId &&
     audit.commandFingerprint === event.commandFingerprint &&
     audit.commandFingerprintVersion === event.commandFingerprintVersion &&
-    audit.action === "reviewAdminSalesOrder" &&
+    audit.action === getAuditAction(event) &&
     audit.actorEmail == null &&
     audit.ip == null &&
     audit.userAgent == null &&
@@ -158,7 +243,7 @@ async function upsertCanonicalAudit(event: AdminAuditOutboxEntity): Promise<void
         commandFingerprintVersion: event.commandFingerprintVersion,
         actorUid: event.actorUid,
         actorEmail: null,
-        action: "reviewAdminSalesOrder",
+        action: getAuditAction(event),
         target: event.target,
         targetId: event.targetId,
         payload: event.payload as unknown as Record<string, unknown>,
