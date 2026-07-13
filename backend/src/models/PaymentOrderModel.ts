@@ -1,4 +1,8 @@
 import { Schema, model, type Document } from "mongoose";
+import {
+  operationalClassificationSchema,
+  type OperationalClassification,
+} from "./OperationalClassification";
 import type { PaymentPayerSourceClassification } from "../services/paymentPayerSource";
 
 /**
@@ -60,6 +64,7 @@ export interface PaymentOrderEntity {
   reconciliationLastCheckedAt?: Date | null;
   reconciliationLastError?: string | null;
   reporting?: PaymentOrderReporting | null;
+  operationalClassification?: OperationalClassification | null;
   metadata?: {
     userConfirmedTransferAt?: Date | null;
     physicalOrderId?: string | null;
@@ -262,6 +267,11 @@ const paymentOrderSchema = new Schema(
       required: false,
       default: undefined,
     },
+    operationalClassification: {
+      type: operationalClassificationSchema,
+      required: false,
+      default: undefined,
+    },
     metadata: {
       type: Schema.Types.Mixed,
       required: false,
@@ -302,6 +312,7 @@ paymentOrderSchema.index({ provider: 1, "metadata.payos.orderCode": 1 }, { spars
 paymentOrderSchema.index({ provider: 1, "metadata.payos.paymentLinkId": 1 }, { sparse: true });
 paymentOrderSchema.index({ status: 1, purpose: 1, provider: 1, completedAt: -1 });
 paymentOrderSchema.index({ "reporting.kpiStatus": 1, completedAt: -1 });
+paymentOrderSchema.index({ "operationalClassification.category": 1, status: 1, completedAt: -1 });
 export const PaymentOrderModel = model("PaymentOrder", paymentOrderSchema);
 
 export type PaymentOrderDocument = Document & {
@@ -329,6 +340,7 @@ export type PaymentOrderDocument = Document & {
   reconciliationLastCheckedAt?: Date | null;
   reconciliationLastError?: string | null;
   reporting?: PaymentOrderReporting | null;
+  operationalClassification?: OperationalClassification | null;
   metadata?: {
     userConfirmedTransferAt?: Date | null;
     physicalOrderId?: string | null;

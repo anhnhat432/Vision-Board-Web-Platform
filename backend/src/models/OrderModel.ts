@@ -1,4 +1,5 @@
 import { Schema, model } from "mongoose";
+import { operationalClassificationSchema } from "./OperationalClassification";
 
 const shippingAddressSchema = new Schema(
   {
@@ -156,11 +157,18 @@ const orderSchema = new Schema(
       type: Date,
       required: false,
     },
+    operationalClassification: {
+      type: operationalClassificationSchema,
+      required: false,
+      default: undefined,
+    },
   },
   {
     timestamps: true,
   },
 );
+
+orderSchema.index({ "operationalClassification.category": 1, createdAt: -1 });
 
 export type OrderStatus =
   | "pending"
