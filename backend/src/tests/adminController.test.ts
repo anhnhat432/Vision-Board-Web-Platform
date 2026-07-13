@@ -4,7 +4,9 @@ import type { NextFunction, Request, Response } from "express";
 
 import {
   completePaymentOrderManually,
+  getAdminSubscriptions,
   getAdminPaymentOrders,
+  getAdminUsers,
   reconcileAdminPaymentOrderPayerSource,
   updateAdminUserRole,
 } from "../controllers/adminController";
@@ -429,5 +431,37 @@ describe("admin user role management", () => {
     const error = secondAdminCheck.getError() as { statusCode?: number };
     assert.equal(error?.statusCode, 403);
     assert.equal(findOneCalls.length, 3);
+  });
+});
+
+describe("admin operational list filters", () => {
+  it("rejects an invalid user category before querying users", async () => {
+    const res = createMockResponse();
+    const recorder = createNextRecorder();
+
+    await getAdminUsers(
+      { query: { operationalCategory: "not-a-category" } } as unknown as Request,
+      res as unknown as Response,
+      recorder.next,
+    );
+
+    const error = recorder.getError() as { statusCode?: number; errorCode?: string };
+    assert.equal(error?.statusCode, 400);
+    assert.equal(error?.errorCode, "invalid_operational_category");
+  });
+
+  it("rejects an invalid subscription scope before querying subscriptions", async () => {
+    const res = createMockResponse();
+    const recorder = createNextRecorder();
+
+    await getAdminSubscriptions(
+      { query: { operationalScope: "not-a-scope" } } as unknown as Request,
+      res as unknown as Response,
+      recorder.next,
+    );
+
+    const error = recorder.getError() as { statusCode?: number; errorCode?: string };
+    assert.equal(error?.statusCode, 400);
+    assert.equal(error?.errorCode, "invalid_operational_scope");
   });
 });
