@@ -46,6 +46,7 @@ import {
   validateOrderIdParam,
 } from "../middleware/requestValidation";
 import { logAdminAction } from "../services/auditLogService";
+import { toSafeClassificationErrorCode } from "../services/adminOperationalClassificationService";
 import { ApiError } from "../utils/apiError";
 import { successResponse } from "../utils/apiResponse";
 import { asyncHandler } from "../utils/asyncHandler";
@@ -87,7 +88,7 @@ interface AuditedAdminActionOptions {
   action: string;
   target: string;
   getTargetId?: (req: Request) => string | null | undefined;
-  getAuditPayload?: (req: Request, res: Response) => unknown;
+  getAuditPayload?: (req: Request, res: Response, error?: unknown) => unknown;
   validators?: RequestHandler[];
   handler: AdminHandler;
   logSuccess?: boolean;
@@ -107,7 +108,11 @@ function getSalesReviewAuditFallbackPayload(body: unknown): Record<string, unkno
   return payload;
 }
 
-export function getOperationalClassificationFailureAuditPayload(req: Request): Record<string, unknown> {
+export function getOperationalClassificationFailureAuditPayload(
+  req: Request,
+  _res?: Response,
+  error?: unknown,
+): Record<string, unknown> {
   const body = req.body && typeof req.body === "object" && !Array.isArray(req.body)
     ? req.body as Record<string, unknown>
     : {};
@@ -117,6 +122,7 @@ export function getOperationalClassificationFailureAuditPayload(req: Request): R
     reason: typeof body.reason === "string" && OPERATIONAL_REASONS.has(body.reason) ? body.reason : null,
     targetCount: changes ? Math.min(changes.length, 100) : 1,
     noteProvided: typeof body.note === "string" && body.note.trim().length > 0,
+    errorCode: toSafeClassificationErrorCode(error),
   };
 }
 
@@ -173,7 +179,7 @@ export function auditedAdminAction(options: AuditedAdminActionOptions): RequestH
         action: options.action,
         target: options.target,
         targetId,
-        payload: options.getAuditPayload?.(req, res) ?? req.body,
+        payload: options.getAuditPayload?.(req, res, error) ?? req.body,
         success: false,
       });
       next(error);

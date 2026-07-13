@@ -292,6 +292,7 @@ function installAdminClassificationModels() {
     ["admin_uid", { firebaseUid: "admin_uid", role: "admin" }],
   ]);
   const events = new Map<string, Record<string, unknown>>();
+  const auditEntries: Array<Record<string, unknown>> = [];
   (OrderModel as unknown as MockableOrder).findById = (id: string) => {
     const stored = id === physicalOrder._id ? physicalOrder : undefined;
     const chain = {
@@ -328,7 +329,10 @@ function installAdminClassificationModels() {
     const chain = { select() { return chain; }, async lean() { return null; } };
     return chain;
   };
-  (AuditLogModel as unknown as { create: unknown }).create = async () => null;
+  (AuditLogModel as unknown as { create: unknown }).create = async (entry: Record<string, unknown>) => {
+    auditEntries.push(structuredClone(entry));
+    return entry;
+  };
   (AdminAuditOutboxModel as unknown as { create: unknown }).create = async (items: Array<Record<string, unknown>>) => {
     events.set(items[0].eventId as string, structuredClone(items[0]));
     return items;
@@ -337,7 +341,7 @@ function installAdminClassificationModels() {
     async withTransaction(work: () => Promise<void>) { await work(); },
     async endSession() {},
   } as unknown as ClientSession);
-  return { physicalOrder, events };
+  return { physicalOrder, events, auditEntries };
 }
 
 describe("POST /api/orders v2", () => {
@@ -547,6 +551,23 @@ describe("PATCH /api/admin/orders/:id/operational-classification", () => {
     };
     assert.equal((await patchAdminPhysicalClassification(app, undefined, { category: "invalid" })).status, 401);
     assert.equal((await patchAdminPhysicalClassification(app, "user-token", { category: "invalid" })).status, 403);
+    const invalid = await patchAdminPhysicalClassification(app, "admin-token", {
+      category: "invalid",
+      reason: "private provider failure",
+      note: "raw private note",
+      requestId: "private-request-id",
+      shippingAddress: "private address",
+    });
+    assert.equal(invalid.status, 400);
+    assert.deepEqual(fixture.auditEntries.at(-1)?.payload, {
+      category: null,
+      reason: null,
+      targetCount: 1,
+      noteProvided: true,
+      errorCode: "unknown_safe",
+    });
+    assert.equal(JSON.stringify(fixture.auditEntries.at(-1)).includes("private address"), false);
+    assert.equal(JSON.stringify(fixture.auditEntries.at(-1)).includes("raw private note"), false);
     const response = await patchAdminPhysicalClassification(app, "admin-token", body);
     assert.equal(response.status, 200);
     assert.equal(fixture.physicalOrder.status, "shipping");

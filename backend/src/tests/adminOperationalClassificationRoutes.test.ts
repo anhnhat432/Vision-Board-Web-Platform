@@ -19,6 +19,7 @@ import { AuditLogModel } from "../models/auditLogModel";
 import { PaymentOrderModel } from "../models/PaymentOrderModel";
 import { UserModel } from "../models/UserModel";
 import { adminRoutes, getOperationalClassificationFailureAuditPayload } from "../routes/adminRoutes";
+import { ApiError } from "../utils/apiError";
 
 type MockableModel = { findOne: unknown; create: unknown };
 const originalUserFindOne = (UserModel as unknown as MockableModel).findOne;
@@ -67,6 +68,7 @@ function installRouteModels() {
     ["exists", { firebaseUid: "exists" }],
   ]);
   const events = new Map<string, Record<string, unknown>>();
+  const auditEntries: Array<Record<string, unknown>> = [];
   const payment = {
     orderId: "VBTEST0001",
     userId: "orphan_uid",
@@ -115,7 +117,10 @@ function installRouteModels() {
     return chain;
   };
   (AuditLogModel as unknown as MockableModel).findOne = () => ({ select() { return this; }, async lean() { return null; } });
-  (AuditLogModel as unknown as MockableModel).create = async () => null;
+  (AuditLogModel as unknown as MockableModel).create = async (entry: Record<string, unknown>) => {
+    auditEntries.push(structuredClone(entry));
+    return entry;
+  };
   (AdminAuditOutboxModel as unknown as MockableModel).create = async (items: Array<Record<string, unknown>>) => {
     if (failAuditPersistence) throw new Error("audit persistence unavailable");
     events.set(items[0].eventId as string, items[0]);
@@ -133,7 +138,7 @@ function installRouteModels() {
       }
     }, async endSession() {},
   } as unknown as ClientSession);
-  return { users, payment, events, setAuditFailure(value: boolean) { failAuditPersistence = value; } };
+  return { users, payment, events, auditEntries, setAuditFailure(value: boolean) { failAuditPersistence = value; } };
 }
 
 afterEach(() => {
@@ -174,6 +179,13 @@ describe("admin operational classification route", () => {
     const app = createApp();
     assert.equal((await request(app, "admin-token", body)).status, 200);
     assert.equal((await request(app, "admin-token", { ...body, category: "internal", reason: "internal_team" })).status, 409);
+    assert.deepEqual(fixture.auditEntries.at(-1)?.payload, {
+      category: "internal",
+      reason: "internal_team",
+      targetCount: 1,
+      noteProvided: true,
+      errorCode: "admin_classification_request_conflict",
+    });
     fixture.setAuditFailure(true);
     const auditFailure = await request(app, "admin-token", {
       ...body,
@@ -183,6 +195,13 @@ describe("admin operational classification route", () => {
     });
     assert.equal(auditFailure.status, 503);
     assert.equal(fixture.users.get("exists")?.operationalClassification?.category, "test");
+    assert.deepEqual(fixture.auditEntries[1]?.payload, {
+      category: "internal",
+      reason: "internal_team",
+      targetCount: 1,
+      noteProvided: true,
+      errorCode: "admin_audit_unavailable",
+    });
   });
 
   it("keeps failure audit payload to its exact safe allowlist", () => {
@@ -193,8 +212,15 @@ describe("admin operational classification route", () => {
         note: "do not log this private note",
         changes: Array.from({ length: 101 }, (_, index) => ({ userUid: `private-${index}` })),
       },
-    } as never);
-    assert.deepEqual(payload, { category: null, reason: null, targetCount: 100, noteProvided: true });
+    } as never, undefined as never, new ApiError(400, "private provider failure", undefined, "invalid_classification_target"));
+    assert.deepEqual(payload, {
+      category: null,
+      reason: null,
+      targetCount: 100,
+      noteProvided: true,
+      errorCode: "invalid_classification_target",
+    });
+    assert.equal(JSON.stringify(payload).includes("private provider failure"), false);
   });
 
   it("authorizes before validation and records one durable payment classification audit", async () => {
@@ -215,6 +241,19 @@ describe("admin operational classification route", () => {
     assert.equal(fixture.payment.status, "completed");
     assert.equal(fixture.events.size, 1);
     assert.equal(fixture.payment.operationalClassification?.category, "test");
+    const conflict = await request(app, "admin-token", {
+      ...body,
+      category: "internal",
+      reason: "internal_team",
+    }, path);
+    assert.equal(conflict.status, 409);
+    assert.deepEqual(fixture.auditEntries.at(-1)?.payload, {
+      category: "internal",
+      reason: "internal_team",
+      targetCount: 1,
+      noteProvided: true,
+      errorCode: "admin_classification_request_conflict",
+    });
   });
 
   it("keeps direct record failure audit payload to the classification allowlist", () => {
@@ -226,7 +265,14 @@ describe("admin operational classification route", () => {
         requestId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
         providerPayload: { bankAccount: "private" },
       },
-    } as never);
-    assert.deepEqual(payload, { category: "test", reason: "test_account", targetCount: 1, noteProvided: true });
+    } as never, undefined as never, new Error("raw provider failure with account 123"));
+    assert.deepEqual(payload, {
+      category: "test",
+      reason: "test_account",
+      targetCount: 1,
+      noteProvided: true,
+      errorCode: "unknown_safe",
+    });
+    assert.equal(JSON.stringify(payload).includes("account 123"), false);
   });
 });
