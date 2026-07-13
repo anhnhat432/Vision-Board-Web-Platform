@@ -26,7 +26,8 @@ export type EnvIssueCategory =
   | "casso"
   | "payos"
   | "monitoring"
-  | "email";
+  | "email"
+  | "audit";
 
 export interface EnvValidationIssue {
   level: EnvIssueLevel;
@@ -129,6 +130,16 @@ function validatePort(value: string): EnvValidationIssue | null {
     };
   }
   return null;
+}
+
+function validateAuditFingerprintSecret(value: string): EnvValidationIssue | null {
+  if (Buffer.byteLength(value, "utf8") >= 32) return null;
+  return {
+    level: "error",
+    key: "ADMIN_AUDIT_FINGERPRINT_SECRET",
+    category: "audit",
+    message: "must contain at least 32 bytes.",
+  };
 }
 
 function isPaidCheckoutDisabled(env: NodeJS.ProcessEnv): boolean {
@@ -433,6 +444,20 @@ export function validateBackendEnv(
   if (isNonEmpty(env.PORT)) {
     const issue = validatePort(env.PORT);
     if (issue) issues.push(issue);
+  }
+
+  if (isProduction) {
+    if (!isNonEmpty(env.ADMIN_AUDIT_FINGERPRINT_SECRET)) {
+      issues.push({
+        level: "error",
+        key: "ADMIN_AUDIT_FINGERPRINT_SECRET",
+        category: "audit",
+        message: "is required and must not be empty.",
+      });
+    } else {
+      const issue = validateAuditFingerprintSecret(env.ADMIN_AUDIT_FINGERPRINT_SECRET);
+      if (issue) issues.push(issue);
+    }
   }
 
   issues.push(...validateBillingProvider(env, isProduction));

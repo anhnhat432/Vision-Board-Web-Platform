@@ -133,7 +133,12 @@ export async function listAuditLogs(input: ListAuditLogsInput) {
   const skip = (page - 1) * limit;
   const [total, items] = await Promise.all([
     AuditLogModel.countDocuments(filter),
-    AuditLogModel.find(filter).sort({ timestamp: -1 }).skip(skip).limit(limit).lean<AuditLogEntity[]>(),
+    AuditLogModel.find(filter)
+      .select("-commandFingerprint -commandFingerprintVersion")
+      .sort({ timestamp: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean<AuditLogEntity[]>(),
   ]);
 
   return {

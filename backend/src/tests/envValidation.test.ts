@@ -24,6 +24,7 @@ function baseProductionEnv(): NodeJS.ProcessEnv {
     PAYOS_CHECKSUM_KEY: "payos-checksum-key",
     PLUS_PRICE_VND: "99000",
     BILLING_PAID_DISABLED: "false",
+    ADMIN_AUDIT_FINGERPRINT_SECRET: "test-admin-audit-fingerprint-secret-at-least-32-bytes",
   };
 }
 
@@ -108,6 +109,20 @@ describe("validateBackendEnv: production core requirements", () => {
     const issues = validateBackendEnv(env, { nodeEnv: "production" });
     const warning = issues.find((issue) => issue.key === "SENTRY_DSN" && issue.level === "warning");
     assert.ok(warning, "expected SENTRY_DSN warning in production");
+  });
+
+  it("requires a strong Admin audit fingerprint secret in production", () => {
+    const missing = baseProductionEnv();
+    delete missing.ADMIN_AUDIT_FINGERPRINT_SECRET;
+    const missingIssue = validateBackendEnv(missing, { nodeEnv: "production" })
+      .find((issue) => issue.key === "ADMIN_AUDIT_FINGERPRINT_SECRET");
+    assert.equal(missingIssue?.level, "error");
+
+    const short = baseProductionEnv();
+    short.ADMIN_AUDIT_FINGERPRINT_SECRET = "too-short";
+    const shortIssue = validateBackendEnv(short, { nodeEnv: "production" })
+      .find((issue) => issue.key === "ADMIN_AUDIT_FINGERPRINT_SECRET");
+    assert.match(shortIssue?.message ?? "", /32 bytes/);
   });
 });
 

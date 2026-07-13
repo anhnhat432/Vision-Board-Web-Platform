@@ -19,10 +19,13 @@ import { UserModel } from "../models/UserModel";
 import { adminRoutes } from "../routes/adminRoutes";
 import { orderRoutes } from "../routes/orderRoutes";
 import { billingService } from "../services/billingServiceInstance";
+import { listAuditLogs } from "../services/auditLogService";
 import { orderService } from "../services/orderService";
 
 type MockableModel = {
   create: unknown;
+  countDocuments: unknown;
+  find: unknown;
   findOne: unknown;
   findOneAndUpdate: unknown;
 };
@@ -50,6 +53,8 @@ interface MockPaymentOrder {
 }
 
 const originalAuditCreate = AuditLogModel.create;
+const originalAuditCountDocuments = AuditLogModel.countDocuments;
+const originalAuditFind = AuditLogModel.find;
 const originalPaymentOrderFindOne = PaymentOrderModel.findOne;
 const originalPaymentOrderFindOneAndUpdate = PaymentOrderModel.findOneAndUpdate;
 const originalRefundFindOne = RefundRequestModel.findOne;
@@ -152,6 +157,8 @@ function mockUserRole(role: "user" | "admin"): void {
 afterEach(() => {
   mock.restoreAll();
   (AuditLogModel as unknown as MockableModel).create = originalAuditCreate;
+  (AuditLogModel as unknown as MockableModel).countDocuments = originalAuditCountDocuments;
+  (AuditLogModel as unknown as MockableModel).find = originalAuditFind;
   (PaymentOrderModel as unknown as MockableModel).findOne = originalPaymentOrderFindOne;
   (PaymentOrderModel as unknown as MockableModel).findOneAndUpdate = originalPaymentOrderFindOneAndUpdate;
   (RefundRequestModel as unknown as MockableModel).findOne = originalRefundFindOne;
@@ -161,6 +168,35 @@ afterEach(() => {
 });
 
 describe("admin audit logging", () => {
+  it("excludes durable command fingerprints when listing audit logs", async () => {
+    let projection: unknown;
+    (AuditLogModel as unknown as MockableModel).countDocuments = async () => 0;
+    (AuditLogModel as unknown as MockableModel).find = () => {
+      const chain = {
+        select(value: unknown) {
+          projection = value;
+          return chain;
+        },
+        sort() {
+          return chain;
+        },
+        skip() {
+          return chain;
+        },
+        limit() {
+          return chain;
+        },
+        async lean() {
+          return [];
+        },
+      };
+      return chain;
+    };
+
+    await listAuditLogs({});
+    assert.equal(projection, "-commandFingerprint -commandFingerprintVersion");
+  });
+
   it("creates an audit log entry when completePaymentOrderManually succeeds", async () => {
     const createdLogs: AuditLogEntity[] = [];
     const order = createMockPaymentOrder();

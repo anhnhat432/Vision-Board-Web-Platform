@@ -128,6 +128,7 @@ export const env = {
   FIREBASE_PRIVATE_KEY: rawPrivateKey.replace(/\\n/g, "\n"),
   FRONTEND_ORIGIN: getRequiredEnv("FRONTEND_ORIGIN"),
   SENTRY_DSN: getOptionalEnv("SENTRY_DSN"),
+  ADMIN_AUDIT_FINGERPRINT_SECRET: getOptionalEnv("ADMIN_AUDIT_FINGERPRINT_SECRET"),
   CASSO_WEBHOOK_SECRET:
     billingProvider === "casso"
       ? getRequiredAnyEnvInProduction(cassoWebhookSecretKeys)

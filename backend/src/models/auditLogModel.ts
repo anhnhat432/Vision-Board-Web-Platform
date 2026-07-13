@@ -6,6 +6,9 @@ export interface AuditLogEntity {
   action: string;
   target: string;
   targetId?: string | null;
+  eventId?: string | null;
+  commandFingerprint?: string | null;
+  commandFingerprintVersion?: "v1" | null;
   payload?: Record<string, unknown> | null;
   ip?: string | null;
   userAgent?: string | null;
@@ -45,6 +48,21 @@ const auditLogSchema = new Schema<AuditLogEntity>(
       trim: true,
       default: null,
     },
+    eventId: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    commandFingerprint: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    commandFingerprintVersion: {
+      type: String,
+      required: false,
+      enum: ["v1"],
+    },
     payload: {
       type: Schema.Types.Mixed,
       required: false,
@@ -80,6 +98,7 @@ const auditLogSchema = new Schema<AuditLogEntity>(
 
 auditLogSchema.index({ actorUid: 1, timestamp: -1 });
 auditLogSchema.index({ action: 1, timestamp: -1 });
+auditLogSchema.index({ eventId: 1 }, { unique: true, sparse: true });
 
 export type AuditLogDocument = AuditLogEntity & { _id: string };
 
