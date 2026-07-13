@@ -156,17 +156,10 @@ const originalOutboxCreate = (AdminAuditOutboxModel as unknown as MockableModel)
 const originalAuditFindOne = (AuditLogModel as unknown as MockableModel).findOne;
 const originalStartSession = mongoose.startSession;
 
-function createSessionMock(options?: { unknownCommit?: boolean }): ClientSession {
-  return {
-    async withTransaction(callback: () => Promise<void>) {
-      await callback();
-      if (options?.unknownCommit) {
-        throw { hasErrorLabel: (label: string) => label === "UnknownTransactionCommitResult" };
-      }
-    },
-    async endSession() {},
-  } as unknown as ClientSession;
-}
+type TransactionSessionDouble = ClientSession & {
+  stage(write: () => void): void;
+  stageCompetingOutbox(event: Record<string, unknown>): void;
+};
 
 function classificationFixture() {
   const users = new Map<string, {
@@ -194,9 +187,53 @@ function classificationFixture() {
   const outboxEvents = new Map<string, Record<string, unknown>>();
   let saves = 0;
   let creates = 0;
+  let loadedSession: ClientSession | undefined;
   let savedSession: ClientSession | undefined;
   let outboxSession: ClientSession | undefined;
   let duplicateAfterPersist = false;
+
+  function createSession(options?: { unknownCommit?: boolean }): ClientSession {
+    let stagedWrites: Array<() => void> = [];
+    let competingOutbox: Record<string, unknown> | undefined;
+    let committed = false;
+    const session = {
+      stage(write: () => void) {
+        stagedWrites.push(write);
+      },
+      stageCompetingOutbox(event: Record<string, unknown>) {
+        competingOutbox = structuredClone(event);
+      },
+      async withTransaction(callback: () => Promise<void>) {
+        stagedWrites = [];
+        competingOutbox = undefined;
+        committed = false;
+        try {
+          await callback();
+          for (const write of stagedWrites) write();
+          committed = true;
+          if (options?.unknownCommit) {
+            throw { hasErrorLabel: (label: string) => label === "UnknownTransactionCommitResult" };
+          }
+        } catch (error) {
+          const raceEvent = competingOutbox as Record<string, unknown> | undefined;
+          if (!committed && raceEvent) {
+            outboxEvents.set(raceEvent.eventId as string, raceEvent);
+          }
+          stagedWrites = [];
+          throw error;
+        }
+      },
+      async endSession() {},
+    } as unknown as TransactionSessionDouble;
+    return session;
+  }
+
+  function requireTransactionSession(session: ClientSession | undefined): TransactionSessionDouble {
+    if (!session || !("stage" in session) || !("stageCompetingOutbox" in session)) {
+      throw new Error("Expected a transaction session.");
+    }
+    return session as TransactionSessionDouble;
+  }
 
   (UserModel as unknown as MockableModel).findOne = (query: { firebaseUid?: string }) => {
     const stored = query.firebaseUid ? users.get(query.firebaseUid) : undefined;
@@ -205,15 +242,24 @@ function classificationFixture() {
     const document = {
       ...structuredClone(stored),
       async save(options?: { session?: ClientSession }) {
-        saves += 1;
         savedSession = options?.session;
-        users.set(stored.firebaseUid, {
-          firebaseUid: stored.firebaseUid,
-          operationalClassification: this.operationalClassification,
+        const classification = structuredClone(this.operationalClassification);
+        requireTransactionSession(options?.session).stage(() => {
+          saves += 1;
+          users.set(stored.firebaseUid, {
+            firebaseUid: stored.firebaseUid,
+            operationalClassification: classification,
+          });
         });
       },
     };
-    return { session: () => document, lean };
+    return {
+      session(session: ClientSession) {
+        loadedSession = session;
+        return document;
+      },
+      lean,
+    };
   };
   (AdminAuditOutboxModel as unknown as MockableModel).findOne = (query: { eventId?: string }) => {
     const event = query.eventId ? outboxEvents.get(query.eventId) : undefined;
@@ -234,20 +280,27 @@ function classificationFixture() {
     events: Array<Record<string, unknown>>,
     options?: { session?: ClientSession },
   ) => {
-    creates += 1;
     outboxSession = options?.session;
-    outboxEvents.set(events[0].eventId as string, events[0]);
+    const event = structuredClone(events[0]);
+    const session = requireTransactionSession(options?.session);
     if (duplicateAfterPersist) {
+      session.stageCompetingOutbox(event);
       throw { code: 11000, keyPattern: { eventId: 1 } };
     }
+    session.stage(() => {
+      creates += 1;
+      outboxEvents.set(event.eventId as string, event);
+    });
     return events;
   };
 
   return {
     users,
     outboxEvents,
+    createSession,
     get saves() { return saves; },
     get creates() { return creates; },
+    get loadedSession() { return loadedSession; },
     get savedSession() { return savedSession; },
     get outboxSession() { return outboxSession; },
     setDuplicateAfterPersist() { duplicateAfterPersist = true; },
@@ -267,7 +320,7 @@ describe("transactional admin user classification", () => {
     const fixture = classificationFixture();
     let capturedSession: ClientSession | undefined;
     (mongoose as unknown as { startSession: unknown }).startSession = async () => {
-      capturedSession = createSessionMock();
+      capturedSession = fixture.createSession();
       return capturedSession;
     };
 
@@ -282,13 +335,14 @@ describe("transactional admin user classification", () => {
     assert.equal(fixture.users.get("exists")?.operationalClassification?.classifiedBy, "admin_uid");
     assert.equal(fixture.outboxEvents.size, 1);
     assert.ok(capturedSession);
+    assert.equal(fixture.loadedSession, capturedSession);
     assert.equal(fixture.savedSession, capturedSession);
     assert.equal(fixture.outboxSession, capturedSession);
   });
 
   it("persists an idempotency intent without saving an exact same classification", async () => {
     const fixture = classificationFixture();
-    (mongoose as unknown as { startSession: unknown }).startSession = async () => createSessionMock();
+    (mongoose as unknown as { startSession: unknown }).startSession = async () => fixture.createSession();
 
     const result = await classifyAdminUser({
       actorUid: "admin_uid", userUid: "same",
@@ -303,7 +357,7 @@ describe("transactional admin user classification", () => {
 
   it("replays a request without a second mutation and rejects conflicting reuse", async () => {
     const fixture = classificationFixture();
-    (mongoose as unknown as { startSession: unknown }).startSession = async () => createSessionMock();
+    (mongoose as unknown as { startSession: unknown }).startSession = async () => fixture.createSession();
     const requestId = "33333333-3333-4333-8333-333333333333";
     const input = { actorUid: "admin_uid", userUid: "exists", requestId, category: "internal" as const, reason: "internal_team" as const };
 
@@ -319,22 +373,23 @@ describe("transactional admin user classification", () => {
   it("resolves a duplicate-event race from the durable identity without a second mutation", async () => {
     const fixture = classificationFixture();
     fixture.setDuplicateAfterPersist();
-    (mongoose as unknown as { startSession: unknown }).startSession = async () => createSessionMock();
+    (mongoose as unknown as { startSession: unknown }).startSession = async () => fixture.createSession();
     const input = {
       actorUid: "admin_uid", userUid: "exists", requestId: "77777777-7777-4777-8777-777777777777",
       category: "test" as const, reason: "test_account" as const,
     };
 
     assert.equal((await classifyAdminUser(input)).status, "unchanged");
-    assert.equal(fixture.users.get("exists")?.operationalClassification?.category, "test");
-    assert.equal(fixture.saves, 1);
+    assert.equal(fixture.outboxEvents.size, 1);
+    assert.equal(fixture.users.get("exists")?.operationalClassification, undefined);
+    assert.equal(fixture.saves, 0);
     assert.equal((await classifyAdminUser(input)).status, "unchanged");
-    assert.equal(fixture.saves, 1);
+    assert.equal(fixture.saves, 0);
   });
 
   it("updates when the same category has a different reason or normalized note", async () => {
     const fixture = classificationFixture();
-    (mongoose as unknown as { startSession: unknown }).startSession = async () => createSessionMock();
+    (mongoose as unknown as { startSession: unknown }).startSession = async () => fixture.createSession();
 
     assert.equal((await classifyAdminUser({
       actorUid: "admin_uid", userUid: "same", requestId: "88888888-8888-4888-8888-888888888888",
@@ -351,7 +406,7 @@ describe("transactional admin user classification", () => {
   it("reports an unknown commit and a retry resolves through the persisted audit identity", async () => {
     const fixture = classificationFixture();
     let unknownOnce = true;
-    (mongoose as unknown as { startSession: unknown }).startSession = async () => createSessionMock({ unknownCommit: unknownOnce });
+    (mongoose as unknown as { startSession: unknown }).startSession = async () => fixture.createSession({ unknownCommit: unknownOnce });
     const input = {
       actorUid: "admin_uid", userUid: "exists", requestId: "44444444-4444-4444-8444-444444444444",
       category: "test" as const, reason: "test_account" as const,
@@ -365,7 +420,7 @@ describe("transactional admin user classification", () => {
 
   it("isolates bulk targets and returns only safe per-target outcomes", async () => {
     const fixture = classificationFixture();
-    (mongoose as unknown as { startSession: unknown }).startSession = async () => createSessionMock();
+    (mongoose as unknown as { startSession: unknown }).startSession = async () => fixture.createSession();
 
     const result = await bulkClassifyAdminUsers({
       actorUid: "admin_uid", category: "internal", reason: "internal_team",
@@ -381,11 +436,11 @@ describe("transactional admin user classification", () => {
   });
 
   it("rejects invalid whole bulk commands before starting a transaction", async () => {
-    classificationFixture();
+    const fixture = classificationFixture();
     let transactionStarts = 0;
     (mongoose as unknown as { startSession: unknown }).startSession = async () => {
       transactionStarts += 1;
-      return createSessionMock();
+      return fixture.createSession();
     };
     const validChange = { userUid: "exists", requestId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa" };
     const cases: Array<{ input: unknown; errorCode: string }> = [
