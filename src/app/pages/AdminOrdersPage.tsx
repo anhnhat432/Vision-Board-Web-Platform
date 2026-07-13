@@ -1,10 +1,14 @@
 ﻿import { ClipboardList, Download, Loader2, Pencil, RefreshCw } from "lucide-react";
 import { Link } from "react-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAuthContext } from "@/lib/auth/AuthContext";
-import { type AdminUpdateOrderPayload, type ApiOrder, type ApiOrderStatus, adminGetOrders, adminUpdateOrder, adminUpdateOrderStatus } from "@/services/orderService";
+import { type AdminApiOrder, type AdminOrderListResponse, type AdminUpdateOrderPayload, type ApiOrder, type ApiOrderStatus, adminClassifyPhysicalOrder, adminExportOrders, adminGetOrders, adminUpdateOrder, adminUpdateOrderStatus } from "@/services/orderService";
+import type { AdminClassificationMutationPayload, AdminOperationalClassificationSummary, AdminOperationalScope } from "@/services/adminService";
 import { AdminEmptyState } from "../components/admin/AdminEmptyState";
+import { AdminOperationalClassificationBadge, getAdminOperationalClassificationSourceLabel } from "../components/admin/AdminOperationalClassificationBadge";
+import { AdminOperationalClassificationDialog } from "../components/admin/AdminOperationalClassificationDialog";
+import { AdminOperationalScopeFilter } from "../components/admin/AdminOperationalScopeFilter";
 import { AdminPageHeader } from "../components/admin/AdminPageHeader";
 import { useAdminPendingCounts } from "../components/admin/AdminPendingCountsContext";
 import { useAdminSearch } from "../components/admin/AdminSearchContext";
@@ -12,7 +16,6 @@ import { AdminStatusBadge } from "../components/admin/AdminStatusBadge";
 import { ADMIN_STATUS_TRANSITIONS, ORDER_STATUS_LABELS, ORDER_STATUS_TONES } from "../components/admin/statusMappings";
 import { adminInput, adminSurface } from "../components/admin/tokens";
 import { ADMIN_LOAD_TIMEOUT_MS, formatDate, formatVnd, getErrorMessage, withTimeout } from "../components/admin/utils";
-import { downloadCsv } from "../components/admin/csvExport";
 import { Button } from "../components/ui/button";
 import {
   Dialog,
@@ -36,6 +39,33 @@ const STATUS_FILTER_ORDER: Array<ApiOrderStatus | "all"> = [
   "delivered",
   "cancelled",
 ];
+
+type OrderListView = {
+  query: string;
+  statusFilter: ApiOrderStatus | "all";
+  frameFilter: string;
+  dateFrom: string;
+  dateTo: string;
+  operationalScope: AdminOperationalScope;
+  page: number;
+};
+
+function getErrorCode(error: unknown): string | undefined {
+  return typeof error === "object" && error !== null && "errorCode" in error
+    ? String(error.errorCode)
+    : undefined;
+}
+
+const DEFAULT_OPERATIONAL_CLASSIFICATION: AdminOperationalClassificationSummary = { effectiveCategory: "real", source: "default" };
+function normalizeOrderOperationalClassification(order: AdminApiOrder): AdminApiOrder {
+  return order.operationalClassification ? order : { ...order, operationalClassification: DEFAULT_OPERATIONAL_CLASSIFICATION };
+}
+
+function getEditableOperationalReason(
+  reason: AdminOperationalClassificationSummary["reason"],
+): AdminClassificationMutationPayload["reason"] | undefined {
+  return reason === "legacy_sales_test" || reason === "legacy_sales_internal" ? undefined : reason;
+}
 
 function OrderActions({
   order,
@@ -87,7 +117,10 @@ export function AdminOrdersPage() {
   const isAdmin = userProfile?.role === "admin";
   const { setOrdersPending } = useAdminPendingCounts();
 
-  const [orders, setOrders] = useState<ApiOrder[]>([]);
+  const [orders, setOrders] = useState<AdminApiOrder[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [statusCounts, setStatusCounts] = useState<Record<ApiOrderStatus | "all", number>>({ all: 0, pending: 0, confirmed: 0, printing: 0, shipping: 0, delivered: 0, cancelled: 0 });
+  const [frameOptions, setFrameOptions] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busyOrderId, setBusyOrderId] = useState<string | null>(null);
@@ -96,6 +129,21 @@ export function AdminOrdersPage() {
   const [frameFilter, setFrameFilter] = useState<string>("all");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
+  const [operationalScope, setOperationalScope] = useState<AdminOperationalScope>("real");
+  const [page, setPage] = useState(1);
+  const loadGeneration = useRef(0);
+  const [exportBusy, setExportBusy] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
+  const [classificationOrder, setClassificationOrder] = useState<AdminApiOrder | null>(null);
+  const [classificationBusy, setClassificationBusy] = useState(false);
+  const [classificationError, setClassificationError] = useState<string | undefined>();
+  const classificationRequestRef = useRef<{ commandKey: string; requestId: string } | null>(null);
+  const classificationMutationRef = useRef(0);
+  const classificationViewKeyRef = useRef<string | null>(null);
+  const currentViewKeyRef = useRef("");
+  const currentViewRef = useRef<OrderListView>({
+    query: "", statusFilter: "all", frameFilter: "all", dateFrom: "", dateTo: "", operationalScope: "real", page: 1,
+  });
 
   // Edit dialog state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -123,25 +171,60 @@ export function AdminOrdersPage() {
     adminNote: "",
   });
 
-  const handleSearchChange = useCallback((next: string) => setQuery(next), []);
+  const resetListPosition = useCallback(() => {
+    setPage(1);
+    setSelectedIds(new Set());
+  }, []);
+  const handleSearchChange = useCallback((next: string) => {
+    resetListPosition();
+    setQuery(next);
+  }, [resetListPosition]);
   useAdminSearch(query, handleSearchChange, "Tìm email, mã đơn, họ tên, số điện thoại");
+  const currentView: OrderListView = { query, statusFilter, frameFilter, dateFrom, dateTo, operationalScope, page };
+  const viewKey = JSON.stringify(currentView);
+  currentViewKeyRef.current = viewKey;
+  currentViewRef.current = currentView;
 
-  const loadOrders = useCallback(async () => {
+  const loadOrders = useCallback(async (
+    view = currentViewRef.current,
+    requestViewKey = JSON.stringify(view),
+  ) => {
+    const generation = ++loadGeneration.current;
     setLoading(true);
     setError(null);
     try {
       const data = await withTimeout(
-        adminGetOrders(),
+        adminGetOrders({ q: view.query, status: view.statusFilter, frame: view.frameFilter, dateFrom: view.dateFrom || undefined, dateTo: view.dateTo || undefined, operationalScope: view.operationalScope, page: view.page, limit: 30 }) as Promise<AdminOrderListResponse>,
         ADMIN_LOAD_TIMEOUT_MS,
         "Máy chủ phản hồi quá lâu. Render có thể đang cold start; hãy thử lại sau vài giây.",
       );
-      setOrders(data);
+      if (generation !== loadGeneration.current || requestViewKey !== currentViewKeyRef.current) return;
+      const boundedPages = Math.max(1, data.totalPages);
+      if (view.page > boundedPages) {
+        setPage(boundedPages);
+        return;
+      }
+      setOrders(data.items.map(normalizeOrderOperationalClassification));
+      setTotalPages(boundedPages);
+      setStatusCounts(data.statusCounts);
+      setFrameOptions(data.frameOptions);
     } catch (err) {
-      setError(getErrorMessage(err, "Không thể tải danh sách đơn in."));
+      if (generation === loadGeneration.current && requestViewKey === currentViewKeyRef.current) setError(getErrorMessage(err, "Không thể tải danh sách đơn in."));
     } finally {
-      setLoading(false);
+      if (generation === loadGeneration.current && requestViewKey === currentViewKeyRef.current) setLoading(false);
     }
   }, []);
+
+  // A classification dialog cannot outlive the server view it was opened from.
+  useEffect(() => {
+    if (classificationViewKeyRef.current === viewKey) return;
+    classificationViewKeyRef.current = viewKey;
+    classificationMutationRef.current += 1;
+    classificationRequestRef.current = null;
+    setClassificationOrder(null);
+    setClassificationBusy(false);
+    setClassificationError(undefined);
+  }, [viewKey]);
 
   useEffect(() => {
     if (authLoading || userProfileLoading) return;
@@ -149,23 +232,20 @@ export function AdminOrdersPage() {
       setLoading(false);
       return;
     }
-    void loadOrders();
-  }, [authLoading, isAdmin, loadOrders, user, userProfileLoading]);
+    void loadOrders(currentViewRef.current, viewKey);
+  }, [authLoading, isAdmin, loadOrders, user, userProfileLoading, viewKey]);
 
-  const handleTransition = (orderId: string, nextStatus: ApiOrderStatus) => {
+  const handleTransition = async (orderId: string, nextStatus: ApiOrderStatus) => {
     setBusyOrderId(orderId);
-
-    adminUpdateOrderStatus(orderId, { status: nextStatus })
-      .then((updated) => {
-        setOrders((prev) => prev.map((order) => (order.id === updated.id ? updated : order)));
-        toast.success(`Đơn ${orderId.slice(-6)} -> ${ORDER_STATUS_LABELS[nextStatus]}`);
-      })
-      .catch((err: unknown) => {
-        toast.error(getErrorMessage(err, "Cập nhật thất bại."));
-      })
-      .finally(() => {
-        setBusyOrderId(null);
-      });
+    try {
+      await adminUpdateOrderStatus(orderId, { status: nextStatus });
+      await loadOrders();
+      toast.success(`Đơn ${orderId.slice(-6)} -> ${ORDER_STATUS_LABELS[nextStatus]}`);
+    } catch (err) {
+      toast.error(getErrorMessage(err, "Cập nhật thất bại."));
+    } finally {
+      setBusyOrderId(null);
+    }
   };
 
   const handleEditOpen = (order: ApiOrder) => {
@@ -199,8 +279,8 @@ export function AdminOrdersPage() {
         note: editForm.note.trim() || undefined,
         adminNote: editForm.adminNote.trim() || undefined,
       };
-      const updated = await adminUpdateOrder(editOrder.id, payload);
-      setOrders((prev) => prev.map((o) => (o.id === updated.id ? updated : o)));
+      await adminUpdateOrder(editOrder.id, payload);
+      await loadOrders();
       toast.success(`Đã cập nhật đơn ${editOrder.id.slice(-6)}.`);
       setEditOrder(null);
     } catch (err) {
@@ -210,81 +290,33 @@ export function AdminOrdersPage() {
     }
   };
 
-  const frameOptions = useMemo(() => {
-    const labels = new Set<string>();
-    orders.forEach((order) => {
-      const frame = order.lines?.find((line) => line.type === "frame")?.label ?? order.kitType;
-      if (frame) labels.add(frame);
-    });
-    return Array.from(labels).sort();
-  }, [orders]);
+  const counts = statusCounts;
 
-  const filteredOrders = useMemo(() => {
-    const normalisedQuery = query.trim().toLowerCase();
-    const fromMs = dateFrom ? new Date(dateFrom).getTime() : null;
-    const toMs = dateTo ? new Date(`${dateTo}T23:59:59`).getTime() : null;
-
-    return orders.filter((order) => {
-      if (statusFilter !== "all" && order.status !== statusFilter) return false;
-
-      const orderFrame = order.lines?.find((line) => line.type === "frame")?.label ?? order.kitType ?? "";
-      if (frameFilter !== "all" && orderFrame !== frameFilter) return false;
-
-      if (dateFrom || dateTo) {
-        const orderTime = new Date(order.createdAt).getTime();
-        if (fromMs && orderTime < fromMs) return false;
-        if (toMs && orderTime > toMs) return false;
-      }
-
-      if (normalisedQuery.length === 0) return true;
-      const haystack = [order.id, order.email ?? "", order.fullName ?? "", order.phone ?? ""].join("\n").toLowerCase();
-      return haystack.includes(normalisedQuery);
-    });
-  }, [dateFrom, dateTo, frameFilter, orders, query, statusFilter]);
-
-  const counts = useMemo(() => {
-    const totals: Record<ApiOrderStatus | "all", number> = {
-      all: orders.length,
-      pending: 0,
-      confirmed: 0,
-      printing: 0,
-      shipping: 0,
-      delivered: 0,
-      cancelled: 0,
-    };
-    orders.forEach((order) => {
-      totals[order.status] += 1;
-    });
-    return totals;
-  }, [orders]);
-
-  const handleExportCsv = () => {
-    const data = filteredOrders;
-    if (data.length === 0) {
-      toast.info("Không có dữ liệu để xuất.");
-      return;
+  const handleExportCsv = async () => {
+    setExportBusy(true);
+    setExportError(null);
+    try {
+      const exported = await adminExportOrders({
+        q: query,
+        status: statusFilter,
+        frame: frameFilter,
+        dateFrom: dateFrom || undefined,
+        dateTo: dateTo || undefined,
+        operationalScope,
+      });
+      const url = URL.createObjectURL(exported.blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = exported.filename || `orders-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      setExportError(getErrorMessage(err, "Không thể xuất đơn hàng. Thử lại."));
+    } finally {
+      setExportBusy(false);
     }
-    const headers = ["Mã đơn", "Họ tên", "Email", "SĐT", "Trạng thái", "Khung", "Set ảnh", "Tổng tiền", "Địa chỉ", "Ngày tạo", "Mục tiêu"];
-    const rows = data.map((o) => {
-      const frame = o.lines?.find((l) => l.type === "frame")?.label ?? o.kitType ?? "";
-      const themes = o.lines?.filter((l) => l.type === "theme").map((l) => l.label).join("; ") ?? "";
-      const addr = o.shippingAddress ? [o.shippingAddress.line1, o.shippingAddress.line2, o.shippingAddress.city].filter(Boolean).join(", ") : "";
-      return [
-        o.id,
-        o.fullName,
-        o.email ?? "",
-        o.phone ?? "",
-        ORDER_STATUS_LABELS[o.status],
-        frame,
-        themes,
-        o.totalVnd != null ? String(o.totalVnd) : "",
-        addr,
-        formatDate(o.createdAt),
-        o.goalSnapshot?.title ?? "",
-      ];
-    });
-    downloadCsv(`orders-${new Date().toISOString().slice(0, 10)}`, headers, rows);
-    toast.success(`Đã xuất ${data.length} đơn hàng.`);
   };
 
   const toggleSelect = (id: string) => {
@@ -296,10 +328,10 @@ export function AdminOrdersPage() {
   };
 
   const toggleSelectAll = () => {
-    if (selectedIds.size === filteredOrders.length) {
+    if (selectedIds.size === orders.length) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(filteredOrders.map((o) => o.id)));
+      setSelectedIds(new Set(orders.map((o) => o.id)));
     }
   };
 
@@ -311,8 +343,7 @@ export function AdminOrdersPage() {
     const ids = [...selectedIds];
     for (const orderId of ids) {
       try {
-        const updated = await adminUpdateOrderStatus(orderId, { status });
-        setOrders((prev) => prev.map((o) => (o.id === updated.id ? updated : o)));
+        await adminUpdateOrderStatus(orderId, { status });
         done++;
       } catch {
         failed++;
@@ -320,10 +351,63 @@ export function AdminOrdersPage() {
     }
     setSelectedIds(new Set());
     setBulkBusy(false);
+    if (done > 0) await loadOrders();
     if (failed > 0) {
       toast.warning(`Đã cập nhật ${done} đơn, ${failed} đơn thất bại.`);
     } else {
       toast.success(`Đã chuyển ${done} đơn sang "${ORDER_STATUS_LABELS[status]}".`);
+    }
+  };
+
+  const openClassification = (order: AdminApiOrder) => {
+    classificationMutationRef.current += 1;
+    classificationRequestRef.current = null;
+    setClassificationError(undefined);
+    setClassificationOrder(order);
+  };
+
+  const handleClassification = async (payload: Omit<AdminClassificationMutationPayload, "requestId">) => {
+    const order = classificationOrder;
+    if (!order) return;
+    if (order.operationalClassification.source === "user" && payload.category === "real") {
+      setClassificationError("Phân loại tài khoản đang kiểm soát đơn này. Hãy khôi phục tài khoản từ trang Người dùng.");
+      return;
+    }
+    const commandKey = JSON.stringify({ id: order.id, ...payload, note: payload.note?.trim() || null });
+    const current = classificationRequestRef.current;
+    const requestId = current?.commandKey === commandKey ? current.requestId : crypto.randomUUID();
+    const viewKey = currentViewKeyRef.current;
+    classificationRequestRef.current = { commandKey, requestId };
+    const mutation = ++classificationMutationRef.current;
+    setClassificationBusy(true);
+    setClassificationError(undefined);
+    try {
+      const result = await adminClassifyPhysicalOrder(order.id, { ...payload, requestId });
+      if (mutation !== classificationMutationRef.current || classificationOrder?.id !== order.id || viewKey !== currentViewKeyRef.current) return;
+      if (result.status === "updated" || result.status === "unchanged") {
+        await loadOrders();
+        if (mutation !== classificationMutationRef.current || viewKey !== currentViewKeyRef.current) return;
+        classificationRequestRef.current = null;
+        setClassificationOrder(null);
+      } else {
+        classificationRequestRef.current = null;
+        setClassificationError("Không thể phân loại đơn in. Hãy thử lại.");
+      }
+    } catch (err) {
+      if (mutation !== classificationMutationRef.current || viewKey !== currentViewKeyRef.current) return;
+      const errorCode = getErrorCode(err);
+      if (errorCode === "admin_classification_request_conflict") {
+        await loadOrders();
+        if (mutation !== classificationMutationRef.current || viewKey !== currentViewKeyRef.current) return;
+        setClassificationError("Dữ liệu đã thay đổi. Danh sách đã được tải lại.");
+      } else if (errorCode === "admin_audit_commit_unknown" || !errorCode) {
+        setClassificationError("Kết quả phân loại chưa rõ. Hãy thử lại cùng yêu cầu này.");
+      } else {
+        classificationRequestRef.current = null;
+        setClassificationError("Không thể phân loại đơn in. Hãy thử lại.");
+      }
+    } finally {
+      if (mutation === classificationMutationRef.current && viewKey === currentViewKeyRef.current) setClassificationBusy(false);
     }
   };
 
@@ -345,11 +429,11 @@ export function AdminOrdersPage() {
               variant="outline"
               size="sm"
               className="gap-1.5 border-app-line bg-app-bg-subtle text-app-ink hover:bg-app-accent-soft hover:text-app-ink"
-              disabled={loading || filteredOrders.length === 0}
-              onClick={handleExportCsv}
+              disabled={loading || exportBusy}
+              onClick={() => void handleExportCsv()}
             >
               <Download className="h-3.5 w-3.5" />
-              CSV
+              {exportBusy ? "Đang xuất..." : "CSV"}
             </Button>
             <Button
               type="button"
@@ -379,10 +463,14 @@ export function AdminOrdersPage() {
           </Button>
         </div>
       ) : null}
+      {exportError ? <p role="alert" className="text-sm text-rose-600">{exportError}</p> : null}
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as ApiOrderStatus | "all")}>
-          <SelectTrigger className={adminInput}>
+        <Select value={statusFilter} onValueChange={(value) => {
+          resetListPosition();
+          setStatusFilter(value as ApiOrderStatus | "all");
+        }}>
+          <SelectTrigger className={adminInput} aria-label="Trạng thái đơn in">
             <SelectValue placeholder="Trạng thái" />
           </SelectTrigger>
           <SelectContent>
@@ -393,8 +481,11 @@ export function AdminOrdersPage() {
             ))}
           </SelectContent>
         </Select>
-        <Select value={frameFilter} onValueChange={(value) => setFrameFilter(value)}>
-          <SelectTrigger className={adminInput}>
+        <Select value={frameFilter} onValueChange={(value) => {
+          resetListPosition();
+          setFrameFilter(value);
+        }}>
+          <SelectTrigger className={adminInput} aria-label="Khung">
             <SelectValue placeholder="Khung" />
           </SelectTrigger>
           <SelectContent>
@@ -410,7 +501,10 @@ export function AdminOrdersPage() {
           <Input
             type="date"
             value={dateFrom}
-            onChange={(e) => setDateFrom(e.target.value)}
+            onChange={(e) => {
+              resetListPosition();
+              setDateFrom(e.target.value);
+            }}
             className={adminInput}
             placeholder="Từ ngày"
             aria-label="Lọc từ ngày"
@@ -420,12 +514,25 @@ export function AdminOrdersPage() {
           <Input
             type="date"
             value={dateTo}
-            onChange={(e) => setDateTo(e.target.value)}
+            onChange={(e) => {
+              resetListPosition();
+              setDateTo(e.target.value);
+            }}
             className={adminInput}
             placeholder="Đến ngày"
             aria-label="Lọc đến ngày"
           />
         </div>
+      </div>
+
+      <div className="w-full sm:w-56">
+        <AdminOperationalScopeFilter
+          value={operationalScope}
+          onChange={(scope) => {
+            resetListPosition();
+            setOperationalScope(scope);
+          }}
+        />
       </div>
 
       <div className="flex flex-wrap gap-2" role="tablist" aria-label="Lọc theo trạng thái">
@@ -438,7 +545,10 @@ export function AdminOrdersPage() {
               type="button"
               role="tab"
               aria-selected={active}
-              onClick={() => setStatusFilter(status)}
+              onClick={() => {
+                resetListPosition();
+                setStatusFilter(status);
+              }}
               className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-150 ${
                 active
                   ? "border-app-accent/40 bg-app-accent-soft text-app-accent shadow-sm"
@@ -457,17 +567,17 @@ export function AdminOrdersPage() {
       </div>
 
       {/* Bulk Actions Bar */}
-      {!loading && filteredOrders.length > 0 ? (
+      {!loading && orders.length > 0 ? (
         <div className="flex flex-wrap items-center gap-2 rounded-[var(--r-card)] border border-app-line/60 bg-app-bg-subtle/50 px-4 py-2.5">
           <label className="flex items-center gap-2 cursor-pointer select-none">
             <input
               type="checkbox"
               className="h-4 w-4 rounded border-app-line-strong text-app-accent accent-app-accent"
-              checked={selectedIds.size === filteredOrders.length && filteredOrders.length > 0}
+              checked={selectedIds.size === orders.length && orders.length > 0}
               onChange={toggleSelectAll}
             />
             <span className="text-xs text-app-ink-soft">
-              {selectedIds.size > 0 ? `Đã chọn ${selectedIds.size}/${filteredOrders.length}` : "Chọn tất cả"}
+              {selectedIds.size > 0 ? `Đã chọn ${selectedIds.size}/${orders.length}` : "Chọn tất cả"}
             </span>
           </label>
           {selectedIds.size > 0 ? (
@@ -537,7 +647,7 @@ export function AdminOrdersPage() {
             </li>
           ))}
         </ul>
-      ) : filteredOrders.length === 0 ? (
+      ) : orders.length === 0 ? (
         <AdminEmptyState
           icon={ClipboardList}
           title={orders.length === 0 ? "Chưa có đơn hàng nào" : "Không tìm thấy đơn phù hợp"}
@@ -549,7 +659,7 @@ export function AdminOrdersPage() {
         />
       ) : (
         <ul className="space-y-3">
-          {filteredOrders.map((order) => {
+          {orders.map((order) => {
             const frameLabel = order.lines?.find((line) => line.type === "frame")?.label ?? order.kitType ?? "—";
             const themeLabels = order.lines?.filter((line) => line.type === "theme").map((l) => l.label) ?? [];
             const shippingAddr = order.shippingAddress;
@@ -579,9 +689,12 @@ export function AdminOrdersPage() {
                       </div>
                     </Link>
                   </div>
-                  <AdminStatusBadge tone={ORDER_STATUS_TONES[order.status]}>
-                    {ORDER_STATUS_LABELS[order.status]}
-                  </AdminStatusBadge>
+                  <div className="flex flex-wrap items-center justify-end gap-2">
+                    <AdminOperationalClassificationBadge classification={order.operationalClassification} />
+                    <AdminStatusBadge tone={ORDER_STATUS_TONES[order.status]}>
+                      {ORDER_STATUS_LABELS[order.status]}
+                    </AdminStatusBadge>
+                  </div>
                 </div>
 
                 <div className="mt-4 grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2 lg:grid-cols-7">
@@ -619,6 +732,12 @@ export function AdminOrdersPage() {
                       {order.goalSnapshot?.title ?? "Không gắn mục tiêu"}
                     </p>
                   </div>
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-wider text-app-ink-muted/70">Phân loại</p>
+                    <p className="mt-0.5 text-xs text-app-ink-soft">
+                      {getAdminOperationalClassificationSourceLabel(order.operationalClassification.source)}
+                    </p>
+                  </div>
                 </div>
 
                 {order.note ? (
@@ -629,23 +748,63 @@ export function AdminOrdersPage() {
                 ) : null}
 
                 <div className="mt-4 flex items-center justify-between border-t border-app-line/60 pt-4">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="gap-1.5 text-app-ink-muted hover:text-app-ink hover:bg-app-accent-soft"
-                    onClick={() => handleEditOpen(order)}
-                  >
-                    <Pencil className="h-3.5 w-3.5" />
-                    Sửa
-                  </Button>
-                  <OrderActions order={order} busy={busyOrderId === order.id} onTransition={handleTransition} />
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="gap-1.5 text-app-ink-muted hover:text-app-ink hover:bg-app-accent-soft"
+                      onClick={() => handleEditOpen(order)}
+                    >
+                      <Pencil className="h-3.5 w-3.5" />
+                      Sửa
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="border-app-line bg-app-bg-subtle text-app-ink hover:bg-app-accent-soft hover:text-app-ink"
+                      disabled={classificationBusy}
+                      onClick={() => openClassification(order)}
+                    >
+                      Phân loại dữ liệu
+                    </Button>
+                  </div>
+                  <OrderActions order={order} busy={busyOrderId === order.id} onTransition={(id, status) => void handleTransition(id, status)} />
                 </div>
               </li>
             );
           })}
         </ul>
       )}
+
+      {totalPages > 1 ? (
+        <nav className="flex items-center justify-end gap-2" aria-label="Phân trang đơn in">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={loading || page <= 1}
+            onClick={() => {
+              setSelectedIds(new Set());
+              setPage((value) => value - 1);
+            }}
+          >
+            Trang trước
+          </Button>
+          <span className="text-sm text-app-ink-muted">Trang {page}/{totalPages}</span>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={loading || page >= totalPages}
+            onClick={() => {
+              setSelectedIds(new Set());
+              setPage((value) => value + 1);
+            }}
+          >
+            Trang sau
+          </Button>
+        </nav>
+      ) : null}
 
       {/* Edit Order Dialog */}
       <Dialog open={editOrder !== null} onOpenChange={(open) => { if (!open) setEditOrder(null); }}>
@@ -750,6 +909,31 @@ export function AdminOrdersPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AdminOperationalClassificationDialog
+        open={classificationOrder !== null}
+        targetType="physical_order"
+        targetLabel={classificationOrder?.id ?? "đơn in"}
+        initialCategory={classificationOrder?.operationalClassification.effectiveCategory ?? "real"}
+        initialReason={getEditableOperationalReason(classificationOrder?.operationalClassification.reason)}
+        initialNote={classificationOrder?.operationalClassification.note}
+        pending={classificationBusy}
+        error={classificationError}
+        disableRealCategory={
+          classificationOrder?.operationalClassification.source === "user"
+          && classificationOrder.operationalClassification.effectiveCategory !== "real"
+        }
+        disabledRealCategoryReason="Phân loại tài khoản đang kiểm soát đơn này. Hãy khôi phục tài khoản từ trang Người dùng."
+        onOpenChange={(open) => {
+          if (!open && !classificationBusy) {
+            classificationMutationRef.current += 1;
+            classificationRequestRef.current = null;
+            setClassificationOrder(null);
+            setClassificationError(undefined);
+          }
+        }}
+        onConfirm={handleClassification}
+      />
     </div>
   );
 }

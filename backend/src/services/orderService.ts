@@ -5,6 +5,7 @@ import { MongoGoalRepository } from "../repositories/mongo/MongoGoalRepository";
 import {
   MongoOrderRepository,
   type GoalSnapshot,
+  type AdminOrderListInput,
   type OrderDiscount,
   type OrderLine,
   type OrderLineType,
@@ -321,8 +322,8 @@ class OrderService {
     return updated;
   }
 
-  async adminGetOrders() {
-    return this.orderRepository.getAllOrders();
+  async adminGetOrders(input: AdminOrderListInput) {
+    return this.orderRepository.getAdminOrders(input);
   }
 
   async adminUpdateStatus(adminUid: string, orderId: string, payload: AdminUpdateStatusPayload) {
@@ -356,9 +357,13 @@ class OrderService {
   }
 
   async adminGetOrder(orderId: string) {
-    const order = await this.orderRepository.getOrderById(orderId);
+    const order = await this.orderRepository.getAdminOrderById(orderId);
     if (!order) throw new ApiError(404, "Order not found.");
     return order;
+  }
+
+  async adminExportOrders(input: Omit<AdminOrderListInput, "page" | "limit">) {
+    return this.orderRepository.getAdminOrdersForExport(input);
   }
 
   async adminUpdateOrder(orderId: string, payload: AdminUpdateOrderPayload) {

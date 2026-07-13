@@ -10,6 +10,7 @@ import {
 } from "../models/PaymentOrderModel";
 import { RefundRequestModel } from "../models/refundRequestModel";
 import { UserModel } from "../models/UserModel";
+import type { AdminOperationalClassificationSummary, OperationalCategory, OperationalClassificationSource } from "../models/OperationalClassification";
 import {
   buildAdminSalesReviewAuditIdentity,
   dispatchAdminAuditOutboxEvent,
@@ -17,6 +18,10 @@ import {
   resolveAdminAuditIdempotency,
   type AdminSalesReviewAuditIdentity,
 } from "./adminAuditOutboxService";
+import {
+  buildEffectiveOperationalClassificationStages,
+  serializeProjectedOperationalClassification,
+} from "./adminOperationalClassificationQuery";
 import { ApiError } from "../utils/apiError";
 
 const REPORT_TIMEZONE = "Asia/Ho_Chi_Minh" as const;
@@ -111,6 +116,8 @@ export interface AdminSalesReportRow {
     amountVnd: number;
     completedAt: string | null;
   };
+  effectiveKpiStatus: PaymentReportingKpiStatus;
+  operationalClassification: AdminOperationalClassificationSummary;
   reporting: {
     kpiStatus: PaymentReportingKpiStatus;
     exclusionReason: PaymentReportingExclusionReason | null;
@@ -231,6 +238,11 @@ interface RawSalesRow {
   payer?: RawSalesPayer | null;
   refund?: { resolvedAt?: Date | null } | null;
   isRefunded?: boolean;
+  effectiveKpiStatus?: PaymentReportingKpiStatus;
+  __effectiveOperationalCategory?: OperationalCategory;
+  __effectiveOperationalSource?: OperationalClassificationSource;
+  __effectiveOperationalReason?: AdminOperationalClassificationSummary["reason"];
+  __effectiveOperationalClassifiedAt?: Date | null;
   reporting?: {
     kpiStatus?: PaymentReportingKpiStatus;
     exclusionReason?: PaymentReportingExclusionReason | null;
@@ -288,6 +300,19 @@ function serializePayer(value: RawSalesPayer | null | undefined): AdminSalesRepo
   };
 }
 
+function serializeSalesOperationalClassification(row: RawSalesRow): AdminOperationalClassificationSummary {
+  if (!row.__effectiveOperationalCategory) {
+    return { effectiveCategory: "real", source: "default" };
+  }
+  const classification = serializeProjectedOperationalClassification(row as unknown as Record<string, unknown>);
+  return {
+    effectiveCategory: classification.effectiveCategory,
+    source: classification.source,
+    ...(classification.reason ? { reason: classification.reason } : {}),
+    ...(classification.classifiedAt ? { classifiedAt: classification.classifiedAt } : {}),
+  };
+}
+
 function serializeSalesRow(row: RawSalesRow): AdminSalesReportRow {
   const isRefunded = Boolean(row.isRefunded);
   const refundCompletedAt = toIso(row.refund?.resolvedAt);
@@ -308,6 +333,8 @@ function serializeSalesRow(row: RawSalesRow): AdminSalesReportRow {
       amountVnd: isRefunded ? row.amount : 0,
       completedAt: refundCompletedAt,
     },
+    effectiveKpiStatus: row.effectiveKpiStatus ?? status,
+    operationalClassification: serializeSalesOperationalClassification(row),
     reporting: {
       kpiStatus: status,
       exclusionReason: row.reporting?.exclusionReason ?? null,
@@ -320,7 +347,7 @@ export function buildAdminSalesReportPipeline(
   filters: AdminSalesReportFilters,
   options: { exportAll?: boolean } = {},
 ): PipelineStage[] {
-  const rowMatch = { effectiveKpiStatus: filters.kpiStatus };
+  const rowMatch = { __effectiveKpiStatus: filters.kpiStatus };
   const skip = (filters.page - 1) * filters.limit;
   const rowsPipeline: PipelineStage.FacetPipelineStage[] = [
     { $match: rowMatch },
@@ -331,7 +358,23 @@ export function buildAdminSalesReportPipeline(
 
   return [
     { $match: buildQualifyingSalesFilter(filters) },
-    { $set: { effectiveKpiStatus: { $ifNull: ["$reporting.kpiStatus", "pending"] } } },
+    ...buildEffectiveOperationalClassificationStages({
+      userIdField: "userId",
+      recordClassificationField: "operationalClassification",
+      legacySalesReasonField: "reporting.exclusionReason",
+    }),
+    {
+      $set: {
+        __storedKpiStatus: { $ifNull: ["$reporting.kpiStatus", "pending"] },
+        __effectiveKpiStatus: {
+          $cond: [
+            { $ne: ["$__effectiveOperationalCategory", "real"] },
+            "excluded",
+            { $ifNull: ["$reporting.kpiStatus", "pending"] },
+          ],
+        },
+      },
+    },
     {
       $lookup: {
         from: UserModel.collection.name,
@@ -381,7 +424,12 @@ export function buildAdminSalesReportPipeline(
           exclusionReason: "$reporting.exclusionReason",
           reviewedAt: "$reporting.reviewedAt",
         },
-        effectiveKpiStatus: 1,
+        effectiveKpiStatus: "$__effectiveKpiStatus",
+        __effectiveKpiStatus: 1,
+        __effectiveOperationalCategory: 1,
+        __effectiveOperationalSource: 1,
+        __effectiveOperationalReason: 1,
+        __effectiveOperationalClassifiedAt: 1,
         user: 1,
         payer: 1,
         refund: 1,
@@ -391,7 +439,7 @@ export function buildAdminSalesReportPipeline(
     {
       $facet: {
         summary: [
-          { $match: { effectiveKpiStatus: "included" } },
+          { $match: { __effectiveKpiStatus: "included" } },
           {
             $group: {
               _id: null,
@@ -413,9 +461,9 @@ export function buildAdminSalesReportPipeline(
             },
           },
         ],
-        tabCounts: [{ $group: { _id: "$effectiveKpiStatus", count: { $sum: 1 } } }],
+        tabCounts: [{ $group: { _id: "$__effectiveKpiStatus", count: { $sum: 1 } } }],
         dailyBuckets: [
-          { $match: { effectiveKpiStatus: "included" } },
+          { $match: { __effectiveKpiStatus: "included" } },
           {
             $group: {
               _id: {
@@ -852,7 +900,10 @@ export function buildAdminSalesReportCsv({ report }: AdminSalesReportExport): st
     "Provider reference",
     "Payer classification",
     "Refund status",
-    "KPI status",
+    "Stored KPI status",
+    "Effective KPI status",
+    "Operational category",
+    "Operational source",
     "Exclusion reason",
   ]);
   const rows = report.items.map((item) => csvLine([
@@ -866,6 +917,9 @@ export function buildAdminSalesReportCsv({ report }: AdminSalesReportExport): st
     item.payer?.classification ?? "unknown",
     item.refund.status,
     item.reporting.kpiStatus,
+    item.effectiveKpiStatus,
+    item.operationalClassification.effectiveCategory,
+    item.operationalClassification.source,
     item.reporting.exclusionReason,
   ]));
   return `\uFEFF${[...metadata, "", headers, ...rows].join("\r\n")}`;

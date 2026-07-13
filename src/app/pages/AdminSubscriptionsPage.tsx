@@ -2,10 +2,14 @@ import { CreditCard, Loader2, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import {
+  type AdminOperationalClassificationSummary,
+  type AdminOperationalScope,
   type AdminSubscriptionListItem,
   adminListSubscriptions,
 } from "@/services/adminService";
+import { AdminOperationalClassificationBadge, getAdminOperationalClassificationSourceLabel } from "../components/admin/AdminOperationalClassificationBadge";
 import { AdminEmptyState } from "../components/admin/AdminEmptyState";
+import { AdminOperationalScopeFilter } from "../components/admin/AdminOperationalScopeFilter";
 import { AdminPageHeader } from "../components/admin/AdminPageHeader";
 import { AdminStatusBadge } from "../components/admin/AdminStatusBadge";
 import { adminSurface } from "../components/admin/tokens";
@@ -31,6 +35,15 @@ const SUB_STATUS_LABELS: Record<string, string> = {
   unpaid: "Chưa thanh toán",
 };
 
+const DEFAULT_OPERATIONAL_CLASSIFICATION: AdminOperationalClassificationSummary = {
+  effectiveCategory: "real",
+  source: "default",
+};
+
+function getSubscriptionClassification(subscription: AdminSubscriptionListItem): AdminOperationalClassificationSummary {
+  return subscription.operationalClassification ?? DEFAULT_OPERATIONAL_CLASSIFICATION;
+}
+
 export function AdminSubscriptionsPage() {
   const { authLoading, user, userProfile, userProfileLoading } = useAuthContext();
   const isAdmin = userProfile?.role === "admin";
@@ -43,13 +56,14 @@ export function AdminSubscriptionsPage() {
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState("all");
   const [planFilter, setPlanFilter] = useState("all");
+  const [operationalScope, setOperationalScope] = useState<AdminOperationalScope>("real");
   const limit = 30;
 
-  const load = useCallback(async (p: number, status: string, plan: string) => {
+  const load = useCallback(async (p: number, status: string, plan: string, scope: AdminOperationalScope) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await adminListSubscriptions({ status, planCode: plan, page: p, limit });
+      const res = await adminListSubscriptions({ status, planCode: plan, operationalScope: scope, page: p, limit });
       setItems(res.items);
       setTotal(res.total);
       setPage(res.page);
@@ -64,8 +78,8 @@ export function AdminSubscriptionsPage() {
   useEffect(() => {
     if (authLoading || userProfileLoading) return;
     if (!user || !isAdmin) { setLoading(false); return; }
-    void load(1, statusFilter, planFilter);
-  }, [authLoading, isAdmin, load, statusFilter, planFilter, user, userProfileLoading]);
+    void load(1, statusFilter, planFilter, operationalScope);
+  }, [authLoading, isAdmin, load, operationalScope, statusFilter, planFilter, user, userProfileLoading]);
 
   return (
     <div className="space-y-6">
@@ -73,7 +87,7 @@ export function AdminSubscriptionsPage() {
         title="Quản lý Subscription"
         description={`${total.toLocaleString("vi-VN")} gói đăng ký`}
         actions={
-          <Button type="button" variant="outline" className="gap-2 border-app-line bg-app-bg-subtle text-app-ink hover:bg-app-accent-soft" disabled={loading} onClick={() => void load(page, statusFilter, planFilter)}>
+          <Button type="button" variant="outline" className="gap-2 border-app-line bg-app-bg-subtle text-app-ink hover:bg-app-accent-soft" disabled={loading} onClick={() => void load(page, statusFilter, planFilter, operationalScope)}>
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
             Tải lại
           </Button>
@@ -99,12 +113,13 @@ export function AdminSubscriptionsPage() {
             <SelectItem value="FREE">Free</SelectItem>
           </SelectContent>
         </Select>
+        <AdminOperationalScopeFilter value={operationalScope} onChange={(scope) => { setOperationalScope(scope); setPage(1); }} />
       </div>
 
       {error ? (
         <div className="rounded-[var(--r-card)] border border-rose-300 bg-rose-50 p-4 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10">
           {error}
-          <Button type="button" variant="ghost" size="sm" className="ml-2 underline" onClick={() => void load(page, statusFilter, planFilter)}>Thử lại</Button>
+          <Button type="button" variant="ghost" size="sm" className="ml-2 underline" onClick={() => void load(page, statusFilter, planFilter, operationalScope)}>Thử lại</Button>
         </div>
       ) : null}
 
@@ -119,6 +134,7 @@ export function AdminSubscriptionsPage() {
                 <th className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">Chu kỳ</th>
                 <th className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">Hết hạn</th>
                 <th className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">Ngày tạo</th>
+                <th className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">Phân loại</th>
               </tr>
             </thead>
             <tbody>
@@ -131,12 +147,15 @@ export function AdminSubscriptionsPage() {
                     <td className="px-4 py-3"><div className="h-4 w-16 animate-pulse rounded bg-app-accent-soft" /></td>
                     <td className="px-4 py-3"><div className="h-4 w-24 animate-pulse rounded bg-app-accent-soft" /></td>
                     <td className="px-4 py-3"><div className="h-4 w-20 animate-pulse rounded bg-app-accent-soft" /></td>
+                    <td className="px-4 py-3"><div className="h-4 w-28 animate-pulse rounded bg-app-accent-soft" /></td>
                   </tr>
                 ))
               ) : items.length === 0 ? (
-                <tr><td colSpan={6}><AdminEmptyState icon={CreditCard} title="Không có subscription nào" description="Thử đổi bộ lọc." /></td></tr>
+                <tr><td colSpan={7}><AdminEmptyState icon={CreditCard} title="Không có subscription nào" description="Thử đổi bộ lọc." /></td></tr>
               ) : (
-                items.map((sub) => (
+                items.map((sub) => {
+                  const classification = getSubscriptionClassification(sub);
+                  return (
                   <tr key={sub.id} className="border-b border-app-line/50 last:border-0 hover:bg-app-accent-soft/20 transition-colors duration-100">
                     <td className="px-4 py-3">
                       <p className="font-medium text-app-ink text-xs">{sub.userDisplayName || sub.userEmail}</p>
@@ -155,8 +174,13 @@ export function AdminSubscriptionsPage() {
                     <td className="px-4 py-3 text-xs text-app-ink-soft">{sub.billingCycle ?? "—"}</td>
                     <td className="px-4 py-3 text-xs text-app-ink-soft">{sub.currentPeriodEnd ? formatDate(sub.currentPeriodEnd) : "—"}</td>
                     <td className="px-4 py-3 text-xs text-app-ink-muted">{formatDate(sub.createdAt)}</td>
+                    <td className="px-4 py-3">
+                      <AdminOperationalClassificationBadge classification={classification} />
+                      <p className="mt-1 text-xs text-app-ink-muted">{getAdminOperationalClassificationSourceLabel(classification.source)}</p>
+                    </td>
                   </tr>
-                ))
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -167,8 +191,8 @@ export function AdminSubscriptionsPage() {
         <div className="flex items-center justify-between">
           <p className="text-sm text-app-ink-muted">Trang {page} / {totalPages}</p>
           <div className="flex gap-2">
-            <Button type="button" variant="outline" size="sm" disabled={page <= 1} onClick={() => void load(page - 1, statusFilter, planFilter)}>Trước</Button>
-            <Button type="button" variant="outline" size="sm" disabled={page >= totalPages} onClick={() => void load(page + 1, statusFilter, planFilter)}>Sau</Button>
+            <Button type="button" variant="outline" size="sm" disabled={page <= 1} onClick={() => void load(page - 1, statusFilter, planFilter, operationalScope)}>Trước</Button>
+            <Button type="button" variant="outline" size="sm" disabled={page >= totalPages} onClick={() => void load(page + 1, statusFilter, planFilter, operationalScope)}>Sau</Button>
           </div>
         </div>
       ) : null}

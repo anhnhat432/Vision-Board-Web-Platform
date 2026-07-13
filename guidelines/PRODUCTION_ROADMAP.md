@@ -1,6 +1,6 @@
 # Production Roadmap
 
-Last updated: 2026-06-25
+Last updated: 2026-07-13
 
 Purpose: turn Vision Board Web Platform into a production-safe core-flow product using a Hybrid Spec-Driven Development (SDD) + Agent-Driven Development (ADD) workflow.
 
@@ -133,6 +133,7 @@ Use this style for auth, billing, sync, destructive actions, and conflict flows.
 
 - broader analytics confidence
 - secondary product surfaces polish
+- [x] Admin operational data classification and KPI cleanup (reporting-only; no DAU or active-user metric claim)
 - deeper admin/reporting/workflow automation
 
 ## 9. What Not To Do

@@ -197,7 +197,7 @@ export function AdminSalesReportPage() {
         <>
           <AdminSalesKpiGrid summary={report.summary} />
           <AdminSalesRevenueChart dailyBuckets={report.dailyBuckets} />
-          <div role="tablist" aria-label="Trạng thái duyệt KPI" className="flex flex-wrap gap-2">
+          <div role="tablist" aria-label="Trạng thái KPI hiệu lực" className="flex flex-wrap gap-2">
             {tabs.map((tab) => (
               <Button
                 key={tab.status}

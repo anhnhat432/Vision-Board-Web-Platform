@@ -1,5 +1,11 @@
 import { Schema, model } from "mongoose";
 
+import {
+  isOperationalClassificationReasonAllowed,
+  type OperationalCategory,
+  type OperationalClassificationReason,
+} from "./OperationalClassification";
+
 export type AdminAuditOutboxErrorCode =
   | "mongo_unavailable"
   | "audit_validation_failed"
@@ -14,16 +20,25 @@ export interface AdminSalesReviewAuditPayload {
   reviewedAt: string;
 }
 
-export interface AdminAuditOutboxEntity {
+export interface AdminOperationalClassificationAuditPayload {
+  previousCategory: OperationalCategory;
+  newCategory: OperationalCategory;
+  reason: OperationalClassificationReason;
+  note?: string;
+  changedAt: string;
+}
+
+export type AdminOperationalClassificationAuditTarget =
+  | "user_operational_classification"
+  | "payment_order_operational_classification"
+  | "physical_order_operational_classification";
+
+export interface AdminAuditOutboxCommon {
   eventId: string;
-  reviewRequestId: string;
   commandFingerprint: string;
   commandFingerprintVersion: "v1";
-  eventType: "admin_sales_reviewed";
   actorUid: string;
-  target: "payment_order_sales_reporting";
   targetId: string;
-  payload: AdminSalesReviewAuditPayload;
   occurredAt: Date;
   status: "pending" | "processing" | "completed";
   attempts: number;
@@ -36,34 +51,117 @@ export interface AdminAuditOutboxEntity {
   updatedAt: Date;
 }
 
-export type AdminAuditOutboxInsert = Omit<AdminAuditOutboxEntity, "createdAt" | "updatedAt">;
-
-const adminSalesReviewAuditPayloadSchema = new Schema<AdminSalesReviewAuditPayload>(
-  {
-    previousStatus: { type: String, required: true, enum: ["pending", "included", "excluded"] },
-    newStatus: { type: String, required: true, enum: ["included", "excluded"] },
-    exclusionReason: {
-      type: String,
-      required: false,
-      enum: ["internal_team", "test", "duplicate", "other"],
-    },
-    noteProvided: { type: Boolean, required: true },
-    reviewedAt: { type: String, required: true },
-  },
-  { _id: false, strict: "throw" },
+export type AdminAuditOutboxEntity = AdminAuditOutboxCommon & (
+  | {
+      eventType: "admin_sales_reviewed";
+      reviewRequestId: string;
+      target: "payment_order_sales_reporting";
+      payload: AdminSalesReviewAuditPayload;
+    }
+  | {
+      eventType: "admin_operational_classification_changed";
+      requestId: string;
+      target: AdminOperationalClassificationAuditTarget;
+      payload: AdminOperationalClassificationAuditPayload;
+    }
 );
+
+type WithoutAuditOutboxTimestamps<Event> = Event extends unknown
+  ? Omit<Event, "createdAt" | "updatedAt">
+  : never;
+
+export type AdminAuditOutboxInsert = WithoutAuditOutboxTimestamps<AdminAuditOutboxEntity>;
+
+const forbiddenPayloadKeys = new Set([
+  "email",
+  "displayName",
+  "bankAccount",
+  "providerPayload",
+  "entitlement",
+  "ADMIN_AUDIT_FINGERPRINT_SECRET",
+]);
+
+const salesPayloadKeys = new Set(["previousStatus", "newStatus", "exclusionReason", "noteProvided", "reviewedAt"]);
+const classificationPayloadKeys = new Set(["previousCategory", "newCategory", "reason", "note", "changedAt"]);
+
+function hasOnlyAllowedKeys(payload: Record<string, unknown>, allowedKeys: Set<string>): boolean {
+  return Object.keys(payload).every((key) => allowedKeys.has(key) && !forbiddenPayloadKeys.has(key));
+}
+
+function isValidSalesPayload(payload: Record<string, unknown>): boolean {
+  return hasOnlyAllowedKeys(payload, salesPayloadKeys) &&
+    (payload.previousStatus === "pending" || payload.previousStatus === "included" || payload.previousStatus === "excluded") &&
+    (payload.newStatus === "included" || payload.newStatus === "excluded") &&
+    (payload.exclusionReason === undefined ||
+      payload.exclusionReason === "internal_team" ||
+      payload.exclusionReason === "test" ||
+      payload.exclusionReason === "duplicate" ||
+      payload.exclusionReason === "other") &&
+    typeof payload.noteProvided === "boolean" &&
+    typeof payload.reviewedAt === "string";
+}
+
+function isValidClassificationPayload(payload: Record<string, unknown>): boolean {
+  if (!hasOnlyAllowedKeys(payload, classificationPayloadKeys)) return false;
+  if (payload.previousCategory !== "real" && payload.previousCategory !== "test" && payload.previousCategory !== "internal") return false;
+  if (payload.newCategory !== "real" && payload.newCategory !== "test" && payload.newCategory !== "internal") return false;
+  if (
+    payload.reason !== "confirmed_real" &&
+    payload.reason !== "test_account" &&
+    payload.reason !== "internal_team" &&
+    payload.reason !== "automated_qa" &&
+    payload.reason !== "other"
+  ) return false;
+  if (typeof payload.changedAt !== "string") return false;
+  if (payload.note !== undefined && (typeof payload.note !== "string" || payload.note !== payload.note.trim() || payload.note.length > 200)) {
+    return false;
+  }
+  const category = payload.newCategory as OperationalCategory;
+  const reason = payload.reason as OperationalClassificationReason;
+  return isOperationalClassificationReasonAllowed(category, reason) && (reason !== "other" || Boolean(payload.note));
+}
 
 const adminAuditOutboxSchema = new Schema<AdminAuditOutboxEntity>(
   {
     eventId: { type: String, required: true, trim: true },
-    reviewRequestId: { type: String, required: true, trim: true },
+    reviewRequestId: {
+      type: String,
+      required(this: AdminAuditOutboxEntity) { return this.eventType === "admin_sales_reviewed"; },
+      trim: true,
+    },
+    requestId: {
+      type: String,
+      required(this: AdminAuditOutboxEntity) { return this.eventType === "admin_operational_classification_changed"; },
+      trim: true,
+    },
     commandFingerprint: { type: String, required: true, match: /^[0-9a-f]{64}$/ },
     commandFingerprintVersion: { type: String, required: true, enum: ["v1"] },
-    eventType: { type: String, required: true, enum: ["admin_sales_reviewed"] },
+    eventType: { type: String, required: true, enum: ["admin_sales_reviewed", "admin_operational_classification_changed"] },
     actorUid: { type: String, required: true, trim: true },
-    target: { type: String, required: true, enum: ["payment_order_sales_reporting"] },
+    target: {
+      type: String,
+      required: true,
+      enum: [
+        "payment_order_sales_reporting",
+        "user_operational_classification",
+        "payment_order_operational_classification",
+        "physical_order_operational_classification",
+      ],
+    },
     targetId: { type: String, required: true, trim: true },
-    payload: { type: adminSalesReviewAuditPayloadSchema, required: true },
+    payload: {
+      type: Schema.Types.Mixed,
+      required: true,
+      validate: {
+        validator(this: AdminAuditOutboxEntity, payload: unknown) {
+          if (!payload || typeof payload !== "object" || Array.isArray(payload)) return false;
+          return this.eventType === "admin_sales_reviewed"
+            ? isValidSalesPayload(payload as Record<string, unknown>)
+            : isValidClassificationPayload(payload as Record<string, unknown>);
+        },
+        message: "Admin audit outbox payload is invalid for its event type.",
+      },
+    },
     occurredAt: { type: Date, required: true },
     status: { type: String, required: true, enum: ["pending", "processing", "completed"] },
     attempts: { type: Number, required: true, min: 0, default: 0 },
@@ -80,6 +178,35 @@ const adminAuditOutboxSchema = new Schema<AdminAuditOutboxEntity>(
   },
   { timestamps: true, versionKey: false, strict: "throw" },
 );
+
+adminAuditOutboxSchema.pre("validate", function validateEventDiscriminator(next) {
+  const event = this as unknown as {
+    eventId?: string;
+    eventType?: string;
+    target?: string;
+    reviewRequestId?: string;
+    requestId?: string;
+  };
+  const classificationTargets = new Set<AdminOperationalClassificationAuditTarget>([
+    "user_operational_classification",
+    "payment_order_operational_classification",
+    "physical_order_operational_classification",
+  ]);
+
+  if (event.eventType === "admin_sales_reviewed") {
+    if (event.target !== "payment_order_sales_reporting") this.invalidate("target", "Sales audit target is invalid.");
+    if (event.requestId !== undefined) this.invalidate("requestId", "Sales audit cannot include a classification request id.");
+  } else if (event.eventType === "admin_operational_classification_changed") {
+    if (!event.target || !classificationTargets.has(event.target as AdminOperationalClassificationAuditTarget)) {
+      this.invalidate("target", "Classification audit target is invalid.");
+    }
+    if (event.reviewRequestId !== undefined) this.invalidate("reviewRequestId", "Classification audit cannot include a sales review request id.");
+    if (event.eventId !== `admin_operational_classification_changed:${event.requestId ?? ""}`) {
+      this.invalidate("eventId", "Classification audit event id is invalid.");
+    }
+  }
+  next();
+});
 
 adminAuditOutboxSchema.index({ eventId: 1 }, { unique: true });
 adminAuditOutboxSchema.index({ status: 1, availableAt: 1, lockedUntil: 1 });

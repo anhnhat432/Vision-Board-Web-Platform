@@ -1,6 +1,13 @@
 import type { Request, RequestHandler } from "express";
 
 import type { BillingCycle } from "../services/billingService";
+import {
+  validateOperationalClassificationInput,
+} from "../services/adminOperationalClassificationService";
+import type {
+  OperationalCategory,
+  OperationalClassificationReason,
+} from "../models/OperationalClassification";
 import { ApiError } from "../utils/apiError";
 
 const OBJECT_ID_REGEX = /^[a-fA-F0-9]{24}$/;
@@ -28,6 +35,21 @@ const MAX_CASSO_TRANSACTIONS = 100;
 const MAX_CASSO_DESCRIPTION_LENGTH = 512;
 const MAX_CASSO_ID_LENGTH = 128;
 const MAX_CASSO_SHORT_FIELD_LENGTH = 128;
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+export interface AdminBulkClassifyUsersBody {
+  category: OperationalCategory;
+  reason: OperationalClassificationReason;
+  note?: string;
+  changes: Array<{ userUid: string; requestId: string }>;
+}
+
+export interface AdminOperationalClassificationBody {
+  category: OperationalCategory;
+  reason: OperationalClassificationReason;
+  note?: string;
+  requestId: string;
+}
 
 type BodyRecord = Record<string, unknown>;
 
@@ -275,6 +297,72 @@ export const validateJsonObjectBody: RequestHandler = (req, _res, next) => {
 
 export const validateOptionalJsonObjectBody: RequestHandler = (req, _res, next) => {
   ensureOptionalJsonObjectBody(req);
+  next();
+};
+
+export const validateAdminBulkOperationalClassificationBody: RequestHandler = (req, _res, next) => {
+  const body = requireJsonObjectBody(req);
+  const classification = validateOperationalClassificationInput({
+    category: body.category,
+    reason: body.reason,
+    note: body.note,
+  });
+  if (!Array.isArray(body.changes) || body.changes.length < 1 || body.changes.length > 100) {
+    throw new ApiError(400, "Classification changes must contain 1 to 100 targets.", undefined, "invalid_classification_targets");
+  }
+
+  const userUids = new Set<string>();
+  const requestIds = new Set<string>();
+  const changes = body.changes.map((value, index) => {
+    if (!isBodyRecord(value)) {
+      throw new ApiError(400, `changes[${index}] must be an object.`, undefined, "invalid_classification_target");
+    }
+    const userUid = typeof value.userUid === "string" ? value.userUid.trim() : "";
+    const requestId = typeof value.requestId === "string" ? value.requestId.trim().toLowerCase() : "";
+    if (!userUid || userUid.length > 128 || !UUID_PATTERN.test(requestId)) {
+      throw new ApiError(400, `changes[${index}] is invalid.`, undefined, "invalid_classification_target");
+    }
+    if (userUids.has(userUid) || requestIds.has(requestId)) {
+      throw new ApiError(400, "Classification targets and request ids must be unique.", undefined, "invalid_classification_target");
+    }
+    userUids.add(userUid);
+    requestIds.add(requestId);
+    return { userUid, requestId };
+  });
+
+  const normalized: AdminBulkClassifyUsersBody = {
+    category: classification.category,
+    reason: classification.reason,
+    changes,
+    ...(classification.note ? { note: classification.note } : {}),
+  };
+  req.body = normalized;
+  next();
+};
+
+export const validateAdminOperationalClassificationBody: RequestHandler = (req, _res, next) => {
+  const body = requireJsonObjectBody(req);
+  const classification = validateOperationalClassificationInput({
+    category: body.category,
+    reason: body.reason,
+    note: body.note,
+  });
+  const requestId = typeof body.requestId === "string" ? body.requestId.trim().toLowerCase() : "";
+  if (!UUID_PATTERN.test(requestId)) {
+    throw new ApiError(
+      400,
+      "A valid classification request id is required.",
+      undefined,
+      "invalid_classification_request_id",
+    );
+  }
+
+  req.body = {
+    category: classification.category,
+    reason: classification.reason,
+    requestId,
+    ...(classification.note ? { note: classification.note } : {}),
+  } satisfies AdminOperationalClassificationBody;
   next();
 };
 

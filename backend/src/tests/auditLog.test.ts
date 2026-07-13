@@ -256,6 +256,7 @@ describe("admin audit logging", () => {
     assert.equal("userId" in (createdLogs[0]?.payload ?? {}), false);
     assert.equal(JSON.stringify(createdLogs[0]).includes("customer@example.com"), false);
     assert.equal(JSON.stringify(createdLogs[0]).includes("customer_uid_should_not_log"), false);
+    assert.equal(JSON.stringify(createdLogs[0]).includes("ADMIN_AUDIT_FINGERPRINT_SECRET"), false);
   });
 
   it("creates an audit log entry when admin updates physical order status", async () => {

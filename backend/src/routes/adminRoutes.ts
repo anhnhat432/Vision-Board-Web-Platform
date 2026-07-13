@@ -34,9 +34,19 @@ import {
   getAdminSalesReportController,
   reviewAdminSalesOrderController,
 } from "../controllers/adminSalesReportController";
+import {
+  bulkClassifyAdminUsersController,
+  classifyAdminPaymentOrderController,
+} from "../controllers/adminOperationalClassificationController";
 import { clearAdminRoleCache, requireAdmin } from "../middleware/requireAdmin";
-import { validateOptionalJsonObjectBody, validateOrderIdParam } from "../middleware/requestValidation";
+import {
+  validateAdminBulkOperationalClassificationBody,
+  validateAdminOperationalClassificationBody,
+  validateOptionalJsonObjectBody,
+  validateOrderIdParam,
+} from "../middleware/requestValidation";
 import { logAdminAction } from "../services/auditLogService";
+import { toSafeClassificationErrorCode } from "../services/adminOperationalClassificationService";
 import { ApiError } from "../utils/apiError";
 import { successResponse } from "../utils/apiResponse";
 import { asyncHandler } from "../utils/asyncHandler";
@@ -46,6 +56,8 @@ const adminRoutes = Router();
 const MAX_THUMBNAIL_BYTES = 2 * 1024 * 1024;
 const SALES_REVIEW_KPI_STATUSES = new Set(["pending", "included", "excluded"]);
 const SALES_REVIEW_EXCLUSION_REASONS = new Set(["internal_team", "test", "duplicate", "other"]);
+const OPERATIONAL_CATEGORIES = new Set(["real", "test", "internal"]);
+const OPERATIONAL_REASONS = new Set(["confirmed_real", "test_account", "internal_team", "automated_qa", "other"]);
 
 const thumbnailUpload = multer({
   storage: multer.memoryStorage(),
@@ -76,7 +88,7 @@ interface AuditedAdminActionOptions {
   action: string;
   target: string;
   getTargetId?: (req: Request) => string | null | undefined;
-  getAuditPayload?: (req: Request, res: Response) => unknown;
+  getAuditPayload?: (req: Request, res: Response, error?: unknown) => unknown;
   validators?: RequestHandler[];
   handler: AdminHandler;
   logSuccess?: boolean;
@@ -94,6 +106,24 @@ function getSalesReviewAuditFallbackPayload(body: unknown): Record<string, unkno
     payload.exclusionReason = input.exclusionReason;
   }
   return payload;
+}
+
+export function getOperationalClassificationFailureAuditPayload(
+  req: Request,
+  _res?: Response,
+  error?: unknown,
+): Record<string, unknown> {
+  const body = req.body && typeof req.body === "object" && !Array.isArray(req.body)
+    ? req.body as Record<string, unknown>
+    : {};
+  const changes = Array.isArray(body.changes) ? body.changes : null;
+  return {
+    category: typeof body.category === "string" && OPERATIONAL_CATEGORIES.has(body.category) ? body.category : null,
+    reason: typeof body.reason === "string" && OPERATIONAL_REASONS.has(body.reason) ? body.reason : null,
+    targetCount: changes ? Math.min(changes.length, 100) : 1,
+    noteProvided: typeof body.note === "string" && body.note.trim().length > 0,
+    errorCode: toSafeClassificationErrorCode(error),
+  };
 }
 
 function runMiddleware(handler: RequestHandler, req: Request, res: Response): Promise<void> {
@@ -149,7 +179,7 @@ export function auditedAdminAction(options: AuditedAdminActionOptions): RequestH
         action: options.action,
         target: options.target,
         targetId,
-        payload: options.getAuditPayload?.(req, res) ?? req.body,
+        payload: options.getAuditPayload?.(req, res, error) ?? req.body,
         success: false,
       });
       next(error);
@@ -233,6 +263,18 @@ adminRoutes.post(
   }),
 );
 adminRoutes.get("/admin/billing/payment-orders", asyncHandler(requireAdmin), asyncHandler(getAdminPaymentOrders));
+adminRoutes.patch(
+  "/admin/billing/payment-orders/:orderId/operational-classification",
+  auditedAdminAction({
+    action: "changeAdminOperationalClassification",
+    target: "payment_order_operational_classification",
+    getTargetId: (req) => req.params.orderId?.trim().toUpperCase(),
+    getAuditPayload: getOperationalClassificationFailureAuditPayload,
+    validators: [validateOrderIdParam, validateAdminOperationalClassificationBody],
+    handler: classifyAdminPaymentOrderController,
+    logSuccess: false,
+  }),
+);
 adminRoutes.post(
   "/admin/billing/payment-orders/:orderId/reconcile-payer-source",
   auditedAdminAction({
@@ -272,6 +314,18 @@ adminRoutes.post(
   }),
 );
 adminRoutes.get("/admin/users", asyncHandler(requireAdmin), asyncHandler(getAdminUsers));
+adminRoutes.patch(
+  "/admin/users/operational-classification",
+  auditedAdminAction({
+    action: "changeAdminOperationalClassification",
+    target: "user_operational_classification",
+    getTargetId: () => "bulk",
+    getAuditPayload: getOperationalClassificationFailureAuditPayload,
+    validators: [validateAdminBulkOperationalClassificationBody],
+    handler: bulkClassifyAdminUsersController,
+    logSuccess: false,
+  }),
+);
 adminRoutes.get("/admin/users/:uid", asyncHandler(requireAdmin), asyncHandler(getAdminUserDetail));
 adminRoutes.patch(
   "/admin/users/:uid/role",

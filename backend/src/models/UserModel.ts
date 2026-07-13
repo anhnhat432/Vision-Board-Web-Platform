@@ -1,4 +1,8 @@
 import { Schema, model } from "mongoose";
+import {
+  operationalClassificationSchema,
+  type OperationalClassification,
+} from "./OperationalClassification";
 
 const userSchema = new Schema(
   {
@@ -49,11 +53,18 @@ const userSchema = new Schema(
       default: "vi",
       trim: true,
     },
+    operationalClassification: {
+      type: operationalClassificationSchema,
+      required: false,
+      default: undefined,
+    },
   },
   {
     timestamps: true,
   },
 );
+
+userSchema.index({ "operationalClassification.category": 1, createdAt: -1 });
 
 export type UserDocument = {
   _id: string;
@@ -65,6 +76,7 @@ export type UserDocument = {
   termsAcceptedAt: Date | null;
   avatarUrl: string | null;
   locale: string;
+  operationalClassification?: OperationalClassification | null;
   createdAt: Date;
   updatedAt: Date;
 };

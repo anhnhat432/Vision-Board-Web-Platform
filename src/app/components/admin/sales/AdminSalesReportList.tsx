@@ -1,5 +1,6 @@
 import type { AdminSalesReportRow } from "@/services/adminService";
 
+import { AdminOperationalClassificationBadge, getAdminOperationalClassificationSourceLabel } from "../AdminOperationalClassificationBadge";
 import { Button } from "../../ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../ui/table";
 import { formatDate, formatVnd } from "../utils";
@@ -10,6 +11,31 @@ interface AdminSalesReportListProps {
   onReview(item: AdminSalesReportRow): void;
   onReconcile(orderId: string): void;
   onViewEvidence(item: AdminSalesReportRow): void;
+}
+
+const SALES_STATUS_LABELS = {
+  pending: "Chờ duyệt",
+  included: "Được tính KPI",
+  excluded: "Không tính KPI",
+} as const;
+
+function SalesKpiStatus({ item }: { item: AdminSalesReportRow }) {
+  const classification = item.operationalClassification ?? { effectiveCategory: "real", source: "default" as const };
+  const effectiveKpiStatus = item.effectiveKpiStatus ?? item.reporting.kpiStatus;
+  const excludedByClassification = effectiveKpiStatus === "excluded" && classification.effectiveCategory !== "real";
+
+  return (
+    <div className="space-y-1 text-xs">
+      <p>Đã duyệt: {SALES_STATUS_LABELS[item.reporting.kpiStatus]}</p>
+      {item.reporting.kpiStatus !== effectiveKpiStatus ? <p>Hiệu lực: Đã loại theo tài khoản</p> : null}
+      {excludedByClassification ? (
+        <div className="flex flex-wrap items-center gap-2">
+          <AdminOperationalClassificationBadge classification={classification} />
+          <p className="text-app-ink-muted">{getAdminOperationalClassificationSourceLabel(classification.source)}</p>
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 function SalesActions({ item, busyOrderId, onReview, onReconcile, onViewEvidence }: Omit<AdminSalesReportListProps, "items"> & { item: AdminSalesReportRow }) {
@@ -67,7 +93,7 @@ export function AdminSalesReportList({ items, busyOrderId, onReview, onReconcile
                   <p>{item.payer?.classification ?? "unknown"}</p>
                   <p className="text-xs text-app-ink-muted">{item.refund.status === "completed" ? "Đã hoàn tiền" : "Chưa hoàn tiền"}</p>
                 </TableCell>
-                <TableCell>{item.reporting.kpiStatus}</TableCell>
+                <TableCell><SalesKpiStatus item={item} /></TableCell>
                 <TableCell><SalesActions item={item} busyOrderId={busyOrderId} onReview={onReview} onReconcile={onReconcile} onViewEvidence={onViewEvidence} /></TableCell>
               </TableRow>
             ))}
@@ -91,7 +117,7 @@ export function AdminSalesReportList({ items, busyOrderId, onReview, onReconcile
               <dt className="text-app-ink-muted">Hoàn tất</dt><dd className="text-right">{formatDate(item.completedAt)}</dd>
               <dt className="text-app-ink-muted">Nguồn tiền</dt><dd className="text-right">{item.payer?.classification ?? "unknown"}</dd>
               <dt className="text-app-ink-muted">Hoàn tiền</dt><dd className="text-right">{item.refund.status === "completed" ? "Đã hoàn tiền" : "Chưa hoàn tiền"}</dd>
-              <dt className="text-app-ink-muted">KPI</dt><dd className="text-right">{item.reporting.kpiStatus}</dd>
+              <dt className="text-app-ink-muted">KPI</dt><dd className="text-right"><SalesKpiStatus item={item} /></dd>
             </dl>
             <div className="mt-4"><SalesActions item={item} busyOrderId={busyOrderId} onReview={onReview} onReconcile={onReconcile} onViewEvidence={onViewEvidence} /></div>
           </li>

@@ -13,11 +13,28 @@ vi.mock("@/lib/api/apiClient", () => ({
 }));
 
 import {
+  adminClassifyPaymentOrder,
+  adminClassifyUsers,
   adminExportSalesReport,
   adminGetSalesReport,
+  adminListPaymentOrders,
+  adminListUsers,
   adminReviewSalesOrder,
+  type AdminOverview,
   type AdminSalesReportRow,
+  type AdminSubscriptionListResponse,
+  type AdminUserListParams,
 } from "./adminService";
+
+const backendSubscriptionListResponse = {
+  page: 1,
+  limit: 30,
+  total: 0,
+  totalPages: 0,
+  items: [],
+} satisfies AdminSubscriptionListResponse;
+
+const requiredSubscriptionListResponse: AdminSubscriptionListResponse = backendSubscriptionListResponse;
 
 describe("adminService sales reporting", () => {
   beforeEach(() => {
@@ -76,5 +93,66 @@ describe("adminService sales reporting", () => {
     type PrivateSalesFields = Extract<keyof AdminSalesReportRow, "reviewNote" | "reviewedBy" | "userId" | "email">;
 
     expectTypeOf<PrivateSalesFields>().toEqualTypeOf<never>();
+  });
+
+  it("exposes the backend effective sales status without adding private review data", () => {
+    expectTypeOf<AdminSalesReportRow>().toHaveProperty("effectiveKpiStatus");
+  });
+});
+
+describe("adminService operational classification", () => {
+  beforeEach(() => {
+    apiClientMock.get.mockReset();
+    apiClientMock.patch.mockReset();
+  });
+
+  it("serializes user category filters and sends bounded bulk classification payloads", async () => {
+    await adminListUsers({ operationalCategory: "real", page: 1, limit: 30 });
+    expect(apiClientMock.get).toHaveBeenCalledWith("/admin/users?operationalCategory=real&page=1&limit=30");
+
+    const payload = {
+      category: "test" as const,
+      reason: "test_account" as const,
+      changes: [{ userUid: "u1", requestId: "11111111-1111-4111-8111-111111111111" }],
+    };
+    await adminClassifyUsers(payload);
+
+    expect(apiClientMock.patch).toHaveBeenCalledWith("/admin/users/operational-classification", payload);
+  });
+
+  it("serializes the all user category instead of falling back to the backend default", async () => {
+    const allUsers = { operationalCategory: "all" } satisfies AdminUserListParams;
+    await adminListUsers(allUsers);
+
+    expect(apiClientMock.get).toHaveBeenCalledWith("/admin/users?operationalCategory=all");
+  });
+
+  it("serializes payment scope filters and targets the payment classification route", async () => {
+    await adminListPaymentOrders({ operationalScope: "excluded", page: 2, limit: 30 });
+    expect(apiClientMock.get).toHaveBeenCalledWith(
+      "/admin/billing/payment-orders?operationalScope=excluded&page=2&limit=30",
+    );
+
+    const payload = {
+      requestId: "11111111-1111-4111-8111-111111111111",
+      category: "internal" as const,
+      reason: "internal_team" as const,
+    };
+    await adminClassifyPaymentOrder("VB TEST/1", payload);
+
+    expect(apiClientMock.patch).toHaveBeenCalledWith(
+      "/admin/billing/payment-orders/VB%20TEST%2F1/operational-classification",
+      payload,
+    );
+  });
+});
+
+describe("adminService subscription contracts", () => {
+  it("does not require an operational scope absent from the backend response", () => {
+    expect(requiredSubscriptionListResponse.items).toEqual([]);
+  });
+
+  it("exposes excluded account counts supplied by the overview backend", () => {
+    expectTypeOf<AdminOverview["summary"]>().toHaveProperty("excludedUsers");
   });
 });

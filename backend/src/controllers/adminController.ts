@@ -11,7 +11,7 @@ import {
   type PaymentOrderDocument,
   type PaymentOrderStatus,
 } from "../models/PaymentOrderModel";
-import { UserModel } from "../models/UserModel";
+import { UserModel, type UserDocument } from "../models/UserModel";
 import {
   getEmailRuntimeStatus,
   hashEmailPayload,
@@ -22,6 +22,17 @@ import * as payosPaymentAdapter from "../services/payosPaymentAdapter";
 import * as payosPayerReconciliation from "../services/payosPayerReconciliation";
 import { ApiError } from "../utils/apiError";
 import { getLastPaymentReconciliationRun } from "../jobs/reconciliationJob";
+import type { AdminOperationalClassificationSummary, OperationalClassification } from "../models/OperationalClassification";
+import { captureBackendException } from "../monitoring/sentry";
+import {
+  asOptionalStage,
+  buildEffectiveOperationalClassificationStages,
+  buildOperationalScopeMatch,
+  buildUserOperationalCategoryFilter,
+  parseOperationalCategoryQuery,
+  parseOperationalScopeQuery,
+  serializeProjectedOperationalClassification,
+} from "../services/adminOperationalClassificationQuery";
 import { successResponse } from "../utils/apiResponse";
 import { clearAdminRoleCache } from "../middleware/requireAdmin";
 
@@ -43,6 +54,7 @@ interface LeanUserSummary {
   displayName?: string | null;
   role: UserRole;
   createdAt?: Date;
+  operationalClassification?: OperationalClassification | null;
 }
 
 interface LeanSubscriptionSummary {
@@ -54,6 +66,7 @@ interface LeanSubscriptionSummary {
   billingCycle?: string;
   currentPeriodEnd?: Date;
   createdAt?: Date;
+  operationalClassification?: AdminOperationalClassificationSummary;
 }
 
 interface LeanPaymentOrderSummary {
@@ -78,7 +91,14 @@ interface LeanPaymentOrderSummary {
   expiresAt?: Date;
   updatedAt?: Date;
   metadata?: PaymentOrderDocument["metadata"];
+  reporting?: { exclusionReason?: "test" | "internal_team" | string | null } | null;
+  operationalClassification?: OperationalClassification | null;
 }
+
+type OperationalProjection = {
+  __effectiveOperationalCategory?: unknown;
+  __effectiveOperationalSource?: unknown;
+};
 
 interface AdminPaymentPayerSummary {
   classification: PaymentPayerSourceClassification;
@@ -112,9 +132,21 @@ function escapeRegex(value: string): string {
 }
 
 function parsePaymentOrderLimit(value: unknown): number {
+  if (value == null || value === "") return DEFAULT_PAYMENT_ORDER_LIMIT;
   const parsed = typeof value === "string" ? Number(value.trim()) : typeof value === "number" ? value : NaN;
-  if (!Number.isFinite(parsed)) return DEFAULT_PAYMENT_ORDER_LIMIT;
-  return Math.min(Math.max(Math.floor(parsed), 1), MAX_PAYMENT_ORDER_LIMIT);
+  if (!Number.isInteger(parsed) || parsed < 1) {
+    throw new ApiError(400, "Payment order limit must be a positive integer.", undefined, "invalid_payment_order_limit");
+  }
+  return Math.min(parsed, MAX_PAYMENT_ORDER_LIMIT);
+}
+
+function parsePaymentOrderPage(value: unknown): number {
+  if (value == null || value === "") return 1;
+  const parsed = typeof value === "string" ? Number(value.trim()) : typeof value === "number" ? value : NaN;
+  if (!Number.isInteger(parsed) || parsed < 1) {
+    throw new ApiError(400, "Payment order page must be a positive integer.", undefined, "invalid_payment_order_page");
+  }
+  return parsed;
 }
 
 function normalizePaymentOrderSearch(value: unknown): string {
@@ -158,7 +190,26 @@ function serializeSubscription(subscription: LeanSubscriptionSummary | undefined
     provider: subscription.provider,
     billingCycle: subscription.billingCycle,
     currentPeriodEnd: subscription.currentPeriodEnd,
+    ...(subscription.operationalClassification ? { operationalClassification: subscription.operationalClassification } : {}),
   };
+}
+
+function serializeUserOperationalClassification(user: Pick<LeanUserSummary, "operationalClassification">): AdminOperationalClassificationSummary {
+  const classification = user.operationalClassification;
+  if (!classification) return { effectiveCategory: "real", source: "default" };
+  return {
+    effectiveCategory: classification.category,
+    source: "user",
+    reason: classification.reason,
+    ...(classification.note ? { note: classification.note } : {}),
+    classifiedAt: classification.classifiedAt.toISOString(),
+  };
+}
+
+function serializeProjectedClassification(row: OperationalProjection): AdminOperationalClassificationSummary | undefined {
+  return typeof row.__effectiveOperationalCategory === "string" && typeof row.__effectiveOperationalSource === "string"
+    ? serializeProjectedOperationalClassification(row as Record<string, unknown>)
+    : undefined;
 }
 
 function serializeUserSummary(user: LeanUserSummary | undefined) {
@@ -204,8 +255,9 @@ function createReconciledPaymentPayerEvidence(
   };
 }
 
-function serializePaymentOrder(order: LeanPaymentOrderSummary, userById: Map<string, LeanUserSummary>) {
+function serializePaymentOrder(order: LeanPaymentOrderSummary & OperationalProjection, userById: Map<string, LeanUserSummary>) {
   const payer = order.metadata?.payos?.payer as AdminPaymentPayerSummary | undefined;
+  const operationalClassification = serializeProjectedClassification(order);
   return {
     orderId: order.orderId,
     userId: order.userId,
@@ -229,6 +281,7 @@ function serializePaymentOrder(order: LeanPaymentOrderSummary, userById: Map<str
     updatedAt: order.updatedAt,
     payer: serializePaymentPayer(payer),
     user: serializeUserSummary(userById.get(order.userId)),
+    ...(operationalClassification ? { operationalClassification } : {}),
   };
 }
 
@@ -292,9 +345,55 @@ export async function getAdminOverview(_req: Request, res: Response, next: NextF
     const expiringWindowEnd = new Date(now.getTime() + DEFAULT_EXPIRING_REMINDER_DAYS * 24 * 60 * 60 * 1000);
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
+    const countAggregate = async (aggregate: Promise<Array<{ total?: number }>>): Promise<number> => {
+      const rows = await aggregate;
+      return rows[0]?.total ?? 0;
+    };
+    const countEffectiveSubscriptions = (baseMatch: Record<string, unknown>) => countAggregate(
+      BillingSubscriptionModel.aggregate<{ total: number }>([
+        { $match: baseMatch },
+        ...buildEffectiveOperationalClassificationStages({ userIdField: "userId", requireLinkedUser: true }),
+        { $match: { __effectiveOperationalCategory: "real" } },
+        { $count: "total" },
+      ]),
+    );
+    const countEffectivePayments = (baseMatch: Record<string, unknown>) => countAggregate(
+      PaymentOrderModel.aggregate<{ total: number }>([
+        { $match: baseMatch },
+        ...buildEffectiveOperationalClassificationStages({
+          userIdField: "userId",
+          recordClassificationField: "operationalClassification",
+          legacySalesReasonField: "reporting.exclusionReason",
+        }),
+        { $match: { __effectiveOperationalCategory: "real" } },
+        { $count: "total" },
+      ]),
+    );
+    const sumEffectivePayments = (baseMatch: Record<string, unknown>) => PaymentOrderModel.aggregate<{ total: number }>([
+      { $match: baseMatch },
+      ...buildEffectiveOperationalClassificationStages({
+        userIdField: "userId",
+        recordClassificationField: "operationalClassification",
+        legacySalesReasonField: "reporting.exclusionReason",
+      }),
+      { $match: { __effectiveOperationalCategory: "real" } },
+      { $group: { _id: null, total: { $sum: "$amount" } } },
+    ]);
+    const countEffectiveOrders = () => countAggregate(
+      OrderModel.aggregate<{ total: number }>([
+        ...buildEffectiveOperationalClassificationStages({
+          userIdField: "userId",
+          recordClassificationField: "operationalClassification",
+        }),
+        { $match: { __effectiveOperationalCategory: "real" } },
+        { $count: "total" },
+      ]),
+    );
+
     const [
       totalUsers,
       adminUsers,
+      excludedUsers,
       activePlusSubscriptions,
       expiringSoonSubscriptions,
       pendingPaymentOrders,
@@ -305,42 +404,45 @@ export async function getAdminOverview(_req: Request, res: Response, next: NextF
       revenueTotal,
       revenueLast30Days,
     ] = await Promise.all([
-      UserModel.countDocuments(),
+      UserModel.countDocuments(buildUserOperationalCategoryFilter("real")),
       UserModel.countDocuments({ role: "admin" }),
-      BillingSubscriptionModel.countDocuments({
+      UserModel.aggregate<{ _id: "test" | "internal"; count: number }>([
+        { $match: { "operationalClassification.category": { $in: ["test", "internal"] } } },
+        { $group: { _id: "$operationalClassification.category", count: { $sum: 1 } } },
+      ]),
+      countEffectiveSubscriptions({
         planCode: "PLUS",
         status: "active",
         $or: [{ currentPeriodEnd: { $exists: false } }, { currentPeriodEnd: null }, { currentPeriodEnd: { $gte: now } }],
       }),
-      BillingSubscriptionModel.countDocuments({
+      countEffectiveSubscriptions({
         planCode: "PLUS",
         status: "active",
         currentPeriodEnd: { $gte: now, $lte: expiringWindowEnd },
       }),
-      PaymentOrderModel.countDocuments({ status: "pending" }),
-      PaymentOrderModel.countDocuments({ status: "completed" }),
-      OrderModel.countDocuments(),
-      UserModel.find()
-        .select("firebaseUid email displayName role createdAt")
+      countEffectivePayments({ status: "pending" }),
+      countEffectivePayments({ status: "completed" }),
+      countEffectiveOrders(),
+      UserModel.find(buildUserOperationalCategoryFilter("real"))
+        .select("firebaseUid email displayName role createdAt operationalClassification")
         .sort({ createdAt: -1 })
         .limit(12)
         .lean<LeanUserSummary[]>(),
-      PaymentOrderModel.find()
-        .select(
-          "orderId userId planCode billingCycle amount currency status provider bankAccount bankName accountName description cassoTransactionId manualCompletedBy manualCompletedAt manualCompletionNote metadata.payos.orderCode metadata.payos.paymentLinkId metadata.payos.payer createdAt completedAt expiresAt updatedAt",
-        )
-        .sort({ createdAt: -1 })
-        .limit(12)
-        .lean<LeanPaymentOrderSummary[]>(),
-      PaymentOrderModel.aggregate<{ total: number }>([
-        { $match: { status: "completed", currency: "VND" } },
-        { $group: { _id: null, total: { $sum: "$amount" } } },
+      PaymentOrderModel.aggregate<LeanPaymentOrderSummary & OperationalProjection>([
+        ...buildEffectiveOperationalClassificationStages({
+          userIdField: "userId",
+          recordClassificationField: "operationalClassification",
+          legacySalesReasonField: "reporting.exclusionReason",
+        }),
+        { $match: { __effectiveOperationalCategory: "real" } },
+        { $sort: { createdAt: -1 } },
+        { $limit: 12 },
       ]),
-      PaymentOrderModel.aggregate<{ total: number }>([
-        { $match: { status: "completed", currency: "VND", completedAt: { $gte: thirtyDaysAgo } } },
-        { $group: { _id: null, total: { $sum: "$amount" } } },
-      ]),
+      sumEffectivePayments({ status: "completed", currency: "VND" }),
+      sumEffectivePayments({ status: "completed", currency: "VND", completedAt: { $gte: thirtyDaysAgo } }),
     ]);
+
+    const excludedUserCount = new Map(excludedUsers.map((row) => [row._id, row.count]));
 
     const userIds = recentUsers.map((user) => user.firebaseUid);
     const recentUserSubscriptions = userIds.length
@@ -365,6 +467,10 @@ export async function getAdminOverview(_req: Request, res: Response, next: NextF
           summary: {
             totalUsers,
             adminUsers,
+            excludedUsers: {
+              test: excludedUserCount.get("test") ?? 0,
+              internal: excludedUserCount.get("internal") ?? 0,
+            },
             activePlusSubscriptions,
             expiringSoonSubscriptions,
             pendingPaymentOrders,
@@ -380,6 +486,7 @@ export async function getAdminOverview(_req: Request, res: Response, next: NextF
             role: user.role,
             createdAt: user.createdAt,
             subscription: serializeSubscription(subscriptionByUserId.get(user.firebaseUid)),
+            operationalClassification: serializeUserOperationalClassification(user),
           })),
           recentPayments: recentPayments.map((payment) => serializePaymentOrder(payment, paymentUserById)),
         },
@@ -387,6 +494,10 @@ export async function getAdminOverview(_req: Request, res: Response, next: NextF
       ),
     );
   } catch (error) {
+    // Keep aggregation failures observable without sending query or customer data to monitoring.
+    captureBackendException(new Error("admin_overview_operational_aggregation_failed"), {
+      tags: { feature: "admin", event: "admin_overview_operational_aggregation_failed" },
+    });
     next(error);
   }
 }
@@ -395,19 +506,31 @@ export async function getAdminPaymentOrders(req: Request, res: Response, next: N
   try {
     const status = normalizePaymentOrderStatus(req.query.status);
     const query = normalizePaymentOrderSearch(req.query.q ?? req.query.query ?? req.query.search);
+    const page = parsePaymentOrderPage(req.query.page);
     const limit = parsePaymentOrderLimit(req.query.limit);
+    const operationalScope = parseOperationalScopeQuery(req.query.operationalScope);
     const filter = await buildPaymentOrderFilter(status, query);
 
-    const [total, orders] = await Promise.all([
-      PaymentOrderModel.countDocuments(filter),
-      PaymentOrderModel.find(filter)
-        .select(
-          "orderId userId planCode billingCycle amount currency status provider bankAccount bankName accountName description cassoTransactionId manualCompletedBy manualCompletedAt manualCompletionNote metadata.payos.orderCode metadata.payos.paymentLinkId metadata.payos.payer createdAt completedAt expiresAt updatedAt",
-        )
-        .sort({ createdAt: -1 })
-        .limit(limit)
-        .lean<LeanPaymentOrderSummary[]>(),
+    const [paymentPage] = await PaymentOrderModel.aggregate<{
+      metadata: Array<{ total: number }>;
+      items: Array<LeanPaymentOrderSummary & OperationalProjection>;
+    }>([
+      { $match: filter },
+      ...buildEffectiveOperationalClassificationStages({
+        userIdField: "userId",
+        recordClassificationField: "operationalClassification",
+        legacySalesReasonField: "reporting.exclusionReason",
+      }),
+      ...asOptionalStage(buildOperationalScopeMatch(operationalScope)),
+      {
+        $facet: {
+          metadata: [{ $count: "total" }],
+          items: [{ $sort: { createdAt: -1 } }, { $skip: (page - 1) * limit }, { $limit: limit }],
+        },
+      },
     ]);
+    const total = paymentPage?.metadata[0]?.total ?? 0;
+    const orders = paymentPage?.items ?? [];
     const userById = await getUserMapByFirebaseIds(orders.map((order) => order.userId));
 
     res.status(200).json(
@@ -416,8 +539,11 @@ export async function getAdminPaymentOrders(req: Request, res: Response, next: N
           generatedAt: new Date().toISOString(),
           query,
           status,
+          operationalScope,
+          page,
           limit,
           total,
+          totalPages: Math.ceil(total / limit),
           items: orders.map((order) => serializePaymentOrder(order, userById)),
         },
         "Admin payment orders loaded.",
@@ -734,30 +860,29 @@ export async function getAdminUsers(req: Request, res: Response, next: NextFunct
   try {
     const query = normalizeUserSearch(req.query.q ?? req.query.query ?? req.query.search);
     const role = normalizeUserRoleFilter(req.query.role);
+    const operationalCategory = parseOperationalCategoryQuery(req.query.operationalCategory);
     const limit = parseUserLimit(req.query.limit);
     const page = parseUserPage(req.query.page);
     const skip = (page - 1) * limit;
 
-    const filter: FilterQuery<typeof UserModel> = {};
-
-    if (role !== "all") {
-      filter.role = role;
-    }
-
+    const userClauses: FilterQuery<UserDocument>[] = [buildUserOperationalCategoryFilter(operationalCategory)];
+    if (role !== "all") userClauses.push({ role });
     if (query) {
       const escapedSearch = escapeRegex(query);
       const searchRegex = new RegExp(escapedSearch, "i");
-      filter.$or = [
+      userClauses.push({ $or: [
         { firebaseUid: searchRegex },
         { email: searchRegex },
         { displayName: searchRegex },
-      ];
+      ] });
     }
+    const nonEmptyUserClauses = userClauses.filter((clause) => Object.keys(clause).length > 0);
+    const filter: FilterQuery<UserDocument> = nonEmptyUserClauses.length > 0 ? { $and: nonEmptyUserClauses } : {};
 
     const [total, users] = await Promise.all([
       UserModel.countDocuments(filter),
       UserModel.find(filter)
-        .select("firebaseUid email displayName role onboardingCompletedAt locale createdAt updatedAt")
+        .select("firebaseUid email displayName role onboardingCompletedAt locale createdAt updatedAt operationalClassification")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
@@ -804,8 +929,9 @@ export async function getAdminUsers(req: Request, res: Response, next: NextFunct
             locale: (user as { locale?: string }).locale ?? "vi",
             createdAt: user.createdAt,
             updatedAt: (user as { updatedAt?: Date }).updatedAt ?? null,
-          subscription: serializeSubscription(subscriptionByUserId.get(user.firebaseUid) ?? undefined),
-          goalCount: goalCountByUserId.get(user.firebaseUid) ?? 0,
+            operationalClassification: serializeUserOperationalClassification(user),
+            subscription: serializeSubscription(subscriptionByUserId.get(user.firebaseUid) ?? undefined),
+            goalCount: goalCountByUserId.get(user.firebaseUid) ?? 0,
           })),
         },
         "Admin users loaded.",
@@ -844,18 +970,29 @@ export async function getAdminUserDetail(req: Request, res: Response, next: Next
       .lean();
 
     // Get payment orders
-    const paymentOrders = await PaymentOrderModel.find({ userId: uid })
-      .select("orderId planCode billingCycle amount currency status provider createdAt completedAt")
-      .sort({ createdAt: -1 })
-      .limit(10)
-      .lean();
+    const paymentOrders = await PaymentOrderModel.aggregate<Record<string, unknown>>([
+      { $match: { userId: uid } },
+      ...buildEffectiveOperationalClassificationStages({
+        userIdField: "userId",
+        recordClassificationField: "operationalClassification",
+        legacySalesReasonField: "reporting.exclusionReason",
+      }),
+      { $sort: { createdAt: -1 } },
+      { $limit: 10 },
+    ]);
 
     // Get physical orders
-    const physicalOrders = await OrderModel.find({ userId: uid })
-      .select("status totalVnd fullName email phone createdAt")
-      .sort({ createdAt: -1 })
-      .limit(10)
-      .lean();
+    const physicalOrders = await OrderModel.aggregate<Record<string, unknown>>([
+      { $match: { userId: uid } },
+      ...buildEffectiveOperationalClassificationStages({
+        userIdField: "userId",
+        recordClassificationField: "operationalClassification",
+      }),
+      { $sort: { createdAt: -1 } },
+      { $limit: 10 },
+    ]);
+
+    const userOperationalClassification = serializeUserOperationalClassification(user);
 
     res.status(200).json(
       successResponse(
@@ -871,8 +1008,9 @@ export async function getAdminUserDetail(req: Request, res: Response, next: Next
             locale: user.locale ?? "vi",
             createdAt: user.createdAt,
             updatedAt: user.updatedAt ?? null,
+            operationalClassification: userOperationalClassification,
           },
-          subscription: serializeSubscription(subscription ?? undefined),
+          subscription: serializeSubscription(subscription ? { ...subscription, operationalClassification: userOperationalClassification } : undefined),
           goals: goals.map((g) => ({
             id: String(g._id),
             title: g.title,
@@ -894,6 +1032,7 @@ export async function getAdminUserDetail(req: Request, res: Response, next: Next
             provider: po.provider,
             createdAt: po.createdAt,
             completedAt: po.completedAt,
+            operationalClassification: serializeProjectedOperationalClassification(po),
           })),
           physicalOrders: physicalOrders.map((o) => ({
             id: String(o._id),
@@ -901,6 +1040,7 @@ export async function getAdminUserDetail(req: Request, res: Response, next: Next
             totalVnd: o.totalVnd,
             fullName: o.fullName,
             createdAt: o.createdAt,
+            operationalClassification: serializeProjectedOperationalClassification(o),
           })),
         },
         "Admin user detail loaded.",
@@ -1136,22 +1276,31 @@ export async function getAdminSubscriptions(req: Request, res: Response, next: N
     const page = Math.max(1, Number(req.query.page) || 1);
     const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 30));
     const skip = (page - 1) * limit;
+    const operationalScope = parseOperationalScopeQuery(req.query.operationalScope);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const filter: FilterQuery<any> = {};
     if (status && status !== "all") filter.status = status;
     if (planCode && planCode !== "all") filter.planCode = planCode;
 
-    const [total, subscriptions] = await Promise.all([
-      BillingSubscriptionModel.countDocuments(filter),
-      BillingSubscriptionModel.find(filter)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit)
-        .lean(),
+    const [subscriptionPage] = await BillingSubscriptionModel.aggregate<{
+      metadata: Array<{ total: number }>;
+      items: Array<Record<string, unknown>>;
+    }>([
+      { $match: filter },
+      ...buildEffectiveOperationalClassificationStages({ userIdField: "userId", requireLinkedUser: true }),
+      ...asOptionalStage(buildOperationalScopeMatch(operationalScope)),
+      {
+        $facet: {
+          metadata: [{ $count: "total" }],
+          items: [{ $sort: { createdAt: -1 } }, { $skip: skip }, { $limit: limit }],
+        },
+      },
     ]);
+    const total = subscriptionPage?.metadata[0]?.total ?? 0;
+    const subscriptions = subscriptionPage?.items ?? [];
 
-    const userIds = [...new Set(subscriptions.map((s) => s.userId))];
+    const userIds = [...new Set(subscriptions.map((s) => String(s.userId ?? "")).filter(Boolean))];
     const users = userIds.length
       ? await UserModel.find({ firebaseUid: { $in: userIds } })
           .select("firebaseUid email displayName")
@@ -1165,21 +1314,25 @@ export async function getAdminSubscriptions(req: Request, res: Response, next: N
         limit,
         total,
         totalPages: Math.ceil(total / limit),
-        items: subscriptions.map((sub) => ({
-          id: (sub as Record<string, unknown>)._id as string,
-          userId: sub.userId,
-          userEmail: userByUid.get(sub.userId)?.email ?? sub.userId,
-          userDisplayName: userByUid.get(sub.userId)?.displayName ?? "",
-          planCode: sub.planCode,
-          status: sub.status,
-          provider: sub.provider,
-          billingCycle: sub.billingCycle ?? null,
-          currentPeriodStart: sub.currentPeriodStart ?? null,
-          currentPeriodEnd: sub.currentPeriodEnd ?? null,
-          canceledAt: sub.canceledAt ?? null,
-          createdAt: sub.createdAt,
-          updatedAt: sub.updatedAt,
-        })),
+        items: subscriptions.map((sub) => {
+          const userId = String(sub.userId ?? "");
+          return {
+            id: sub._id as string,
+            userId,
+            userEmail: userByUid.get(userId)?.email ?? userId,
+            userDisplayName: userByUid.get(userId)?.displayName ?? "",
+            planCode: sub.planCode,
+            status: sub.status,
+            provider: sub.provider,
+            billingCycle: sub.billingCycle ?? null,
+            currentPeriodStart: sub.currentPeriodStart ?? null,
+            currentPeriodEnd: sub.currentPeriodEnd ?? null,
+            canceledAt: sub.canceledAt ?? null,
+            createdAt: sub.createdAt,
+            updatedAt: sub.updatedAt,
+            operationalClassification: serializeProjectedOperationalClassification(sub),
+          };
+        }),
       }, "Admin subscriptions loaded."),
     );
   } catch (error) {

@@ -13,7 +13,7 @@ import { describe, expect, it } from "vitest";
  * cấp UI. Nó KHÔNG sửa asset hay tên thương hiệu — nó chỉ so khớp:
  *   1. Chuỗi tên thương hiệu ("Dear Our Future") tại các bề mặt brand chính
  *      (title index.html, manifest name/short_name, aria-label logo).
- *   2. Hash byte (sha256) của các tệp logo/favicon so với baseline đã ghi.
+ *   2. Hash chuẩn hóa (sha256) của các tệp logo/favicon so với baseline đã ghi.
  *
  * Nếu BẤT KỲ khác biệt nào xuất hiện (diff hoặc chưa được phê duyệt), test FAIL
  * với thông báo chỉ rõ thay đổi brand cần chủ sản phẩm phê duyệt trước khi áp
@@ -30,8 +30,10 @@ const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "
 const EXPECTED_BRAND_NAME = "Dear Our Future";
 
 /**
- * Baseline hash byte (sha256, hex) của các tệp thuộc Brand_Identity ngay trước
- * khi nâng cấp UI. Chỉ được cập nhật khi thay đổi brand đã được phê duyệt.
+ * Baseline hash (sha256, hex) của các tệp thuộc Brand_Identity ngay trước khi
+ * nâng cấp UI. Asset văn bản được chuẩn hóa CRLF về LF để guard ổn định giữa
+ * Windows và CI; asset nhị phân vẫn được kiểm tra theo byte tuyệt đối.
+ * Chỉ được cập nhật khi thay đổi brand đã được phê duyệt.
  */
 const BRAND_ASSET_BASELINE: Readonly<Record<string, string>> = {
   "public/icon.svg": "4c3467960f618e63c2973a8e5903f5cf1953d07f72ab4e18a0c3a7a62d9ce2f3",
@@ -48,7 +50,12 @@ function readText(relativePath: string): string {
 }
 
 function sha256(relativePath: string): string {
-  return createHash("sha256").update(readFileSync(path.join(projectRoot, relativePath))).digest("hex");
+  const content = readFileSync(path.join(projectRoot, relativePath));
+  const canonicalContent = relativePath.endsWith(".svg")
+    ? Buffer.from(content.toString("utf8").replace(/\r\n/g, "\n"), "utf8")
+    : content;
+
+  return createHash("sha256").update(canonicalContent).digest("hex");
 }
 
 describe("brand preservation guard (Requirement 7)", () => {
@@ -69,10 +76,9 @@ describe("brand preservation guard (Requirement 7)", () => {
       short_name?: string;
     };
 
-    expect(
-      manifest.name,
-      `manifest.name đã đổi (nhận: ${JSON.stringify(manifest.name)}). ${APPROVAL_HINT}`,
-    ).toBe(EXPECTED_BRAND_NAME);
+    expect(manifest.name, `manifest.name đã đổi (nhận: ${JSON.stringify(manifest.name)}). ${APPROVAL_HINT}`).toBe(
+      EXPECTED_BRAND_NAME,
+    );
     expect(
       manifest.short_name,
       `manifest.short_name đã đổi (nhận: ${JSON.stringify(manifest.short_name)}). ${APPROVAL_HINT}`,
@@ -84,13 +90,12 @@ describe("brand preservation guard (Requirement 7)", () => {
     const labelMatch = svg.match(/aria-label="([^"]*)"/);
     const label = labelMatch?.[1]?.trim();
 
-    expect(
-      label,
-      `aria-label logo icon.svg đã đổi (nhận: ${JSON.stringify(label)}). ${APPROVAL_HINT}`,
-    ).toBe(EXPECTED_BRAND_NAME);
+    expect(label, `aria-label logo icon.svg đã đổi (nhận: ${JSON.stringify(label)}). ${APPROVAL_HINT}`).toBe(
+      EXPECTED_BRAND_NAME,
+    );
   });
 
-  it("giữ nguyên byte hash của từng tệp logo/favicon so với baseline (Req 7.1, 7.3, 7.4)", () => {
+  it("giữ nguyên hash chuẩn hóa của từng tệp logo/favicon so với baseline (Req 7.1, 7.3, 7.4)", () => {
     for (const [assetPath, expectedHash] of Object.entries(BRAND_ASSET_BASELINE)) {
       const actualHash = sha256(assetPath);
       expect(

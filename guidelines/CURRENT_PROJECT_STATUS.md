@@ -1,6 +1,6 @@
 # Current Project Status
 
-Last reviewed: 2026-06-27
+Last reviewed: 2026-07-13
 
 Purpose: this file records the current code-backed state of Vision Board Web Platform so humans and AI coding agents do not assume features are more complete than they are.
 
@@ -143,6 +143,13 @@ Implemented in backend:
 - Goal, plan, week, task, metric, auth/profile, order, and vision-board route surfaces.
 - Account export and delete endpoints at `/api/account/export` and `/api/account/delete`. Account deletion removes app data before Firebase Admin user deletion, treats `auth/user-not-found` as idempotent, and returns `firebase_account_delete_failed` when Firebase deletion fails after app data deletion so the frontend signs out and clears local data instead of re-syncing deleted server data.
 - Backend check script through `npm --prefix backend run check`.
+
+Admin operational reporting:
+
+- Admin operational metrics now exclude records classified as `test` or `internal`.
+- User classification cascades to Plus subscriptions, payments, and physical orders without changing entitlement or provider state.
+- Admin lists default to real data and retain `Test & n\u1ed9i b\u1ed9` / `T\u1ea5t c\u1ea3` filters for audit.
+- Formal sales KPI still requires an `included` review in addition to effective `real` classification.
 
 Implemented tests:
 

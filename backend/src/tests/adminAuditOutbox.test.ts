@@ -16,6 +16,8 @@ import {
   type AdminAuditOutboxEntity,
 } from "../models/AdminAuditOutboxModel";
 import {
+  buildAdminOperationalClassificationAuditEvent,
+  buildAdminOperationalClassificationAuditIdentity,
   buildAdminSalesReviewAuditIdentity,
   dispatchAdminAuditOutboxEvent,
   isDuplicateAdminAuditEventIdError,
@@ -62,6 +64,7 @@ type MockableAuditLogModel = {
 };
 
 const originalAuditFingerprintSecret = env.ADMIN_AUDIT_FINGERPRINT_SECRET;
+const auditFingerprintFixtureSecret = "test-admin-audit-fingerprint-secret-at-least-32-bytes";
 const originalOutboxFindOne = (AdminAuditOutboxModel as unknown as MockableModel).findOne;
 const originalAuditFindOne = (AuditLogModel as unknown as MockableModel).findOne;
 const originalOutboxFindOneAndUpdate = AdminAuditOutboxModel.findOneAndUpdate;
@@ -78,7 +81,13 @@ function createLeanResult(value: IdentityRow | null) {
   };
 }
 
-function identityRow(identity: ReturnType<typeof buildAdminSalesReviewAuditIdentity>): IdentityRow {
+function identityRow(identity: {
+  actorUid: string;
+  target: string;
+  targetId: string;
+  commandFingerprint: string;
+  commandFingerprintVersion: "v1";
+}): IdentityRow {
   return {
     actorUid: identity.actorUid,
     target: identity.target,
@@ -97,7 +106,9 @@ function leanResult<T>(value: T): LeanResult<T> {
   return { async lean() { return value; } };
 }
 
-function createOutboxFixture(overrides: Partial<AdminAuditOutboxEntity> = {}): AdminAuditOutboxEntity {
+type AdminSalesReviewOutboxEntity = Extract<AdminAuditOutboxEntity, { eventType: "admin_sales_reviewed" }>;
+
+function createOutboxFixture(overrides: Partial<AdminSalesReviewOutboxEntity> = {}): AdminSalesReviewOutboxEntity {
   const occurredAt = new Date("2026-07-13T02:00:00.000Z");
   return {
     eventId: "admin_sales_reviewed:req-1",
@@ -132,7 +143,9 @@ function createCanonicalAuditFixture(event: AdminAuditOutboxEntity): AuditLogEnt
     commandFingerprintVersion: event.commandFingerprintVersion,
     actorUid: event.actorUid,
     actorEmail: null,
-    action: "reviewAdminSalesOrder",
+    action: event.eventType === "admin_sales_reviewed"
+      ? "reviewAdminSalesOrder"
+      : "changeAdminOperationalClassification",
     target: event.target,
     targetId: event.targetId,
     payload: event.payload as unknown as Record<string, unknown>,
@@ -140,6 +153,33 @@ function createCanonicalAuditFixture(event: AdminAuditOutboxEntity): AuditLogEnt
     userAgent: null,
     timestamp: event.occurredAt,
     success: true,
+  };
+}
+
+function createClassificationOutboxFixture(): AdminAuditOutboxEntity {
+  const changedAt = new Date("2026-07-13T03:00:00.000Z");
+  const requestId = "11111111-1111-4111-8111-111111111111";
+  const identity = buildAdminOperationalClassificationAuditIdentity({
+    requestId,
+    actorUid: "admin_uid",
+    target: "user_operational_classification",
+    targetId: "user_test",
+    newCategory: "test",
+    reason: "test_account",
+    note: "Seeded checkout tests",
+  });
+  return {
+    ...buildAdminOperationalClassificationAuditEvent({
+      identity,
+      requestId,
+      previousCategory: "real",
+      newCategory: "test",
+      reason: "test_account",
+      note: "Seeded checkout tests",
+      changedAt,
+    }),
+    createdAt: changedAt,
+    updatedAt: changedAt,
   };
 }
 
@@ -178,7 +218,80 @@ afterEach(() => {
 });
 
 describe("Admin audit outbox identity", () => {
+  it("builds a stable classification event without changing sales review identity", () => {
+    const salesInput = {
+      reviewRequestId: "22222222-2222-4222-8222-222222222222",
+      actorUid: "admin_uid",
+      targetId: "VBREVIEW01",
+      newStatus: "included" as const,
+    };
+    const classificationInput = {
+      requestId: "11111111-1111-4111-8111-111111111111",
+      actorUid: "admin_uid",
+      target: "user_operational_classification" as const,
+      targetId: "user_test",
+      newCategory: "test" as const,
+      reason: "test_account" as const,
+      note: "Seeded checkout tests",
+    };
+
+    const sales = buildAdminSalesReviewAuditIdentity(salesInput);
+    const classification = buildAdminOperationalClassificationAuditIdentity(classificationInput);
+
+    assert.equal(sales.eventId, `admin_sales_reviewed:${salesInput.reviewRequestId}`);
+    assert.equal(
+      classification.eventId,
+      "admin_operational_classification_changed:11111111-1111-4111-8111-111111111111",
+    );
+    assert.notEqual(
+      classification.commandFingerprint,
+      buildAdminOperationalClassificationAuditIdentity({
+        ...classificationInput,
+        newCategory: "internal",
+        reason: "internal_team",
+      }).commandFingerprint,
+    );
+  });
+
+  it("rejects classification event fields that do not match its HMAC identity", () => {
+    const changedAt = new Date("2026-07-13T03:00:00.000Z");
+    const input = {
+      requestId: "55555555-5555-4555-8555-555555555555",
+      actorUid: "admin_uid",
+      target: "user_operational_classification" as const,
+      targetId: "user_test",
+      newCategory: "test" as const,
+      reason: "test_account" as const,
+      note: "Seeded checkout tests",
+    };
+    const identity = buildAdminOperationalClassificationAuditIdentity(input);
+    const baseEvent = {
+      identity,
+      requestId: input.requestId,
+      previousCategory: "real" as const,
+      newCategory: input.newCategory,
+      reason: input.reason,
+      note: input.note,
+      changedAt,
+    };
+
+    for (const mismatch of [
+      { requestId: "66666666-6666-4666-8666-666666666666" },
+      { newCategory: "internal" as const },
+      { reason: "automated_qa" as const },
+      { note: "Different private note" },
+    ]) {
+      assert.throws(
+        () => buildAdminOperationalClassificationAuditEvent({ ...baseEvent, ...mismatch }),
+        (error: unknown) => error instanceof ApiError &&
+          error.errorCode === "admin_audit_unavailable" &&
+          !error.message.includes("Different private note"),
+      );
+    }
+  });
+
   it("builds deterministic versioned HMAC identity without persisting the raw note", () => {
+    env.ADMIN_AUDIT_FINGERPRINT_SECRET = auditFingerprintFixtureSecret;
     const input = {
       reviewRequestId: "11111111-1111-4111-8111-111111111111",
       actorUid: "admin_uid",
@@ -194,6 +307,7 @@ describe("Admin audit outbox identity", () => {
     assert.equal(first.eventId, "admin_sales_reviewed:11111111-1111-4111-8111-111111111111");
     assert.equal(first.commandFingerprintVersion, "v1");
     assert.equal(first.commandFingerprint, second.commandFingerprint);
+    assert.equal(first.commandFingerprint, "164fb1729a14c31a61f9b790e433dde9c9345d3e340ced11047b67183b2e9f06");
     assert.notEqual(first.commandFingerprint, changed.commandFingerprint);
     assert.equal(JSON.stringify(first).includes("private customer note"), false);
     assert.equal(JSON.stringify(first).includes(process.env.ADMIN_AUDIT_FINGERPRINT_SECRET!), false);
@@ -228,6 +342,69 @@ describe("Admin audit outbox identity", () => {
     assert.ok(AuditLogModel.schema.indexes().some(([keys, options]) =>
       keys.eventId === 1 && options.unique === true && options.sparse === true,
     ));
+  });
+
+  it("rejects forbidden and unknown classification audit payload fields", async () => {
+    const event = createClassificationOutboxFixture();
+    for (const forbiddenField of [
+      "email",
+      "displayName",
+      "bankAccount",
+      "providerPayload",
+      "entitlement",
+      "ADMIN_AUDIT_FINGERPRINT_SECRET",
+    ]) {
+      const document = new AdminAuditOutboxModel({
+        ...event,
+        payload: { ...event.payload, [forbiddenField]: "private-value" },
+      });
+      await assert.rejects(document.validate());
+    }
+    const sales = new AdminAuditOutboxModel({
+      ...createOutboxFixture(),
+      payload: { ...createOutboxFixture().payload, email: "customer@example.com" },
+    });
+    await assert.rejects(sales.validate());
+  });
+
+  it("rejects classification category/reason mismatches and blank other notes", async () => {
+    const event = createClassificationOutboxFixture();
+    const mismatch = new AdminAuditOutboxModel({
+      ...event,
+      payload: { ...event.payload, newCategory: "internal", reason: "test_account" },
+    });
+    const blankOther = new AdminAuditOutboxModel({
+      ...event,
+      payload: { ...event.payload, reason: "other", note: "   " },
+    });
+
+    await assert.rejects(mismatch.validate());
+    await assert.rejects(blankOther.validate());
+  });
+
+  it("rejects event-type target and request-id mismatches", async () => {
+    const classification = createClassificationOutboxFixture();
+    const salesWithClassificationTarget = new AdminAuditOutboxModel({
+      ...createOutboxFixture(),
+      target: "user_operational_classification",
+    });
+    const classificationWithSalesRequestId = new AdminAuditOutboxModel({
+      ...classification,
+      reviewRequestId: "44444444-4444-4444-8444-444444444444",
+    });
+
+    await assert.rejects(salesWithClassificationTarget.validate());
+    await assert.rejects(classificationWithSalesRequestId.validate());
+  });
+
+  it("rejects classification event ids that do not match their request ids", async () => {
+    const event = createClassificationOutboxFixture();
+    const document = new AdminAuditOutboxModel({
+      ...event,
+      eventId: "admin_operational_classification_changed:other-request",
+    });
+
+    await assert.rejects(document.validate());
   });
 });
 
@@ -275,9 +452,40 @@ describe("resolveAdminAuditIdempotency", () => {
     assert.equal(isDuplicateAdminAuditEventIdError({ code: 11000, keyPattern: { eventId: 1 } }), true);
     assert.equal(isDuplicateAdminAuditEventIdError({ code: 11000, keyPattern: { actorUid: 1 } }), false);
   });
+
+  it("uses the common identity conflict contract for classification events", async () => {
+    const identity = buildAdminOperationalClassificationAuditIdentity({
+      requestId: "33333333-3333-4333-8333-333333333333",
+      actorUid: "admin_uid",
+      target: "physical_order_operational_classification",
+      targetId: "physical_order_test",
+      newCategory: "internal",
+      reason: "internal_team",
+    });
+    mockIdempotencyRows(identityRow(identity), null);
+    assert.equal(await resolveAdminAuditIdempotency(identity), "match");
+    mockIdempotencyRows({ ...identityRow(identity), targetId: "other" }, null);
+    assert.equal(await resolveAdminAuditIdempotency(identity), "conflict");
+  });
 });
 
 describe("admin audit outbox dispatcher", () => {
+  it("materializes the classification action from its discriminated event type", async () => {
+    const event = createClassificationOutboxFixture();
+    let capturedAuditUpdate: AuditLogUpsert | undefined;
+    mockClaimThenComplete(event, () => {});
+    (AuditLogModel as unknown as MockableAuditLogModel).updateOne = async (_filter, update) => {
+      capturedAuditUpdate = update;
+      return { acknowledged: true, matchedCount: 0, modifiedCount: 0, upsertedCount: 1, upsertedId: "audit-classification" };
+    };
+    (AuditLogModel as unknown as MockableAuditLogModel).findOne = () => leanResult(createCanonicalAuditFixture(event));
+
+    await dispatchAdminAuditOutboxEvent(event.eventId);
+
+    assert.equal(capturedAuditUpdate?.$setOnInsert.action, "changeAdminOperationalClassification");
+    assert.deepEqual(capturedAuditUpdate?.$setOnInsert.payload, event.payload);
+  });
+
   it("claims, upserts one canonical AuditLog, and completes with lease CAS", async () => {
     const claimed = createOutboxFixture({ status: "processing", leaseToken: "lease-1", attempts: 1 });
     let capturedAuditUpdate: AuditLogUpsert | undefined;

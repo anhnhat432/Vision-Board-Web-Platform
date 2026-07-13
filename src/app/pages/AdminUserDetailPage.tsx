@@ -1,13 +1,17 @@
 import { ArrowLeft, ArrowUpCircle, CreditCard, Loader2, Package, Shield, Target, User as UserIcon } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, Link } from "react-router";
 import { toast } from "sonner";
 import {
   type AdminUserDetail,
+  type AdminOperationalClassificationReason,
+  adminClassifyUsers,
   adminGetUserDetail,
   adminUpdateUserRole,
   adminUpdateUserSubscription,
 } from "@/services/adminService";
+import { AdminOperationalClassificationBadge } from "../components/admin/AdminOperationalClassificationBadge";
+import { AdminOperationalClassificationDialog } from "../components/admin/AdminOperationalClassificationDialog";
 import { AdminPageHeader } from "../components/admin/AdminPageHeader";
 import { adminSurface } from "../components/admin/tokens";
 import { ADMIN_LOAD_TIMEOUT_MS, formatDate, formatVnd, getErrorMessage, withTimeout } from "../components/admin/utils";
@@ -43,28 +47,53 @@ export function AdminUserDetailPage() {
   const [subUpdating, setSubUpdating] = useState(false);
   const [subConfirmOpen, setSubConfirmOpen] = useState(false);
   const [pendingPlanCode, setPendingPlanCode] = useState<"PLUS" | "FREE" | null>(null);
+  const [classificationOpen, setClassificationOpen] = useState(false);
+  const [classificationBusy, setClassificationBusy] = useState(false);
+  const [classificationError, setClassificationError] = useState<string | undefined>();
+  const classificationRequestRef = useRef<{
+    commandKey: string;
+    requestId: string;
+  } | null>(null);
+  const classificationMutationRef = useRef(0);
+  const loadGeneration = useRef(0);
+  const currentUidRef = useRef(uid);
+  const previousUidRef = useRef(uid);
+  currentUidRef.current = uid;
 
-  const load = useCallback(async () => {
-    if (!uid) return;
+  const load = useCallback(async (requestedUid = currentUidRef.current) => {
+    if (!requestedUid) return;
+    const generation = ++loadGeneration.current;
     setLoading(true);
     setError(null);
     try {
       const res = await withTimeout(
-        adminGetUserDetail(uid),
+        adminGetUserDetail(requestedUid),
         ADMIN_LOAD_TIMEOUT_MS,
         "Hết thời gian tải thông tin người dùng.",
       );
+      if (generation !== loadGeneration.current || requestedUid !== currentUidRef.current) return;
       setData(res);
     } catch (err) {
+      if (generation !== loadGeneration.current || requestedUid !== currentUidRef.current) return;
       setError(getErrorMessage(err, "Không thể tải thông tin người dùng."));
     } finally {
-      setLoading(false);
+      if (generation === loadGeneration.current && requestedUid === currentUidRef.current) setLoading(false);
     }
-  }, [uid]);
+  }, []);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    void load(uid);
+  }, [load, uid]);
+
+  useEffect(() => {
+    if (previousUidRef.current === uid) return;
+    previousUidRef.current = uid;
+    classificationMutationRef.current += 1;
+    classificationRequestRef.current = null;
+    setClassificationBusy(false);
+    setClassificationOpen(false);
+    setClassificationError(undefined);
+  }, [uid]);
 
   const handleToggleRole = () => {
     if (!data) return;
@@ -104,11 +133,7 @@ export function AdminUserDetailPage() {
         planCode: pendingPlanCode,
       });
       setData(res);
-      toast.success(
-        pendingPlanCode === "PLUS"
-          ? "Đã nâng lên gói Plus."
-          : "Đã hạ về gói Free.",
-      );
+      toast.success(pendingPlanCode === "PLUS" ? "Đã nâng lên gói Plus." : "Đã hạ về gói Free.");
     } catch (err) {
       toast.error(getErrorMessage(err, "Không thể thay đổi gói dịch vụ."));
     } finally {
@@ -122,6 +147,57 @@ export function AdminUserDetailPage() {
     setSubConfirmOpen(true);
   };
 
+  const handleClassification = async (payload: {
+    category: "real" | "test" | "internal";
+    reason: AdminOperationalClassificationReason;
+    note?: string;
+  }) => {
+    if (!uid) return;
+    const targetUid = uid;
+    const commandKey = JSON.stringify({
+      uid: targetUid,
+      category: payload.category,
+      reason: payload.reason,
+      note: payload.note?.trim() || null,
+    });
+    const currentRequest = classificationRequestRef.current;
+    const requestId = currentRequest?.commandKey === commandKey ? currentRequest.requestId : crypto.randomUUID();
+    classificationRequestRef.current = { commandKey, requestId };
+    const mutation = ++classificationMutationRef.current;
+    setClassificationBusy(true);
+    setClassificationError(undefined);
+    try {
+      const result = await adminClassifyUsers({
+        ...payload,
+        changes: [{ userUid: targetUid, requestId }],
+      });
+      if (targetUid !== currentUidRef.current || mutation !== classificationMutationRef.current) return;
+      const targetResult = result.results.find((item) => item.userUid === targetUid);
+      const shouldReload =
+        targetResult?.status === "updated" ||
+        targetResult?.status === "unchanged" ||
+        (targetResult?.status === "failed" && targetResult.errorCode === "idempotency_conflict");
+      if (shouldReload) {
+        await load();
+        if (targetUid !== currentUidRef.current || mutation !== classificationMutationRef.current) return;
+        classificationRequestRef.current = null;
+        setClassificationOpen(false);
+        return;
+      }
+      if (targetResult?.status === "failed" && targetResult.errorCode === "admin_audit_commit_unknown") {
+        setClassificationError("Kết quả phân loại chưa rõ. Hãy thử lại cùng yêu cầu này.");
+        return;
+      }
+      classificationRequestRef.current = null;
+      setClassificationError("Không thể phân loại người dùng. Hãy kiểm tra lại và thử lại.");
+    } catch {
+      if (targetUid !== currentUidRef.current || mutation !== classificationMutationRef.current) return;
+      setClassificationError("Không thể gửi yêu cầu phân loại. Hãy thử lại.");
+    } finally {
+      if (mutation === classificationMutationRef.current) setClassificationBusy(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -133,13 +209,22 @@ export function AdminUserDetailPage() {
   if (error || !data) {
     return (
       <div className="space-y-4">
-        <Link to="/admin/users" className="inline-flex items-center gap-1 text-sm text-app-ink-muted hover:text-app-ink">
+        <Link
+          to="/admin/users"
+          className="inline-flex items-center gap-1 text-sm text-app-ink-muted hover:text-app-ink"
+        >
           <ArrowLeft className="h-4 w-4" />
           Quay lại danh sách
         </Link>
         <div className="rounded-[var(--r-card)] border border-red-200 bg-red-50 p-4 text-sm text-red-700">
           {error || "Không tìm thấy người dùng."}
-          <Button type="button" variant="ghost" size="sm" className="ml-2 text-red-700 underline" onClick={() => void load()}>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="ml-2 text-red-700 underline"
+            onClick={() => void load()}
+          >
             Thử lại
           </Button>
         </div>
@@ -151,7 +236,10 @@ export function AdminUserDetailPage() {
 
   return (
     <div className="space-y-6">
-      <Link to="/admin/users" className="inline-flex items-center gap-1 text-sm text-app-ink-muted hover:text-app-ink transition-colors">
+      <Link
+        to="/admin/users"
+        className="inline-flex items-center gap-1 text-sm text-app-ink-muted hover:text-app-ink transition-colors"
+      >
         <ArrowLeft className="h-4 w-4" />
         Quay lại danh sách
       </Link>
@@ -160,26 +248,39 @@ export function AdminUserDetailPage() {
         title={user.displayName || user.email}
         description={`UID: ${user.firebaseUid}`}
         actions={
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            className="gap-1 border-app-line"
-            disabled={roleUpdating}
-            onClick={handleToggleRole}
-          >
-            {roleUpdating ? <Loader2 className="h-3 w-3 animate-spin" /> : <Shield className="h-3 w-3" />}
-            {user.role === "admin" ? "Gỡ quyền Admin" : "Cấp quyền Admin"}
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="gap-1 border-app-line"
+              disabled={roleUpdating}
+              onClick={handleToggleRole}
+            >
+              {roleUpdating ? <Loader2 className="h-3 w-3 animate-spin" /> : <Shield className="h-3 w-3" />}
+              {user.role === "admin" ? "Gỡ quyền Admin" : "Cấp quyền Admin"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="border-app-line"
+              disabled={classificationBusy}
+              onClick={() => {
+                setClassificationError(undefined);
+                setClassificationOpen(true);
+              }}
+            >
+              Phân loại dữ liệu
+            </Button>
+          </div>
         }
       />
 
       <AlertDialog open={roleConfirmOpen} onOpenChange={handleRoleDialogChange}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>
-              {pendingRole === "admin" ? "Cấp quyền Admin?" : "Gỡ quyền Admin?"}
-            </AlertDialogTitle>
+            <AlertDialogTitle>{pendingRole === "admin" ? "Cấp quyền Admin?" : "Gỡ quyền Admin?"}</AlertDialogTitle>
             <AlertDialogDescription>
               {pendingRole === "admin"
                 ? `Xác nhận cấp quyền Admin cho ${user.email}. Người này sẽ truy cập được các trang quản trị.`
@@ -207,6 +308,24 @@ export function AdminUserDetailPage() {
         </AlertDialogContent>
       </AlertDialog>
 
+      <AdminOperationalClassificationDialog
+        open={classificationOpen}
+        targetType="user"
+        targetLabel={user.displayName || user.email}
+        initialCategory={user.operationalClassification.effectiveCategory}
+        initialReason={user.operationalClassification.reason as AdminOperationalClassificationReason | undefined}
+        initialNote={user.operationalClassification.note}
+        pending={classificationBusy}
+        error={classificationError}
+        onOpenChange={(open) => {
+          if (!classificationBusy) {
+            setClassificationOpen(open);
+            if (!open) setClassificationError(undefined);
+          }
+        }}
+        onConfirm={handleClassification}
+      />
+
       <div className="grid gap-6 lg:grid-cols-3">
         {/* User Info Card */}
         <div className={`${adminSurface.card} p-5 space-y-1`}>
@@ -216,13 +335,24 @@ export function AdminUserDetailPage() {
           </div>
           <InfoRow label="Email" value={user.email} />
           <InfoRow label="Tên hiển thị" value={user.displayName} />
-          <InfoRow
-            label="Vai trò"
-            value={user.role === "admin" ? "Admin" : "User"}
-          />
+          <InfoRow label="Vai trò" value={user.role === "admin" ? "Admin" : "User"} />
+          <div className="flex items-center justify-between gap-4 py-2">
+            <span className="text-xs text-app-ink-muted">Phân loại vận hành</span>
+            {user.operationalClassification.effectiveCategory === "real" ? (
+              <span className="text-sm text-app-ink">Dữ liệu thật</span>
+            ) : (
+              <AdminOperationalClassificationBadge classification={user.operationalClassification} />
+            )}
+          </div>
           <InfoRow label="Ngôn ngữ" value={user.locale} />
-          <InfoRow label="Đã hoàn thành onboarding" value={user.onboardingCompletedAt ? formatDate(user.onboardingCompletedAt) : "Chưa"} />
-          <InfoRow label="Đã đồng ý điều khoản" value={user.termsAcceptedAt ? formatDate(user.termsAcceptedAt) : "Chưa"} />
+          <InfoRow
+            label="Đã hoàn thành onboarding"
+            value={user.onboardingCompletedAt ? formatDate(user.onboardingCompletedAt) : "Chưa"}
+          />
+          <InfoRow
+            label="Đã đồng ý điều khoản"
+            value={user.termsAcceptedAt ? formatDate(user.termsAcceptedAt) : "Chưa"}
+          />
           <InfoRow label="Ngày tạo" value={formatDate(user.createdAt)} />
         </div>
 
@@ -238,7 +368,10 @@ export function AdminUserDetailPage() {
               <InfoRow label="Trạng thái" value={subscription.status} />
               <InfoRow label="Nhà cung cấp" value={subscription.provider} />
               <InfoRow label="Chu kỳ" value={subscription.billingCycle} />
-              <InfoRow label="Hết hạn" value={subscription.currentPeriodEnd ? formatDate(subscription.currentPeriodEnd) : "—"} />
+              <InfoRow
+                label="Hết hạn"
+                value={subscription.currentPeriodEnd ? formatDate(subscription.currentPeriodEnd) : "—"}
+              />
             </>
           ) : (
             <p className="text-sm text-app-ink-muted">Chưa có gói dịch vụ nào.</p>
@@ -254,7 +387,11 @@ export function AdminUserDetailPage() {
                 disabled={subUpdating}
                 onClick={() => openSubConfirm("FREE")}
               >
-                {subUpdating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ArrowUpCircle className="h-3.5 w-3.5 rotate-180" />}
+                {subUpdating ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <ArrowUpCircle className="h-3.5 w-3.5 rotate-180" />
+                )}
                 Hạ về gói Free
               </Button>
             ) : (
@@ -266,7 +403,11 @@ export function AdminUserDetailPage() {
                 disabled={subUpdating}
                 onClick={() => openSubConfirm("PLUS")}
               >
-                {subUpdating ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ArrowUpCircle className="h-3.5 w-3.5" />}
+                {subUpdating ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <ArrowUpCircle className="h-3.5 w-3.5" />
+                )}
                 Nâng lên gói Plus
               </Button>
             )}
@@ -297,9 +438,7 @@ export function AdminUserDetailPage() {
                 }
                 onClick={() => void handleSubscriptionChange()}
               >
-                {subUpdating ? (
-                  <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
-                ) : null}
+                {subUpdating ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : null}
                 {pendingPlanCode === "PLUS" ? "Nâng lên Plus" : "Hạ về Free"}
               </AlertDialogAction>
             </AlertDialogFooter>
@@ -332,9 +471,7 @@ export function AdminUserDetailPage() {
                     >
                       {goal.status}
                     </span>
-                    {goal.readinessScore != null && (
-                      <span>Score: {goal.readinessScore}</span>
-                    )}
+                    {goal.readinessScore != null && <span>Score: {goal.readinessScore}</span>}
                   </div>
                 </div>
               ))}

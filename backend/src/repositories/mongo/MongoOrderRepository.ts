@@ -1,4 +1,15 @@
+import { Types, type PipelineStage } from "mongoose";
+
+import type { AdminOperationalClassificationSummary } from "../../models/OperationalClassification";
 import { OrderModel, type OrderStatus } from "../../models/OrderModel";
+import {
+  asOptionalStage,
+  buildEffectiveOperationalClassificationStages,
+  buildOperationalScopeMatch,
+  type OperationalScope,
+  serializeProjectedOperationalClassification,
+} from "../../services/adminOperationalClassificationQuery";
+import { ApiError } from "../../utils/apiError";
 
 export interface ShippingAddress {
   line1: string;
@@ -67,6 +78,30 @@ export interface OrderEntity {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface AdminOrderEntity extends OrderEntity {
+  operationalClassification: AdminOperationalClassificationSummary;
+}
+
+export interface AdminOrderListInput {
+  q: string;
+  status: OrderStatus | "all";
+  frame: string | "all";
+  dateFrom?: Date;
+  dateToExclusive?: Date;
+  operationalScope: OperationalScope;
+  page: number;
+  limit: number;
+}
+
+export interface AdminOrderListResult {
+  items: AdminOrderEntity[];
+  total: number;
+  statusCounts: Record<OrderStatus | "all", number>;
+  frameOptions: string[];
+}
+
+const MAX_ADMIN_ORDER_EXPORT_ROWS = 5_000;
 
 export interface CreateOrderData {
   userId: string;
@@ -185,6 +220,90 @@ function mapOrder(doc: any): OrderEntity {
   };
 }
 
+function mapAdminOrder(doc: any): AdminOrderEntity {
+  return {
+    ...mapOrder(doc),
+    operationalClassification: serializeProjectedOperationalClassification(doc as Record<string, unknown>),
+  };
+}
+
+function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function buildAdminOrderRowFilterStages(input: Pick<AdminOrderListInput, "q" | "status" | "frame" | "dateFrom" | "dateToExclusive">): PipelineStage.FacetPipelineStage[] {
+  const stages: PipelineStage.FacetPipelineStage[] = [];
+
+  if (input.q) {
+    const search = escapeRegex(input.q);
+    stages.push({
+      $match: {
+        $or: [
+          { email: { $regex: search, $options: "i" } },
+          { fullName: { $regex: search, $options: "i" } },
+          { phone: { $regex: search, $options: "i" } },
+          { $expr: { $regexMatch: { input: { $toString: "$_id" }, regex: search, options: "i" } } },
+        ],
+      },
+    });
+  }
+
+  if (input.status !== "all") stages.push({ $match: { status: input.status } });
+
+  if (input.frame !== "all") {
+    const frame = `^${escapeRegex(input.frame)}$`;
+    stages.push({
+      $match: {
+        $or: [
+          { lines: { $elemMatch: { type: "frame", label: { $regex: frame, $options: "i" } } } },
+          { kitType: { $regex: frame, $options: "i" } },
+        ],
+      },
+    });
+  }
+
+  if (input.dateFrom || input.dateToExclusive) {
+    const createdAt: Record<string, Date> = {};
+    if (input.dateFrom) createdAt.$gte = input.dateFrom;
+    if (input.dateToExclusive) createdAt.$lt = input.dateToExclusive;
+    stages.push({ $match: { createdAt } });
+  }
+
+  return stages;
+}
+
+function mapAdminOrderFacet(facet: {
+  metadata?: Array<{ total?: number }>;
+  items?: unknown[];
+  statusCounts?: Array<{ _id?: string; count?: number }>;
+  frameOptions?: Array<{ _id?: string }>;
+}): AdminOrderListResult {
+  const statusCounts: Record<OrderStatus | "all", number> = {
+    pending: 0,
+    confirmed: 0,
+    printing: 0,
+    shipping: 0,
+    delivered: 0,
+    cancelled: 0,
+    all: 0,
+  };
+  for (const row of facet.statusCounts ?? []) {
+    if (row._id && row._id in statusCounts) {
+      statusCounts[row._id as OrderStatus] = row.count ?? 0;
+      statusCounts.all += row.count ?? 0;
+    }
+  }
+
+  return {
+    total: facet.metadata?.[0]?.total ?? 0,
+    items: (facet.items ?? []).map((item) => mapAdminOrder(item)),
+    statusCounts,
+    frameOptions: (facet.frameOptions ?? [])
+      .map((row) => row._id)
+      .filter((label): label is string => typeof label === "string" && label.length > 0),
+  };
+}
+
 export class MongoOrderRepository {
   async createOrder(data: CreateOrderData): Promise<OrderEntity> {
     const doc = await OrderModel.create({
@@ -212,18 +331,85 @@ export class MongoOrderRepository {
   }
 
   async getOrderById(id: string): Promise<OrderEntity | null> {
-    const doc = await OrderModel.findById(id).lean();
+    const doc = await OrderModel.findById(id).select("-__v -operationalClassification").lean();
     return doc ? mapOrder(doc) : null;
   }
 
   async getOrdersByUserId(userId: string): Promise<OrderEntity[]> {
-    const docs = await OrderModel.find({ userId }).sort({ createdAt: -1 }).lean();
+    const docs = await OrderModel.find({ userId }).select("-__v -operationalClassification").sort({ createdAt: -1 }).lean();
     return docs.map((doc) => mapOrder(doc));
   }
 
   async getAllOrders(): Promise<OrderEntity[]> {
     const docs = await OrderModel.find({}).sort({ createdAt: -1 }).lean();
     return docs.map((doc) => mapOrder(doc));
+  }
+
+  async getAdminOrders(input: AdminOrderListInput): Promise<AdminOrderListResult> {
+    const rowFilterStages = buildAdminOrderRowFilterStages(input);
+    const scopePipeline = [
+      ...buildEffectiveOperationalClassificationStages({
+        userIdField: "userId",
+        recordClassificationField: "operationalClassification",
+      }),
+      ...asOptionalStage(buildOperationalScopeMatch(input.operationalScope)),
+    ];
+    const [facet] = await OrderModel.aggregate<{
+      metadata: Array<{ total: number }>;
+      items: unknown[];
+      statusCounts: Array<{ _id: string; count: number }>;
+      frameOptions: Array<{ _id: string }>;
+    }>([
+      ...scopePipeline,
+      {
+        $facet: {
+          metadata: [...rowFilterStages, { $count: "total" }],
+          items: [
+            ...rowFilterStages,
+            { $sort: { createdAt: -1 } },
+            { $skip: (input.page - 1) * input.limit },
+            { $limit: input.limit },
+          ],
+          statusCounts: [{ $group: { _id: "$status", count: { $sum: 1 } } }],
+          frameOptions: [
+            { $unwind: "$lines" },
+            { $match: { "lines.type": "frame" } },
+            { $group: { _id: "$lines.label" } },
+            { $sort: { _id: 1 } },
+          ],
+        },
+      },
+    ]);
+    return mapAdminOrderFacet(facet ?? {});
+  }
+
+  async getAdminOrderById(id: string): Promise<AdminOrderEntity | null> {
+    if (!Types.ObjectId.isValid(id)) return null;
+    const [order] = await OrderModel.aggregate([
+      { $match: { _id: new Types.ObjectId(id) } },
+      ...buildEffectiveOperationalClassificationStages({
+        userIdField: "userId",
+        recordClassificationField: "operationalClassification",
+      }),
+    ]);
+    return order ? mapAdminOrder(order) : null;
+  }
+
+  async getAdminOrdersForExport(input: Omit<AdminOrderListInput, "page" | "limit">): Promise<AdminOrderEntity[]> {
+    const rows = await OrderModel.aggregate([
+      ...buildEffectiveOperationalClassificationStages({
+        userIdField: "userId",
+        recordClassificationField: "operationalClassification",
+      }),
+      ...asOptionalStage(buildOperationalScopeMatch(input.operationalScope)),
+      ...buildAdminOrderRowFilterStages(input),
+      { $sort: { createdAt: -1 } },
+      { $limit: MAX_ADMIN_ORDER_EXPORT_ROWS + 1 },
+    ]);
+    if (rows.length > MAX_ADMIN_ORDER_EXPORT_ROWS) {
+      throw new ApiError(413, "Order export is too large. Narrow the filters.", undefined, "admin_order_export_too_large");
+    }
+    return rows.map((row) => mapAdminOrder(row));
   }
 
   async patchOrder(id: string, fields: { totalVnd?: number; discount?: undefined }): Promise<OrderEntity | null> {
