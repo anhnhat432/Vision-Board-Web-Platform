@@ -46,6 +46,7 @@ describe("adminService sales reporting", () => {
       kpiStatus: "excluded" as const,
       exclusionReason: "test" as const,
       reviewNote: "Bản kiểm thử.",
+      reviewRequestId: "6d884b3c-b7f1-44bd-9b17-d5527a8db734",
     };
 
     await adminReviewSalesOrder("VB REPORT/01", payload);

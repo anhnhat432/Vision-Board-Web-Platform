@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router";
 import { toast } from "sonner";
 
 import {
-  type AdminReviewSalesOrderPayload,
+  type AdminSalesReviewDecisionPayload,
   type AdminSalesReportRow,
   type AdminSalesReportParams,
   type AdminSalesReportResult,
@@ -40,6 +40,15 @@ function toSearchParams(state: SalesReportUrlState): URLSearchParams {
   return params;
 }
 
+function buildReviewCommandKey(orderId: string, decision: AdminSalesReviewDecisionPayload): string {
+  return JSON.stringify({
+    orderId,
+    kpiStatus: decision.kpiStatus,
+    exclusionReason: decision.kpiStatus === "excluded" ? decision.exclusionReason ?? null : null,
+    reviewNote: decision.reviewNote?.trim().slice(0, 500) || null,
+  });
+}
+
 export function AdminSalesReportPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [report, setReport] = useState<AdminSalesReportResult | null>(null);
@@ -53,6 +62,7 @@ export function AdminSalesReportPage() {
   const [exportBusy, setExportBusy] = useState(false);
   const [exportError, setExportError] = useState<string | null>(null);
   const requestGeneration = useRef(0);
+  const reviewRequestRef = useRef<{ commandKey: string; reviewRequestId: string } | null>(null);
   const state = useMemo(() => parseSalesReportUrlState(searchParams), [searchParams]);
   const validationError = validateSalesReportUrlState(state);
   const activeParams = useMemo<AdminSalesReportParams>(() => ({
@@ -93,12 +103,19 @@ export function AdminSalesReportPage() {
   }, [activeParams, loadReport, validationError]);
 
   const updateState = (next: SalesReportUrlState) => setSearchParams(toSearchParams(next), { replace: true });
-  const handleReview = async (payload: AdminReviewSalesOrderPayload) => {
+  const handleReview = async (decision: AdminSalesReviewDecisionPayload) => {
     if (!reviewItem) return;
+    const commandKey = buildReviewCommandKey(reviewItem.orderId, decision);
+    const current = reviewRequestRef.current;
+    const reviewRequestId = current?.commandKey === commandKey
+      ? current.reviewRequestId
+      : crypto.randomUUID();
+    reviewRequestRef.current = { commandKey, reviewRequestId };
     try {
       setReviewBusy(true);
       setReviewError(null);
-      await adminReviewSalesOrder(reviewItem.orderId, payload);
+      await adminReviewSalesOrder(reviewItem.orderId, { ...decision, reviewRequestId });
+      reviewRequestRef.current = null;
       await loadReport(activeParams);
       setReviewItem(null);
       toast.success("Đã cập nhật trạng thái KPI.");
@@ -202,7 +219,11 @@ export function AdminSalesReportPage() {
             <AdminSalesReportList
               items={report.items}
               busyOrderId={busyOrderId}
-              onReview={(item) => { setReviewError(null); setReviewItem(item); }}
+              onReview={(item) => {
+                reviewRequestRef.current = null;
+                setReviewError(null);
+                setReviewItem(item);
+              }}
               onReconcile={(orderId) => void handleReconcile(orderId)}
               onViewEvidence={setEvidenceItem}
             />
@@ -220,7 +241,12 @@ export function AdminSalesReportPage() {
         item={reviewItem}
         busy={reviewBusy}
         error={reviewError}
-        onOpenChange={(open) => { if (!open && !reviewBusy) setReviewItem(null); }}
+        onOpenChange={(open) => {
+          if (!open && !reviewBusy) {
+            reviewRequestRef.current = null;
+            setReviewItem(null);
+          }
+        }}
         onConfirm={handleReview}
       />
       <AdminPaymentPayerEvidenceDialog

@@ -314,10 +314,11 @@ describe("AdminSalesReportPage", () => {
     await user.type(screen.getByLabelText("Ghi chú duyệt"), "Đã đối chiếu PayOS và giao dịch ngân hàng.");
     await user.click(screen.getByRole("button", { name: "Xác nhận duyệt" }));
 
-    await waitFor(() => expect(adminServiceMock.adminReviewSalesOrder).toHaveBeenCalledWith("VBPAY00001", {
+    await waitFor(() => expect(adminServiceMock.adminReviewSalesOrder).toHaveBeenCalledWith("VBPAY00001", expect.objectContaining({
       kpiStatus: "included",
       reviewNote: "Đã đối chiếu PayOS và giao dịch ngân hàng.",
-    }));
+      reviewRequestId: expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i),
+    })));
     await waitFor(() => expect(adminServiceMock.adminGetSalesReport).toHaveBeenCalledTimes(2));
   });
 
@@ -333,6 +334,45 @@ describe("AdminSalesReportPage", () => {
     expect(await screen.findByText("timeout")).toBeInTheDocument();
     expect(screen.getByRole("alertdialog")).toBeInTheDocument();
     expect(adminServiceMock.adminGetSalesReport).toHaveBeenCalledTimes(1);
+  });
+
+  it("reuses the request ID when retrying an unchanged failed review", async () => {
+    const user = userEvent.setup();
+    adminServiceMock.adminReviewSalesOrder.mockRejectedValueOnce(new Error("timeout"));
+    renderPage();
+
+    await user.click((await screen.findAllByRole("button", { name: "Duyệt KPI VBPAY00001" }))[0]);
+    await user.click(screen.getByLabelText("Được tính KPI"));
+    await user.click(screen.getByRole("button", { name: "Xác nhận duyệt" }));
+    expect(await screen.findByText("timeout")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Xác nhận duyệt" }));
+    await waitFor(() => expect(adminServiceMock.adminReviewSalesOrder).toHaveBeenCalledTimes(2));
+
+    const firstPayload = adminServiceMock.adminReviewSalesOrder.mock.calls[0][1];
+    const secondPayload = adminServiceMock.adminReviewSalesOrder.mock.calls[1][1];
+    expect(firstPayload.reviewRequestId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+    expect(secondPayload.reviewRequestId).toBe(firstPayload.reviewRequestId);
+  });
+
+  it("uses a new request ID when a failed review command changes", async () => {
+    const user = userEvent.setup();
+    adminServiceMock.adminReviewSalesOrder.mockRejectedValueOnce(new Error("timeout"));
+    renderPage();
+
+    await user.click((await screen.findAllByRole("button", { name: "Duyệt KPI VBPAY00001" }))[0]);
+    await user.click(screen.getByLabelText("Được tính KPI"));
+    await user.click(screen.getByRole("button", { name: "Xác nhận duyệt" }));
+    expect(await screen.findByText("timeout")).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText("Ghi chú duyệt"), "Đã bổ sung bằng chứng.");
+    await user.click(screen.getByRole("button", { name: "Xác nhận duyệt" }));
+    await waitFor(() => expect(adminServiceMock.adminReviewSalesOrder).toHaveBeenCalledTimes(2));
+
+    const firstPayload = adminServiceMock.adminReviewSalesOrder.mock.calls[0][1];
+    const secondPayload = adminServiceMock.adminReviewSalesOrder.mock.calls[1][1];
+    expect(secondPayload.reviewRequestId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+    expect(secondPayload.reviewRequestId).not.toBe(firstPayload.reviewRequestId);
   });
 
   it("reconciles only the matching PayOS row and opens shared safe evidence", async () => {

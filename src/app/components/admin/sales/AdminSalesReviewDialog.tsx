@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 import type {
-  AdminReviewSalesOrderPayload,
+  AdminSalesReviewDecisionPayload,
   AdminSalesExclusionReason,
   AdminSalesReportRow,
 } from "@/services/adminService";
@@ -23,7 +23,7 @@ export interface AdminSalesReviewDialogProps {
   busy: boolean;
   error: string | null;
   onOpenChange(open: boolean): void;
-  onConfirm(payload: AdminReviewSalesOrderPayload): Promise<void>;
+  onConfirm(payload: AdminSalesReviewDecisionPayload): Promise<void>;
 }
 
 const EXCLUSION_REASONS: Array<{ value: AdminSalesExclusionReason; label: string }> = [
@@ -119,7 +119,7 @@ export function AdminSalesReviewDialog({
             onClick={async (event) => {
               event.preventDefault();
               if (validationError) return;
-              const payload: AdminReviewSalesOrderPayload = status === "included"
+              const payload: AdminSalesReviewDecisionPayload = status === "included"
                 ? { kpiStatus: "included", ...(note ? { reviewNote: note } : {}) }
                 : {
                     kpiStatus: "excluded",

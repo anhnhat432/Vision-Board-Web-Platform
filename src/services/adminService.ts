@@ -135,10 +135,14 @@ export interface AdminSalesReportParams {
   limit?: number;
 }
 
-export interface AdminReviewSalesOrderPayload {
+export interface AdminSalesReviewDecisionPayload {
   kpiStatus: "included" | "excluded";
   exclusionReason?: AdminSalesExclusionReason;
   reviewNote?: string;
+}
+
+export interface AdminReviewSalesOrderPayload extends AdminSalesReviewDecisionPayload {
+  reviewRequestId: string;
 }
 
 function buildSalesReportQuery(params: AdminSalesReportParams, includePagination: boolean): string {
