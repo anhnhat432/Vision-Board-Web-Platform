@@ -16,7 +16,12 @@ export function AdminOperationalClassificationBadge({
   classification?: AdminOperationalClassificationSummary | null;
 }) {
   const effectiveCategory = classification?.effectiveCategory ?? "real";
-  if (effectiveCategory === "real") return null;
+  if (effectiveCategory === "real") {
+    if (classification?.source === "user") {
+      return <AdminStatusBadge tone="confirmed">Dữ liệu thật · Đã xác nhận</AdminStatusBadge>;
+    }
+    return null;
+  }
 
   const isTest = effectiveCategory === "test";
   return <AdminStatusBadge tone={isTest ? "pending" : "expired"}>{isTest ? "Test" : "Nội bộ"}</AdminStatusBadge>;
