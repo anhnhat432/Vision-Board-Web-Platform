@@ -13,10 +13,11 @@ export function getAdminOperationalClassificationSourceLabel(
 export function AdminOperationalClassificationBadge({
   classification,
 }: {
-  classification: AdminOperationalClassificationSummary;
+  classification?: AdminOperationalClassificationSummary | null;
 }) {
-  if (classification.effectiveCategory === "real") return null;
+  const effectiveCategory = classification?.effectiveCategory ?? "real";
+  if (effectiveCategory === "real") return null;
 
-  const isTest = classification.effectiveCategory === "test";
+  const isTest = effectiveCategory === "test";
   return <AdminStatusBadge tone={isTest ? "pending" : "expired"}>{isTest ? "Test" : "Nội bộ"}</AdminStatusBadge>;
 }

@@ -125,6 +125,23 @@ describe("AdminUsersPage operational cleanup", () => {
     expect(await screen.findByTestId("location-search")).toHaveTextContent("operationalCategory=real");
   });
 
+  it("renders legacy user responses without operational classification", async () => {
+    const response = makeUsersResponse();
+    adminServiceMock.adminListUsers.mockResolvedValueOnce({
+      ...response,
+      items: response.items.map((item) => {
+        const legacyItem: Record<string, unknown> = { ...item };
+        delete legacyItem.operationalClassification;
+        return legacyItem;
+      }),
+    });
+
+    await renderPage();
+
+    expect(await screen.findByText("U1")).toBeInTheDocument();
+    expect(screen.getByText("U2")).toBeInTheDocument();
+  });
+
   it("classifies explicit selections and announces partial failures without exposing user details", async () => {
     const user = userEvent.setup();
     adminServiceMock.adminClassifyUsers.mockResolvedValueOnce({
