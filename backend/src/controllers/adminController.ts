@@ -132,9 +132,21 @@ function escapeRegex(value: string): string {
 }
 
 function parsePaymentOrderLimit(value: unknown): number {
+  if (value == null || value === "") return DEFAULT_PAYMENT_ORDER_LIMIT;
   const parsed = typeof value === "string" ? Number(value.trim()) : typeof value === "number" ? value : NaN;
-  if (!Number.isFinite(parsed)) return DEFAULT_PAYMENT_ORDER_LIMIT;
-  return Math.min(Math.max(Math.floor(parsed), 1), MAX_PAYMENT_ORDER_LIMIT);
+  if (!Number.isInteger(parsed) || parsed < 1) {
+    throw new ApiError(400, "Payment order limit must be a positive integer.", undefined, "invalid_payment_order_limit");
+  }
+  return Math.min(parsed, MAX_PAYMENT_ORDER_LIMIT);
+}
+
+function parsePaymentOrderPage(value: unknown): number {
+  if (value == null || value === "") return 1;
+  const parsed = typeof value === "string" ? Number(value.trim()) : typeof value === "number" ? value : NaN;
+  if (!Number.isInteger(parsed) || parsed < 1) {
+    throw new ApiError(400, "Payment order page must be a positive integer.", undefined, "invalid_payment_order_page");
+  }
+  return parsed;
 }
 
 function normalizePaymentOrderSearch(value: unknown): string {
@@ -494,19 +506,31 @@ export async function getAdminPaymentOrders(req: Request, res: Response, next: N
   try {
     const status = normalizePaymentOrderStatus(req.query.status);
     const query = normalizePaymentOrderSearch(req.query.q ?? req.query.query ?? req.query.search);
+    const page = parsePaymentOrderPage(req.query.page);
     const limit = parsePaymentOrderLimit(req.query.limit);
+    const operationalScope = parseOperationalScopeQuery(req.query.operationalScope);
     const filter = await buildPaymentOrderFilter(status, query);
 
-    const [total, orders] = await Promise.all([
-      PaymentOrderModel.countDocuments(filter),
-      PaymentOrderModel.find(filter)
-        .select(
-          "orderId userId planCode billingCycle amount currency status provider bankAccount bankName accountName description cassoTransactionId manualCompletedBy manualCompletedAt manualCompletionNote metadata.payos.orderCode metadata.payos.paymentLinkId metadata.payos.payer createdAt completedAt expiresAt updatedAt",
-        )
-        .sort({ createdAt: -1 })
-        .limit(limit)
-        .lean<LeanPaymentOrderSummary[]>(),
+    const [paymentPage] = await PaymentOrderModel.aggregate<{
+      metadata: Array<{ total: number }>;
+      items: Array<LeanPaymentOrderSummary & OperationalProjection>;
+    }>([
+      { $match: filter },
+      ...buildEffectiveOperationalClassificationStages({
+        userIdField: "userId",
+        recordClassificationField: "operationalClassification",
+        legacySalesReasonField: "reporting.exclusionReason",
+      }),
+      ...asOptionalStage(buildOperationalScopeMatch(operationalScope)),
+      {
+        $facet: {
+          metadata: [{ $count: "total" }],
+          items: [{ $sort: { createdAt: -1 } }, { $skip: (page - 1) * limit }, { $limit: limit }],
+        },
+      },
     ]);
+    const total = paymentPage?.metadata[0]?.total ?? 0;
+    const orders = paymentPage?.items ?? [];
     const userById = await getUserMapByFirebaseIds(orders.map((order) => order.userId));
 
     res.status(200).json(
@@ -515,8 +539,11 @@ export async function getAdminPaymentOrders(req: Request, res: Response, next: N
           generatedAt: new Date().toISOString(),
           query,
           status,
+          operationalScope,
+          page,
           limit,
           total,
+          totalPages: Math.ceil(total / limit),
           items: orders.map((order) => serializePaymentOrder(order, userById)),
         },
         "Admin payment orders loaded.",

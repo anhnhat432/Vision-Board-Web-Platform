@@ -94,20 +94,31 @@ const originals = {
 
 const deleteFilters: Record<string, unknown[]> = {};
 const exportFilters: Record<string, unknown[]> = {};
+const exportSelections: Record<string, string[]> = {};
 let firebaseDeleteUid: string | null = null;
 let firebaseDeleteBehavior: "success" | "not-found" | "failure" = "success";
 let originalConsoleError: typeof console.error;
 
-function queryResult<T>(result: T) {
+function queryResult<T>(result: T, selectionKey?: string) {
+  let selectedResult = result;
   const chain = {
-    select() {
+    select(projection: string) {
+      if (selectionKey) exportSelections[selectionKey] = [...(exportSelections[selectionKey] ?? []), projection];
+      if (projection.includes("-operationalClassification")) {
+        selectedResult = structuredClone(result) as T;
+        if (Array.isArray(selectedResult)) {
+          for (const item of selectedResult) delete (item as Record<string, unknown>).operationalClassification;
+        } else if (selectedResult && typeof selectedResult === "object") {
+          delete (selectedResult as Record<string, unknown>).operationalClassification;
+        }
+      }
       return chain;
     },
     sort() {
       return chain;
     },
     async lean() {
-      return result;
+      return selectedResult;
     },
   };
 
@@ -138,14 +149,14 @@ function mockDeleteManyFailure(model: MockableModel, key: string, message: strin
 function mockFindMany<T>(model: MockableModel, key: string, items: T[]): void {
   model.find = (filter: unknown) => {
     exportFilters[key] = [...(exportFilters[key] ?? []), filter];
-    return queryResult(items);
+    return queryResult(items, key);
   };
 }
 
 function mockFindOne<T>(model: MockableModel, key: string, item: T): void {
   model.findOne = (filter: unknown) => {
     exportFilters[key] = [...(exportFilters[key] ?? []), filter];
-    return queryResult(item);
+    return queryResult(item, key);
   };
 }
 
@@ -237,6 +248,7 @@ function mockAccountExportModels(): void {
   mockFindOne(UserModel as unknown as MockableModel, "users", {
     firebaseUid: ownerUserId,
     email: "owner@example.test",
+    operationalClassification: { category: "test", classifiedBy: "admin_uid", note: "private profile note" },
   });
   mockFindMany(BillingEventModel as unknown as MockableModel, "billingEvents", [
     { _id: "billing_event_1", userId: ownerUserId },
@@ -263,7 +275,7 @@ function mockAccountExportModels(): void {
     { _id: "metric_owner_1", userId: ownerUserId, weekId: ownerWeekId },
   ]);
   mockFindMany(OrderModel as unknown as MockableModel, "orders", [
-    { _id: "order_owner_1", userId: ownerUserId },
+    { _id: "order_owner_1", userId: ownerUserId, operationalClassification: { category: "test", classifiedBy: "admin_uid", note: "private order note" } },
   ]);
   mockFindMany(PaymentOrderModel as unknown as MockableModel, "paymentOrders", [
     {
@@ -271,6 +283,7 @@ function mockAccountExportModels(): void {
       userId: ownerUserId,
       orderId: ownerPaymentOrderId,
       description: ownerPaymentOrderId,
+      operationalClassification: { category: "test", classifiedBy: "admin_uid", note: "private payment note" },
       metadata: {
         payos: {
           orderCode: 123456,
@@ -376,6 +389,7 @@ async function requestJson(
 describe("GET /api/account/export", () => {
   beforeEach(() => {
     for (const key of Object.keys(exportFilters)) delete exportFilters[key];
+    for (const key of Object.keys(exportSelections)) delete exportSelections[key];
     mockAccountExportModels();
   });
 
@@ -463,6 +477,12 @@ describe("GET /api/account/export", () => {
     assert.equal(JSON.stringify(response.body).includes("998877665544"), false);
     assert.equal(JSON.stringify(response.body).includes("LEGACY_RAW_PAYOS_WEBHOOK_TEXT_SENTINEL"), false);
     assert.equal(JSON.stringify(response.body).includes("9988****5544"), true);
+    assert.deepEqual(exportSelections.users, ["-__v -operationalClassification"]);
+    assert.deepEqual(exportSelections.orders, ["-__v -operationalClassification"]);
+    assert.deepEqual(exportSelections.paymentOrders, ["-__v -operationalClassification"]);
+    assert.equal(JSON.stringify(response.body).includes("operationalClassification"), false);
+    assert.equal(JSON.stringify(response.body).includes("classifiedBy"), false);
+    assert.equal(JSON.stringify(response.body).includes("private profile note"), false);
     assert.equal(exportedPaymentOrder?.description, ownerPaymentOrderId);
   });
 });

@@ -58,6 +58,7 @@ interface MockPaymentOrder {
 const originalPaymentOrderFind = PaymentOrderModel.find;
 const originalPaymentOrderFindOne = PaymentOrderModel.findOne;
 const originalPaymentOrderCountDocuments = PaymentOrderModel.countDocuments;
+const originalPaymentOrderAggregate = PaymentOrderModel.aggregate;
 const originalUserFind = UserModel.find;
 const originalUserFindOne = UserModel.findOne;
 const originalUserCountDocuments = UserModel.countDocuments;
@@ -69,6 +70,7 @@ afterEach(() => {
   (PaymentOrderModel as unknown as MockableModel).find = originalPaymentOrderFind;
   (PaymentOrderModel as unknown as MockableModel).findOne = originalPaymentOrderFindOne;
   (PaymentOrderModel as unknown as MockableModel).countDocuments = originalPaymentOrderCountDocuments;
+  (PaymentOrderModel as unknown as MockableModel).aggregate = originalPaymentOrderAggregate;
   (UserModel as unknown as MockableModel).find = originalUserFind;
   (UserModel as unknown as MockableModel).findOne = originalUserFindOne;
   (UserModel as unknown as MockableModel).countDocuments = originalUserCountDocuments;
@@ -273,9 +275,7 @@ describe("admin payment recovery", () => {
       createdAt: new Date("2026-05-08T00:00:00Z"),
       expiresAt: new Date("2026-05-08T00:30:00Z"),
     } as Partial<MockPaymentOrder>);
-    let capturedCountFilter: unknown;
-    let capturedFindFilter: unknown;
-    let capturedLimit = 0;
+    let capturedPipeline: Array<Record<string, unknown>> | undefined;
 
     (UserModel as unknown as MockableModel).find = (query: unknown) => {
       const chain = {
@@ -305,28 +305,9 @@ describe("admin payment recovery", () => {
       return chain;
     };
 
-    (PaymentOrderModel as unknown as MockableModel).countDocuments = async (filter: unknown) => {
-      capturedCountFilter = filter;
-      return 1;
-    };
-    (PaymentOrderModel as unknown as MockableModel).find = (filter: unknown) => {
-      capturedFindFilter = filter;
-      const chain = {
-        select() {
-          return chain;
-        },
-        sort() {
-          return chain;
-        },
-        limit(limit: number) {
-          capturedLimit = limit;
-          return chain;
-        },
-        async lean() {
-          return [order];
-        },
-      };
-      return chain;
+    (PaymentOrderModel as unknown as MockableModel).aggregate = async (pipeline: Array<Record<string, unknown>>) => {
+      capturedPipeline = pipeline;
+      return [{ metadata: [{ total: 1 }], items: [order] }];
     };
 
     const req = {
@@ -338,9 +319,9 @@ describe("admin payment recovery", () => {
     await getAdminPaymentOrders(req, res as unknown as Response, recorder.next);
 
     assert.equal(recorder.getError(), undefined);
-    assert.deepEqual(capturedCountFilter, capturedFindFilter);
-    assert.equal((capturedFindFilter as Record<string, unknown>).status, "pending");
-    assert.equal(capturedLimit, 100);
+    assert.equal((capturedPipeline?.[0]?.$match as Record<string, unknown>).status, "pending");
+    const facet = capturedPipeline?.find((stage) => "$facet" in stage)?.$facet as Record<string, Array<Record<string, unknown>>> | undefined;
+    assert.deepEqual(facet?.items.at(-1), { $limit: 100 });
 
     const body = res.payload as { success: boolean; data: Record<string, unknown> };
     const items = body.data.items as Array<Record<string, unknown>>;
@@ -520,5 +501,64 @@ describe("admin operational list filters", () => {
     const error = recorder.getError() as { statusCode?: number; errorCode?: string };
     assert.equal(error?.statusCode, 400);
     assert.equal(error?.errorCode, "invalid_operational_scope");
+  });
+
+  it("defaults payment list to real and paginates after effective filtering", async () => {
+    let capturedPipeline: Array<Record<string, unknown>> | undefined;
+    const order = createMockPaymentOrder({
+      createdAt: new Date("2026-07-10T00:00:00.000Z"),
+      __effectiveOperationalCategory: "real",
+      __effectiveOperationalSource: "default",
+    } as Partial<MockPaymentOrder>);
+
+    (PaymentOrderModel as unknown as MockableModel).aggregate = async (pipeline: Array<Record<string, unknown>>) => {
+      capturedPipeline = pipeline;
+      return [{ metadata: [{ total: 3 }], items: [order] }];
+    };
+    (PaymentOrderModel as unknown as MockableModel).countDocuments = async () => 3;
+    (PaymentOrderModel as unknown as MockableModel).find = () => ({
+      select() { return this; },
+      sort() { return this; },
+      limit() { return this; },
+      async lean() { return [order]; },
+    });
+    (UserModel as unknown as MockableModel).find = () => ({
+      select() { return this; },
+      async lean() { return []; },
+    });
+
+    const res = createMockResponse();
+    const recorder = createNextRecorder();
+    await getAdminPaymentOrders(
+      { query: { page: "2", limit: "2" } } as unknown as Request,
+      res as unknown as Response,
+      recorder.next,
+    );
+
+    assert.equal(recorder.getError(), undefined);
+    assert.deepEqual(capturedPipeline?.find((stage) => "$match" in stage && (stage.$match as Record<string, unknown>).__effectiveOperationalCategory === "real"), {
+      $match: { __effectiveOperationalCategory: "real" },
+    });
+    const facet = capturedPipeline?.find((stage) => "$facet" in stage)?.$facet as Record<string, Array<Record<string, unknown>>> | undefined;
+    assert.deepEqual(facet?.items.slice(-3), [{ $sort: { createdAt: -1 } }, { $skip: 2 }, { $limit: 2 }]);
+    const body = res.payload as { data: { page: number; totalPages: number; operationalScope: string; items: Array<{ operationalClassification: { effectiveCategory: string } }> } };
+    assert.equal(body.data.page, 2);
+    assert.equal(body.data.totalPages, 2);
+    assert.equal(body.data.operationalScope, "real");
+    assert.equal(body.data.items[0]?.operationalClassification.effectiveCategory, "real");
+  });
+
+  it("rejects invalid payment pagination before querying", async () => {
+    const res = createMockResponse();
+    const recorder = createNextRecorder();
+    await getAdminPaymentOrders(
+      { query: { page: "0" } } as unknown as Request,
+      res as unknown as Response,
+      recorder.next,
+    );
+
+    const error = recorder.getError() as { statusCode?: number; errorCode?: string };
+    assert.equal(error?.statusCode, 400);
+    assert.equal(error?.errorCode, "invalid_payment_order_page");
   });
 });

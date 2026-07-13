@@ -233,11 +233,11 @@ async function getUserAccountExport(userId: string) {
     visionBoards,
   ] =
     await Promise.all([
-      UserModel.findOne({ firebaseUid: userId }).select("-__v").lean(),
+      UserModel.findOne({ firebaseUid: userId }).select("-__v -operationalClassification").lean(),
       GoalModel.find(withoutTombstones({ userId })).select("-__v").sort({ createdAt: 1 }).lean(),
       PlanModel.find(withoutTombstones({ userId })).select("-__v").sort({ createdAt: 1 }).lean(),
-      OrderModel.find({ userId }).select("-__v").sort({ createdAt: 1 }).lean(),
-      PaymentOrderModel.find({ userId }).select("-__v").sort({ createdAt: 1 }).lean(),
+      OrderModel.find({ userId }).select("-__v -operationalClassification").sort({ createdAt: 1 }).lean(),
+      PaymentOrderModel.find({ userId }).select("-__v -operationalClassification").sort({ createdAt: 1 }).lean(),
       BillingSubscriptionModel.find({ userId }).select("-__v").sort({ createdAt: 1 }).lean(),
       BillingEventModel.find({ userId }).select("-__v").sort({ createdAt: 1 }).lean(),
       CouponUsageModel.find({ userId }).select("-__v").sort({ usedAt: 1 }).lean(),

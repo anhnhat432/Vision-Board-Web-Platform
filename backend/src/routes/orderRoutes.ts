@@ -3,6 +3,7 @@ import { Router } from "express";
 import {
   adminGetOrder,
   adminGetOrders,
+  adminExportOrders,
   adminUpdateOrder,
   adminUpdateOrderStatus,
   cancelOrder,
@@ -40,6 +41,7 @@ orderRoutes.post(
 
 // Admin-only routes
 orderRoutes.get("/admin/orders", asyncHandler(requireAdmin), asyncHandler(adminGetOrders));
+orderRoutes.get("/admin/orders/export", asyncHandler(requireAdmin), asyncHandler(adminExportOrders));
 orderRoutes.get(
   "/admin/orders/:id",
   asyncHandler(requireAdmin),

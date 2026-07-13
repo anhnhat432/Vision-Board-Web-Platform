@@ -1,11 +1,115 @@
 import type { Request, Response } from "express";
 
 import { orderService } from "../services/orderService";
+import type { OrderStatus } from "../models/OrderModel";
+import type { AdminOrderListInput, OrderEntity } from "../repositories/mongo/MongoOrderRepository";
+import { parseOperationalScopeQuery } from "../services/adminOperationalClassificationQuery";
 import { recordCouponUsage } from "../services/discountService";
 import { getPaymentProviderAdapter } from "../services/paymentProviderRegistry";
 import { ApiError } from "../utils/apiError";
 import { successResponse } from "../utils/apiResponse";
 import { requireAuthUser } from "./controllerHelpers";
+
+const ORDER_STATUSES = new Set<OrderStatus>(["pending", "confirmed", "printing", "shipping", "delivered", "cancelled"]);
+const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
+  pending: "Chờ xác nhận",
+  confirmed: "Đã xác nhận",
+  printing: "Đang in",
+  shipping: "Đang giao",
+  delivered: "Đã giao",
+  cancelled: "Đã hủy",
+};
+const DEFAULT_ADMIN_ORDER_LIMIT = 30;
+const MAX_ADMIN_ORDER_LIMIT = 100;
+const MAX_ADMIN_ORDER_QUERY_LENGTH = 120;
+
+function parsePositiveInteger(value: unknown, fallback: number, field: "page" | "limit"): number {
+  if (value == null || value === "") return fallback;
+  const parsed = typeof value === "string" ? Number(value.trim()) : Array.isArray(value) ? NaN : Number(value);
+  if (!Number.isInteger(parsed) || parsed < 1) {
+    throw new ApiError(400, `${field} must be a positive integer.`, undefined, `invalid_admin_order_${field}`);
+  }
+  return field === "limit" ? Math.min(parsed, MAX_ADMIN_ORDER_LIMIT) : parsed;
+}
+
+function parseBoundedText(value: unknown, field: "q" | "frame"): string {
+  if (value == null || value === "") return "";
+  if (typeof value !== "string") {
+    throw new ApiError(400, `${field} must be a string.`, undefined, `invalid_admin_order_${field}`);
+  }
+  return value.trim().slice(0, MAX_ADMIN_ORDER_QUERY_LENGTH);
+}
+
+function parseAdminOrderStatus(value: unknown): OrderStatus | "all" {
+  if (value == null || value === "") return "all";
+  if (typeof value !== "string") {
+    throw new ApiError(400, "status must be a string.", undefined, "invalid_admin_order_status");
+  }
+  const status = value.trim().toLowerCase();
+  if (status === "all" || ORDER_STATUSES.has(status as OrderStatus)) return status as OrderStatus | "all";
+  throw new ApiError(400, "Order status is invalid.", undefined, "invalid_admin_order_status");
+}
+
+function parseOrderDate(value: unknown, field: "dateFrom" | "dateTo"): Date | undefined {
+  if (value == null || value === "") return undefined;
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    throw new ApiError(400, `${field} must use YYYY-MM-DD.`, undefined, "invalid_admin_order_date");
+  }
+  const [year, month, day] = value.split("-").map(Number);
+  const calendarDate = new Date(Date.UTC(year, month - 1, day));
+  if (
+    calendarDate.getUTCFullYear() !== year ||
+    calendarDate.getUTCMonth() !== month - 1 ||
+    calendarDate.getUTCDate() !== day
+  ) {
+    throw new ApiError(400, `${field} must be a valid calendar date.`, undefined, "invalid_admin_order_date");
+  }
+  return new Date(`${value}T00:00:00+07:00`);
+}
+
+function nextCalendarDay(date: Date): Date {
+  return new Date(date.getTime() + 24 * 60 * 60 * 1000);
+}
+
+function parseAdminOrderListInput(query: Request["query"]): AdminOrderListInput {
+  const dateFrom = parseOrderDate(query.dateFrom, "dateFrom");
+  const dateTo = parseOrderDate(query.dateTo, "dateTo");
+  if (dateFrom && dateTo && dateTo < dateFrom) {
+    throw new ApiError(400, "dateTo must not be before dateFrom.", undefined, "invalid_admin_order_date");
+  }
+  const frame = parseBoundedText(query.frame, "frame");
+  return {
+    q: parseBoundedText(query.q, "q"),
+    status: parseAdminOrderStatus(query.status),
+    frame: frame || "all",
+    dateFrom,
+    dateToExclusive: dateTo ? nextCalendarDay(dateTo) : undefined,
+    operationalScope: parseOperationalScopeQuery(query.operationalScope),
+    page: parsePositiveInteger(query.page, 1, "page"),
+    limit: parsePositiveInteger(query.limit, DEFAULT_ADMIN_ORDER_LIMIT, "limit"),
+  };
+}
+
+function csvCell(value: string | number | Date | undefined): string {
+  const text = value instanceof Date ? value.toISOString() : String(value ?? "");
+  const safe = /^[=+\-@]/.test(text) ? `'${text}` : text;
+  return `"${safe.replace(/"/g, '""')}"`;
+}
+
+function buildAdminOrderCsv(orders: OrderEntity[]): string {
+  const headers = ["Mã đơn", "Họ tên", "Email", "SĐT", "Trạng thái", "Khung", "Set ảnh", "Tổng tiền", "Địa chỉ", "Ngày tạo", "Mục tiêu"];
+  const rows = orders.map((order) => {
+    const frame = order.lines.find((line) => line.type === "frame")?.label ?? order.kitType ?? "";
+    const themes = order.lines.filter((line) => line.type === "theme").map((line) => line.label).join("; ");
+    const address = [order.shippingAddress.line1, order.shippingAddress.line2, order.shippingAddress.city]
+      .filter(Boolean)
+      .join(", ");
+    return [order.id, order.fullName, order.email, order.phone, ORDER_STATUS_LABELS[order.status], frame, themes, order.totalVnd, address, order.createdAt, order.goalSnapshot?.title]
+      .map(csvCell)
+      .join(",");
+  });
+  return `\uFEFF${headers.map(csvCell).join(",")}\n${rows.join("\n")}`;
+}
 
 function buildPhysicalOrderPaymentDiscount(physicalOrder: Awaited<ReturnType<typeof orderService.getOrder>>) {
   if (!physicalOrder.discount) return undefined;
@@ -61,14 +165,42 @@ export async function cancelOrder(req: Request, res: Response): Promise<void> {
 
 export async function adminGetOrders(req: Request, res: Response): Promise<void> {
   requireAuthUser(req);
-  const orders = await orderService.adminGetOrders();
-  res.status(200).json(successResponse(orders));
+  const input = parseAdminOrderListInput(req.query);
+  const result = await orderService.adminGetOrders(input);
+  res.status(200).json(successResponse({
+    page: input.page,
+    limit: input.limit,
+    total: result.total,
+    totalPages: Math.ceil(result.total / input.limit),
+    operationalScope: input.operationalScope,
+    query: input.q,
+    status: input.status,
+    frame: input.frame,
+    dateFrom: req.query.dateFrom ?? null,
+    dateTo: req.query.dateTo ?? null,
+    statusCounts: result.statusCounts,
+    frameOptions: result.frameOptions,
+    items: result.items,
+  }));
 }
 
 export async function adminGetOrder(req: Request, res: Response): Promise<void> {
   requireAuthUser(req);
   const order = await orderService.adminGetOrder(req.params.id);
   res.status(200).json(successResponse(order));
+}
+
+export async function adminExportOrders(req: Request, res: Response): Promise<void> {
+  requireAuthUser(req);
+  const { page: _page, limit: _limit, ...input } = parseAdminOrderListInput(req.query);
+  const orders = await orderService.adminExportOrders(input);
+  res
+    .status(200)
+    .set({
+      "Content-Type": "text/csv; charset=utf-8",
+      "Content-Disposition": 'attachment; filename="orders.csv"',
+    })
+    .send(buildAdminOrderCsv(orders));
 }
 
 export async function adminUpdateOrderStatus(req: Request, res: Response): Promise<void> {

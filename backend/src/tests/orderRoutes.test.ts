@@ -35,7 +35,9 @@ type MockableCatalog = {
 
 type MockableOrder = {
   create: unknown;
+  find: unknown;
   findById: unknown;
+  aggregate: unknown;
 };
 
 type MockableDiscount = {
@@ -50,7 +52,9 @@ type MockableCouponUsage = {
 const originalCatalogFind = OrderCatalogModel.find;
 const originalCatalogFindOne = OrderCatalogModel.findOne;
 const originalOrderCreate = OrderModel.create;
+const originalOrderFind = (OrderModel as unknown as MockableOrder).find;
 const originalOrderFindById = (OrderModel as unknown as MockableOrder).findById;
+const originalOrderAggregate = (OrderModel as unknown as MockableOrder).aggregate;
 const originalDiscountFind = DiscountModel.find;
 const originalDiscountFindOne = DiscountModel.findOne;
 const originalCouponUsageFindOne = CouponUsageModel.findOne;
@@ -65,7 +69,9 @@ function restoreModels(): void {
   (OrderCatalogModel as unknown as MockableCatalog).find = originalCatalogFind;
   (OrderCatalogModel as unknown as MockableCatalog).findOne = originalCatalogFindOne;
   (OrderModel as unknown as MockableOrder).create = originalOrderCreate;
+  (OrderModel as unknown as MockableOrder).find = originalOrderFind;
   (OrderModel as unknown as MockableOrder).findById = originalOrderFindById;
+  (OrderModel as unknown as MockableOrder).aggregate = originalOrderAggregate;
   (DiscountModel as unknown as MockableDiscount).find = originalDiscountFind;
   (DiscountModel as unknown as MockableDiscount).findOne = originalDiscountFindOne;
   (CouponUsageModel as unknown as MockableCouponUsage).findOne = originalCouponUsageFindOne;
@@ -276,6 +282,25 @@ async function patchAdminPhysicalClassification(app: Express, token: string | un
     );
     const text = await response.text();
     return { status: response.status, body: text.startsWith("{") ? JSON.parse(text) as Record<string, unknown> : {} };
+  } finally {
+    await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
+  }
+}
+
+async function getAdminOrderRoute(app: Express, path: string, token: string | undefined): Promise<{ status: number; body: Record<string, unknown>; contentType: string | null }> {
+  const server = app.listen(0);
+  await new Promise<void>((resolve) => server.once("listening", resolve));
+  const address = server.address() as AddressInfo;
+  try {
+    const response = await fetch(`http://127.0.0.1:${address.port}${path}`, {
+      headers: token ? { authorization: `Bearer ${token}` } : {},
+    });
+    const text = await response.text();
+    return {
+      status: response.status,
+      body: text.startsWith("{") ? JSON.parse(text) as Record<string, unknown> : {},
+      contentType: response.headers.get("content-type"),
+    };
   } finally {
     await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
   }
@@ -573,5 +598,99 @@ describe("PATCH /api/admin/orders/:id/operational-classification", () => {
     assert.equal(fixture.physicalOrder.status, "shipping");
     assert.equal(fixture.physicalOrder.operationalClassification?.category, "internal");
     assert.equal(fixture.events.size, 1);
+  });
+});
+
+describe("GET /api/admin/orders operational list", () => {
+  afterEach(() => {
+    restoreModels();
+  });
+
+  it("requires Admin authorization and returns JSON errors for invalid paginated-list queries", async () => {
+    installAdminClassificationModels();
+    const app = createAdminClassificationApp();
+
+    const nonAdmin = await getAdminOrderRoute(app, "/api/admin/orders?page=0", "user-token");
+    assert.equal(nonAdmin.status, 403);
+
+    const invalid = await getAdminOrderRoute(app, "/api/admin/orders/export?page=0", "admin-token");
+    assert.equal(invalid.status, 400);
+    assert.equal(invalid.body.success, false);
+    assert.equal(invalid.contentType?.includes("text/csv"), false);
+  });
+
+  it("returns effective classification after server-side operational filtering", async () => {
+    installAdminClassificationModels();
+    (OrderModel as unknown as MockableOrder).aggregate = async () => [{
+      metadata: [{ total: 1 }],
+      items: [{
+        _id: { toString: () => "507f1f77bcf86cd799439011" },
+        userId: "orphan_uid",
+        status: "pending",
+        lines: [],
+        fullName: "Customer",
+        email: "customer@example.com",
+        phone: "1",
+        shippingAddress: { line1: "x" },
+        createdAt: new Date("2026-07-10T00:00:00.000Z"),
+        updatedAt: new Date("2026-07-10T00:00:00.000Z"),
+        __effectiveOperationalCategory: "real",
+        __effectiveOperationalSource: "default",
+      }],
+      statusCounts: [{ _id: "pending", count: 1 }],
+      frameOptions: [],
+    }];
+    const response = await getAdminOrderRoute(
+      createAdminClassificationApp(),
+      "/api/admin/orders?operationalScope=real&page=2&limit=2",
+      "admin-token",
+    );
+
+    assert.equal(response.status, 200);
+    const data = response.body.data as Record<string, unknown>;
+    assert.equal(data.operationalScope, "real");
+    assert.equal(data.page, 2);
+    assert.equal((data.items as Array<{ operationalClassification: { effectiveCategory: string } }>)[0]?.operationalClassification.effectiveCategory, "real");
+  });
+});
+
+describe("customer order classification privacy", () => {
+  afterEach(() => {
+    restoreModels();
+  });
+
+  it("does not serialize Admin classification on customer order endpoints", async () => {
+    const customerOrder = {
+      _id: { toString: () => "507f1f77bcf86cd799439011" },
+      userId: "user_test",
+      status: "pending",
+      lines: [],
+      fullName: "Customer",
+      email: "customer@example.com",
+      phone: "1",
+      shippingAddress: { line1: "x" },
+      createdAt: new Date("2026-07-10T00:00:00.000Z"),
+      updatedAt: new Date("2026-07-10T00:00:00.000Z"),
+      operationalClassification: { category: "internal", classifiedBy: "admin_uid", note: "private admin note" },
+    };
+    (OrderModel as unknown as MockableOrder).findById = () => ({
+      select() { return this; },
+      async lean() { return customerOrder; },
+    });
+    (OrderModel as unknown as MockableOrder).find = () => ({
+      select() { return this; },
+      sort() { return this; },
+      async lean() { return [customerOrder]; },
+    });
+    const app = createTestApp();
+
+    const single = await getAdminOrderRoute(app, "/api/orders/507f1f77bcf86cd799439011", "ok");
+    const list = await getAdminOrderRoute(app, "/api/orders", "ok");
+
+    assert.equal(single.status, 200);
+    assert.equal(list.status, 200);
+    assert.equal(JSON.stringify(single.body).includes("operationalClassification"), false);
+    assert.equal(JSON.stringify(list.body).includes("classifiedBy"), false);
+    assert.equal(JSON.stringify(list.body).includes("private admin note"), false);
   });
 });
