@@ -34,6 +34,7 @@ const originalPaymentFindOne = (PaymentOrderModel as unknown as { findOne: unkno
 function createApp(): Express {
   const app = express();
   app.use(express.json());
+  app.use("/api", generalApiRateLimiter);
   app.use("/api", createAuthMiddleware({
     async verifyIdToken(token: string) {
       if (token === "admin-token") return { uid: "admin_uid", email: "admin@example.test", emailVerified: true };
@@ -41,7 +42,6 @@ function createApp(): Express {
       throw new Error("Invalid test token");
     },
   }));
-  app.use("/api", generalApiRateLimiter);
   app.use("/api", adminRoutes);
   app.use(errorMiddleware);
   return app;

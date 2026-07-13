@@ -253,6 +253,7 @@ async function postOrder(app: Express, body: unknown): Promise<JsonResponse> {
 function createAdminClassificationApp(): Express {
   const app = express();
   app.use(express.json());
+  app.use("/api", generalApiRateLimiter);
   app.use(
     "/api",
     createAuthMiddleware({
@@ -263,7 +264,6 @@ function createAdminClassificationApp(): Express {
       },
     }),
   );
-  app.use("/api", generalApiRateLimiter);
   app.use("/api", orderRoutes);
   app.use(errorMiddleware);
   return app;
