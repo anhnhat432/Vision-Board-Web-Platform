@@ -136,7 +136,7 @@ describe("AdminOrdersPage server operational data", () => {
     expect(screen.queryByText("Trang 3/2")).not.toBeInTheDocument();
   });
 
-  it("does not reload the old list view after a classification resolves", async () => {
+  it("clears a pending classification dialog when its order view changes", async () => {
     const { AdminOrdersPage } = await import("./AdminOrdersPage");
     let resolveClassification: (value: { status: "updated" }) => void = () => undefined;
     orders.adminClassifyPhysicalOrder.mockImplementation(() => new Promise((resolve) => { resolveClassification = resolve; }));
@@ -148,9 +148,48 @@ describe("AdminOrdersPage server operational data", () => {
     await waitFor(() => expect(orders.adminClassifyPhysicalOrder).toHaveBeenCalled());
     fireEvent.change(document.querySelector('input[aria-label="Tìm đơn"]')!, { target: { value: "scope-change" } });
     await waitFor(() => expect(orders.adminGetOrders).toHaveBeenCalledWith(expect.objectContaining({ q: "scope-change", status: "all", page: 1 })));
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
+    expect(screen.getByRole("button", { name: "Phân loại dữ liệu" })).toBeEnabled();
 
+    fireEvent.click(screen.getByRole("button", { name: "Phân loại dữ liệu" }));
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
     await act(async () => { resolveClassification({ status: "updated" }); });
-    await waitFor(() => expect(orders.adminGetOrders).toHaveBeenCalled());
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Hủy" }));
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
     expect(orders.adminGetOrders).toHaveBeenLastCalledWith(expect.objectContaining({ q: "scope-change", status: "all", page: 1 }));
+  });
+
+  it("reloads the active filtered view after a deferred status transition", async () => {
+    const { AdminOrdersPage } = await import("./AdminOrdersPage");
+    let resolveTransition: () => void = () => undefined;
+    orders.adminUpdateOrderStatus.mockImplementation(() => new Promise<void>((resolve) => { resolveTransition = resolve; }));
+    renderPage(AdminOrdersPage);
+
+    await screen.findByText("Mặc định dữ liệu thật");
+    fireEvent.click(screen.getByRole("button", { name: "Đã xác nhận" }));
+    await waitFor(() => expect(orders.adminUpdateOrderStatus).toHaveBeenCalledWith("order-1", { status: "confirmed" }));
+    fireEvent.change(screen.getByRole("textbox", { name: "Tìm đơn" }), { target: { value: "active-view" } });
+    await waitFor(() => expect(orders.adminGetOrders).toHaveBeenLastCalledWith(expect.objectContaining({ q: "active-view", page: 1 })));
+
+    await act(async () => { resolveTransition(); });
+    await waitFor(() => expect(orders.adminGetOrders).toHaveBeenLastCalledWith(expect.objectContaining({ q: "active-view", page: 1 })));
+  });
+
+  it("reloads the active filtered view after a deferred bulk update", async () => {
+    const { AdminOrdersPage } = await import("./AdminOrdersPage");
+    let resolveBulkUpdate: () => void = () => undefined;
+    orders.adminUpdateOrderStatus.mockImplementation(() => new Promise<void>((resolve) => { resolveBulkUpdate = resolve; }));
+    renderPage(AdminOrdersPage);
+
+    await screen.findByText("Mặc định dữ liệu thật");
+    fireEvent.click(screen.getAllByRole("checkbox")[0]);
+    fireEvent.click(screen.getAllByRole("button", { name: "Đã xác nhận" })[0]);
+    await waitFor(() => expect(orders.adminUpdateOrderStatus).toHaveBeenCalledWith("order-1", { status: "confirmed" }));
+    fireEvent.change(screen.getByRole("textbox", { name: "Tìm đơn" }), { target: { value: "bulk-view" } });
+    await waitFor(() => expect(orders.adminGetOrders).toHaveBeenLastCalledWith(expect.objectContaining({ q: "bulk-view", page: 1 })));
+
+    await act(async () => { resolveBulkUpdate(); });
+    await waitFor(() => expect(orders.adminGetOrders).toHaveBeenLastCalledWith(expect.objectContaining({ q: "bulk-view", page: 1 })));
   });
 });

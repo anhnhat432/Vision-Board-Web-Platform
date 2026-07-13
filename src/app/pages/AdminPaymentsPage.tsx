@@ -135,7 +135,6 @@ export function AdminPaymentsPage() {
   const currentViewKeyRef = useRef("");
 
   const handleSearchChange = useCallback((next: string) => {
-    setPage(1);
     setQuery(next);
   }, []);
   useAdminSearch(query, handleSearchChange, "Tìm mã đơn, email, mã giao dịch");
@@ -168,7 +167,19 @@ export function AdminPaymentsPage() {
     [],
   );
 
-  currentViewKeyRef.current = JSON.stringify({ q: debouncedQuery, statusFilter, operationalScope, page });
+  const viewKey = JSON.stringify({ q: debouncedQuery, statusFilter, operationalScope, page });
+  currentViewKeyRef.current = viewKey;
+
+  // A classification belongs to one server view. Changing that view releases its dialog;
+  // an in-flight request is ignored by its generation guard when it later settles.
+  useEffect(() => {
+    classificationMutationRef.current += 1;
+    classificationRequestRef.current = null;
+    setClassificationPayment(null);
+    setClassificationBusy(false);
+    setClassificationError(undefined);
+  }, [viewKey]);
+
   useEffect(() => {
     if (authLoading || userProfileLoading) return;
     if (!user || !isAdmin) {
@@ -181,10 +192,13 @@ export function AdminPaymentsPage() {
   // Debounced reload when the user types in the topbar search input.
   useEffect(() => {
     const handle = window.setTimeout(() => {
-      setDebouncedQuery(query);
+      if (query !== debouncedQuery) {
+        setDebouncedQuery(query);
+        setPage(1);
+      }
     }, SEARCH_DEBOUNCE_MS);
     return () => window.clearTimeout(handle);
-  }, [query]);
+  }, [debouncedQuery, query]);
 
   // Track separate "all-pending" count for the sidebar badge — independent of the
   // current filter so users see the true backlog even when viewing "completed".

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -90,6 +90,7 @@ describe("AdminPaymentsPage operational classification", () => {
     await waitFor(() => expect(service.adminListPaymentOrders).toHaveBeenCalledWith(expect.objectContaining({ q: "", page: 2 })));
 
     fireEvent.change(screen.getByRole("textbox", { name: "Tìm thanh toán" }), { target: { value: "abc" } });
+    expect(service.adminListPaymentOrders.mock.calls.filter(([params]) => params.q === "" && params.page === 1)).toHaveLength(1);
     expect(service.adminListPaymentOrders).not.toHaveBeenCalledWith(expect.objectContaining({ q: "abc", page: 2 }));
     expect(service.adminListPaymentOrders).not.toHaveBeenCalledWith(expect.objectContaining({ q: "abc", page: 1 }));
 
@@ -111,7 +112,7 @@ describe("AdminPaymentsPage operational classification", () => {
     expect(screen.queryByText("Trang 5/4")).not.toBeInTheDocument();
   });
 
-  it("does not reload the old payment view after a classification resolves", async () => {
+  it("clears a pending classification dialog when its payment view changes", async () => {
     let resolveClassification: (value: { status: "updated" }) => void = () => undefined;
     service.adminClassifyPaymentOrder.mockImplementation(() => new Promise((resolve) => { resolveClassification = resolve; }));
     await renderPage();
@@ -121,10 +122,17 @@ describe("AdminPaymentsPage operational classification", () => {
     await waitFor(() => expect(service.adminClassifyPaymentOrder).toHaveBeenCalled());
     fireEvent.change(document.querySelector('input[aria-label="Tìm thanh toán"]')!, { target: { value: "scope-change" } });
     await waitFor(() => expect(service.adminListPaymentOrders).toHaveBeenCalledWith(expect.objectContaining({ q: "scope-change", status: "all", page: 1, limit: 30 })), { timeout: 600 });
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument());
+    expect(screen.getByRole("button", { name: "Phân loại dữ liệu" })).toBeEnabled();
 
-    resolveClassification({ status: "updated" });
-    await waitFor(() => expect(service.adminClassifyPaymentOrder).toHaveBeenCalled());
+    await userEvent.setup().click(screen.getByRole("button", { name: "Phân loại dữ liệu" }));
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+
+    await act(async () => { resolveClassification({ status: "updated" }); });
     await new Promise((resolve) => window.setTimeout(resolve, 0));
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+    await userEvent.setup().click(screen.getByRole("button", { name: "Hủy" }));
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
     expect(service.adminListPaymentOrders).toHaveBeenLastCalledWith(expect.objectContaining({ q: "scope-change", status: "all", page: 1, limit: 30 }));
   });
 });

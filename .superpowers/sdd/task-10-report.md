@@ -40,7 +40,15 @@
 
 ## Review Verification
 
-- `npm.cmd run test:ui -- src/app/components/admin/AdminOperationalClassification.test.tsx src/app/pages/AdminPaymentsPage.test.tsx src/app/pages/AdminPaymentsPage.dialog.test.tsx src/app/pages/AdminOrdersPage.test.tsx src/app/pages/AdminOrderDetailPage.test.tsx` - passed, 5 files and 26 tests.
+- `npm.cmd run test:ui -- src/app/components/admin/AdminOperationalClassification.test.tsx src/app/pages/AdminPaymentsPage.test.tsx src/app/pages/AdminPaymentsPage.dialog.test.tsx src/app/pages/AdminOrdersPage.test.tsx src/app/pages/AdminOrderDetailPage.test.tsx` - passed, 5 files and 28 tests.
 - `npm.cmd run typecheck` - passed (exit 0).
 - `git diff --check` and `git diff --check ddf94b66..HEAD` - passed (exit 0).
 - Non-failing test warnings remain: payment dialogs render outside `AdminPendingCountsProvider`; payment page tests log React `act(...)` warnings.
+
+## Review Re-Review Follow-up
+
+- RED: from payment page 2, typing `abc` immediately issued a duplicate old-view `{ q: "", page: 1 }` request before the debounced `{ q: "abc", page: 1 }` request.
+- RED: deferred payment and physical-order classification dialogs stayed locked after their active list view changed; deferred physical-order transition and bulk completion then reloaded the captured old `{ q: "" }` view rather than the current filter.
+- GREEN: Payments now batch the debounced query and page reset only when the debounced value changes, so page 2 typing creates one final `{ q: "abc", page: 1 }` request with no intermediate old-view reload.
+- GREEN: both classification pages invalidate the old mutation generation and clear dialog/busy/error/request state when their view key changes; late completions cannot close or modify a newly opened dialog.
+- GREEN: Orders loads from a current-view ref and rejects responses whose view key is no longer active, covering deferred transition and bulk reloads (the edit path uses the same loader).

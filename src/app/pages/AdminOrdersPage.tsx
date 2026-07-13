@@ -40,6 +40,16 @@ const STATUS_FILTER_ORDER: Array<ApiOrderStatus | "all"> = [
   "cancelled",
 ];
 
+type OrderListView = {
+  query: string;
+  statusFilter: ApiOrderStatus | "all";
+  frameFilter: string;
+  dateFrom: string;
+  dateTo: string;
+  operationalScope: AdminOperationalScope;
+  page: number;
+};
+
 function getErrorCode(error: unknown): string | undefined {
   return typeof error === "object" && error !== null && "errorCode" in error
     ? String(error.errorCode)
@@ -131,6 +141,9 @@ export function AdminOrdersPage() {
   const classificationRequestRef = useRef<{ commandKey: string; requestId: string } | null>(null);
   const classificationMutationRef = useRef(0);
   const currentViewKeyRef = useRef("");
+  const currentViewRef = useRef<OrderListView>({
+    query: "", statusFilter: "all", frameFilter: "all", dateFrom: "", dateTo: "", operationalScope: "real", page: 1,
+  });
 
   // Edit dialog state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -167,21 +180,25 @@ export function AdminOrdersPage() {
     setQuery(next);
   }, [resetListPosition]);
   useAdminSearch(query, handleSearchChange, "Tìm email, mã đơn, họ tên, số điện thoại");
-  currentViewKeyRef.current = JSON.stringify({ query, statusFilter, frameFilter, dateFrom, dateTo, operationalScope, page });
+  const currentView: OrderListView = { query, statusFilter, frameFilter, dateFrom, dateTo, operationalScope, page };
+  const viewKey = JSON.stringify(currentView);
+  currentViewKeyRef.current = viewKey;
+  currentViewRef.current = currentView;
 
-  const loadOrders = useCallback(async () => {
+  const loadOrders = useCallback(async (view = currentViewRef.current) => {
     const generation = ++loadGeneration.current;
+    const requestViewKey = JSON.stringify(view);
     setLoading(true);
     setError(null);
     try {
       const data = await withTimeout(
-        adminGetOrders({ q: query, status: statusFilter, frame: frameFilter, dateFrom: dateFrom || undefined, dateTo: dateTo || undefined, operationalScope, page, limit: 30 }) as Promise<AdminOrderListResponse>,
+        adminGetOrders({ q: view.query, status: view.statusFilter, frame: view.frameFilter, dateFrom: view.dateFrom || undefined, dateTo: view.dateTo || undefined, operationalScope: view.operationalScope, page: view.page, limit: 30 }) as Promise<AdminOrderListResponse>,
         ADMIN_LOAD_TIMEOUT_MS,
         "Máy chủ phản hồi quá lâu. Render có thể đang cold start; hãy thử lại sau vài giây.",
       );
-      if (generation !== loadGeneration.current) return;
+      if (generation !== loadGeneration.current || requestViewKey !== currentViewKeyRef.current) return;
       const boundedPages = Math.max(1, data.totalPages);
-      if (page > boundedPages) {
+      if (view.page > boundedPages) {
         setPage(boundedPages);
         return;
       }
@@ -191,11 +208,20 @@ export function AdminOrdersPage() {
       setStatusCounts(data.statusCounts);
       setFrameOptions(data.frameOptions);
     } catch (err) {
-      if (generation === loadGeneration.current) setError(getErrorMessage(err, "Không thể tải danh sách đơn in."));
+      if (generation === loadGeneration.current && requestViewKey === currentViewKeyRef.current) setError(getErrorMessage(err, "Không thể tải danh sách đơn in."));
     } finally {
-      if (generation === loadGeneration.current) setLoading(false);
+      if (generation === loadGeneration.current && requestViewKey === currentViewKeyRef.current) setLoading(false);
     }
-  }, [dateFrom, dateTo, frameFilter, operationalScope, page, query, statusFilter]);
+  }, []);
+
+  // A classification dialog cannot outlive the server view it was opened from.
+  useEffect(() => {
+    classificationMutationRef.current += 1;
+    classificationRequestRef.current = null;
+    setClassificationOrder(null);
+    setClassificationBusy(false);
+    setClassificationError(undefined);
+  }, [viewKey]);
 
   useEffect(() => {
     if (authLoading || userProfileLoading) return;
@@ -204,7 +230,7 @@ export function AdminOrdersPage() {
       return;
     }
     void loadOrders();
-  }, [authLoading, isAdmin, loadOrders, user, userProfileLoading]);
+  }, [authLoading, isAdmin, loadOrders, user, userProfileLoading, viewKey]);
 
   const handleTransition = async (orderId: string, nextStatus: ApiOrderStatus) => {
     setBusyOrderId(orderId);
