@@ -242,7 +242,6 @@ interface RawSalesRow {
   __effectiveOperationalCategory?: OperationalCategory;
   __effectiveOperationalSource?: OperationalClassificationSource;
   __effectiveOperationalReason?: AdminOperationalClassificationSummary["reason"];
-  __effectiveOperationalNote?: string;
   __effectiveOperationalClassifiedAt?: Date | null;
   reporting?: {
     kpiStatus?: PaymentReportingKpiStatus;
@@ -301,13 +300,23 @@ function serializePayer(value: RawSalesPayer | null | undefined): AdminSalesRepo
   };
 }
 
+function serializeSalesOperationalClassification(row: RawSalesRow): AdminOperationalClassificationSummary {
+  if (!row.__effectiveOperationalCategory) {
+    return { effectiveCategory: "real", source: "default" };
+  }
+  const classification = serializeProjectedOperationalClassification(row as unknown as Record<string, unknown>);
+  return {
+    effectiveCategory: classification.effectiveCategory,
+    source: classification.source,
+    ...(classification.reason ? { reason: classification.reason } : {}),
+    ...(classification.classifiedAt ? { classifiedAt: classification.classifiedAt } : {}),
+  };
+}
+
 function serializeSalesRow(row: RawSalesRow): AdminSalesReportRow {
   const isRefunded = Boolean(row.isRefunded);
   const refundCompletedAt = toIso(row.refund?.resolvedAt);
   const status = row.reporting?.kpiStatus ?? "pending";
-  const operationalClassification = row.__effectiveOperationalCategory
-    ? serializeProjectedOperationalClassification(row as unknown as Record<string, unknown>)
-    : { effectiveCategory: "real", source: "default" } as const;
   return {
     orderId: row.orderId,
     customerLabelMasked: maskPersonName(row.user?.displayName, row.orderId),
@@ -325,7 +334,7 @@ function serializeSalesRow(row: RawSalesRow): AdminSalesReportRow {
       completedAt: refundCompletedAt,
     },
     effectiveKpiStatus: row.effectiveKpiStatus ?? status,
-    operationalClassification,
+    operationalClassification: serializeSalesOperationalClassification(row),
     reporting: {
       kpiStatus: status,
       exclusionReason: row.reporting?.exclusionReason ?? null,
@@ -420,7 +429,6 @@ export function buildAdminSalesReportPipeline(
         __effectiveOperationalCategory: 1,
         __effectiveOperationalSource: 1,
         __effectiveOperationalReason: 1,
-        __effectiveOperationalNote: 1,
         __effectiveOperationalClassifiedAt: 1,
         user: 1,
         payer: 1,

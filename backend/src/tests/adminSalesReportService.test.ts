@@ -91,6 +91,8 @@ type SalesFacetFixture = {
   rows: Array<Record<string, unknown>>;
 };
 
+const CLASSIFICATION_NOTE_SENTINEL = "raw-classification-note-sentinel";
+
 function buildSalesFacetFixture(options: {
   storedStatus?: "pending" | "included" | "excluded";
   userCategory?: "real" | "test" | "internal";
@@ -161,6 +163,7 @@ function buildSalesFacetFixture(options: {
           : options.legacyExclusionReason === "internal_team"
             ? "legacy_sales_internal"
             : undefined,
+      __effectiveOperationalNote: CLASSIFICATION_NOTE_SENTINEL,
       effectiveKpiStatus,
       metadata: { providerPayload: "private provider payload" },
       bankAccount: "private bank account",
@@ -176,11 +179,11 @@ function installSalesFacetFixture(facet: SalesFacetFixture): void {
 
 function readEffectiveSalesRow(row: unknown): {
   effectiveKpiStatus?: unknown;
-  operationalClassification?: { effectiveCategory?: unknown; source?: unknown };
+  operationalClassification?: { effectiveCategory?: unknown; source?: unknown; note?: unknown };
 } {
   return row as {
     effectiveKpiStatus?: unknown;
-    operationalClassification?: { effectiveCategory?: unknown; source?: unknown };
+    operationalClassification?: { effectiveCategory?: unknown; source?: unknown; note?: unknown };
   };
 }
 
@@ -343,6 +346,8 @@ describe("admin sales report aggregation", () => {
     assert.equal(report.items[0]?.reporting.kpiStatus, "included");
     assert.equal(readEffectiveSalesRow(report.items[0]).effectiveKpiStatus, "excluded");
     assert.equal(readEffectiveSalesRow(report.items[0]).operationalClassification?.source, "user");
+    assert.equal(readEffectiveSalesRow(report.items[0]).operationalClassification?.note, undefined);
+    assert.equal(JSON.stringify(report).includes(CLASSIFICATION_NOTE_SENTINEL), false);
   });
 
   it("restores the stored review decision when classification becomes real", async () => {
@@ -591,6 +596,7 @@ describe("admin sales report aggregation", () => {
     assert.equal(csv.includes("private review note"), false);
     assert.equal(csv.includes("private provider payload"), false);
     assert.equal(csv.includes("private bank account"), false);
+    assert.equal(csv.includes(CLASSIFICATION_NOTE_SENTINEL), false);
   });
 
   it("rejects oversized exports instead of returning a partial CSV", async () => {

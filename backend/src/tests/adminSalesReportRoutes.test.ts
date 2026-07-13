@@ -21,6 +21,8 @@ import { RefundRequestModel } from "../models/refundRequestModel";
 import { UserModel } from "../models/UserModel";
 import { adminRoutes } from "../routes/adminRoutes";
 
+const CLASSIFICATION_NOTE_SENTINEL = "raw-classification-note-sentinel";
+
 type MockableModel = {
   aggregate: unknown;
   findOne: unknown;
@@ -236,6 +238,7 @@ describe("admin sales report routes", () => {
         effectiveKpiStatus: "excluded",
         __effectiveOperationalCategory: "test",
         __effectiveOperationalSource: "user",
+        __effectiveOperationalNote: CLASSIFICATION_NOTE_SENTINEL,
         metadata: { providerPayload: "private provider payload" },
         bankAccount: "private bank account",
       }],
@@ -258,6 +261,7 @@ describe("admin sales report routes", () => {
     assert.equal(JSON.stringify(response.json).includes("private review note"), false);
     assert.equal(JSON.stringify(response.json).includes("private provider payload"), false);
     assert.equal(JSON.stringify(response.json).includes("private bank account"), false);
+    assert.equal(JSON.stringify(response.json).includes(CLASSIFICATION_NOTE_SENTINEL), false);
   });
 
   it("reviews a qualifying order through the protected route and rejects invalid review input without an update", async () => {
