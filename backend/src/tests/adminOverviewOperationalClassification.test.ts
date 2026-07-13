@@ -63,8 +63,8 @@ function expression(value: unknown, row: Row): unknown {
 }
 
 function matches(row: Row, filter: Row): boolean {
-  if ("$or" in filter) return (filter.$or as Row[]).some((clause) => matches(row, clause));
   return Object.entries(filter).every(([path, expected]) => {
+    if (path === "$or") return (expected as Row[]).some((clause) => matches(row, clause));
     const actual = valueAt(row, path);
     if (!expected || typeof expected !== "object" || expected instanceof Date) return actual === expected;
     const operator = expected as Row;
@@ -105,6 +105,10 @@ describe("admin overview operational classification", () => {
     ];
     const subscriptions: Row[] = [
       { _id: "sub-real", userId: "real", planCode: "PLUS", status: "active", currentPeriodEnd: tomorrow, createdAt: now },
+      { _id: "sub-far", userId: "real", planCode: "PLUS", status: "active", currentPeriodEnd: new Date(now.getTime() + 20 * 24 * 60 * 60 * 1000), createdAt: now },
+      { _id: "sub-free", userId: "real", planCode: "FREE", status: "active", currentPeriodEnd: tomorrow, createdAt: now },
+      { _id: "sub-inactive", userId: "real", planCode: "PLUS", status: "canceled", currentPeriodEnd: tomorrow, createdAt: now },
+      { _id: "sub-expired", userId: "real", planCode: "PLUS", status: "active", currentPeriodEnd: earlier, createdAt: now },
       { _id: "sub-test", userId: "test", planCode: "PLUS", status: "active", currentPeriodEnd: tomorrow, createdAt: now },
       { _id: "sub-internal", userId: "internal", planCode: "PLUS", status: "active", currentPeriodEnd: tomorrow, createdAt: now },
       { _id: "sub-orphan", userId: "orphan", planCode: "PLUS", status: "active", currentPeriodEnd: tomorrow, createdAt: now },
@@ -113,6 +117,7 @@ describe("admin overview operational classification", () => {
       { orderId: "pending-real", userId: "real", status: "pending", purpose: "plus_subscription", amount: 0, currency: "VND", createdAt: now },
       { orderId: "pending-test", userId: "test", status: "pending", purpose: "physical_order", amount: 0, currency: "VND", createdAt: now },
       { orderId: "completed-real", userId: "real", status: "completed", purpose: "plus_subscription", amount: 100, currency: "VND", completedAt: now, createdAt: now },
+      { orderId: "completed-old", userId: "real", status: "completed", purpose: "plus_subscription", amount: 25, currency: "VND", completedAt: new Date(now.getTime() - 31 * 24 * 60 * 60 * 1000), createdAt: earlier },
       { orderId: "record-real", userId: "orphan", status: "completed", purpose: "physical_order", amount: 50, currency: "VND", completedAt: now, createdAt: now, operationalClassification: { category: "real", reason: "confirmed_real", classifiedAt: now }, reporting: { exclusionReason: "test" } },
       { orderId: "completed-test", userId: "test", status: "completed", purpose: "plus_subscription", amount: 200, currency: "VND", completedAt: now, createdAt: now },
       { orderId: "completed-usd", userId: "real", status: "completed", purpose: "plus_subscription", amount: 300, currency: "USD", completedAt: now, createdAt: earlier },
@@ -146,12 +151,12 @@ describe("admin overview operational classification", () => {
     assert.equal(forwarded, undefined);
     const data = (res.payload as { data: { summary: Record<string, unknown>; recentUsers: Row[]; recentPayments: Row[] } }).data;
     assert.deepEqual(data.summary, {
-      totalUsers: 2, adminUsers: 1, excludedUsers: { test: 1, internal: 1 }, activePlusSubscriptions: 1,
-      expiringSoonSubscriptions: 1, pendingPaymentOrders: 1, completedPaymentOrders: 3, physicalOrders: 2,
-      revenueTotalVnd: 150, revenueLast30DaysVnd: 150,
+      totalUsers: 2, adminUsers: 1, excludedUsers: { test: 1, internal: 1 }, activePlusSubscriptions: 2,
+      expiringSoonSubscriptions: 1, pendingPaymentOrders: 1, completedPaymentOrders: 4, physicalOrders: 2,
+      revenueTotalVnd: 175, revenueLast30DaysVnd: 150,
     });
     assert.deepEqual(data.recentUsers.map((user) => user.firebaseUid).sort(), ["admin", "real"]);
-    assert.deepEqual(data.recentPayments.map((payment) => payment.orderId).sort(), ["completed-real", "completed-usd", "pending-real", "record-real"]);
+    assert.deepEqual(data.recentPayments.map((payment) => payment.orderId).sort(), ["completed-old", "completed-real", "completed-usd", "pending-real", "record-real"]);
     assert.equal(data.recentPayments.some((payment) => Object.keys(payment).some((key) => key.startsWith("__effectiveOperational"))), false);
   });
 });
