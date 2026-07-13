@@ -34,10 +34,14 @@ import {
   getAdminSalesReportController,
   reviewAdminSalesOrderController,
 } from "../controllers/adminSalesReportController";
-import { bulkClassifyAdminUsersController } from "../controllers/adminOperationalClassificationController";
+import {
+  bulkClassifyAdminUsersController,
+  classifyAdminPaymentOrderController,
+} from "../controllers/adminOperationalClassificationController";
 import { clearAdminRoleCache, requireAdmin } from "../middleware/requireAdmin";
 import {
   validateAdminBulkOperationalClassificationBody,
+  validateAdminOperationalClassificationBody,
   validateOptionalJsonObjectBody,
   validateOrderIdParam,
 } from "../middleware/requestValidation";
@@ -107,11 +111,11 @@ export function getOperationalClassificationFailureAuditPayload(req: Request): R
   const body = req.body && typeof req.body === "object" && !Array.isArray(req.body)
     ? req.body as Record<string, unknown>
     : {};
-  const changes = Array.isArray(body.changes) ? body.changes : [];
+  const changes = Array.isArray(body.changes) ? body.changes : null;
   return {
     category: typeof body.category === "string" && OPERATIONAL_CATEGORIES.has(body.category) ? body.category : null,
     reason: typeof body.reason === "string" && OPERATIONAL_REASONS.has(body.reason) ? body.reason : null,
-    targetCount: Math.min(changes.length, 100),
+    targetCount: changes ? Math.min(changes.length, 100) : 1,
     noteProvided: typeof body.note === "string" && body.note.trim().length > 0,
   };
 }
@@ -253,6 +257,18 @@ adminRoutes.post(
   }),
 );
 adminRoutes.get("/admin/billing/payment-orders", asyncHandler(requireAdmin), asyncHandler(getAdminPaymentOrders));
+adminRoutes.patch(
+  "/admin/billing/payment-orders/:orderId/operational-classification",
+  auditedAdminAction({
+    action: "changeAdminOperationalClassification",
+    target: "payment_order_operational_classification",
+    getTargetId: (req) => req.params.orderId?.trim().toUpperCase(),
+    getAuditPayload: getOperationalClassificationFailureAuditPayload,
+    validators: [validateOrderIdParam, validateAdminOperationalClassificationBody],
+    handler: classifyAdminPaymentOrderController,
+    logSuccess: false,
+  }),
+);
 adminRoutes.post(
   "/admin/billing/payment-orders/:orderId/reconcile-payer-source",
   auditedAdminAction({

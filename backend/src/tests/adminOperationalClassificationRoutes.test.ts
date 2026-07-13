@@ -16,6 +16,7 @@ import { errorMiddleware } from "../middleware/errorMiddleware";
 import { clearAdminRoleCache } from "../middleware/requireAdmin";
 import { AdminAuditOutboxModel } from "../models/AdminAuditOutboxModel";
 import { AuditLogModel } from "../models/auditLogModel";
+import { PaymentOrderModel } from "../models/PaymentOrderModel";
 import { UserModel } from "../models/UserModel";
 import { adminRoutes, getOperationalClassificationFailureAuditPayload } from "../routes/adminRoutes";
 
@@ -26,6 +27,7 @@ const originalOutboxCreate = (AdminAuditOutboxModel as unknown as MockableModel)
 const originalAuditFindOne = (AuditLogModel as unknown as MockableModel).findOne;
 const originalAuditCreate = (AuditLogModel as unknown as MockableModel).create;
 const originalStartSession = mongoose.startSession;
+const originalPaymentFindOne = (PaymentOrderModel as unknown as { findOne: unknown }).findOne;
 
 function createApp(): Express {
   const app = express();
@@ -42,18 +44,18 @@ function createApp(): Express {
   return app;
 }
 
-async function request(app: Express, token: string | undefined, body: unknown) {
+async function request(app: Express, token: string | undefined, body: unknown, path = "/admin/users/operational-classification") {
   const server = app.listen(0);
   await new Promise<void>((resolve) => server.once("listening", resolve));
   const address = server.address() as AddressInfo;
   try {
-    const response = await fetch(`http://127.0.0.1:${address.port}/api/admin/users/operational-classification`, {
+    const response = await fetch(`http://127.0.0.1:${address.port}/api${path}`, {
       method: "PATCH",
       headers: { "content-type": "application/json", ...(token ? { authorization: `Bearer ${token}` } : {}) },
       body: JSON.stringify(body),
     });
     const text = await response.text();
-    return { status: response.status, json: text ? JSON.parse(text) as Record<string, unknown> : {} };
+    return { status: response.status, json: text.startsWith("{") ? JSON.parse(text) as Record<string, unknown> : {} };
   } finally {
     await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
   }
@@ -65,6 +67,15 @@ function installRouteModels() {
     ["exists", { firebaseUid: "exists" }],
   ]);
   const events = new Map<string, Record<string, unknown>>();
+  const payment = {
+    orderId: "VBTEST0001",
+    userId: "orphan_uid",
+    status: "completed",
+    amount: 120000,
+    provider: "payos",
+    reporting: { kpiStatus: "included" },
+    operationalClassification: undefined as Record<string, unknown> | undefined,
+  };
   let failAuditPersistence = false;
   (UserModel as unknown as MockableModel).findOne = (query: { firebaseUid?: string }) => {
     const stored = query.firebaseUid ? users.get(query.firebaseUid) : undefined;
@@ -75,6 +86,23 @@ function installRouteModels() {
         return {
           ...structuredClone(stored),
           async save() { users.set(stored.firebaseUid, { firebaseUid: stored.firebaseUid, operationalClassification: this.operationalClassification }); },
+        };
+      },
+      async lean() { return stored ? structuredClone(stored) : null; },
+    };
+    return chain;
+  };
+  (PaymentOrderModel as unknown as { findOne: unknown }).findOne = (query: { orderId?: string }) => {
+    const stored = query.orderId === payment.orderId ? payment : undefined;
+    const chain = {
+      session() {
+        if (!stored) return null;
+        return {
+          ...stored,
+          async save() {
+            const { save: _save, ...next } = this as Record<string, unknown> & { save: unknown };
+            Object.assign(stored, structuredClone(next));
+          },
         };
       },
       async lean() { return stored ? structuredClone(stored) : null; },
@@ -105,7 +133,7 @@ function installRouteModels() {
       }
     }, async endSession() {},
   } as unknown as ClientSession);
-  return { users, setAuditFailure(value: boolean) { failAuditPersistence = value; } };
+  return { users, payment, events, setAuditFailure(value: boolean) { failAuditPersistence = value; } };
 }
 
 afterEach(() => {
@@ -114,6 +142,7 @@ afterEach(() => {
   (AdminAuditOutboxModel as unknown as MockableModel).create = originalOutboxCreate;
   (AuditLogModel as unknown as MockableModel).findOne = originalAuditFindOne;
   (AuditLogModel as unknown as MockableModel).create = originalAuditCreate;
+  (PaymentOrderModel as unknown as { findOne: unknown }).findOne = originalPaymentFindOne;
   (mongoose as unknown as { startSession: unknown }).startSession = originalStartSession;
   clearAdminRoleCache();
 });
@@ -166,5 +195,38 @@ describe("admin operational classification route", () => {
       },
     } as never);
     assert.deepEqual(payload, { category: null, reason: null, targetCount: 100, noteProvided: true });
+  });
+
+  it("authorizes before validation and records one durable payment classification audit", async () => {
+    const fixture = installRouteModels();
+    const app = createApp();
+    const path = "/admin/billing/payment-orders/VBTEST0001/operational-classification";
+    const body = {
+      category: "test",
+      reason: "test_account",
+      note: "do not audit this raw input",
+      requestId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      customerEmail: "private@example.test",
+    };
+    assert.equal((await request(app, undefined, { category: "bad" }, path)).status, 401);
+    assert.equal((await request(app, "user-token", { category: "bad" }, path)).status, 403);
+    const successful = await request(app, "admin-token", body, path);
+    assert.equal(successful.status, 200);
+    assert.equal(fixture.payment.status, "completed");
+    assert.equal(fixture.events.size, 1);
+    assert.equal(fixture.payment.operationalClassification?.category, "test");
+  });
+
+  it("keeps direct record failure audit payload to the classification allowlist", () => {
+    const payload = getOperationalClassificationFailureAuditPayload({
+      body: {
+        category: "test",
+        reason: "test_account",
+        note: "do not log this private note",
+        requestId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+        providerPayload: { bankAccount: "private" },
+      },
+    } as never);
+    assert.deepEqual(payload, { category: "test", reason: "test_account", targetCount: 1, noteProvided: true });
   });
 });

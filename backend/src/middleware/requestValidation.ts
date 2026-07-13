@@ -44,6 +44,13 @@ export interface AdminBulkClassifyUsersBody {
   changes: Array<{ userUid: string; requestId: string }>;
 }
 
+export interface AdminOperationalClassificationBody {
+  category: OperationalCategory;
+  reason: OperationalClassificationReason;
+  note?: string;
+  requestId: string;
+}
+
 type BodyRecord = Record<string, unknown>;
 
 function isBodyRecord(value: unknown): value is BodyRecord {
@@ -330,6 +337,32 @@ export const validateAdminBulkOperationalClassificationBody: RequestHandler = (r
     ...(classification.note ? { note: classification.note } : {}),
   };
   req.body = normalized;
+  next();
+};
+
+export const validateAdminOperationalClassificationBody: RequestHandler = (req, _res, next) => {
+  const body = requireJsonObjectBody(req);
+  const classification = validateOperationalClassificationInput({
+    category: body.category,
+    reason: body.reason,
+    note: body.note,
+  });
+  const requestId = typeof body.requestId === "string" ? body.requestId.trim().toLowerCase() : "";
+  if (!UUID_PATTERN.test(requestId)) {
+    throw new ApiError(
+      400,
+      "A valid classification request id is required.",
+      undefined,
+      "invalid_classification_request_id",
+    );
+  }
+
+  req.body = {
+    category: classification.category,
+    reason: classification.reason,
+    requestId,
+    ...(classification.note ? { note: classification.note } : {}),
+  } satisfies AdminOperationalClassificationBody;
   next();
 };
 

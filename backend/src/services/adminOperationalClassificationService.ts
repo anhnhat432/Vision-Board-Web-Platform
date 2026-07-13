@@ -8,6 +8,8 @@ import {
   type OperationalClassification,
   type OperationalClassificationReason,
 } from "../models/OperationalClassification";
+import { OrderModel } from "../models/OrderModel";
+import { PaymentOrderModel } from "../models/PaymentOrderModel";
 import { UserModel, type UserDocument } from "../models/UserModel";
 import {
   buildAdminOperationalClassificationAuditEvent,
@@ -42,6 +44,20 @@ export interface ClassifyAdminUserResult {
   classification: AdminOperationalClassificationSummary;
 }
 
+export interface ClassifyAdminRecordInput {
+  actorUid: string;
+  orderId: string;
+  requestId: string;
+  category: unknown;
+  reason: unknown;
+  note?: unknown;
+}
+
+export interface ClassifyAdminRecordResult {
+  status: "updated" | "unchanged";
+  classification: AdminOperationalClassificationSummary;
+}
+
 export type AdminClassificationSafeErrorCode =
   | "user_not_found"
   | "admin_audit_unavailable"
@@ -66,6 +82,21 @@ interface ValidatedClassificationCommand {
   reason: OperationalClassificationReason;
   note?: string;
   changedAt: Date;
+}
+
+interface ValidatedRecordClassificationCommand extends Omit<ValidatedClassificationCommand, "userUid"> {
+  orderId: string;
+}
+
+type ClassificationTarget =
+  | { type: "payment_order"; id: string; auditTarget: "payment_order_operational_classification" }
+  | { type: "physical_order"; id: string; auditTarget: "physical_order_operational_classification" };
+
+interface ClassificationRecordDocument {
+  userId: string;
+  operationalClassification?: OperationalClassification | null;
+  reporting?: { exclusionReason?: "test" | "internal_team" | string | null } | null;
+  save(options?: { session?: ClientSession; validateModifiedOnly?: boolean }): Promise<unknown>;
 }
 
 interface ValidatedBulkClassificationCommand {
@@ -132,6 +163,25 @@ function validateClassificationCommand(input: ClassifyAdminUserInput): Validated
   return { actorUid, userUid, requestId, ...classification, changedAt: new Date() };
 }
 
+function validateRecordClassificationCommand(input: ClassifyAdminRecordInput): ValidatedRecordClassificationCommand {
+  const actorUid = input.actorUid.trim();
+  const orderId = input.orderId.trim();
+  const requestId = input.requestId.trim().toLowerCase();
+  if (!actorUid || !orderId || orderId.length > 128) {
+    throw new ApiError(400, "Classification target is invalid.", undefined, "invalid_classification_target");
+  }
+  if (!UUID_PATTERN.test(requestId)) {
+    throw new ApiError(
+      400,
+      "A valid classification request id is required.",
+      undefined,
+      "invalid_classification_request_id",
+    );
+  }
+  const classification = validateOperationalClassificationInput(input);
+  return { actorUid, orderId, requestId, ...classification, changedAt: new Date() };
+}
+
 function validateBulkClassificationCommand(input: BulkClassifyAdminUsersInput): ValidatedBulkClassificationCommand {
   const rawInput = input && typeof input === "object"
     ? input as { actorUid?: unknown; category?: unknown; reason?: unknown; note?: unknown; changes?: unknown }
@@ -176,7 +226,9 @@ function validateBulkClassificationCommand(input: BulkClassifyAdminUsersInput): 
   return { actorUid, ...classification, changes };
 }
 
-function buildStoredClassification(command: ValidatedClassificationCommand): OperationalClassification {
+function buildStoredClassification(
+  command: Pick<ValidatedClassificationCommand, "actorUid" | "category" | "reason" | "note" | "changedAt">,
+): OperationalClassification {
   return {
     category: command.category,
     reason: command.reason,
@@ -258,6 +310,131 @@ async function resolveClassificationRace(
     );
   }
   return null;
+}
+
+async function findClassificationTarget(
+  target: ClassificationTarget,
+  session: ClientSession,
+): Promise<ClassificationRecordDocument | null> {
+  if (target.type === "payment_order") {
+    return PaymentOrderModel.findOne({ orderId: target.id }).session(session) as unknown as ClassificationRecordDocument | null;
+  }
+  return OrderModel.findById(target.id).session(session) as unknown as ClassificationRecordDocument | null;
+}
+
+async function readCurrentClassificationTarget(
+  target: ClassificationTarget,
+  status: "unchanged",
+): Promise<ClassifyAdminRecordResult> {
+  const record = target.type === "payment_order"
+    ? await PaymentOrderModel.findOne({ orderId: target.id }).lean<ClassificationRecordDocument | null>()
+    : await OrderModel.findById(target.id).lean<ClassificationRecordDocument | null>();
+  if (!record) throw new ApiError(404, "Classification target not found.", undefined, "invalid_classification_target");
+  const user = await UserModel.findOne({ firebaseUid: record.userId }).lean<UserDocument | null>();
+  return {
+    status,
+    classification: resolveEffectiveOperationalClassification({
+      userClassification: user?.operationalClassification,
+      recordClassification: record.operationalClassification,
+      legacySalesReason: legacySalesReason(record),
+    }),
+  };
+}
+
+function legacySalesReason(record: Pick<ClassificationRecordDocument, "reporting">): "test" | "internal_team" | null {
+  const reason = record.reporting?.exclusionReason;
+  return reason === "test" || reason === "internal_team" ? reason : null;
+}
+
+async function resolveRecordClassificationRace(
+  identity: AdminOperationalClassificationAuditIdentity,
+  target: ClassificationTarget,
+): Promise<ClassifyAdminRecordResult | null> {
+  const raced = await resolveAdminAuditIdempotency(identity);
+  if (raced === "match") return readCurrentClassificationTarget(target, "unchanged");
+  if (raced === "conflict") {
+    throw new ApiError(
+      409,
+      "Classification request conflicts with an earlier command.",
+      undefined,
+      "admin_classification_request_conflict",
+    );
+  }
+  return null;
+}
+
+async function classifyAdminRecordTarget(
+  target: ClassificationTarget,
+  input: ClassifyAdminRecordInput,
+): Promise<ClassifyAdminRecordResult> {
+  const command = validateRecordClassificationCommand(input);
+  const identity = buildAdminOperationalClassificationAuditIdentity({
+    requestId: command.requestId,
+    actorUid: command.actorUid,
+    target: target.auditTarget,
+    targetId: target.id,
+    newCategory: command.category,
+    reason: command.reason,
+    note: command.note,
+  });
+  const replay = await resolveRecordClassificationRace(identity, target);
+  if (replay) return replay;
+
+  try {
+    return await withClassificationTransaction(async (session) => {
+      const record = await findClassificationTarget(target, session);
+      if (!record) throw new ApiError(404, "Classification target not found.", undefined, "invalid_classification_target");
+
+      const user = await UserModel.findOne({ firebaseUid: record.userId }).session(session);
+      const previous = record.operationalClassification ?? null;
+      const next = buildStoredClassification(command);
+      const status = sameStoredClassification(previous, next) ? "unchanged" : "updated";
+      if (status === "updated") {
+        record.operationalClassification = next;
+        await record.save({ session, validateModifiedOnly: true });
+      }
+      await AdminAuditOutboxModel.create([
+        buildAdminOperationalClassificationAuditEvent({
+          identity,
+          requestId: command.requestId,
+          previousCategory: previous?.category ?? "real",
+          newCategory: command.category,
+          reason: command.reason,
+          note: command.note,
+          changedAt: command.changedAt,
+        }),
+      ], { session });
+      return {
+        status,
+        classification: resolveEffectiveOperationalClassification({
+          userClassification: user?.operationalClassification,
+          recordClassification: status === "updated" ? next : previous,
+          legacySalesReason: legacySalesReason(record),
+        }),
+      };
+    });
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+    if (isDuplicateAdminAuditEventIdError(error)) {
+      const raced = await resolveRecordClassificationRace(identity, target);
+      if (raced) return raced;
+    }
+    throw new ApiError(503, "Admin audit storage is unavailable. Retry later.", undefined, "admin_audit_unavailable");
+  }
+}
+
+export function classifyAdminPaymentOrder(input: ClassifyAdminRecordInput): Promise<ClassifyAdminRecordResult> {
+  return classifyAdminRecordTarget(
+    { type: "payment_order", id: input.orderId.trim().toUpperCase(), auditTarget: "payment_order_operational_classification" },
+    input,
+  );
+}
+
+export function classifyAdminPhysicalOrder(input: ClassifyAdminRecordInput): Promise<ClassifyAdminRecordResult> {
+  return classifyAdminRecordTarget(
+    { type: "physical_order", id: input.orderId.trim(), auditTarget: "physical_order_operational_classification" },
+    input,
+  );
 }
 
 export async function classifyAdminUser(input: ClassifyAdminUserInput): Promise<ClassifyAdminUserResult> {

@@ -11,10 +11,14 @@ import mongoose, { type ClientSession } from "mongoose";
 
 import { AdminAuditOutboxModel } from "../models/AdminAuditOutboxModel";
 import { AuditLogModel } from "../models/auditLogModel";
+import { OrderModel } from "../models/OrderModel";
+import { PaymentOrderModel } from "../models/PaymentOrderModel";
 import { UserModel } from "../models/UserModel";
 import { ApiError } from "../utils/apiError";
 import {
   bulkClassifyAdminUsers,
+  classifyAdminPaymentOrder,
+  classifyAdminPhysicalOrder,
   classifyAdminUser,
   resolveEffectiveOperationalClassification,
   validateOperationalClassificationInput,
@@ -148,6 +152,64 @@ describe("operational classification resolver", () => {
   });
 });
 
+describe("transactional direct record classification", () => {
+  it("classifies an orphan payment without changing payment state", async () => {
+    const { payment } = directRecordClassificationFixture();
+    const before = { status: payment.status, amount: payment.amount, provider: payment.provider };
+    const result = await classifyAdminPaymentOrder({
+      actorUid: "admin_uid",
+      orderId: "VBTEST0001",
+      requestId: "11111111-1111-4111-8111-111111111111",
+      category: "test",
+      reason: "test_account",
+    });
+    assert.deepEqual({ status: payment.status, amount: payment.amount, provider: payment.provider }, before);
+    assert.equal(result.classification.source, "record");
+  });
+
+  it("classifies a physical order without changing fulfillment", async () => {
+    const { physicalOrder } = directRecordClassificationFixture();
+    const status = physicalOrder.status;
+    await classifyAdminPhysicalOrder({
+      actorUid: "admin_uid",
+      orderId: physicalOrder._id,
+      requestId: "22222222-2222-4222-8222-222222222222",
+      category: "internal",
+      reason: "internal_team",
+    });
+    assert.equal(physicalOrder.status, status);
+  });
+
+  it("returns inherited user classification after a direct real write", async () => {
+    directRecordClassificationFixture({ paymentUserId: "test_user", userCategory: "test" });
+    const result = await classifyAdminPaymentOrder({
+      actorUid: "admin_uid",
+      orderId: "VBTEST0001",
+      requestId: "33333333-3333-4333-8333-333333333333",
+      category: "real",
+      reason: "confirmed_real",
+    });
+    assert.equal(result.classification.effectiveCategory, "test");
+    assert.equal(result.classification.source, "user");
+  });
+
+  it("lets direct real suppress legacy sales exclusion without rewriting the stored review", async () => {
+    const { payment } = directRecordClassificationFixture();
+    payment.reporting = { kpiStatus: "included", exclusionReason: "test" };
+    const storedReviewBefore = structuredClone(payment.reporting);
+    const result = await classifyAdminPaymentOrder({
+      actorUid: "admin_uid",
+      orderId: "VBTEST0001",
+      requestId: "44444444-4444-4444-8444-444444444444",
+      category: "real",
+      reason: "confirmed_real",
+    });
+    assert.deepEqual(payment.reporting, storedReviewBefore);
+    assert.equal(result.classification.effectiveCategory, "real");
+    assert.equal(result.classification.source, "record");
+  });
+});
+
 type MockableModel = { findOne: unknown; create: unknown };
 
 const originalUserFindOne = (UserModel as unknown as MockableModel).findOne;
@@ -155,6 +217,8 @@ const originalOutboxFindOne = (AdminAuditOutboxModel as unknown as MockableModel
 const originalOutboxCreate = (AdminAuditOutboxModel as unknown as MockableModel).create;
 const originalAuditFindOne = (AuditLogModel as unknown as MockableModel).findOne;
 const originalStartSession = mongoose.startSession;
+const originalPaymentFindOne = (PaymentOrderModel as unknown as { findOne: unknown }).findOne;
+const originalPhysicalOrderFindById = (OrderModel as unknown as { findById: unknown }).findById;
 
 type TransactionSessionDouble = ClientSession & {
   stage(write: () => void): void;
@@ -307,11 +371,94 @@ function classificationFixture() {
   };
 }
 
+function directRecordClassificationFixture(options: { paymentUserId?: string; userCategory?: "test" | "internal" } = {}) {
+  const payment = {
+    orderId: "VBTEST0001",
+    userId: options.paymentUserId ?? "orphan_uid",
+    status: "completed",
+    amount: 120000,
+    provider: "payos",
+    reporting: { kpiStatus: "included", exclusionReason: undefined as string | undefined },
+    operationalClassification: undefined as Record<string, unknown> | undefined,
+  };
+  const physicalOrder = {
+    _id: "507f1f77bcf86cd799439011",
+    userId: "physical_uid",
+    status: "shipping",
+    operationalClassification: undefined as Record<string, unknown> | undefined,
+  };
+  const users = new Map<string, Record<string, unknown>>();
+  if (options.paymentUserId && options.userCategory) {
+    users.set(options.paymentUserId, {
+      firebaseUid: options.paymentUserId,
+      operationalClassification: {
+        category: options.userCategory,
+        reason: options.userCategory === "test" ? "test_account" : "internal_team",
+        classifiedBy: "earlier_admin",
+        classifiedAt: new Date("2026-07-12T00:00:00.000Z"),
+      },
+    });
+  }
+  const outboxEvents = new Map<string, Record<string, unknown>>();
+
+  const documentFor = <T extends Record<string, unknown>>(stored: T) => ({
+    ...stored,
+    async save() {
+      const { save: _save, ...data } = this as Record<string, unknown> & { save: unknown };
+      Object.assign(stored, structuredClone(data));
+    },
+  });
+  (PaymentOrderModel as unknown as { findOne: unknown }).findOne = (query: { orderId?: string }) => {
+    const stored = query.orderId === payment.orderId ? payment : undefined;
+    const chain = {
+      session() { return stored ? documentFor(stored) : null; },
+      async lean() { return stored ? structuredClone(stored) : null; },
+    };
+    return chain;
+  };
+  (OrderModel as unknown as { findById: unknown }).findById = (id: string) => {
+    const stored = id === physicalOrder._id ? physicalOrder : undefined;
+    const chain = {
+      session() { return stored ? documentFor(stored) : null; },
+      async lean() { return stored ? structuredClone(stored) : null; },
+    };
+    return chain;
+  };
+  (UserModel as unknown as MockableModel).findOne = (query: { firebaseUid?: string }) => {
+    const stored = query.firebaseUid ? users.get(query.firebaseUid) : undefined;
+    const chain = {
+      session() { return stored ? documentFor(stored) : null; },
+      async lean() { return stored ? structuredClone(stored) : null; },
+    };
+    return chain;
+  };
+  (AdminAuditOutboxModel as unknown as MockableModel).findOne = (query: { eventId?: string }) => {
+    const event = query.eventId ? outboxEvents.get(query.eventId) : undefined;
+    const chain = { select() { return chain; }, async lean() { return event ?? null; } };
+    return chain;
+  };
+  (AuditLogModel as unknown as MockableModel).findOne = () => {
+    const chain = { select() { return chain; }, async lean() { return null; } };
+    return chain;
+  };
+  (AdminAuditOutboxModel as unknown as MockableModel).create = async (events: Array<Record<string, unknown>>) => {
+    outboxEvents.set(events[0].eventId as string, structuredClone(events[0]));
+    return events;
+  };
+  (mongoose as unknown as { startSession: unknown }).startSession = async () => ({
+    async withTransaction(work: () => Promise<void>) { await work(); },
+    async endSession() {},
+  } as unknown as ClientSession);
+  return { payment, physicalOrder, outboxEvents };
+}
+
 afterEach(() => {
   (UserModel as unknown as MockableModel).findOne = originalUserFindOne;
   (AdminAuditOutboxModel as unknown as MockableModel).findOne = originalOutboxFindOne;
   (AdminAuditOutboxModel as unknown as MockableModel).create = originalOutboxCreate;
   (AuditLogModel as unknown as MockableModel).findOne = originalAuditFindOne;
+  (PaymentOrderModel as unknown as { findOne: unknown }).findOne = originalPaymentFindOne;
+  (OrderModel as unknown as { findById: unknown }).findById = originalPhysicalOrderFindById;
   (mongoose as unknown as { startSession: unknown }).startSession = originalStartSession;
 });
 

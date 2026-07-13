@@ -11,11 +11,16 @@ import {
   getOrderById,
   getOrders,
 } from "../controllers/orderController";
+import { classifyAdminPhysicalOrderController } from "../controllers/adminOperationalClassificationController";
 import { requireEmailVerified } from "../middleware/authMiddlewareCore";
 import { requireAdmin } from "../middleware/requireAdmin";
-import { validateJsonObjectBody, validateObjectIdParam } from "../middleware/requestValidation";
+import {
+  validateAdminOperationalClassificationBody,
+  validateJsonObjectBody,
+  validateObjectIdParam,
+} from "../middleware/requestValidation";
 import { asyncHandler } from "../utils/asyncHandler";
-import { auditedAdminAction } from "./adminRoutes";
+import { auditedAdminAction, getOperationalClassificationFailureAuditPayload } from "./adminRoutes";
 
 
 const orderRoutes = Router();
@@ -40,6 +45,18 @@ orderRoutes.get(
   asyncHandler(requireAdmin),
   validateObjectIdParam("id", "orderId"),
   asyncHandler(adminGetOrder),
+);
+orderRoutes.patch(
+  "/admin/orders/:id/operational-classification",
+  auditedAdminAction({
+    action: "changeAdminOperationalClassification",
+    target: "physical_order_operational_classification",
+    getTargetId: (req) => req.params.id,
+    getAuditPayload: getOperationalClassificationFailureAuditPayload,
+    validators: [validateObjectIdParam("id", "orderId"), validateAdminOperationalClassificationBody],
+    handler: classifyAdminPhysicalOrderController,
+    logSuccess: false,
+  }),
 );
 orderRoutes.patch(
   "/admin/orders/:id/status",
