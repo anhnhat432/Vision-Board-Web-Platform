@@ -36,7 +36,8 @@ interface PendingBulkClassification {
 }
 
 interface BulkResult {
-  succeeded: number;
+  updated: number;
+  unchanged: number;
   failed: Array<{ userUid: string; errorCode: string }>;
   transportFailed?: boolean;
 }
@@ -252,7 +253,11 @@ export function AdminUsersPage() {
       );
       const retryableChanges = currentChanges.filter((item) => retryableUids.has(item.userUid));
       if (submissionViewKey === currentViewRef.current.key) {
-        setBulkResult({ succeeded: result.results.length - failed.length, failed });
+        setBulkResult({
+          updated: result.results.filter((item) => item.status === "updated").length,
+          unchanged: result.results.filter((item) => item.status === "unchanged").length,
+          failed,
+        });
         setPendingBulk(retryableChanges.length > 0 ? { viewKey: submissionViewKey, payload, changes: retryableChanges } : null);
         setSelectedUids(new Set(retryableChanges.map((item) => item.userUid)));
         setClassificationOpen(false);
@@ -260,7 +265,7 @@ export function AdminUsersPage() {
       await loadUsers(currentViewRef.current.params);
     } catch {
       if (submissionViewKey === currentViewRef.current.key) {
-        setBulkResult({ succeeded: 0, failed: [], transportFailed: true });
+        setBulkResult({ updated: 0, unchanged: 0, failed: [], transportFailed: true });
         setClassificationError("Không thể gửi yêu cầu phân loại. Hãy thử lại.");
         setClassificationOpen(false);
       }
@@ -395,7 +400,7 @@ export function AdminUsersPage() {
         <p role="status" aria-live="polite" className="text-sm text-app-ink-soft">
           {bulkResult.transportFailed
             ? "Không thể gửi yêu cầu phân loại. Bạn có thể thử lại."
-            : `${bulkResult.succeeded} thành công, ${bulkResult.failed.length} thất bại${bulkResult.failed.length > 0 ? ` (${bulkResult.failed.map((item) => item.userUid).join(", ")})` : ""}.`}
+            : `${bulkResult.updated} đã cập nhật, ${bulkResult.unchanged} không thay đổi, ${bulkResult.failed.length} thất bại${bulkResult.failed.length > 0 ? ` (${bulkResult.failed.map((item) => item.userUid).join(", ")})` : ""}.`}
         </p>
       ) : null}
       {classificationError ? (

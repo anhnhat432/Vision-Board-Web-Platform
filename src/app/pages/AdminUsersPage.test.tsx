@@ -142,20 +142,24 @@ describe("AdminUsersPage operational cleanup", () => {
     expect(screen.getByText("U2")).toBeInTheDocument();
   });
 
-  it("classifies explicit selections and announces partial failures without exposing user details", async () => {
+  it("announces updated, unchanged, and failed classification results separately", async () => {
     const user = userEvent.setup();
     adminServiceMock.adminClassifyUsers.mockResolvedValueOnce({
       category: "test",
       results: [
         { userUid: "u1", status: "updated" },
-        { userUid: "u2", status: "failed", errorCode: "user_not_found" },
+        { userUid: "u2", status: "unchanged" },
+        { userUid: "missing-user", status: "failed", errorCode: "user_not_found" },
       ],
     });
     await renderPage();
     await selectUsers(user);
     await confirmTestClassification(user);
 
-    await waitFor(() => expect(screen.getByRole("status")).toHaveTextContent("1 thành công, 1 thất bại"));
+    await waitFor(() =>
+      expect(screen.getByRole("status")).toHaveTextContent("1 đã cập nhật, 1 không thay đổi, 1 thất bại"),
+    );
+    expect(screen.getByRole("status")).toHaveTextContent("missing-user");
     expect(screen.getByRole("status")).not.toHaveTextContent("@example.test");
   });
 
