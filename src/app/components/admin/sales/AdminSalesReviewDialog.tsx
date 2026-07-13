@@ -33,6 +33,8 @@ const EXCLUSION_REASONS: Array<{ value: AdminSalesExclusionReason; label: string
   { value: "other", label: "Lý do khác" },
 ];
 
+const REVIEW_NOTE_ID = "admin-sales-review-note";
+
 export function AdminSalesReviewDialog({
   item,
   busy,
@@ -103,9 +105,9 @@ export function AdminSalesReviewDialog({
               </select>
             </label>
           ) : null}
-          <label className="grid gap-2 text-sm font-medium text-app-ink">
+          <label htmlFor={REVIEW_NOTE_ID} className="grid gap-2 text-sm font-medium text-app-ink">
             Ghi chú duyệt
-            <Textarea value={reviewNote} onChange={(event) => setReviewNote(event.target.value)} />
+            <Textarea id={REVIEW_NOTE_ID} value={reviewNote} onChange={(event) => setReviewNote(event.target.value)} />
           </label>
         </fieldset>
         {validationError ? <p role="alert" className="text-sm text-rose-600">{validationError}</p> : null}
