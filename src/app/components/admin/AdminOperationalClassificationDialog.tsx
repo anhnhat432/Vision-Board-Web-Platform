@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { type MouseEvent, useEffect, useRef, useState } from "react";
 import type {
   AdminClassificationMutationPayload,
   AdminOperationalCategory,
@@ -120,7 +120,7 @@ export function AdminOperationalClassificationDialog({
     setValidationError(undefined);
   };
 
-  const handleConfirm = async (event: Event) => {
+  const handleConfirm = async (event: MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     const note = draft.note.trim();
     if (draft.reason === "other" && !note) {
