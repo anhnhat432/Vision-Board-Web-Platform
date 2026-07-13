@@ -1,18 +1,22 @@
-﻿import { ClipboardList, Download, Loader2, Pencil, RefreshCw } from "lucide-react";
+﻿import { ClipboardList, Download, Loader2, Pencil, RefreshCw, Search } from "lucide-react";
 import { Link } from "react-router";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { type AdminApiOrder, type AdminOrderListResponse, type AdminUpdateOrderPayload, type ApiOrder, type ApiOrderStatus, adminClassifyPhysicalOrder, adminExportOrders, adminGetOrders, adminUpdateOrder, adminUpdateOrderStatus } from "@/services/orderService";
 import type { AdminClassificationMutationPayload, AdminOperationalClassificationSummary, AdminOperationalScope } from "@/services/adminService";
+import { AdminDataPanel } from "../components/admin/AdminDataPanel";
 import { AdminEmptyState } from "../components/admin/AdminEmptyState";
+import { AdminFeedbackBanner } from "../components/admin/AdminFeedbackBanner";
 import { AdminOperationalClassificationBadge, getAdminOperationalClassificationSourceLabel } from "../components/admin/AdminOperationalClassificationBadge";
 import { AdminOperationalClassificationDialog } from "../components/admin/AdminOperationalClassificationDialog";
 import { AdminOperationalScopeFilter } from "../components/admin/AdminOperationalScopeFilter";
+import { AdminPagination } from "../components/admin/AdminPagination";
 import { AdminPageHeader } from "../components/admin/AdminPageHeader";
 import { useAdminPendingCounts } from "../components/admin/AdminPendingCountsContext";
 import { useAdminSearch } from "../components/admin/AdminSearchContext";
 import { AdminStatusBadge } from "../components/admin/AdminStatusBadge";
+import { AdminToolbar } from "../components/admin/AdminToolbar";
 import { ADMIN_STATUS_TRANSITIONS, ORDER_STATUS_LABELS, ORDER_STATUS_TONES } from "../components/admin/statusMappings";
 import { adminInput, adminSurface } from "../components/admin/tokens";
 import { ADMIN_LOAD_TIMEOUT_MS, formatDate, formatVnd, getErrorMessage, withTimeout } from "../components/admin/utils";
@@ -417,6 +421,15 @@ export function AdminOrdersPage() {
     return () => setOrdersPending(undefined);
   }, [counts.pending, setOrdersPending]);
 
+  const hasActiveFilters =
+    query.trim().length > 0 ||
+    statusFilter !== "all" ||
+    frameFilter !== "all" ||
+    dateFrom.length > 0 ||
+    dateTo.length > 0 ||
+    operationalScope !== "real";
+  const showSelectionBar = selectedIds.size > 0 || bulkBusy;
+
   return (
     <div className="space-y-6">
       <AdminPageHeader
@@ -449,27 +462,32 @@ export function AdminOrdersPage() {
         }
       />
 
-      {error ? (
-        <div className="rounded-[var(--r-card)] border border-rose-300 bg-rose-50 p-5 text-sm dark:border-rose-500/30 dark:bg-rose-500/10">
-          <p className="font-semibold text-rose-700 dark:text-rose-200">Không tải được đơn in</p>
-          <p className="mt-1 leading-6 text-rose-600 dark:text-rose-100/80">{error}</p>
-          <Button
-            type="button"
-            variant="outline"
-            className="mt-4 rounded-xl border-app-line bg-app-bg-subtle text-app-ink hover:bg-app-accent-soft hover:text-app-ink"
-            onClick={() => void loadOrders()}
-          >
-            Thử lại
-          </Button>
+      <AdminToolbar
+        label="Bộ lọc đơn in"
+        meta={`${counts.all.toLocaleString("vi-VN")} đơn trong phạm vi hiện tại`}
+      >
+        <div className="relative w-full sm:max-w-md md:hidden">
+          <Search
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted"
+            aria-hidden="true"
+          />
+          <Input
+            type="search"
+            aria-label="Tìm kiếm đơn in"
+            autoComplete="off"
+            placeholder="Tìm email, mã đơn, họ tên, số điện thoại"
+            value={query}
+            onChange={(event) => handleSearchChange(event.target.value)}
+            className="pl-9"
+          />
         </div>
-      ) : null}
-      {exportError ? <p role="alert" className="text-sm text-rose-600">{exportError}</p> : null}
-
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <Select value={statusFilter} onValueChange={(value) => {
-          resetListPosition();
-          setStatusFilter(value as ApiOrderStatus | "all");
-        }}>
+        <Select
+          value={statusFilter}
+          onValueChange={(value) => {
+            resetListPosition();
+            setStatusFilter(value as ApiOrderStatus | "all");
+          }}
+        >
           <SelectTrigger className={adminInput} aria-label="Trạng thái đơn in">
             <SelectValue placeholder="Trạng thái" />
           </SelectTrigger>
@@ -481,10 +499,13 @@ export function AdminOrdersPage() {
             ))}
           </SelectContent>
         </Select>
-        <Select value={frameFilter} onValueChange={(value) => {
-          resetListPosition();
-          setFrameFilter(value);
-        }}>
+        <Select
+          value={frameFilter}
+          onValueChange={(value) => {
+            resetListPosition();
+            setFrameFilter(value);
+          }}
+        >
           <SelectTrigger className={adminInput} aria-label="Khung">
             <SelectValue placeholder="Khung" />
           </SelectTrigger>
@@ -497,43 +518,36 @@ export function AdminOrdersPage() {
             ))}
           </SelectContent>
         </Select>
-        <div>
-          <Input
-            type="date"
-            value={dateFrom}
-            onChange={(e) => {
-              resetListPosition();
-              setDateFrom(e.target.value);
-            }}
-            className={adminInput}
-            placeholder="Từ ngày"
-            aria-label="Lọc từ ngày"
-          />
-        </div>
-        <div>
-          <Input
-            type="date"
-            value={dateTo}
-            onChange={(e) => {
-              resetListPosition();
-              setDateTo(e.target.value);
-            }}
-            className={adminInput}
-            placeholder="Đến ngày"
-            aria-label="Lọc đến ngày"
-          />
-        </div>
-      </div>
-
-      <div className="w-full sm:w-56">
-        <AdminOperationalScopeFilter
-          value={operationalScope}
-          onChange={(scope) => {
+        <Input
+          type="date"
+          value={dateFrom}
+          onChange={(event) => {
             resetListPosition();
-            setOperationalScope(scope);
+            setDateFrom(event.target.value);
           }}
+          className={adminInput}
+          aria-label="Lọc từ ngày"
         />
-      </div>
+        <Input
+          type="date"
+          value={dateTo}
+          onChange={(event) => {
+            resetListPosition();
+            setDateTo(event.target.value);
+          }}
+          className={adminInput}
+          aria-label="Lọc đến ngày"
+        />
+        <div className="w-full sm:w-56">
+          <AdminOperationalScopeFilter
+            value={operationalScope}
+            onChange={(scope) => {
+              resetListPosition();
+              setOperationalScope(scope);
+            }}
+          />
+        </div>
+      </AdminToolbar>
 
       <div className="flex flex-wrap gap-2" role="tablist" aria-label="Lọc theo trạng thái">
         {STATUS_FILTER_ORDER.map((status) => {
@@ -549,7 +563,7 @@ export function AdminOrdersPage() {
                 resetListPosition();
                 setStatusFilter(status);
               }}
-              className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-150 ${
+              className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-medium transition-all duration-150 motion-reduce:transition-none ${
                 active
                   ? "border-app-accent/40 bg-app-accent-soft text-app-accent shadow-sm"
                   : "border-app-line/60 bg-app-surface text-app-ink-soft hover:bg-app-accent-soft/50 hover:text-app-ink hover:border-app-accent/20"
@@ -566,18 +580,56 @@ export function AdminOrdersPage() {
         })}
       </div>
 
+      {error ? (
+        <AdminFeedbackBanner
+          tone="error"
+          summary={
+            <div>
+              <p className="font-semibold">Không tải được đơn in</p>
+              <p className="mt-1 font-normal">{error}</p>
+            </div>
+          }
+          action={
+            <Button type="button" variant="outline" size="sm" onClick={() => void loadOrders()}>
+              Thử lại
+            </Button>
+          }
+        />
+      ) : null}
+
+      {exportError ? (
+        <AdminFeedbackBanner
+          tone="error"
+          summary={exportError}
+          action={
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={exportBusy}
+              onClick={() => void handleExportCsv()}
+            >
+              Thử xuất lại
+            </Button>
+          }
+          onDismiss={() => setExportError(null)}
+          dismissLabel="Đóng lỗi xuất đơn in"
+        />
+      ) : null}
+
       {/* Bulk Actions Bar */}
-      {!loading && orders.length > 0 ? (
+      {showSelectionBar ? (
         <div className="flex flex-wrap items-center gap-2 rounded-[var(--r-card)] border border-app-line/60 bg-app-bg-subtle/50 px-4 py-2.5">
           <label className="flex items-center gap-2 cursor-pointer select-none">
             <input
               type="checkbox"
+              aria-label="Chọn tất cả đơn trên trang"
               className="h-4 w-4 rounded border-app-line-strong text-app-accent accent-app-accent"
               checked={selectedIds.size === orders.length && orders.length > 0}
               onChange={toggleSelectAll}
             />
             <span className="text-xs text-app-ink-soft">
-              {selectedIds.size > 0 ? `Đã chọn ${selectedIds.size}/${orders.length}` : "Chọn tất cả"}
+              Đã chọn {selectedIds.size}/{orders.length}
             </span>
           </label>
           {selectedIds.size > 0 ? (
@@ -617,10 +669,16 @@ export function AdminOrdersPage() {
               </Button>
             </div>
           ) : null}
-          {bulkBusy ? <Loader2 className="ml-2 h-4 w-4 animate-spin text-app-ink-muted" /> : null}
+          {bulkBusy ? <Loader2 className="ml-2 h-4 w-4 animate-spin text-app-ink-muted motion-reduce:animate-none" /> : null}
         </div>
       ) : null}
 
+      <AdminDataPanel
+        title="Danh sách đơn in"
+        description="Thông tin khách hàng, cấu hình đơn, phân loại và bước xử lý tiếp theo."
+        busy={loading}
+        contentClassName="p-3 sm:p-4"
+      >
       {loading && orders.length === 0 ? (
         <ul className="space-y-3" role="status" aria-live="polite" aria-busy="true">
           <span className="sr-only">Đang tải danh sách đơn in...</span>
@@ -650,11 +708,11 @@ export function AdminOrdersPage() {
       ) : orders.length === 0 ? (
         <AdminEmptyState
           icon={ClipboardList}
-          title={orders.length === 0 ? "Chưa có đơn hàng nào" : "Không tìm thấy đơn phù hợp"}
+          title={hasActiveFilters ? "Không tìm thấy đơn phù hợp" : "Chưa có đơn hàng nào"}
           description={
-            orders.length === 0
-              ? "Đơn hàng từ người dùng sẽ xuất hiện ở đây khi có."
-              : "Thử bỏ bộ lọc hoặc thay đổi từ khóa tìm kiếm."
+            hasActiveFilters
+              ? "Thử bỏ bộ lọc hoặc thay đổi từ khóa tìm kiếm."
+              : "Đơn hàng từ người dùng sẽ xuất hiện ở đây khi có."
           }
         />
       ) : (
@@ -672,13 +730,14 @@ export function AdminOrdersPage() {
                   <div className="flex items-center gap-2">
                     <input
                       type="checkbox"
+                      aria-label={`Chọn đơn ${order.id}`}
                       className="h-4 w-4 rounded border-app-line-strong text-app-accent accent-app-accent shrink-0 mt-0.5"
                       checked={selectedIds.has(order.id)}
                       onChange={() => toggleSelect(order.id)}
                     />
                     <Link to={`/admin/orders/${order.id}`} className="min-w-0 flex items-center gap-3 group">
                       {/* Avatar circle */}
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-app-accent-soft to-app-bg-subtle text-xs font-bold text-app-accent transition-transform duration-150 group-hover:scale-105">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-app-line bg-app-bg-subtle text-xs font-bold text-app-accent">
                         {(order.fullName || "?").charAt(0).toUpperCase()}
                       </span>
                       <div className="min-w-0">
@@ -747,7 +806,7 @@ export function AdminOrdersPage() {
                   </div>
                 ) : null}
 
-                <div className="mt-4 flex items-center justify-between border-t border-app-line/60 pt-4">
+                <div className="mt-4 flex flex-col gap-3 border-t border-app-line/60 pt-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex flex-wrap items-center gap-2">
                     <Button
                       type="button"
@@ -777,33 +836,19 @@ export function AdminOrdersPage() {
           })}
         </ul>
       )}
+      </AdminDataPanel>
 
       {totalPages > 1 ? (
-        <nav className="flex items-center justify-end gap-2" aria-label="Phân trang đơn in">
-          <Button
-            type="button"
-            variant="outline"
-            disabled={loading || page <= 1}
-            onClick={() => {
-              setSelectedIds(new Set());
-              setPage((value) => value - 1);
-            }}
-          >
-            Trang trước
-          </Button>
-          <span className="text-sm text-app-ink-muted">Trang {page}/{totalPages}</span>
-          <Button
-            type="button"
-            variant="outline"
-            disabled={loading || page >= totalPages}
-            onClick={() => {
-              setSelectedIds(new Set());
-              setPage((value) => value + 1);
-            }}
-          >
-            Trang sau
-          </Button>
-        </nav>
+        <AdminPagination
+          page={page}
+          totalPages={totalPages}
+          disabled={loading}
+          itemLabel="đơn in"
+          onPageChange={(nextPage) => {
+            setSelectedIds(new Set());
+            setPage(nextPage);
+          }}
+        />
       ) : null}
 
       {/* Edit Order Dialog */}

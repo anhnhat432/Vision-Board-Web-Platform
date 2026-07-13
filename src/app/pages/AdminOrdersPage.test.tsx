@@ -51,6 +51,43 @@ describe("AdminOrdersPage server operational data", () => {
     expect(screen.getByRole("button", { name: "Trang sau" })).toBeEnabled();
   });
 
+  it("renders a labelled operations toolbar, mobile search, and accessible data panel", async () => {
+    const { AdminOrdersPage } = await import("./AdminOrdersPage");
+    renderPage(AdminOrdersPage);
+
+    expect(await screen.findByRole("region", { name: "Bộ lọc đơn in" })).toBeInTheDocument();
+    expect(screen.getByRole("searchbox", { name: "Tìm kiếm đơn in" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Danh sách đơn in" })).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "Phân trang đơn in" })).toBeInTheDocument();
+  });
+
+  it("hides bulk controls until a row is selected", async () => {
+    const { AdminOrdersPage } = await import("./AdminOrdersPage");
+    renderPage(AdminOrdersPage);
+
+    await screen.findByText("Mặc định dữ liệu thật");
+    expect(screen.queryByText("Chọn tất cả")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("checkbox", { name: "Chọn đơn order-1" }));
+
+    expect(screen.getByText("Đã chọn 1/1")).toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: "Chọn tất cả đơn trên trang" })).toBeInTheDocument();
+  });
+
+  it("keeps rendered orders visible when a refresh fails", async () => {
+    const { AdminOrdersPage } = await import("./AdminOrdersPage");
+    orders.adminGetOrders
+      .mockResolvedValueOnce(response)
+      .mockRejectedValueOnce(new Error("Render timeout"));
+    renderPage(AdminOrdersPage);
+
+    expect(await screen.findByText("Nguyen A")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Tải lại" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Render timeout");
+    expect(screen.getByText("Nguyen A")).toBeInTheDocument();
+  });
+
   it("sends all filters to the server before requesting the next page", async () => {
     const { AdminOrdersPage } = await import("./AdminOrdersPage");
     renderPage(AdminOrdersPage);
@@ -183,7 +220,7 @@ describe("AdminOrdersPage server operational data", () => {
     renderPage(AdminOrdersPage);
 
     await screen.findByText("Mặc định dữ liệu thật");
-    fireEvent.click(screen.getAllByRole("checkbox")[0]);
+    fireEvent.click(screen.getByRole("checkbox", { name: "Chọn đơn order-1" }));
     fireEvent.click(screen.getAllByRole("button", { name: "Đã xác nhận" })[0]);
     await waitFor(() => expect(orders.adminUpdateOrderStatus).toHaveBeenCalledWith("order-1", { status: "confirmed" }));
     fireEvent.change(screen.getByRole("textbox", { name: "Tìm đơn" }), { target: { value: "bulk-view" } });
