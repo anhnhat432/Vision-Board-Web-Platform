@@ -194,6 +194,9 @@ function classificationFixture() {
   const outboxEvents = new Map<string, Record<string, unknown>>();
   let saves = 0;
   let creates = 0;
+  let savedSession: ClientSession | undefined;
+  let outboxSession: ClientSession | undefined;
+  let duplicateAfterPersist = false;
 
   (UserModel as unknown as MockableModel).findOne = (query: { firebaseUid?: string }) => {
     const stored = query.firebaseUid ? users.get(query.firebaseUid) : undefined;
@@ -201,8 +204,9 @@ function classificationFixture() {
     if (!stored) return { session: () => null, lean };
     const document = {
       ...structuredClone(stored),
-      async save() {
+      async save(options?: { session?: ClientSession }) {
         saves += 1;
+        savedSession = options?.session;
         users.set(stored.firebaseUid, {
           firebaseUid: stored.firebaseUid,
           operationalClassification: this.operationalClassification,
@@ -226,13 +230,28 @@ function classificationFixture() {
     };
     return chain;
   };
-  (AdminAuditOutboxModel as unknown as MockableModel).create = async (events: Array<Record<string, unknown>>) => {
+  (AdminAuditOutboxModel as unknown as MockableModel).create = async (
+    events: Array<Record<string, unknown>>,
+    options?: { session?: ClientSession },
+  ) => {
     creates += 1;
+    outboxSession = options?.session;
     outboxEvents.set(events[0].eventId as string, events[0]);
+    if (duplicateAfterPersist) {
+      throw { code: 11000, keyPattern: { eventId: 1 } };
+    }
     return events;
   };
 
-  return { users, outboxEvents, get saves() { return saves; }, get creates() { return creates; } };
+  return {
+    users,
+    outboxEvents,
+    get saves() { return saves; },
+    get creates() { return creates; },
+    get savedSession() { return savedSession; },
+    get outboxSession() { return outboxSession; },
+    setDuplicateAfterPersist() { duplicateAfterPersist = true; },
+  };
 }
 
 afterEach(() => {
@@ -263,6 +282,8 @@ describe("transactional admin user classification", () => {
     assert.equal(fixture.users.get("exists")?.operationalClassification?.classifiedBy, "admin_uid");
     assert.equal(fixture.outboxEvents.size, 1);
     assert.ok(capturedSession);
+    assert.equal(fixture.savedSession, capturedSession);
+    assert.equal(fixture.outboxSession, capturedSession);
   });
 
   it("persists an idempotency intent without saving an exact same classification", async () => {
@@ -295,6 +316,38 @@ describe("transactional admin user classification", () => {
     );
   });
 
+  it("resolves a duplicate-event race from the durable identity without a second mutation", async () => {
+    const fixture = classificationFixture();
+    fixture.setDuplicateAfterPersist();
+    (mongoose as unknown as { startSession: unknown }).startSession = async () => createSessionMock();
+    const input = {
+      actorUid: "admin_uid", userUid: "exists", requestId: "77777777-7777-4777-8777-777777777777",
+      category: "test" as const, reason: "test_account" as const,
+    };
+
+    assert.equal((await classifyAdminUser(input)).status, "unchanged");
+    assert.equal(fixture.users.get("exists")?.operationalClassification?.category, "test");
+    assert.equal(fixture.saves, 1);
+    assert.equal((await classifyAdminUser(input)).status, "unchanged");
+    assert.equal(fixture.saves, 1);
+  });
+
+  it("updates when the same category has a different reason or normalized note", async () => {
+    const fixture = classificationFixture();
+    (mongoose as unknown as { startSession: unknown }).startSession = async () => createSessionMock();
+
+    assert.equal((await classifyAdminUser({
+      actorUid: "admin_uid", userUid: "same", requestId: "88888888-8888-4888-8888-888888888888",
+      category: "test", reason: "other", note: "new reason",
+    })).status, "updated");
+    assert.equal((await classifyAdminUser({
+      actorUid: "admin_uid", userUid: "same", requestId: "99999999-9999-4999-8999-999999999999",
+      category: "test", reason: "other", note: "  changed note  ",
+    })).status, "updated");
+    assert.equal(fixture.saves, 2);
+    assert.equal(fixture.users.get("same")?.operationalClassification?.note, "changed note");
+  });
+
   it("reports an unknown commit and a retry resolves through the persisted audit identity", async () => {
     const fixture = classificationFixture();
     let unknownOnce = true;
@@ -325,5 +378,52 @@ describe("transactional admin user classification", () => {
     assert.deepEqual(result.results.map((item: { status: string }) => item.status), ["updated", "failed"]);
     assert.deepEqual(result.results[1], { userUid: "missing", status: "failed", errorCode: "user_not_found" });
     assert.equal(fixture.users.get("exists")?.operationalClassification?.category, "internal");
+  });
+
+  it("rejects invalid whole bulk commands before starting a transaction", async () => {
+    classificationFixture();
+    let transactionStarts = 0;
+    (mongoose as unknown as { startSession: unknown }).startSession = async () => {
+      transactionStarts += 1;
+      return createSessionMock();
+    };
+    const validChange = { userUid: "exists", requestId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa" };
+    const cases: Array<{ input: unknown; errorCode: string }> = [
+      {
+        input: {
+          actorUid: "admin_uid", category: "test", reason: "test_account",
+          changes: Array.from({ length: 101 }, () => validChange),
+        },
+        errorCode: "invalid_classification_targets",
+      },
+      {
+        input: {
+          actorUid: "admin_uid", category: "test", reason: "test_account",
+          changes: [validChange, { userUid: " exists ", requestId: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb" }],
+        },
+        errorCode: "invalid_classification_target",
+      },
+      {
+        input: {
+          actorUid: "admin_uid", category: "test", reason: "test_account",
+          changes: [validChange, { userUid: "same", requestId: "AAAAAAAA-AAAA-4AAA-8AAA-AAAAAAAAAAAA" }],
+        },
+        errorCode: "invalid_classification_target",
+      },
+      {
+        input: {
+          actorUid: "admin_uid", category: "real", reason: "test_account", changes: [validChange],
+        },
+        errorCode: "classification_reason_mismatch",
+      },
+    ];
+
+    for (const testCase of cases) {
+      await assert.rejects(
+        bulkClassifyAdminUsers(testCase.input as never),
+        hasErrorCode(testCase.errorCode),
+      );
+    }
+    assert.equal(transactionStarts, 0);
   });
 });

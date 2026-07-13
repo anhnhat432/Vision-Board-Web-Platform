@@ -68,6 +68,14 @@ interface ValidatedClassificationCommand {
   changedAt: Date;
 }
 
+interface ValidatedBulkClassificationCommand {
+  actorUid: string;
+  category: OperationalCategory;
+  reason: OperationalClassificationReason;
+  note?: string;
+  changes: Array<{ userUid: string; requestId: string }>;
+}
+
 export function validateOperationalClassificationInput(input: {
   category: unknown;
   reason: unknown;
@@ -122,6 +130,50 @@ function validateClassificationCommand(input: ClassifyAdminUserInput): Validated
   }
   const classification = validateOperationalClassificationInput(input);
   return { actorUid, userUid, requestId, ...classification, changedAt: new Date() };
+}
+
+function validateBulkClassificationCommand(input: BulkClassifyAdminUsersInput): ValidatedBulkClassificationCommand {
+  const rawInput = input && typeof input === "object"
+    ? input as { actorUid?: unknown; category?: unknown; reason?: unknown; note?: unknown; changes?: unknown }
+    : {};
+  const actorUid = typeof rawInput.actorUid === "string" ? rawInput.actorUid.trim() : "";
+  if (!actorUid) {
+    throw new ApiError(400, "Classification actor is invalid.", undefined, "invalid_classification_actor");
+  }
+  const classification = validateOperationalClassificationInput({
+    category: rawInput.category,
+    reason: rawInput.reason,
+    note: rawInput.note,
+  });
+  if (!Array.isArray(rawInput.changes) || rawInput.changes.length < 1 || rawInput.changes.length > 100) {
+    throw new ApiError(400, "Classification changes must contain 1 to 100 targets.", undefined, "invalid_classification_targets");
+  }
+
+  const userUids = new Set<string>();
+  const requestIds = new Set<string>();
+  const changes = rawInput.changes.map((rawChange, index) => {
+    if (!rawChange || typeof rawChange !== "object" || Array.isArray(rawChange)) {
+      throw new ApiError(400, `changes[${index}] must be an object.`, undefined, "invalid_classification_target");
+    }
+    const change = rawChange as { userUid?: unknown; requestId?: unknown };
+    if (typeof change.userUid !== "string" || typeof change.requestId !== "string") {
+      throw new ApiError(400, `changes[${index}] is invalid.`, undefined, "invalid_classification_target");
+    }
+    const command = validateClassificationCommand({
+      actorUid,
+      userUid: change.userUid,
+      requestId: change.requestId,
+      ...classification,
+    });
+    if (userUids.has(command.userUid) || requestIds.has(command.requestId)) {
+      throw new ApiError(400, "Classification targets and request ids must be unique.", undefined, "invalid_classification_target");
+    }
+    userUids.add(command.userUid);
+    requestIds.add(command.requestId);
+    return { userUid: command.userUid, requestId: command.requestId };
+  });
+
+  return { actorUid, ...classification, changes };
 }
 
 function buildStoredClassification(command: ValidatedClassificationCommand): OperationalClassification {
@@ -283,26 +335,27 @@ export async function bulkClassifyAdminUsers(input: BulkClassifyAdminUsersInput)
     | { userUid: string; status: "failed"; errorCode: AdminClassificationSafeErrorCode }
   >;
 }> {
+  const command = validateBulkClassificationCommand(input);
   const results: Array<
     | { userUid: string; status: "updated" | "unchanged" }
     | { userUid: string; status: "failed"; errorCode: AdminClassificationSafeErrorCode }
   > = [];
-  for (const change of input.changes) {
+  for (const change of command.changes) {
     try {
       const result = await classifyAdminUser({
-        actorUid: input.actorUid,
+        actorUid: command.actorUid,
         userUid: change.userUid,
         requestId: change.requestId,
-        category: input.category,
-        reason: input.reason,
-        note: input.note,
+        category: command.category,
+        reason: command.reason,
+        note: command.note,
       });
       results.push({ userUid: change.userUid, status: result.status });
     } catch (error) {
       results.push({ userUid: change.userUid, status: "failed", errorCode: toSafeClassificationErrorCode(error) });
     }
   }
-  return { category: input.category, results };
+  return { category: command.category, results };
 }
 
 export function resolveEffectiveOperationalClassification(input: {
