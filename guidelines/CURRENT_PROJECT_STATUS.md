@@ -1,6 +1,6 @@
 # Current Project Status
 
-Last reviewed: 2026-06-27
+Last reviewed: 2026-07-13
 
 Purpose: this file records the current code-backed state of Vision Board Web Platform so humans and AI coding agents do not assume features are more complete than they are.
 

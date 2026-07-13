@@ -1,6 +1,6 @@
 # Production Roadmap
 
-Last updated: 2026-06-25
+Last updated: 2026-07-13
 
 Purpose: turn Vision Board Web Platform into a production-safe core-flow product using a Hybrid Spec-Driven Development (SDD) + Agent-Driven Development (ADD) workflow.
 

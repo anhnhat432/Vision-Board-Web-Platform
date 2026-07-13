@@ -64,6 +64,7 @@ type MockableAuditLogModel = {
 };
 
 const originalAuditFingerprintSecret = env.ADMIN_AUDIT_FINGERPRINT_SECRET;
+const auditFingerprintFixtureSecret = "test-admin-audit-fingerprint-secret-at-least-32-bytes";
 const originalOutboxFindOne = (AdminAuditOutboxModel as unknown as MockableModel).findOne;
 const originalAuditFindOne = (AuditLogModel as unknown as MockableModel).findOne;
 const originalOutboxFindOneAndUpdate = AdminAuditOutboxModel.findOneAndUpdate;
@@ -290,6 +291,7 @@ describe("Admin audit outbox identity", () => {
   });
 
   it("builds deterministic versioned HMAC identity without persisting the raw note", () => {
+    env.ADMIN_AUDIT_FINGERPRINT_SECRET = auditFingerprintFixtureSecret;
     const input = {
       reviewRequestId: "11111111-1111-4111-8111-111111111111",
       actorUid: "admin_uid",

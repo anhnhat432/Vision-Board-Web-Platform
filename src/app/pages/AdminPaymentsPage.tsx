@@ -131,6 +131,7 @@ export function AdminPaymentsPage() {
   const [classificationError, setClassificationError] = useState<string>();
   const classificationRequestRef = useRef<{ commandKey: string; requestId: string } | null>(null);
   const classificationMutationRef = useRef(0);
+  const classificationViewKeyRef = useRef<string | null>(null);
   const loadGenerationRef = useRef(0);
   const currentViewKeyRef = useRef("");
 
@@ -173,6 +174,8 @@ export function AdminPaymentsPage() {
   // A classification belongs to one server view. Changing that view releases its dialog;
   // an in-flight request is ignored by its generation guard when it later settles.
   useEffect(() => {
+    if (classificationViewKeyRef.current === viewKey) return;
+    classificationViewKeyRef.current = viewKey;
     classificationMutationRef.current += 1;
     classificationRequestRef.current = null;
     setClassificationPayment(null);
@@ -559,7 +562,7 @@ export function AdminPaymentsPage() {
       )}
 
       {totalPages > 1 ? (
-        <div className="flex items-center justify-end gap-2" aria-label="Phân trang thanh toán">
+        <nav className="flex items-center justify-end gap-2" aria-label="Phân trang thanh toán">
           <Button type="button" variant="outline" disabled={loading || page <= 1} onClick={() => setPage((value) => value - 1)}>
             Trang trước
           </Button>
@@ -567,7 +570,7 @@ export function AdminPaymentsPage() {
           <Button type="button" variant="outline" disabled={loading || page >= totalPages} onClick={() => setPage((value) => value + 1)}>
             Trang sau
           </Button>
-        </div>
+        </nav>
       ) : null}
 
       <AlertDialog

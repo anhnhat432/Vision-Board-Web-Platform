@@ -118,7 +118,6 @@ export function AdminOrdersPage() {
   const { setOrdersPending } = useAdminPendingCounts();
 
   const [orders, setOrders] = useState<AdminApiOrder[]>([]);
-  const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [statusCounts, setStatusCounts] = useState<Record<ApiOrderStatus | "all", number>>({ all: 0, pending: 0, confirmed: 0, printing: 0, shipping: 0, delivered: 0, cancelled: 0 });
   const [frameOptions, setFrameOptions] = useState<string[]>([]);
@@ -140,6 +139,7 @@ export function AdminOrdersPage() {
   const [classificationError, setClassificationError] = useState<string | undefined>();
   const classificationRequestRef = useRef<{ commandKey: string; requestId: string } | null>(null);
   const classificationMutationRef = useRef(0);
+  const classificationViewKeyRef = useRef<string | null>(null);
   const currentViewKeyRef = useRef("");
   const currentViewRef = useRef<OrderListView>({
     query: "", statusFilter: "all", frameFilter: "all", dateFrom: "", dateTo: "", operationalScope: "real", page: 1,
@@ -185,9 +185,11 @@ export function AdminOrdersPage() {
   currentViewKeyRef.current = viewKey;
   currentViewRef.current = currentView;
 
-  const loadOrders = useCallback(async (view = currentViewRef.current) => {
+  const loadOrders = useCallback(async (
+    view = currentViewRef.current,
+    requestViewKey = JSON.stringify(view),
+  ) => {
     const generation = ++loadGeneration.current;
-    const requestViewKey = JSON.stringify(view);
     setLoading(true);
     setError(null);
     try {
@@ -203,7 +205,6 @@ export function AdminOrdersPage() {
         return;
       }
       setOrders(data.items.map(normalizeOrderOperationalClassification));
-      setTotal(data.total);
       setTotalPages(boundedPages);
       setStatusCounts(data.statusCounts);
       setFrameOptions(data.frameOptions);
@@ -216,6 +217,8 @@ export function AdminOrdersPage() {
 
   // A classification dialog cannot outlive the server view it was opened from.
   useEffect(() => {
+    if (classificationViewKeyRef.current === viewKey) return;
+    classificationViewKeyRef.current = viewKey;
     classificationMutationRef.current += 1;
     classificationRequestRef.current = null;
     setClassificationOrder(null);
@@ -229,7 +232,7 @@ export function AdminOrdersPage() {
       setLoading(false);
       return;
     }
-    void loadOrders();
+    void loadOrders(currentViewRef.current, viewKey);
   }, [authLoading, isAdmin, loadOrders, user, userProfileLoading, viewKey]);
 
   const handleTransition = async (orderId: string, nextStatus: ApiOrderStatus) => {
@@ -776,7 +779,7 @@ export function AdminOrdersPage() {
       )}
 
       {totalPages > 1 ? (
-        <div className="flex items-center justify-end gap-2" aria-label="Phân trang đơn in">
+        <nav className="flex items-center justify-end gap-2" aria-label="Phân trang đơn in">
           <Button
             type="button"
             variant="outline"
@@ -800,7 +803,7 @@ export function AdminOrdersPage() {
           >
             Trang sau
           </Button>
-        </div>
+        </nav>
       ) : null}
 
       {/* Edit Order Dialog */}

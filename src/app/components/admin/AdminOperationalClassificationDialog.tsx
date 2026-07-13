@@ -1,4 +1,4 @@
-import { type MouseEvent, useEffect, useRef, useState } from "react";
+import { type MouseEvent, useCallback, useEffect, useRef, useState } from "react";
 import type {
   AdminClassificationMutationPayload,
   AdminOperationalCategory,
@@ -85,7 +85,10 @@ export function AdminOperationalClassificationDialog({
   onOpenChange,
   onConfirm,
 }: AdminOperationalClassificationDialogProps) {
-  const resetDraft = () => createDraft(initialCategory, initialReason, initialNote);
+  const resetDraft = useCallback(
+    () => createDraft(initialCategory, initialReason, initialNote),
+    [initialCategory, initialNote, initialReason],
+  );
   const [draft, setDraft] = useState(resetDraft);
   const [validationError, setValidationError] = useState<string>();
   const wasOpen = useRef(open);
@@ -97,7 +100,7 @@ export function AdminOperationalClassificationDialog({
       setValidationError(undefined);
       wasOpen.current = open;
     }
-  }, [open, initialCategory, initialReason, initialNote]);
+  }, [open, resetDraft]);
 
   const handleOpenChange = (nextOpen: boolean) => {
     if (pending && !nextOpen) return;

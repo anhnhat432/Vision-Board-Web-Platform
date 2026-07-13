@@ -95,8 +95,7 @@ export function AdminOrderDetailPage() {
   const previousIdRef = useRef(id);
   currentIdRef.current = id;
 
-  const load = useCallback(async () => {
-    const requestedId = currentIdRef.current;
+  const load = useCallback(async (requestedId = currentIdRef.current) => {
     if (!requestedId) return;
     const generation = ++loadGeneration.current;
     setLoading(true);
@@ -118,7 +117,7 @@ export function AdminOrderDetailPage() {
   }, []);
 
   useEffect(() => {
-    void load();
+    void load(id);
   }, [id, load]);
 
   useEffect(() => {

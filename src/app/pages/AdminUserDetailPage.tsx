@@ -60,8 +60,7 @@ export function AdminUserDetailPage() {
   const previousUidRef = useRef(uid);
   currentUidRef.current = uid;
 
-  const load = useCallback(async () => {
-    const requestedUid = currentUidRef.current;
+  const load = useCallback(async (requestedUid = currentUidRef.current) => {
     if (!requestedUid) return;
     const generation = ++loadGeneration.current;
     setLoading(true);
@@ -83,7 +82,7 @@ export function AdminUserDetailPage() {
   }, []);
 
   useEffect(() => {
-    void load();
+    void load(uid);
   }, [load, uid]);
 
   useEffect(() => {
