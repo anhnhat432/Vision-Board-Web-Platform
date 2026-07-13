@@ -1,5 +1,7 @@
 # Admin Users UX Clarity Implementation Plan
 
+> **Superseded:** Do not execute this plan independently. Its approved requirements are integrated into `docs/superpowers/specs/2026-07-14-admin-ui-system-phase-1-design.md` and will be replanned with the shared Admin shell.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Make operational classification scannable, hide inactive bulk controls, and present classification results as clear accessible feedback.

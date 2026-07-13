@@ -1,5 +1,7 @@
 # Admin Users UX Clarity Design
 
+> **Superseded as a standalone design:** The approved requirements are integrated into `docs/superpowers/specs/2026-07-14-admin-ui-system-phase-1-design.md`. Keep this file as historical detail; do not plan it separately.
+
 ## Problem
 
 The Admin Users page now persists and reports operational classification correctly, but the interface still makes the state hard to understand:
