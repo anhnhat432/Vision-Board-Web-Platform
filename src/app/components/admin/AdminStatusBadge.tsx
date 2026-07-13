@@ -1,6 +1,7 @@
 import { cn } from "../ui/utils";
 
 export type AdminBadgeTone =
+  | "neutral"
   | "pending"
   | "confirmed"
   | "printing"
@@ -14,6 +15,7 @@ export type AdminBadgeTone =
 
 /** Dot colour per tone — used for the status indicator dot. */
 const DOT_CLASS: Record<AdminBadgeTone, string> = {
+  neutral: "bg-slate-400",
   pending: "bg-amber-400",
   confirmed: "bg-sky-400",
   printing: "bg-violet-400",
@@ -27,6 +29,7 @@ const DOT_CLASS: Record<AdminBadgeTone, string> = {
 };
 
 const TONE_CLASS: Record<AdminBadgeTone, string> = {
+  neutral: "border-app-line bg-app-bg-subtle text-app-ink-soft",
   pending:
     "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:border-amber-500/30",
   confirmed:
