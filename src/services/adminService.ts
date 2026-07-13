@@ -547,7 +547,7 @@ export interface AdminUserListResponse {
 export interface AdminUserListParams {
   q?: string;
   role?: string;
-  operationalCategory?: AdminOperationalCategory;
+  operationalCategory?: AdminOperationalCategory | "all";
   page?: number;
   limit?: number;
 }
@@ -617,7 +617,7 @@ export function adminListUsers(params: AdminUserListParams = {}): Promise<AdminU
   const searchParams = new URLSearchParams();
   if (params.q?.trim()) searchParams.set("q", params.q.trim());
   if (params.role && params.role !== "all") searchParams.set("role", params.role);
-  if (params.operationalCategory) searchParams.set("operationalCategory", params.operationalCategory);
+  if (params.operationalCategory !== undefined) searchParams.set("operationalCategory", params.operationalCategory);
   if (params.page) searchParams.set("page", String(params.page));
   if (params.limit) searchParams.set("limit", String(params.limit));
 

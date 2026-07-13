@@ -103,7 +103,7 @@ export function AdminUsersPage() {
       page: currentPage,
       role: roleFilter,
       q: search,
-      ...(operationalCategory === "all" ? {} : { operationalCategory }),
+      operationalCategory,
     }),
     [currentPage, operationalCategory, roleFilter, search],
   );

@@ -22,6 +22,7 @@ import {
   adminReviewSalesOrder,
   type AdminSalesReportRow,
   type AdminSubscriptionListResponse,
+  type AdminUserListParams,
 } from "./adminService";
 
 const backendSubscriptionListResponse = {
@@ -112,6 +113,13 @@ describe("adminService operational classification", () => {
     await adminClassifyUsers(payload);
 
     expect(apiClientMock.patch).toHaveBeenCalledWith("/admin/users/operational-classification", payload);
+  });
+
+  it("serializes the all user category instead of falling back to the backend default", async () => {
+    const allUsers = { operationalCategory: "all" } satisfies AdminUserListParams;
+    await adminListUsers(allUsers);
+
+    expect(apiClientMock.get).toHaveBeenCalledWith("/admin/users?operationalCategory=all");
   });
 
   it("serializes payment scope filters and targets the payment classification route", async () => {

@@ -89,7 +89,7 @@ describe("AdminUsersPage operational cleanup", () => {
     vi.restoreAllMocks();
   });
 
-  it("loads real users by default and changes excluded category from the filter", async () => {
+  it("loads real users by default and forwards every selected category to the service", async () => {
     const user = userEvent.setup();
     await renderPage();
 
@@ -103,6 +103,13 @@ describe("AdminUsersPage operational cleanup", () => {
     await waitFor(() =>
       expect(adminServiceMock.adminListUsers).toHaveBeenLastCalledWith(
         expect.objectContaining({ operationalCategory: "test", page: 1 }),
+      ),
+    );
+    await user.selectOptions(screen.getByLabelText("Phân loại vận hành"), "all");
+
+    await waitFor(() =>
+      expect(adminServiceMock.adminListUsers).toHaveBeenLastCalledWith(
+        expect.objectContaining({ operationalCategory: "all", page: 1 }),
       ),
     );
   });
