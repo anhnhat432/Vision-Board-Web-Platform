@@ -1575,3 +1575,26 @@ git commit -m "docs(admin): record phase 1 verification"
 ```
 
 Do not create an empty commit when no verification documentation changed.
+
+## Execution Record - 2026-07-14
+
+Phase 1 implementation completed on branch `codex/admin-users-ux-clarity` with these checkpoints:
+
+- `0656d321 feat(admin): establish grouped editorial shell`
+- `05e86799 feat(admin): add editorial data primitives`
+- `e7d1e683 feat(admin): add persistent feedback pattern`
+- `e99b703a feat(admin): align dashboard reference layout`
+- `3068c14a feat(admin): clarify users data workspace`
+- `73fda8c4 feat(admin): present bulk results clearly`
+
+Verification evidence:
+
+- Focused Admin UI suite: 8 files, 30 tests passed.
+- Frontend typecheck: passed after the final implementation change.
+- Full Biome lint: 1,028 files checked, no errors, no fixes applied.
+- Broad fast regression suite: 138 files, 1,361 tests passed.
+- Production build: passed; no build errors.
+- Route suite: 17 tests passed, including the real-mode Admin sales-report guard.
+- `git diff --check origin/main...HEAD`: passed.
+
+Manual visual QA is not claimed at this checkpoint. The isolated worktree contains no authenticated Firebase admin session, reusable Playwright storage state, or admin credentials, so Dashboard/Users could not be inspected behind the real Admin guard at 1440px, 1024px, and 390px. This visual pass remains an explicit Phase 4 hardening item; automated component and route evidence does not replace it.
