@@ -1,5 +1,46 @@
 import { delete as apiDelete, get, getFile, patch, post, put } from "@/lib/api/apiClient";
 
+export type AdminOperationalCategory = "real" | "test" | "internal";
+export type AdminOperationalScope = "real" | "excluded" | "all";
+export type AdminOperationalClassificationReason =
+  | "confirmed_real"
+  | "test_account"
+  | "internal_team"
+  | "automated_qa"
+  | "other";
+
+export interface AdminOperationalClassificationSummary {
+  effectiveCategory: AdminOperationalCategory;
+  source: "default" | "user" | "record" | "legacy_sales_review";
+  reason?: AdminOperationalClassificationReason | "legacy_sales_test" | "legacy_sales_internal";
+  note?: string;
+  classifiedAt?: string;
+}
+
+export interface AdminClassificationMutationPayload {
+  requestId: string;
+  category: AdminOperationalCategory;
+  reason: AdminOperationalClassificationReason;
+  note?: string;
+}
+
+export interface AdminClassifyUsersPayload extends Omit<AdminClassificationMutationPayload, "requestId"> {
+  changes: Array<{ userUid: string; requestId: string }>;
+}
+
+export interface AdminClassificationMutationResult {
+  status: "updated" | "unchanged";
+  classification: AdminOperationalClassificationSummary;
+}
+
+export interface AdminClassifyUsersResult {
+  category: AdminOperationalCategory;
+  results: Array<
+    | { userUid: string; status: "updated" | "unchanged" }
+    | { userUid: string; status: "failed"; errorCode: string }
+  >;
+}
+
 export interface AdminEmailStatus {
   provider: string;
   configured: boolean;
@@ -12,6 +53,7 @@ export interface AdminSubscriptionSummary {
   provider: string;
   billingCycle?: string;
   currentPeriodEnd?: string;
+  operationalClassification?: AdminOperationalClassificationSummary;
 }
 
 export interface AdminUserSummary {
@@ -21,6 +63,7 @@ export interface AdminUserSummary {
   role: "user" | "admin";
   createdAt?: string;
   subscription: AdminSubscriptionSummary | null;
+  operationalClassification: AdminOperationalClassificationSummary;
 }
 
 export interface AdminPaymentOrderSummary {
@@ -52,6 +95,7 @@ export interface AdminPaymentOrderSummary {
     role: "user" | "admin";
     createdAt?: string;
   } | null;
+  operationalClassification: AdminOperationalClassificationSummary;
 }
 
 export interface AdminPaymentPayerSource {
@@ -91,6 +135,7 @@ export interface AdminSalesReportRow {
     exclusionReason: AdminSalesExclusionReason | null;
     reviewedAt: string | null;
   };
+  operationalClassification: AdminOperationalClassificationSummary;
 }
 
 export interface AdminSalesReportResult {
@@ -246,14 +291,19 @@ export interface AdminPaymentOrderListResponse {
   generatedAt: string;
   query: string;
   status: AdminPaymentOrderSummary["status"] | "all";
+  operationalScope: AdminOperationalScope;
+  page: number;
   limit: number;
   total: number;
+  totalPages: number;
   items: AdminPaymentOrderSummary[];
 }
 
 export interface AdminPaymentOrderListParams {
   q?: string;
   status?: AdminPaymentOrderSummary["status"] | "all";
+  operationalScope?: AdminOperationalScope;
+  page?: number;
   limit?: number;
 }
 
@@ -287,10 +337,22 @@ export function adminListPaymentOrders(
   const searchParams = new URLSearchParams();
   if (params.q?.trim()) searchParams.set("q", params.q.trim());
   if (params.status && params.status !== "all") searchParams.set("status", params.status);
+  if (params.operationalScope) searchParams.set("operationalScope", params.operationalScope);
+  if (params.page) searchParams.set("page", String(params.page));
   if (params.limit) searchParams.set("limit", String(params.limit));
 
   const query = searchParams.toString();
   return get<AdminPaymentOrderListResponse>(`/admin/billing/payment-orders${query ? `?${query}` : ""}`);
+}
+
+export function adminClassifyPaymentOrder(
+  orderId: string,
+  payload: AdminClassificationMutationPayload,
+): Promise<AdminClassificationMutationResult> {
+  return patch<AdminClassificationMutationResult, AdminClassificationMutationPayload>(
+    `/admin/billing/payment-orders/${encodeURIComponent(orderId)}/operational-classification`,
+    payload,
+  );
 }
 
 export function adminListRefundRequests(
@@ -471,6 +533,7 @@ export interface AdminUserListItem {
   updatedAt: string | null;
   subscription: AdminSubscriptionSummary | null;
   goalCount: number;
+  operationalClassification: AdminOperationalClassificationSummary;
 }
 
 export interface AdminUserListResponse {
@@ -484,6 +547,7 @@ export interface AdminUserListResponse {
 export interface AdminUserListParams {
   q?: string;
   role?: string;
+  operationalCategory?: AdminOperationalCategory;
   page?: number;
   limit?: number;
 }
@@ -510,6 +574,7 @@ export interface AdminUserPaymentOrderSummary {
   provider: string;
   createdAt: string;
   completedAt?: string;
+  operationalClassification: AdminOperationalClassificationSummary;
 }
 
 export interface AdminPhysicalOrderSummary {
@@ -518,6 +583,7 @@ export interface AdminPhysicalOrderSummary {
   totalVnd: number;
   fullName: string;
   createdAt: string;
+  operationalClassification: AdminOperationalClassificationSummary;
 }
 
 export interface AdminUserDetail {
@@ -532,6 +598,7 @@ export interface AdminUserDetail {
     locale: string;
     createdAt: string;
     updatedAt: string | null;
+    operationalClassification: AdminOperationalClassificationSummary;
   };
   subscription: AdminSubscriptionSummary | null;
   goals: AdminGoalSummary[];
@@ -550,11 +617,16 @@ export function adminListUsers(params: AdminUserListParams = {}): Promise<AdminU
   const searchParams = new URLSearchParams();
   if (params.q?.trim()) searchParams.set("q", params.q.trim());
   if (params.role && params.role !== "all") searchParams.set("role", params.role);
+  if (params.operationalCategory) searchParams.set("operationalCategory", params.operationalCategory);
   if (params.page) searchParams.set("page", String(params.page));
   if (params.limit) searchParams.set("limit", String(params.limit));
 
   const query = searchParams.toString();
   return get<AdminUserListResponse>(`/admin/users${query ? `?${query}` : ""}`);
+}
+
+export function adminClassifyUsers(payload: AdminClassifyUsersPayload): Promise<AdminClassifyUsersResult> {
+  return patch<AdminClassifyUsersResult, AdminClassifyUsersPayload>("/admin/users/operational-classification", payload);
 }
 
 export function adminGetUserDetail(uid: string): Promise<AdminUserDetail> {
@@ -595,6 +667,7 @@ export interface AdminSubscriptionListItem {
   canceledAt: string | null;
   createdAt: string;
   updatedAt: string;
+  operationalClassification: AdminOperationalClassificationSummary;
 }
 
 export interface AdminSubscriptionListResponse {
@@ -602,18 +675,23 @@ export interface AdminSubscriptionListResponse {
   limit: number;
   total: number;
   totalPages: number;
+  operationalScope: AdminOperationalScope;
   items: AdminSubscriptionListItem[];
 }
 
-export function adminListSubscriptions(params: {
+export interface AdminSubscriptionListParams {
   status?: string;
   planCode?: string;
+  operationalScope?: AdminOperationalScope;
   page?: number;
   limit?: number;
-} = {}): Promise<AdminSubscriptionListResponse> {
+}
+
+export function adminListSubscriptions(params: AdminSubscriptionListParams = {}): Promise<AdminSubscriptionListResponse> {
   const searchParams = new URLSearchParams();
   if (params.status && params.status !== "all") searchParams.set("status", params.status);
   if (params.planCode && params.planCode !== "all") searchParams.set("planCode", params.planCode);
+  if (params.operationalScope) searchParams.set("operationalScope", params.operationalScope);
   if (params.page) searchParams.set("page", String(params.page));
   if (params.limit) searchParams.set("limit", String(params.limit));
   const query = searchParams.toString();

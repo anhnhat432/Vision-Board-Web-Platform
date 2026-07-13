@@ -1,4 +1,10 @@
-import { get, patch, post } from "@/lib/api/apiClient";
+import { get, getFile, patch, post } from "@/lib/api/apiClient";
+import type {
+  AdminClassificationMutationPayload,
+  AdminClassificationMutationResult,
+  AdminOperationalClassificationSummary,
+  AdminOperationalScope,
+} from "./adminService";
 
 export type ApiOrderStatus = "pending" | "confirmed" | "printing" | "shipping" | "delivered" | "cancelled";
 
@@ -119,16 +125,79 @@ export interface AdminUpdateStatusPayload {
   adminNote?: string;
 }
 
-export function adminGetOrders(): Promise<ApiOrder[]> {
-  return get<ApiOrder[]>("/admin/orders");
+export interface AdminOrderListParams {
+  q?: string;
+  status?: ApiOrderStatus | "all";
+  frame?: string | "all";
+  dateFrom?: string;
+  dateTo?: string;
+  operationalScope?: AdminOperationalScope;
+  page?: number;
+  limit?: number;
 }
 
-export function adminGetOrder(orderId: string): Promise<ApiOrder> {
-  return get<ApiOrder>(`/admin/orders/${orderId}`);
+export interface AdminApiOrder extends ApiOrder {
+  operationalClassification: AdminOperationalClassificationSummary;
 }
 
-export function adminUpdateOrderStatus(orderId: string, payload: AdminUpdateStatusPayload): Promise<ApiOrder> {
-  return patch<ApiOrder, AdminUpdateStatusPayload>(`/admin/orders/${orderId}/status`, payload);
+export interface AdminOrderListResponse {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  operationalScope: AdminOperationalScope;
+  query: string;
+  status: ApiOrderStatus | "all";
+  frame: string | "all";
+  dateFrom: string | null;
+  dateTo: string | null;
+  statusCounts: Record<ApiOrderStatus | "all", number>;
+  frameOptions: string[];
+  items: AdminApiOrder[];
+}
+
+function buildAdminOrderQuery(params: AdminOrderListParams, includePagination: boolean): string {
+  const searchParams = new URLSearchParams();
+  if (params.q?.trim()) searchParams.set("q", params.q.trim());
+  if (params.status && params.status !== "all") searchParams.set("status", params.status);
+  if (params.frame && params.frame !== "all") searchParams.set("frame", params.frame);
+  if (params.dateFrom) searchParams.set("dateFrom", params.dateFrom);
+  if (params.dateTo) searchParams.set("dateTo", params.dateTo);
+  if (params.operationalScope) searchParams.set("operationalScope", params.operationalScope);
+  if (includePagination && params.page) searchParams.set("page", String(params.page));
+  if (includePagination && params.limit) searchParams.set("limit", String(params.limit));
+  return searchParams.toString();
+}
+
+export function adminGetOrders(): Promise<ApiOrder[]>;
+export function adminGetOrders(params: AdminOrderListParams): Promise<AdminOrderListResponse>;
+export async function adminGetOrders(params?: AdminOrderListParams): Promise<ApiOrder[] | AdminOrderListResponse> {
+  const query = buildAdminOrderQuery(params ?? {}, true);
+  const response = await get<AdminOrderListResponse>(`/admin/orders${query ? `?${query}` : ""}`);
+  return params === undefined ? response.items : response;
+}
+
+export function adminExportOrders(params: AdminOrderListParams = {}): Promise<{ blob: Blob; filename: string | null }> {
+  const query = buildAdminOrderQuery(params, false);
+  return getFile(`/admin/orders/export${query ? `?${query}` : ""}`);
+}
+
+export function adminGetOrder(orderId: string): Promise<AdminApiOrder> {
+  return get<AdminApiOrder>(`/admin/orders/${orderId}`);
+}
+
+export function adminClassifyPhysicalOrder(
+  orderId: string,
+  payload: AdminClassificationMutationPayload,
+): Promise<AdminClassificationMutationResult> {
+  return patch<AdminClassificationMutationResult, AdminClassificationMutationPayload>(
+    `/admin/orders/${encodeURIComponent(orderId)}/operational-classification`,
+    payload,
+  );
+}
+
+export function adminUpdateOrderStatus(orderId: string, payload: AdminUpdateStatusPayload): Promise<AdminApiOrder> {
+  return patch<AdminApiOrder, AdminUpdateStatusPayload>(`/admin/orders/${orderId}/status`, payload);
 }
 
 // ─── Admin Order Edit ────────────────────────────────────────────────────────
@@ -142,6 +211,6 @@ export interface AdminUpdateOrderPayload {
   adminNote?: string;
 }
 
-export function adminUpdateOrder(orderId: string, payload: AdminUpdateOrderPayload): Promise<ApiOrder> {
-  return patch<ApiOrder, AdminUpdateOrderPayload>(`/admin/orders/${orderId}`, payload);
+export function adminUpdateOrder(orderId: string, payload: AdminUpdateOrderPayload): Promise<AdminApiOrder> {
+  return patch<AdminApiOrder, AdminUpdateOrderPayload>(`/admin/orders/${orderId}`, payload);
 }
