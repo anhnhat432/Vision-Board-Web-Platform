@@ -1,5 +1,4 @@
 import {
-  BarChart3,
   Bell,
   CreditCard,
   Loader2,
@@ -21,7 +20,9 @@ import {
   adminSendExpiringBillingReminders,
 } from "@/services/adminService";
 import { type ApiOrder, adminGetOrders } from "@/services/orderService";
+import { AdminDataPanel } from "../components/admin/AdminDataPanel";
 import { AdminEmptyState } from "../components/admin/AdminEmptyState";
+import { AdminFeedbackBanner } from "../components/admin/AdminFeedbackBanner";
 import { AdminPageHeader } from "../components/admin/AdminPageHeader";
 import { AdminStatCard } from "../components/admin/AdminStatCard";
 import { AdminStatusBadge } from "../components/admin/AdminStatusBadge";
@@ -71,13 +72,10 @@ function ReminderBanner({
   const expiringCount = overview?.summary.expiringSoonSubscriptions ?? 0;
 
   return (
-    <div className="relative overflow-hidden rounded-[var(--r-card)] border border-app-accent/20 bg-gradient-to-r from-app-accent-soft via-app-surface to-app-surface p-5">
-      {/* Decorative accent circle */}
-      <span className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-app-accent/5 blur-xl" />
-
-      <div className="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+    <div className={`${adminSurface.card} border-app-accent/25 p-5`}>
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex gap-4">
-          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-app-accent to-app-accent/70 text-white shadow-sm">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[var(--r-tile)] bg-app-accent-soft text-app-accent">
             <Bell className="h-5 w-5" />
           </span>
           <div className="min-w-0">
@@ -107,7 +105,7 @@ function ReminderBanner({
         </div>
         <Button
           type="button"
-          className="gap-2 rounded-xl bg-app-accent text-white shadow-sm hover:bg-app-accent-hover hover:shadow-md transition-all duration-150"
+          className="gap-2"
           disabled={loading || !emailConfigured || expiringCount === 0}
           onClick={onRun}
         >
@@ -213,25 +211,23 @@ function RecentOrdersPreview({
   onSeeAll: () => void;
 }) {
   return (
-    <div className={`${adminSurface.card} p-5`}>
-      <div className="mb-4 flex items-center justify-between">
-        <div>
-          <p className="text-base font-semibold text-app-ink">
-            Đơn in mới nhất
-          </p>
-          <p className="text-xs text-app-ink-muted">5 đơn gần đây nhất.</p>
-        </div>
+    <AdminDataPanel
+      title="Đơn in mới nhất"
+      description="5 đơn gần đây nhất."
+      actions={
         <Button
           type="button"
           variant="ghost"
           size="sm"
-          className="gap-1 text-app-accent hover:bg-app-accent-soft hover:text-app-accent rounded-lg font-medium"
+          className="gap-1 text-app-accent"
           onClick={onSeeAll}
         >
           Xem tất cả
           <span aria-hidden="true">→</span>
         </Button>
-      </div>
+      }
+      contentClassName="px-5 py-1"
+    >
       {orders.length === 0 ? (
         <p className="py-4 text-center text-sm text-app-ink-muted">
           Chưa có đơn in nào.
@@ -241,7 +237,7 @@ function RecentOrdersPreview({
           {orders.slice(0, 5).map((order) => (
             <li
               key={order.id}
-              className="flex flex-wrap items-center justify-between gap-3 py-3 transition-colors hover:bg-app-bg-subtle/30 -mx-2 px-2 rounded-lg"
+              className="flex flex-wrap items-center justify-between gap-3 py-3"
             >
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-app-ink">
@@ -258,7 +254,7 @@ function RecentOrdersPreview({
           ))}
         </ul>
       )}
-    </div>
+    </AdminDataPanel>
   );
 }
 
@@ -351,26 +347,29 @@ export function AdminDashboardPage() {
       />
 
       {error ? (
-        <div className="rounded-[var(--r-card)] border border-rose-300 bg-rose-50 p-5 text-sm dark:border-rose-500/30 dark:bg-rose-500/10">
-          <p className="font-semibold text-rose-700 dark:text-rose-200">
-            Không tải được dữ liệu
-          </p>
-          <p className="mt-1 leading-6 text-rose-600 dark:text-rose-100/80">
-            {error}
-          </p>
-          <Button
-            type="button"
-            variant="outline"
-            className="mt-4 rounded-xl border-app-line bg-app-bg-subtle text-app-ink hover:bg-app-accent-soft hover:text-app-ink"
-            onClick={() => void loadData()}
-          >
-            Thử lại
-          </Button>
-        </div>
+        <AdminFeedbackBanner
+          tone="error"
+          summary={
+            <div>
+              <p className="font-semibold">Không tải được dữ liệu</p>
+              <p className="mt-1 font-normal">{error}</p>
+            </div>
+          }
+          action={
+            <Button type="button" variant="outline" size="sm" onClick={() => void loadData()}>
+              Thử lại
+            </Button>
+          }
+        />
       ) : null}
 
       {loading && !overview ? (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div
+          role="status"
+          aria-label="Đang tải tổng quan quản trị"
+          className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+        >
+          <span className="sr-only">Đang tải tổng quan quản trị</span>
           <StatSkeleton />
           <StatSkeleton />
           <StatSkeleton />
@@ -432,89 +431,64 @@ export function AdminDashboardPage() {
         result={reminderResult}
       />
 
-      {/* Revenue Chart */}
       {summary ? (
-        <div className={`${adminSurface.card} p-5`}>
-          <div className="flex items-center gap-2 mb-4">
-            <BarChart3 className="h-4 w-4 text-app-ink-muted" />
-            <div>
-              <p className="text-sm font-semibold text-app-ink">Doanh thu</p>
-              <p className="text-xs text-app-ink-muted">Tổng và 30 ngày gần nhất</p>
+        <AdminDataPanel
+          title="Doanh thu"
+          description="Tổng và 30 ngày gần nhất."
+          contentClassName="space-y-4 p-5"
+        >
+          <div>
+            <div className="mb-1 flex justify-between text-sm">
+              <span className="text-app-ink-soft">Tổng doanh thu</span>
+              <span className="font-semibold text-app-ink">{formatVnd(summary.revenueTotalVnd)}</span>
+            </div>
+            <div className="h-2.5 w-full overflow-hidden rounded-full bg-app-bg-subtle">
+              <div className="h-full w-full rounded-full bg-app-accent" />
             </div>
           </div>
-          <div className="space-y-4">
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="text-app-ink-soft">Tổng doanh thu</span>
-                <span className="font-semibold text-app-ink">{formatVnd(summary.revenueTotalVnd)}</span>
-              </div>
-              <div className="h-3 w-full rounded-full bg-app-bg-subtle overflow-hidden">
-                <div className="h-full rounded-full bg-app-accent" style={{ width: "100%" }} />
-              </div>
+          <div>
+            <div className="mb-1 flex justify-between text-sm">
+              <span className="text-app-ink-soft">30 ngày qua</span>
+              <span className="font-semibold text-app-ink">{formatVnd(summary.revenueLast30DaysVnd)}</span>
             </div>
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span className="text-app-ink-soft">30 ngày qua</span>
-                <span className="font-semibold text-app-ink">{formatVnd(summary.revenueLast30DaysVnd)}</span>
-              </div>
-              <div className="h-3 w-full rounded-full bg-app-bg-subtle overflow-hidden">
-                <div
-                  className="h-full rounded-full bg-emerald-500"
-                  style={{
-                    width: `${summary.revenueTotalVnd > 0 ? Math.min(100, Math.round((summary.revenueLast30DaysVnd / summary.revenueTotalVnd) * 100)) : 0}%`,
-                  }}
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              <div className="rounded-xl bg-app-bg-subtle p-3 text-center">
-                <p className="text-xs text-app-ink-muted">Plus đang dùng</p>
-                <p className="text-lg font-bold text-app-ink">{summary.activePlusSubscriptions}</p>
-              </div>
-              <div className="rounded-xl bg-app-bg-subtle p-3 text-center">
-                <p className="text-xs text-app-ink-muted">Đơn in</p>
-                <p className="text-lg font-bold text-app-ink">{summary.physicalOrders}</p>
-              </div>
+            <div className="h-2.5 w-full overflow-hidden rounded-full bg-app-bg-subtle">
+              <div
+                className="h-full rounded-full bg-emerald-500"
+                style={{
+                  width: `${summary.revenueTotalVnd > 0 ? Math.min(100, Math.round((summary.revenueLast30DaysVnd / summary.revenueTotalVnd) * 100)) : 0}%`,
+                }}
+              />
             </div>
           </div>
-        </div>
+          <div className="grid grid-cols-2 gap-3 pt-2">
+            <div className="rounded-[var(--r-control)] bg-app-bg-subtle p-3 text-center">
+              <p className="text-xs text-app-ink-muted">Plus đang dùng</p>
+              <p className="text-lg font-bold text-app-ink">{summary.activePlusSubscriptions}</p>
+            </div>
+            <div className="rounded-[var(--r-control)] bg-app-bg-subtle p-3 text-center">
+              <p className="text-xs text-app-ink-muted">Đơn in</p>
+              <p className="text-lg font-bold text-app-ink">{summary.physicalOrders}</p>
+            </div>
+          </div>
+        </AdminDataPanel>
       ) : null}
 
       <section className="grid gap-4 lg:grid-cols-2">
-        <div className={`${adminSurface.card} p-5`}>
-          <div className="mb-4 flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400">
-              <CreditCard className="h-3.5 w-3.5" />
-            </span>
-            <div>
-              <p className="text-sm font-semibold text-app-ink">
-                Thanh toán gần đây
-              </p>
-              <p className="text-xs text-app-ink-muted">
-                Các đơn thanh toán tự động mới nhất.
-              </p>
-            </div>
-          </div>
+        <AdminDataPanel
+          title="Thanh toán gần đây"
+          description="Các đơn thanh toán tự động mới nhất."
+          contentClassName="px-5 py-1"
+        >
           <RecentPaymentList payments={overview?.recentPayments ?? []} />
-        </div>
+        </AdminDataPanel>
 
-        <div className={`${adminSurface.card} p-5`}>
-          <div className="mb-4 flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-50 text-violet-600 dark:bg-violet-500/15 dark:text-violet-400">
-              <Users className="h-3.5 w-3.5" />
-            </span>
-            <div>
-              <p className="text-sm font-semibold text-app-ink">User mới</p>
-              <p className="text-xs text-app-ink-muted">
-                Email:{" "}
-                {overview?.email.configured
-                  ? "đã cấu hình"
-                  : "chưa cấu hình"}
-              </p>
-            </div>
-          </div>
+        <AdminDataPanel
+          title="Người dùng mới"
+          description={`Email: ${overview?.email.configured ? "đã cấu hình" : "chưa cấu hình"}`}
+          contentClassName="px-5 py-1"
+        >
           <RecentUserList users={overview?.recentUsers ?? []} />
-        </div>
+        </AdminDataPanel>
       </section>
 
       <RecentOrdersPreview

@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -61,5 +62,36 @@ describe("AdminDashboardPage operational summary", () => {
     expect(screen.getByRole("link", { name: /15 tài khoản test/i })).toHaveAttribute("href", "/admin/users?operationalCategory=test");
     expect(screen.getByRole("link", { name: /2 tài khoản nội bộ/i })).toHaveAttribute("href", "/admin/users?operationalCategory=internal");
     expect(orderServiceMock.adminGetOrders).toHaveBeenCalledWith({ operationalScope: "real", page: 1, limit: 12 });
+  });
+
+  it("uses labelled operational panels without adding unsupported active-user claims", async () => {
+    render(<MemoryRouter><AdminDashboardPage /></MemoryRouter>);
+
+    expect(await screen.findByRole("region", { name: "Thanh toán gần đây" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Người dùng mới" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Đơn in mới nhất" })).toBeInTheDocument();
+    expect(screen.queryByText(/active user|DAU/i)).not.toBeInTheDocument();
+  });
+
+  it("keeps rendered KPIs visible when a refresh fails", async () => {
+    const user = userEvent.setup();
+    adminServiceMock.adminGetOverview
+      .mockResolvedValueOnce(overview)
+      .mockRejectedValueOnce(new Error("network unavailable"));
+
+    render(<MemoryRouter><AdminDashboardPage /></MemoryRouter>);
+    expect(await screen.findByText("20")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Tải lại" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("network unavailable");
+    expect(screen.getByText("20")).toBeInTheDocument();
+  });
+
+  it("shows the shared empty state when no overview is returned", async () => {
+    adminServiceMock.adminGetOverview.mockResolvedValueOnce(null);
+    render(<MemoryRouter><AdminDashboardPage /></MemoryRouter>);
+
+    expect(await screen.findByText("Chưa có dữ liệu")).toBeInTheDocument();
   });
 });
