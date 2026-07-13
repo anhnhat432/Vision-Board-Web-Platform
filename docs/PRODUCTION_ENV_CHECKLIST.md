@@ -197,17 +197,22 @@ curl -i -H "Authorization: Bearer $ID_TOKEN" $RENDER_URL/api/auth/me
 
 ## Required for MongoDB
 
-| Variable      | Used in                       | Example (safe)                                                                                  | Risk                                                                                                                              |
-| ------------- | ----------------------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `MONGODB_URI` | `backend/src/config/mongo.ts` | `mongodb+srv://user:pass@cluster0.example.mongodb.net/vision_board?retryWrites=true&w=majority` | Boot crash if missing. Localhost in production raises a warning — the validator does not block, but it is almost certainly wrong. |
+| Variable                             | Used in                       | Example (safe)                                                                                  | Risk                                                                                                                              |
+| ------------------------------------ | ----------------------------- | ----------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `MONGODB_URI`                        | `backend/src/config/mongo.ts` | `mongodb+srv://user:pass@cluster0.example.mongodb.net/vision_board?retryWrites=true&w=majority` | Boot crash if missing. Localhost in production raises a warning — the validator does not block, but it is almost certainly wrong. |
+| `ADMIN_AUDIT_FINGERPRINT_SECRET`     | Admin sales review audit outbox | Render secret with at least 32 stable random bytes                                               | Review writes fail closed without it. Do not rotate independently in the initial version; rotation needs an approved previous-secret overlap implementation. |
 
 Recommended cluster hardening:
 
+- Render must set `ADMIN_AUDIT_FINGERPRINT_SECRET` as a stable secret of at
+  least 32 random bytes.
 - Enable IP access list (Render egress IPs or `0.0.0.0/0` only if the URI
   uses SCRAM auth + TLS).
 - Use a dedicated user with `readWrite` on `vision_board` only.
 - Enable backups; the in-repo `npm run backup:mongo` script is operator
   tooling and depends on the optional `MONGODB_BACKUP_*` and `R2_*` vars.
+- Use MongoDB Atlas or another replica-set topology with transactions enabled;
+  standalone MongoDB cannot atomically commit the sales review and audit outbox.
 
 Verify after deploy:
 
@@ -292,3 +297,4 @@ Use `docs/ops/staging-proof-runbook.md` for the exact staging workflow inputs, r
 10. Email verification staging smoke: run `.github/workflows/email-verification-e2e-staging.yml` with `allow_create=CREATE_TEST_ACCOUNT`; if `EMAIL_VERIFICATION_E2E_EMAIL` is configured, it must be disposable and include a `verify` marker.
 11. Account delete staging smoke: run `.github/workflows/account-delete-e2e-staging.yml` with `allow_delete=DELETE_TEST_ACCOUNT`, disposable `ACCOUNT_DELETE_E2E_EMAIL`, and `ACCOUNT_DELETE_E2E_PASSWORD`.
 12. Cross-device sync smoke: set `LWW_E2E_URL`, `LWW_E2E_EMAIL`, and `LWW_E2E_PASSWORD` before running `npm run test:e2e:lww` against staging/preview. For GitHub Actions, use `.github/workflows/lww-e2e-staging.yml` with repository secrets `LWW_E2E_EMAIL` and `LWW_E2E_PASSWORD`.
+13. Admin audit release smoke: review one staging sales order, then confirm exactly one matching outbox row and one canonical audit row. Inspect both rows to confirm they contain no forbidden customer data.

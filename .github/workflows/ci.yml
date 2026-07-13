@@ -46,7 +46,9 @@ jobs:
         run: |
           {
             echo "NODE_ENV=test"
-            echo "MONGODB_URI=mongodb://127.0.0.1:27017/vision-board-ci"
+            echo "MONGODB_URI=mongodb://127.0.0.1:27017/vision-board-ci?replicaSet=rs0&directConnection=true"
+            echo "MONGODB_TRANSACTION_TEST_URI=mongodb://127.0.0.1:27017/vision-board-ci-transactions?replicaSet=rs0&directConnection=true"
+            echo "ADMIN_AUDIT_FINGERPRINT_SECRET=vision-board-ci-admin-audit-fingerprint-secret-32-bytes-minimum"
             echo "FIREBASE_PROJECT_ID=vision-board-ci"
             echo "FIREBASE_CLIENT_EMAIL=firebase-adminsdk-ci@vision-board-ci.iam.gserviceaccount.com"
             echo "FRONTEND_ORIGIN=https://example.com"
@@ -54,7 +56,26 @@ jobs:
             node -e "const { generateKeyPairSync } = require('crypto'); const { privateKey } = generateKeyPairSync('rsa', { modulusLength: 2048 }); process.stdout.write(privateKey.export({ type: 'pkcs8', format: 'pem' }));"
             echo "EOF"
           } >> "$GITHUB_ENV"
+      - name: Start MongoDB replica set
+        run: |
+          docker run -d --name vision-board-mongo-rs -p 27017:27017 mongo:7 --replSet rs0 --bind_ip_all --setParameter enableTestCommands=1
+          ready=0
+          for i in {1..30}; do
+            if docker exec vision-board-mongo-rs mongosh --quiet --eval 'db.adminCommand({ ping: 1 })'; then ready=1; break; fi
+            sleep 1
+          done
+          test "$ready" -eq 1
+          docker exec vision-board-mongo-rs mongosh --quiet --eval 'rs.initiate({_id:"rs0",members:[{_id:0,host:"localhost:27017"}]})'
+          primary=0
+          for i in {1..30}; do
+            if docker exec vision-board-mongo-rs mongosh --quiet --eval 'if (!db.hello().isWritablePrimary) quit(1)'; then primary=1; break; fi
+            sleep 1
+          done
+          test "$primary" -eq 1
       - run: npm --prefix backend ci
       - run: npm --prefix backend run typecheck
       - run: npm --prefix backend run build
       - run: npm --prefix backend test
+      - name: Stop MongoDB replica set
+        if: always()
+        run: docker rm -f vision-board-mongo-rs || true
