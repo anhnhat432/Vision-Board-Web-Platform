@@ -13,6 +13,7 @@ process.env.ADMIN_AUDIT_FINGERPRINT_SECRET ??= "test-admin-audit-fingerprint-sec
 
 import { createAuthMiddleware } from "../middleware/authMiddlewareCore";
 import { errorMiddleware } from "../middleware/errorMiddleware";
+import { generalApiRateLimiter } from "../middleware/rateLimiters";
 import { clearAdminRoleCache } from "../middleware/requireAdmin";
 import { AdminAuditOutboxModel } from "../models/AdminAuditOutboxModel";
 import { AuditLogModel } from "../models/auditLogModel";
@@ -40,6 +41,7 @@ function createApp(): Express {
       throw new Error("Invalid test token");
     },
   }));
+  app.use("/api", generalApiRateLimiter);
   app.use("/api", adminRoutes);
   app.use(errorMiddleware);
   return app;

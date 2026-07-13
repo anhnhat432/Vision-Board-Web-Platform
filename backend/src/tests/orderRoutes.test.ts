@@ -13,6 +13,7 @@ import mongoose, { type ClientSession } from "mongoose";
 
 import { createAuthMiddleware } from "../middleware/authMiddlewareCore";
 import { errorMiddleware } from "../middleware/errorMiddleware";
+import { generalApiRateLimiter } from "../middleware/rateLimiters";
 import { clearAdminRoleCache } from "../middleware/requireAdmin";
 import { AdminAuditOutboxModel } from "../models/AdminAuditOutboxModel";
 import { AuditLogModel } from "../models/auditLogModel";
@@ -262,6 +263,7 @@ function createAdminClassificationApp(): Express {
       },
     }),
   );
+  app.use("/api", generalApiRateLimiter);
   app.use("/api", orderRoutes);
   app.use(errorMiddleware);
   return app;
