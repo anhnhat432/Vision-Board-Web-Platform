@@ -16,14 +16,15 @@ Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
 
 describe("admin operational classification primitives", () => {
   it("renders a confirmed real badge only for an explicit user classification", () => {
-    render(
-      <>
-        <AdminOperationalClassificationBadge classification={{ effectiveCategory: "real", source: "user" }} />
-        <AdminOperationalClassificationBadge classification={{ effectiveCategory: "real", source: "default" }} />
-      </>,
+    const { rerender } = render(
+      <AdminOperationalClassificationBadge classification={{ effectiveCategory: "real", source: "user" }} />,
     );
+    expect(screen.getByText("Dữ liệu thật · Đã xác nhận")).toBeInTheDocument();
 
-    expect(screen.getAllByText("Dữ liệu thật · Đã xác nhận")).toHaveLength(1);
+    rerender(
+      <AdminOperationalClassificationBadge classification={{ effectiveCategory: "real", source: "default" }} />,
+    );
+    expect(screen.queryByText("Dữ liệu thật · Đã xác nhận")).not.toBeInTheDocument();
   });
 
   it("renders excluded classification badges and source labels without a real-data badge", () => {
