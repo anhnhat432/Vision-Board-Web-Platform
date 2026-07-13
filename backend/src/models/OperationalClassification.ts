@@ -58,7 +58,8 @@ export const operationalClassificationSchema = new Schema<OperationalClassificat
 
 operationalClassificationSchema.path("reason").validate(
   function validateCategoryReason(reason: OperationalClassificationReason) {
-    return isOperationalClassificationReasonAllowed(this.category, reason);
+    if (!isOperationalClassificationReasonAllowed(this.category, reason)) return false;
+    return reason !== "other" || Boolean(this.note?.trim());
   },
-  "Operational classification reason does not match category.",
+  "Operational classification reason does not match category or requires a non-empty note.",
 );

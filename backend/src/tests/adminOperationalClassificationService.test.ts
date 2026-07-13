@@ -20,6 +20,40 @@ describe("operational classification resolver", () => {
       resolveEffectiveOperationalClassification({ legacySalesReason: "test" }).source,
       "legacy_sales_review",
     );
+    assert.deepEqual(
+      resolveEffectiveOperationalClassification({
+        userClassification: {
+          category: "real",
+          reason: "confirmed_real",
+          classifiedBy: "a",
+          classifiedAt,
+        },
+        legacySalesReason: "test",
+      }),
+      {
+        effectiveCategory: "test",
+        source: "legacy_sales_review",
+        reason: "legacy_sales_test",
+      },
+    );
+    assert.deepEqual(
+      resolveEffectiveOperationalClassification({
+        recordClassification: {
+          category: "real",
+          reason: "confirmed_real",
+          classifiedBy: "a",
+          classifiedAt,
+        },
+        legacySalesReason: "test",
+      }),
+      {
+        effectiveCategory: "real",
+        source: "record",
+        reason: "confirmed_real",
+        classifiedAt: classifiedAt.toISOString(),
+        note: undefined,
+      },
+    );
     assert.equal(
       resolveEffectiveOperationalClassification({
         recordClassification: {
