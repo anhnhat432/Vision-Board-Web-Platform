@@ -11,6 +11,7 @@ import {
   updateAdminUserRole,
 } from "../controllers/adminController";
 import { clearAdminRoleCache, requireAdmin } from "../middleware/requireAdmin";
+import { BillingSubscriptionModel } from "../models/BillingSubscriptionModel";
 import { PaymentOrderModel, type PaymentOrderStatus } from "../models/PaymentOrderModel";
 import { UserModel } from "../models/UserModel";
 import { billingService } from "../services/billingServiceInstance";
@@ -21,6 +22,7 @@ type MockableModel = {
   find: unknown;
   findOne: unknown;
   countDocuments: unknown;
+  aggregate: unknown;
 };
 
 type MockableBillingService = {
@@ -58,6 +60,8 @@ const originalPaymentOrderFindOne = PaymentOrderModel.findOne;
 const originalPaymentOrderCountDocuments = PaymentOrderModel.countDocuments;
 const originalUserFind = UserModel.find;
 const originalUserFindOne = UserModel.findOne;
+const originalUserCountDocuments = UserModel.countDocuments;
+const originalBillingSubscriptionAggregate = BillingSubscriptionModel.aggregate;
 const originalBillingUpsert = billingService.upsertSubscriptionFromProviderEvent;
 
 afterEach(() => {
@@ -67,6 +71,8 @@ afterEach(() => {
   (PaymentOrderModel as unknown as MockableModel).countDocuments = originalPaymentOrderCountDocuments;
   (UserModel as unknown as MockableModel).find = originalUserFind;
   (UserModel as unknown as MockableModel).findOne = originalUserFindOne;
+  (UserModel as unknown as MockableModel).countDocuments = originalUserCountDocuments;
+  (BillingSubscriptionModel as unknown as MockableModel).aggregate = originalBillingSubscriptionAggregate;
   (billingService as unknown as MockableBillingService).upsertSubscriptionFromProviderEvent = originalBillingUpsert;
   clearAdminRoleCache();
 });
@@ -435,6 +441,57 @@ describe("admin user role management", () => {
 });
 
 describe("admin operational list filters", () => {
+  it("defaults the user list to the persisted real category without role heuristics", async () => {
+    let capturedFilter: Record<string, unknown> | undefined;
+    (UserModel as unknown as MockableModel).countDocuments = async (filter: Record<string, unknown>) => {
+      capturedFilter = filter;
+      return 0;
+    };
+    (UserModel as unknown as MockableModel).find = (filter: Record<string, unknown>) => {
+      capturedFilter = filter;
+      const chain = {
+        select() { return chain; }, sort() { return chain; }, skip() { return chain; }, limit() { return chain; }, async lean() { return []; },
+      };
+      return chain;
+    };
+
+    const res = createMockResponse();
+    const recorder = createNextRecorder();
+    await getAdminUsers({ query: {} } as unknown as Request, res as unknown as Response, recorder.next);
+
+    assert.equal(recorder.getError(), undefined);
+    assert.deepEqual(capturedFilter, {
+      $and: [{
+        $or: [
+          { operationalClassification: { $exists: false } },
+          { operationalClassification: null },
+          { "operationalClassification.category": "real" },
+        ],
+      }],
+    });
+  });
+
+  it("defaults the subscription list to effective real scope before its facet pagination", async () => {
+    let capturedPipeline: Array<Record<string, unknown>> | undefined;
+    (BillingSubscriptionModel as unknown as MockableModel).aggregate = async (pipeline: Array<Record<string, unknown>>) => {
+      capturedPipeline = pipeline;
+      return [{ metadata: [], items: [] }];
+    };
+
+    const res = createMockResponse();
+    const recorder = createNextRecorder();
+    await getAdminSubscriptions({ query: {} } as unknown as Request, res as unknown as Response, recorder.next);
+
+    assert.equal(recorder.getError(), undefined);
+    assert.deepEqual(capturedPipeline?.find((stage) => "$match" in stage && (stage.$match as Record<string, unknown>).__effectiveOperationalCategory === "real"), {
+      $match: { __effectiveOperationalCategory: "real" },
+    });
+    assert.deepEqual(capturedPipeline?.find((stage) => "$match" in stage && "__operationalUser._id" in (stage.$match as Record<string, unknown>)), {
+      $match: { "__operationalUser._id": { $exists: true } },
+    });
+    assert.equal(capturedPipeline?.at(-1) && "$facet" in capturedPipeline.at(-1)!, true);
+  });
+
   it("rejects an invalid user category before querying users", async () => {
     const res = createMockResponse();
     const recorder = createNextRecorder();
