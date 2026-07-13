@@ -20,6 +20,7 @@ import {
   adminListPaymentOrders,
   adminListUsers,
   adminReviewSalesOrder,
+  type AdminOverview,
   type AdminSalesReportRow,
   type AdminSubscriptionListResponse,
   type AdminUserListParams,
@@ -93,6 +94,10 @@ describe("adminService sales reporting", () => {
 
     expectTypeOf<PrivateSalesFields>().toEqualTypeOf<never>();
   });
+
+  it("exposes the backend effective sales status without adding private review data", () => {
+    expectTypeOf<AdminSalesReportRow>().toHaveProperty("effectiveKpiStatus");
+  });
 });
 
 describe("adminService operational classification", () => {
@@ -144,6 +149,10 @@ describe("adminService operational classification", () => {
 
 describe("adminService subscription contracts", () => {
   it("does not require an operational scope absent from the backend response", () => {
-    expect(backendSubscriptionListResponse.items).toEqual([]);
+    expect(requiredSubscriptionListResponse.items).toEqual([]);
+  });
+
+  it("exposes excluded account counts supplied by the overview backend", () => {
+    expectTypeOf<AdminOverview["summary"]>().toHaveProperty("excludedUsers");
   });
 });

@@ -169,6 +169,40 @@ describe("AdminSalesReportPage", () => {
     expect(within(chartTable).getByText("0đ")).toBeInTheDocument();
   });
 
+  it("shows a stored included review as effectively excluded by account classification", async () => {
+    adminServiceMock.adminGetSalesReport.mockResolvedValue({
+      ...report,
+      items: [{
+        ...report.items[0],
+        reporting: { kpiStatus: "included" as const, exclusionReason: null, reviewedAt: "2026-07-11T00:00:00.000Z" },
+        effectiveKpiStatus: "excluded" as const,
+        operationalClassification: { effectiveCategory: "test" as const, source: "user" as const },
+      }],
+    });
+
+    renderPage();
+
+    expect(await screen.findAllByText("Đã duyệt: Được tính KPI")).toHaveLength(2);
+    expect(screen.getAllByText("Hiệu lực: Đã loại theo tài khoản")).toHaveLength(2);
+  });
+
+  it("labels legacy sales-review classification separately from direct record classification", async () => {
+    adminServiceMock.adminGetSalesReport.mockResolvedValue({
+      ...report,
+      items: [{
+        ...report.items[0],
+        reporting: { kpiStatus: "excluded" as const, exclusionReason: "test" as const, reviewedAt: "2026-07-11T00:00:00.000Z" },
+        effectiveKpiStatus: "excluded" as const,
+        operationalClassification: { effectiveCategory: "test" as const, source: "legacy_sales_review" as const },
+      }],
+    });
+
+    renderPage();
+
+    expect(await screen.findAllByText("Theo duyệt KPI cũ")).toHaveLength(2);
+    expect(screen.queryByText("Đánh dấu trực tiếp")).not.toBeInTheDocument();
+  });
+
   it("preserves a URL-selected 7-day range", async () => {
     renderPage("/admin/reports/sales?range=7d");
 

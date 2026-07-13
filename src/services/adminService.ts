@@ -135,6 +135,7 @@ export interface AdminSalesReportRow {
     exclusionReason: AdminSalesExclusionReason | null;
     reviewedAt: string | null;
   };
+  effectiveKpiStatus: AdminSalesKpiStatus;
   operationalClassification: AdminOperationalClassificationSummary;
 }
 
@@ -259,6 +260,10 @@ export interface AdminOverview {
   summary: {
     totalUsers: number;
     adminUsers: number;
+    excludedUsers: {
+      test: number;
+      internal: number;
+    };
     activePlusSubscriptions: number;
     expiringSoonSubscriptions: number;
     pendingPaymentOrders: number;

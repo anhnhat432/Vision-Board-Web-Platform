@@ -169,12 +169,9 @@ function buildAdminOrderQuery(params: AdminOrderListParams, includePagination: b
   return searchParams.toString();
 }
 
-export function adminGetOrders(): Promise<ApiOrder[]>;
-export function adminGetOrders(params: AdminOrderListParams): Promise<AdminOrderListResponse>;
-export async function adminGetOrders(params?: AdminOrderListParams): Promise<ApiOrder[] | AdminOrderListResponse> {
-  const query = buildAdminOrderQuery(params ?? {}, true);
-  const response = await get<AdminOrderListResponse>(`/admin/orders${query ? `?${query}` : ""}`);
-  return params === undefined ? response.items : response;
+export function adminGetOrders(params: AdminOrderListParams): Promise<AdminOrderListResponse> {
+  const query = buildAdminOrderQuery(params, true);
+  return get<AdminOrderListResponse>(`/admin/orders${query ? `?${query}` : ""}`);
 }
 
 export function adminExportOrders(params: AdminOrderListParams = {}): Promise<{ blob: Blob; filename: string | null }> {

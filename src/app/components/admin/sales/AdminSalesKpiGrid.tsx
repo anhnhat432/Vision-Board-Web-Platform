@@ -16,7 +16,7 @@ export function AdminSalesKpiGrid({ summary }: { summary: AdminSalesReportResult
   ];
 
   return (
-    <section aria-label="Chỉ số bán hàng" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+    <section aria-label="Chỉ số bán hàng hiệu lực" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
       {cards.map((card) => <AdminStatCard key={card.label} {...card} />)}
     </section>
   );

@@ -9,7 +9,7 @@ import {
   WalletCards,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import {
@@ -281,12 +281,12 @@ export function AdminDashboardPage() {
     setError(null);
     try {
       const [overviewData, orderData] = await withTimeout(
-        Promise.all([adminGetOverview(), adminGetOrders()]),
+        Promise.all([adminGetOverview(), adminGetOrders({ operationalScope: "real", page: 1, limit: 12 })]),
         ADMIN_LOAD_TIMEOUT_MS,
         "Máy chủ quản trị phản hồi quá lâu. Render có thể đang cold start; hãy thử lại sau vài giây.",
       );
       setOverview(overviewData);
-      setOrders(orderData);
+      setOrders(orderData.items);
     } catch (err) {
       setError(getErrorMessage(err, "Không thể tải dữ liệu quản trị."));
     } finally {
@@ -406,6 +406,22 @@ export function AdminDashboardPage() {
             detail={`${summary.pendingPaymentOrders} đang chờ, ${summary.physicalOrders} đơn in`}
             accent="orders"
           />
+        </div>
+      ) : null}
+
+      {summary && (summary.excludedUsers.test > 0 || summary.excludedUsers.internal > 0) ? (
+        <div className="flex flex-wrap gap-3 text-sm text-app-ink-soft">
+          <span>Dữ liệu đã loại khỏi tổng quan:</span>
+          {summary.excludedUsers.test > 0 ? (
+            <Link to="/admin/users?operationalCategory=test" className="font-medium text-app-accent hover:underline">
+              {summary.excludedUsers.test} tài khoản test
+            </Link>
+          ) : null}
+          {summary.excludedUsers.internal > 0 ? (
+            <Link to="/admin/users?operationalCategory=internal" className="font-medium text-app-accent hover:underline">
+              {summary.excludedUsers.internal} tài khoản nội bộ
+            </Link>
+          ) : null}
         </div>
       ) : null}
 
