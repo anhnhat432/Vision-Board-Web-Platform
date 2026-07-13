@@ -77,6 +77,113 @@ function createReviewOrder(overrides: Record<string, unknown> = {}) {
   };
 }
 
+type SalesFacetFixture = {
+  summary: Array<{
+    successfulTransactions: number;
+    uniquePaidUsers: number;
+    grossRevenueVnd: number;
+    refundedAmountVnd: number;
+    netRevenueVnd: number;
+  }>;
+  tabCounts: Array<{ _id: "pending" | "included" | "excluded"; count: number }>;
+  dailyBuckets: unknown[];
+  rowCount: Array<{ count: number }>;
+  rows: Array<Record<string, unknown>>;
+};
+
+function buildSalesFacetFixture(options: {
+  storedStatus?: "pending" | "included" | "excluded";
+  userCategory?: "real" | "test" | "internal";
+  recordCategory?: "real" | "test" | "internal";
+  legacyExclusionReason?: "test" | "internal_team";
+  isRefunded?: boolean;
+} = {}): SalesFacetFixture {
+  const storedStatus = options.storedStatus ?? "pending";
+  const isUserExcluded = options.userCategory === "test" || options.userCategory === "internal";
+  const effectiveCategory = isUserExcluded
+    ? options.userCategory
+    : options.recordCategory ??
+      (options.legacyExclusionReason === "test" ? "test" :
+        options.legacyExclusionReason === "internal_team" ? "internal" : "real");
+  const source = isUserExcluded
+    ? "user"
+    : options.recordCategory
+      ? "record"
+      : options.legacyExclusionReason
+        ? "legacy_sales_review"
+        : options.userCategory
+          ? "user"
+          : "default";
+  const effectiveKpiStatus = effectiveCategory === "real" ? storedStatus : "excluded";
+  const isIncluded = effectiveKpiStatus === "included";
+  const amount = 99000;
+
+  return {
+    summary: isIncluded ? [{
+      successfulTransactions: 1,
+      uniquePaidUsers: 1,
+      grossRevenueVnd: amount,
+      refundedAmountVnd: options.isRefunded ? amount : 0,
+      netRevenueVnd: options.isRefunded ? 0 : amount,
+    }] : [],
+    tabCounts: [{ _id: effectiveKpiStatus, count: 1 }],
+    dailyBuckets: isIncluded ? [{
+      _id: "2026-07-10",
+      transactions: 1,
+      grossRevenueVnd: amount,
+      refundedAmountVnd: options.isRefunded ? amount : 0,
+      netRevenueVnd: options.isRefunded ? 0 : amount,
+    }] : [],
+    rowCount: [{ count: 1 }],
+    rows: [{
+      orderId: "VBCLASS01",
+      userId: "private-user-id",
+      amount,
+      currency: "VND",
+      provider: "payos",
+      completedAt: new Date("2026-07-10T03:00:00.000Z"),
+      user: { email: "customer@example.com", displayName: "Customer Name" },
+      payer: null,
+      refund: options.isRefunded ? { resolvedAt: new Date("2026-07-11T03:00:00.000Z") } : null,
+      isRefunded: Boolean(options.isRefunded),
+      reporting: {
+        kpiStatus: storedStatus,
+        exclusionReason: options.legacyExclusionReason ?? null,
+        reviewedAt: new Date("2026-07-11T02:00:00.000Z"),
+        reviewNote: "private review note",
+      },
+      __effectiveOperationalCategory: effectiveCategory,
+      __effectiveOperationalSource: source,
+      __effectiveOperationalReason: options.recordCategory === "real"
+        ? "confirmed_real"
+        : options.legacyExclusionReason === "test"
+          ? "legacy_sales_test"
+          : options.legacyExclusionReason === "internal_team"
+            ? "legacy_sales_internal"
+            : undefined,
+      effectiveKpiStatus,
+      metadata: { providerPayload: "private provider payload" },
+      bankAccount: "private bank account",
+      manualCompletedAt: null,
+      cassoTransactionId: null,
+    }],
+  };
+}
+
+function installSalesFacetFixture(facet: SalesFacetFixture): void {
+  (PaymentOrderModel as unknown as { aggregate: (pipeline: unknown[]) => Promise<SalesFacetFixture[]> }).aggregate = async () => [facet];
+}
+
+function readEffectiveSalesRow(row: unknown): {
+  effectiveKpiStatus?: unknown;
+  operationalClassification?: { effectiveCategory?: unknown; source?: unknown };
+} {
+  return row as {
+    effectiveKpiStatus?: unknown;
+    operationalClassification?: { effectiveCategory?: unknown; source?: unknown };
+  };
+}
+
 const reviewInput = {
   orderId: "VBREVIEW01",
   reviewerUid: "admin_uid",
@@ -191,13 +298,136 @@ describe("admin sales report aggregation", () => {
     assert.deepEqual(facet.rows.at(-1), { $limit: 10_001 });
     const safeProject = pipeline.find((stage) => {
       const project = stage.$project as Record<string, unknown> | undefined;
-      return project?.effectiveKpiStatus === 1 && project?.payer === 1;
+      return project?.effectiveKpiStatus === "$__effectiveKpiStatus" && project?.payer === 1;
     })?.$project as Record<string, unknown>;
     assert.equal(safeProject.qrDataUrl, undefined);
     assert.equal(safeProject.metadata, undefined);
     assert.equal(safeProject.bankAccount, undefined);
     assert.equal(JSON.stringify(safeProject.reporting).includes("reviewNote"), false);
     assert.equal(JSON.stringify(safeProject.reporting).includes("reviewedBy"), false);
+  });
+
+  it("places Task 5 effective classification stages before the effective KPI status", () => {
+    const filters = parseAdminSalesReportFilters({
+      from: "2026-07-01",
+      to: "2026-07-11",
+      kpiStatus: "included",
+    });
+    const pipeline = buildAdminSalesReportPipeline(filters) as unknown as Array<Record<string, unknown>>;
+    const classificationLookupIndex = pipeline.findIndex((stage) =>
+      (stage.$lookup as { as?: unknown } | undefined)?.as === "__operationalUsers",
+    );
+    const effectiveClassificationIndex = pipeline.findIndex((stage) =>
+      "__effectiveOperationalCategory" in (stage.$set as Record<string, unknown> ?? {}),
+    );
+    const effectiveKpiIndex = pipeline.findIndex((stage) =>
+      "__effectiveKpiStatus" in (stage.$set as Record<string, unknown> ?? {}),
+    );
+
+    assert.ok(classificationLookupIndex >= 0);
+    assert.ok(effectiveClassificationIndex > classificationLookupIndex);
+    assert.ok(effectiveKpiIndex > effectiveClassificationIndex);
+  });
+
+  it("excludes a stored included sale when its user is test", async () => {
+    installSalesFacetFixture(buildSalesFacetFixture({ storedStatus: "included", userCategory: "test" }));
+
+    const report = await getAdminSalesReport({
+      from: "2026-07-01",
+      to: "2026-07-11",
+      kpiStatus: "excluded",
+    });
+
+    assert.equal(report.summary.successfulTransactions, 0);
+    assert.equal(report.tabCounts.excluded, 1);
+    assert.equal(report.items[0]?.reporting.kpiStatus, "included");
+    assert.equal(readEffectiveSalesRow(report.items[0]).effectiveKpiStatus, "excluded");
+    assert.equal(readEffectiveSalesRow(report.items[0]).operationalClassification?.source, "user");
+  });
+
+  it("restores the stored review decision when classification becomes real", async () => {
+    installSalesFacetFixture(buildSalesFacetFixture({ storedStatus: "included", userCategory: "real" }));
+
+    const report = await getAdminSalesReport({
+      from: "2026-07-01",
+      to: "2026-07-11",
+      kpiStatus: "included",
+    });
+
+    assert.equal(report.summary.successfulTransactions, 1);
+    assert.equal(report.items[0]?.reporting.kpiStatus, "included");
+    assert.equal(readEffectiveSalesRow(report.items[0]).effectiveKpiStatus, "included");
+    assert.equal(readEffectiveSalesRow(report.items[0]).operationalClassification?.effectiveCategory, "real");
+  });
+
+  it("uses direct record real over legacy sales exclusion but keeps a non-real user authoritative", async () => {
+    installSalesFacetFixture(buildSalesFacetFixture({
+      storedStatus: "included",
+      recordCategory: "real",
+      legacyExclusionReason: "test",
+    }));
+    const recordReal = await getAdminSalesReport({
+      from: "2026-07-01",
+      to: "2026-07-11",
+      kpiStatus: "included",
+    });
+    assert.equal(readEffectiveSalesRow(recordReal.items[0]).effectiveKpiStatus, "included");
+    assert.equal(readEffectiveSalesRow(recordReal.items[0]).operationalClassification?.source, "record");
+
+    installSalesFacetFixture(buildSalesFacetFixture({
+      storedStatus: "included",
+      userCategory: "internal",
+      recordCategory: "real",
+      legacyExclusionReason: "test",
+    }));
+    const nonRealUser = await getAdminSalesReport({
+      from: "2026-07-01",
+      to: "2026-07-11",
+      kpiStatus: "excluded",
+    });
+    assert.equal(readEffectiveSalesRow(nonRealUser.items[0]).effectiveKpiStatus, "excluded");
+    assert.equal(readEffectiveSalesRow(nonRealUser.items[0]).operationalClassification?.source, "user");
+    assert.equal(readEffectiveSalesRow(nonRealUser.items[0]).operationalClassification?.effectiveCategory, "internal");
+  });
+
+  it("keeps a real pending sale pending and counts refunds only for effectively included sales", async () => {
+    installSalesFacetFixture(buildSalesFacetFixture({ storedStatus: "pending", userCategory: "real" }));
+    const pending = await getAdminSalesReport({
+      from: "2026-07-01",
+      to: "2026-07-11",
+      kpiStatus: "pending",
+    });
+    assert.equal(readEffectiveSalesRow(pending.items[0]).effectiveKpiStatus, "pending");
+    assert.equal(pending.summary.successfulTransactions, 0);
+    assert.equal(pending.tabCounts.pending, 1);
+
+    installSalesFacetFixture(buildSalesFacetFixture({
+      storedStatus: "included",
+      userCategory: "real",
+      isRefunded: true,
+    }));
+    const includedRefund = await getAdminSalesReport({
+      from: "2026-07-01",
+      to: "2026-07-11",
+      kpiStatus: "included",
+    });
+    assert.equal(includedRefund.summary.refundedAmountVnd, 99000);
+    assert.equal(includedRefund.summary.netRevenueVnd, 0);
+    assert.equal(includedRefund.dailyBuckets[0]?.netRevenueVnd, 0);
+
+    installSalesFacetFixture(buildSalesFacetFixture({
+      storedStatus: "included",
+      userCategory: "test",
+      isRefunded: true,
+    }));
+    const excludedRefund = await getAdminSalesReport({
+      from: "2026-07-01",
+      to: "2026-07-11",
+      kpiStatus: "excluded",
+    });
+    assert.equal(excludedRefund.summary.refundedAmountVnd, 0);
+    assert.equal(excludedRefund.summary.netRevenueVnd, 0);
+    assert.deepEqual(excludedRefund.dailyBuckets, []);
   });
 
   it("normalizes legacy reviews, counts distinct users, and subtracts one completed refund", async () => {
@@ -340,6 +570,27 @@ describe("admin sales report aggregation", () => {
     assert.match(csv, /"Generated at"/);
     assert.match(csv, /"Order ID"/);
     assert.equal(csv.includes("a@example.com"), false);
+  });
+
+  it("exports effective KPI and classification summaries without private identifiers or payloads", async () => {
+    installSalesFacetFixture(buildSalesFacetFixture({ storedStatus: "included", userCategory: "test" }));
+
+    const exported = await getAdminSalesReportExport({
+      from: "2026-07-01",
+      to: "2026-07-11",
+      kpiStatus: "excluded",
+    });
+    const csv = buildAdminSalesReportCsv(exported);
+
+    assert.match(csv, /"Stored KPI status"/);
+    assert.match(csv, /"Effective KPI status"/);
+    assert.match(csv, /"Operational category"/);
+    assert.match(csv, /"user"/);
+    assert.match(csv, /"test"/);
+    assert.equal(csv.includes("private-user-id"), false);
+    assert.equal(csv.includes("private review note"), false);
+    assert.equal(csv.includes("private provider payload"), false);
+    assert.equal(csv.includes("private bank account"), false);
   });
 
   it("rejects oversized exports instead of returning a partial CSV", async () => {

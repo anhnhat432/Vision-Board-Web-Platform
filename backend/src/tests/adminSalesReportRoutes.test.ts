@@ -214,6 +214,52 @@ describe("admin sales report routes", () => {
     }
   });
 
+  it("returns the effective classification while preserving the stored review decision", async () => {
+    mockUserRoles();
+    (PaymentOrderModel as unknown as MockableModel).aggregate = async () => [{
+      summary: [],
+      tabCounts: [{ _id: "excluded", count: 1 }],
+      dailyBuckets: [],
+      rowCount: [{ count: 1 }],
+      rows: [{
+        orderId: "VBCLASSROUTE01",
+        userId: "private-user-id",
+        amount: 99000,
+        currency: "VND",
+        provider: "payos",
+        completedAt: new Date("2026-07-10T03:00:00.000Z"),
+        user: { email: "customer@example.com", displayName: "Customer Name" },
+        payer: null,
+        refund: null,
+        isRefunded: false,
+        reporting: { kpiStatus: "included", reviewNote: "private review note" },
+        effectiveKpiStatus: "excluded",
+        __effectiveOperationalCategory: "test",
+        __effectiveOperationalSource: "user",
+        metadata: { providerPayload: "private provider payload" },
+        bankAccount: "private bank account",
+      }],
+    }];
+    const app = createAdminTestApp();
+
+    const response = await request(
+      app,
+      "GET",
+      "/api/admin/reports/sales?from=2026-07-01&to=2026-07-11&kpiStatus=excluded",
+      "admin-token",
+    );
+
+    assert.equal(response.status, 200);
+    const item = ((response.json.data as Record<string, unknown>).items as Array<Record<string, unknown>>)[0] ?? {};
+    assert.equal((item.reporting as Record<string, unknown>).kpiStatus, "included");
+    assert.equal(item.effectiveKpiStatus, "excluded");
+    assert.deepEqual(item.operationalClassification, { effectiveCategory: "test", source: "user" });
+    assert.equal(JSON.stringify(response.json).includes("private-user-id"), false);
+    assert.equal(JSON.stringify(response.json).includes("private review note"), false);
+    assert.equal(JSON.stringify(response.json).includes("private provider payload"), false);
+    assert.equal(JSON.stringify(response.json).includes("private bank account"), false);
+  });
+
   it("reviews a qualifying order through the protected route and rejects invalid review input without an update", async () => {
     mockUserRoles();
     let directAuditCreates = 0;
