@@ -10,9 +10,14 @@ process.env.ADMIN_AUDIT_FINGERPRINT_SECRET ??= "test-admin-audit-fingerprint-sec
 
 import { env } from "../config/env";
 import { AuditLogModel } from "../models/auditLogModel";
-import { AdminAuditOutboxModel } from "../models/AdminAuditOutboxModel";
+import { type AuditLogEntity } from "../models/auditLogModel";
+import {
+  AdminAuditOutboxModel,
+  type AdminAuditOutboxEntity,
+} from "../models/AdminAuditOutboxModel";
 import {
   buildAdminSalesReviewAuditIdentity,
+  dispatchAdminAuditOutboxEvent,
   isDuplicateAdminAuditEventIdError,
   resolveAdminAuditIdempotency,
 } from "../services/adminAuditOutboxService";
@@ -30,9 +35,37 @@ type MockableModel = {
   findOne: unknown;
 };
 
+type LeanResult<T> = { lean(): Promise<T> };
+type OutboxFilter = Record<string, unknown>;
+type OutboxUpdate = Record<string, unknown> & {
+  $set?: Record<string, unknown>;
+  $inc?: Record<string, number>;
+};
+type OutboxFindOneAndUpdate = (
+  filter: OutboxFilter,
+  update: OutboxUpdate,
+  options?: Record<string, unknown>,
+) => LeanResult<AdminAuditOutboxEntity | null>;
+type MockableOutboxModel = { findOneAndUpdate: OutboxFindOneAndUpdate };
+
+interface AuditLogUpsert {
+  $setOnInsert: {
+    timestamp: Date;
+    actorEmail: null;
+    [key: string]: unknown;
+  };
+}
+
+type MockableAuditLogModel = {
+  updateOne(filter: Record<string, unknown>, update: AuditLogUpsert): Promise<unknown>;
+  findOne(filter: Record<string, unknown>): LeanResult<AuditLogEntity | null>;
+};
+
 const originalAuditFingerprintSecret = env.ADMIN_AUDIT_FINGERPRINT_SECRET;
 const originalOutboxFindOne = (AdminAuditOutboxModel as unknown as MockableModel).findOne;
 const originalAuditFindOne = (AuditLogModel as unknown as MockableModel).findOne;
+const originalOutboxFindOneAndUpdate = AdminAuditOutboxModel.findOneAndUpdate;
+const originalAuditUpdateOne = AuditLogModel.updateOne;
 
 function createLeanResult(value: IdentityRow | null) {
   return {
@@ -60,10 +93,88 @@ function mockIdempotencyRows(outbox: IdentityRow | null, audit: IdentityRow | nu
   (AuditLogModel as unknown as MockableModel).findOne = () => createLeanResult(audit);
 }
 
+function leanResult<T>(value: T): LeanResult<T> {
+  return { async lean() { return value; } };
+}
+
+function createOutboxFixture(overrides: Partial<AdminAuditOutboxEntity> = {}): AdminAuditOutboxEntity {
+  const occurredAt = new Date("2026-07-13T02:00:00.000Z");
+  return {
+    eventId: "admin_sales_reviewed:req-1",
+    reviewRequestId: "11111111-1111-4111-8111-111111111111",
+    commandFingerprint: "a".repeat(64),
+    commandFingerprintVersion: "v1",
+    eventType: "admin_sales_reviewed",
+    actorUid: "admin_uid",
+    target: "payment_order_sales_reporting",
+    targetId: "VBREVIEW01",
+    payload: {
+      previousStatus: "pending",
+      newStatus: "excluded",
+      exclusionReason: "test",
+      noteProvided: true,
+      reviewedAt: occurredAt.toISOString(),
+    },
+    occurredAt,
+    status: "pending",
+    attempts: 0,
+    availableAt: occurredAt,
+    createdAt: occurredAt,
+    updatedAt: occurredAt,
+    ...overrides,
+  };
+}
+
+function createCanonicalAuditFixture(event: AdminAuditOutboxEntity): AuditLogEntity {
+  return {
+    eventId: event.eventId,
+    commandFingerprint: event.commandFingerprint,
+    commandFingerprintVersion: event.commandFingerprintVersion,
+    actorUid: event.actorUid,
+    actorEmail: null,
+    action: "reviewAdminSalesOrder",
+    target: event.target,
+    targetId: event.targetId,
+    payload: event.payload as unknown as Record<string, unknown>,
+    ip: null,
+    userAgent: null,
+    timestamp: event.occurredAt,
+    success: true,
+  };
+}
+
+function mockClaimThenComplete(
+  event: AdminAuditOutboxEntity,
+  capture: (filter: Record<string, unknown>) => void,
+): void {
+  let call = 0;
+  (AdminAuditOutboxModel as unknown as MockableOutboxModel).findOneAndUpdate = (filter) => {
+    call += 1;
+    if (call === 1) return leanResult(event);
+    capture(filter);
+    return leanResult({ ...event, status: "completed", completedAt: new Date() });
+  };
+}
+
+function mockClaimThenRetry(
+  event: AdminAuditOutboxEntity,
+  capture: (update: OutboxUpdate) => void,
+): void {
+  let call = 0;
+  (AdminAuditOutboxModel as unknown as MockableOutboxModel).findOneAndUpdate = (_filter, update) => {
+    call += 1;
+    if (call === 1) return leanResult(event);
+    capture(update);
+    return leanResult({ ...event, status: "pending" });
+  };
+}
+
 afterEach(() => {
   env.ADMIN_AUDIT_FINGERPRINT_SECRET = originalAuditFingerprintSecret;
   (AdminAuditOutboxModel as unknown as MockableModel).findOne = originalOutboxFindOne;
   (AuditLogModel as unknown as MockableModel).findOne = originalAuditFindOne;
+  (AdminAuditOutboxModel as unknown as { findOneAndUpdate: unknown }).findOneAndUpdate = originalOutboxFindOneAndUpdate;
+  (AuditLogModel as unknown as { updateOne: unknown }).updateOne = originalAuditUpdateOne;
 });
 
 describe("Admin audit outbox identity", () => {
@@ -163,5 +274,164 @@ describe("resolveAdminAuditIdempotency", () => {
   it("recognizes duplicate eventId key errors only", () => {
     assert.equal(isDuplicateAdminAuditEventIdError({ code: 11000, keyPattern: { eventId: 1 } }), true);
     assert.equal(isDuplicateAdminAuditEventIdError({ code: 11000, keyPattern: { actorUid: 1 } }), false);
+  });
+});
+
+describe("admin audit outbox dispatcher", () => {
+  it("claims, upserts one canonical AuditLog, and completes with lease CAS", async () => {
+    const claimed = createOutboxFixture({ status: "processing", leaseToken: "lease-1", attempts: 1 });
+    let capturedAuditUpdate: AuditLogUpsert | undefined;
+    let capturedCompletionFilter: Record<string, unknown> | undefined;
+    mockClaimThenComplete(claimed, (filter) => { capturedCompletionFilter = filter; });
+    (AuditLogModel as unknown as MockableAuditLogModel).updateOne = async (_filter, update) => {
+      capturedAuditUpdate = update;
+      return { acknowledged: true, matchedCount: 0, modifiedCount: 0, upsertedCount: 1, upsertedId: "audit-1" };
+    };
+    (AuditLogModel as unknown as MockableAuditLogModel).findOne = () => leanResult(createCanonicalAuditFixture(claimed));
+
+    const result = await dispatchAdminAuditOutboxEvent("admin_sales_reviewed:req-1");
+
+    assert.deepEqual(result, { status: "completed", eventId: "admin_sales_reviewed:req-1" });
+    assert.equal(capturedAuditUpdate?.$setOnInsert.timestamp.toISOString(), claimed.occurredAt.toISOString());
+    assert.equal(capturedAuditUpdate?.$setOnInsert.actorEmail, null);
+    assert.equal(capturedCompletionFilter?.leaseToken, "lease-1");
+  });
+
+  it("retries with only an allowlisted error code and never raw error text", async () => {
+    const claimed = createOutboxFixture({ status: "processing", leaseToken: "lease-2", attempts: 2 });
+    let capturedRetryUpdate: OutboxUpdate | undefined;
+    mockClaimThenRetry(claimed, (update) => { capturedRetryUpdate = update; });
+    (AuditLogModel as unknown as MockableAuditLogModel).updateOne = async () => {
+      throw new Error("customer@example.com private note");
+    };
+
+    const result = await dispatchAdminAuditOutboxEvent(claimed.eventId);
+
+    assert.equal(result.status, "retry_scheduled");
+    assert.equal(capturedRetryUpdate?.$set?.lastErrorCode, "unknown_safe");
+    assert.equal(JSON.stringify(capturedRetryUpdate).includes("customer@example.com"), false);
+  });
+
+  it("reclaims an expired processing lease", async () => {
+    const expired = createOutboxFixture({
+      status: "processing",
+      leaseToken: "expired-lease",
+      lockedUntil: new Date("2000-01-01T00:00:00.000Z"),
+      attempts: 4,
+    });
+    let claimUpdate: OutboxUpdate | undefined;
+    (AdminAuditOutboxModel as unknown as MockableOutboxModel).findOneAndUpdate = (_filter, update) => {
+      claimUpdate = update;
+      return leanResult(null);
+    };
+
+    await dispatchAdminAuditOutboxEvent(expired.eventId);
+
+    assert.notEqual(claimUpdate?.$set?.leaseToken, "expired-lease");
+    assert.equal(claimUpdate?.$inc?.attempts, 1);
+  });
+
+  it("does not complete through a stale lease token", async () => {
+    const claimed = createOutboxFixture({ status: "processing", leaseToken: "lease-stale", attempts: 1 });
+    (AdminAuditOutboxModel as unknown as MockableOutboxModel).findOneAndUpdate = (() => {
+      let call = 0;
+      return () => {
+        call += 1;
+        return leanResult(call === 1 ? claimed : null);
+      };
+    })();
+    (AuditLogModel as unknown as MockableAuditLogModel).updateOne = async () => ({});
+    (AuditLogModel as unknown as MockableAuditLogModel).findOne = () => leanResult(createCanonicalAuditFixture(claimed));
+
+    assert.deepEqual(
+      await dispatchAdminAuditOutboxEvent(claimed.eventId),
+      { status: "lease_lost", eventId: claimed.eventId },
+    );
+  });
+
+  it("accepts the canonical row after a duplicate-key upsert race", async () => {
+    const claimed = createOutboxFixture({ status: "processing", leaseToken: "lease-race", attempts: 1 });
+    let completionCalls = 0;
+    mockClaimThenComplete(claimed, () => { completionCalls += 1; });
+    (AuditLogModel as unknown as MockableAuditLogModel).updateOne = async () => {
+      throw { code: 11000, keyPattern: { eventId: 1 } };
+    };
+    (AuditLogModel as unknown as MockableAuditLogModel).findOne = () => leanResult(createCanonicalAuditFixture(claimed));
+
+    assert.deepEqual(
+      await dispatchAdminAuditOutboxEvent(claimed.eventId),
+      { status: "completed", eventId: claimed.eventId },
+    );
+    assert.equal(completionCalls, 1);
+  });
+
+  it("rejects a mismatched canonical row after a duplicate-key race", async () => {
+    const claimed = createOutboxFixture({ status: "processing", leaseToken: "lease-race-mismatch", attempts: 1 });
+    let retryUpdate: OutboxUpdate | undefined;
+    mockClaimThenRetry(claimed, (update) => { retryUpdate = update; });
+    (AuditLogModel as unknown as MockableAuditLogModel).updateOne = async () => {
+      throw { code: 11000, keyPattern: { eventId: 1 } };
+    };
+    (AuditLogModel as unknown as MockableAuditLogModel).findOne = () => leanResult({
+      ...createCanonicalAuditFixture(claimed),
+      commandFingerprint: "b".repeat(64),
+    });
+
+    assert.equal((await dispatchAdminAuditOutboxEvent(claimed.eventId)).status, "retry_scheduled");
+    assert.equal(retryUpdate?.$set?.lastErrorCode, "audit_validation_failed");
+  });
+
+  it("accepts a normally matched existing canonical row only after verification", async () => {
+    const claimed = createOutboxFixture({ status: "processing", leaseToken: "lease-existing", attempts: 1 });
+    let completionCalls = 0;
+    mockClaimThenComplete(claimed, () => { completionCalls += 1; });
+    (AuditLogModel as unknown as MockableAuditLogModel).updateOne = async () => ({ matchedCount: 1 });
+    (AuditLogModel as unknown as MockableAuditLogModel).findOne = () => leanResult(createCanonicalAuditFixture(claimed));
+
+    assert.deepEqual(
+      await dispatchAdminAuditOutboxEvent(claimed.eventId),
+      { status: "completed", eventId: claimed.eventId },
+    );
+    assert.equal(completionCalls, 1);
+  });
+
+  it("rejects a mismatched normally matched canonical row", async () => {
+    const claimed = createOutboxFixture({ status: "processing", leaseToken: "lease-existing-mismatch", attempts: 1 });
+    let retryUpdate: OutboxUpdate | undefined;
+    mockClaimThenRetry(claimed, (update) => { retryUpdate = update; });
+    (AuditLogModel as unknown as MockableAuditLogModel).updateOne = async () => ({ matchedCount: 1 });
+    (AuditLogModel as unknown as MockableAuditLogModel).findOne = () => leanResult({
+      ...createCanonicalAuditFixture(claimed),
+      payload: { ...claimed.payload, noteProvided: false },
+    });
+
+    assert.equal((await dispatchAdminAuditOutboxEvent(claimed.eventId)).status, "retry_scheduled");
+    assert.equal(retryUpdate?.$set?.lastErrorCode, "audit_validation_failed");
+  });
+
+  it("caps retry availability at one hour", async () => {
+    const claimed = createOutboxFixture({ status: "processing", leaseToken: "lease-backoff", attempts: 20 });
+    let retryUpdate: OutboxUpdate | undefined;
+    mockClaimThenRetry(claimed, (update) => { retryUpdate = update; });
+    (AuditLogModel as unknown as MockableAuditLogModel).updateOne = async () => {
+      throw new Error("unavailable");
+    };
+    const beforeDispatch = Date.now();
+
+    await dispatchAdminAuditOutboxEvent(claimed.eventId);
+
+    const availableAt = retryUpdate?.$set?.availableAt as Date;
+    assert.ok(availableAt instanceof Date);
+    assert.equal(availableAt.getTime() - beforeDispatch, 3_600_000);
+  });
+
+  it("keeps pending events outside TTL eligibility", () => {
+    const pending = createOutboxFixture();
+    const ttlIndexes = AdminAuditOutboxModel.schema.indexes().filter(([, options]) =>
+      typeof options.expireAfterSeconds === "number",
+    );
+
+    assert.equal("completedAt" in pending, false);
+    assert.deepEqual(ttlIndexes.map(([keys]) => keys), [{ completedAt: 1 }]);
   });
 });

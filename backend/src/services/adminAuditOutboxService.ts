@@ -1,11 +1,14 @@
-import { createHmac } from "node:crypto";
+import { createHmac, randomUUID } from "node:crypto";
+import { isDeepStrictEqual } from "node:util";
 
 import { env } from "../config/env";
+import * as backendMonitoring from "../monitoring/sentry";
 import {
   AdminAuditOutboxModel,
+  type AdminAuditOutboxErrorCode,
   type AdminAuditOutboxEntity,
 } from "../models/AdminAuditOutboxModel";
-import { AuditLogModel } from "../models/auditLogModel";
+import { AuditLogModel, type AuditLogEntity } from "../models/auditLogModel";
 import { ApiError } from "../utils/apiError";
 
 export interface AdminSalesReviewAuditIdentityInput {
@@ -25,6 +28,20 @@ export interface AdminSalesReviewAuditIdentity {
   targetId: string;
   commandFingerprint: string;
   commandFingerprintVersion: "v1";
+}
+
+export type AdminAuditDispatchStatus = "not_available" | "completed" | "retry_scheduled" | "lease_lost";
+
+export interface AdminAuditDispatchResult {
+  status: AdminAuditDispatchStatus;
+  eventId: string | null;
+}
+
+export interface AdminAuditDispatchSummary {
+  claimed: number;
+  completed: number;
+  retryScheduled: number;
+  leaseLost: number;
 }
 
 type AdminAuditIdentityRow = Pick<
@@ -109,4 +126,159 @@ export async function initializeAdminAuditPersistence(): Promise<void> {
     AdminAuditOutboxModel.init(),
     AuditLogModel.init(),
   ]);
+}
+
+class AdminAuditCanonicalMismatchError extends Error {
+  override name = "AdminAuditCanonicalMismatchError";
+}
+
+function canonicalAuditMatches(event: AdminAuditOutboxEntity, audit: AuditLogEntity): boolean {
+  return audit.eventId === event.eventId &&
+    audit.actorUid === event.actorUid &&
+    audit.target === event.target &&
+    audit.targetId === event.targetId &&
+    audit.commandFingerprint === event.commandFingerprint &&
+    audit.commandFingerprintVersion === event.commandFingerprintVersion &&
+    audit.action === "reviewAdminSalesOrder" &&
+    audit.actorEmail == null &&
+    audit.ip == null &&
+    audit.userAgent == null &&
+    audit.success === true &&
+    audit.timestamp.getTime() === event.occurredAt.getTime() &&
+    isDeepStrictEqual(audit.payload, event.payload);
+}
+
+async function upsertCanonicalAudit(event: AdminAuditOutboxEntity): Promise<void> {
+  await AuditLogModel.updateOne(
+    { eventId: event.eventId },
+    {
+      $setOnInsert: {
+        eventId: event.eventId,
+        commandFingerprint: event.commandFingerprint,
+        commandFingerprintVersion: event.commandFingerprintVersion,
+        actorUid: event.actorUid,
+        actorEmail: null,
+        action: "reviewAdminSalesOrder",
+        target: event.target,
+        targetId: event.targetId,
+        payload: event.payload as unknown as Record<string, unknown>,
+        ip: null,
+        userAgent: null,
+        timestamp: event.occurredAt,
+        success: true,
+      },
+    },
+    { upsert: true, runValidators: true },
+  );
+}
+
+async function materializeAdminAuditEvent(event: AdminAuditOutboxEntity): Promise<void> {
+  try {
+    await upsertCanonicalAudit(event);
+  } catch (error) {
+    if (!isDuplicateAdminAuditEventIdError(error)) throw error;
+  }
+
+  const existing = await AuditLogModel.findOne({ eventId: event.eventId }).lean<AuditLogEntity | null>();
+  if (!existing || !canonicalAuditMatches(event, existing)) {
+    throw new AdminAuditCanonicalMismatchError("Canonical Admin audit identity mismatch.");
+  }
+}
+
+function classifyAdminAuditOutboxError(error: unknown): AdminAuditOutboxErrorCode {
+  const name = error instanceof Error ? error.name : "";
+  if (name === "ValidationError" || name === "AdminAuditCanonicalMismatchError") {
+    return "audit_validation_failed";
+  }
+  if (name === "MongoNetworkError" || name === "MongoServerSelectionError" || name === "MongoTopologyClosedError") {
+    return "mongo_unavailable";
+  }
+  return "unknown_safe";
+}
+
+function retryAvailableAt(attempts: number, now: Date): Date {
+  const delayMs = Math.min(60 * 60 * 1000, 1000 * (2 ** Math.min(Math.max(attempts, 1), 12)));
+  return new Date(now.getTime() + delayMs);
+}
+
+export async function dispatchAdminAuditOutboxEvent(eventId?: string): Promise<AdminAuditDispatchResult> {
+  const now = new Date();
+  const leaseToken = randomUUID();
+  const event = await AdminAuditOutboxModel.findOneAndUpdate(
+    {
+      ...(eventId ? { eventId } : {}),
+      $or: [
+        { status: "pending", availableAt: { $lte: now } },
+        { status: "processing", lockedUntil: { $lte: now } },
+      ],
+    },
+    {
+      $set: {
+        status: "processing",
+        leaseToken,
+        lockedUntil: new Date(now.getTime() + 120_000),
+      },
+      $inc: { attempts: 1 },
+    },
+    { new: true, sort: { availableAt: 1, createdAt: 1 } },
+  ).lean<AdminAuditOutboxEntity | null>();
+  if (!event) return { status: "not_available", eventId: null };
+  const claimedLeaseToken = event.leaseToken ?? leaseToken;
+
+  try {
+    await materializeAdminAuditEvent(event);
+    const completed = await AdminAuditOutboxModel.findOneAndUpdate(
+      { eventId: event.eventId, status: "processing", leaseToken: claimedLeaseToken },
+      {
+        $set: {
+          status: "completed",
+          completedAt: new Date(),
+          leaseToken: null,
+          lockedUntil: null,
+          lastErrorCode: null,
+        },
+      },
+      { new: true },
+    ).lean<AdminAuditOutboxEntity | null>();
+    if (!completed) return { status: "lease_lost", eventId: event.eventId };
+    return { status: "completed", eventId: event.eventId };
+  } catch (error) {
+    const errorCode = classifyAdminAuditOutboxError(error);
+    const retried = await AdminAuditOutboxModel.findOneAndUpdate(
+      { eventId: event.eventId, status: "processing", leaseToken: claimedLeaseToken },
+      {
+        $set: {
+          status: "pending",
+          availableAt: retryAvailableAt(event.attempts, now),
+          lastErrorCode: errorCode,
+          leaseToken: null,
+          lockedUntil: null,
+        },
+      },
+      { new: true },
+    ).lean<AdminAuditOutboxEntity | null>();
+    if (!retried) return { status: "lease_lost", eventId: event.eventId };
+
+    if (event.attempts >= 3) {
+      backendMonitoring.captureBackendException(new Error(`Admin audit outbox dispatch failed: ${errorCode}`), {
+        tags: { feature: "admin_audit_outbox", errorCode },
+        extra: { eventId: event.eventId, targetId: event.targetId, attempts: event.attempts },
+      });
+    }
+    return { status: "retry_scheduled", eventId: event.eventId };
+  }
+}
+
+export async function dispatchAdminAuditOutboxBatch(limit = 25): Promise<AdminAuditDispatchSummary> {
+  const boundedLimit = Math.min(Math.max(Math.floor(limit), 1), 100);
+  const summary: AdminAuditDispatchSummary = { claimed: 0, completed: 0, retryScheduled: 0, leaseLost: 0 };
+  for (let index = 0; index < boundedLimit; index += 1) {
+    const result = await dispatchAdminAuditOutboxEvent();
+    if (result.status === "not_available") break;
+    summary.claimed += 1;
+    if (result.status === "completed") summary.completed += 1;
+    if (result.status === "retry_scheduled") summary.retryScheduled += 1;
+    if (result.status === "lease_lost") summary.leaseLost += 1;
+  }
+  return summary;
 }

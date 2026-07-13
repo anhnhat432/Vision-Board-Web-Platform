@@ -6,12 +6,16 @@ import { startTombstoneCleanupJob } from "./jobs/cleanupTombstones";
 import { startFailedReceiptRetryJob } from "./jobs/failedReceiptRetryJob";
 import { startPaymentOrderExpiryJob } from "./jobs/paymentOrderExpiryJob";
 import { startPaymentReconciliationJob } from "./jobs/reconciliationJob";
+import { startAdminAuditOutboxJob } from "./jobs/adminAuditOutboxJob";
+import { initializeAdminAuditPersistence } from "./services/adminAuditOutboxService";
 
 async function bootstrap(): Promise<void> {
   await connectMongo();
+  await initializeAdminAuditPersistence();
   startFailedReceiptRetryJob();
   startPaymentOrderExpiryJob();
   startPaymentReconciliationJob();
+  startAdminAuditOutboxJob();
   startTombstoneCleanupJob();
 
   app.listen(env.PORT, () => {
