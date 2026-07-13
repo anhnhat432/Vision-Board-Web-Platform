@@ -124,6 +124,16 @@ describe("validateBackendEnv: production core requirements", () => {
       .find((issue) => issue.key === "ADMIN_AUDIT_FINGERPRINT_SECRET");
     assert.match(shortIssue?.message ?? "", /32 bytes/);
   });
+
+  it("rejects an Admin audit fingerprint secret that is short after runtime trimming", () => {
+    const env = baseProductionEnv();
+    env.ADMIN_AUDIT_FINGERPRINT_SECRET = ` ${"x".repeat(31)} `;
+
+    const issue = validateBackendEnv(env, { nodeEnv: "production" })
+      .find((candidate) => candidate.key === "ADMIN_AUDIT_FINGERPRINT_SECRET");
+
+    assert.match(issue?.message ?? "", /32 bytes/);
+  });
 });
 
 describe("validateBackendEnv: Casso billing", () => {

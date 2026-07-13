@@ -133,7 +133,7 @@ function validatePort(value: string): EnvValidationIssue | null {
 }
 
 function validateAuditFingerprintSecret(value: string): EnvValidationIssue | null {
-  if (Buffer.byteLength(value, "utf8") >= 32) return null;
+  if (Buffer.byteLength(value.trim(), "utf8") >= 32) return null;
   return {
     level: "error",
     key: "ADMIN_AUDIT_FINGERPRINT_SECRET",
