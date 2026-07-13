@@ -181,6 +181,7 @@ const adminAuditOutboxSchema = new Schema<AdminAuditOutboxEntity>(
 
 adminAuditOutboxSchema.pre("validate", function validateEventDiscriminator(next) {
   const event = this as unknown as {
+    eventId?: string;
     eventType?: string;
     target?: string;
     reviewRequestId?: string;
@@ -200,6 +201,9 @@ adminAuditOutboxSchema.pre("validate", function validateEventDiscriminator(next)
       this.invalidate("target", "Classification audit target is invalid.");
     }
     if (event.reviewRequestId !== undefined) this.invalidate("reviewRequestId", "Classification audit cannot include a sales review request id.");
+    if (event.eventId !== `admin_operational_classification_changed:${event.requestId ?? ""}`) {
+      this.invalidate("eventId", "Classification audit event id is invalid.");
+    }
   }
   next();
 });

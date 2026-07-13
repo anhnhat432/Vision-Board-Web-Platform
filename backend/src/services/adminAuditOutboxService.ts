@@ -1,4 +1,4 @@
-import { createHmac, randomUUID } from "node:crypto";
+import { createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 import { isDeepStrictEqual } from "node:util";
 
 import { env } from "../config/env";
@@ -142,6 +142,28 @@ export function buildAdminOperationalClassificationAuditEvent(input: {
   note?: string;
   changedAt: Date;
 }): AdminAuditOutboxInsert {
+  const expectedIdentity = buildAdminOperationalClassificationAuditIdentity({
+    requestId: input.requestId,
+    actorUid: input.identity.actorUid,
+    target: input.identity.target,
+    targetId: input.identity.targetId,
+    newCategory: input.newCategory,
+    reason: input.reason,
+    note: input.note,
+  });
+  if (
+    input.identity.eventId !== expectedIdentity.eventId ||
+    input.identity.requestId !== expectedIdentity.requestId ||
+    input.identity.commandFingerprintVersion !== expectedIdentity.commandFingerprintVersion ||
+    input.identity.commandFingerprint.length !== expectedIdentity.commandFingerprint.length ||
+    !timingSafeEqual(
+      Buffer.from(input.identity.commandFingerprint, "utf8"),
+      Buffer.from(expectedIdentity.commandFingerprint, "utf8"),
+    )
+  ) {
+    throw createUnavailableError();
+  }
+
   const note = input.note?.trim().slice(0, 200) || undefined;
   const payload: AdminOperationalClassificationAuditPayload = {
     previousCategory: input.previousCategory,

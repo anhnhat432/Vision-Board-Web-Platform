@@ -252,6 +252,43 @@ describe("Admin audit outbox identity", () => {
     );
   });
 
+  it("rejects classification event fields that do not match its HMAC identity", () => {
+    const changedAt = new Date("2026-07-13T03:00:00.000Z");
+    const input = {
+      requestId: "55555555-5555-4555-8555-555555555555",
+      actorUid: "admin_uid",
+      target: "user_operational_classification" as const,
+      targetId: "user_test",
+      newCategory: "test" as const,
+      reason: "test_account" as const,
+      note: "Seeded checkout tests",
+    };
+    const identity = buildAdminOperationalClassificationAuditIdentity(input);
+    const baseEvent = {
+      identity,
+      requestId: input.requestId,
+      previousCategory: "real" as const,
+      newCategory: input.newCategory,
+      reason: input.reason,
+      note: input.note,
+      changedAt,
+    };
+
+    for (const mismatch of [
+      { requestId: "66666666-6666-4666-8666-666666666666" },
+      { newCategory: "internal" as const },
+      { reason: "automated_qa" as const },
+      { note: "Different private note" },
+    ]) {
+      assert.throws(
+        () => buildAdminOperationalClassificationAuditEvent({ ...baseEvent, ...mismatch }),
+        (error: unknown) => error instanceof ApiError &&
+          error.errorCode === "admin_audit_unavailable" &&
+          !error.message.includes("Different private note"),
+      );
+    }
+  });
+
   it("builds deterministic versioned HMAC identity without persisting the raw note", () => {
     const input = {
       reviewRequestId: "11111111-1111-4111-8111-111111111111",
@@ -356,6 +393,16 @@ describe("Admin audit outbox identity", () => {
 
     await assert.rejects(salesWithClassificationTarget.validate());
     await assert.rejects(classificationWithSalesRequestId.validate());
+  });
+
+  it("rejects classification event ids that do not match their request ids", async () => {
+    const event = createClassificationOutboxFixture();
+    const document = new AdminAuditOutboxModel({
+      ...event,
+      eventId: "admin_operational_classification_changed:other-request",
+    });
+
+    await assert.rejects(document.validate());
   });
 });
 
