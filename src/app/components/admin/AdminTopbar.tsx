@@ -29,7 +29,6 @@ export function AdminTopbar({ onOpenSidebar }: AdminTopbarProps) {
   const location = useLocation();
   const label = findAdminLabel(location.pathname);
   const { handler } = useAdminSearchSlot();
-  const searchActive = handler !== null;
 
   return (
     <header className="sticky top-0 z-30 border-b border-app-line bg-app-bg/85 backdrop-blur-md">
@@ -65,11 +64,10 @@ export function AdminTopbar({ onOpenSidebar }: AdminTopbarProps) {
           </span>
         </div>
 
-        {/* Right: search */}
-        <div className="hidden w-full max-w-xs md:block">
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted" />
-            {searchActive && handler ? (
+        {handler ? (
+          <div className="hidden w-full max-w-sm md:block">
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted" />
               <Input
                 type="search"
                 value={handler.value}
@@ -77,25 +75,13 @@ export function AdminTopbar({ onOpenSidebar }: AdminTopbarProps) {
                 placeholder={handler.placeholder}
                 className={cn(
                   adminInput,
-                  "h-9 rounded-lg pl-9 border-app-line/60 bg-app-bg-subtle/60",
+                  "h-9 rounded-lg border-app-line/60 bg-app-surface pl-9",
                 )}
                 aria-label="Tìm kiếm trên trang admin"
               />
-            ) : (
-              <Input
-                type="search"
-                disabled
-                placeholder="Tìm kiếm (chọn trang để mở)"
-                className={cn(
-                  adminInput,
-                  "h-9 rounded-lg pl-9 border-app-line/60 bg-app-bg-subtle/60 disabled:cursor-not-allowed disabled:opacity-60",
-                )}
-                aria-label="Tìm kiếm trên trang admin"
-                title="Tìm kiếm hoạt động khi trang hỗ trợ"
-              />
-            )}
+            </div>
           </div>
-        </div>
+        ) : null}
       </div>
     </header>
   );

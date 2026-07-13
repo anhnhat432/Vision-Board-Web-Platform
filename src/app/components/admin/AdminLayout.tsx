@@ -189,12 +189,8 @@ function AdminLayoutShell({
 
   return (
     <div className="min-h-screen bg-app-bg text-app-ink">
-      {/* Subtle dotted background texture */}
-      <div className="fixed inset-0 pointer-events-none opacity-[0.015] dark:opacity-[0.03]"
-        style={{ backgroundImage: "radial-gradient(circle, currentColor 1px, transparent 1px)", backgroundSize: "24px 24px" }}
-      />
-      <div className="relative flex min-h-screen">
-        <div className="hidden w-60 shrink-0 lg:block">
+      <div className="flex min-h-screen">
+        <div className="hidden w-64 shrink-0 border-r border-app-line lg:block">
           <div className="sticky top-0 h-screen">
             <AdminSidebar email={email} onLogout={onLogout} pendingCounts={pendingCounts} />
           </div>
@@ -213,7 +209,7 @@ function AdminLayoutShell({
 
         <div className="flex min-w-0 flex-1 flex-col">
           <AdminTopbar onOpenSidebar={() => onMobileOpenChange(true)} />
-          <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 lg:px-8">
+          <main className="mx-auto w-full max-w-[1600px] flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
             <Outlet />
           </main>
         </div>
