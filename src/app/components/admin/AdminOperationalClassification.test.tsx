@@ -111,4 +111,25 @@ describe("admin operational classification primitives", () => {
     expect(screen.getByRole("alertdialog")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Hủy" })).toBeDisabled();
   });
+
+  it("keeps an inherited non-real record from offering an in-dialog real override", async () => {
+    const user = userEvent.setup();
+    render(
+      <AdminOperationalClassificationDialog
+        open
+        targetType="payment_order"
+        targetLabel="VBPAY0001"
+        initialCategory="test"
+        pending={false}
+        disableRealCategory
+        disabledRealCategoryReason="Phân loại tài khoản đang kiểm soát đơn này. Hãy khôi phục tài khoản từ trang Người dùng."
+        onOpenChange={() => undefined}
+        onConfirm={() => undefined}
+      />,
+    );
+
+    expect(screen.getByText("Phân loại tài khoản đang kiểm soát đơn này. Hãy khôi phục tài khoản từ trang Người dùng.")).toBeInTheDocument();
+    await user.click(screen.getByRole("combobox", { name: "Phân loại" }));
+    expect(screen.getByRole("option", { name: "Dữ liệu thật" })).toHaveAttribute("data-disabled");
+  });
 });

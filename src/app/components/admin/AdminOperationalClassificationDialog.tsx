@@ -45,6 +45,8 @@ export interface AdminOperationalClassificationDialogProps {
   initialNote?: string;
   pending: boolean;
   error?: string;
+  disableRealCategory?: boolean;
+  disabledRealCategoryReason?: string;
   onOpenChange(open: boolean): void;
   onConfirm(payload: Omit<AdminClassificationMutationPayload, "requestId">): Promise<void> | void;
 }
@@ -78,6 +80,8 @@ export function AdminOperationalClassificationDialog({
   initialNote,
   pending,
   error,
+  disableRealCategory = false,
+  disabledRealCategoryReason,
   onOpenChange,
   onConfirm,
 }: AdminOperationalClassificationDialogProps) {
@@ -106,6 +110,7 @@ export function AdminOperationalClassificationDialog({
 
   const handleCategoryChange = (value: string) => {
     if (!isOperationalCategory(value)) return;
+    if (disableRealCategory && value === "real") return;
     setDraft((current) => ({
       ...current,
       category: value,
@@ -163,6 +168,11 @@ export function AdminOperationalClassificationDialog({
               Phân loại tài khoản sẽ áp dụng cho Plus, thanh toán và in ấn trong báo cáo.
             </p>
           ) : null}
+          {disableRealCategory && disabledRealCategoryReason ? (
+            <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+              {disabledRealCategoryReason}
+            </p>
+          ) : null}
 
           <div className="grid gap-2">
             <label htmlFor="admin-operational-category" className="text-sm font-medium text-app-ink">
@@ -173,7 +183,7 @@ export function AdminOperationalClassificationDialog({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="real">Dữ liệu thật</SelectItem>
+                <SelectItem value="real" disabled={disableRealCategory}>Dữ liệu thật</SelectItem>
                 <SelectItem value="test">Test</SelectItem>
                 <SelectItem value="internal">Nội bộ</SelectItem>
               </SelectContent>

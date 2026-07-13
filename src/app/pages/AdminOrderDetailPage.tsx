@@ -1,7 +1,10 @@
 import { ArrowLeft, Calendar, Loader2, MapPin, Package, Receipt, Tag, User } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, Link } from "react-router";
-import { type ApiOrder, adminGetOrder } from "@/services/orderService";
+import type { AdminClassificationMutationPayload } from "@/services/adminService";
+import { type AdminApiOrder, adminClassifyPhysicalOrder, adminGetOrder } from "@/services/orderService";
+import { AdminOperationalClassificationBadge, getAdminOperationalClassificationSourceLabel } from "../components/admin/AdminOperationalClassificationBadge";
+import { AdminOperationalClassificationDialog } from "../components/admin/AdminOperationalClassificationDialog";
 import { AdminPageHeader } from "../components/admin/AdminPageHeader";
 import { AdminStatusBadge } from "../components/admin/AdminStatusBadge";
 import { ORDER_STATUS_LABELS, ORDER_STATUS_TONES } from "../components/admin/statusMappings";
@@ -16,6 +19,12 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
       <span className="text-sm text-app-ink text-right">{value || "—"}</span>
     </div>
   );
+}
+
+function getErrorCode(error: unknown): string | undefined {
+  return typeof error === "object" && error !== null && "errorCode" in error
+    ? String(error.errorCode)
+    : undefined;
 }
 
 function TimelineEntry({
@@ -56,31 +65,101 @@ function TimelineEntry({
 
 export function AdminOrderDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const [order, setOrder] = useState<ApiOrder | null>(null);
+  const [order, setOrder] = useState<AdminApiOrder | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [classificationOpen, setClassificationOpen] = useState(false);
+  const [classificationBusy, setClassificationBusy] = useState(false);
+  const [classificationError, setClassificationError] = useState<string | undefined>();
+  const classificationRequestRef = useRef<{ commandKey: string; requestId: string } | null>(null);
+  const classificationMutationRef = useRef(0);
+  const loadGeneration = useRef(0);
+  const currentIdRef = useRef(id);
+  const previousIdRef = useRef(id);
+  currentIdRef.current = id;
 
   const load = useCallback(async () => {
-    if (!id) return;
+    const requestedId = currentIdRef.current;
+    if (!requestedId) return;
+    const generation = ++loadGeneration.current;
     setLoading(true);
     setError(null);
     try {
       const data = await withTimeout(
-        adminGetOrder(id),
+        adminGetOrder(requestedId),
         ADMIN_LOAD_TIMEOUT_MS,
         "Hết thời gian tải chi tiết đơn hàng.",
       );
+      if (generation !== loadGeneration.current || requestedId !== currentIdRef.current) return;
       setOrder(data);
     } catch (err) {
+      if (generation !== loadGeneration.current || requestedId !== currentIdRef.current) return;
       setError(getErrorMessage(err, "Không thể tải chi tiết đơn hàng."));
     } finally {
-      setLoading(false);
+      if (generation === loadGeneration.current && requestedId === currentIdRef.current) setLoading(false);
     }
-  }, [id]);
+  }, []);
 
   useEffect(() => {
     void load();
-  }, [load]);
+  }, [id, load]);
+
+  useEffect(() => {
+    if (previousIdRef.current === id) return;
+    previousIdRef.current = id;
+    classificationMutationRef.current += 1;
+    classificationRequestRef.current = null;
+    setClassificationBusy(false);
+    setClassificationOpen(false);
+    setClassificationError(undefined);
+  }, [id]);
+
+  const handleClassification = async (payload: Omit<AdminClassificationMutationPayload, "requestId">) => {
+    const targetOrder = order;
+    const targetId = id;
+    if (!targetOrder || !targetId) return;
+    if (targetOrder.operationalClassification.source === "user" && payload.category === "real") {
+      setClassificationError("Phân loại tài khoản đang kiểm soát đơn này. Hãy khôi phục tài khoản từ trang Người dùng.");
+      return;
+    }
+    const commandKey = JSON.stringify({ id: targetId, ...payload, note: payload.note?.trim() || null });
+    const current = classificationRequestRef.current;
+    const requestId = current?.commandKey === commandKey ? current.requestId : crypto.randomUUID();
+    classificationRequestRef.current = { commandKey, requestId };
+    const mutation = ++classificationMutationRef.current;
+    setClassificationBusy(true);
+    setClassificationError(undefined);
+    try {
+      const result = await adminClassifyPhysicalOrder(targetId, { ...payload, requestId });
+      if (mutation !== classificationMutationRef.current || targetId !== currentIdRef.current) return;
+      if (result.status === "updated" || result.status === "unchanged") {
+        await load();
+        if (mutation !== classificationMutationRef.current || targetId !== currentIdRef.current) return;
+        classificationRequestRef.current = null;
+        setClassificationOpen(false);
+      } else if (result.errorCode === "admin_audit_commit_unknown") {
+        setClassificationError("Kết quả phân loại chưa rõ. Hãy thử lại cùng yêu cầu này.");
+      } else {
+        classificationRequestRef.current = null;
+        setClassificationError("Không thể phân loại đơn in. Hãy thử lại.");
+      }
+    } catch (err) {
+      if (mutation !== classificationMutationRef.current || targetId !== currentIdRef.current) return;
+      const errorCode = getErrorCode(err);
+      if (errorCode === "admin_classification_request_conflict") {
+        await load();
+        if (mutation !== classificationMutationRef.current || targetId !== currentIdRef.current) return;
+        setClassificationError("Dữ liệu đã thay đổi. Chi tiết đơn đã được tải lại.");
+      } else if (errorCode === "admin_audit_commit_unknown" || !errorCode) {
+        setClassificationError("Kết quả phân loại chưa rõ. Hãy thử lại cùng yêu cầu này.");
+      } else {
+        classificationRequestRef.current = null;
+        setClassificationError("Không thể phân loại đơn in. Hãy thử lại.");
+      }
+    } finally {
+      if (mutation === classificationMutationRef.current) setClassificationBusy(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -128,11 +207,31 @@ export function AdminOrderDetailPage() {
 
       <AdminPageHeader
         title={`Đơn ${order.id.slice(-8).toUpperCase()}`}
+        actions={
+          <Button
+            type="button"
+            variant="outline"
+            disabled={classificationBusy}
+            onClick={() => {
+              classificationMutationRef.current += 1;
+              classificationRequestRef.current = null;
+              setClassificationError(undefined);
+              setClassificationOpen(true);
+            }}
+          >
+            Phân loại dữ liệu
+          </Button>
+        }
         description={
           <span className="flex items-center gap-2 mt-1">
+            <AdminOperationalClassificationBadge classification={order.operationalClassification} />
             <AdminStatusBadge tone={ORDER_STATUS_TONES[order.status]}>
               {ORDER_STATUS_LABELS[order.status]}
             </AdminStatusBadge>
+            <span className="text-app-ink-muted">·</span>
+            <span className="text-xs text-app-ink-muted">
+              {getAdminOperationalClassificationSourceLabel(order.operationalClassification.source)}
+            </span>
             <span className="text-app-ink-muted">·</span>
             <span className="inline-flex items-center gap-1 text-xs text-app-ink-muted">
               <Calendar className="h-3 w-3" />
@@ -375,6 +474,31 @@ export function AdminOrderDetailPage() {
           </div>
         </div>
       </div>
+
+      <AdminOperationalClassificationDialog
+        open={classificationOpen}
+        targetType="physical_order"
+        targetLabel={order.id}
+        initialCategory={order.operationalClassification.effectiveCategory}
+        initialReason={order.operationalClassification.reason}
+        initialNote={order.operationalClassification.note}
+        pending={classificationBusy}
+        error={classificationError}
+        disableRealCategory={
+          order.operationalClassification.source === "user"
+          && order.operationalClassification.effectiveCategory !== "real"
+        }
+        disabledRealCategoryReason="Phân loại tài khoản đang kiểm soát đơn này. Hãy khôi phục tài khoản từ trang Người dùng."
+        onOpenChange={(open) => {
+          if (!open && !classificationBusy) {
+            classificationMutationRef.current += 1;
+            classificationRequestRef.current = null;
+            setClassificationOpen(false);
+            setClassificationError(undefined);
+          }
+        }}
+        onConfirm={handleClassification}
+      />
     </div>
   );
 }
