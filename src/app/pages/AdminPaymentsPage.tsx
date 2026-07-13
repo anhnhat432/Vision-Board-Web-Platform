@@ -77,6 +77,12 @@ function normalizePaymentOperationalClassification(payment: AdminPaymentOrderSum
     : { ...payment, operationalClassification: DEFAULT_OPERATIONAL_CLASSIFICATION };
 }
 
+function getEditableOperationalReason(
+  reason: AdminOperationalClassificationSummary["reason"],
+): AdminClassificationMutationPayload["reason"] | undefined {
+  return reason === "legacy_sales_test" || reason === "legacy_sales_internal" ? undefined : reason;
+}
+
 function getPaymentOwnerLabel(payment: AdminPaymentOrderSummary): string {
   return payment.user?.email || payment.user?.displayName || payment.userId;
 }
@@ -112,6 +118,7 @@ export function AdminPaymentsPage() {
   const [busyOrderId, setBusyOrderId] = useState<string | null>(null);
 
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<AdminPaymentOrderSummary["status"] | "all">("all");
   const [operationalScope, setOperationalScope] = useState<AdminOperationalScope>("real");
   const [page, setPage] = useState(1);
@@ -125,12 +132,16 @@ export function AdminPaymentsPage() {
   const classificationRequestRef = useRef<{ commandKey: string; requestId: string } | null>(null);
   const classificationMutationRef = useRef(0);
   const loadGenerationRef = useRef(0);
+  const currentViewKeyRef = useRef("");
 
-  const handleSearchChange = useCallback((next: string) => setQuery(next), []);
+  const handleSearchChange = useCallback((next: string) => {
+    setPage(1);
+    setQuery(next);
+  }, []);
   useAdminSearch(query, handleSearchChange, "Tìm mã đơn, email, mã giao dịch");
 
   const loadPayments = useCallback(
-    async (nextQuery = query, nextStatus = statusFilter, nextScope = operationalScope, nextPage = page) => {
+    async (nextQuery: string, nextStatus: AdminPaymentOrderSummary["status"] | "all", nextScope: AdminOperationalScope, nextPage: number) => {
       const generation = ++loadGenerationRef.current;
       setLoading(true);
       setError(null);
@@ -139,9 +150,14 @@ export function AdminPaymentsPage() {
           q: nextQuery, status: nextStatus, operationalScope: nextScope, page: nextPage, limit: 30,
         });
         if (generation !== loadGenerationRef.current) return;
+        const boundedPages = Math.max(1, result.totalPages);
+        if (nextPage > boundedPages) {
+          setPage(boundedPages);
+          return;
+        }
         setItems(result.items.map(normalizePaymentOperationalClassification));
         setTotal(result.total);
-        setTotalPages(result.totalPages);
+        setTotalPages(boundedPages);
       } catch (err) {
         if (generation !== loadGenerationRef.current) return;
         setError(getErrorMessage(err, "Không thể tải danh sách thanh toán tự động."));
@@ -149,39 +165,26 @@ export function AdminPaymentsPage() {
         if (generation === loadGenerationRef.current) setLoading(false);
       }
     },
-    [operationalScope, page, query, statusFilter],
+    [],
   );
 
-  // Initial load + filter changes (query has its own debounced effect below).
-  // We use a stable ref pattern: ref captures the latest query without making
-  // the effect re-run on every keystroke.
-  const queryRef = useRef(query);
-  queryRef.current = query;
+  currentViewKeyRef.current = JSON.stringify({ q: debouncedQuery, statusFilter, operationalScope, page });
   useEffect(() => {
     if (authLoading || userProfileLoading) return;
     if (!user || !isAdmin) {
       setLoading(false);
       return;
     }
-    void loadPayments(queryRef.current, statusFilter, operationalScope, page);
-  }, [authLoading, isAdmin, loadPayments, operationalScope, page, statusFilter, user, userProfileLoading]);
+    void loadPayments(debouncedQuery, statusFilter, operationalScope, page);
+  }, [authLoading, debouncedQuery, isAdmin, loadPayments, operationalScope, page, statusFilter, user, userProfileLoading]);
 
   // Debounced reload when the user types in the topbar search input.
-  const isFirstRunRef = useRef(true);
-  const statusRef = useRef(statusFilter);
-  statusRef.current = statusFilter;
   useEffect(() => {
-    if (isFirstRunRef.current) {
-      isFirstRunRef.current = false;
-      return;
-    }
-    if (authLoading || userProfileLoading || !user || !isAdmin) return;
     const handle = window.setTimeout(() => {
-      setPage(1);
-      void loadPayments(query, statusRef.current, operationalScope, 1);
+      setDebouncedQuery(query);
     }, SEARCH_DEBOUNCE_MS);
     return () => window.clearTimeout(handle);
-  }, [query, authLoading, isAdmin, loadPayments, operationalScope, user, userProfileLoading]);
+  }, [query]);
 
   // Track separate "all-pending" count for the sidebar badge — independent of the
   // current filter so users see the true backlog even when viewing "completed".
@@ -220,16 +223,17 @@ export function AdminPaymentsPage() {
     const commandKey = JSON.stringify({ id: payment.orderId, ...payload, note: payload.note?.trim() || null });
     const current = classificationRequestRef.current;
     const requestId = current?.commandKey === commandKey ? current.requestId : crypto.randomUUID();
+    const viewKey = currentViewKeyRef.current;
     classificationRequestRef.current = { commandKey, requestId };
     const mutation = ++classificationMutationRef.current;
     setClassificationBusy(true);
     setClassificationError(undefined);
     try {
       const result = await adminClassifyPaymentOrder(payment.orderId, { ...payload, requestId });
-      if (mutation !== classificationMutationRef.current || classificationPayment?.orderId !== payment.orderId) return;
+      if (mutation !== classificationMutationRef.current || classificationPayment?.orderId !== payment.orderId || viewKey !== currentViewKeyRef.current) return;
       if (result.status === "updated" || result.status === "unchanged") {
-        await loadPayments();
-        if (mutation !== classificationMutationRef.current) return;
+        await loadPayments(debouncedQuery, statusFilter, operationalScope, page);
+        if (mutation !== classificationMutationRef.current || viewKey !== currentViewKeyRef.current) return;
         classificationRequestRef.current = null;
         setClassificationPayment(null);
       } else if ((result as { errorCode?: string }).errorCode === "admin_audit_commit_unknown") {
@@ -239,11 +243,11 @@ export function AdminPaymentsPage() {
         setClassificationError("Không thể phân loại đơn thanh toán. Hãy thử lại.");
       }
     } catch (err) {
-      if (mutation !== classificationMutationRef.current) return;
+      if (mutation !== classificationMutationRef.current || viewKey !== currentViewKeyRef.current) return;
       const errorCode = getErrorCode(err);
       if (errorCode === "admin_classification_request_conflict") {
-        await loadPayments();
-        if (mutation !== classificationMutationRef.current) return;
+        await loadPayments(debouncedQuery, statusFilter, operationalScope, page);
+        if (mutation !== classificationMutationRef.current || viewKey !== currentViewKeyRef.current) return;
         setClassificationError("Dữ liệu đã thay đổi. Danh sách đã được tải lại.");
       } else if (errorCode === "admin_audit_commit_unknown" || !errorCode) {
         setClassificationError("Kết quả phân loại chưa rõ. Hãy thử lại cùng yêu cầu này.");
@@ -252,7 +256,7 @@ export function AdminPaymentsPage() {
         setClassificationError("Không thể phân loại đơn thanh toán. Hãy thử lại.");
       }
     } finally {
-      if (mutation === classificationMutationRef.current) setClassificationBusy(false);
+      if (mutation === classificationMutationRef.current && viewKey === currentViewKeyRef.current) setClassificationBusy(false);
     }
   };
 
@@ -271,7 +275,7 @@ export function AdminPaymentsPage() {
       toast.success(`Đã mở Plus cho đơn ${result.orderId}.`);
       setPendingOrderId(null);
       setManualNote("Đã đối chiếu giao dịch tiền vào trong cổng thanh toán/app ngân hàng.");
-      void loadPayments(query, statusFilter);
+      void loadPayments(debouncedQuery, statusFilter, operationalScope, page);
     } catch (err) {
       toast.error(getErrorMessage(err, "Không thể hoàn tất đơn thanh toán."));
     } finally {
@@ -339,7 +343,7 @@ export function AdminPaymentsPage() {
               variant="outline"
               className="gap-2 border-app-line bg-app-bg-subtle text-app-ink hover:bg-app-accent-soft hover:text-app-ink"
               disabled={loading}
-              onClick={() => void loadPayments(query, statusFilter)}
+              onClick={() => void loadPayments(debouncedQuery, statusFilter, operationalScope, page)}
             >
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
               Tải lại
@@ -356,7 +360,7 @@ export function AdminPaymentsPage() {
             type="button"
             variant="outline"
             className="mt-4 border-app-line bg-app-bg-subtle text-app-ink hover:bg-app-accent-soft hover:text-app-ink"
-            onClick={() => void loadPayments(query, statusFilter)}
+            onClick={() => void loadPayments(debouncedQuery, statusFilter, operationalScope, page)}
           >
             Thử lại
           </Button>
@@ -599,7 +603,7 @@ export function AdminPaymentsPage() {
         targetType="payment_order"
         targetLabel={classificationPayment?.orderId ?? "đơn thanh toán"}
         initialCategory={classificationPayment?.operationalClassification.effectiveCategory ?? "real"}
-        initialReason={classificationPayment?.operationalClassification.reason}
+        initialReason={getEditableOperationalReason(classificationPayment?.operationalClassification.reason)}
         initialNote={classificationPayment?.operationalClassification.note}
         pending={classificationBusy}
         error={classificationError}

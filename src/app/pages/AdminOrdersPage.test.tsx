@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AdminPendingCountsProvider } from "../components/admin/AdminPendingCountsContext";
@@ -105,5 +105,52 @@ describe("AdminOrdersPage server operational data", () => {
     fireEvent.click(screen.getByRole("button", { name: "Xác nhận phân loại" }));
     await waitFor(() => expect(orders.adminClassifyPhysicalOrder).toHaveBeenCalledWith("order-1", expect.objectContaining({ category: "test", reason: "test_account" })));
     await waitFor(() => expect(orders.adminGetOrders).toHaveBeenCalledTimes(2));
+  });
+
+  it("normalizes a legacy list item without operational classification", async () => {
+    const { AdminOrdersPage } = await import("./AdminOrdersPage");
+    orders.adminGetOrders.mockResolvedValue({
+      ...response,
+      items: [{ ...response.items[0], operationalClassification: undefined }],
+    });
+    renderPage(AdminOrdersPage);
+
+    expect(await screen.findByText("Mặc định dữ liệu thật")).toBeInTheDocument();
+  });
+
+  it("rebases an out-of-range list response to the server's final page", async () => {
+    const { AdminOrdersPage } = await import("./AdminOrdersPage");
+    orders.adminGetOrders.mockImplementation((params: { page?: number }) => Promise.resolve({
+      ...response,
+      page: params.page ?? 1,
+      totalPages: (params.page ?? 1) >= 3 ? 2 : 3,
+    }));
+    renderPage(AdminOrdersPage);
+
+    await waitFor(() => expect(orders.adminGetOrders).toHaveBeenCalledWith(expect.objectContaining({ page: 1 })));
+    fireEvent.click(screen.getByRole("button", { name: "Trang sau" }));
+    await waitFor(() => expect(orders.adminGetOrders).toHaveBeenCalledWith(expect.objectContaining({ page: 2 })));
+    fireEvent.click(screen.getByRole("button", { name: "Trang sau" }));
+    await waitFor(() => expect(orders.adminGetOrders).toHaveBeenCalledWith(expect.objectContaining({ page: 3 })));
+    await waitFor(() => expect(orders.adminGetOrders).toHaveBeenCalledWith(expect.objectContaining({ page: 2 })));
+    expect(screen.queryByText("Trang 3/2")).not.toBeInTheDocument();
+  });
+
+  it("does not reload the old list view after a classification resolves", async () => {
+    const { AdminOrdersPage } = await import("./AdminOrdersPage");
+    let resolveClassification: (value: { status: "updated" }) => void = () => undefined;
+    orders.adminClassifyPhysicalOrder.mockImplementation(() => new Promise((resolve) => { resolveClassification = resolve; }));
+    renderPage(AdminOrdersPage);
+
+    await screen.findByText("Mặc định dữ liệu thật");
+    fireEvent.click(screen.getByRole("button", { name: "Phân loại dữ liệu" }));
+    fireEvent.click(screen.getByRole("button", { name: "Xác nhận phân loại" }));
+    await waitFor(() => expect(orders.adminClassifyPhysicalOrder).toHaveBeenCalled());
+    fireEvent.change(document.querySelector('input[aria-label="Tìm đơn"]')!, { target: { value: "scope-change" } });
+    await waitFor(() => expect(orders.adminGetOrders).toHaveBeenCalledWith(expect.objectContaining({ q: "scope-change", status: "all", page: 1 })));
+
+    await act(async () => { resolveClassification({ status: "updated" }); });
+    await waitFor(() => expect(orders.adminGetOrders).toHaveBeenCalled());
+    expect(orders.adminGetOrders).toHaveBeenLastCalledWith(expect.objectContaining({ q: "scope-change", status: "all", page: 1 }));
   });
 });

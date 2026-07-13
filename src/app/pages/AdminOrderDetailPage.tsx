@@ -1,7 +1,7 @@
 import { ArrowLeft, Calendar, Loader2, MapPin, Package, Receipt, Tag, User } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, Link } from "react-router";
-import type { AdminClassificationMutationPayload } from "@/services/adminService";
+import type { AdminClassificationMutationPayload, AdminOperationalClassificationSummary } from "@/services/adminService";
 import { type AdminApiOrder, adminClassifyPhysicalOrder, adminGetOrder } from "@/services/orderService";
 import { AdminOperationalClassificationBadge, getAdminOperationalClassificationSourceLabel } from "../components/admin/AdminOperationalClassificationBadge";
 import { AdminOperationalClassificationDialog } from "../components/admin/AdminOperationalClassificationDialog";
@@ -25,6 +25,23 @@ function getErrorCode(error: unknown): string | undefined {
   return typeof error === "object" && error !== null && "errorCode" in error
     ? String(error.errorCode)
     : undefined;
+}
+
+const DEFAULT_OPERATIONAL_CLASSIFICATION: AdminOperationalClassificationSummary = {
+  effectiveCategory: "real",
+  source: "default",
+};
+
+function normalizeOrderOperationalClassification(order: AdminApiOrder): AdminApiOrder {
+  return order.operationalClassification
+    ? order
+    : { ...order, operationalClassification: DEFAULT_OPERATIONAL_CLASSIFICATION };
+}
+
+function getEditableOperationalReason(
+  reason: AdminOperationalClassificationSummary["reason"],
+): AdminClassificationMutationPayload["reason"] | undefined {
+  return reason === "legacy_sales_test" || reason === "legacy_sales_internal" ? undefined : reason;
 }
 
 function TimelineEntry({
@@ -91,7 +108,7 @@ export function AdminOrderDetailPage() {
         "Hết thời gian tải chi tiết đơn hàng.",
       );
       if (generation !== loadGeneration.current || requestedId !== currentIdRef.current) return;
-      setOrder(data);
+      setOrder(normalizeOrderOperationalClassification(data));
     } catch (err) {
       if (generation !== loadGeneration.current || requestedId !== currentIdRef.current) return;
       setError(getErrorMessage(err, "Không thể tải chi tiết đơn hàng."));
@@ -137,8 +154,6 @@ export function AdminOrderDetailPage() {
         if (mutation !== classificationMutationRef.current || targetId !== currentIdRef.current) return;
         classificationRequestRef.current = null;
         setClassificationOpen(false);
-      } else if (result.errorCode === "admin_audit_commit_unknown") {
-        setClassificationError("Kết quả phân loại chưa rõ. Hãy thử lại cùng yêu cầu này.");
       } else {
         classificationRequestRef.current = null;
         setClassificationError("Không thể phân loại đơn in. Hãy thử lại.");
@@ -480,7 +495,7 @@ export function AdminOrderDetailPage() {
         targetType="physical_order"
         targetLabel={order.id}
         initialCategory={order.operationalClassification.effectiveCategory}
-        initialReason={order.operationalClassification.reason}
+        initialReason={getEditableOperationalReason(order.operationalClassification.reason)}
         initialNote={order.operationalClassification.note}
         pending={classificationBusy}
         error={classificationError}

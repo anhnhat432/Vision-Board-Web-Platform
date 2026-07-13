@@ -48,4 +48,16 @@ describe("AdminOrderDetailPage operational classification", () => {
     await waitFor(() => expect(orders.adminClassifyPhysicalOrder).toHaveBeenCalledWith("order-1", expect.objectContaining({ category: "test", reason: "test_account" })));
     await waitFor(() => expect(orders.adminGetOrder).toHaveBeenCalledTimes(2));
   });
+
+  it("normalizes a legacy order without operational classification to the real default", async () => {
+    const { AdminOrderDetailPage } = await import("./AdminOrderDetailPage");
+    orders.adminGetOrder.mockResolvedValue({
+      ...order,
+      operationalClassification: undefined,
+    });
+
+    renderPage(AdminOrderDetailPage);
+
+    expect(await screen.findByText("Mặc định dữ liệu thật")).toBeInTheDocument();
+  });
 });

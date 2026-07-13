@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { type AdminApiOrder, type AdminOrderListResponse, type AdminUpdateOrderPayload, type ApiOrder, type ApiOrderStatus, adminClassifyPhysicalOrder, adminExportOrders, adminGetOrders, adminUpdateOrder, adminUpdateOrderStatus } from "@/services/orderService";
-import type { AdminClassificationMutationPayload, AdminOperationalScope } from "@/services/adminService";
+import type { AdminClassificationMutationPayload, AdminOperationalClassificationSummary, AdminOperationalScope } from "@/services/adminService";
 import { AdminEmptyState } from "../components/admin/AdminEmptyState";
 import { AdminOperationalClassificationBadge, getAdminOperationalClassificationSourceLabel } from "../components/admin/AdminOperationalClassificationBadge";
 import { AdminOperationalClassificationDialog } from "../components/admin/AdminOperationalClassificationDialog";
@@ -44,6 +44,17 @@ function getErrorCode(error: unknown): string | undefined {
   return typeof error === "object" && error !== null && "errorCode" in error
     ? String(error.errorCode)
     : undefined;
+}
+
+const DEFAULT_OPERATIONAL_CLASSIFICATION: AdminOperationalClassificationSummary = { effectiveCategory: "real", source: "default" };
+function normalizeOrderOperationalClassification(order: AdminApiOrder): AdminApiOrder {
+  return order.operationalClassification ? order : { ...order, operationalClassification: DEFAULT_OPERATIONAL_CLASSIFICATION };
+}
+
+function getEditableOperationalReason(
+  reason: AdminOperationalClassificationSummary["reason"],
+): AdminClassificationMutationPayload["reason"] | undefined {
+  return reason === "legacy_sales_test" || reason === "legacy_sales_internal" ? undefined : reason;
 }
 
 function OrderActions({
@@ -119,6 +130,7 @@ export function AdminOrdersPage() {
   const [classificationError, setClassificationError] = useState<string | undefined>();
   const classificationRequestRef = useRef<{ commandKey: string; requestId: string } | null>(null);
   const classificationMutationRef = useRef(0);
+  const currentViewKeyRef = useRef("");
 
   // Edit dialog state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -155,6 +167,7 @@ export function AdminOrdersPage() {
     setQuery(next);
   }, [resetListPosition]);
   useAdminSearch(query, handleSearchChange, "Tìm email, mã đơn, họ tên, số điện thoại");
+  currentViewKeyRef.current = JSON.stringify({ query, statusFilter, frameFilter, dateFrom, dateTo, operationalScope, page });
 
   const loadOrders = useCallback(async () => {
     const generation = ++loadGeneration.current;
@@ -167,9 +180,14 @@ export function AdminOrdersPage() {
         "Máy chủ phản hồi quá lâu. Render có thể đang cold start; hãy thử lại sau vài giây.",
       );
       if (generation !== loadGeneration.current) return;
-      setOrders(data.items);
+      const boundedPages = Math.max(1, data.totalPages);
+      if (page > boundedPages) {
+        setPage(boundedPages);
+        return;
+      }
+      setOrders(data.items.map(normalizeOrderOperationalClassification));
       setTotal(data.total);
-      setTotalPages(data.totalPages);
+      setTotalPages(boundedPages);
       setStatusCounts(data.statusCounts);
       setFrameOptions(data.frameOptions);
     } catch (err) {
@@ -329,30 +347,29 @@ export function AdminOrdersPage() {
     const commandKey = JSON.stringify({ id: order.id, ...payload, note: payload.note?.trim() || null });
     const current = classificationRequestRef.current;
     const requestId = current?.commandKey === commandKey ? current.requestId : crypto.randomUUID();
+    const viewKey = currentViewKeyRef.current;
     classificationRequestRef.current = { commandKey, requestId };
     const mutation = ++classificationMutationRef.current;
     setClassificationBusy(true);
     setClassificationError(undefined);
     try {
       const result = await adminClassifyPhysicalOrder(order.id, { ...payload, requestId });
-      if (mutation !== classificationMutationRef.current || classificationOrder?.id !== order.id) return;
+      if (mutation !== classificationMutationRef.current || classificationOrder?.id !== order.id || viewKey !== currentViewKeyRef.current) return;
       if (result.status === "updated" || result.status === "unchanged") {
         await loadOrders();
-        if (mutation !== classificationMutationRef.current) return;
+        if (mutation !== classificationMutationRef.current || viewKey !== currentViewKeyRef.current) return;
         classificationRequestRef.current = null;
         setClassificationOrder(null);
-      } else if (result.errorCode === "admin_audit_commit_unknown") {
-        setClassificationError("Kết quả phân loại chưa rõ. Hãy thử lại cùng yêu cầu này.");
       } else {
         classificationRequestRef.current = null;
         setClassificationError("Không thể phân loại đơn in. Hãy thử lại.");
       }
     } catch (err) {
-      if (mutation !== classificationMutationRef.current) return;
+      if (mutation !== classificationMutationRef.current || viewKey !== currentViewKeyRef.current) return;
       const errorCode = getErrorCode(err);
       if (errorCode === "admin_classification_request_conflict") {
         await loadOrders();
-        if (mutation !== classificationMutationRef.current) return;
+        if (mutation !== classificationMutationRef.current || viewKey !== currentViewKeyRef.current) return;
         setClassificationError("Dữ liệu đã thay đổi. Danh sách đã được tải lại.");
       } else if (errorCode === "admin_audit_commit_unknown" || !errorCode) {
         setClassificationError("Kết quả phân loại chưa rõ. Hãy thử lại cùng yêu cầu này.");
@@ -361,7 +378,7 @@ export function AdminOrdersPage() {
         setClassificationError("Không thể phân loại đơn in. Hãy thử lại.");
       }
     } finally {
-      if (mutation === classificationMutationRef.current) setClassificationBusy(false);
+      if (mutation === classificationMutationRef.current && viewKey === currentViewKeyRef.current) setClassificationBusy(false);
     }
   };
 
@@ -869,7 +886,7 @@ export function AdminOrdersPage() {
         targetType="physical_order"
         targetLabel={classificationOrder?.id ?? "đơn in"}
         initialCategory={classificationOrder?.operationalClassification.effectiveCategory ?? "real"}
-        initialReason={classificationOrder?.operationalClassification.reason}
+        initialReason={getEditableOperationalReason(classificationOrder?.operationalClassification.reason)}
         initialNote={classificationOrder?.operationalClassification.note}
         pending={classificationBusy}
         error={classificationError}
