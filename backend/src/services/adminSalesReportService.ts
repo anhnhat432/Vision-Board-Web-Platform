@@ -1,5 +1,7 @@
-import type { FilterQuery, PipelineStage } from "mongoose";
+import mongoose, { type ClientSession, type FilterQuery, type PipelineStage } from "mongoose";
 
+import * as backendMonitoring from "../monitoring/sentry";
+import { AdminAuditOutboxModel, type AdminAuditOutboxInsert } from "../models/AdminAuditOutboxModel";
 import {
   PaymentOrderModel,
   type PaymentOrderDocument,
@@ -8,6 +10,13 @@ import {
 } from "../models/PaymentOrderModel";
 import { RefundRequestModel } from "../models/refundRequestModel";
 import { UserModel } from "../models/UserModel";
+import {
+  buildAdminSalesReviewAuditIdentity,
+  dispatchAdminAuditOutboxEvent,
+  isDuplicateAdminAuditEventIdError,
+  resolveAdminAuditIdempotency,
+  type AdminSalesReviewAuditIdentity,
+} from "./adminAuditOutboxService";
 import { ApiError } from "../utils/apiError";
 
 const REPORT_TIMEZONE = "Asia/Ho_Chi_Minh" as const;
@@ -17,6 +26,7 @@ const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;
 const MAX_RANGE_DAYS = 366;
 const MAX_EXPORT_ROWS = 10_000;
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export type AdminSalesReportProvider = "all" | (typeof REAL_PROVIDERS)[number];
 export type AdminSalesReportStatus = PaymentReportingKpiStatus;
@@ -505,21 +515,135 @@ export async function getAdminSalesReportExport(input: AdminSalesReportQueryInpu
 export interface ReviewAdminSalesOrderInput {
   orderId: string;
   reviewerUid: string;
+  reviewRequestId: unknown;
   kpiStatus: unknown;
   exclusionReason?: unknown;
   reviewNote?: unknown;
 }
 
-export interface AdminSalesReviewAudit {
-  previousStatus: PaymentReportingKpiStatus;
-  newStatus: "included" | "excluded";
-  exclusionReason?: PaymentReportingExclusionReason;
-  noteProvided: boolean;
+interface RawReviewOrder extends RawSalesRow {
+  _id: unknown;
+  userId: string;
+  status: "completed";
+  purpose: "plus_subscription";
+  updatedAt: Date;
+  metadata?: { payos?: { payer?: RawSalesPayer | null } | null } | null;
+}
+
+interface AdminSalesReviewResponseContext {
+  user: { email?: string; displayName?: string } | null;
+  refund: { resolvedAt?: Date | null } | null;
+}
+
+interface PreloadedAdminSalesReviewResponse {
+  order: RawReviewOrder;
+  context: AdminSalesReviewResponseContext;
+}
+
+export interface ReviewAdminSalesOrderDependencies {
+  triggerAuditDispatch(eventId: string): void;
+}
+
+const REVIEW_ORDER_SELECTION =
+  "_id orderId userId status purpose amount currency provider completedAt cassoTransactionId " +
+  "metadata.payos.payer manualCompletedAt reporting updatedAt";
+
+const defaultReviewDependencies: ReviewAdminSalesOrderDependencies = {
+  triggerAuditDispatch(eventId) {
+    void dispatchAdminAuditOutboxEvent(eventId).catch(() => {
+      backendMonitoring.captureBackendException(new Error("Admin audit outbox immediate dispatch failed."), {
+        tags: { feature: "admin_audit_outbox", stage: "immediate_dispatch" },
+        extra: { eventId },
+      });
+    });
+  },
+};
+
+const qualifyingReviewFilter = (orderId: string) => ({
+  orderId,
+  status: "completed",
+  purpose: "plus_subscription",
+  currency: "VND",
+  provider: { $in: [...REAL_PROVIDERS] },
+});
+
+async function loadAdminSalesReviewResponse(orderId: string): Promise<PreloadedAdminSalesReviewResponse> {
+  const order = await PaymentOrderModel.findOne(qualifyingReviewFilter(orderId))
+    .select(REVIEW_ORDER_SELECTION)
+    .lean<RawReviewOrder | null>();
+  if (!order) {
+    throw new ApiError(404, "Qualifying sales order not found.", undefined, "sales_order_not_found");
+  }
+  const [user, refund] = await Promise.all([
+    UserModel.findOne({ firebaseUid: order.userId }).select("email displayName").lean(),
+    RefundRequestModel.findOne({ orderId: order.orderId, status: "completed" })
+      .select("resolvedAt")
+      .sort({ resolvedAt: -1 })
+      .lean(),
+  ]);
+  return { order, context: { user, refund } };
+}
+
+function serializeAdminSalesReviewResponse(
+  order: RawReviewOrder,
+  context: AdminSalesReviewResponseContext,
+): AdminSalesReportRow {
+  return serializeSalesRow({
+    ...order,
+    user: context.user,
+    refund: context.refund,
+    isRefunded: Boolean(context.refund),
+    payer: order.metadata?.payos?.payer ?? null,
+  });
+}
+
+function buildReviewStateFilter(order: RawReviewOrder): Record<string, unknown> {
+  return order.reporting?.kpiStatus
+    ? { "reporting.kpiStatus": order.reporting.kpiStatus }
+    : { $or: [{ reporting: { $exists: false } }, { "reporting.kpiStatus": { $exists: false } }] };
+}
+
+function hasMongoErrorLabel(error: unknown, label: string): boolean {
+  if (!error || typeof error !== "object") return false;
+  const candidate = error as { hasErrorLabel?: (value: string) => boolean; errorLabels?: unknown };
+  return candidate.hasErrorLabel?.(label) === true ||
+    (Array.isArray(candidate.errorLabels) && candidate.errorLabels.includes(label));
+}
+
+function buildAdminSalesReviewOutboxEvent(
+  order: RawReviewOrder,
+  identity: AdminSalesReviewAuditIdentity,
+  reviewedAt: Date,
+  decision: ReturnType<typeof normalizeReviewInput>,
+): AdminAuditOutboxInsert {
+  return {
+    ...identity,
+    eventType: "admin_sales_reviewed",
+    occurredAt: reviewedAt,
+    payload: {
+      previousStatus: order.reporting?.kpiStatus ?? "pending",
+      newStatus: decision.kpiStatus,
+      ...(decision.exclusionReason ? { exclusionReason: decision.exclusionReason } : {}),
+      noteProvided: Boolean(decision.reviewNote),
+      reviewedAt: reviewedAt.toISOString(),
+    },
+    status: "pending",
+    attempts: 0,
+    availableAt: reviewedAt,
+    leaseToken: null,
+    lockedUntil: null,
+    lastErrorCode: null,
+  };
 }
 
 function normalizeReviewInput(input: ReviewAdminSalesOrderInput) {
   const orderId = input.orderId.trim().toUpperCase();
   const reviewerUid = input.reviewerUid.trim();
+  const rawReviewRequestId = typeof input.reviewRequestId === "string" ? input.reviewRequestId.trim() : "";
+  if (!UUID_PATTERN.test(rawReviewRequestId)) {
+    throw new ApiError(400, "A valid review request id is required.", undefined, "invalid_sales_review_request_id");
+  }
+  const reviewRequestId = rawReviewRequestId.toLowerCase();
   const reviewNote = typeof input.reviewNote === "string" ? input.reviewNote.trim().slice(0, 500) || undefined : undefined;
   if (input.kpiStatus !== "included" && input.kpiStatus !== "excluded") {
     throw new ApiError(400, "KPI status must be included or excluded.", undefined, "invalid_sales_review_status");
@@ -540,34 +664,63 @@ function normalizeReviewInput(input: ReviewAdminSalesOrderInput) {
   return {
     orderId,
     reviewerUid,
+    reviewRequestId,
     kpiStatus,
     exclusionReason: input.exclusionReason as PaymentReportingExclusionReason | undefined,
     reviewNote,
   };
 }
 
-export async function reviewAdminSalesOrder(input: ReviewAdminSalesOrderInput): Promise<{
-  item: AdminSalesReportRow;
-  audit: AdminSalesReviewAudit;
-}> {
-  const normalized = normalizeReviewInput(input);
-  const existing = await PaymentOrderModel.findOne({
-    orderId: normalized.orderId,
-    status: "completed",
-    purpose: "plus_subscription",
-    currency: "VND",
-    provider: { $in: [...REAL_PROVIDERS] },
-  })
-    .select("_id orderId amount currency provider completedAt cassoTransactionId metadata.payos.payer manualCompletedAt reporting updatedAt userId")
-    .lean();
-  if (!existing) {
-    throw new ApiError(404, "Qualifying sales order not found.", undefined, "sales_order_not_found");
+async function resolveAdminSalesReviewRace(
+  identity: AdminSalesReviewAuditIdentity,
+  orderId: string,
+): Promise<{ item: AdminSalesReportRow } | null> {
+  const raced = await resolveAdminAuditIdempotency(identity);
+  if (raced === "match") {
+    const current = await loadAdminSalesReviewResponse(orderId);
+    return { item: serializeAdminSalesReviewResponse(current.order, current.context) };
   }
-  if (normalized.kpiStatus === "included" && existing.manualCompletedAt && !normalized.reviewNote) {
+  if (raced === "conflict") {
+    throw new ApiError(
+      409,
+      "Review request id was already used for another command.",
+      undefined,
+      "sales_review_idempotency_conflict",
+    );
+  }
+  return null;
+}
+
+export async function reviewAdminSalesOrder(
+  input: ReviewAdminSalesOrderInput,
+  dependencies: ReviewAdminSalesOrderDependencies = defaultReviewDependencies,
+): Promise<{ item: AdminSalesReportRow }> {
+  const normalized = normalizeReviewInput(input);
+  const identity = buildAdminSalesReviewAuditIdentity({
+    reviewRequestId: normalized.reviewRequestId,
+    actorUid: normalized.reviewerUid,
+    targetId: normalized.orderId,
+    newStatus: normalized.kpiStatus,
+    exclusionReason: normalized.exclusionReason,
+    reviewNote: normalized.reviewNote,
+  })
+  const idempotency = await resolveAdminAuditIdempotency(identity);
+  if (idempotency === "conflict") {
+    throw new ApiError(
+      409,
+      "Review request id was already used for another command.",
+      undefined,
+      "sales_review_idempotency_conflict",
+    );
+  }
+  const preloaded = await loadAdminSalesReviewResponse(normalized.orderId);
+  if (idempotency === "match") {
+    return { item: serializeAdminSalesReviewResponse(preloaded.order, preloaded.context) };
+  }
+  if (normalized.kpiStatus === "included" && preloaded.order.manualCompletedAt && !normalized.reviewNote) {
     throw new ApiError(400, "Manual completions require a review note.", undefined, "manual_sales_review_note_required");
   }
 
-  const previousStatus = existing.reporting?.kpiStatus ?? "pending";
   const reviewedAt = new Date();
   const setFields: Record<string, unknown> = {
     "reporting.kpiStatus": normalized.kpiStatus,
@@ -578,50 +731,91 @@ export async function reviewAdminSalesOrder(input: ReviewAdminSalesOrderInput): 
   if (normalized.kpiStatus === "excluded") {
     setFields["reporting.exclusionReason"] = normalized.exclusionReason;
   }
-  const stateFilter = existing.reporting?.kpiStatus
-    ? { "reporting.kpiStatus": existing.reporting.kpiStatus }
-    : { $or: [{ reporting: { $exists: false } }, { "reporting.kpiStatus": { $exists: false } }] };
   const update = normalized.kpiStatus === "included"
     ? { $set: setFields, $unset: { "reporting.exclusionReason": "" } }
     : { $set: setFields };
-  const updated = await PaymentOrderModel.findOneAndUpdate(
-    {
-      _id: existing._id,
-      orderId: normalized.orderId,
-      status: "completed",
-      purpose: "plus_subscription",
-      currency: "VND",
-      provider: { $in: [...REAL_PROVIDERS] },
-      updatedAt: existing.updatedAt,
-      ...stateFilter,
-    },
-    update,
-    { new: true, runValidators: true },
-  ).lean();
-  if (!updated) {
-    throw new ApiError(409, "This sales review changed elsewhere. Reload and retry.", undefined, "sales_review_conflict");
+  const frozenOptimisticFilter = {
+    ...qualifyingReviewFilter(normalized.orderId),
+    _id: preloaded.order._id,
+    updatedAt: preloaded.order.updatedAt,
+    ...buildReviewStateFilter(preloaded.order),
+  };
+
+  let session: ClientSession | undefined;
+  let committedOrder: RawReviewOrder | null = null;
+  try {
+    session = await mongoose.startSession();
+    await session.withTransaction(async () => {
+      const existing = await PaymentOrderModel.findOne(frozenOptimisticFilter, null, { session })
+        .select(REVIEW_ORDER_SELECTION)
+        .lean<RawReviewOrder | null>();
+      if (!existing) {
+        throw new ApiError(409, "This sales review changed elsewhere. Reload and retry.", undefined, "sales_review_conflict");
+      }
+
+      const updated = await PaymentOrderModel.findOneAndUpdate(
+        frozenOptimisticFilter,
+        update,
+        { new: true, runValidators: true, session },
+      ).lean<RawReviewOrder | null>();
+      if (!updated) {
+        throw new ApiError(409, "This sales review changed elsewhere. Reload and retry.", undefined, "sales_review_conflict");
+      }
+
+      await AdminAuditOutboxModel.create([
+        buildAdminSalesReviewOutboxEvent(existing, identity, reviewedAt, normalized),
+      ], { session });
+      committedOrder = updated;
+    }, {
+      readConcern: { level: "snapshot" },
+      writeConcern: { w: "majority" },
+      readPreference: "primary",
+    });
+  } catch (error) {
+    if (error instanceof ApiError && error.errorCode === "sales_review_conflict") {
+      const replay = await resolveAdminSalesReviewRace(identity, normalized.orderId);
+      if (replay) return replay;
+      throw error;
+    }
+    if (error instanceof ApiError) throw error;
+    if (hasMongoErrorLabel(error, "UnknownTransactionCommitResult")) {
+      throw new ApiError(
+        503,
+        "Sales review commit result is unknown. Retry the same action.",
+        undefined,
+        "admin_audit_commit_unknown",
+      );
+    }
+    if (isDuplicateAdminAuditEventIdError(error)) {
+      const replay = await resolveAdminSalesReviewRace(identity, normalized.orderId);
+      if (replay) return replay;
+    }
+    throw new ApiError(503, "Admin audit storage is unavailable. Retry later.", undefined, "admin_audit_unavailable");
+  } finally {
+    if (session) {
+      try {
+        await session.endSession();
+      } catch {
+        backendMonitoring.captureBackendException(new Error("Admin sales review session cleanup failed."), {
+          tags: { feature: "admin_audit_outbox", stage: "session_cleanup" },
+          extra: { eventId: identity.eventId },
+        });
+      }
+    }
   }
 
-  const user = await UserModel.findOne({ firebaseUid: updated.userId }).select("email displayName").lean();
-  const refund = await RefundRequestModel.findOne({ orderId: updated.orderId, status: "completed" })
-    .select("resolvedAt")
-    .sort({ resolvedAt: -1 })
-    .lean();
-  return {
-    item: serializeSalesRow({
-      ...updated,
-      user,
-      refund,
-      isRefunded: Boolean(refund),
-      payer: updated.metadata?.payos?.payer ?? null,
-    } as RawSalesRow),
-    audit: {
-      previousStatus,
-      newStatus: normalized.kpiStatus,
-      ...(normalized.exclusionReason ? { exclusionReason: normalized.exclusionReason } : {}),
-      noteProvided: Boolean(normalized.reviewNote),
-    },
-  };
+  if (!committedOrder) {
+    throw new ApiError(503, "Admin audit storage is unavailable. Retry later.", undefined, "admin_audit_unavailable");
+  }
+  try {
+    dependencies.triggerAuditDispatch(identity.eventId);
+  } catch {
+    backendMonitoring.captureBackendException(new Error("Admin audit outbox immediate dispatch scheduling failed."), {
+      tags: { feature: "admin_audit_outbox", stage: "dispatch_schedule" },
+      extra: { eventId: identity.eventId },
+    });
+  }
+  return { item: serializeAdminSalesReviewResponse(committedOrder, preloaded.context) };
 }
 
 function csvCell(value: unknown): string {

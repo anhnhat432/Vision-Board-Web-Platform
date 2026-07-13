@@ -2,16 +2,19 @@ import assert from "node:assert/strict";
 import type { AddressInfo } from "node:net";
 import { afterEach, describe, it, mock } from "node:test";
 import express, { type Express } from "express";
+import mongoose, { type ClientSession } from "mongoose";
 
 process.env.MONGODB_URI ??= "mongodb://127.0.0.1:27017/audit-log-test";
 process.env.FIREBASE_PROJECT_ID ??= "audit-log-test";
 process.env.FIREBASE_CLIENT_EMAIL ??= "firebase-admin@example.test";
 process.env.FIREBASE_PRIVATE_KEY ??= "-----BEGIN PRIVATE KEY-----\\ntest\\n-----END PRIVATE KEY-----\\n";
 process.env.FRONTEND_ORIGIN ??= "http://localhost:5173";
+process.env.ADMIN_AUDIT_FINGERPRINT_SECRET ??= "test-admin-audit-fingerprint-secret-at-least-32-bytes";
 
 import { createAuthMiddleware } from "../middleware/authMiddlewareCore";
 import { errorMiddleware } from "../middleware/errorMiddleware";
 import { clearAdminRoleCache } from "../middleware/requireAdmin";
+import { AdminAuditOutboxModel } from "../models/AdminAuditOutboxModel";
 import { AuditLogModel, type AuditLogEntity } from "../models/auditLogModel";
 import { PaymentOrderModel, type PaymentOrderStatus } from "../models/PaymentOrderModel";
 import { RefundRequestModel } from "../models/refundRequestModel";
@@ -59,6 +62,10 @@ const originalPaymentOrderFindOne = PaymentOrderModel.findOne;
 const originalPaymentOrderFindOneAndUpdate = PaymentOrderModel.findOneAndUpdate;
 const originalRefundFindOne = RefundRequestModel.findOne;
 const originalUserFindOne = UserModel.findOne;
+const originalOutboxCreate = AdminAuditOutboxModel.create;
+const originalOutboxFindOne = AdminAuditOutboxModel.findOne;
+const originalOutboxFindOneAndUpdate = AdminAuditOutboxModel.findOneAndUpdate;
+const originalStartSession = mongoose.startSession;
 const originalBillingUpsert = billingService.upsertSubscriptionFromProviderEvent;
 
 function createMockPaymentOrder(overrides: Partial<MockPaymentOrder> = {}): MockPaymentOrder {
@@ -72,6 +79,15 @@ function createMockPaymentOrder(overrides: Partial<MockPaymentOrder> = {}): Mock
     },
     ...overrides,
   };
+}
+
+function createSessionMock(): ClientSession {
+  return {
+    async withTransaction(callback: () => Promise<void>) {
+      await callback();
+    },
+    async endSession() {},
+  } as unknown as ClientSession;
 }
 
 function createAdminTestApp(): Express {
@@ -163,6 +179,10 @@ afterEach(() => {
   (PaymentOrderModel as unknown as MockableModel).findOneAndUpdate = originalPaymentOrderFindOneAndUpdate;
   (RefundRequestModel as unknown as MockableModel).findOne = originalRefundFindOne;
   (UserModel as unknown as MockableModel).findOne = originalUserFindOne;
+  (AdminAuditOutboxModel as unknown as { create: unknown }).create = originalOutboxCreate;
+  (AdminAuditOutboxModel as unknown as { findOne: unknown }).findOne = originalOutboxFindOne;
+  (AdminAuditOutboxModel as unknown as { findOneAndUpdate: unknown }).findOneAndUpdate = originalOutboxFindOneAndUpdate;
+  (mongoose as unknown as { startSession: unknown }).startSession = originalStartSession;
   (billingService as unknown as MockableBillingService).upsertSubscriptionFromProviderEvent = originalBillingUpsert;
   clearAdminRoleCache();
 });
@@ -361,39 +381,36 @@ describe("admin audit logging", () => {
       reporting: { kpiStatus: "excluded", exclusionReason: "test", reviewedAt: new Date("2026-07-11T02:00:00.000Z") },
     });
     (RefundRequestModel as unknown as MockableModel).findOne = () => createLeanResult(null);
+    (AuditLogModel as unknown as MockableModel).findOne = () => createLeanResult(null);
+    (AdminAuditOutboxModel as unknown as { findOne: unknown }).findOne = () => createLeanResult(null);
+    (AdminAuditOutboxModel as unknown as { create: unknown }).create = async () => [];
+    (AdminAuditOutboxModel as unknown as { findOneAndUpdate: unknown }).findOneAndUpdate = () => createLeanResult(null);
+    (mongoose as unknown as { startSession: unknown }).startSession = async () => createSessionMock();
 
     const success = await requestJson(createAdminTestApp(), "PATCH", "/api/admin/reports/sales/VBREVIEW01/review", {
       body: {
         kpiStatus: "excluded",
         exclusionReason: "test",
         reviewNote: "raw private review note",
+        reviewRequestId: "11111111-1111-4111-8111-111111111111",
       },
     });
     assert.equal(success.status, 200);
-    const capturedAudit = createdLogs[0];
-    assert.deepEqual(capturedAudit?.payload, {
-      previousStatus: "pending",
-      newStatus: "excluded",
-      exclusionReason: "test",
-      noteProvided: true,
-    });
-    assert.equal(capturedAudit?.actorUid, "admin_uid");
-    assert.equal(capturedAudit?.targetId, "VBREVIEW01");
-    assert.equal(JSON.stringify(capturedAudit).includes("raw private review note"), false);
-    assert.equal(JSON.stringify(capturedAudit).includes("customer@example.com"), false);
+    assert.equal(createdLogs.length, 0);
 
     const failed = await requestJson(createAdminTestApp(), "PATCH", "/api/admin/reports/sales/VBREVIEW01/review", {
       body: {
         kpiStatus: "customer@example.com",
         exclusionReason: "customer_uid_should_not_log",
         reviewNote: "raw private review note",
+        reviewRequestId: "22222222-2222-4222-8222-222222222222",
       },
     });
     assert.equal(failed.status, 400);
     assert.equal(failed.body.errorCode, "invalid_sales_review_status");
-    assert.deepEqual(createdLogs[1]?.payload, { noteProvided: true });
-    assert.equal(JSON.stringify(createdLogs[1]).includes("raw private review note"), false);
-    assert.equal(JSON.stringify(createdLogs[1]).includes("customer@example.com"), false);
-    assert.equal(JSON.stringify(createdLogs[1]).includes("customer_uid_should_not_log"), false);
+    assert.deepEqual(createdLogs[0]?.payload, { noteProvided: true });
+    assert.equal(JSON.stringify(createdLogs[0]).includes("raw private review note"), false);
+    assert.equal(JSON.stringify(createdLogs[0]).includes("customer@example.com"), false);
+    assert.equal(JSON.stringify(createdLogs[0]).includes("customer_uid_should_not_log"), false);
   });
 });

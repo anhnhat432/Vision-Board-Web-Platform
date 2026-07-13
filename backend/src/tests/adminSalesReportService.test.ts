@@ -1,6 +1,17 @@
 import assert from "node:assert/strict";
-import { afterEach, describe, it } from "node:test";
+import { afterEach, beforeEach, describe, it } from "node:test";
+import mongoose, { type ClientSession } from "mongoose";
 
+process.env.MONGODB_URI ??= "mongodb://127.0.0.1:27017/admin-sales-report-service-test";
+process.env.FIREBASE_PROJECT_ID ??= "admin-sales-report-service-test";
+process.env.FIREBASE_CLIENT_EMAIL ??= "firebase-admin@example.test";
+process.env.FIREBASE_PRIVATE_KEY ??= "-----BEGIN PRIVATE KEY-----\\ntest\\n-----END PRIVATE KEY-----\\n";
+process.env.FRONTEND_ORIGIN ??= "http://localhost:5173";
+process.env.ADMIN_AUDIT_FINGERPRINT_SECRET ??= "test-admin-audit-fingerprint-secret-at-least-32-bytes";
+
+import { AdminAuditOutboxModel } from "../models/AdminAuditOutboxModel";
+import { AuditLogModel } from "../models/auditLogModel";
+import { env } from "../config/env";
 import { PaymentOrderModel } from "../models/PaymentOrderModel";
 import { RefundRequestModel } from "../models/refundRequestModel";
 import { UserModel } from "../models/UserModel";
@@ -14,27 +25,66 @@ import {
   parseAdminSalesReportFilters,
 } from "../services/adminSalesReportService";
 import { ApiError } from "../utils/apiError";
+import { buildAdminSalesReviewAuditIdentity } from "../services/adminAuditOutboxService";
 
 const originalAggregate = PaymentOrderModel.aggregate;
 const originalFindOne = PaymentOrderModel.findOne;
 const originalFindOneAndUpdate = PaymentOrderModel.findOneAndUpdate;
 const originalRefundFindOne = RefundRequestModel.findOne;
 const originalUserFindOne = UserModel.findOne;
+const originalOutboxCreate = AdminAuditOutboxModel.create;
+const originalOutboxFindOne = AdminAuditOutboxModel.findOne;
+const originalAuditFindOne = AuditLogModel.findOne;
+const originalStartSession = mongoose.startSession;
 
 type ReviewResult = {
   item: Record<string, unknown>;
-  audit: Record<string, unknown>;
 };
 
-function reviewAdminSalesOrder(input: unknown): Promise<ReviewResult> {
+function reviewAdminSalesOrder(input: unknown, dependencies?: unknown): Promise<ReviewResult> {
   const review = (adminSalesReportService as unknown as {
-    reviewAdminSalesOrder?: (reviewInput: unknown) => Promise<ReviewResult>;
+    reviewAdminSalesOrder?: (reviewInput: unknown, dependencies?: unknown) => Promise<ReviewResult>;
   }).reviewAdminSalesOrder;
   if (typeof review !== "function") {
     assert.fail("reviewAdminSalesOrder must be exported");
   }
-  return review(input);
+  return review(input, dependencies ?? { triggerAuditDispatch() {} });
 }
+
+function createSessionMock(): ClientSession {
+  return {
+    async withTransaction(callback: () => Promise<void>) {
+      await callback();
+    },
+    async endSession() {},
+  } as unknown as ClientSession;
+}
+
+function createReviewOrder(overrides: Record<string, unknown> = {}) {
+  return {
+    _id: "order_doc_1",
+    orderId: "VBREVIEW01",
+    userId: "customer_uid",
+    status: "completed" as const,
+    purpose: "plus_subscription" as const,
+    currency: "VND" as const,
+    provider: "payos" as const,
+    amount: 99000,
+    completedAt: new Date("2026-07-10T03:00:00.000Z"),
+    reporting: undefined,
+    updatedAt: new Date("2026-07-10T03:06:00.000Z"),
+    ...overrides,
+  };
+}
+
+const reviewInput = {
+  orderId: "VBREVIEW01",
+  reviewerUid: "admin_uid",
+  reviewRequestId: "11111111-1111-4111-8111-111111111111",
+  kpiStatus: "excluded" as const,
+  exclusionReason: "test" as const,
+  reviewNote: "private note",
+};
 
 function createLeanResult<T>(value: T) {
   const chain = {
@@ -51,12 +101,25 @@ function createLeanResult<T>(value: T) {
   return chain;
 }
 
+beforeEach(() => {
+  (AdminAuditOutboxModel as unknown as { findOne: unknown }).findOne = () => createLeanResult(null);
+  (AuditLogModel as unknown as { findOne: unknown }).findOne = () => createLeanResult(null);
+  (AdminAuditOutboxModel as unknown as { create: unknown }).create = async (events: unknown[]) => events;
+  (mongoose as unknown as { startSession: unknown }).startSession = async () => createSessionMock();
+  (UserModel as unknown as { findOne: unknown }).findOne = () => createLeanResult(null);
+  (RefundRequestModel as unknown as { findOne: unknown }).findOne = () => createLeanResult(null);
+});
+
 afterEach(() => {
   (PaymentOrderModel as unknown as { aggregate: unknown }).aggregate = originalAggregate;
   (PaymentOrderModel as unknown as { findOne: unknown }).findOne = originalFindOne;
   (PaymentOrderModel as unknown as { findOneAndUpdate: unknown }).findOneAndUpdate = originalFindOneAndUpdate;
   (RefundRequestModel as unknown as { findOne: unknown }).findOne = originalRefundFindOne;
   (UserModel as unknown as { findOne: unknown }).findOne = originalUserFindOne;
+  (AdminAuditOutboxModel as unknown as { create: unknown }).create = originalOutboxCreate;
+  (AdminAuditOutboxModel as unknown as { findOne: unknown }).findOne = originalOutboxFindOne;
+  (AuditLogModel as unknown as { findOne: unknown }).findOne = originalAuditFindOne;
+  (mongoose as unknown as { startSession: unknown }).startSession = originalStartSession;
 });
 
 describe("admin sales report filters", () => {
@@ -292,6 +355,348 @@ describe("admin sales report aggregation", () => {
 });
 
 describe("admin sales KPI review", () => {
+  it("commits review and outbox in the same session", async () => {
+    const original = {
+      _id: "order_doc_1",
+      orderId: "VBREVIEW01",
+      userId: "customer_uid",
+      status: "completed" as const,
+      purpose: "plus_subscription" as const,
+      currency: "VND" as const,
+      provider: "payos" as const,
+      amount: 99000,
+      completedAt: new Date("2026-07-10T03:00:00.000Z"),
+      reporting: undefined,
+      updatedAt: new Date("2026-07-10T03:06:00.000Z"),
+    };
+    const session = createSessionMock();
+    let capturedPaymentOptions: Record<string, unknown> = {};
+    let capturedOutboxOptions: Record<string, unknown> = {};
+    let capturedOutbox: Record<string, unknown> = {};
+    (mongoose as unknown as { startSession(): Promise<ClientSession> }).startSession = async () => session;
+    (PaymentOrderModel as unknown as { findOne: unknown }).findOne = () => createLeanResult(original);
+    (PaymentOrderModel as unknown as { findOneAndUpdate: unknown }).findOneAndUpdate = (
+      _filter: unknown,
+      _update: unknown,
+      options: Record<string, unknown>,
+    ) => {
+      capturedPaymentOptions = options;
+      return createLeanResult({
+        ...original,
+        reporting: { kpiStatus: "excluded", exclusionReason: "test", reviewedAt: new Date() },
+      });
+    };
+    (AdminAuditOutboxModel as unknown as { create: unknown }).create = (
+      events: Array<Record<string, unknown>>,
+      options: Record<string, unknown>,
+    ) => {
+      capturedOutbox = events[0] ?? {};
+      capturedOutboxOptions = options;
+      return Promise.resolve(events);
+    };
+    (UserModel as unknown as { findOne: unknown }).findOne = () => createLeanResult(null);
+    (RefundRequestModel as unknown as { findOne: unknown }).findOne = () => createLeanResult(null);
+
+    await reviewAdminSalesOrder({
+      orderId: "VBREVIEW01",
+      reviewerUid: "admin_uid",
+      reviewRequestId: "11111111-1111-4111-8111-111111111111",
+      kpiStatus: "excluded",
+      exclusionReason: "test",
+      reviewNote: "private note",
+    }, { triggerAuditDispatch() {} });
+
+    assert.equal(capturedPaymentOptions.session, session);
+    assert.equal(capturedOutboxOptions.session, session);
+    assert.equal((capturedOutbox.payload as Record<string, unknown>).noteProvided, true);
+    assert.equal(JSON.stringify(capturedOutbox).includes("private note"), false);
+  });
+
+  it("rolls back when the outbox insert fails", async () => {
+    const order = createReviewOrder();
+    let ended = false;
+    const session = {
+      async withTransaction(callback: () => Promise<void>) {
+        await callback();
+      },
+      async endSession() {
+        ended = true;
+      },
+    } as unknown as ClientSession;
+    (mongoose as unknown as { startSession: unknown }).startSession = async () => session;
+    (PaymentOrderModel as unknown as { findOne: unknown }).findOne = () => createLeanResult(order);
+    (PaymentOrderModel as unknown as { findOneAndUpdate: unknown }).findOneAndUpdate = () => createLeanResult({
+      ...order,
+      reporting: { kpiStatus: "excluded", exclusionReason: "test", reviewedAt: new Date() },
+    });
+    (AdminAuditOutboxModel as unknown as { create: unknown }).create = async () => {
+      throw new Error("outbox unavailable");
+    };
+
+    await assert.rejects(
+      reviewAdminSalesOrder(reviewInput),
+      (error: unknown) => error instanceof ApiError && error.errorCode === "admin_audit_unavailable",
+    );
+    assert.equal(ended, true);
+  });
+
+  it("keeps stale review conflict semantics", async () => {
+    const order = createReviewOrder();
+    let outboxCreates = 0;
+    (PaymentOrderModel as unknown as { findOne: unknown }).findOne = () => createLeanResult(order);
+    (PaymentOrderModel as unknown as { findOneAndUpdate: unknown }).findOneAndUpdate = () => createLeanResult(null);
+    (AdminAuditOutboxModel as unknown as { create: unknown }).create = async () => {
+      outboxCreates += 1;
+      return [];
+    };
+
+    await assert.rejects(
+      reviewAdminSalesOrder(reviewInput),
+      (error: unknown) => error instanceof ApiError && error.statusCode === 409 && error.errorCode === "sales_review_conflict",
+    );
+    assert.equal(outboxCreates, 0);
+  });
+
+  it("does not adopt a newer baseline during a driver transaction retry", async () => {
+    const order = createReviewOrder();
+    let readCount = 0;
+    const session = {
+      async withTransaction(callback: () => Promise<void>) {
+        await callback();
+        await callback();
+      },
+      async endSession() {},
+    } as unknown as ClientSession;
+    (mongoose as unknown as { startSession: unknown }).startSession = async () => session;
+    (PaymentOrderModel as unknown as { findOne: unknown }).findOne = () => {
+      readCount += 1;
+      return createLeanResult(readCount === 3 ? null : order);
+    };
+    (PaymentOrderModel as unknown as { findOneAndUpdate: unknown }).findOneAndUpdate = () => createLeanResult({
+      ...order,
+      reporting: { kpiStatus: "excluded", exclusionReason: "test", reviewedAt: new Date() },
+    });
+
+    await assert.rejects(
+      reviewAdminSalesOrder(reviewInput),
+      (error: unknown) => error instanceof ApiError && error.statusCode === 409 && error.errorCode === "sales_review_conflict",
+    );
+  });
+
+  it("returns a matching idempotent replay without mutation", async () => {
+    const order = createReviewOrder();
+    const identity = buildAdminSalesReviewAuditIdentity({
+      reviewRequestId: reviewInput.reviewRequestId,
+      actorUid: reviewInput.reviewerUid,
+      targetId: reviewInput.orderId,
+      newStatus: reviewInput.kpiStatus,
+      exclusionReason: reviewInput.exclusionReason,
+      reviewNote: reviewInput.reviewNote,
+    });
+    let updates = 0;
+    let outboxCreates = 0;
+    (AdminAuditOutboxModel as unknown as { findOne: unknown }).findOne = () => createLeanResult(identity);
+    (PaymentOrderModel as unknown as { findOne: unknown }).findOne = () => createLeanResult(order);
+    (PaymentOrderModel as unknown as { findOneAndUpdate: unknown }).findOneAndUpdate = () => {
+      updates += 1;
+      return createLeanResult(order);
+    };
+    (AdminAuditOutboxModel as unknown as { create: unknown }).create = async () => {
+      outboxCreates += 1;
+      return [];
+    };
+
+    const result = await reviewAdminSalesOrder(reviewInput);
+    assert.equal(result.item.orderId, order.orderId);
+    assert.equal(updates, 0);
+    assert.equal(outboxCreates, 0);
+  });
+
+  it("replays a concurrent duplicate after the frozen optimistic check loses", async () => {
+    const order = createReviewOrder();
+    const identity = buildAdminSalesReviewAuditIdentity({
+      reviewRequestId: reviewInput.reviewRequestId,
+      actorUid: reviewInput.reviewerUid,
+      targetId: reviewInput.orderId,
+      newStatus: reviewInput.kpiStatus,
+      exclusionReason: reviewInput.exclusionReason,
+      reviewNote: reviewInput.reviewNote,
+    });
+    let idempotencyReads = 0;
+    let updates = 0;
+    let outboxCreates = 0;
+    (AdminAuditOutboxModel as unknown as { findOne: unknown }).findOne = () => {
+      idempotencyReads += 1;
+      return createLeanResult(idempotencyReads === 1 ? null : identity);
+    };
+    (PaymentOrderModel as unknown as { findOne: unknown }).findOne = () => createLeanResult(order);
+    (PaymentOrderModel as unknown as { findOneAndUpdate: unknown }).findOneAndUpdate = () => {
+      updates += 1;
+      return createLeanResult({
+        ...order,
+        reporting: { kpiStatus: "excluded", exclusionReason: "test", reviewedAt: new Date() },
+      });
+    };
+    (AdminAuditOutboxModel as unknown as { create: unknown }).create = async () => {
+      outboxCreates += 1;
+      throw { code: 11000, keyPattern: { eventId: 1 } };
+    };
+
+    const result = await reviewAdminSalesOrder(reviewInput);
+    assert.equal(result.item.orderId, order.orderId);
+    assert.equal(updates, 1);
+    assert.equal(outboxCreates, 1);
+  });
+
+  it("rejects a reused request id for another target or decision", async () => {
+    const identity = buildAdminSalesReviewAuditIdentity({
+      reviewRequestId: reviewInput.reviewRequestId,
+      actorUid: reviewInput.reviewerUid,
+      targetId: "VBOTHER01",
+      newStatus: reviewInput.kpiStatus,
+      exclusionReason: reviewInput.exclusionReason,
+      reviewNote: reviewInput.reviewNote,
+    });
+    let updates = 0;
+    (AdminAuditOutboxModel as unknown as { findOne: unknown }).findOne = () => createLeanResult(identity);
+    (PaymentOrderModel as unknown as { findOneAndUpdate: unknown }).findOneAndUpdate = () => {
+      updates += 1;
+      return createLeanResult(null);
+    };
+
+    await assert.rejects(
+      reviewAdminSalesOrder(reviewInput),
+      (error: unknown) => error instanceof ApiError && error.statusCode === 409 && error.errorCode === "sales_review_idempotency_conflict",
+    );
+    assert.equal(updates, 0);
+  });
+
+  it("rejects a concurrent request-id reuse for another command", async () => {
+    const order = createReviewOrder();
+    const conflictingIdentity = buildAdminSalesReviewAuditIdentity({
+      reviewRequestId: reviewInput.reviewRequestId,
+      actorUid: reviewInput.reviewerUid,
+      targetId: "VBOTHER01",
+      newStatus: reviewInput.kpiStatus,
+      exclusionReason: reviewInput.exclusionReason,
+      reviewNote: reviewInput.reviewNote,
+    });
+    let idempotencyReads = 0;
+    (AdminAuditOutboxModel as unknown as { findOne: unknown }).findOne = () => {
+      idempotencyReads += 1;
+      return createLeanResult(idempotencyReads === 1 ? null : conflictingIdentity);
+    };
+    (PaymentOrderModel as unknown as { findOne: unknown }).findOne = () => createLeanResult(order);
+    (PaymentOrderModel as unknown as { findOneAndUpdate: unknown }).findOneAndUpdate = () => createLeanResult({
+      ...order,
+      reporting: { kpiStatus: "excluded", exclusionReason: "test", reviewedAt: new Date() },
+    });
+    (AdminAuditOutboxModel as unknown as { create: unknown }).create = async () => {
+      throw { code: 11000, keyPattern: { eventId: 1 } };
+    };
+
+    await assert.rejects(
+      reviewAdminSalesOrder(reviewInput),
+      (error: unknown) => error instanceof ApiError && error.errorCode === "sales_review_idempotency_conflict",
+    );
+  });
+
+  it("treats a note-only change as idempotency conflict", async () => {
+    const identity = buildAdminSalesReviewAuditIdentity({
+      reviewRequestId: reviewInput.reviewRequestId,
+      actorUid: reviewInput.reviewerUid,
+      targetId: reviewInput.orderId,
+      newStatus: reviewInput.kpiStatus,
+      exclusionReason: reviewInput.exclusionReason,
+      reviewNote: "different private note",
+    });
+    (AdminAuditOutboxModel as unknown as { findOne: unknown }).findOne = () => createLeanResult(identity);
+
+    await assert.rejects(
+      reviewAdminSalesOrder(reviewInput),
+      (error: unknown) => error instanceof ApiError && error.statusCode === 409 && error.errorCode === "sales_review_idempotency_conflict",
+    );
+  });
+
+  it("fails closed when the HMAC secret is absent or short", async () => {
+    const originalSecret = env.ADMIN_AUDIT_FINGERPRINT_SECRET;
+    const originalStartSessionForSecretTest = mongoose.startSession;
+    let startSessionCount = 0;
+    (mongoose as unknown as { startSession: unknown }).startSession = async () => {
+      startSessionCount += 1;
+      return createSessionMock();
+    };
+    try {
+      for (const invalidSecret of ["", "too-short"]) {
+        env.ADMIN_AUDIT_FINGERPRINT_SECRET = invalidSecret;
+        await assert.rejects(
+          reviewAdminSalesOrder({ ...reviewInput, reviewRequestId: "22222222-2222-4222-8222-222222222222" }),
+          (error: unknown) => error instanceof ApiError && error.errorCode === "admin_audit_unavailable",
+        );
+        assert.equal(startSessionCount, 0);
+      }
+    } finally {
+      env.ADMIN_AUDIT_FINGERPRINT_SECRET = originalSecret;
+      (mongoose as unknown as { startSession: unknown }).startSession = originalStartSessionForSecretTest;
+    }
+  });
+
+  it("reports an unknown final commit result", async () => {
+    const order = createReviewOrder();
+    const session = {
+      async withTransaction() {
+        throw { errorLabels: ["UnknownTransactionCommitResult"] };
+      },
+      async endSession() {},
+    } as unknown as ClientSession;
+    (mongoose as unknown as { startSession: unknown }).startSession = async () => session;
+    (PaymentOrderModel as unknown as { findOne: unknown }).findOne = () => createLeanResult(order);
+
+    await assert.rejects(
+      reviewAdminSalesOrder(reviewInput),
+      (error: unknown) => error instanceof ApiError && error.errorCode === "admin_audit_commit_unknown",
+    );
+  });
+
+  it("fails closed when transactions are unsupported", async () => {
+    const order = createReviewOrder();
+    (PaymentOrderModel as unknown as { findOne: unknown }).findOne = () => createLeanResult(order);
+    (mongoose as unknown as { startSession: unknown }).startSession = async () => {
+      throw new Error("Transaction numbers are only allowed on a replica set member or mongos");
+    };
+
+    await assert.rejects(
+      reviewAdminSalesOrder(reviewInput),
+      (error: unknown) => error instanceof ApiError && error.errorCode === "admin_audit_unavailable",
+    );
+  });
+
+  it("performs no required query after confirmed commit", async () => {
+    const order = createReviewOrder();
+    let userQueries = 0;
+    let refundQueries = 0;
+    (PaymentOrderModel as unknown as { findOne: unknown }).findOne = () => createLeanResult(order);
+    (PaymentOrderModel as unknown as { findOneAndUpdate: unknown }).findOneAndUpdate = () => createLeanResult({
+      ...order,
+      reporting: { kpiStatus: "excluded", exclusionReason: "test", reviewedAt: new Date() },
+    });
+    (UserModel as unknown as { findOne: unknown }).findOne = () => {
+      userQueries += 1;
+      if (userQueries > 1) throw new Error("User query after commit");
+      return createLeanResult(null);
+    };
+    (RefundRequestModel as unknown as { findOne: unknown }).findOne = () => {
+      refundQueries += 1;
+      if (refundQueries > 1) throw new Error("Refund query after commit");
+      return createLeanResult(null);
+    };
+
+    const result = await reviewAdminSalesOrder(reviewInput);
+    assert.equal(result.item.orderId, order.orderId);
+    assert.equal(userQueries, 1);
+    assert.equal(refundQueries, 1);
+  });
+
   it("requires reasons and notes, then atomically includes a manual completion without changing billing fields", async () => {
     const original = {
       _id: "order_doc_1",
@@ -314,6 +719,7 @@ describe("admin sales KPI review", () => {
       reviewAdminSalesOrder({
         orderId: original.orderId,
         reviewerUid: "admin_uid",
+        reviewRequestId: "22222222-2222-4222-8222-222222222222",
         kpiStatus: "included",
       }),
       (error: unknown) => error instanceof ApiError && error.errorCode === "manual_sales_review_note_required",
@@ -346,13 +752,11 @@ describe("admin sales KPI review", () => {
     const result = await reviewAdminSalesOrder({
       orderId: original.orderId,
       reviewerUid: "admin_uid",
+      reviewRequestId: "33333333-3333-4333-8333-333333333333",
       kpiStatus: "included",
       reviewNote: "Da doi chieu anh chuyen khoan va PayOS.",
     });
 
-    assert.equal(result.audit.previousStatus, "pending");
-    assert.equal(result.audit.newStatus, "included");
-    assert.equal(result.audit.noteProvided, true);
     assert.equal((update?.$set as Record<string, unknown>)["reporting.kpiStatus"], "included");
     assert.equal((filter?.updatedAt as Date).toISOString(), original.updatedAt.toISOString());
     assert.deepEqual(filter?.$or, [
@@ -375,7 +779,12 @@ describe("admin sales KPI review", () => {
 
     for (const input of invalidInputs) {
       await assert.rejects(
-        reviewAdminSalesOrder({ orderId: "VBREVIEW01", reviewerUid: "admin_uid", ...input }),
+        reviewAdminSalesOrder({
+          orderId: "VBREVIEW01",
+          reviewerUid: "admin_uid",
+          reviewRequestId: "44444444-4444-4444-8444-444444444444",
+          ...input,
+        }),
         (error: unknown) => error instanceof ApiError && error.statusCode === 400,
       );
     }
@@ -415,6 +824,7 @@ describe("admin sales KPI review", () => {
     const result = await reviewAdminSalesOrder({
       orderId: existing.orderId,
       reviewerUid: "admin_uid",
+      reviewRequestId: "55555555-5555-4555-8555-555555555555",
       kpiStatus: "included",
     });
 
@@ -446,6 +856,7 @@ describe("admin sales KPI review", () => {
       reviewAdminSalesOrder({
         orderId: existing.orderId,
         reviewerUid: "admin_uid",
+        reviewRequestId: "66666666-6666-4666-8666-666666666666",
         kpiStatus: "excluded",
         exclusionReason: "test",
       }),

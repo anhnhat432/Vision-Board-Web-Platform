@@ -33,10 +33,10 @@ export async function reviewAdminSalesOrderController(req: Request, res: Respons
   const result = await reviewAdminSalesOrder({
     orderId: req.params.orderId ?? "",
     reviewerUid,
+    reviewRequestId: req.body?.reviewRequestId,
     kpiStatus: req.body?.kpiStatus,
     exclusionReason: req.body?.exclusionReason,
     reviewNote: req.body?.reviewNote,
   });
-  res.locals.adminSalesReviewAudit = result.audit;
   res.status(200).json(successResponse({ item: result.item }));
 }

@@ -79,6 +79,7 @@ interface AuditedAdminActionOptions {
   getAuditPayload?: (req: Request, res: Response) => unknown;
   validators?: RequestHandler[];
   handler: AdminHandler;
+  logSuccess?: boolean;
 }
 
 function getSalesReviewAuditFallbackPayload(body: unknown): Record<string, unknown> {
@@ -132,14 +133,16 @@ export function auditedAdminAction(options: AuditedAdminActionOptions): RequestH
         await runMiddleware(validator, req, res);
       }
       await runAdminHandler(options.handler, req, res);
-      await logAdminAction({
-        req,
-        action: options.action,
-        target: options.target,
-        targetId,
-        payload: options.getAuditPayload?.(req, res) ?? req.body,
-        success: true,
-      });
+      if (options.logSuccess !== false) {
+        await logAdminAction({
+          req,
+          action: options.action,
+          target: options.target,
+          targetId,
+          payload: options.getAuditPayload?.(req, res) ?? req.body,
+          success: true,
+        });
+      }
     } catch (error) {
       await logAdminAction({
         req,
@@ -177,10 +180,10 @@ adminRoutes.patch(
     action: "reviewAdminSalesOrder",
     target: "payment_order_sales_reporting",
     getTargetId: (req) => req.params.orderId?.trim().toUpperCase(),
-    getAuditPayload: (req, res) =>
-      res.locals.adminSalesReviewAudit ?? getSalesReviewAuditFallbackPayload(req.body),
+    getAuditPayload: (req) => getSalesReviewAuditFallbackPayload(req.body),
     validators: [validateOrderIdParam, validateOptionalJsonObjectBody],
     handler: reviewAdminSalesOrderController,
+    logSuccess: false,
   }),
 );
 adminRoutes.get("/admin/reconciliation/last-run", asyncHandler(requireAdmin), asyncHandler(getReconciliationLastRun));
