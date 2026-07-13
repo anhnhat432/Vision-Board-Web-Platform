@@ -184,8 +184,9 @@ describe("AdminUsersPage operational cleanup", () => {
     await waitFor(() =>
       expect(screen.getByRole("status")).toHaveTextContent("1 đã cập nhật, 1 không thay đổi, 1 thất bại"),
     );
-    expect(screen.getByRole("status")).toHaveTextContent("missing-user");
-    expect(screen.getByRole("status")).not.toHaveTextContent("@example.test");
+    expect(screen.getByRole("status")).not.toHaveTextContent("missing-user");
+    expect(screen.getByText("missing-user · user_not_found")).toBeInTheDocument();
+    expect(screen.queryByText(/Đã chọn 0\/100 người dùng/)).not.toBeInTheDocument();
   });
 
   it("retries only unknown-commit targets with their original request ids", async () => {

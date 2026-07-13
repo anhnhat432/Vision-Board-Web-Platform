@@ -11,6 +11,10 @@ import {
   adminClassifyUsers,
   adminListUsers,
 } from "@/services/adminService";
+import {
+  AdminBulkClassificationFeedback,
+  type AdminBulkClassificationResult,
+} from "../components/admin/AdminBulkClassificationFeedback";
 import { AdminDataPanel } from "../components/admin/AdminDataPanel";
 import { AdminOperationalClassificationBadge } from "../components/admin/AdminOperationalClassificationBadge";
 import { AdminOperationalClassificationDialog } from "../components/admin/AdminOperationalClassificationDialog";
@@ -35,13 +39,6 @@ interface PendingBulkClassification {
     note?: string;
   };
   changes: Array<{ userUid: string; requestId: string }>;
-}
-
-interface BulkResult {
-  updated: number;
-  unchanged: number;
-  failed: Array<{ userUid: string; errorCode: string }>;
-  transportFailed?: boolean;
 }
 
 function parseOperationalCategory(value: string | null): UserOperationalCategory {
@@ -98,7 +95,7 @@ export function AdminUsersPage() {
   const [classificationBusy, setClassificationBusy] = useState(false);
   const [classificationError, setClassificationError] = useState<string | undefined>();
   const [pendingBulk, setPendingBulk] = useState<PendingBulkClassification | null>(null);
-  const [bulkResult, setBulkResult] = useState<BulkResult | null>(null);
+  const [bulkResult, setBulkResult] = useState<AdminBulkClassificationResult | null>(null);
   const requestGeneration = useRef(0);
   const previousCategorySourceRef = useRef(rawOperationalCategory);
   const categorySourceChanged = previousCategorySourceRef.current !== rawOperationalCategory;
@@ -273,7 +270,7 @@ export function AdminUsersPage() {
     } catch {
       if (submissionViewKey === currentViewRef.current.key) {
         setBulkResult({ updated: 0, unchanged: 0, failed: [], transportFailed: true });
-        setClassificationError("Không thể gửi yêu cầu phân loại. Hãy thử lại.");
+        setClassificationError(undefined);
         setClassificationOpen(false);
       }
     } finally {
@@ -413,16 +410,7 @@ export function AdminUsersPage() {
       ) : null}
 
       {bulkResult ? (
-        <p role="status" aria-live="polite" className="text-sm text-app-ink-soft">
-          {bulkResult.transportFailed
-            ? "Không thể gửi yêu cầu phân loại. Bạn có thể thử lại."
-            : `${bulkResult.updated} đã cập nhật, ${bulkResult.unchanged} không thay đổi, ${bulkResult.failed.length} thất bại${bulkResult.failed.length > 0 ? ` (${bulkResult.failed.map((item) => item.userUid).join(", ")})` : ""}.`}
-        </p>
-      ) : null}
-      {classificationError ? (
-        <p role="alert" className="text-sm text-rose-700">
-          {classificationError}
-        </p>
+        <AdminBulkClassificationFeedback result={bulkResult} onDismiss={() => setBulkResult(null)} />
       ) : null}
 
       {error ? (
