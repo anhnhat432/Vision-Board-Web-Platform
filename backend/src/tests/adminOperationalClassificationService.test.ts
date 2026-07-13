@@ -1,8 +1,21 @@
-import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+process.env.MONGODB_URI ??= "mongodb://127.0.0.1:27017/admin-operational-classification-service-test";
+process.env.FIREBASE_PROJECT_ID ??= "admin-operational-classification-service-test";
+process.env.FIREBASE_CLIENT_EMAIL ??= "firebase-admin@example.test";
+process.env.FIREBASE_PRIVATE_KEY ??= "-----BEGIN PRIVATE KEY-----\\ntest\\n-----END PRIVATE KEY-----\\n";
+process.env.FRONTEND_ORIGIN ??= "http://localhost:5173";
+process.env.ADMIN_AUDIT_FINGERPRINT_SECRET ??= "test-admin-audit-fingerprint-secret-at-least-32-bytes";
 
+import assert from "node:assert/strict";
+import { afterEach, describe, it } from "node:test";
+import mongoose, { type ClientSession } from "mongoose";
+
+import { AdminAuditOutboxModel } from "../models/AdminAuditOutboxModel";
+import { AuditLogModel } from "../models/auditLogModel";
+import { UserModel } from "../models/UserModel";
 import { ApiError } from "../utils/apiError";
 import {
+  bulkClassifyAdminUsers,
+  classifyAdminUser,
   resolveEffectiveOperationalClassification,
   validateOperationalClassificationInput,
 } from "../services/adminOperationalClassificationService";
@@ -132,5 +145,185 @@ describe("operational classification resolver", () => {
       }),
       { category: "test", reason: "other", note: "scripted regression" },
     );
+  });
+});
+
+type MockableModel = { findOne: unknown; create: unknown };
+
+const originalUserFindOne = (UserModel as unknown as MockableModel).findOne;
+const originalOutboxFindOne = (AdminAuditOutboxModel as unknown as MockableModel).findOne;
+const originalOutboxCreate = (AdminAuditOutboxModel as unknown as MockableModel).create;
+const originalAuditFindOne = (AuditLogModel as unknown as MockableModel).findOne;
+const originalStartSession = mongoose.startSession;
+
+function createSessionMock(options?: { unknownCommit?: boolean }): ClientSession {
+  return {
+    async withTransaction(callback: () => Promise<void>) {
+      await callback();
+      if (options?.unknownCommit) {
+        throw { hasErrorLabel: (label: string) => label === "UnknownTransactionCommitResult" };
+      }
+    },
+    async endSession() {},
+  } as unknown as ClientSession;
+}
+
+function classificationFixture() {
+  const users = new Map<string, {
+    firebaseUid: string;
+    operationalClassification?: {
+      category: "real" | "test" | "internal";
+      reason: "confirmed_real" | "test_account" | "internal_team" | "automated_qa" | "other";
+      note?: string;
+      classifiedBy: string;
+      classifiedAt: Date;
+    };
+  }>([
+    ["exists", { firebaseUid: "exists" }],
+    ["same", {
+      firebaseUid: "same",
+      operationalClassification: {
+        category: "test",
+        reason: "test_account",
+        note: "historical checkout tests",
+        classifiedBy: "earlier_admin",
+        classifiedAt: new Date("2026-07-12T00:00:00.000Z"),
+      },
+    }],
+  ]);
+  const outboxEvents = new Map<string, Record<string, unknown>>();
+  let saves = 0;
+  let creates = 0;
+
+  (UserModel as unknown as MockableModel).findOne = (query: { firebaseUid?: string }) => {
+    const stored = query.firebaseUid ? users.get(query.firebaseUid) : undefined;
+    const lean = async () => stored ? structuredClone(stored) : null;
+    if (!stored) return { session: () => null, lean };
+    const document = {
+      ...structuredClone(stored),
+      async save() {
+        saves += 1;
+        users.set(stored.firebaseUid, {
+          firebaseUid: stored.firebaseUid,
+          operationalClassification: this.operationalClassification,
+        });
+      },
+    };
+    return { session: () => document, lean };
+  };
+  (AdminAuditOutboxModel as unknown as MockableModel).findOne = (query: { eventId?: string }) => {
+    const event = query.eventId ? outboxEvents.get(query.eventId) : undefined;
+    const chain = {
+      select() { return chain; },
+      async lean() { return event ?? null; },
+    };
+    return chain;
+  };
+  (AuditLogModel as unknown as MockableModel).findOne = () => {
+    const chain = {
+      select() { return chain; },
+      async lean() { return null; },
+    };
+    return chain;
+  };
+  (AdminAuditOutboxModel as unknown as MockableModel).create = async (events: Array<Record<string, unknown>>) => {
+    creates += 1;
+    outboxEvents.set(events[0].eventId as string, events[0]);
+    return events;
+  };
+
+  return { users, outboxEvents, get saves() { return saves; }, get creates() { return creates; } };
+}
+
+afterEach(() => {
+  (UserModel as unknown as MockableModel).findOne = originalUserFindOne;
+  (AdminAuditOutboxModel as unknown as MockableModel).findOne = originalOutboxFindOne;
+  (AdminAuditOutboxModel as unknown as MockableModel).create = originalOutboxCreate;
+  (AuditLogModel as unknown as MockableModel).findOne = originalAuditFindOne;
+  (mongoose as unknown as { startSession: unknown }).startSession = originalStartSession;
+});
+
+describe("transactional admin user classification", () => {
+  it("commits a changed user and one durable audit intent in the same transaction", async () => {
+    const fixture = classificationFixture();
+    let capturedSession: ClientSession | undefined;
+    (mongoose as unknown as { startSession: unknown }).startSession = async () => {
+      capturedSession = createSessionMock();
+      return capturedSession;
+    };
+
+    const result = await classifyAdminUser({
+      actorUid: " admin_uid ", userUid: " exists ",
+      requestId: "11111111-1111-4111-8111-111111111111",
+      category: "test", reason: "test_account", note: " historical checkout tests ",
+    });
+
+    assert.equal(result.status, "updated");
+    assert.equal(result.classification.effectiveCategory, "test");
+    assert.equal(fixture.users.get("exists")?.operationalClassification?.classifiedBy, "admin_uid");
+    assert.equal(fixture.outboxEvents.size, 1);
+    assert.ok(capturedSession);
+  });
+
+  it("persists an idempotency intent without saving an exact same classification", async () => {
+    const fixture = classificationFixture();
+    (mongoose as unknown as { startSession: unknown }).startSession = async () => createSessionMock();
+
+    const result = await classifyAdminUser({
+      actorUid: "admin_uid", userUid: "same",
+      requestId: "22222222-2222-4222-8222-222222222222",
+      category: "test", reason: "test_account", note: "  historical checkout tests  ",
+    });
+
+    assert.equal(result.status, "unchanged");
+    assert.equal(fixture.saves, 0);
+    assert.equal(fixture.creates, 1);
+  });
+
+  it("replays a request without a second mutation and rejects conflicting reuse", async () => {
+    const fixture = classificationFixture();
+    (mongoose as unknown as { startSession: unknown }).startSession = async () => createSessionMock();
+    const requestId = "33333333-3333-4333-8333-333333333333";
+    const input = { actorUid: "admin_uid", userUid: "exists", requestId, category: "internal" as const, reason: "internal_team" as const };
+
+    assert.equal((await classifyAdminUser(input)).status, "updated");
+    assert.equal((await classifyAdminUser(input)).status, "unchanged");
+    assert.equal(fixture.saves, 1);
+    await assert.rejects(
+      classifyAdminUser({ ...input, category: "test", reason: "test_account" }),
+      hasErrorCode("admin_classification_request_conflict"),
+    );
+  });
+
+  it("reports an unknown commit and a retry resolves through the persisted audit identity", async () => {
+    const fixture = classificationFixture();
+    let unknownOnce = true;
+    (mongoose as unknown as { startSession: unknown }).startSession = async () => createSessionMock({ unknownCommit: unknownOnce });
+    const input = {
+      actorUid: "admin_uid", userUid: "exists", requestId: "44444444-4444-4444-8444-444444444444",
+      category: "test" as const, reason: "test_account" as const,
+    };
+
+    await assert.rejects(classifyAdminUser(input), hasErrorCode("admin_audit_commit_unknown"));
+    unknownOnce = false;
+    assert.equal((await classifyAdminUser(input)).status, "unchanged");
+    assert.equal(fixture.saves, 1);
+  });
+
+  it("isolates bulk targets and returns only safe per-target outcomes", async () => {
+    const fixture = classificationFixture();
+    (mongoose as unknown as { startSession: unknown }).startSession = async () => createSessionMock();
+
+    const result = await bulkClassifyAdminUsers({
+      actorUid: "admin_uid", category: "internal", reason: "internal_team",
+      changes: [
+        { userUid: "exists", requestId: "55555555-5555-4555-8555-555555555555" },
+        { userUid: "missing", requestId: "66666666-6666-4666-8666-666666666666" },
+      ],
+    });
+
+    assert.deepEqual(result.results.map((item: { status: string }) => item.status), ["updated", "failed"]);
+    assert.deepEqual(result.results[1], { userUid: "missing", status: "failed", errorCode: "user_not_found" });
+    assert.equal(fixture.users.get("exists")?.operationalClassification?.category, "internal");
   });
 });
