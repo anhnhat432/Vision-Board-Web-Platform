@@ -17,10 +17,11 @@ export function AdminOperationalClassificationBadge({
 }) {
   const effectiveCategory = classification?.effectiveCategory ?? "real";
   if (effectiveCategory === "real") {
-    if (classification?.source === "user") {
-      return <AdminStatusBadge tone="confirmed">Dữ liệu thật · Đã xác nhận</AdminStatusBadge>;
-    }
-    return null;
+    return classification?.source === "user" ? (
+      <AdminStatusBadge tone="confirmed">Dữ liệu thật · Đã xác nhận</AdminStatusBadge>
+    ) : (
+      <AdminStatusBadge tone="neutral">Dữ liệu thật · Mặc định</AdminStatusBadge>
+    );
   }
 
   const isTest = effectiveCategory === "test";

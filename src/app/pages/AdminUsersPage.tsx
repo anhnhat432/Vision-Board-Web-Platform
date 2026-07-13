@@ -11,11 +11,13 @@ import {
   adminClassifyUsers,
   adminListUsers,
 } from "@/services/adminService";
+import { AdminDataPanel } from "../components/admin/AdminDataPanel";
 import { AdminOperationalClassificationBadge } from "../components/admin/AdminOperationalClassificationBadge";
 import { AdminOperationalClassificationDialog } from "../components/admin/AdminOperationalClassificationDialog";
 import { AdminEmptyState } from "../components/admin/AdminEmptyState";
 import { AdminPageHeader } from "../components/admin/AdminPageHeader";
-import { adminSurface } from "../components/admin/tokens";
+import { useAdminSearch } from "../components/admin/AdminSearchContext";
+import { AdminToolbar } from "../components/admin/AdminToolbar";
 import { ADMIN_LOAD_TIMEOUT_MS, formatDate, getErrorMessage, withTimeout } from "../components/admin/utils";
 import { downloadCsv } from "../components/admin/csvExport";
 import { Button } from "../components/ui/button";
@@ -61,6 +63,9 @@ function UserRowSkeleton() {
             <div className="h-3 w-40 animate-pulse rounded bg-app-accent-soft" />
           </div>
         </div>
+      </td>
+      <td className="px-4 py-3.5">
+        <div className="h-5 w-32 animate-pulse rounded-full bg-app-accent-soft" />
       </td>
       <td className="px-4 py-3.5">
         <div className="h-4 w-16 animate-pulse rounded bg-app-accent-soft" />
@@ -166,11 +171,13 @@ export function AdminUsersPage() {
     void loadUsers(activeParams);
   }, [activeParams, loadUsers]);
 
-  const handleSearch = (value: string) => {
+  const handleSearch = useCallback((value: string) => {
     setSearch(value);
     setPage(1);
     clearClassificationState();
-  };
+  }, [clearClassificationState]);
+
+  useAdminSearch(search, handleSearch, "Tìm theo email, tên hoặc UID…");
 
   const handleRoleFilter = (role: string) => {
     setRoleFilter(role);
@@ -298,6 +305,7 @@ export function AdminUsersPage() {
   const allVisibleSelected = visibleUids.length > 0 && visibleUids.every((uid) => selectedUids.has(uid));
   const retryUnknownCommit =
     pendingBulk && bulkResult?.failed.some((item) => item.errorCode === "admin_audit_commit_unknown");
+  const showBulkActions = selectedUids.size > 0 || pendingBulk?.viewKey === activeViewKey;
 
   return (
     <div className="space-y-6">
@@ -314,19 +322,23 @@ export function AdminUsersPage() {
             onClick={handleExportCsv}
           >
             <Download className="h-3.5 w-3.5" />
-            CSV
+            Xuất CSV
           </Button>
         }
       />
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted" />
+      <AdminToolbar label="Bộ lọc người dùng" meta={`${total.toLocaleString("vi-VN")} kết quả`}>
+        <div className="relative w-full sm:max-w-md md:hidden">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted" />
           <Input
-            placeholder="Tìm theo email, tên, UID..."
+            type="search"
+            name="admin-user-search"
+            aria-label="Tìm kiếm người dùng"
+            autoComplete="off"
+            placeholder="Tìm theo email, tên hoặc UID…"
             value={search}
             onChange={(event) => handleSearch(event.target.value)}
-            className="pl-9 rounded-lg bg-app-surface border-app-line/60 transition-colors duration-150"
+            className="pl-9"
           />
         </div>
         <label className="flex items-center gap-2 text-sm text-app-ink-soft">
@@ -343,11 +355,13 @@ export function AdminUsersPage() {
             <option value="all">Tất cả</option>
           </select>
         </label>
-        <div className="flex gap-2">
+        <fieldset className="flex gap-2">
+          <legend className="sr-only">Lọc theo vai trò</legend>
           {(["all", "user", "admin"] as const).map((role) => (
             <Button
               key={role}
               type="button"
+              aria-pressed={roleFilter === role}
               variant={roleFilter === role ? "default" : "outline"}
               size="sm"
               className={
@@ -360,41 +374,43 @@ export function AdminUsersPage() {
               {role === "all" ? "Tất cả" : role === "admin" ? "Admin" : "User"}
             </Button>
           ))}
-        </div>
-      </div>
+        </fieldset>
+      </AdminToolbar>
 
-      <div className="flex flex-wrap items-center gap-3 rounded-[var(--r-card)] border border-app-line bg-app-bg-subtle/40 p-3">
-        <p className="text-sm text-app-ink-soft">
-          Đã chọn {selectedUids.size}/{MAX_BULK_SELECTION} người dùng.
-        </p>
-        <Button
-          type="button"
-          size="sm"
-          disabled={selectedUids.size === 0 || classificationBusy}
-          onClick={() => {
-            setClassificationError(undefined);
-            setClassificationOpen(true);
-          }}
-        >
-          Phân loại {selectedUids.size} người dùng
-        </Button>
-        {pendingBulk?.viewKey === activeViewKey ? (
+      {showBulkActions ? (
+        <div className="flex flex-wrap items-center gap-3 rounded-[var(--r-card)] border border-app-line bg-app-bg-subtle/40 p-3">
+          <p className="text-sm text-app-ink-soft">
+            Đã chọn {selectedUids.size}/{MAX_BULK_SELECTION} người dùng.
+          </p>
           <Button
             type="button"
-            variant="outline"
             size="sm"
-            disabled={classificationBusy}
-            onClick={retryPendingClassification}
+            disabled={selectedUids.size === 0 || classificationBusy}
+            onClick={() => {
+              setClassificationError(undefined);
+              setClassificationOpen(true);
+            }}
           >
-            {retryUnknownCommit ? "Thử lại mục chưa rõ kết quả" : "Thử lại phân loại"}
+            Phân loại {selectedUids.size} người dùng
           </Button>
-        ) : null}
-        {selectionMessage ? (
-          <p role="status" aria-live="polite" className="text-sm text-amber-700">
-            {selectionMessage}
-          </p>
-        ) : null}
-      </div>
+          {pendingBulk?.viewKey === activeViewKey ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={classificationBusy}
+              onClick={retryPendingClassification}
+            >
+              {retryUnknownCommit ? "Thử lại mục chưa rõ kết quả" : "Thử lại phân loại"}
+            </Button>
+          ) : null}
+          {selectionMessage ? (
+            <p role="status" aria-live="polite" className="text-sm text-amber-700">
+              {selectionMessage}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
 
       {bulkResult ? (
         <p role="status" aria-live="polite" className="text-sm text-app-ink-soft">
@@ -427,26 +443,29 @@ export function AdminUsersPage() {
         </div>
       ) : null}
 
-      <div className={`${adminSurface.card} overflow-hidden`} aria-busy={loading}>
-        <div className="overflow-x-auto">
+      <AdminDataPanel busy={loading} contentClassName="overflow-x-auto">
           <table className="w-full text-left text-sm">
+            <caption className="sr-only">Danh sách người dùng</caption>
             <thead>
               <tr className="border-b border-app-line bg-gradient-to-r from-app-bg-subtle/80 to-app-bg-subtle/40">
-                <th className="px-4 py-3">
-                  <input
-                    type="checkbox"
-                    aria-label="Chọn tất cả người dùng trên trang"
-                    checked={allVisibleSelected}
-                    disabled={loading || items.length === 0}
-                    onChange={toggleVisibleUsers}
-                  />
+                <th scope="col" className="px-4 py-3">
+                  <label className="inline-flex min-h-6 min-w-6 items-center justify-center">
+                    <input
+                      type="checkbox"
+                      aria-label="Chọn tất cả người dùng trên trang"
+                      checked={allVisibleSelected}
+                      disabled={loading || items.length === 0}
+                      onChange={toggleVisibleUsers}
+                    />
+                  </label>
                 </th>
-                <th className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">
+                <th scope="col" className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">
                   Người dùng
                 </th>
-                <th className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">Vai trò</th>
-                <th className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">Gói</th>
-                <th className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">Ngày tạo</th>
+                <th scope="col" className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">Trạng thái dữ liệu</th>
+                <th scope="col" className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">Vai trò</th>
+                <th scope="col" className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">Gói</th>
+                <th scope="col" className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">Ngày tạo</th>
               </tr>
             </thead>
             <tbody>
@@ -460,7 +479,7 @@ export function AdminUsersPage() {
                 </>
               ) : items.length === 0 ? (
                 <tr>
-                  <td colSpan={5}>
+                  <td colSpan={6}>
                     <AdminEmptyState
                       icon={UsersIcon}
                       title="Không tìm thấy người dùng"
@@ -472,19 +491,21 @@ export function AdminUsersPage() {
                 items.map((user, index) => (
                   <tr
                     key={user.firebaseUid}
-                    className={`border-b border-app-line/50 last:border-0 transition-colors duration-100 hover:bg-app-accent-soft/20 ${index % 2 === 0 ? "bg-app-surface" : "bg-app-bg-subtle/20"}`}
+                    className={`border-b border-app-line/50 transition-colors duration-100 last:border-0 hover:bg-app-accent-soft/20 motion-reduce:transition-none ${index % 2 === 0 ? "bg-app-surface" : "bg-app-bg-subtle/20"}`}
                   >
                     <td className="px-4 py-3.5">
-                      <input
-                        type="checkbox"
-                        aria-label={`Chọn ${user.email || user.firebaseUid}`}
-                        checked={selectedUids.has(user.firebaseUid)}
-                        onChange={() => toggleUser(user.firebaseUid)}
-                      />
+                      <label className="inline-flex min-h-6 min-w-6 items-center justify-center">
+                        <input
+                          type="checkbox"
+                          aria-label={`Chọn ${user.email || user.firebaseUid}`}
+                          checked={selectedUids.has(user.firebaseUid)}
+                          onChange={() => toggleUser(user.firebaseUid)}
+                        />
+                      </label>
                     </td>
                     <td className="px-4 py-3.5">
                       <Link to={`/admin/users/${user.firebaseUid}`} className="group flex items-center gap-3">
-                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-app-accent-soft to-app-bg-subtle text-xs font-bold text-app-accent transition-transform duration-150 group-hover:scale-105">
+                        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-xs font-bold text-app-accent">
                           {(user.displayName || user.email || "?").charAt(0).toUpperCase()}
                         </span>
                         <div className="min-w-0">
@@ -492,9 +513,11 @@ export function AdminUsersPage() {
                             {user.displayName || user.email}
                           </p>
                           <p className="text-xs text-app-ink-muted truncate max-w-[200px]">{user.email}</p>
-                          <AdminOperationalClassificationBadge classification={user.operationalClassification} />
                         </div>
                       </Link>
+                    </td>
+                    <td className="px-4 py-3.5">
+                      <AdminOperationalClassificationBadge classification={user.operationalClassification} />
                     </td>
                     <td className="px-4 py-3.5">
                       {user.role === "admin" ? (
@@ -519,8 +542,7 @@ export function AdminUsersPage() {
               )}
             </tbody>
           </table>
-        </div>
-      </div>
+      </AdminDataPanel>
 
       {totalPages > 1 ? (
         <div className="flex items-center justify-between">

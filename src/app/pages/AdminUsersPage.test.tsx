@@ -142,6 +142,31 @@ describe("AdminUsersPage operational cleanup", () => {
     expect(screen.getByText("U2")).toBeInTheDocument();
   });
 
+  it("shows classification as a dedicated accessible table column", async () => {
+    await renderPage();
+
+    expect(await screen.findByRole("table", { name: "Danh sách người dùng" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Trạng thái dữ liệu" })).toHaveAttribute(
+      "scope",
+      "col",
+    );
+    expect(screen.getAllByText("Dữ liệu thật · Mặc định")).toHaveLength(2);
+  });
+
+  it("exposes accessible search and filters while hiding inactive bulk controls", async () => {
+    const user = userEvent.setup();
+    await renderPage();
+
+    expect(await screen.findByRole("searchbox", { name: "Tìm kiếm người dùng" })).toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Lọc theo vai trò" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Tất cả" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.queryByText(/Đã chọn 0\/100 người dùng/)).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole("checkbox", { name: /u1@example\.test/ }));
+    expect(screen.getByText("Đã chọn 1/100 người dùng.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Phân loại 1 người dùng" })).toBeEnabled();
+  });
+
   it("announces updated, unchanged, and failed classification results separately", async () => {
     const user = userEvent.setup();
     adminServiceMock.adminClassifyUsers.mockResolvedValueOnce({
@@ -210,7 +235,7 @@ describe("AdminUsersPage operational cleanup", () => {
         expect.objectContaining({ operationalCategory: "test", page: 1 }),
       ),
     );
-    expect(screen.getByText("Đã chọn 0/100 người dùng.")).toBeInTheDocument();
+    expect(screen.queryByText("Đã chọn 0/100 người dùng.")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Thử lại mục chưa rõ kết quả" })).not.toBeInTheDocument();
   });
 
@@ -241,7 +266,7 @@ describe("AdminUsersPage operational cleanup", () => {
     expect(adminServiceMock.adminListUsers).toHaveBeenLastCalledWith(
       expect.objectContaining({ operationalCategory: "test", page: 1 }),
     );
-    expect(screen.getByText("Đã chọn 0/100 người dùng.")).toBeInTheDocument();
+    expect(screen.queryByText("Đã chọn 0/100 người dùng.")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Thử lại mục chưa rõ kết quả" })).not.toBeInTheDocument();
   });
 

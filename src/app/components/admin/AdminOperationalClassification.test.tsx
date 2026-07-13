@@ -15,7 +15,7 @@ Object.defineProperty(HTMLElement.prototype, "scrollIntoView", {
 });
 
 describe("admin operational classification primitives", () => {
-  it("renders a confirmed real badge only for an explicit user classification", () => {
+  it("distinguishes confirmed and default real classifications", () => {
     const { rerender } = render(
       <AdminOperationalClassificationBadge classification={{ effectiveCategory: "real", source: "user" }} />,
     );
@@ -24,14 +24,13 @@ describe("admin operational classification primitives", () => {
     rerender(
       <AdminOperationalClassificationBadge classification={{ effectiveCategory: "real", source: "default" }} />,
     );
+    expect(screen.getByText("Dữ liệu thật · Mặc định")).toBeInTheDocument();
     expect(screen.queryByText("Dữ liệu thật · Đã xác nhận")).not.toBeInTheDocument();
   });
 
-  it("renders excluded classification badges and source labels without a real-data badge", () => {
-    const { rerender } = render(
-      <AdminOperationalClassificationBadge classification={{ effectiveCategory: "real", source: "default" }} />,
-    );
-    expect(screen.queryByText("Test")).not.toBeInTheDocument();
+  it("renders default real for legacy data and explicit excluded states", () => {
+    const { rerender } = render(<AdminOperationalClassificationBadge classification={undefined} />);
+    expect(screen.getByText("Dữ liệu thật · Mặc định")).toBeInTheDocument();
 
     rerender(
       <AdminOperationalClassificationBadge
@@ -39,6 +38,13 @@ describe("admin operational classification primitives", () => {
       />,
     );
     expect(screen.getByText("Test")).toBeInTheDocument();
+
+    rerender(
+      <AdminOperationalClassificationBadge
+        classification={{ effectiveCategory: "internal", source: "user", reason: "internal_team" }}
+      />,
+    );
+    expect(screen.getByText("Nội bộ")).toBeInTheDocument();
     expect(getAdminOperationalClassificationSourceLabel("record")).toBe("Đánh dấu trực tiếp");
   });
 
