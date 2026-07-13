@@ -120,6 +120,59 @@ function createMockPaymentOrder(overrides: Partial<MockPaymentOrder> = {}): Mock
   };
 }
 
+type FixtureRow = Record<string, unknown>;
+
+function fixtureValueAt(row: FixtureRow, path: string): unknown {
+  return path.split(".").reduce<unknown>((value, key) => (
+    value && typeof value === "object" ? (value as FixtureRow)[key] : undefined
+  ), row);
+}
+
+// Evaluates generated lookup/projection stages rather than duplicating classification precedence.
+function fixtureExpression(value: unknown, row: FixtureRow): unknown {
+  if (typeof value === "string") return value.startsWith("$") ? fixtureValueAt(row, value.slice(1)) : value;
+  if (Array.isArray(value)) return value.map((item) => fixtureExpression(item, row));
+  if (!value || typeof value !== "object" || value instanceof Date || value instanceof RegExp) return value;
+  const operator = value as FixtureRow;
+  if ("$ifNull" in operator) { const [first, fallback] = operator.$ifNull as [unknown, unknown]; const resolved = fixtureExpression(first, row); return resolved == null ? fixtureExpression(fallback, row) : resolved; }
+  if ("$first" in operator) { const values = fixtureExpression(operator.$first, row); return Array.isArray(values) ? values[0] : undefined; }
+  if ("$cond" in operator) { const [condition, yes, no] = operator.$cond as [unknown, unknown, unknown]; return fixtureExpression(condition, row) ? fixtureExpression(yes, row) : fixtureExpression(no, row); }
+  if ("$eq" in operator || "$ne" in operator) { const [left, right] = (operator.$eq ?? operator.$ne) as [unknown, unknown]; const equal = fixtureExpression(left, row) === fixtureExpression(right, row); return "$eq" in operator ? equal : !equal; }
+  if ("$in" in operator) { const [needle, haystack] = operator.$in as [unknown, unknown]; const values = fixtureExpression(haystack, row); return Array.isArray(values) && values.includes(fixtureExpression(needle, row)); }
+  if ("$or" in operator) return (operator.$or as unknown[]).some((item) => Boolean(fixtureExpression(item, row)));
+  return Object.fromEntries(Object.entries(operator).map(([key, item]) => [key, fixtureExpression(item, row)]));
+}
+
+function fixtureMatches(row: FixtureRow, filter: FixtureRow): boolean {
+  return Object.entries(filter).every(([path, expected]) => {
+    if (path === "$or") return (expected as FixtureRow[]).some((clause) => fixtureMatches(row, clause));
+    const actual = fixtureValueAt(row, path);
+    if (expected instanceof RegExp) return expected.test(String(actual ?? ""));
+    if (!expected || typeof expected !== "object" || expected instanceof Date) return actual === expected;
+    const operator = expected as FixtureRow;
+    if ("$in" in operator) return (operator.$in as unknown[]).includes(actual);
+    return false;
+  });
+}
+
+function runPaymentFixturePipeline(rows: FixtureRow[], users: FixtureRow[], pipeline: FixtureRow[]): FixtureRow[] {
+  return pipeline.reduce<FixtureRow[]>((current, stage) => {
+    if ("$match" in stage) return current.filter((row) => fixtureMatches(row, stage.$match as FixtureRow));
+    if ("$lookup" in stage) {
+      const lookup = stage.$lookup as { localField: string; foreignField: string; as: string };
+      return current.map((row) => ({ ...row, [lookup.as]: users.filter((user) => fixtureValueAt(user, lookup.foreignField) === fixtureValueAt(row, lookup.localField)) }));
+    }
+    if ("$set" in stage) return current.map((row) => Object.entries(stage.$set as FixtureRow).reduce<FixtureRow>((next, [key, value]) => ({ ...next, [key]: fixtureExpression(value, next) }), { ...row }));
+    if ("$unset" in stage) return current.map((row) => Object.fromEntries(Object.entries(row).filter(([key]) => !(stage.$unset as string[]).includes(key))));
+    if ("$sort" in stage) return [...current].sort((left, right) => Number(fixtureValueAt(right, "createdAt")) - Number(fixtureValueAt(left, "createdAt")));
+    if ("$skip" in stage) return current.slice(stage.$skip as number);
+    if ("$limit" in stage) return current.slice(0, stage.$limit as number);
+    if ("$count" in stage) return current.length ? [{ [stage.$count as string]: current.length }] : [];
+    if ("$facet" in stage) return [Object.fromEntries(Object.entries(stage.$facet as Record<string, FixtureRow[]>).map(([key, subPipeline]) => [key, runPaymentFixturePipeline(current, users, subPipeline)]))];
+    throw new Error(`Unsupported payment stage: ${Object.keys(stage).join(",")}`);
+  }, rows);
+}
+
 describe("admin payment recovery", () => {
   it("reconciles a completed PayOS order without changing its payment or entitlement state", async () => {
     const order = createMockPaymentOrder({
@@ -504,48 +557,53 @@ describe("admin operational list filters", () => {
   });
 
   it("defaults payment list to real and paginates after effective filtering", async () => {
-    let capturedPipeline: Array<Record<string, unknown>> | undefined;
-    const order = createMockPaymentOrder({
-      createdAt: new Date("2026-07-10T00:00:00.000Z"),
-      __effectiveOperationalCategory: "real",
-      __effectiveOperationalSource: "default",
-    } as Partial<MockPaymentOrder>);
+    const users: FixtureRow[] = [
+      { firebaseUid: "user-inherited", email: "excluded@example.com", displayName: "Excluded User", role: "user", createdAt: new Date("2026-01-01T00:00:00.000Z"), operationalClassification: { category: "internal", reason: "internal_team" } },
+      { firebaseUid: "user-real", email: "owner@example.com", displayName: "Real Owner", role: "user", createdAt: new Date("2026-01-02T00:00:00.000Z") },
+    ];
+    const orders: FixtureRow[] = [
+      { orderId: "PAY-INHERITED", userId: "user-inherited", status: "pending", createdAt: new Date("2026-07-06T00:00:00.000Z"), operationalClassification: { category: "real", reason: "confirmed_real" } },
+      { orderId: "PAY-RECORD", userId: "orphan-record", status: "pending", createdAt: new Date("2026-07-05T00:00:00.000Z"), operationalClassification: { category: "test", reason: "test_account" } },
+      { orderId: "PAY-LEGACY", userId: "orphan-legacy", status: "completed", createdAt: new Date("2026-07-04T00:00:00.000Z"), reporting: { exclusionReason: "internal_team" } },
+      { orderId: "PAY-REAL-1", userId: "user-real", status: "pending", createdAt: new Date("2026-07-03T00:00:00.000Z") },
+      { orderId: "PAY-REAL-2", userId: "orphan-real-2", status: "pending", createdAt: new Date("2026-07-02T00:00:00.000Z") },
+      { orderId: "PAY-REAL-3", userId: "orphan-real-3", status: "pending", createdAt: new Date("2026-07-01T00:00:00.000Z") },
+    ];
 
-    (PaymentOrderModel as unknown as MockableModel).aggregate = async (pipeline: Array<Record<string, unknown>>) => {
-      capturedPipeline = pipeline;
-      return [{ metadata: [{ total: 3 }], items: [order] }];
+    (PaymentOrderModel as unknown as MockableModel).aggregate = async (pipeline: FixtureRow[]) => runPaymentFixturePipeline(orders, users, pipeline);
+    (UserModel as unknown as MockableModel).find = (filter: FixtureRow) => {
+      const chain = {
+        select() { return chain; },
+        limit() { return chain; },
+        async lean() {
+          return users.filter((user) => fixtureMatches(user, filter));
+        },
+      };
+      return chain;
     };
-    (PaymentOrderModel as unknown as MockableModel).countDocuments = async () => 3;
-    (PaymentOrderModel as unknown as MockableModel).find = () => ({
-      select() { return this; },
-      sort() { return this; },
-      limit() { return this; },
-      async lean() { return [order]; },
-    });
-    (UserModel as unknown as MockableModel).find = () => ({
-      select() { return this; },
-      async lean() { return []; },
-    });
 
-    const res = createMockResponse();
-    const recorder = createNextRecorder();
-    await getAdminPaymentOrders(
-      { query: { page: "2", limit: "2" } } as unknown as Request,
-      res as unknown as Response,
-      recorder.next,
-    );
+    const runList = async (query: Record<string, string>) => {
+      const res = createMockResponse();
+      const recorder = createNextRecorder();
+      await getAdminPaymentOrders({ query } as unknown as Request, res as unknown as Response, recorder.next);
+      assert.equal(recorder.getError(), undefined);
+      return (res.payload as { data: { page: number; total: number; totalPages: number; operationalScope: string; items: Array<{ orderId: string; operationalClassification: { effectiveCategory: string; source: string } }> } }).data;
+    };
 
-    assert.equal(recorder.getError(), undefined);
-    assert.deepEqual(capturedPipeline?.find((stage) => "$match" in stage && (stage.$match as Record<string, unknown>).__effectiveOperationalCategory === "real"), {
-      $match: { __effectiveOperationalCategory: "real" },
-    });
-    const facet = capturedPipeline?.find((stage) => "$facet" in stage)?.$facet as Record<string, Array<Record<string, unknown>>> | undefined;
-    assert.deepEqual(facet?.items.slice(-3), [{ $sort: { createdAt: -1 } }, { $skip: 2 }, { $limit: 2 }]);
-    const body = res.payload as { data: { page: number; totalPages: number; operationalScope: string; items: Array<{ operationalClassification: { effectiveCategory: string } }> } };
-    assert.equal(body.data.page, 2);
-    assert.equal(body.data.totalPages, 2);
-    assert.equal(body.data.operationalScope, "real");
-    assert.equal(body.data.items[0]?.operationalClassification.effectiveCategory, "real");
+    const realPageTwo = await runList({ page: "2", limit: "2" });
+    assert.equal(realPageTwo.operationalScope, "real");
+    assert.equal(realPageTwo.page, 2);
+    assert.equal(realPageTwo.total, 3);
+    assert.equal(realPageTwo.totalPages, 2);
+    assert.deepEqual(realPageTwo.items.map((item) => item.orderId), ["PAY-REAL-3"]);
+    assert.deepEqual(realPageTwo.items[0]?.operationalClassification, { effectiveCategory: "real", source: "default" });
+
+    const excluded = await runList({ operationalScope: "excluded", limit: "100" });
+    assert.deepEqual(excluded.items.map((item) => item.operationalClassification.source).sort(), ["legacy_sales_review", "record", "user"]);
+
+    const searched = await runList({ operationalScope: "all", status: "pending", q: "owner@example.com" });
+    assert.deepEqual(searched.items.map((item) => item.orderId), ["PAY-REAL-1"]);
+    assert.deepEqual(searched.items[0]?.operationalClassification, { effectiveCategory: "real", source: "default" });
   });
 
   it("rejects invalid payment pagination before querying", async () => {
