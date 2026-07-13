@@ -26,6 +26,7 @@ const MAX_BULK_SELECTION = 100;
 type UserOperationalCategory = AdminOperationalCategory | "all";
 
 interface PendingBulkClassification {
+  viewKey: string;
   payload: {
     category: AdminOperationalCategory;
     reason: AdminOperationalClassificationReason;
@@ -75,7 +76,8 @@ function UserRowSkeleton() {
 
 export function AdminUsersPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const operationalCategory = parseOperationalCategory(searchParams.get("operationalCategory"));
+  const rawOperationalCategory = searchParams.get("operationalCategory");
+  const operationalCategory = parseOperationalCategory(rawOperationalCategory);
   const [items, setItems] = useState<AdminUserListItem[]>([]);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
@@ -92,16 +94,25 @@ export function AdminUsersPage() {
   const [pendingBulk, setPendingBulk] = useState<PendingBulkClassification | null>(null);
   const [bulkResult, setBulkResult] = useState<BulkResult | null>(null);
   const requestGeneration = useRef(0);
+  const previousCategorySourceRef = useRef(rawOperationalCategory);
+  const categorySourceChanged = previousCategorySourceRef.current !== rawOperationalCategory;
+  const currentPage = categorySourceChanged ? 1 : page;
 
   const activeParams = useMemo<AdminUserListParams>(
     () => ({
-      page,
+      page: currentPage,
       role: roleFilter,
       q: search,
       ...(operationalCategory === "all" ? {} : { operationalCategory }),
     }),
-    [operationalCategory, page, roleFilter, search],
+    [currentPage, operationalCategory, roleFilter, search],
   );
+  const activeViewKey = useMemo(
+    () => JSON.stringify(activeParams),
+    [activeParams],
+  );
+  const currentViewRef = useRef({ key: activeViewKey, params: activeParams });
+  currentViewRef.current = { key: activeViewKey, params: activeParams };
 
   const loadUsers = useCallback(async (params: AdminUserListParams) => {
     const generation = ++requestGeneration.current;
@@ -126,34 +137,44 @@ export function AdminUsersPage() {
     }
   }, []);
 
+  const clearClassificationState = useCallback(() => {
+    setSelectedUids(new Set());
+    setSelectionMessage(null);
+    setClassificationOpen(false);
+    setClassificationError(undefined);
+    setPendingBulk(null);
+    setBulkResult(null);
+  }, []);
+
   useEffect(() => {
-    const rawCategory = searchParams.get("operationalCategory");
-    if (rawCategory && rawCategory !== operationalCategory) {
+    if (rawOperationalCategory && rawOperationalCategory !== operationalCategory) {
       const normalized = new URLSearchParams(searchParams);
       normalized.set("operationalCategory", operationalCategory);
       setSearchParams(normalized, { replace: true });
     }
-  }, [operationalCategory, searchParams, setSearchParams]);
+  }, [operationalCategory, rawOperationalCategory, searchParams, setSearchParams]);
+
+  useEffect(() => {
+    if (previousCategorySourceRef.current === rawOperationalCategory) return;
+    previousCategorySourceRef.current = rawOperationalCategory;
+    setPage(1);
+    clearClassificationState();
+  }, [clearClassificationState, rawOperationalCategory]);
 
   useEffect(() => {
     void loadUsers(activeParams);
   }, [activeParams, loadUsers]);
 
-  const clearSelection = () => {
-    setSelectedUids(new Set());
-    setSelectionMessage(null);
-  };
-
   const handleSearch = (value: string) => {
     setSearch(value);
     setPage(1);
-    clearSelection();
+    clearClassificationState();
   };
 
   const handleRoleFilter = (role: string) => {
     setRoleFilter(role);
     setPage(1);
-    clearSelection();
+    clearClassificationState();
   };
 
   const handleCategoryChange = (value: string) => {
@@ -162,12 +183,12 @@ export function AdminUsersPage() {
     nextParams.set("operationalCategory", nextCategory);
     setSearchParams(nextParams, { replace: true });
     setPage(1);
-    clearSelection();
+    clearClassificationState();
   };
 
   const handlePageChange = (nextPage: number) => {
     setPage(nextPage);
-    clearSelection();
+    clearClassificationState();
   };
 
   const toggleUser = (uid: string) => {
@@ -216,7 +237,8 @@ export function AdminUsersPage() {
   ) => {
     const currentChanges = changes ?? [...selectedUids].map((userUid) => ({ userUid, requestId: crypto.randomUUID() }));
     if (currentChanges.length === 0) return;
-    const command = { payload, changes: currentChanges };
+    const submissionViewKey = currentViewRef.current.key;
+    const command = { viewKey: submissionViewKey, payload, changes: currentChanges };
     setPendingBulk(command);
     setClassificationBusy(true);
     setClassificationError(undefined);
@@ -229,22 +251,26 @@ export function AdminUsersPage() {
         failed.filter((item) => item.errorCode === "admin_audit_commit_unknown").map((item) => item.userUid),
       );
       const retryableChanges = currentChanges.filter((item) => retryableUids.has(item.userUid));
-      setBulkResult({ succeeded: result.results.length - failed.length, failed });
-      setPendingBulk(retryableChanges.length > 0 ? { payload, changes: retryableChanges } : null);
-      setSelectedUids(new Set(retryableChanges.map((item) => item.userUid)));
-      setClassificationOpen(false);
-      await loadUsers(activeParams);
+      if (submissionViewKey === currentViewRef.current.key) {
+        setBulkResult({ succeeded: result.results.length - failed.length, failed });
+        setPendingBulk(retryableChanges.length > 0 ? { viewKey: submissionViewKey, payload, changes: retryableChanges } : null);
+        setSelectedUids(new Set(retryableChanges.map((item) => item.userUid)));
+        setClassificationOpen(false);
+      }
+      await loadUsers(currentViewRef.current.params);
     } catch {
-      setBulkResult({ succeeded: 0, failed: [], transportFailed: true });
-      setClassificationError("Không thể gửi yêu cầu phân loại. Hãy thử lại.");
-      setClassificationOpen(false);
+      if (submissionViewKey === currentViewRef.current.key) {
+        setBulkResult({ succeeded: 0, failed: [], transportFailed: true });
+        setClassificationError("Không thể gửi yêu cầu phân loại. Hãy thử lại.");
+        setClassificationOpen(false);
+      }
     } finally {
       setClassificationBusy(false);
     }
   };
 
   const retryPendingClassification = () => {
-    if (!pendingBulk || classificationBusy) return;
+    if (!pendingBulk || pendingBulk.viewKey !== currentViewRef.current.key || classificationBusy) return;
     void submitBulkClassification(pendingBulk.payload, pendingBulk.changes);
   };
 
@@ -347,7 +373,7 @@ export function AdminUsersPage() {
         >
           Phân loại {selectedUids.size} người dùng
         </Button>
-        {pendingBulk ? (
+        {pendingBulk?.viewKey === activeViewKey ? (
           <Button
             type="button"
             variant="outline"

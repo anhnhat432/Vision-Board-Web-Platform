@@ -1,6 +1,6 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router";
+import { MemoryRouter, useLocation, useNavigate } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 Object.defineProperty(HTMLElement.prototype, "hasPointerCapture", {
@@ -45,10 +45,22 @@ function makeUsersResponse(category: "real" | "test" | "internal" = "real") {
   };
 }
 
-async function renderPage(entry = "/admin/users") {
+function UsersNavigationControls() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  return (
+    <>
+      <button type="button" onClick={() => navigate("/admin/users?operationalCategory=test")}>Mở dữ liệu Test</button>
+      <output data-testid="location-search">{location.search}</output>
+    </>
+  );
+}
+
+async function renderPage(entry = "/admin/users", withNavigationControls = false) {
   const { AdminUsersPage } = await import("./AdminUsersPage");
   render(
     <MemoryRouter initialEntries={[entry]}>
+      {withNavigationControls ? <UsersNavigationControls /> : null}
       <AdminUsersPage />
     </MemoryRouter>,
   );
@@ -95,6 +107,17 @@ describe("AdminUsersPage operational cleanup", () => {
     );
   });
 
+  it("normalizes an invalid URL category to real", async () => {
+    await renderPage("/admin/users?operationalCategory=invalid", true);
+
+    await waitFor(() =>
+      expect(adminServiceMock.adminListUsers).toHaveBeenCalledWith(
+        expect.objectContaining({ operationalCategory: "real", page: 1 }),
+      ),
+    );
+    expect(await screen.findByTestId("location-search")).toHaveTextContent("operationalCategory=real");
+  });
+
   it("classifies explicit selections and announces partial failures without exposing user details", async () => {
     const user = userEvent.setup();
     adminServiceMock.adminClassifyUsers.mockResolvedValueOnce({
@@ -135,6 +158,63 @@ describe("AdminUsersPage operational cleanup", () => {
 
     await waitFor(() => expect(adminServiceMock.adminClassifyUsers).toHaveBeenCalledTimes(2));
     expect(adminServiceMock.adminClassifyUsers.mock.calls[1][0].changes).toEqual([originalChange]);
+  });
+
+  it("clears pending selection when navigation changes the URL category", async () => {
+    const user = userEvent.setup();
+    adminServiceMock.adminClassifyUsers.mockResolvedValueOnce({
+      category: "real",
+      results: [
+        { userUid: "u1", status: "failed", errorCode: "admin_audit_commit_unknown" },
+        { userUid: "u2", status: "failed", errorCode: "admin_audit_commit_unknown" },
+      ],
+    });
+    await renderPage("/admin/users", true);
+    await selectUsers(user);
+    await user.click(screen.getByRole("button", { name: /Phân loại 2 người dùng/ }));
+    await user.click(screen.getByRole("button", { name: "Xác nhận phân loại" }));
+    await screen.findByRole("button", { name: "Thử lại mục chưa rõ kết quả" });
+
+    fireEvent.click(screen.getByRole("button", { name: "Mở dữ liệu Test", hidden: true }));
+
+    await waitFor(() =>
+      expect(adminServiceMock.adminListUsers).toHaveBeenLastCalledWith(
+        expect.objectContaining({ operationalCategory: "test", page: 1 }),
+      ),
+    );
+    expect(screen.getByText("Đã chọn 0/100 người dùng.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Thử lại mục chưa rõ kết quả" })).not.toBeInTheDocument();
+  });
+
+  it("does not restore stale bulk retry state or reload the previous view after navigation", async () => {
+    const user = userEvent.setup();
+    const response = {
+      category: "real",
+      results: [{ userUid: "u1", status: "failed" as const, errorCode: "admin_audit_commit_unknown" }],
+    };
+    let resolveClassification: (value: typeof response) => void = () => undefined;
+    adminServiceMock.adminClassifyUsers.mockReturnValueOnce(new Promise<typeof response>((resolve) => {
+      resolveClassification = resolve;
+    }));
+    await renderPage("/admin/users", true);
+    await selectUsers(user);
+    await user.click(screen.getByRole("button", { name: /Phân loại 2 người dùng/ }));
+    await user.click(screen.getByRole("button", { name: "Xác nhận phân loại" }));
+    fireEvent.click(screen.getByRole("button", { name: "Mở dữ liệu Test", hidden: true }));
+    await waitFor(() =>
+      expect(adminServiceMock.adminListUsers).toHaveBeenLastCalledWith(
+        expect.objectContaining({ operationalCategory: "test", page: 1 }),
+      ),
+    );
+
+    resolveClassification(response);
+
+    await waitFor(() => expect(adminServiceMock.adminListUsers).toHaveBeenCalledTimes(3));
+    expect(adminServiceMock.adminListUsers).toHaveBeenLastCalledWith(
+      expect.objectContaining({ operationalCategory: "test", page: 1 }),
+    );
+    expect(screen.getByText("Đã chọn 0/100 người dùng.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Thử lại mục chưa rõ kết quả" })).not.toBeInTheDocument();
   });
 
   it("keeps all request ids available when the bulk request fails before results", async () => {

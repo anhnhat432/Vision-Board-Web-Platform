@@ -54,32 +54,47 @@ export function AdminUserDetailPage() {
     commandKey: string;
     requestId: string;
   } | null>(null);
+  const classificationMutationRef = useRef(0);
   const loadGeneration = useRef(0);
+  const currentUidRef = useRef(uid);
+  const previousUidRef = useRef(uid);
+  currentUidRef.current = uid;
 
   const load = useCallback(async () => {
-    if (!uid) return;
+    const requestedUid = currentUidRef.current;
+    if (!requestedUid) return;
     const generation = ++loadGeneration.current;
     setLoading(true);
     setError(null);
     try {
       const res = await withTimeout(
-        adminGetUserDetail(uid),
+        adminGetUserDetail(requestedUid),
         ADMIN_LOAD_TIMEOUT_MS,
         "Hết thời gian tải thông tin người dùng.",
       );
-      if (generation !== loadGeneration.current) return;
+      if (generation !== loadGeneration.current || requestedUid !== currentUidRef.current) return;
       setData(res);
     } catch (err) {
-      if (generation !== loadGeneration.current) return;
+      if (generation !== loadGeneration.current || requestedUid !== currentUidRef.current) return;
       setError(getErrorMessage(err, "Không thể tải thông tin người dùng."));
     } finally {
-      if (generation === loadGeneration.current) setLoading(false);
+      if (generation === loadGeneration.current && requestedUid === currentUidRef.current) setLoading(false);
     }
-  }, [uid]);
+  }, []);
 
   useEffect(() => {
     void load();
-  }, [load]);
+  }, [load, uid]);
+
+  useEffect(() => {
+    if (previousUidRef.current === uid) return;
+    previousUidRef.current = uid;
+    classificationMutationRef.current += 1;
+    classificationRequestRef.current = null;
+    setClassificationBusy(false);
+    setClassificationOpen(false);
+    setClassificationError(undefined);
+  }, [uid]);
 
   const handleToggleRole = () => {
     if (!data) return;
@@ -139,7 +154,9 @@ export function AdminUserDetailPage() {
     note?: string;
   }) => {
     if (!uid) return;
+    const targetUid = uid;
     const commandKey = JSON.stringify({
+      uid: targetUid,
       category: payload.category,
       reason: payload.reason,
       note: payload.note?.trim() || null,
@@ -147,20 +164,23 @@ export function AdminUserDetailPage() {
     const currentRequest = classificationRequestRef.current;
     const requestId = currentRequest?.commandKey === commandKey ? currentRequest.requestId : crypto.randomUUID();
     classificationRequestRef.current = { commandKey, requestId };
+    const mutation = ++classificationMutationRef.current;
     setClassificationBusy(true);
     setClassificationError(undefined);
     try {
       const result = await adminClassifyUsers({
         ...payload,
-        changes: [{ userUid: uid, requestId }],
+        changes: [{ userUid: targetUid, requestId }],
       });
-      const targetResult = result.results.find((item) => item.userUid === uid);
+      if (targetUid !== currentUidRef.current || mutation !== classificationMutationRef.current) return;
+      const targetResult = result.results.find((item) => item.userUid === targetUid);
       const shouldReload =
         targetResult?.status === "updated" ||
         targetResult?.status === "unchanged" ||
         (targetResult?.status === "failed" && targetResult.errorCode === "idempotency_conflict");
       if (shouldReload) {
         await load();
+        if (targetUid !== currentUidRef.current || mutation !== classificationMutationRef.current) return;
         classificationRequestRef.current = null;
         setClassificationOpen(false);
         return;
@@ -172,9 +192,10 @@ export function AdminUserDetailPage() {
       classificationRequestRef.current = null;
       setClassificationError("Không thể phân loại người dùng. Hãy kiểm tra lại và thử lại.");
     } catch {
+      if (targetUid !== currentUidRef.current || mutation !== classificationMutationRef.current) return;
       setClassificationError("Không thể gửi yêu cầu phân loại. Hãy thử lại.");
     } finally {
-      setClassificationBusy(false);
+      if (mutation === classificationMutationRef.current) setClassificationBusy(false);
     }
   };
 

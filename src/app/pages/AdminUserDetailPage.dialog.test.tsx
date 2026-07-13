@@ -1,6 +1,6 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter, Route, Routes } from "react-router";
+import { MemoryRouter, Route, Routes, useNavigate } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 Object.defineProperty(HTMLElement.prototype, "hasPointerCapture", {
@@ -26,13 +26,13 @@ vi.mock("@/services/adminService", () => ({
   adminUpdateUserSubscription: adminServiceMock.adminUpdateUserSubscription,
 }));
 
-function makeUserDetail(role: "user" | "admin" = "user") {
+function makeUserDetail(role: "user" | "admin" = "user", firebaseUid = "user_1") {
   const now = new Date().toISOString();
   return {
     user: {
-      firebaseUid: "user_1",
-      email: "user1@example.test",
-      displayName: "User 1",
+      firebaseUid,
+      email: `${firebaseUid}@example.test`,
+      displayName: `User ${firebaseUid.slice(-1)}`,
       role,
       onboardingCompletedAt: null,
       termsAcceptedAt: null,
@@ -49,12 +49,17 @@ function makeUserDetail(role: "user" | "admin" = "user") {
   };
 }
 
-async function renderPage() {
+function DetailNavigationControls() {
+  const navigate = useNavigate();
+  return <button type="button" onClick={() => navigate("/admin/users/user_2")}>Mở người dùng 2</button>;
+}
+
+async function renderPage(withNavigationControls = false) {
   const { AdminUserDetailPage } = await import("./AdminUserDetailPage");
   render(
     <MemoryRouter initialEntries={["/admin/users/user_1"]}>
       <Routes>
-        <Route path="/admin/users/:uid" element={<AdminUserDetailPage />} />
+        <Route path="/admin/users/:uid" element={<>{withNavigationControls ? <DetailNavigationControls /> : null}<AdminUserDetailPage /></>} />
       </Routes>
     </MemoryRouter>,
   );
@@ -124,7 +129,7 @@ describe("AdminUserDetailPage role confirmation", () => {
       resolveClassification = resolve;
     });
     const classified = makeUserDetail("user");
-    classified.user.operationalClassification = { effectiveCategory: "test", source: "user", reason: "test_account" };
+    classified.user.operationalClassification = { effectiveCategory: "test", source: "user" };
     adminServiceMock.adminGetUserDetail.mockResolvedValueOnce(makeUserDetail("user")).mockResolvedValueOnce(classified);
     adminServiceMock.adminClassifyUsers.mockReturnValueOnce(classificationPending);
 
@@ -142,5 +147,45 @@ describe("AdminUserDetailPage role confirmation", () => {
     await waitFor(() => expect(adminServiceMock.adminGetUserDetail).toHaveBeenCalledTimes(2));
     const reloadedClassificationRow = (await screen.findByText("Phân loại vận hành")).parentElement;
     expect(within(reloadedClassificationRow as HTMLElement).getByText("Test")).toBeInTheDocument();
+  });
+
+  it("does not reload the previous user when a classification resolves after navigation", async () => {
+    const user = userEvent.setup();
+    const classificationResult = { category: "test", results: [{ userUid: "user_1", status: "updated" as const }] };
+    let resolveClassification: (value: typeof classificationResult) => void = () => undefined;
+    adminServiceMock.adminClassifyUsers.mockReturnValueOnce(new Promise<typeof classificationResult>((resolve) => {
+      resolveClassification = resolve;
+    }));
+    adminServiceMock.adminGetUserDetail.mockImplementation((uid: string) => Promise.resolve(makeUserDetail("user", uid)));
+
+    await renderPage(true);
+    await user.click(await screen.findByRole("button", { name: "Phân loại dữ liệu" }));
+    await user.click(screen.getByRole("button", { name: "Xác nhận phân loại" }));
+    fireEvent.click(screen.getByRole("button", { name: "Mở người dùng 2", hidden: true }));
+    expect(await screen.findByRole("heading", { name: "User 2" })).toBeInTheDocument();
+
+    resolveClassification(classificationResult);
+
+    await waitFor(() => expect(adminServiceMock.adminGetUserDetail).toHaveBeenCalledWith("user_2"));
+    expect(adminServiceMock.adminGetUserDetail.mock.calls.filter(([uid]) => uid === "user_1")).toHaveLength(1);
+    expect(screen.getByRole("heading", { name: "User 2" })).toBeInTheDocument();
+  });
+
+  it("reuses the detail request id after an unknown commit response", async () => {
+    const user = userEvent.setup();
+    adminServiceMock.adminClassifyUsers.mockResolvedValue({
+      category: "test",
+      results: [{ userUid: "user_1", status: "failed", errorCode: "admin_audit_commit_unknown" }],
+    });
+    await renderPage();
+    await user.click(await screen.findByRole("button", { name: "Phân loại dữ liệu" }));
+    await user.click(screen.getByRole("button", { name: "Xác nhận phân loại" }));
+    await screen.findByText(/Kết quả phân loại chưa rõ/);
+    await user.click(screen.getByRole("button", { name: "Xác nhận phân loại" }));
+
+    await waitFor(() => expect(adminServiceMock.adminClassifyUsers).toHaveBeenCalledTimes(2));
+    expect(adminServiceMock.adminClassifyUsers.mock.calls[1][0].changes).toEqual(
+      adminServiceMock.adminClassifyUsers.mock.calls[0][0].changes,
+    );
   });
 });
