@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, Link } from "react-router";
 import { toast } from "sonner";
 import {
+  type AdminOperationalClassificationSummary,
   type AdminUserDetail,
   type AdminOperationalClassificationReason,
   adminClassifyUsers,
@@ -233,6 +234,10 @@ export function AdminUserDetailPage() {
   }
 
   const { user, subscription, goals, paymentOrders, physicalOrders } = data;
+  const operationalClassification: AdminOperationalClassificationSummary = user.operationalClassification ?? {
+    effectiveCategory: "real",
+    source: "default",
+  };
 
   return (
     <div className="space-y-6">
@@ -312,9 +317,9 @@ export function AdminUserDetailPage() {
         open={classificationOpen}
         targetType="user"
         targetLabel={user.displayName || user.email}
-        initialCategory={user.operationalClassification.effectiveCategory}
-        initialReason={user.operationalClassification.reason as AdminOperationalClassificationReason | undefined}
-        initialNote={user.operationalClassification.note}
+        initialCategory={operationalClassification.effectiveCategory}
+        initialReason={operationalClassification.reason as AdminOperationalClassificationReason | undefined}
+        initialNote={operationalClassification.note}
         pending={classificationBusy}
         error={classificationError}
         onOpenChange={(open) => {
@@ -338,10 +343,10 @@ export function AdminUserDetailPage() {
           <InfoRow label="Vai trò" value={user.role === "admin" ? "Admin" : "User"} />
           <div className="flex items-center justify-between gap-4 py-2">
             <span className="text-xs text-app-ink-muted">Phân loại vận hành</span>
-            {user.operationalClassification.effectiveCategory === "real" ? (
+            {operationalClassification.effectiveCategory === "real" ? (
               <span className="text-sm text-app-ink">Dữ liệu thật</span>
             ) : (
-              <AdminOperationalClassificationBadge classification={user.operationalClassification} />
+              <AdminOperationalClassificationBadge classification={operationalClassification} />
             )}
           </div>
           <InfoRow label="Ngôn ngữ" value={user.locale} />

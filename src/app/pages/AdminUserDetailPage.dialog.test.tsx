@@ -86,6 +86,19 @@ describe("AdminUserDetailPage role confirmation", () => {
     vi.restoreAllMocks();
   });
 
+  it("renders legacy user details without operational classification", async () => {
+    const detail = makeUserDetail("user");
+    const legacyUser: Record<string, unknown> = { ...detail.user };
+    delete legacyUser.operationalClassification;
+    adminServiceMock.adminGetUserDetail.mockResolvedValueOnce({ ...detail, user: legacyUser });
+
+    await renderPage();
+
+    expect(await screen.findByRole("heading", { name: "User 1" })).toBeInTheDocument();
+    const classificationRow = screen.getByText("Phân loại vận hành").parentElement;
+    expect(within(classificationRow as HTMLElement).getByText("Dữ liệu thật")).toBeInTheDocument();
+  });
+
   it("uses an in-app dialog and cancels without calling the role API", async () => {
     const confirmSpy = vi.spyOn(window, "confirm");
     const user = userEvent.setup();
