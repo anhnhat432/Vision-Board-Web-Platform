@@ -9,6 +9,9 @@ const authContextMock = vi.hoisted(() => ({
 const appModeMock = vi.hoisted(() => ({
   isDemoMode: vi.fn(() => false),
 }));
+const adminServiceMock = vi.hoisted(() => ({
+  adminGetSalesReport: vi.fn(),
+}));
 const autoCloudSyncMock = vi.hoisted(() => ({
   triggerSyncNow: vi.fn(),
   triggerDrainOnly: vi.fn(),
@@ -86,6 +89,11 @@ vi.mock("@/lib/api/apiClient", () => ({
   toAppError: (error: unknown) => error,
 }));
 
+vi.mock("@/services/adminService", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("@/services/adminService")>()),
+  adminGetSalesReport: adminServiceMock.adminGetSalesReport,
+}));
+
 vi.mock("@/services/syncService", () => ({
   post12WeekImportValidation: vi.fn(),
   post12WeekImport: vi.fn(),
@@ -122,7 +130,10 @@ import { resolveModeAwareCopy } from "./utils/demo-copy-guard";
 import { initializeUserData, saveUserData } from "./utils/storage";
 
 beforeAll(async () => {
-  await import("./components/root-layout/AppShellLayout");
+  await Promise.all([
+    import("./components/admin/AdminLayout"),
+    import("./components/root-layout/AppShellLayout"),
+  ]);
 });
 
 function renderRoute(pathname: string) {
@@ -179,6 +190,7 @@ describe("app routes", () => {
 
   beforeEach(() => {
     localStorage.clear();
+    adminServiceMock.adminGetSalesReport.mockReset();
     authContextMock.useAuthContext.mockReturnValue({
       user: null,
       userProfile: null,
@@ -290,6 +302,40 @@ describe("app routes", () => {
 
     expect(realPaths).not.toContain("billing/mock-checkout");
     expect(demoPaths).toContain("billing/mock-checkout");
+  });
+
+  it("registers the sales report only in the real-mode route table", () => {
+    const realPaths = collectRoutePaths(createAppRoutes("real"));
+    const demoPaths = collectRoutePaths(createAppRoutes("demo"));
+
+    expect(realPaths).toContain("reports/sales");
+    expect(demoPaths).not.toContain("reports/sales");
+  });
+
+  it("blocks a non-admin sales-report URL before loading report data", async () => {
+    authContextMock.useAuthContext.mockReturnValue({
+      user: { uid: "regular-user", email: "user@example.test" },
+      userProfile: { id: "regular-user", email: "user@example.test", role: "user" },
+      userProfileLoading: false,
+      userProfileError: null,
+      authLoading: false,
+      error: null,
+      login: vi.fn(),
+      logout: vi.fn(),
+      refreshUserProfile: vi.fn(),
+      isConfigured: true,
+    });
+    const userData = initializeUserData();
+    saveUserData({ ...userData, onboardingCompleted: true });
+
+    const route = renderRoute("/admin/reports/sales");
+    await route.waitForIdle();
+
+    expect(
+      await screen.findByRole("heading", { name: "Không có quyền quản trị" }),
+    ).toBeInTheDocument();
+    expect(adminServiceMock.adminGetSalesReport).not.toHaveBeenCalled();
+    await route.dispose();
   });
 
   it("redirects /billing to the billing plan page", async () => {
