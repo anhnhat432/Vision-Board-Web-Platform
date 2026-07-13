@@ -30,8 +30,8 @@ export function AdminEmptyState({
         className,
       )}
     >
-      <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-app-accent-soft to-app-bg-subtle text-app-accent shadow-sm">
-        <Icon className="h-7 w-7" />
+      <span className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] border border-app-line bg-app-surface text-app-accent">
+        <Icon className="h-6 w-6" />
       </span>
       <div className="space-y-1.5">
         <p className="text-base font-semibold text-app-ink">{title}</p>

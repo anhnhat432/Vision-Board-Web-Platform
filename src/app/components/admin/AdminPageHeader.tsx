@@ -5,6 +5,7 @@ import { cn } from "../ui/utils";
 interface AdminPageHeaderProps {
   title: string;
   description?: ReactNode;
+  meta?: ReactNode;
   actions?: ReactNode;
   className?: string;
 }
@@ -17,22 +18,15 @@ interface AdminPageHeaderProps {
 export function AdminPageHeader({
   title,
   description,
+  meta,
   actions,
   className,
 }: AdminPageHeaderProps) {
   return (
-    <header
-      className={cn(
-        "relative border-b border-app-line pb-5",
-        className,
-      )}
-    >
-      {/* Gradient accent line at the top edge */}
-      <span className="absolute inset-x-0 -top-5 h-px bg-gradient-to-r from-transparent via-app-accent/30 to-transparent" />
-
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <header className={cn("border-b border-app-line pb-5", className)}>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0 space-y-1">
-          <h1 className="text-[1.6rem] font-bold tracking-tight text-app-ink leading-tight">
+          <h1 className="text-[1.6rem] font-bold leading-tight tracking-tight text-app-ink">
             {title}
           </h1>
           {description ? (
@@ -40,6 +34,7 @@ export function AdminPageHeader({
               {description}
             </p>
           ) : null}
+          {meta ? <div className="pt-1 text-xs font-medium text-app-ink-soft">{meta}</div> : null}
         </div>
         {actions ? (
           <div className="flex flex-wrap items-center gap-2">{actions}</div>

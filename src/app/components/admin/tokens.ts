@@ -7,16 +7,15 @@
  */
 
 export const adminSurface = {
-  card:
-    "bg-app-surface border border-app-line rounded-[var(--r-card)] shadow-sm",
+  card: "rounded-[var(--r-card)] border border-app-line bg-app-surface shadow-sm",
   cardHover:
-    "hover:shadow-md hover:-translate-y-0.5 transition-all duration-200",
+    "transition-colors duration-150 motion-reduce:transition-none hover:border-app-line-strong hover:bg-app-bg-subtle/30",
   cardAccent:
-    "bg-app-surface border border-app-line rounded-[var(--r-card)] shadow-sm relative overflow-hidden",
-  muted: "bg-app-bg-subtle border border-app-line rounded-[var(--r-control)]",
+    "relative overflow-hidden rounded-[var(--r-card)] border border-app-line bg-app-surface shadow-sm",
+  muted: "rounded-[var(--r-control)] border border-app-line bg-app-bg-subtle",
   divider: "border-app-line",
   glass:
-    "bg-app-surface/80 backdrop-blur-sm border border-app-line/60 rounded-[var(--r-card)] shadow-sm",
+    "rounded-[var(--r-card)] border border-app-line bg-app-surface/90 shadow-sm backdrop-blur-sm",
 } as const;
 
 export const adminText = {
@@ -32,18 +31,16 @@ export const adminInput =
 export const adminFocusRing =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40 focus-visible:ring-offset-0";
 
-/** Accent bar colours for stat cards — each card gets a unique top-bar hue. */
 export const statAccentBars = {
-  users: "bg-gradient-to-r from-emerald-400 to-teal-500",
-  plus: "bg-gradient-to-r from-violet-400 to-purple-500",
-  revenue: "bg-gradient-to-r from-amber-400 to-orange-500",
-  orders: "bg-gradient-to-r from-sky-400 to-blue-500",
+  users: "bg-emerald-500/70",
+  plus: "bg-sky-500/70",
+  revenue: "bg-amber-500/70",
+  orders: "bg-app-accent/70",
 } as const;
 
-/** Icon container gradient backgrounds for stat cards. */
 export const statIconBg = {
-  users: "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400",
-  plus: "bg-violet-50 text-violet-600 dark:bg-violet-500/15 dark:text-violet-400",
-  revenue: "bg-amber-50 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400",
-  orders: "bg-sky-50 text-sky-600 dark:bg-sky-500/15 dark:text-sky-400",
+  users: "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300",
+  plus: "bg-sky-50 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300",
+  revenue: "bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-300",
+  orders: "bg-app-accent-soft text-app-accent",
 } as const;

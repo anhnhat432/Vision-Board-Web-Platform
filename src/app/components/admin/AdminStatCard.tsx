@@ -18,8 +18,7 @@ interface AdminStatCardProps {
 /**
  * Stat tile used on the dashboard.
  *
- * Features: coloured top accent bar, icon with tinted background,
- * hover lift + shadow transition.
+ * Uses a restrained accent marker and a semantic icon surface.
  */
 export function AdminStatCard({
   icon: Icon,
@@ -38,13 +37,13 @@ export function AdminStatCard({
         className,
       )}
     >
-      {/* Top accent bar */}
       {accent ? (
         <span
           className={cn(
-            "absolute inset-x-0 top-0 h-1 rounded-t-[var(--r-card)]",
+            "absolute inset-y-5 left-0 w-0.5 rounded-r-full",
             statAccentBars[accent],
           )}
+          aria-hidden="true"
         />
       ) : null}
 
