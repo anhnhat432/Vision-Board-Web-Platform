@@ -133,6 +133,7 @@ Use this style for auth, billing, sync, destructive actions, and conflict flows.
 
 - broader analytics confidence
 - secondary product surfaces polish
+- [x] Admin operational data classification and KPI cleanup (reporting-only; no DAU or active-user metric claim)
 - deeper admin/reporting/workflow automation
 
 ## 9. What Not To Do
