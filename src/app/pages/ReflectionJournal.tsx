@@ -23,6 +23,7 @@ import { ScreenStateView } from "@/app/components/states/ScreenStateView";
 import { useScreenDataState } from "@/app/components/states/useScreenDataState";
 import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
 import { emptyNarratives } from "../components/empty-states/narratives";
+import { PageBackLink } from "../components/PageBackLink";
 import { ScreenGuide } from "../components/ScreenGuide";
 import { SCREEN_GUIDES } from "../components/screen-guides";
 import {
@@ -368,6 +369,7 @@ function ReflectionJournalContent() {
     <div className="mx-auto max-w-6xl space-y-6 px-4 pb-12 pt-8 sm:px-6 lg:px-8">
       <WaterReflectionPool />
       <ScreenGuide {...SCREEN_GUIDES.reflectionJournal} autoOpen />
+      <PageBackLink fallback="/" className="mb-1" />
       <AlertDialog
         open={Boolean(reflectionToDelete)}
         onOpenChange={(open) => {
@@ -460,19 +462,19 @@ function ReflectionJournalContent() {
         {/* Search + Filters */}
         <div className="rounded-card border border-app-line bg-app-surface p-3.5 shadow-3xs sm:p-4">
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#A8A296]" aria-hidden="true" />
+            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted" aria-hidden="true" />
             <Input
               type="search"
               aria-label="Tìm kiếm nhật ký"
               placeholder="Tìm kiếm nhật ký…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-12 rounded-[13px] border-app-line bg-app-bg/45 pl-[42px] text-[13.5px] placeholder:text-[#A8A296]"
+              className="h-12 rounded-control border-app-line bg-app-bg/45 pl-[42px] text-[13.5px] placeholder:text-app-ink-muted"
             />
           </div>
           <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
             <div className="min-w-0 space-y-2">
-              <span className="block text-[10px] font-bold uppercase tracking-[0.1em] text-[#A8A296]">Loại</span>
+              <span className="block text-[10px] font-bold uppercase tracking-[0.1em] text-app-ink-muted">Loại</span>
               <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap">
                 {(["all", "weekly-review", "freeform"] as const).map((type) => {
                   const isActive = filterType === type;
@@ -496,7 +498,7 @@ function ReflectionJournalContent() {
             </div>
 
             <div className="min-w-0 space-y-2">
-              <span className="block text-[10px] font-bold uppercase tracking-[0.1em] text-[#A8A296]">Tâm trạng</span>
+              <span className="block text-[10px] font-bold uppercase tracking-[0.1em] text-app-ink-muted">Tâm trạng</span>
               <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
                 {(["", "happy", "neutral", "sad"] as const).map((mood) => {
                   const labels: Record<string, string> = {
@@ -728,7 +730,7 @@ function ReflectionJournalContent() {
 
               {/* Prompt Cards */}
               <div className="w-full max-w-[660px] border-t border-app-line pt-6">
-                <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#A8A296] mb-3.5">
+                <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-app-ink-muted mb-3.5">
                   Gợi ý mở đầu
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -976,7 +978,7 @@ function ReflectionJournalContent() {
               <div>
                 <div className="font-serif text-[40px] font-extrabold leading-none text-app-ink tabular-nums">
                   <MotionCountUp value={weekCompletion.completed} />
-                  <span className="text-lg font-bold text-[#A8A296]"> / {weekCompletion.total}</span>
+                  <span className="text-lg font-bold text-app-ink-muted"> / {weekCompletion.total}</span>
                 </div>
                 <div className="mt-1.5 text-[11.5px] font-medium text-[#7A6E5E] dark:text-app-ink-soft">
                   task hoàn thành

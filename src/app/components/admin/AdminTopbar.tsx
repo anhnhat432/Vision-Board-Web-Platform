@@ -1,5 +1,5 @@
-import { ChevronRight, Menu, Search } from "lucide-react";
-import { useLocation } from "react-router";
+import { ArrowLeft, ChevronRight, Menu, Search } from "lucide-react";
+import { Link, useLocation } from "react-router";
 
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
@@ -30,6 +30,8 @@ export function AdminTopbar({ onOpenSidebar }: AdminTopbarProps) {
   const label = findAdminLabel(location.pathname);
   const { handler } = useAdminSearchSlot();
 
+  const isDashboard = location.pathname === "/admin" || location.pathname === "/admin/dashboard";
+
   return (
     <header className="sticky top-0 z-30 border-b border-app-line bg-app-bg/85 backdrop-blur-md">
       <div className="flex h-14 items-center justify-between gap-3 px-4 sm:px-6">
@@ -51,17 +53,29 @@ export function AdminTopbar({ onOpenSidebar }: AdminTopbarProps) {
             aria-label="Breadcrumb"
             className="hidden min-w-0 items-center gap-1.5 text-sm lg:flex"
           >
-            <span className="rounded-md bg-app-accent-soft/50 px-2 py-0.5 text-xs font-semibold text-app-accent">
+            <Link
+              to="/admin/dashboard"
+              className="rounded-md bg-app-accent-soft/50 px-2 py-0.5 text-xs font-semibold text-app-accent hover:bg-app-accent-soft transition-colors"
+            >
               Admin
-            </span>
+            </Link>
             <ChevronRight className="h-3.5 w-3.5 text-app-ink-muted" />
             <span className="truncate font-semibold text-app-ink">{label}</span>
           </nav>
 
-          {/* Mobile page label */}
-          <span className="truncate text-sm font-semibold text-app-ink lg:hidden">
-            {label}
-          </span>
+          {/* Mobile page label with optional back link */}
+          <div className="flex min-w-0 items-center gap-1.5 lg:hidden">
+            {!isDashboard && (
+              <Link
+                to="/admin/dashboard"
+                aria-label="Quay lại tổng quan quản trị"
+                className="inline-flex items-center text-app-ink-muted hover:text-app-ink transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Link>
+            )}
+            <span className="truncate text-sm font-semibold text-app-ink">{label}</span>
+          </div>
         </div>
 
         {handler ? (

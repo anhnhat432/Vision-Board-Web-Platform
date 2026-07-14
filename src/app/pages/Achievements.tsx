@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
+import { PageBackLink } from "../components/PageBackLink";
 import { EmptyState } from "@/app/components/states/EmptyState";
 import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
 import { celebrateLarge } from "@/lib/effects/celebrate";
@@ -166,6 +167,7 @@ function AchievementsContent() {
   return (
     <div className="min-h-screen bg-app-bg-subtle">
       <main className="achievements-stagger mx-auto max-w-[1100px] px-9 py-[30px] pb-16">
+        <PageBackLink fallback="/" className="mb-4" />
 
         {/* ── Hero ── */}
         <div className="mb-6">
