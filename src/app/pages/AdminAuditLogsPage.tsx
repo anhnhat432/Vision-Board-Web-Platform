@@ -1,31 +1,61 @@
-import { CheckCircle2, ChevronLeft, ChevronRight, FileText, Search, XCircle } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { FileText, Search } from "lucide-react";
+import { useCallback, useEffect, useId, useState } from "react";
 import {
   type AdminAuditLogEntry,
   type AdminAuditLogListParams,
   adminListAuditLogs,
 } from "@/services/adminService";
+import { AdminDataPanel } from "../components/admin/AdminDataPanel";
 import { AdminEmptyState } from "../components/admin/AdminEmptyState";
+import { AdminFeedbackBanner } from "../components/admin/AdminFeedbackBanner";
 import { AdminPageHeader } from "../components/admin/AdminPageHeader";
-import { adminSurface } from "../components/admin/tokens";
+import { AdminPagination } from "../components/admin/AdminPagination";
+import { AdminStatusBadge } from "../components/admin/AdminStatusBadge";
+import { AdminToolbar } from "../components/admin/AdminToolbar";
 import { ADMIN_LOAD_TIMEOUT_MS, formatDate, getErrorMessage, withTimeout } from "../components/admin/utils";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../components/ui/table";
 
 function AuditRowSkeleton() {
   return (
-    <tr>
-      <td className="px-4 py-3"><div className="h-4 w-32 animate-pulse rounded bg-app-accent-soft" /></td>
-      <td className="px-4 py-3"><div className="h-4 w-40 animate-pulse rounded bg-app-accent-soft" /></td>
-      <td className="px-4 py-3"><div className="h-4 w-24 animate-pulse rounded bg-app-accent-soft" /></td>
-      <td className="px-4 py-3"><div className="h-4 w-20 animate-pulse rounded bg-app-accent-soft" /></td>
-      <td className="px-4 py-3"><div className="h-4 w-16 animate-pulse rounded bg-app-accent-soft" /></td>
-    </tr>
+    <TableRow>
+      <TableCell>
+        <div className="h-4 w-32 animate-pulse rounded bg-app-accent-soft motion-reduce:animate-none" />
+      </TableCell>
+      <TableCell>
+        <div className="h-4 w-40 animate-pulse rounded bg-app-accent-soft motion-reduce:animate-none" />
+      </TableCell>
+      <TableCell>
+        <div className="h-4 w-24 animate-pulse rounded bg-app-accent-soft motion-reduce:animate-none" />
+      </TableCell>
+      <TableCell>
+        <div className="h-4 w-20 animate-pulse rounded bg-app-accent-soft motion-reduce:animate-none" />
+      </TableCell>
+      <TableCell>
+        <div className="h-4 w-16 animate-pulse rounded bg-app-accent-soft motion-reduce:animate-none" />
+      </TableCell>
+    </TableRow>
   );
 }
 
-function PayloadPreview({ payload }: { payload?: Record<string, unknown> | null }) {
+function PayloadPreview({
+  action,
+  payload,
+}: {
+  action: string;
+  payload?: Record<string, unknown> | null;
+}) {
   const [expanded, setExpanded] = useState(false);
+  const contentId = useId();
   if (!payload || Object.keys(payload).length === 0) return null;
 
   const entries = Object.entries(payload);
@@ -35,13 +65,19 @@ function PayloadPreview({ payload }: { payload?: Record<string, unknown> | null 
     <div className="mt-1">
       <button
         type="button"
-        className="text-xs text-app-ink-muted hover:text-app-ink transition-colors"
-        onClick={() => setExpanded(!expanded)}
+        aria-expanded={expanded}
+        aria-controls={contentId}
+        aria-label={`${expanded ? "Ẩn" : "Xem"} payload ${action}`}
+        className="text-xs text-app-ink-muted transition-colors hover:text-app-ink motion-reduce:transition-none"
+        onClick={() => setExpanded((current) => !current)}
       >
         {expanded ? "Thu gọn" : `${preview}${entries.length > 3 ? "..." : ""}`}
       </button>
       {expanded ? (
-        <pre className="mt-1 max-h-32 overflow-auto rounded bg-app-bg-subtle p-2 text-xs text-app-ink-soft">
+        <pre
+          id={contentId}
+          className="mt-1 max-h-32 overflow-auto rounded bg-app-bg-subtle p-2 text-xs text-app-ink-soft"
+        >
           {JSON.stringify(payload, null, 2)}
         </pre>
       ) : null}
@@ -98,59 +134,87 @@ export function AdminAuditLogsPage() {
         description={`Tổng cộng ${total.toLocaleString("vi-VN")} hành động`}
       />
 
-      {/* Filters */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="relative flex-1 max-w-xs">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted" />
+      <AdminToolbar label="Bộ lọc audit logs" meta={`Hiển thị ${items.length} / ${total} hành động`}>
+        <div className="relative w-full sm:max-w-xs">
+          <Search
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted"
+            aria-hidden="true"
+          />
           <Input
+            type="search"
+            aria-label="Lọc theo action"
+            autoComplete="off"
             placeholder="Lọc theo action..."
             value={searchAction}
-            onChange={(e) => setSearchAction(e.target.value)}
-            className="pl-9 bg-app-surface border-app-line"
+            onChange={(event) => {
+              setPage(1);
+              setSearchAction(event.target.value);
+            }}
+            className="border-app-line bg-app-surface pl-9"
           />
         </div>
-        <div className="relative flex-1 max-w-xs">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted" />
+        <div className="relative w-full sm:max-w-xs">
+          <Search
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted"
+            aria-hidden="true"
+          />
           <Input
+            type="search"
+            aria-label="Lọc theo actor UID"
+            autoComplete="off"
             placeholder="Lọc theo actor UID..."
             value={searchActor}
-            onChange={(e) => setSearchActor(e.target.value)}
-            className="pl-9 bg-app-surface border-app-line"
+            onChange={(event) => {
+              setPage(1);
+              setSearchActor(event.target.value);
+            }}
+            className="border-app-line bg-app-surface pl-9"
           />
         </div>
-      </div>
+      </AdminToolbar>
 
-      {/* Error */}
       {error ? (
-        <div className="rounded-[var(--r-card)] border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-          {error}
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="ml-2 text-red-700 underline"
-            onClick={() => void load({ page, action: searchAction || undefined, actorUid: searchActor || undefined, limit })}
-          >
-            Thử lại
-          </Button>
-        </div>
+        <AdminFeedbackBanner
+          tone="error"
+          summary={error}
+          action={
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() =>
+                void load({
+                  page,
+                  action: searchAction || undefined,
+                  actorUid: searchActor || undefined,
+                  limit,
+                })
+              }
+            >
+              Thử lại
+            </Button>
+          }
+        />
       ) : null}
 
-      {/* Table */}
-      <div className={`${adminSurface.card} overflow-hidden`}>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-app-line bg-app-bg-subtle">
-                <th className="px-4 py-3 font-medium text-app-ink-soft">Thời gian</th>
-                <th className="px-4 py-3 font-medium text-app-ink-soft">Action</th>
-                <th className="px-4 py-3 font-medium text-app-ink-soft">Actor</th>
-                <th className="px-4 py-3 font-medium text-app-ink-soft">Target</th>
-                <th className="px-4 py-3 font-medium text-app-ink-soft">Kết quả</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
+      <AdminDataPanel
+        title="Audit logs đã ghi nhận"
+        description="Theo dõi hành động quản trị, đối tượng tác động và kết quả xử lý."
+        busy={loading}
+      >
+        <Table containerClassName="rounded-none border-0 shadow-none" className="text-app-ink-soft">
+          <TableCaption className="sr-only">Danh sách audit logs</TableCaption>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent">
+              <TableHead scope="col">Thời gian</TableHead>
+              <TableHead scope="col">Action</TableHead>
+              <TableHead scope="col">Actor</TableHead>
+              <TableHead scope="col">Target</TableHead>
+              <TableHead scope="col">Kết quả</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+              {loading && items.length === 0 ? (
                 <>
                   <AuditRowSkeleton />
                   <AuditRowSkeleton />
@@ -159,84 +223,63 @@ export function AdminAuditLogsPage() {
                   <AuditRowSkeleton />
                 </>
               ) : items.length === 0 ? (
-                <tr>
-                  <td colSpan={5}>
+                <TableRow className="hover:bg-transparent">
+                  <TableCell colSpan={5} className="whitespace-normal p-4">
                     <AdminEmptyState
                       icon={FileText}
                       title="Không có audit log"
                       description="Chưa có hành động quản trị nào được ghi nhận."
                     />
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ) : (
                 items.map((log, i) => (
-                  <tr key={log._id || i} className="border-b border-app-line last:border-0 hover:bg-app-bg-subtle/50 transition-colors">
-                    <td className="px-4 py-3 text-xs text-app-ink-muted whitespace-nowrap">
+                  <TableRow key={log._id || i}>
+                    <TableCell className="text-xs text-app-ink-muted">
                       {formatDate(log.timestamp)}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="rounded bg-app-bg-subtle px-1.5 py-0.5 text-xs font-mono text-app-ink">
+                    </TableCell>
+                    <TableCell>
+                      <span className="rounded bg-app-bg-subtle px-1.5 py-0.5 font-mono text-xs text-app-ink">
                         {log.action}
                       </span>
-                      <PayloadPreview payload={log.payload} />
-                    </td>
-                    <td className="px-4 py-3">
-                      <p className="text-xs text-app-ink-muted truncate max-w-[160px]" title={log.actorUid}>
+                      <PayloadPreview action={log.action} payload={log.payload} />
+                    </TableCell>
+                    <TableCell>
+                      <p className="max-w-[200px] truncate text-xs text-app-ink-soft" title={log.actorUid}>
                         {log.actorEmail || log.actorUid}
                       </p>
-                    </td>
-                    <td className="px-4 py-3 text-xs text-app-ink-soft">
+                      {log.actorEmail ? (
+                        <p className="mt-1 max-w-[200px] truncate font-mono text-xs text-app-ink-muted">
+                          {log.actorUid}
+                        </p>
+                      ) : null}
+                    </TableCell>
+                    <TableCell className="font-mono text-xs text-app-ink-soft">
                       <span className="font-mono">{log.target}</span>
                       {log.targetId ? (
                         <span className="ml-1 text-app-ink-muted">({log.targetId})</span>
                       ) : null}
-                    </td>
-                    <td className="px-4 py-3">
-                      {log.success ? (
-                        <CheckCircle2 className="h-4 w-4 text-emerald-400" />
-                      ) : (
-                        <XCircle className="h-4 w-4 text-rose-400" />
-                      )}
-                    </td>
-                  </tr>
+                    </TableCell>
+                    <TableCell>
+                      <AdminStatusBadge tone={log.success ? "completed" : "failed"}>
+                        {log.success ? "Thành công" : "Thất bại"}
+                      </AdminStatusBadge>
+                    </TableCell>
+                  </TableRow>
                 ))
               )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+          </TableBody>
+        </Table>
+      </AdminDataPanel>
 
-      {/* Pagination */}
       {totalPages > 1 ? (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-app-ink-muted">
-            Trang {page} / {totalPages}
-          </p>
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={page <= 1}
-              onClick={() => handlePageChange(page - 1)}
-              className="gap-1 border-app-line"
-            >
-              <ChevronLeft className="h-4 w-4" />
-              Trước
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              disabled={page >= totalPages}
-              onClick={() => handlePageChange(page + 1)}
-              className="gap-1 border-app-line"
-            >
-              Sau
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+        <AdminPagination
+          page={page}
+          totalPages={totalPages}
+          disabled={loading}
+          itemLabel="audit logs"
+          onPageChange={handlePageChange}
+        />
       ) : null}
     </div>
   );
