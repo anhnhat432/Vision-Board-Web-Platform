@@ -2,7 +2,7 @@ import type { AdminSalesReportRow } from "@/services/adminService";
 
 import { AdminOperationalClassificationBadge, getAdminOperationalClassificationSourceLabel } from "../AdminOperationalClassificationBadge";
 import { Button } from "../../ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../ui/table";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "../../ui/table";
 import { formatDate, formatVnd } from "../utils";
 
 interface AdminSalesReportListProps {
@@ -65,15 +65,16 @@ export function AdminSalesReportList({ items, busyOrderId, onReview, onReconcile
   return (
     <>
       <div className="hidden md:block" data-testid="sales-report-desktop-table">
-        <Table>
+        <Table containerClassName="rounded-none border-0 shadow-none">
+          <TableCaption className="sr-only">Giao dịch trong báo cáo kinh doanh</TableCaption>
           <TableHeader>
             <TableRow>
-              <TableHead>Khách hàng</TableHead>
-              <TableHead>Giao dịch</TableHead>
-              <TableHead>Số tiền</TableHead>
-              <TableHead>Đối chiếu</TableHead>
-              <TableHead>Trạng thái KPI</TableHead>
-              <TableHead>Hành động</TableHead>
+              <TableHead scope="col">Khách hàng</TableHead>
+              <TableHead scope="col">Giao dịch</TableHead>
+              <TableHead scope="col" className="text-right">Số tiền</TableHead>
+              <TableHead scope="col">Đối chiếu</TableHead>
+              <TableHead scope="col">Trạng thái KPI</TableHead>
+              <TableHead scope="col">Hành động</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -88,7 +89,7 @@ export function AdminSalesReportList({ items, busyOrderId, onReview, onReconcile
                   <p className="text-xs text-app-ink-muted">{item.provider} · {item.providerReference ?? "Chưa có mã"}</p>
                   <p className="text-xs text-app-ink-muted">{formatDate(item.completedAt)}</p>
                 </TableCell>
-                <TableCell>{formatVnd(item.amountVnd)}</TableCell>
+                <TableCell className="text-right font-semibold tabular-nums">{formatVnd(item.amountVnd)}</TableCell>
                 <TableCell>
                   <p>{item.payer?.classification ?? "unknown"}</p>
                   <p className="text-xs text-app-ink-muted">{item.refund.status === "completed" ? "Đã hoàn tiền" : "Chưa hoàn tiền"}</p>

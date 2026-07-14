@@ -23,7 +23,10 @@ import { AdminSalesKpiGrid } from "../components/admin/sales/AdminSalesKpiGrid";
 import { AdminSalesReportList } from "../components/admin/sales/AdminSalesReportList";
 import { AdminSalesReviewDialog } from "../components/admin/sales/AdminSalesReviewDialog";
 import { AdminSalesRevenueChart } from "../components/admin/sales/AdminSalesRevenueChart";
+import { AdminDataPanel } from "../components/admin/AdminDataPanel";
 import { AdminEmptyState } from "../components/admin/AdminEmptyState";
+import { AdminFeedbackBanner } from "../components/admin/AdminFeedbackBanner";
+import { AdminPagination } from "../components/admin/AdminPagination";
 import { AdminPageHeader } from "../components/admin/AdminPageHeader";
 import { AdminPaymentPayerEvidenceDialog } from "../components/admin/AdminPaymentPayerEvidenceDialog";
 import { getErrorMessage } from "../components/admin/utils";
@@ -184,19 +187,47 @@ export function AdminSalesReportPage() {
         availableProviders={report?.availableProviders ?? ["payos", "casso"]}
         onChange={updateState}
       />
-      {validationError ? <p role="alert" className="text-sm text-rose-600">{validationError}</p> : null}
+      {validationError ? <AdminFeedbackBanner tone="error" summary={validationError} /> : null}
       {loadError ? (
-        <div role="alert" className="flex items-center justify-between gap-3 rounded-[var(--r-card)] border border-rose-200 bg-rose-50 p-4">
-          <p className="text-sm text-rose-700">{loadError}</p>
-          <Button type="button" variant="outline" onClick={() => void loadReport(activeParams)}>Thử lại</Button>
-        </div>
+        <AdminFeedbackBanner
+          tone="error"
+          summary={
+            <div>
+              <p className="font-semibold">Không tải được báo cáo kinh doanh</p>
+              <p className="mt-1 font-normal">{loadError}</p>
+            </div>
+          }
+          action={
+            <Button type="button" variant="outline" size="sm" onClick={() => void loadReport(activeParams)}>
+              Thử lại
+            </Button>
+          }
+        />
       ) : null}
-      {exportError ? <p role="alert" className="text-sm text-rose-600">{exportError}</p> : null}
+      {exportError ? (
+        <AdminFeedbackBanner
+          tone="error"
+          summary={exportError}
+          action={
+            <Button type="button" variant="outline" size="sm" onClick={() => void handleExport()}>
+              Thử xuất lại
+            </Button>
+          }
+          onDismiss={() => setExportError(null)}
+          dismissLabel="Đóng lỗi xuất báo cáo"
+        />
+      ) : null}
       {loading && !report ? <p role="status">Đang tải báo cáo kinh doanh…</p> : null}
       {report ? (
         <>
           <AdminSalesKpiGrid summary={report.summary} />
           <AdminSalesRevenueChart dailyBuckets={report.dailyBuckets} />
+          <AdminDataPanel
+            title="Giao dịch trong báo cáo"
+            description="Trạng thái KPI hiệu lực sau phân loại tài khoản, duyệt thủ công và hoàn tiền."
+            busy={loading}
+            contentClassName="space-y-4 p-3 sm:p-4"
+          >
           <div role="tablist" aria-label="Trạng thái KPI hiệu lực" className="flex flex-wrap gap-2">
             {tabs.map((tab) => (
               <Button
@@ -228,13 +259,16 @@ export function AdminSalesReportPage() {
               onViewEvidence={setEvidenceItem}
             />
           )}
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-app-ink-muted">Trang {report.page}/{report.totalPages}</p>
-            <div className="flex gap-2">
-              <Button type="button" variant="outline" disabled={report.page <= 1} onClick={() => updateState({ ...state, page: state.page - 1 })}>Trang trước</Button>
-              <Button type="button" variant="outline" disabled={report.page >= report.totalPages} onClick={() => updateState({ ...state, page: state.page + 1 })}>Trang sau</Button>
-            </div>
-          </div>
+          </AdminDataPanel>
+          {report.totalPages > 1 ? (
+            <AdminPagination
+              page={report.page}
+              totalPages={report.totalPages}
+              disabled={loading}
+              itemLabel="báo cáo kinh doanh"
+              onPageChange={(nextPage) => updateState({ ...state, page: nextPage })}
+            />
+          ) : null}
         </>
       ) : null}
       <AdminSalesReviewDialog
