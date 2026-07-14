@@ -1,6 +1,8 @@
 import { ArrowRight, Calendar, Sparkles, Target } from "lucide-react";
 import { useMemo } from "react";
 import { Link } from "react-router";
+import { motion, useReducedMotion } from "motion/react";
+import { CountUp } from "@/app/components/ui/count-up";
 
 interface DashboardHeroProps {
   caption: string;
@@ -41,6 +43,7 @@ export function DashboardHero({
   planHref,
 }: DashboardHeroProps) {
   const safeProgress = clampPercent(progressPercent);
+  const reduceMotion = useReducedMotion() ?? false;
   const weekLabel = currentWeek ? `Tuần ${currentWeek} / ${totalWeeks}` : "Tuần -- / 12";
 
   const selectedQuote = useMemo(() => {
@@ -64,7 +67,7 @@ export function DashboardHero({
       className="grid w-full select-none gap-[18px] lg:grid-cols-[minmax(0,1fr)_324px]"
     >
       {/* Hero — layered forest panel */}
-      <div className="group/hero relative isolate overflow-hidden rounded-[26px] p-7 text-white shadow-app-lg ring-1 ring-inset ring-white/10 sm:p-9">
+      <div className="group/hero relative isolate overflow-hidden rounded-card-lg p-7 text-white shadow-app-lg ring-1 ring-inset ring-white/10 sm:p-9">
         {/* Nền gradient nhiều lớp (light + dark) */}
         <div
           aria-hidden="true"
@@ -130,7 +133,7 @@ export function DashboardHero({
       {/* Featured Goal focus card */}
       <div
         data-tour-id="dashboard-plan-card"
-        className="group/goal flex flex-col overflow-hidden rounded-[26px] border border-app-line bg-app-surface p-5 shadow-app-md transition-shadow duration-[var(--duration-base)] ease-[var(--ease-standard)] hover:shadow-app-lg"
+        className="group/goal flex flex-col overflow-hidden rounded-card-lg border border-app-line bg-app-surface p-5 shadow-app-md transition-shadow duration-[var(--duration-base)] ease-[var(--ease-standard)] hover:shadow-app-lg"
       >
         <p className="mb-3 flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-[0.14em] text-app-accent">
           <Target className="h-3.5 w-3.5" />
@@ -157,15 +160,19 @@ export function DashboardHero({
         <div className="mt-auto">
           <div className="mb-1.5 flex items-baseline justify-between">
             <span className="text-[11px] font-semibold uppercase tracking-wide text-app-ink-muted">Tiến độ chu kỳ</span>
-            <span className="font-mono text-sm font-bold tabular-nums text-app-accent">{safeProgress}%</span>
+            <span className="font-mono text-sm font-bold tabular-nums text-app-accent">
+              <CountUp value={safeProgress} suffix="%" />
+            </span>
           </div>
           <div
             className="mb-4 h-2 w-full overflow-hidden rounded-full bg-app-bg-subtle ring-1 ring-inset ring-app-line/60"
             aria-hidden="true"
           >
-            <div
-              className="h-full rounded-full bg-grad-aspire transition-[width] duration-[var(--duration-slow)] ease-[var(--ease-decelerate)]"
-              style={{ width: `${Math.max(safeProgress, 2)}%` }}
+            <motion.div
+              className="h-full rounded-full bg-grad-aspire"
+              initial={reduceMotion ? false : { width: "0%" }}
+              animate={{ width: `${Math.max(safeProgress, 2)}%` }}
+              transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
             />
           </div>
           <Link

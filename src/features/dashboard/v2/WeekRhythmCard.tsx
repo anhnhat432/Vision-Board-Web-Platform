@@ -52,7 +52,7 @@ const KPI_CARD_STYLES = {
   Tuần: { iconBg: "bg-app-accent-subtle text-app-accent" },
   "Tỷ lệ lead": { iconBg: "bg-app-accent-subtle text-app-accent" },
   Nhịp: { iconBg: "bg-app-accent-subtle text-app-accent" },
-  Chuỗi: { iconBg: "bg-[#FFEDE8] text-[#FF5C3E]" },
+  Chuỗi: { iconBg: "bg-app-energy/10 text-app-energy" },
 };
 
 function buildEmptyWeekDays(today: Date): WeekDayProgress[] {
@@ -100,7 +100,11 @@ function buildWeekDays(system: TwelveWeekSystem | null, currentWeek: number | nu
 
 function WeekProgressDay({ day }: { day: WeekDayProgress }) {
   const fillHeight = day.isFuture || day.total === 0 ? 0 : clamp(day.percent, 8, 100);
-  const fillColor = day.isToday ? "#C6F24E" : day.percent === 100 ? "#0C5E3A" : "rgba(12,94,58,0.4)";
+  const fillColor = day.isToday
+    ? "var(--app-accent)"
+    : day.percent === 100
+      ? "var(--app-accent-active)"
+      : "color-mix(in srgb, var(--app-accent) 40%, transparent)";
 
   return (
     <div className="flex flex-1 flex-col items-center gap-1.5 text-center">
@@ -180,7 +184,7 @@ export function WeekRhythmCard({
   return (
     <section
       data-testid="dashboard-kpi-row"
-      className="rounded-[20px] glass-panel glass-panel-hover p-[22px]"
+      className="rounded-card glass-panel glass-panel-hover p-[22px]"
       aria-labelledby="dashboard-week-rhythm-title"
     >
       <div className="mb-5 border-b border-app-line pb-3.5">
@@ -191,7 +195,7 @@ export function WeekRhythmCard({
           <Zap className="h-[15px] w-[15px] text-app-accent" />
           Nhịp tuần {safeWeek}
         </h2>
-        <p className="text-[12.5px] text-app-ink-soft">
+        <p className="text-[12px] leading-relaxed text-app-ink-soft">
           Đã hoàn thành <strong className="font-extrabold text-app-accent">{completedCount}</strong> trên tổng{" "}
           <strong className="font-extrabold text-app-ink">{totalCount}</strong> việc tuần này
         </p>
@@ -227,7 +231,7 @@ export function WeekRhythmCard({
         <div className="flex items-center gap-2.5">
           {days.map((day) => {
             const hasCheckIn = system?.dailyCheckIns?.some((c) => c.date === day.key && c.didWorkToday) ?? false;
-            const dotColor = day.isToday ? "#C6F24E" : hasCheckIn ? "#0C5E3A" : "#E2DED3";
+            const dotColor = day.isToday || hasCheckIn ? "var(--app-accent)" : "#E2DED3";
             const tooltipText = day.isFuture
               ? `${day.label}: Tương lai`
               : hasCheckIn
@@ -240,7 +244,7 @@ export function WeekRhythmCard({
                   className="h-[11px] w-[11px] rounded-full"
                   style={{
                     backgroundColor: dotColor,
-                    boxShadow: day.isToday ? "0 0 0 3px rgba(198,242,78,0.35)" : undefined,
+                    boxShadow: day.isToday ? "0 0 0 3px color-mix(in srgb, var(--app-accent) 35%, transparent)" : undefined,
                   }}
                   aria-hidden="true"
                 />

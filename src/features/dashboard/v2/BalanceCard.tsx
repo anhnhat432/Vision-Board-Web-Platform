@@ -28,7 +28,7 @@ const DEFAULT_STYLE = { bar: "#0C5E3A", icon: Activity, iconColor: "#0C5E3A", ic
 export function BalanceCard({ rows }: BalanceCardProps) {
   return (
     <section
-      className="rounded-[20px] glass-panel glass-panel-hover p-[22px]"
+      className="rounded-card glass-panel glass-panel-hover p-[22px]"
       aria-labelledby="dashboard-balance-title"
     >
       <div className="mb-4 border-b border-app-line pb-3.5">
@@ -51,7 +51,7 @@ export function BalanceCard({ rows }: BalanceCardProps) {
           return (
             <div key={row.label}>
               <div className="mb-[7px] flex items-center justify-between gap-3">
-                <span className="flex items-center gap-2 text-[12.5px] font-semibold text-app-ink">
+                <span className="flex items-center gap-2 text-[12px] font-semibold text-app-ink">
                   <span
                     className="flex size-6 items-center justify-center rounded-[7px]"
                     style={{ backgroundColor: style.iconBg, color: style.iconColor }}

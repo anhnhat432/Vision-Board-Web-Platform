@@ -152,6 +152,10 @@ function PublicVisitorFallback() {
 function getInitialSecondaryInsightsOpen(isDesktopViewport: boolean): boolean {
   if (typeof window === "undefined") return isDesktopViewport;
 
+  // Mobile: luôn thu gọn ban đầu để tránh section "Phân tích & nhịp độ" tràn
+  // ~2000px cuộn. Stored value chỉ áp dụng cho desktop (nơi có không gian dọc).
+  if (!isDesktopViewport) return false;
+
   try {
     const storedValue = window.localStorage.getItem(DASHBOARD_SECONDARY_INSIGHTS_OPEN_KEY);
     if (storedValue === "true") return true;
@@ -1278,33 +1282,27 @@ function DashboardActiveLayout({
 function FreeGoalLimitCard({ current, limit, onUpgrade }: { current: number; limit: number; onUpgrade: () => void }) {
   return (
     <section
-      className="mb-5 flex flex-col items-start gap-4 rounded-2xl border border-app-line bg-app-surface px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
+      className="mb-4 flex items-center gap-3 rounded-card border border-app-line bg-app-surface px-4 py-2.5"
       aria-label="Giới hạn gói Free"
     >
-      <div className="flex items-center gap-3.5">
-        <span
-          className="flex size-[38px] shrink-0 items-center justify-center rounded-[11px] bg-app-accent-subtle text-app-accent"
-          aria-hidden="true"
-        >
-          <Gem className="h-[19px] w-[19px]" />
-        </span>
-        <div>
-          <p className="text-[13.5px] font-bold text-app-ink">
-            Gói Free ·{" "}
-            <span className="font-mono text-app-accent">
-              {current}/{limit}
-            </span>{" "}
-            mục tiêu
-          </p>
-          <p className="mt-0.5 text-[12.5px] leading-relaxed text-app-ink-muted">
-            Nâng cấp Plus khi bạn cần tạo thêm mục tiêu mới. Dữ liệu cũ vẫn được giữ nguyên.
-          </p>
-        </div>
-      </div>
+      <span
+        className="flex size-7 shrink-0 items-center justify-center rounded-control bg-app-accent-subtle text-app-accent"
+        aria-hidden="true"
+      >
+        <Gem className="h-4 w-4" />
+      </span>
+      <p className="flex-1 text-[12.5px] font-semibold text-app-ink">
+        Gói Free ·{" "}
+        <span className="font-mono text-app-accent">
+          {current}/{limit}
+        </span>{" "}
+        mục tiêu
+        <span className="font-normal text-app-ink-muted"> — nâng cấp Plus để tạo thêm mục tiêu mới.</span>
+      </p>
       <button
         type="button"
         onClick={onUpgrade}
-        className="inline-flex min-h-11 shrink-0 items-center justify-center self-start rounded-full bg-app-ink px-5 py-2.5 text-[13px] font-semibold text-app-bg transition-all duration-200 hover:-translate-y-px active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:self-auto"
+        className="inline-flex min-h-9 shrink-0 items-center justify-center rounded-full bg-app-ink px-4 py-1.5 text-[12px] font-semibold text-app-bg transition-all duration-200 hover:-translate-y-px active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
       >
         Mở Plus
       </button>

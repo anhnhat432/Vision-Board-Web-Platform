@@ -132,7 +132,7 @@ export function DailyStoicCard() {
         {/* MẶT SAU THẺ BÀI (CARD BACK) - Nhìn thấy đầu tiên */}
         <button
           type="button"
-          className="absolute inset-0 flex h-full w-full flex-col items-center justify-between overflow-hidden rounded-[20px] bg-[#17150F] p-6 text-center text-white transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E7B400]/50"
+          className="absolute inset-0 flex h-full w-full flex-col items-center justify-between overflow-hidden rounded-card bg-[#17150F] p-6 text-center text-white transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#E7B400]/50"
           style={{
             backfaceVisibility: "hidden",
             WebkitBackfaceVisibility: "hidden",
@@ -174,7 +174,7 @@ export function DailyStoicCard() {
 
         {/* MẶT TRƯỚC THẺ BÀI (CARD FRONT) - Hiển thị sau khi lật */}
         <div
-          className="absolute inset-0 w-full h-full rounded-[20px] border border-app-line bg-app-surface text-app-ink p-5 flex flex-col justify-between shadow-app-md"
+          className="absolute inset-0 w-full h-full rounded-card border border-app-line bg-app-surface text-app-ink p-5 flex flex-col justify-between shadow-app-md"
           style={{
             backfaceVisibility: "hidden",
             WebkitBackfaceVisibility: "hidden",

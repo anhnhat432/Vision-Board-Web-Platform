@@ -52,7 +52,6 @@ const KNOWN_PREEXISTING_ALLOWLIST: readonly string[] = [
   "src/app/pages/SMARTGoalSetup/components/AnvilForgingEffect.tsx :: motion-duration :: duration-500",
   "src/app/pages/SMARTGoalSetup/components/QualityFeedbackPanel.tsx :: motion-duration :: duration-500",
   "src/app/pages/SMARTGoalSetup/components/SmartGoalHero.tsx :: motion-duration :: duration-500",
-  "src/features/dashboard/v2/ActiveGoalsCard.tsx :: motion-duration :: duration-500",
   "src/features/dashboard/v2/BalanceCard.tsx :: motion-duration :: duration-500",
   "src/features/dashboard/v2/DailyStoicCard.tsx :: motion-duration :: duration-700",
   "src/features/dashboard/v2/DreamToPlanPreview.tsx :: motion-duration :: duration-500",

@@ -87,7 +87,7 @@ export function TwelveWeekTrendCard({ points, currentWeek }: TwelveWeekTrendCard
 
   return (
     <section
-      className="rounded-[18px] border border-app-line bg-app-surface p-5 md:p-6 transition-all duration-300 hover:border-app-accent/20"
+      className="rounded-card border border-app-line bg-app-surface p-5 md:p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-app-accent/20 hover:shadow-app-md"
       aria-labelledby="dashboard-trend-title"
     >
       <div className="mb-5 border-b border-app-line pb-4">
@@ -98,7 +98,7 @@ export function TwelveWeekTrendCard({ points, currentWeek }: TwelveWeekTrendCard
           <TrendingUp className="h-[15px] w-[15px] text-app-accent" />
           Đường 12 tuần
         </h2>
-        <p className="text-[12.5px] text-app-ink-soft">Tiến độ % thực thi theo từng tuần</p>
+        <p className="text-[12px] leading-relaxed text-app-ink-soft">Tiến độ % thực thi theo từng tuần</p>
       </div>
 
       <div className="mt-5 h-[180px] overflow-hidden relative">
