@@ -126,4 +126,25 @@ describe("AdminRefundsPage resolve dialog", () => {
 
     expect(promptSpy).not.toHaveBeenCalled();
   });
+
+  it("uses a labelled data panel and keeps failed resolve feedback persistent", async () => {
+    const user = userEvent.setup();
+    adminServiceMock.adminCompleteRefundRequest.mockRejectedValueOnce(new Error("Bank transfer timeout"));
+    const { AdminRefundsPage } = await import("./AdminRefundsPage");
+
+    render(
+      <MemoryRouter>
+        <AdminRefundsPage />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByRole("region", { name: "Yêu cầu hoàn tiền đang chờ" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Đã hoàn tiền" }));
+    const dialog = await screen.findByRole("alertdialog", { name: "Xác nhận đã hoàn tiền?" });
+    await user.click(within(dialog).getByRole("button", { name: "Xác nhận đã hoàn tiền" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Bank transfer timeout");
+    expect(screen.getByRole("alertdialog", { name: "Xác nhận đã hoàn tiền?" })).toBeInTheDocument();
+    expect(within(dialog).getByText("VBREF00001")).toBeInTheDocument();
+  });
 });
