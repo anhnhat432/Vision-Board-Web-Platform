@@ -23,7 +23,7 @@ const response = {
   page: 1,
   limit: 30,
   total: 1,
-  totalPages: 1,
+  totalPages: 2,
   items: [{
     id: "sub-1",
     userId: "user-1",
@@ -67,5 +67,33 @@ describe("AdminSubscriptionsPage operational classification", () => {
       expect.objectContaining({ operationalScope: "excluded", page: 1, limit: 30 }),
     ));
     expect(await screen.findByText("Theo phân loại tài khoản")).toBeInTheDocument();
+  });
+
+  it("renders labelled filters, a named table, and shared pagination", async () => {
+    render(<AdminSubscriptionsPage />);
+
+    expect(await screen.findByRole("region", { name: "Bộ lọc subscription" })).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Trạng thái subscription" })).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Gói subscription" })).toBeInTheDocument();
+    expect(screen.getByRole("table", { name: "Danh sách subscription" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Phân loại" })).toHaveAttribute("scope", "col");
+    expect(screen.getByRole("navigation", { name: "Phân trang subscription" })).toBeInTheDocument();
+  });
+
+  it("retains safe subscription rows when refresh fails and retries the same view", async () => {
+    const user = userEvent.setup();
+    adminServiceMock.adminListSubscriptions
+      .mockResolvedValueOnce(response)
+      .mockRejectedValueOnce(new Error("Subscription timeout"))
+      .mockResolvedValueOnce(response);
+    render(<AdminSubscriptionsPage />);
+
+    expect(await screen.findByText("member@example.test")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Tải lại" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Subscription timeout");
+    expect(screen.getByText("member@example.test")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: "Thử lại" }));
+    await waitFor(() => expect(adminServiceMock.adminListSubscriptions).toHaveBeenCalledTimes(3));
   });
 });
