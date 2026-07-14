@@ -1,16 +1,26 @@
-import { ArrowLeft, Calendar, Loader2, MapPin, Package, Receipt, Tag, User } from "lucide-react";
+import { ArrowLeft, Calendar, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams, Link } from "react-router";
 import type { AdminClassificationMutationPayload, AdminOperationalClassificationSummary } from "@/services/adminService";
 import { type AdminApiOrder, adminClassifyPhysicalOrder, adminGetOrder } from "@/services/orderService";
+import { AdminDataPanel } from "../components/admin/AdminDataPanel";
+import { AdminFeedbackBanner } from "../components/admin/AdminFeedbackBanner";
 import { AdminOperationalClassificationBadge, getAdminOperationalClassificationSourceLabel } from "../components/admin/AdminOperationalClassificationBadge";
 import { AdminOperationalClassificationDialog } from "../components/admin/AdminOperationalClassificationDialog";
 import { AdminPageHeader } from "../components/admin/AdminPageHeader";
 import { AdminStatusBadge } from "../components/admin/AdminStatusBadge";
 import { ORDER_STATUS_LABELS, ORDER_STATUS_TONES } from "../components/admin/statusMappings";
-import { adminSurface } from "../components/admin/tokens";
 import { ADMIN_LOAD_TIMEOUT_MS, formatDate, formatVnd, getErrorMessage, withTimeout } from "../components/admin/utils";
 import { Button } from "../components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../components/ui/table";
 
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -177,8 +187,9 @@ export function AdminOrderDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-app-ink-soft" />
+      <div className="flex items-center justify-center gap-2 py-20" role="status">
+        <Loader2 className="h-6 w-6 animate-spin text-app-ink-soft motion-reduce:animate-none" aria-hidden="true" />
+        <span className="sr-only">Đang tải chi tiết đơn hàng</span>
       </div>
     );
   }
@@ -190,15 +201,18 @@ export function AdminOrderDetailPage() {
           to="/admin/orders"
           className="inline-flex items-center gap-1 text-sm text-app-ink-muted hover:text-app-ink"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           Quay lại danh sách
         </Link>
-        <div className="rounded-[var(--r-card)] border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-500/30 dark:bg-red-500/10">
-          {error || "Không tìm thấy đơn hàng."}
-          <Button type="button" variant="ghost" size="sm" className="ml-2 text-red-700 underline" onClick={() => void load()}>
-            Thử lại
-          </Button>
-        </div>
+        <AdminFeedbackBanner
+          tone="error"
+          summary={error || "Không tìm thấy đơn hàng."}
+          action={
+            <Button type="button" variant="outline" size="sm" onClick={() => void load()}>
+              Thử lại
+            </Button>
+          }
+        />
       </div>
     );
   }
@@ -206,6 +220,7 @@ export function AdminOrderDetailPage() {
   const frameLine = order.lines?.find((l) => l.type === "frame");
   const themeLines = order.lines?.filter((l) => l.type === "theme") ?? [];
   const stickerLines = order.lines?.filter((l) => l.type === "sticker") ?? [];
+  const visibleLines = [...(frameLine ? [frameLine] : []), ...themeLines, ...stickerLines];
   const shippingAddr = order.shippingAddress;
   const statusHistory = order.statusHistory ?? [];
 
@@ -215,7 +230,7 @@ export function AdminOrderDetailPage() {
         to="/admin/orders"
         className="inline-flex items-center gap-1 text-sm text-app-ink-muted hover:text-app-ink transition-colors"
       >
-        <ArrowLeft className="h-4 w-4" />
+        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         Quay lại danh sách
       </Link>
 
@@ -248,7 +263,7 @@ export function AdminOrderDetailPage() {
             </span>
             <span className="text-app-ink-muted">·</span>
             <span className="inline-flex items-center gap-1 text-xs text-app-ink-muted">
-              <Calendar className="h-3 w-3" />
+              <Calendar className="h-3 w-3" aria-hidden="true" />
               {formatDate(order.createdAt)}
             </span>
           </span>
@@ -256,14 +271,8 @@ export function AdminOrderDetailPage() {
       />
 
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Left column: Customer + Shipping + Notes */}
         <div className="lg:col-span-1 space-y-4">
-          {/* Customer Info */}
-          <div className={`${adminSurface.card} p-5 space-y-1`}>
-            <div className="flex items-center gap-2 mb-3">
-              <User className="h-4 w-4 text-app-ink-muted" />
-              <h3 className="text-sm font-semibold text-app-ink">Khách hàng</h3>
-            </div>
+          <AdminDataPanel title="Khách hàng" contentClassName="space-y-1 p-5">
             <InfoRow label="Họ tên" value={order.fullName} />
             <InfoRow
               label="Email"
@@ -281,24 +290,18 @@ export function AdminOrderDetailPage() {
                 </a>
               }
             />
-          </div>
+          </AdminDataPanel>
 
-          {/* Shipping Address */}
-          <div className={`${adminSurface.card} p-5 space-y-1`}>
-            <div className="flex items-center gap-2 mb-3">
-              <MapPin className="h-4 w-4 text-app-ink-muted" />
-              <h3 className="text-sm font-semibold text-app-ink">Địa chỉ giao hàng</h3>
-            </div>
+          <AdminDataPanel title="Địa chỉ giao hàng" contentClassName="p-5">
             <p className="text-sm text-app-ink leading-relaxed">
               {shippingAddr?.line1 || "—"}
               {shippingAddr?.line2 ? <><br />{shippingAddr.line2}</> : null}
               {shippingAddr?.city ? <><br />{shippingAddr.city}</> : null}
             </p>
-          </div>
+          </AdminDataPanel>
 
-          {/* Notes */}
           {(order.note || order.adminNote) ? (
-            <div className={`${adminSurface.card} p-5 space-y-3`}>
+            <AdminDataPanel title="Ghi chú" contentClassName="space-y-3 p-5">
               {order.note ? (
                 <div>
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-app-ink-muted/70 mb-1">
@@ -315,92 +318,53 @@ export function AdminOrderDetailPage() {
                   <p className="text-sm text-app-ink-soft leading-relaxed">{order.adminNote}</p>
                 </div>
               ) : null}
-            </div>
+            </AdminDataPanel>
           ) : null}
 
-          {/* Goal Snapshot */}
           {order.goalSnapshot?.title ? (
-            <div className={`${adminSurface.card} p-5 space-y-1`}>
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-app-ink-muted/70 mb-1">
-                Mục tiêu gắn kèm
-              </h3>
+            <AdminDataPanel title="Mục tiêu gắn kèm" contentClassName="p-5">
               <p className="text-sm text-app-ink-soft">{order.goalSnapshot.title}</p>
-            </div>
+            </AdminDataPanel>
           ) : null}
         </div>
 
-        {/* Right column: Line Items + Pricing + Timeline */}
         <div className="lg:col-span-2 space-y-4">
-          {/* Line Items */}
-          <div className={`${adminSurface.card} p-5`}>
-            <div className="flex items-center gap-2 mb-4">
-              <Package className="h-4 w-4 text-app-ink-muted" />
-              <h3 className="text-sm font-semibold text-app-ink">Sản phẩm trong đơn</h3>
-            </div>
+          <AdminDataPanel title="Sản phẩm trong đơn">
+            <Table containerClassName="rounded-none border-0 shadow-none" className="text-app-ink-soft">
+              <TableCaption className="sr-only">Sản phẩm trong đơn</TableCaption>
+              <TableHeader>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead scope="col">Loại</TableHead>
+                  <TableHead scope="col">Tên</TableHead>
+                  <TableHead scope="col" className="text-right">SL</TableHead>
+                  <TableHead scope="col" className="text-right">Đơn giá</TableHead>
+                  <TableHead scope="col" className="text-right">Thành tiền</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {visibleLines.map((line) => (
+                  <TableRow key={`${line.type}-${line.itemId}`}>
+                    <TableCell>
+                      <AdminStatusBadge tone="neutral">
+                        {line.type === "frame" ? "Khung" : line.type === "theme" ? "Ảnh" : "Sticker"}
+                      </AdminStatusBadge>
+                    </TableCell>
+                    <TableCell className="text-app-ink">{line.label}</TableCell>
+                    <TableCell className="text-right tabular-nums text-app-ink">{line.qty}</TableCell>
+                    <TableCell className="text-right tabular-nums text-app-ink-soft">
+                      {formatVnd(line.unitPriceVnd)}
+                    </TableCell>
+                    <TableCell className="text-right font-medium tabular-nums text-app-ink">
+                      {formatVnd(line.lineTotalVnd)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </AdminDataPanel>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr className="border-b border-app-line">
-                    <th className="pb-2 pr-3 font-medium text-app-ink-soft text-xs uppercase tracking-wider">Loại</th>
-                    <th className="pb-2 pr-3 font-medium text-app-ink-soft text-xs uppercase tracking-wider">Tên</th>
-                    <th className="pb-2 pr-3 font-medium text-app-ink-soft text-xs uppercase tracking-wider text-right">SL</th>
-                    <th className="pb-2 pr-3 font-medium text-app-ink-soft text-xs uppercase tracking-wider text-right">Đơn giá</th>
-                    <th className="pb-2 font-medium text-app-ink-soft text-xs uppercase tracking-wider text-right">Thành tiền</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-app-line/60">
-                  {frameLine ? (
-                    <tr>
-                      <td className="py-2.5 pr-3">
-                        <span className="inline-flex items-center rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400">
-                          Khung
-                        </span>
-                      </td>
-                      <td className="py-2.5 pr-3 text-app-ink">{frameLine.label}</td>
-                      <td className="py-2.5 pr-3 text-app-ink text-right">{frameLine.qty}</td>
-                      <td className="py-2.5 pr-3 text-app-ink-soft text-right">{formatVnd(frameLine.unitPriceVnd)}</td>
-                      <td className="py-2.5 text-app-ink font-medium text-right">{formatVnd(frameLine.lineTotalVnd)}</td>
-                    </tr>
-                  ) : null}
-                  {themeLines.map((line) => (
-                    <tr key={line.itemId}>
-                      <td className="py-2.5 pr-3">
-                        <span className="inline-flex items-center rounded-full bg-violet-500/10 px-2 py-0.5 text-xs font-medium text-violet-600 dark:text-violet-400">
-                          Ảnh
-                        </span>
-                      </td>
-                      <td className="py-2.5 pr-3 text-app-ink">{line.label}</td>
-                      <td className="py-2.5 pr-3 text-app-ink text-right">{line.qty}</td>
-                      <td className="py-2.5 pr-3 text-app-ink-soft text-right">{formatVnd(line.unitPriceVnd)}</td>
-                      <td className="py-2.5 text-app-ink font-medium text-right">{formatVnd(line.lineTotalVnd)}</td>
-                    </tr>
-                  ))}
-                  {stickerLines.map((line) => (
-                    <tr key={line.itemId}>
-                      <td className="py-2.5 pr-3">
-                        <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                          Sticker
-                        </span>
-                      </td>
-                      <td className="py-2.5 pr-3 text-app-ink">{line.label}</td>
-                      <td className="py-2.5 pr-3 text-app-ink text-right">{line.qty}</td>
-                      <td className="py-2.5 pr-3 text-app-ink-soft text-right">{formatVnd(line.unitPriceVnd)}</td>
-                      <td className="py-2.5 text-app-ink font-medium text-right">{formatVnd(line.lineTotalVnd)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Pricing Summary */}
-          <div className={`${adminSurface.card} p-5`}>
-            <div className="flex items-center gap-2 mb-4">
-              <Receipt className="h-4 w-4 text-app-ink-muted" />
-              <h3 className="text-sm font-semibold text-app-ink">Tổng tiền</h3>
-            </div>
-            <div className="space-y-2">
+          <AdminDataPanel title="Tổng tiền" contentClassName="p-5">
+            <div className="space-y-2 tabular-nums">
               <div className="flex justify-between text-sm">
                 <span className="text-app-ink-muted">Tạm tính</span>
                 <span className="text-app-ink">{formatVnd(order.subtotalVnd ?? 0)}</span>
@@ -427,15 +391,10 @@ export function AdminOrderDetailPage() {
                 <span className="font-bold text-app-ink">{formatVnd(order.totalVnd ?? 0)}</span>
               </div>
             </div>
-          </div>
+          </AdminDataPanel>
 
-          {/* Status Timeline */}
           {statusHistory.length > 0 ? (
-            <div className={`${adminSurface.card} p-5`}>
-              <div className="flex items-center gap-2 mb-4">
-                <Tag className="h-4 w-4 text-app-ink-muted" />
-                <h3 className="text-sm font-semibold text-app-ink">Lịch sử trạng thái</h3>
-              </div>
+            <AdminDataPanel title="Lịch sử trạng thái" contentClassName="p-5">
               <div className="ml-1">
                 {statusHistory.map((entry, index) => (
                   <TimelineEntry
@@ -447,14 +406,10 @@ export function AdminOrderDetailPage() {
                   />
                 ))}
               </div>
-            </div>
+            </AdminDataPanel>
           ) : null}
 
-          {/* Metadata */}
-          <div className={`${adminSurface.card} p-5`}>
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-app-ink-muted/70 mb-3">
-              Thông tin hệ thống
-            </h3>
+          <AdminDataPanel title="Thông tin hệ thống" contentClassName="p-5">
             <div className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
               <div>
                 <span className="text-app-ink-muted">Mã đơn:</span>{" "}
@@ -485,7 +440,7 @@ export function AdminOrderDetailPage() {
                 </div>
               ) : null}
             </div>
-          </div>
+          </AdminDataPanel>
         </div>
       </div>
 
