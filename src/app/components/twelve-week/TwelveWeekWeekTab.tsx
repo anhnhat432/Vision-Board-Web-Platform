@@ -432,6 +432,7 @@ export function TwelveWeekWeekTab({
             weekNo={selectedWeek}
             currentWeek={system.currentWeek}
             system={system}
+            onSelectWeek={setSelectedWeek}
           />
         </StaggerSection>
       ) : (

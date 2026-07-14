@@ -1,0 +1,33 @@
+# Week Tab UI Upgrade — Spec
+
+## Surface
+`src/app/components/twelve-week/TwelveWeekWeekTab.tsx` (shell) + sub-components:
+`WeeklyRail`, `WeeklyHeroBeforeReview`, `WeeklyReviewForm`, `WeeklyReviewSummary`, `WeeklyEmptyFuture`.
+
+Mixed surface (12-week execution = core product flow). UI-only; no storage/sync/auth/billing/entitlement changes.
+
+## Audit Findings (code-based)
+1. `WeeklyEmptyFuture` "Quay lại Tuần X" pill là `<span>` không có onClick — affordance chết. (line 57-60)
+2. `WeeklyReviewForm` step-progress connector lines: `.weekly-step-line` absolute, không có positioned ancestor, `left:(idx/4)*100%` lệch +12.5% so với tâm dot → lines không nối dot. (lines 237-254)
+3. `WeeklyReviewSummary` có "insights teaser" card cuối (line 331-343) — copy generic filler, không phải content thật, nằm sau next-week-recommendation CTA → dư.
+4. Score số lớn (hero/summary) dùng CSS pulse static, chưa có count-up (dashboard đã có → product inconsistency).
+5. Hero progress bar dùng `<Progress>` tĩnh, chưa có entrance motion (dashboard đã có motion.div → inconsistency).
+
+## Acceptance (EARS)
+- WHEN user views a future week, THE system SHALL make "Quay lại Tuần X" chọn tuần hiện tại khi click.
+- WHEN the step-progress renders, THE connector lines SHALL span giữa tâm hai dot kề nhau (không trôi tới ancestor sai).
+- WHEN a score number mounts into view, THE system SHALL count up from 0→value (trừ `prefers-reduced-motion`: hiển thị giá trị cuối ngay).
+- WHEN the hero progress bar mounts, THE fill SHALL animate width 0→target (trừ reduced-motion: tức thì).
+- WHERE the summary's next-week recommendation CTA exists, THE system SHALL NOT render filler "Góc nhìn tuần sau" card bên dưới.
+- WHERE tests assert `weekly-review-check-*` và `weekly-review-readiness`, THE system SHALL giữ nguyên testid + text.
+
+## Phases
+1. Correctness: WeeklyEmptyFuture pill → button onSelectWeek(currentWeek); WeeklyReviewForm stepper restructure (flex line giữa dot, bỏ absolute math).
+2. Focal + motion: CountUp trên 3 score (hero lead, form lead+lag, summary lead+lag); motion.div entrance trên hero progress bar (giữ shimmer class trên track).
+3. Declutter: xoá WeeklyReviewSummary "insights teaser" filler card.
+4. Verify: typecheck, lint, test:run, build.
+
+## Risks
+- Stepper restructure đụng JSX map → cần `Fragment` key; test không assert line structure → an toàn.
+- CountUp render `<span>` thay text → giữ className/serif token; `data-testid="weekly-lead-score"` phải nằm trên CountUp span để test `getByTestId`仍 pass.
+- motion.div thay `<Progress>` → giữ `weekly-progress-bar` shimmer trên track cha.

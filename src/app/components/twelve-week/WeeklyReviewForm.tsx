@@ -1,6 +1,8 @@
 import { Check, Loader2 } from "lucide-react";
+import { Fragment } from "react";
 import { interpretWeeklyExecutionScore } from "@/features/plan12week/logic";
 import { Button } from "../ui/button";
+import { CountUp } from "../ui/count-up";
 import { Label } from "../ui/label";
 import { Progress } from "../ui/progress";
 import { Textarea } from "../ui/textarea";
@@ -179,9 +181,12 @@ export function WeeklyReviewForm({
                   Chưa có việc
                 </span>
               ) : (
-                <span data-testid="weekly-lead-score" className="font-bold text-app-accent">
-                  {leadScoreValue}%
-                </span>
+                <CountUp
+                  data-testid="weekly-lead-score"
+                  value={leadScoreValue}
+                  suffix="%"
+                  className="font-bold text-app-accent"
+                />
               )}
             </div>
             {!weekCompletion.isEmpty && (
@@ -193,9 +198,12 @@ export function WeeklyReviewForm({
             <div className="flex flex-1 flex-col justify-between space-y-1.5 border-t border-app-line/30 pt-3 sm:border-l sm:border-t-0 sm:pl-6 sm:pt-0">
               <div className="flex items-baseline justify-between text-xs font-semibold text-app-ink-soft">
                 <span className="font-serif">Chỉ số kết quả</span>
-                <span data-testid="weekly-lag-score" className="font-bold text-app-ink">
-                  {lagScoreValue}%
-                </span>
+                <CountUp
+                  data-testid="weekly-lag-score"
+                  value={lagScoreValue ?? 0}
+                  suffix="%"
+                  className="font-bold text-app-ink"
+                />
               </div>
               <span className="min-w-0 break-words text-xs font-medium leading-snug text-app-ink-muted">
                 {system.lagMetric.name}: {lagMetricValue}
@@ -218,42 +226,43 @@ export function WeeklyReviewForm({
         </div>
 
         {/* Step Progress Indicator */}
-        <div className="px-1">
-          <div className="weekly-step-progress">
-            {reviewReadinessItems.map((item, idx) => {
-              const isFirstPending = !item.done && reviewReadinessItems.slice(0, idx).every((prev) => prev.done);
-              const isActive = isFirstPending;
-              const dotClass = item.done
-                ? "weekly-step-dot weekly-step-dot--done"
-                : isActive
-                  ? "weekly-step-dot weekly-step-dot--active"
-                  : "weekly-step-dot weekly-step-dot--pending";
-              const labelClass = item.done
-                ? "weekly-step-label weekly-step-label--done"
-                : isActive
-                  ? "weekly-step-label weekly-step-label--active"
-                  : "weekly-step-label";
+          <div className="px-1">
+            <div className="weekly-step-progress">
+              {reviewReadinessItems.map((item, idx) => {
+                const isFirstPending = !item.done && reviewReadinessItems.slice(0, idx).every((prev) => prev.done);
+                const isActive = isFirstPending;
+                const dotClass = item.done
+                  ? "weekly-step-dot weekly-step-dot--done"
+                  : isActive
+                    ? "weekly-step-dot weekly-step-dot--active"
+                    : "weekly-step-dot weekly-step-dot--pending";
+                const labelClass = item.done
+                  ? "weekly-step-label weekly-step-label--done"
+                  : isActive
+                    ? "weekly-step-label weekly-step-label--active"
+                    : "weekly-step-label";
 
-              return (
-                <div key={item.key} className="flex flex-1 flex-col items-center">
-                  {idx > 0 && (
-                    <div
-                      className={cn(
-                        "weekly-step-line absolute",
-                        reviewReadinessItems[idx - 1]?.done ? "weekly-step-line--done" : "",
-                      )}
-                      style={{ left: `${(idx / 4) * 100}%`, width: `${100 / 4}%`, top: "14px" }}
-                    />
-                  )}
-                  <div className={dotClass}>
-                    {item.done ? <Check className="h-3 w-3" /> : idx + 1}
-                  </div>
-                  <span className={cn(labelClass, "mt-1.5")}>{item.label}</span>
-                </div>
-              );
-            })}
+                return (
+                  <Fragment key={item.key}>
+                    {idx > 0 && (
+                      <div
+                        className={cn(
+                          "weekly-step-line",
+                          reviewReadinessItems[idx - 1]?.done ? "weekly-step-line--done" : "",
+                        )}
+                      />
+                    )}
+                    <div className="flex flex-col items-center">
+                      <div className={dotClass}>
+                        {item.done ? <Check className="h-3 w-3" /> : idx + 1}
+                      </div>
+                      <span className={cn(labelClass, "mt-1.5")}>{item.label}</span>
+                    </div>
+                  </Fragment>
+                );
+              })}
+            </div>
           </div>
-        </div>
 
         <TwelveWeekEmotionFlow system={system} currentWeekRange={currentWeekRange} currentWeek={currentWeekLimit} />
 
@@ -278,9 +287,11 @@ export function WeeklyReviewForm({
                     Chưa có việc trong tuần này
                   </span>
                 ) : (
-                  <span className="text-4xl font-serif font-extrabold text-app-accent leading-none">
-                    {leadScoreValue}%
-                  </span>
+                  <CountUp
+                    value={leadScoreValue}
+                    suffix="%"
+                    className="text-4xl font-serif font-extrabold text-app-accent leading-none"
+                  />
                 )}
                 {!weekCompletion.isEmpty && (
                   <div className="text-xs text-app-ink-soft leading-snug border-l border-app-line/60 pl-4 py-0.5">

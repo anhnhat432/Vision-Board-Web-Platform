@@ -5,9 +5,10 @@ interface WeeklyEmptyFutureProps {
   weekNo: number;
   currentWeek: number;
   system: TwelveWeekSystem;
+  onSelectWeek: (weekNo: number) => void;
 }
 
-export function WeeklyEmptyFuture({ weekNo, currentWeek, system }: WeeklyEmptyFutureProps) {
+export function WeeklyEmptyFuture({ weekNo, currentWeek, system, onSelectWeek }: WeeklyEmptyFutureProps) {
   const tasks = system.taskInstances.filter((t) => t.weekNumber === weekNo && !t.skipped);
 
   return (
@@ -54,10 +55,13 @@ export function WeeklyEmptyFuture({ weekNo, currentWeek, system }: WeeklyEmptyFu
         </div>
       )}
 
-      <div className="mt-8 inline-flex items-center gap-2 rounded-full bg-app-accent-soft/60 border border-app-line/20 px-4 py-2 text-xs font-semibold text-app-accent">
+      <button
+        type="button"
+        onClick={() => onSelectWeek(currentWeek)}
+        className="mt-8 inline-flex items-center gap-2 rounded-full bg-app-accent-soft/60 border border-app-line/20 px-4 py-2 text-xs font-semibold text-app-accent transition-colors duration-200 hover:bg-app-accent-soft weekly-btn-press"
+      >
         <Play className="h-3.5 w-3.5" />
         <span>Quay lại Tuần {currentWeek}</span>
-      </div>
-    </div>
+      </button>    </div>
   );
 }

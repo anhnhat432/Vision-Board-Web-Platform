@@ -1,6 +1,7 @@
-import { Check, Lightbulb, Pencil } from "lucide-react";
+import { Check, Pencil } from "lucide-react";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
+import { CountUp } from "../ui/count-up";
 import type { LeadIndicator, TwelveWeekSystem, UniversalWeeklyReview } from "../../utils/storage-types";
 import type { NextWeekRecommendation } from "@/features/plan12week/logic";
 import { getWorkloadDecisionLabel } from "../../utils/twelve-week-system-ui";
@@ -109,12 +110,12 @@ export function WeeklyReviewSummary({
               Điểm thực thi tuần
             </span>
             <div className="flex items-baseline gap-1">
-              <span
+              <CountUp
                 data-testid="weekly-lead-score"
+                value={summaryReview.leadCompletionPercent}
+                suffix="%"
                 className="weekly-score-animate font-serif text-5xl font-extrabold leading-none text-app-accent sm:text-6xl"
-              >
-                {summaryReview.leadCompletionPercent}%
-              </span>
+              />
             </div>
             <p className="text-xs text-app-ink-soft font-semibold mt-1">
               Hoàn thành {weekCompletion.completed}/{weekCompletion.total} việc cam kết.
@@ -130,7 +131,7 @@ export function WeeklyReviewSummary({
                 data-testid="weekly-lag-score"
                 className="font-serif text-4xl font-extrabold leading-none text-app-ink sm:text-5xl"
               >
-                {lagScoreValue}%
+                <CountUp value={lagScoreValue ?? 0} suffix="%" />
               </p>
               <p className="mt-1 break-words text-xs font-semibold leading-snug text-app-ink-soft">
                 {system.lagMetric.name}: <span className="font-bold text-app-ink">{lagMetricValue}</span>
@@ -327,20 +328,7 @@ export function WeeklyReviewSummary({
         </div>
       )}
 
-      {/* Insights teaser */}
-      <div className="rounded-card-lg border border-app-line/40 bg-app-surface p-4 shadow-xs weekly-card-lift">
-        <div className="flex items-start gap-3">
-          <div className="shrink-0 w-8 h-8 rounded-full bg-app-warm-soft flex items-center justify-center">
-            <Lightbulb className="h-4 w-4 text-app-warm" />
-          </div>
-          <div className="space-y-1">
-            <p className="text-sm font-semibold text-app-ink">Góc nhìn tuần sau</p>
-            <p className="text-xs text-app-ink-soft leading-relaxed max-w-[65ch]">
-              Dữ liệu tuần này sẽ giúp điều chỉnh tải việc và ưu tiên cho tuần tiếp theo. Bạn có thể xem lại bất cứ lúc nào.
-            </p>
-          </div>
-        </div>
-      </div>
+      {/* Insights teaser removed — filler non-content; next-week recommendation CTA above is the real closing. */}
     </div>
   );
 }

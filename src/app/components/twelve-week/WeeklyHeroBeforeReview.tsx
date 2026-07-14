@@ -1,4 +1,5 @@
 import { AlertCircle, Calendar, Target } from "lucide-react";
+import { CountUp } from "../ui/count-up";
 import { Progress } from "../ui/progress";
 import { cn } from "../ui/utils";
 import type { LeadIndicator } from "../../utils/storage-types";
@@ -153,12 +154,12 @@ export function WeeklyHeroBeforeReview({
                   </span>
                 ) : (
                   <div className="flex items-baseline gap-1">
-                    <span
+                    <CountUp
                       data-testid="weekly-lead-score"
+                      value={leadScoreValue}
+                      suffix="%"
                       className="weekly-score-animate font-serif text-6xl sm:text-7xl font-extrabold text-app-accent leading-none tracking-tighter"
-                    >
-                      {leadScoreValue}%
-                    </span>
+                    />
                   </div>
                 )}
               </div>
