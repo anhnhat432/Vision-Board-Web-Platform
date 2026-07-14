@@ -517,7 +517,9 @@ export function RootLayout() {
   const normalizedPathname = normalizePathname(location.pathname);
   const isPublicLanding = !user && normalizedPathname === "/";
   const suppressAutoWelcomeGuide =
-    normalizedPathname.startsWith("/vision-board") || normalizedPathname.startsWith("/gallery");
+    normalizedPathname.startsWith("/admin") ||
+    normalizedPathname.startsWith("/vision-board") ||
+    normalizedPathname.startsWith("/gallery");
   const commandPaletteGoals: CommandPaletteGoal[] = (guideUserData.goals ?? []).slice(0, 12).map((goal) => ({
     id: goal.id,
     title: goal.title || "Mục tiêu chưa đặt tên",
