@@ -12,19 +12,25 @@ import { AdminTopbar } from "./AdminTopbar";
 
 function AdminStatusCard({
   action,
+  announceStatus = false,
   description,
   icon,
   secondaryAction,
   title,
 }: {
   action?: ReactNode;
+  announceStatus?: boolean;
   description: string;
   icon: ReactNode;
   secondaryAction?: ReactNode;
   title: string;
 }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-app-bg px-4 py-10 text-app-ink">
+    <div
+      role={announceStatus ? "status" : undefined}
+      aria-live={announceStatus ? "polite" : undefined}
+      className="flex min-h-screen items-center justify-center bg-app-bg px-4 py-10 text-app-ink"
+    >
       <Card
         className="w-full max-w-md border-app-line text-app-ink shadow-lg backdrop-blur"
         style={{ backgroundColor: "var(--app-surface)" }}
@@ -73,6 +79,7 @@ export function AdminLayout() {
   if (authLoading) {
     return (
       <AdminStatusCard
+        announceStatus
         icon={
           <Loader2
             className="h-7 w-7 animate-spin text-app-ink-soft motion-reduce:animate-none"
@@ -92,6 +99,7 @@ export function AdminLayout() {
   if (userProfileLoading) {
     return (
       <AdminStatusCard
+        announceStatus
         icon={
           <Loader2
             className="h-7 w-7 animate-spin text-app-ink-soft motion-reduce:animate-none"
