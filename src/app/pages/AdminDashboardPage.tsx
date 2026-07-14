@@ -274,6 +274,7 @@ export function AdminDashboardPage() {
   const [reminderLoading, setReminderLoading] = useState(false);
   const [reminderResult, setReminderResult] =
     useState<AdminReminderRunResult | null>(null);
+  const [reminderError, setReminderError] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -303,6 +304,7 @@ export function AdminDashboardPage() {
   }, [authLoading, isAdmin, loadData, user, userProfileLoading]);
 
   const handleReminderRun = async () => {
+    setReminderError(null);
     setReminderLoading(true);
     try {
       const result = await adminSendExpiringBillingReminders({ daysAhead: 7 });
@@ -318,7 +320,7 @@ export function AdminDashboardPage() {
       );
       void loadData();
     } catch (err) {
-      toast.error(getErrorMessage(err, "Không thể gửi lời nhắc lúc này."));
+      setReminderError(getErrorMessage(err, "Không thể gửi lời nhắc lúc này."));
     } finally {
       setReminderLoading(false);
     }
@@ -436,6 +438,29 @@ export function AdminDashboardPage() {
         overview={overview}
         result={reminderResult}
       />
+
+      {reminderError ? (
+        <AdminFeedbackBanner
+          tone="error"
+          summary={
+            <div>
+              <p className="font-semibold">Không gửi được email nhắc hạn</p>
+              <p className="mt-1 font-normal">{reminderError}</p>
+            </div>
+          }
+          action={
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={reminderLoading}
+              onClick={() => void handleReminderRun()}
+            >
+              Thử gửi lại
+            </Button>
+          }
+        />
+      ) : null}
 
       {summary ? (
         <AdminDataPanel
