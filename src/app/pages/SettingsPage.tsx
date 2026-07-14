@@ -27,6 +27,7 @@ import { usePetPreferences } from "@/app/features/pet/usePetPreferences";
 import { useAutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { deleteAccount, exportAccountData } from "@/services/syncService";
+import { PageBackLink } from "../components/PageBackLink";
 import { PageHero } from "../components/layout/PageHero";
 import { ScreenGuide } from "../components/ScreenGuide";
 import { SCREEN_GUIDES } from "../components/screen-guides";
@@ -385,6 +386,7 @@ export function SettingsPage() {
   return (
     <div className="mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
       <ScreenGuide {...SCREEN_GUIDES.settings} autoOpen />
+      <PageBackLink href="/" label="Quay lại Trang chính" ariaLabel="Quay lại Trang chính" className="mb-3" />
       <PageHero
         className="page-enter"
         eyebrow="CÀI ĐẶT"

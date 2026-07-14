@@ -1,6 +1,7 @@
 import { HelpCircle, LifeBuoy } from "lucide-react";
 import { Link } from "react-router";
 import { AppPublicFooter } from "../components/layout/AppPublicFooter";
+import { PageBackLink } from "../components/PageBackLink";
 import { Card, CardContent, CardDescription, CardHeader } from "../components/ui/card";
 
 const SUPPORT_EMAIL = import.meta.env.VITE_BILLING_SUPPORT_EMAIL?.trim() || "support@dearourfuture.com";
@@ -33,6 +34,7 @@ const FAQ_ITEMS = [
 export function BillingFAQPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
+      <PageBackLink href="/billing/plan" label="Quay lại trang gói" ariaLabel="Quay lại trang gói" className="mb-3" />
       <Card className="overflow-hidden rounded-card border-app-line bg-app-surface">
         <CardHeader className="border-b border-app-line bg-app-bg">
           <div className="flex items-start gap-4">

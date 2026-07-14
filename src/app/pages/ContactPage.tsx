@@ -1,5 +1,6 @@
 import { Clock3, CreditCard, LifeBuoy, Mail, ShieldCheck } from "lucide-react";
 import { Link } from "react-router";
+import { PageBackLink } from "../components/PageBackLink";
 
 const SUPPORT_EMAIL = import.meta.env.VITE_BILLING_SUPPORT_EMAIL?.trim() || "support@dearourfuture.com";
 const SUPPORT_MAILTO = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("Dear Our Future support")}`;
@@ -25,6 +26,7 @@ const SUPPORT_TOPICS = [
 export function ContactPage() {
   return (
     <article className="mx-auto max-w-4xl space-y-section px-4 py-8 sm:px-6">
+      <PageBackLink fallback="/" className="mb-2" />
       <header className="surface-raised overflow-hidden rounded-card border border-app-line bg-app-surface p-card-pad sm:p-7">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
           <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-pill bg-app-accent-soft text-app-accent">

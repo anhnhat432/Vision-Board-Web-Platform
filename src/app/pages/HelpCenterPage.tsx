@@ -3,6 +3,7 @@ import { Eye, PenLine, Scale, Settings as SettingsIcon } from "lucide-react";
 import { Images, Palette } from "lucide-react";
 import { Link } from "react-router";
 import { AppPublicFooter } from "../components/layout/AppPublicFooter";
+import { PageBackLink } from "../components/PageBackLink";
 import { SCREEN_GUIDES } from "../components/screen-guides";
 
 const SUPPORT_EMAIL = import.meta.env.VITE_BILLING_SUPPORT_EMAIL?.trim() || "support@dearourfuture.com";
@@ -185,6 +186,7 @@ export function HelpCenterPage() {
   return (
     <div className="bg-app-bg">
       <div className="mx-auto max-w-3xl space-y-section px-4 py-8 sm:px-6">
+        <PageBackLink fallback="/" className="mb-2" />
         <header className="surface-raised overflow-hidden rounded-card border border-app-line bg-app-surface p-card-pad sm:p-7">
           <div className="flex items-start gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-pill bg-app-accent-soft text-app-accent">
