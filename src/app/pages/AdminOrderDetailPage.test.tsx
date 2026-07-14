@@ -60,4 +60,39 @@ describe("AdminOrderDetailPage operational classification", () => {
 
     expect(await screen.findByText("Mặc định dữ liệu thật")).toBeInTheDocument();
   });
+
+  it("renders labelled detail panels and an accessible line-item table", async () => {
+    orders.adminGetOrder.mockResolvedValue({
+      ...order,
+      lines: [
+        {
+          itemId: "frame-oak",
+          type: "frame",
+          label: "Khung gỗ sồi",
+          qty: 1,
+          unitPriceVnd: 99000,
+          lineTotalVnd: 99000,
+        },
+      ],
+    });
+    const { AdminOrderDetailPage } = await import("./AdminOrderDetailPage");
+    renderPage(AdminOrderDetailPage);
+
+    expect(await screen.findByRole("region", { name: "Khách hàng" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Sản phẩm trong đơn" })).toBeInTheDocument();
+    expect(screen.getByRole("table", { name: "Sản phẩm trong đơn" })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Thành tiền" })).toHaveAttribute("scope", "col");
+  });
+
+  it("shows a labelled retry state when the detail request fails", async () => {
+    orders.adminGetOrder.mockRejectedValueOnce(new Error("order detail offline"));
+    const { AdminOrderDetailPage } = await import("./AdminOrderDetailPage");
+    renderPage(AdminOrderDetailPage);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("order detail offline");
+    expect(screen.getByRole("link", { name: "Quay lại danh sách" })).toHaveAttribute(
+      "href",
+      "/admin/orders",
+    );
+  });
 });

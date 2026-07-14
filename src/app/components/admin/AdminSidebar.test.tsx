@@ -1,19 +1,41 @@
-import { describe, expect, it } from "vitest";
+import { render, screen, within } from "@testing-library/react";
+import { MemoryRouter } from "react-router";
+import { describe, expect, it, vi } from "vitest";
 
-import { getAdminNavItems } from "./AdminSidebar";
+import { AdminSidebar, getAdminNavGroups, getAdminNavItems } from "./AdminSidebar";
 
-describe("getAdminNavItems", () => {
-  it("shows the sales report exactly once in real mode and never in demo mode", () => {
-    const realModeSalesLinks = getAdminNavItems("real").filter(
-      (item) => item.label === "Báo cáo kinh doanh",
-    );
-    const demoModeSalesLinks = getAdminNavItems("demo").filter(
-      (item) => item.label === "Báo cáo kinh doanh",
-    );
-
-    expect(realModeSalesLinks).toEqual([
-      expect.objectContaining({ to: "/admin/reports/sales" }),
+describe("AdminSidebar", () => {
+  it("groups every real-mode destination in the approved order", () => {
+    expect(
+      getAdminNavGroups("real").map((group) => [
+        group.label,
+        group.items.map((item) => item.label),
+      ]),
+    ).toEqual([
+      ["Tổng quan", ["Tổng quan"]],
+      ["Khách hàng", ["Người dùng", "Subscription", "Email"]],
+      ["Kinh doanh", ["Báo cáo kinh doanh", "Thanh toán", "Hoàn tiền", "Giảm giá"]],
+      ["Vận hành", ["Đơn hàng", "Catalog"]],
+      ["Hệ thống", ["Cài đặt", "Audit Logs"]],
     ]);
-    expect(demoModeSalesLinks).toEqual([]);
+
+    expect(getAdminNavItems("demo").some((item) => item.to === "/admin/reports/sales")).toBe(false);
+  });
+
+  it("marks the current destination and shows pending counts", () => {
+    render(
+      <MemoryRouter initialEntries={["/admin/payments"]}>
+        <AdminSidebar
+          email="admin@example.test"
+          onLogout={vi.fn()}
+          pendingCounts={{ "/admin/payments": 3 }}
+        />
+      </MemoryRouter>,
+    );
+
+    expect(screen.getByRole("heading", { name: "Kinh doanh" })).toBeInTheDocument();
+    const paymentLink = screen.getByRole("link", { name: /Thanh toán/ });
+    expect(paymentLink).toHaveAttribute("aria-current", "page");
+    expect(within(paymentLink).getByText("3")).toBeInTheDocument();
   });
 });

@@ -8,12 +8,13 @@ import {
   adminListRefundRequests,
   adminRejectRefundRequest,
 } from "@/services/adminService";
+import { AdminDataPanel } from "../components/admin/AdminDataPanel";
 import { AdminEmptyState } from "../components/admin/AdminEmptyState";
+import { AdminFeedbackBanner } from "../components/admin/AdminFeedbackBanner";
 import { AdminPageHeader } from "../components/admin/AdminPageHeader";
 import { useAdminPendingCounts } from "../components/admin/AdminPendingCountsContext";
 import { AdminStatusBadge } from "../components/admin/AdminStatusBadge";
 import { REFUND_STATUS_LABELS, REFUND_STATUS_TONES } from "../components/admin/statusMappings";
-import { adminSurface } from "../components/admin/tokens";
 import { formatDate, getErrorMessage } from "../components/admin/utils";
 import {
   AlertDialog,
@@ -38,6 +39,7 @@ export function AdminRefundsPage() {
   const [items, setItems] = useState<AdminRefundRequestSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
 
   const [pending, setPending] = useState<{ request: AdminRefundRequestSummary; status: RefundActionStatus } | null>(
@@ -74,6 +76,7 @@ export function AdminRefundsPage() {
   }, [items.length, setRefundsPending]);
 
   const openConfirm = (request: AdminRefundRequestSummary, status: RefundActionStatus) => {
+    setActionError(null);
     setPending({ request, status });
     setAdminNote(status === "completed" ? "Đã chuyển khoản hoàn tiền thủ công." : "Không đủ điều kiện hoàn tiền.");
   };
@@ -97,7 +100,7 @@ export function AdminRefundsPage() {
       );
       void loadRefunds();
     } catch (err) {
-      toast.error(getErrorMessage(err, "Không thể xử lý yêu cầu hoàn tiền."));
+      setActionError(getErrorMessage(err, "Không thể xử lý yêu cầu hoàn tiền."));
     } finally {
       setBusyId(null);
     }
@@ -116,30 +119,58 @@ export function AdminRefundsPage() {
             disabled={loading}
             onClick={() => void loadRefunds()}
           >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+            {loading ? (
+              <Loader2
+                className="h-4 w-4 animate-spin motion-reduce:animate-none"
+                aria-hidden="true"
+              />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
             Tải lại
           </Button>
         }
       />
 
       {error ? (
-        <div className="rounded-[var(--r-card)] border border-rose-500/30 bg-rose-500/10 p-5 text-sm text-rose-200">
-          <p className="font-semibold">Không tải được yêu cầu hoàn tiền</p>
-          <p className="mt-1 leading-6 text-rose-100/80">{error}</p>
-          <Button
-            type="button"
-            variant="outline"
-            className="mt-4 border-app-line bg-app-bg-subtle text-app-ink hover:bg-app-accent-soft hover:text-app-ink"
-            onClick={() => void loadRefunds()}
-          >
-            Thử lại
-          </Button>
-        </div>
+        <AdminFeedbackBanner
+          tone="error"
+          summary={
+            <div>
+              <p className="font-semibold">Không tải được yêu cầu hoàn tiền</p>
+              <p className="mt-1 font-normal">{error}</p>
+            </div>
+          }
+          action={
+            <Button type="button" variant="outline" size="sm" onClick={() => void loadRefunds()}>
+              Thử lại
+            </Button>
+          }
+        />
       ) : null}
 
+      {actionError && pending === null ? (
+        <AdminFeedbackBanner
+          tone="error"
+          summary={actionError}
+          onDismiss={() => setActionError(null)}
+          dismissLabel="Đóng lỗi xử lý hoàn tiền"
+        />
+      ) : null}
+
+      <AdminDataPanel
+        title="Yêu cầu hoàn tiền đang chờ"
+        description="Đối chiếu lý do, tài khoản nhận tiền và ghi chú trước khi xác nhận."
+        busy={loading}
+        contentClassName="p-3 sm:p-4"
+      >
       {loading && items.length === 0 ? (
-        <div className="flex min-h-[40vh] items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-app-ink-muted" />
+        <div className="flex min-h-[40vh] items-center justify-center" role="status">
+          <Loader2
+            className="h-6 w-6 animate-spin text-app-ink-muted motion-reduce:animate-none"
+            aria-hidden="true"
+          />
+          <span className="sr-only">Đang tải yêu cầu hoàn tiền</span>
         </div>
       ) : items.length === 0 ? (
         <AdminEmptyState
@@ -150,8 +181,8 @@ export function AdminRefundsPage() {
       ) : (
         <ul className="space-y-3">
           {items.map((request) => (
-            <li key={request.id} className={`${adminSurface.card} p-5`}>
-              <div className="flex flex-wrap items-start justify-between gap-3">
+            <li key={request.id} className="rounded-[var(--r-card)] border border-app-line bg-app-surface p-4 sm:p-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="font-mono text-xs font-semibold text-app-ink">{request.orderId}</p>
@@ -163,7 +194,7 @@ export function AdminRefundsPage() {
                     {request.contactEmail} · tạo {formatDate(request.createdAt)}
                   </p>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
                   <Button
                     type="button"
                     size="sm"
@@ -171,14 +202,19 @@ export function AdminRefundsPage() {
                     disabled={busyId === request.id}
                     onClick={() => openConfirm(request, "completed")}
                   >
-                    {busyId === request.id ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : null}
+                    {busyId === request.id ? (
+                      <Loader2
+                        className="mr-1 h-3.5 w-3.5 animate-spin motion-reduce:animate-none"
+                        aria-hidden="true"
+                      />
+                    ) : null}
                     Đã hoàn tiền
                   </Button>
                   <Button
                     type="button"
                     size="sm"
                     variant="outline"
-                    className="border-rose-500/30 bg-rose-500/10 text-rose-200 hover:bg-rose-500/20 hover:text-rose-100"
+                    className="border-app-status-error/30 bg-app-status-error/10 text-app-status-error hover:bg-app-status-error/20 hover:text-app-status-error"
                     disabled={busyId === request.id}
                     onClick={() => openConfirm(request, "rejected")}
                   >
@@ -192,17 +228,18 @@ export function AdminRefundsPage() {
                   <p className="text-xs font-semibold uppercase tracking-wider text-app-ink-muted">Lý do user</p>
                   <p className="mt-1 text-sm leading-6 text-app-ink-soft">{request.reason}</p>
                 </div>
-                <div className="rounded-[var(--r-control)] border border-app-status-warning/30 bg-app-status-warning/10 p-3">
+                <div className="rounded-[var(--r-control)] border border-app-status-warning/40 bg-app-surface p-3">
                   <p className="text-xs font-semibold uppercase tracking-wider text-app-status-warning">
                     Tài khoản nhận hoàn tiền
                   </p>
-                  <p className="mt-1 text-sm leading-6 text-app-status-warning">{request.refundAccount}</p>
+                  <p className="mt-1 break-words text-sm font-medium leading-6 text-app-ink">{request.refundAccount}</p>
                 </div>
               </div>
             </li>
           ))}
         </ul>
       )}
+      </AdminDataPanel>
 
       <AlertDialog
         open={pending !== null}
@@ -222,6 +259,14 @@ export function AdminRefundsPage() {
               {pending?.request.contactEmail ?? "—"}
             </AlertDialogDescription>
           </AlertDialogHeader>
+          {actionError ? (
+            <AdminFeedbackBanner
+              tone="error"
+              summary={actionError}
+              onDismiss={() => setActionError(null)}
+              dismissLabel="Đóng lỗi xử lý hoàn tiền"
+            />
+          ) : null}
           <div className="grid gap-3">
             <div className="rounded-[var(--r-control)] bg-app-bg-subtle p-3">
               <p className="text-xs font-semibold uppercase tracking-wider text-app-ink-muted">Lý do user</p>

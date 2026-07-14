@@ -12,19 +12,25 @@ import { AdminTopbar } from "./AdminTopbar";
 
 function AdminStatusCard({
   action,
+  announceStatus = false,
   description,
   icon,
   secondaryAction,
   title,
 }: {
   action?: ReactNode;
+  announceStatus?: boolean;
   description: string;
   icon: ReactNode;
   secondaryAction?: ReactNode;
   title: string;
 }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-app-bg px-4 py-10 text-app-ink">
+    <div
+      role={announceStatus ? "status" : undefined}
+      aria-live={announceStatus ? "polite" : undefined}
+      className="flex min-h-screen items-center justify-center bg-app-bg px-4 py-10 text-app-ink"
+    >
       <Card
         className="w-full max-w-md border-app-line text-app-ink shadow-lg backdrop-blur"
         style={{ backgroundColor: "var(--app-surface)" }}
@@ -63,7 +69,7 @@ export function AdminLayout() {
   if (!isConfigured) {
     return (
       <AdminStatusCard
-        icon={<AlertTriangle className="h-7 w-7 text-amber-300" />}
+        icon={<AlertTriangle className="h-7 w-7 text-app-status-warning" />}
         title="Chưa cấu hình đăng nhập"
         description="Trang quản trị cần đăng nhập và máy chủ sản xuất để kiểm soát hệ thống."
       />
@@ -73,7 +79,13 @@ export function AdminLayout() {
   if (authLoading) {
     return (
       <AdminStatusCard
-        icon={<Loader2 className="h-7 w-7 animate-spin text-app-ink-soft" />}
+        announceStatus
+        icon={
+          <Loader2
+            className="h-7 w-7 animate-spin text-app-ink-soft motion-reduce:animate-none"
+            aria-hidden="true"
+          />
+        }
         title="Đang kiểm tra đăng nhập"
         description="Hệ thống đang xác thực phiên quản trị hiện tại."
       />
@@ -87,7 +99,13 @@ export function AdminLayout() {
   if (userProfileLoading) {
     return (
       <AdminStatusCard
-        icon={<Loader2 className="h-7 w-7 animate-spin text-app-ink-soft" />}
+        announceStatus
+        icon={
+          <Loader2
+            className="h-7 w-7 animate-spin text-app-ink-soft motion-reduce:animate-none"
+            aria-hidden="true"
+          />
+        }
         title="Đang tải quyền quản trị"
         description="Hệ thống đang kiểm tra hồ sơ và vai trò của tài khoản này."
       />
@@ -97,7 +115,7 @@ export function AdminLayout() {
   if (!userProfile) {
     return (
       <AdminStatusCard
-        icon={<AlertTriangle className="h-7 w-7 text-amber-300" />}
+        icon={<AlertTriangle className="h-7 w-7 text-app-status-warning" />}
         title="Không tải được hồ sơ"
         description={
           userProfileError ||
@@ -127,7 +145,7 @@ export function AdminLayout() {
   if (userProfile.role !== "admin") {
     return (
       <AdminStatusCard
-        icon={<AlertTriangle className="h-7 w-7 text-rose-300" />}
+        icon={<AlertTriangle className="h-7 w-7 text-app-status-error" />}
         title="Không có quyền quản trị"
         description="Tài khoản này chưa có quyền quản trị, hoặc hồ sơ chưa được làm mới sau khi bạn cập nhật quyền."
         action={
@@ -189,12 +207,8 @@ function AdminLayoutShell({
 
   return (
     <div className="min-h-screen bg-app-bg text-app-ink">
-      {/* Subtle dotted background texture */}
-      <div className="fixed inset-0 pointer-events-none opacity-[0.015] dark:opacity-[0.03]"
-        style={{ backgroundImage: "radial-gradient(circle, currentColor 1px, transparent 1px)", backgroundSize: "24px 24px" }}
-      />
-      <div className="relative flex min-h-screen">
-        <div className="hidden w-60 shrink-0 lg:block">
+      <div className="flex min-h-screen">
+        <div className="hidden w-64 shrink-0 border-r border-app-line lg:block">
           <div className="sticky top-0 h-screen">
             <AdminSidebar email={email} onLogout={onLogout} pendingCounts={pendingCounts} />
           </div>
@@ -213,7 +227,7 @@ function AdminLayoutShell({
 
         <div className="flex min-w-0 flex-1 flex-col">
           <AdminTopbar onOpenSidebar={() => onMobileOpenChange(true)} />
-          <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 lg:px-8">
+          <main className="mx-auto w-full max-w-[1600px] flex-1 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
             <Outlet />
           </main>
         </div>

@@ -110,8 +110,8 @@ export function AdminSalesReviewDialog({
             <Textarea id={REVIEW_NOTE_ID} value={reviewNote} onChange={(event) => setReviewNote(event.target.value)} />
           </label>
         </fieldset>
-        {validationError ? <p role="alert" className="text-sm text-rose-600">{validationError}</p> : null}
-        {error ? <p role="alert" className="text-sm text-rose-600">{error}</p> : null}
+        {validationError ? <p role="alert" className="text-sm text-app-status-error">{validationError}</p> : null}
+        {error ? <p role="alert" className="text-sm text-app-status-error">{error}</p> : null}
         <AlertDialogFooter>
           <AlertDialogCancel disabled={busy}>Hủy</AlertDialogCancel>
           <AlertDialogAction

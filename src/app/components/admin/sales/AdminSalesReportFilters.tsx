@@ -1,5 +1,6 @@
 import type { AdminSalesKpiStatus } from "@/services/adminService";
 
+import { AdminToolbar } from "../AdminToolbar";
 import { Button } from "../../ui/button";
 import { Input } from "../../ui/input";
 
@@ -91,7 +92,7 @@ export function AdminSalesReportFilters({
   };
 
   return (
-    <div className="grid gap-4 rounded-[var(--r-card)] border border-app-line bg-app-surface p-4 lg:grid-cols-[auto_1fr_1fr_1fr]">
+    <AdminToolbar label="Bộ lọc báo cáo kinh doanh" className="items-start lg:items-end">
       <fieldset>
         <legend className="mb-2 text-sm font-medium text-app-ink">Khoảng thời gian</legend>
         <div className="flex flex-wrap gap-2">
@@ -108,15 +109,15 @@ export function AdminSalesReportFilters({
           ))}
         </div>
       </fieldset>
-      <label htmlFor="sales-report-from" className="grid gap-2 text-sm font-medium text-app-ink">
+      <label htmlFor="sales-report-from" className="grid min-w-40 gap-2 text-sm font-medium text-app-ink">
         Từ ngày
         <Input id="sales-report-from" type="date" value={value.from} disabled={value.range !== "custom"} onChange={(event) => onChange({ ...value, from: event.target.value, page: 1 })} />
       </label>
-      <label htmlFor="sales-report-to" className="grid gap-2 text-sm font-medium text-app-ink">
+      <label htmlFor="sales-report-to" className="grid min-w-40 gap-2 text-sm font-medium text-app-ink">
         Đến ngày
         <Input id="sales-report-to" type="date" value={value.to} disabled={value.range !== "custom"} onChange={(event) => onChange({ ...value, to: event.target.value, page: 1 })} />
       </label>
-      <label className="grid gap-2 text-sm font-medium text-app-ink">
+      <label className="grid min-w-40 gap-2 text-sm font-medium text-app-ink">
         Provider
         <select
           value={value.provider}
@@ -127,6 +128,6 @@ export function AdminSalesReportFilters({
           {availableProviders.map((provider) => <option key={provider} value={provider}>{provider}</option>)}
         </select>
       </label>
-    </div>
+    </AdminToolbar>
   );
 }

@@ -6,7 +6,7 @@ import { createContext, type ReactNode, useCallback, useContext, useEffect, useM
  * Pages own the actual search state. They publish `{ value, placeholder, onChange }`
  * to this context via `useAdminSearch`. The topbar renders an input bound to
  * whichever handler is currently registered. When no page is registered, the
- * topbar shows a disabled stub.
+ * topbar omits the search control.
  */
 export interface AdminSearchHandler {
   value: string;
@@ -39,7 +39,7 @@ export function useAdminSearchSlot(): AdminSearchContextValue {
 
 /**
  * Page hook: bind the topbar search input to the page's local query state.
- * Pass `null` to opt out (topbar will fall back to disabled stub).
+ * Set `enabled` to false to opt out; the topbar omits the search control.
  */
 export function useAdminSearch(
   value: string,

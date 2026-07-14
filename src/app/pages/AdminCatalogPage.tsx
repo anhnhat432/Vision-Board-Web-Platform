@@ -4,14 +4,16 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/app/components/ui/button";
 import { Input } from "@/app/components/ui/input";
 import { Switch } from "@/app/components/ui/switch";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/app/components/ui/table";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/app/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/app/components/ui/tabs";
 import type { CatalogItem, CatalogItemType } from "@/features/order/catalog/types";
 import { formatVnd } from "@/features/order/lib/pricing";
 import { getApiBaseUrl } from "@/lib/api/apiClient";
 import { authedFetch } from "@/lib/auth/authedFetch";
 
+import { AdminDataPanel } from "../components/admin/AdminDataPanel";
 import { AdminEmptyState } from "../components/admin/AdminEmptyState";
+import { AdminFeedbackBanner } from "../components/admin/AdminFeedbackBanner";
 import { AdminPageHeader } from "../components/admin/AdminPageHeader";
 import { adminInput } from "../components/admin/tokens";
 
@@ -75,6 +77,7 @@ export function AdminCatalogPage() {
   }, [refresh]);
 
   async function updatePrice(itemId: string, priceVnd: number) {
+    setError(null);
     setSaving(itemId);
     const prev = items;
     setItems(items.map((i) => (i.itemId === itemId ? { ...i, priceVnd } : i)));
@@ -92,6 +95,7 @@ export function AdminCatalogPage() {
   }
 
   async function toggleActive(itemId: string, isActive: boolean) {
+    setError(null);
     setSaving(itemId);
     const prev = items;
     setItems(items.map((i) => (i.itemId === itemId ? { ...i, isActive } : i)));
@@ -155,111 +159,124 @@ export function AdminCatalogPage() {
 
   function renderTab(type: CatalogItemType) {
     const list = items.filter((i) => i.type === type).sort((a, b) => a.sortOrder - b.sortOrder);
-    if (list.length === 0) {
-      return (
-        <AdminEmptyState
-          icon={Package}
-          title="Chưa có item nào"
-          description={`Catalog ${TAB_LABELS[type]} chưa có item. Thêm item từ backend để bắt đầu.`}
-        />
-      );
-    }
 
     return (
-      <Table
-        containerClassName="rounded-[var(--r-card)] border-app-line bg-app-surface shadow-none"
-        className="text-app-ink-soft"
+      <AdminDataPanel
+        title={`Catalog ${TAB_LABELS[type]}`}
+        description={`${list.length.toLocaleString("vi-VN")} item`}
+        busy={loading}
       >
-        <TableHeader className="bg-app-bg-subtle [&_tr]:border-b [&_tr]:border-app-line">
-          <TableRow className="border-app-line hover:bg-transparent">
-            <TableHead className="text-app-ink-muted">Ảnh</TableHead>
-            <TableHead className="text-app-ink-muted">Item ID</TableHead>
-            <TableHead className="text-app-ink-muted">Tên</TableHead>
-            <TableHead className="text-app-ink-muted">Giá (đ)</TableHead>
-            <TableHead className="text-app-ink-muted">Trạng thái</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody className="divide-y divide-app-line">
-          {list.map((item) => (
-            <TableRow key={item.itemId} className="border-app-line hover:bg-app-bg-subtle">
-              <TableCell>
-                <div className="flex items-center gap-3">
-                  {item.thumbnail ? (
-                    <img
-                      src={item.thumbnail}
-                      alt={item.label}
-                      className="h-12 w-12 rounded-[var(--r-tile)] border border-app-line object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] border border-dashed border-app-line-strong bg-app-bg-subtle text-xs text-app-ink-muted">
-                      no img
+        {list.length === 0 ? (
+          <div className="p-4">
+            <AdminEmptyState
+              icon={Package}
+              title="Chưa có item nào"
+              description={`Catalog ${TAB_LABELS[type]} chưa có item. Thêm item từ backend để bắt đầu.`}
+            />
+          </div>
+        ) : (
+          <Table containerClassName="rounded-none border-0 shadow-none" className="text-app-ink-soft">
+            <TableCaption className="sr-only">Danh sách {TAB_LABELS[type]}</TableCaption>
+            <TableHeader>
+              <TableRow>
+                <TableHead scope="col">Ảnh</TableHead>
+                <TableHead scope="col">Item ID</TableHead>
+                <TableHead scope="col">Tên</TableHead>
+                <TableHead scope="col" className="text-right">
+                  Giá
+                </TableHead>
+                <TableHead scope="col">Trạng thái</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {list.map((item) => (
+                <TableRow key={item.itemId}>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      {item.thumbnail ? (
+                        <img
+                          src={item.thumbnail}
+                          alt={item.label}
+                          className="h-12 w-12 rounded-[var(--r-tile)] border border-app-line object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-12 w-12 items-center justify-center rounded-[var(--r-tile)] border border-dashed border-app-line-strong bg-app-bg-subtle text-xs text-app-ink-muted">
+                          Chưa có ảnh
+                        </div>
+                      )}
+                      <input
+                        ref={(el) => {
+                          fileInputs.current[item.itemId] = el;
+                        }}
+                        type="file"
+                        aria-label={`Tải ảnh cho ${item.label}`}
+                        accept="image/png,image/jpeg,image/webp"
+                        className="hidden"
+                        onChange={(event) => {
+                          const file = event.target.files?.[0];
+                          if (file) void uploadThumbnail(item.itemId, file);
+                        }}
+                      />
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        aria-label={`Đổi ảnh ${item.label}`}
+                        disabled={uploading === item.itemId}
+                        onClick={() => fileInputs.current[item.itemId]?.click()}
+                      >
+                        {uploading === item.itemId ? (
+                          <span className="inline-flex items-center gap-1">
+                            <Loader2
+                              className="h-3 w-3 animate-spin motion-reduce:animate-none"
+                              aria-hidden="true"
+                            />{" "}
+                            Đang upload…
+                          </span>
+                        ) : (
+                          "Đổi ảnh"
+                        )}
+                      </Button>
                     </div>
-                  )}
-                  <input
-                    ref={(el) => {
-                      fileInputs.current[item.itemId] = el;
-                    }}
-                    type="file"
-                    accept="image/png,image/jpeg,image/webp"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) void uploadThumbnail(item.itemId, file);
-                    }}
-                  />
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    className="border-app-line bg-app-bg-subtle text-app-ink-soft hover:bg-app-accent-soft hover:text-app-ink"
-                    disabled={uploading === item.itemId}
-                    onClick={() => fileInputs.current[item.itemId]?.click()}
-                  >
-                    {uploading === item.itemId ? (
-                      <span className="inline-flex items-center gap-1">
-                        <Loader2 className="h-3 w-3 animate-spin" /> Đang upload…
+                  </TableCell>
+                  <TableCell className="font-mono text-xs text-app-ink-soft">{item.itemId}</TableCell>
+                  <TableCell className="text-app-ink">{item.label}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center justify-end gap-2">
+                      <Input
+                        type="number"
+                        aria-label={`Giá ${item.label}`}
+                        className={`${adminInput} w-32 text-right tabular-nums`}
+                        defaultValue={item.priceVnd}
+                        disabled={saving === item.itemId}
+                        onBlur={(event) => {
+                          const value = Number(event.target.value);
+                          if (!Number.isFinite(value) || value < 0) return;
+                          if (value !== item.priceVnd) void updatePrice(item.itemId, value);
+                        }}
+                      />
+                      <span className="text-xs tabular-nums text-app-ink-muted">{formatVnd(item.priceVnd)}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="inline-flex items-center gap-2 text-xs">
+                      <Switch
+                        checked={item.isActive}
+                        disabled={saving === item.itemId}
+                        onCheckedChange={(checked) => void toggleActive(item.itemId, Boolean(checked))}
+                        aria-label={`${item.label}: ${item.isActive ? "đang bán" : "đã ẩn"}`}
+                      />
+                      <span className={item.isActive ? "text-app-accent" : "text-app-ink-muted"}>
+                        {item.isActive ? "Đang bán" : "Đã ẩn"}
                       </span>
-                    ) : (
-                      "Đổi ảnh"
-                    )}
-                  </Button>
-                </div>
-              </TableCell>
-              <TableCell className="font-mono text-xs text-app-ink-soft">{item.itemId}</TableCell>
-              <TableCell className="text-app-ink">{item.label}</TableCell>
-              <TableCell>
-                <div className="flex items-center gap-2">
-                  <Input
-                    type="number"
-                    className={`${adminInput} w-32`}
-                    defaultValue={item.priceVnd}
-                    disabled={saving === item.itemId}
-                    onBlur={(e) => {
-                      const v = Number(e.target.value);
-                      if (!Number.isFinite(v) || v < 0) return;
-                      if (v !== item.priceVnd) void updatePrice(item.itemId, v);
-                    }}
-                  />
-                  <span className="text-xs text-app-ink-muted">{formatVnd(item.priceVnd)}</span>
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className="inline-flex items-center gap-2 text-xs">
-                  <Switch
-                    checked={item.isActive}
-                    disabled={saving === item.itemId}
-                    onCheckedChange={(checked) => void toggleActive(item.itemId, Boolean(checked))}
-                    aria-label={`${item.label}: ${item.isActive ? "đang bán" : "đã ẩn"}`}
-                  />
-                  <span className={item.isActive ? "text-app-accent" : "text-app-ink-muted"}>
-                    {item.isActive ? "Đang bán" : "Đã ẩn"}
-                  </span>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </AdminDataPanel>
     );
   }
 
@@ -276,28 +293,50 @@ export function AdminCatalogPage() {
             disabled={loading}
             onClick={() => void refresh()}
           >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />
+            ) : (
+              <RefreshCw className="h-4 w-4" aria-hidden="true" />
+            )}
             Tải lại
           </Button>
         }
       />
 
       {error ? (
-        <div className="rounded-[var(--r-card)] border border-rose-500/30 bg-rose-500/10 p-4 text-sm text-rose-200">
-          {error}
-        </div>
+        <AdminFeedbackBanner
+          tone="error"
+          summary={error}
+          onDismiss={() => setError(null)}
+          dismissLabel="Đóng lỗi catalog"
+          action={
+            <Button type="button" variant="outline" size="sm" onClick={() => void refresh()}>
+              Thử lại
+            </Button>
+          }
+        />
       ) : null}
 
       {loading && items.length === 0 ? (
-        <div className="flex min-h-[40vh] items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-app-ink-muted" />
+        <div className="flex min-h-[40vh] items-center justify-center" role="status">
+          <Loader2
+            className="h-6 w-6 animate-spin text-app-ink-muted motion-reduce:animate-none"
+            aria-hidden="true"
+          />
+          <span className="sr-only">Đang tải catalog</span>
         </div>
       ) : (
         <Tabs defaultValue="frame">
-          <TabsList className="bg-app-bg-subtle">
-            <TabsTrigger value="frame">{TAB_LABELS.frame}</TabsTrigger>
-            <TabsTrigger value="theme">{TAB_LABELS.theme}</TabsTrigger>
-            <TabsTrigger value="sticker">{TAB_LABELS.sticker}</TabsTrigger>
+          <TabsList aria-label="Loại catalog" className="bg-app-bg-subtle">
+            <TabsTrigger value="frame">
+              {TAB_LABELS.frame} ({items.filter((item) => item.type === "frame").length})
+            </TabsTrigger>
+            <TabsTrigger value="theme">
+              {TAB_LABELS.theme} ({items.filter((item) => item.type === "theme").length})
+            </TabsTrigger>
+            <TabsTrigger value="sticker">
+              {TAB_LABELS.sticker} ({items.filter((item) => item.type === "sticker").length})
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="frame" className="mt-4">
             {renderTab("frame")}

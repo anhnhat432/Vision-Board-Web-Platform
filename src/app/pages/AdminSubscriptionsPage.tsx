@@ -7,12 +7,15 @@ import {
   type AdminSubscriptionListItem,
   adminListSubscriptions,
 } from "@/services/adminService";
+import { AdminDataPanel } from "../components/admin/AdminDataPanel";
 import { AdminOperationalClassificationBadge, getAdminOperationalClassificationSourceLabel } from "../components/admin/AdminOperationalClassificationBadge";
 import { AdminEmptyState } from "../components/admin/AdminEmptyState";
+import { AdminFeedbackBanner } from "../components/admin/AdminFeedbackBanner";
 import { AdminOperationalScopeFilter } from "../components/admin/AdminOperationalScopeFilter";
+import { AdminPagination } from "../components/admin/AdminPagination";
 import { AdminPageHeader } from "../components/admin/AdminPageHeader";
 import { AdminStatusBadge } from "../components/admin/AdminStatusBadge";
-import { adminSurface } from "../components/admin/tokens";
+import { AdminToolbar } from "../components/admin/AdminToolbar";
 import { formatDate, getErrorMessage } from "../components/admin/utils";
 import { Button } from "../components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
@@ -88,15 +91,25 @@ export function AdminSubscriptionsPage() {
         description={`${total.toLocaleString("vi-VN")} gói đăng ký`}
         actions={
           <Button type="button" variant="outline" className="gap-2 border-app-line bg-app-bg-subtle text-app-ink hover:bg-app-accent-soft" disabled={loading} onClick={() => void load(page, statusFilter, planFilter, operationalScope)}>
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+            {loading ? (
+              <Loader2
+                className="h-4 w-4 animate-spin motion-reduce:animate-none"
+                aria-hidden="true"
+              />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
             Tải lại
           </Button>
         }
       />
 
-      <div className="flex flex-wrap gap-3">
+      <AdminToolbar
+        label="Bộ lọc subscription"
+        meta={`${total.toLocaleString("vi-VN")} gói đăng ký`}
+      >
         <Select value={statusFilter} onValueChange={(v) => { setStatusFilter(v); setPage(1); }}>
-          <SelectTrigger className="w-44"><SelectValue placeholder="Trạng thái" /></SelectTrigger>
+          <SelectTrigger className="w-44" aria-label="Trạng thái subscription"><SelectValue placeholder="Trạng thái" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tất cả trạng thái</SelectItem>
             <SelectItem value="active">Đang hoạt động</SelectItem>
@@ -106,7 +119,7 @@ export function AdminSubscriptionsPage() {
           </SelectContent>
         </Select>
         <Select value={planFilter} onValueChange={(v) => { setPlanFilter(v); setPage(1); }}>
-          <SelectTrigger className="w-36"><SelectValue placeholder="Gói" /></SelectTrigger>
+          <SelectTrigger className="w-36" aria-label="Gói subscription"><SelectValue placeholder="Gói" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Tất cả gói</SelectItem>
             <SelectItem value="PLUS">Plus</SelectItem>
@@ -114,40 +127,60 @@ export function AdminSubscriptionsPage() {
           </SelectContent>
         </Select>
         <AdminOperationalScopeFilter value={operationalScope} onChange={(scope) => { setOperationalScope(scope); setPage(1); }} />
-      </div>
+      </AdminToolbar>
 
       {error ? (
-        <div className="rounded-[var(--r-card)] border border-rose-300 bg-rose-50 p-4 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10">
-          {error}
-          <Button type="button" variant="ghost" size="sm" className="ml-2 underline" onClick={() => void load(page, statusFilter, planFilter, operationalScope)}>Thử lại</Button>
-        </div>
+        <AdminFeedbackBanner
+          tone="error"
+          summary={
+            <div>
+              <p className="font-semibold">Không tải được danh sách subscription</p>
+              <p className="mt-1 font-normal">{error}</p>
+            </div>
+          }
+          action={
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => void load(page, statusFilter, planFilter, operationalScope)}
+            >
+              Thử lại
+            </Button>
+          }
+        />
       ) : null}
 
-      <div className={`${adminSurface.card} overflow-hidden`}>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+      <AdminDataPanel
+        title="Danh sách subscription"
+        description="Gói, trạng thái, chu kỳ, thời hạn và phân loại hiệu lực theo tài khoản."
+        busy={loading}
+        contentClassName="overflow-x-auto"
+      >
+          <table className="w-full min-w-[860px] text-left text-sm">
+            <caption className="sr-only">Danh sách subscription</caption>
             <thead>
               <tr className="border-b border-app-line bg-gradient-to-r from-app-bg-subtle/80 to-app-bg-subtle/40">
-                <th className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">User</th>
-                <th className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">Gói</th>
-                <th className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">Trạng thái</th>
-                <th className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">Chu kỳ</th>
-                <th className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">Hết hạn</th>
-                <th className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">Ngày tạo</th>
-                <th className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">Phân loại</th>
+                <th scope="col" className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">User</th>
+                <th scope="col" className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">Gói</th>
+                <th scope="col" className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">Trạng thái</th>
+                <th scope="col" className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">Chu kỳ</th>
+                <th scope="col" className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">Hết hạn</th>
+                <th scope="col" className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">Ngày tạo</th>
+                <th scope="col" className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">Phân loại</th>
               </tr>
             </thead>
             <tbody>
               {loading && items.length === 0 ? (
                 Array.from({ length: 5 }, (_, i) => `subscription-skeleton-${i}`).map((skeletonKey) => (
                   <tr key={skeletonKey}>
-                    <td className="px-4 py-3"><div className="h-4 w-32 animate-pulse rounded bg-app-accent-soft" /></td>
-                    <td className="px-4 py-3"><div className="h-4 w-12 animate-pulse rounded bg-app-accent-soft" /></td>
-                    <td className="px-4 py-3"><div className="h-5 w-20 animate-pulse rounded-full bg-app-accent-soft" /></td>
-                    <td className="px-4 py-3"><div className="h-4 w-16 animate-pulse rounded bg-app-accent-soft" /></td>
-                    <td className="px-4 py-3"><div className="h-4 w-24 animate-pulse rounded bg-app-accent-soft" /></td>
-                    <td className="px-4 py-3"><div className="h-4 w-20 animate-pulse rounded bg-app-accent-soft" /></td>
-                    <td className="px-4 py-3"><div className="h-4 w-28 animate-pulse rounded bg-app-accent-soft" /></td>
+                    <td className="px-4 py-3"><div className="h-4 w-32 animate-pulse rounded bg-app-accent-soft motion-reduce:animate-none" /></td>
+                    <td className="px-4 py-3"><div className="h-4 w-12 animate-pulse rounded bg-app-accent-soft motion-reduce:animate-none" /></td>
+                    <td className="px-4 py-3"><div className="h-5 w-20 animate-pulse rounded-full bg-app-accent-soft motion-reduce:animate-none" /></td>
+                    <td className="px-4 py-3"><div className="h-4 w-16 animate-pulse rounded bg-app-accent-soft motion-reduce:animate-none" /></td>
+                    <td className="px-4 py-3"><div className="h-4 w-24 animate-pulse rounded bg-app-accent-soft motion-reduce:animate-none" /></td>
+                    <td className="px-4 py-3"><div className="h-4 w-20 animate-pulse rounded bg-app-accent-soft motion-reduce:animate-none" /></td>
+                    <td className="px-4 py-3"><div className="h-4 w-28 animate-pulse rounded bg-app-accent-soft motion-reduce:animate-none" /></td>
                   </tr>
                 ))
               ) : items.length === 0 ? (
@@ -156,7 +189,7 @@ export function AdminSubscriptionsPage() {
                 items.map((sub) => {
                   const classification = getSubscriptionClassification(sub);
                   return (
-                  <tr key={sub.id} className="border-b border-app-line/50 last:border-0 hover:bg-app-accent-soft/20 transition-colors duration-100">
+                  <tr key={sub.id} className="border-b border-app-line/50 last:border-0 hover:bg-app-accent-soft/20 transition-colors duration-100 motion-reduce:transition-none">
                     <td className="px-4 py-3">
                       <p className="font-medium text-app-ink text-xs">{sub.userDisplayName || sub.userEmail}</p>
                       <p className="text-xs text-app-ink-muted">{sub.userEmail}</p>
@@ -184,17 +217,18 @@ export function AdminSubscriptionsPage() {
               )}
             </tbody>
           </table>
-        </div>
-      </div>
+      </AdminDataPanel>
 
       {totalPages > 1 ? (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-app-ink-muted">Trang {page} / {totalPages}</p>
-          <div className="flex gap-2">
-            <Button type="button" variant="outline" size="sm" disabled={page <= 1} onClick={() => void load(page - 1, statusFilter, planFilter, operationalScope)}>Trước</Button>
-            <Button type="button" variant="outline" size="sm" disabled={page >= totalPages} onClick={() => void load(page + 1, statusFilter, planFilter, operationalScope)}>Sau</Button>
-          </div>
-        </div>
+        <AdminPagination
+          page={page}
+          totalPages={totalPages}
+          disabled={loading}
+          itemLabel="subscription"
+          onPageChange={(nextPage) =>
+            void load(nextPage, statusFilter, planFilter, operationalScope)
+          }
+        />
       ) : null}
     </div>
   );

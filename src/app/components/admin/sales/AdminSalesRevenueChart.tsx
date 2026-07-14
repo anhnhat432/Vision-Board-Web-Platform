@@ -31,7 +31,7 @@ export function AdminSalesRevenueChart({ dailyBuckets }: { dailyBuckets: AdminSa
       </div>
       <table className="sr-only">
         <caption>Doanh thu theo ngày</caption>
-        <thead><tr><th>Ngày</th><th>Doanh thu gộp</th><th>Hoàn tiền</th><th>Doanh thu thuần</th></tr></thead>
+        <thead><tr><th scope="col">Ngày</th><th scope="col">Doanh thu gộp</th><th scope="col">Hoàn tiền</th><th scope="col">Doanh thu thuần</th></tr></thead>
         <tbody>
           {dailyBuckets.map((bucket) => (
             <tr key={bucket.date}>

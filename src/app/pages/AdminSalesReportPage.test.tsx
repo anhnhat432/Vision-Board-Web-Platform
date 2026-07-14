@@ -169,6 +169,43 @@ describe("AdminSalesReportPage", () => {
     expect(within(chartTable).getByText("0đ")).toBeInTheDocument();
   });
 
+  it("exposes labelled report filters, a named table, and shared pagination", async () => {
+    renderPage();
+
+    expect(await screen.findByRole("region", { name: "Bộ lọc báo cáo kinh doanh" })).toBeInTheDocument();
+    const table = screen.getByRole("table", { name: "Giao dịch trong báo cáo kinh doanh" });
+    expect(table).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Số tiền" })).toHaveAttribute("scope", "col");
+    expect(screen.getByRole("navigation", { name: "Phân trang báo cáo kinh doanh" })).toBeInTheDocument();
+  });
+
+  it("keeps export failure persistent and retries the active export", async () => {
+    const user = userEvent.setup();
+    adminServiceMock.adminExportSalesReport
+      .mockRejectedValueOnce(new Error("Export timeout"))
+      .mockResolvedValueOnce({
+        blob: new Blob(["orderId"], { type: "text/csv" }),
+        filename: "sales-report.csv",
+      });
+    Object.defineProperty(URL, "createObjectURL", {
+      configurable: true,
+      value: vi.fn(() => "blob:report"),
+    });
+    Object.defineProperty(URL, "revokeObjectURL", {
+      configurable: true,
+      value: vi.fn(),
+    });
+    vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => undefined);
+
+    renderPage();
+    await screen.findByText("Giao dịch thành công");
+    await user.click(screen.getByRole("button", { name: "Xuất CSV" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Export timeout");
+    await user.click(screen.getByRole("button", { name: "Thử xuất lại" }));
+    await waitFor(() => expect(adminServiceMock.adminExportSalesReport).toHaveBeenCalledTimes(2));
+  });
+
   it("shows a stored included review as effectively excluded by account classification", async () => {
     adminServiceMock.adminGetSalesReport.mockResolvedValue({
       ...report,

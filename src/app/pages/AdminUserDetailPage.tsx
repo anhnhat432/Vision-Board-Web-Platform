@@ -1,5 +1,5 @@
-import { ArrowLeft, ArrowUpCircle, CreditCard, Loader2, Package, Shield, Target, User as UserIcon } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowLeft, ArrowUpCircle, Loader2, Shield } from "lucide-react";
+import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { useParams, Link } from "react-router";
 import { toast } from "sonner";
 import {
@@ -11,10 +11,18 @@ import {
   adminUpdateUserRole,
   adminUpdateUserSubscription,
 } from "@/services/adminService";
+import { AdminDataPanel } from "../components/admin/AdminDataPanel";
+import { AdminFeedbackBanner } from "../components/admin/AdminFeedbackBanner";
 import { AdminOperationalClassificationBadge } from "../components/admin/AdminOperationalClassificationBadge";
 import { AdminOperationalClassificationDialog } from "../components/admin/AdminOperationalClassificationDialog";
 import { AdminPageHeader } from "../components/admin/AdminPageHeader";
-import { adminSurface } from "../components/admin/tokens";
+import { AdminStatusBadge } from "../components/admin/AdminStatusBadge";
+import {
+  ORDER_STATUS_LABELS,
+  ORDER_STATUS_TONES,
+  PAYMENT_STATUS_LABELS,
+  PAYMENT_STATUS_TONES,
+} from "../components/admin/statusMappings";
 import { ADMIN_LOAD_TIMEOUT_MS, formatDate, formatVnd, getErrorMessage, withTimeout } from "../components/admin/utils";
 import {
   AlertDialog,
@@ -27,8 +35,17 @@ import {
   AlertDialogTitle,
 } from "../components/ui/alert-dialog";
 import { Button } from "../components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../components/ui/table";
 
-function InfoRow({ label, value }: { label: string; value: string | null | undefined }) {
+function InfoRow({ label, value }: { label: string; value: ReactNode }) {
   return (
     <div className="flex items-start justify-between gap-4 py-2">
       <span className="text-xs text-app-ink-muted">{label}</span>
@@ -45,9 +62,11 @@ export function AdminUserDetailPage() {
   const [roleUpdating, setRoleUpdating] = useState(false);
   const [roleConfirmOpen, setRoleConfirmOpen] = useState(false);
   const [pendingRole, setPendingRole] = useState<"user" | "admin" | null>(null);
+  const [roleError, setRoleError] = useState<string | null>(null);
   const [subUpdating, setSubUpdating] = useState(false);
   const [subConfirmOpen, setSubConfirmOpen] = useState(false);
   const [pendingPlanCode, setPendingPlanCode] = useState<"PLUS" | "FREE" | null>(null);
+  const [subscriptionError, setSubscriptionError] = useState<string | null>(null);
   const [classificationOpen, setClassificationOpen] = useState(false);
   const [classificationBusy, setClassificationBusy] = useState(false);
   const [classificationError, setClassificationError] = useState<string | undefined>();
@@ -98,6 +117,7 @@ export function AdminUserDetailPage() {
 
   const handleToggleRole = () => {
     if (!data) return;
+    setRoleError(null);
     setPendingRole(data.user.role === "admin" ? "user" : "admin");
     setRoleConfirmOpen(true);
   };
@@ -105,12 +125,16 @@ export function AdminUserDetailPage() {
   const handleRoleDialogChange = (open: boolean) => {
     if (roleUpdating) return;
     setRoleConfirmOpen(open);
-    if (!open) setPendingRole(null);
+    if (!open) {
+      setPendingRole(null);
+      setRoleError(null);
+    }
   };
 
   const handleRoleChange = async () => {
     if (!data || !uid || !pendingRole) return;
 
+    setRoleError(null);
     setRoleUpdating(true);
     try {
       const res = await adminUpdateUserRole(uid, pendingRole);
@@ -119,7 +143,9 @@ export function AdminUserDetailPage() {
       setRoleConfirmOpen(false);
       setPendingRole(null);
     } catch (err) {
-      toast.error(getErrorMessage(err, "Không thể cập nhật vai trò."));
+      const message = getErrorMessage(err, "Không thể cập nhật vai trò.");
+      setRoleError(message);
+      toast.error(message);
     } finally {
       setRoleUpdating(false);
     }
@@ -128,6 +154,7 @@ export function AdminUserDetailPage() {
   const handleSubscriptionChange = async () => {
     if (!data || !uid || !pendingPlanCode) return;
     setSubConfirmOpen(false);
+    setSubscriptionError(null);
     setSubUpdating(true);
     try {
       const res = await adminUpdateUserSubscription(uid, {
@@ -136,7 +163,9 @@ export function AdminUserDetailPage() {
       setData(res);
       toast.success(pendingPlanCode === "PLUS" ? "Đã nâng lên gói Plus." : "Đã hạ về gói Free.");
     } catch (err) {
-      toast.error(getErrorMessage(err, "Không thể thay đổi gói dịch vụ."));
+      const message = getErrorMessage(err, "Không thể thay đổi gói dịch vụ.");
+      setSubscriptionError(message);
+      toast.error(message);
     } finally {
       setSubUpdating(false);
       setPendingPlanCode(null);
@@ -144,6 +173,7 @@ export function AdminUserDetailPage() {
   };
 
   const openSubConfirm = (planCode: "PLUS" | "FREE") => {
+    setSubscriptionError(null);
     setPendingPlanCode(planCode);
     setSubConfirmOpen(true);
   };
@@ -201,8 +231,9 @@ export function AdminUserDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 className="h-6 w-6 animate-spin text-app-ink-soft" />
+      <div className="flex items-center justify-center gap-2 py-20" role="status">
+        <Loader2 className="h-6 w-6 animate-spin text-app-ink-soft motion-reduce:animate-none" aria-hidden="true" />
+        <span className="sr-only">Đang tải thông tin người dùng</span>
       </div>
     );
   }
@@ -214,21 +245,18 @@ export function AdminUserDetailPage() {
           to="/admin/users"
           className="inline-flex items-center gap-1 text-sm text-app-ink-muted hover:text-app-ink"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
           Quay lại danh sách
         </Link>
-        <div className="rounded-[var(--r-card)] border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-          {error || "Không tìm thấy người dùng."}
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="ml-2 text-red-700 underline"
-            onClick={() => void load()}
-          >
-            Thử lại
-          </Button>
-        </div>
+        <AdminFeedbackBanner
+          tone="error"
+          summary={error || "Không tìm thấy người dùng."}
+          action={
+            <Button type="button" variant="outline" size="sm" onClick={() => void load()}>
+              Thử lại
+            </Button>
+          }
+        />
       </div>
     );
   }
@@ -243,9 +271,9 @@ export function AdminUserDetailPage() {
     <div className="space-y-6">
       <Link
         to="/admin/users"
-        className="inline-flex items-center gap-1 text-sm text-app-ink-muted hover:text-app-ink transition-colors"
+        className="inline-flex items-center gap-1 text-sm text-app-ink-muted transition-colors hover:text-app-ink motion-reduce:transition-none"
       >
-        <ArrowLeft className="h-4 w-4" />
+        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         Quay lại danh sách
       </Link>
 
@@ -262,7 +290,11 @@ export function AdminUserDetailPage() {
               disabled={roleUpdating}
               onClick={handleToggleRole}
             >
-              {roleUpdating ? <Loader2 className="h-3 w-3 animate-spin" /> : <Shield className="h-3 w-3" />}
+              {roleUpdating ? (
+                <Loader2 className="h-3 w-3 animate-spin motion-reduce:animate-none" aria-hidden="true" />
+              ) : (
+                <Shield className="h-3 w-3" aria-hidden="true" />
+              )}
               {user.role === "admin" ? "Gỡ quyền Admin" : "Cấp quyền Admin"}
             </Button>
             <Button
@@ -282,6 +314,14 @@ export function AdminUserDetailPage() {
         }
       />
 
+      {subscriptionError ? (
+        <AdminFeedbackBanner
+          tone="error"
+          summary={subscriptionError}
+          onDismiss={() => setSubscriptionError(null)}
+        />
+      ) : null}
+
       <AlertDialog open={roleConfirmOpen} onOpenChange={handleRoleDialogChange}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -292,6 +332,7 @@ export function AdminUserDetailPage() {
                 : `Xác nhận gỡ quyền Admin của ${user.email}. Người này sẽ mất quyền truy cập quản trị.`}
             </AlertDialogDescription>
           </AlertDialogHeader>
+          {roleError ? <AdminFeedbackBanner tone="error" summary={roleError} /> : null}
           <AlertDialogFooter>
             <AlertDialogCancel disabled={roleUpdating}>Hủy</AlertDialogCancel>
             <AlertDialogAction
@@ -306,7 +347,9 @@ export function AdminUserDetailPage() {
                 void handleRoleChange();
               }}
             >
-              {roleUpdating ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : null}
+              {roleUpdating ? (
+                <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin motion-reduce:animate-none" aria-hidden="true" />
+              ) : null}
               {pendingRole === "admin" ? "Cấp quyền Admin" : "Gỡ quyền Admin"}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -332,22 +375,13 @@ export function AdminUserDetailPage() {
       />
 
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* User Info Card */}
-        <div className={`${adminSurface.card} p-5 space-y-1`}>
-          <div className="flex items-center gap-2 mb-3">
-            <UserIcon className="h-4 w-4 text-app-ink-muted" />
-            <h3 className="text-sm font-semibold text-app-ink">Thông tin cá nhân</h3>
-          </div>
+        <AdminDataPanel title="Thông tin cá nhân" contentClassName="space-y-1 p-5">
           <InfoRow label="Email" value={user.email} />
           <InfoRow label="Tên hiển thị" value={user.displayName} />
           <InfoRow label="Vai trò" value={user.role === "admin" ? "Admin" : "User"} />
           <div className="flex items-center justify-between gap-4 py-2">
             <span className="text-xs text-app-ink-muted">Phân loại vận hành</span>
-            {operationalClassification.effectiveCategory === "real" ? (
-              <span className="text-sm text-app-ink">Dữ liệu thật</span>
-            ) : (
-              <AdminOperationalClassificationBadge classification={operationalClassification} />
-            )}
+            <AdminOperationalClassificationBadge classification={operationalClassification} />
           </div>
           <InfoRow label="Ngôn ngữ" value={user.locale} />
           <InfoRow
@@ -359,18 +393,16 @@ export function AdminUserDetailPage() {
             value={user.termsAcceptedAt ? formatDate(user.termsAcceptedAt) : "Chưa"}
           />
           <InfoRow label="Ngày tạo" value={formatDate(user.createdAt)} />
-        </div>
+        </AdminDataPanel>
 
-        {/* Subscription Card */}
-        <div className={`${adminSurface.card} p-5 space-y-1`}>
-          <div className="flex items-center gap-2 mb-3">
-            <CreditCard className="h-4 w-4 text-app-ink-muted" />
-            <h3 className="text-sm font-semibold text-app-ink">Gói dịch vụ</h3>
-          </div>
+        <AdminDataPanel title="Gói dịch vụ" contentClassName="space-y-1 p-5">
           {subscription ? (
             <>
               <InfoRow label="Gói" value={subscription.planCode} />
-              <InfoRow label="Trạng thái" value={subscription.status} />
+              <InfoRow
+                label="Trạng thái"
+                value={<AdminStatusBadge tone="neutral">{subscription.status}</AdminStatusBadge>}
+              />
               <InfoRow label="Nhà cung cấp" value={subscription.provider} />
               <InfoRow label="Chu kỳ" value={subscription.billingCycle} />
               <InfoRow
@@ -381,21 +413,20 @@ export function AdminUserDetailPage() {
           ) : (
             <p className="text-sm text-app-ink-muted">Chưa có gói dịch vụ nào.</p>
           )}
-          {/* Upgrade/Downgrade buttons */}
           <div className="mt-4 pt-3 border-t border-app-line">
             {subscription?.planCode === "PLUS" ? (
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                className="w-full gap-1.5 border-app-line text-app-ink-muted hover:bg-rose-50 hover:text-rose-600 hover:border-rose-300 dark:hover:bg-rose-500/10 dark:hover:text-rose-400 dark:hover:border-rose-500/30 transition-colors duration-150"
+                className="w-full gap-1.5 border-app-line text-app-ink-muted transition-colors duration-150 hover:border-app-status-error/30 hover:bg-app-status-error/10 hover:text-app-status-error motion-reduce:transition-none"
                 disabled={subUpdating}
                 onClick={() => openSubConfirm("FREE")}
               >
                 {subUpdating ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  <Loader2 className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" aria-hidden="true" />
                 ) : (
-                  <ArrowUpCircle className="h-3.5 w-3.5 rotate-180" />
+                  <ArrowUpCircle className="h-3.5 w-3.5 rotate-180" aria-hidden="true" />
                 )}
                 Hạ về gói Free
               </Button>
@@ -404,22 +435,21 @@ export function AdminUserDetailPage() {
                 type="button"
                 variant="default"
                 size="sm"
-                className="w-full gap-1.5 bg-app-accent text-white shadow-sm hover:bg-app-accent-hover transition-colors duration-150"
+                className="w-full gap-1.5 bg-app-accent text-white shadow-sm transition-colors duration-150 hover:bg-app-accent-hover motion-reduce:transition-none"
                 disabled={subUpdating}
                 onClick={() => openSubConfirm("PLUS")}
               >
                 {subUpdating ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  <Loader2 className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" aria-hidden="true" />
                 ) : (
-                  <ArrowUpCircle className="h-3.5 w-3.5" />
+                  <ArrowUpCircle className="h-3.5 w-3.5" aria-hidden="true" />
                 )}
                 Nâng lên gói Plus
               </Button>
             )}
           </div>
-        </div>
+        </AdminDataPanel>
 
-        {/* Subscription Confirm Dialog */}
         <AlertDialog open={subConfirmOpen} onOpenChange={setSubConfirmOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
@@ -443,19 +473,16 @@ export function AdminUserDetailPage() {
                 }
                 onClick={() => void handleSubscriptionChange()}
               >
-                {subUpdating ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : null}
+                {subUpdating ? (
+                  <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin motion-reduce:animate-none" aria-hidden="true" />
+                ) : null}
                 {pendingPlanCode === "PLUS" ? "Nâng lên Plus" : "Hạ về Free"}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
 
-        {/* Goals Summary Card */}
-        <div className={`${adminSurface.card} p-5 space-y-3`}>
-          <div className="flex items-center gap-2">
-            <Target className="h-4 w-4 text-app-ink-muted" />
-            <h3 className="text-sm font-semibold text-app-ink">Mục tiêu ({goals.length})</h3>
-          </div>
+        <AdminDataPanel title={`Mục tiêu (${goals.length})`} contentClassName="space-y-3 p-5">
           {goals.length === 0 ? (
             <p className="text-sm text-app-ink-muted">Chưa có mục tiêu nào.</p>
           ) : (
@@ -464,111 +491,97 @@ export function AdminUserDetailPage() {
                 <div key={goal.id} className="rounded-[var(--r-control)] border border-app-line p-3">
                   <p className="text-sm font-medium text-app-ink truncate">{goal.title}</p>
                   <div className="mt-1 flex items-center gap-2 text-xs text-app-ink-muted">
-                    <span className="rounded bg-app-bg-subtle px-1.5 py-0.5">{goal.category}</span>
-                    <span
-                      className={`rounded px-1.5 py-0.5 ${
-                        goal.status === "active"
-                          ? "bg-emerald-500/15 text-emerald-300"
-                          : goal.status === "completed"
-                            ? "bg-app-accent-soft text-app-accent"
-                            : "bg-app-bg-subtle text-app-ink-muted"
-                      }`}
+                    <AdminStatusBadge tone="neutral">{goal.category}</AdminStatusBadge>
+                    <AdminStatusBadge
+                      tone={goal.status === "completed" ? "completed" : goal.status === "active" ? "pending" : "neutral"}
                     >
-                      {goal.status}
-                    </span>
+                      {goal.status === "completed"
+                        ? "Hoàn thành"
+                        : goal.status === "active"
+                          ? "Đang thực hiện"
+                          : goal.status}
+                    </AdminStatusBadge>
                     {goal.readinessScore != null && <span>Score: {goal.readinessScore}</span>}
                   </div>
                 </div>
               ))}
             </div>
           )}
-        </div>
+        </AdminDataPanel>
       </div>
 
-      {/* Payment Orders */}
-      <div className={`${adminSurface.card} p-5`}>
-        <div className="flex items-center gap-2 mb-3">
-          <CreditCard className="h-4 w-4 text-app-ink-muted" />
-          <h3 className="text-sm font-semibold text-app-ink">Lịch sử thanh toán ({paymentOrders.length})</h3>
-        </div>
+      <AdminDataPanel title={`Lịch sử thanh toán (${paymentOrders.length})`}>
         {paymentOrders.length === 0 ? (
-          <p className="text-sm text-app-ink-muted">Chưa có thanh toán nào.</p>
+          <p className="p-5 text-sm text-app-ink-muted">Chưa có thanh toán nào.</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-app-line">
-                  <th className="pb-2 pr-4 font-medium text-app-ink-soft">Mã đơn</th>
-                  <th className="pb-2 pr-4 font-medium text-app-ink-soft">Gói</th>
-                  <th className="pb-2 pr-4 font-medium text-app-ink-soft">Số tiền</th>
-                  <th className="pb-2 pr-4 font-medium text-app-ink-soft">Trạng thái</th>
-                  <th className="pb-2 font-medium text-app-ink-soft">Ngày tạo</th>
-                </tr>
-              </thead>
-              <tbody>
+          <Table containerClassName="rounded-none border-0 shadow-none" className="text-app-ink-soft">
+            <TableCaption className="sr-only">Lịch sử thanh toán</TableCaption>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead scope="col">Mã đơn</TableHead>
+                <TableHead scope="col">Gói</TableHead>
+                <TableHead scope="col" className="text-right">Số tiền</TableHead>
+                <TableHead scope="col">Trạng thái</TableHead>
+                <TableHead scope="col">Ngày tạo</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
                 {paymentOrders.map((po) => (
-                  <tr key={po.orderId} className="border-b border-app-line last:border-0">
-                    <td className="py-2 pr-4 text-app-ink font-mono text-xs">{po.orderId}</td>
-                    <td className="py-2 pr-4 text-app-ink-soft">{po.planCode}</td>
-                    <td className="py-2 pr-4 text-app-ink">{formatVnd(po.amount)}</td>
-                    <td className="py-2 pr-4">
-                      <span
-                        className={`inline-flex items-center rounded-[var(--r-pill)] border px-2 py-0.5 text-xs font-medium ${
-                          po.status === "completed"
-                            ? "bg-app-accent-soft text-app-accent border-app-accent/30"
-                            : po.status === "pending"
-                              ? "bg-amber-500/15 text-amber-200 border-amber-500/30"
-                              : "bg-app-bg-subtle text-app-ink-soft border-app-line-strong"
-                        }`}
+                  <TableRow key={po.orderId}>
+                    <TableCell className="font-mono text-xs text-app-ink">{po.orderId}</TableCell>
+                    <TableCell>{po.planCode}</TableCell>
+                    <TableCell className="text-right tabular-nums text-app-ink">
+                      {formatVnd(po.amount)}
+                    </TableCell>
+                    <TableCell>
+                      <AdminStatusBadge
+                        tone={PAYMENT_STATUS_TONES[po.status as keyof typeof PAYMENT_STATUS_TONES] ?? "neutral"}
                       >
-                        {po.status}
-                      </span>
-                    </td>
-                    <td className="py-2 text-app-ink-muted text-xs">{formatDate(po.createdAt)}</td>
-                  </tr>
+                        {PAYMENT_STATUS_LABELS[po.status as keyof typeof PAYMENT_STATUS_LABELS] ?? po.status}
+                      </AdminStatusBadge>
+                    </TableCell>
+                    <TableCell className="text-xs text-app-ink-muted">{formatDate(po.createdAt)}</TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
+            </TableBody>
+          </Table>
         )}
-      </div>
+      </AdminDataPanel>
 
-      {/* Physical Orders */}
       {physicalOrders.length > 0 ? (
-        <div className={`${adminSurface.card} p-5`}>
-          <div className="flex items-center gap-2 mb-3">
-            <Package className="h-4 w-4 text-app-ink-muted" />
-            <h3 className="text-sm font-semibold text-app-ink">Đơn hàng vật lý ({physicalOrders.length})</h3>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-app-line">
-                  <th className="pb-2 pr-4 font-medium text-app-ink-soft">Mã đơn</th>
-                  <th className="pb-2 pr-4 font-medium text-app-ink-soft">Người nhận</th>
-                  <th className="pb-2 pr-4 font-medium text-app-ink-soft">Tổng tiền</th>
-                  <th className="pb-2 pr-4 font-medium text-app-ink-soft">Trạng thái</th>
-                  <th className="pb-2 font-medium text-app-ink-soft">Ngày tạo</th>
-                </tr>
-              </thead>
-              <tbody>
+        <AdminDataPanel title={`Đơn hàng vật lý (${physicalOrders.length})`}>
+          <Table containerClassName="rounded-none border-0 shadow-none" className="text-app-ink-soft">
+            <TableCaption className="sr-only">Đơn hàng vật lý</TableCaption>
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead scope="col">Mã đơn</TableHead>
+                <TableHead scope="col">Người nhận</TableHead>
+                <TableHead scope="col" className="text-right">Tổng tiền</TableHead>
+                <TableHead scope="col">Trạng thái</TableHead>
+                <TableHead scope="col">Ngày tạo</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
                 {physicalOrders.map((o) => (
-                  <tr key={o.id} className="border-b border-app-line last:border-0">
-                    <td className="py-2 pr-4 text-app-ink font-mono text-xs">{o.id.slice(-8)}</td>
-                    <td className="py-2 pr-4 text-app-ink-soft">{o.fullName}</td>
-                    <td className="py-2 pr-4 text-app-ink">{formatVnd(o.totalVnd)}</td>
-                    <td className="py-2 pr-4">
-                      <span className="inline-flex items-center rounded-[var(--r-pill)] border px-2 py-0.5 text-xs font-medium bg-app-bg-subtle text-app-ink-soft border-app-line-strong">
-                        {o.status}
-                      </span>
-                    </td>
-                    <td className="py-2 text-app-ink-muted text-xs">{formatDate(o.createdAt)}</td>
-                  </tr>
+                  <TableRow key={o.id}>
+                    <TableCell className="font-mono text-xs text-app-ink">{o.id}</TableCell>
+                    <TableCell>{o.fullName}</TableCell>
+                    <TableCell className="text-right tabular-nums text-app-ink">
+                      {formatVnd(o.totalVnd)}
+                    </TableCell>
+                    <TableCell>
+                      <AdminStatusBadge
+                        tone={ORDER_STATUS_TONES[o.status as keyof typeof ORDER_STATUS_TONES] ?? "neutral"}
+                      >
+                        {ORDER_STATUS_LABELS[o.status as keyof typeof ORDER_STATUS_LABELS] ?? o.status}
+                      </AdminStatusBadge>
+                    </TableCell>
+                    <TableCell className="text-xs text-app-ink-muted">{formatDate(o.createdAt)}</TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+            </TableBody>
+          </Table>
+        </AdminDataPanel>
       ) : null}
     </div>
   );

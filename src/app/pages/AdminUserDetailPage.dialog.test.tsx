@@ -2,6 +2,10 @@ import { fireEvent, render, screen, waitFor, within } from "@testing-library/rea
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes, useNavigate } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type {
+  AdminPhysicalOrderSummary,
+  AdminUserPaymentOrderSummary,
+} from "@/services/adminService";
 
 Object.defineProperty(HTMLElement.prototype, "hasPointerCapture", {
   configurable: true,
@@ -25,6 +29,7 @@ vi.mock("@/services/adminService", () => ({
   adminUpdateUserRole: adminServiceMock.adminUpdateUserRole,
   adminUpdateUserSubscription: adminServiceMock.adminUpdateUserSubscription,
 }));
+vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
 function makeUserDetail(role: "user" | "admin" = "user", firebaseUid = "user_1") {
   const now = new Date().toISOString();
@@ -44,8 +49,8 @@ function makeUserDetail(role: "user" | "admin" = "user", firebaseUid = "user_1")
     },
     subscription: null,
     goals: [],
-    paymentOrders: [],
-    physicalOrders: [],
+    paymentOrders: [] as AdminUserPaymentOrderSummary[],
+    physicalOrders: [] as AdminPhysicalOrderSummary[],
   };
 }
 
@@ -67,6 +72,7 @@ async function renderPage(withNavigationControls = false) {
 
 describe("AdminUserDetailPage role confirmation", () => {
   beforeEach(() => {
+    vi.resetAllMocks();
     vi.resetModules();
     adminServiceMock.adminGetUserDetail.mockResolvedValue(makeUserDetail("user"));
     adminServiceMock.adminClassifyUsers.mockResolvedValue({
@@ -96,7 +102,7 @@ describe("AdminUserDetailPage role confirmation", () => {
 
     expect(await screen.findByRole("heading", { name: "User 1" })).toBeInTheDocument();
     const classificationRow = screen.getByText("Phân loại vận hành").parentElement;
-    expect(within(classificationRow as HTMLElement).getByText("Dữ liệu thật")).toBeInTheDocument();
+    expect(within(classificationRow as HTMLElement).getByText(/Dữ liệu thật/)).toBeInTheDocument();
   });
 
   it("uses an in-app dialog and cancels without calling the role API", async () => {
@@ -153,7 +159,7 @@ describe("AdminUserDetailPage role confirmation", () => {
     await user.click(screen.getByRole("button", { name: "Xác nhận phân loại" }));
 
     const classificationRow = screen.getByText("Phân loại vận hành").parentElement;
-    expect(within(classificationRow as HTMLElement).getByText("Dữ liệu thật")).toBeInTheDocument();
+    expect(within(classificationRow as HTMLElement).getByText(/Dữ liệu thật/)).toBeInTheDocument();
     expect(adminServiceMock.adminGetUserDetail).toHaveBeenCalledTimes(1);
     resolveClassification(classificationResult);
 
@@ -200,5 +206,68 @@ describe("AdminUserDetailPage role confirmation", () => {
     expect(adminServiceMock.adminClassifyUsers.mock.calls[1][0].changes).toEqual(
       adminServiceMock.adminClassifyUsers.mock.calls[0][0].changes,
     );
+  });
+
+  it("renders named user panels and accessible history tables", async () => {
+    const detail = makeUserDetail("user");
+    detail.paymentOrders = [
+      {
+        orderId: "pay-1",
+        planCode: "PLUS",
+        billingCycle: "twelve_weeks",
+        amount: 99000,
+        currency: "VND",
+        status: "completed",
+        provider: "payos",
+        createdAt: detail.user.createdAt,
+        operationalClassification: { effectiveCategory: "real", source: "default" },
+      },
+    ];
+    detail.physicalOrders = [
+      {
+        id: "physical-1",
+        status: "pending",
+        totalVnd: 149000,
+        fullName: "User 1",
+        createdAt: detail.user.createdAt,
+        operationalClassification: { effectiveCategory: "real", source: "default" },
+      },
+    ];
+    adminServiceMock.adminGetUserDetail.mockResolvedValueOnce(detail);
+
+    await renderPage();
+
+    expect(await screen.findByRole("region", { name: "Thông tin cá nhân" })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: "Gói dịch vụ" })).toBeInTheDocument();
+    expect(screen.getByRole("table", { name: "Lịch sử thanh toán" })).toBeInTheDocument();
+    expect(screen.getByRole("table", { name: "Đơn hàng vật lý" })).toBeInTheDocument();
+  });
+
+  it("keeps role failure visible inside the confirmation dialog", async () => {
+    const user = userEvent.setup();
+    adminServiceMock.adminUpdateUserRole.mockRejectedValueOnce(new Error("role update failed"));
+    await renderPage();
+    await user.click(await screen.findByRole("button", { name: /Cấp quyền Admin/ }));
+    const dialog = await screen.findByRole("alertdialog", { name: "Cấp quyền Admin?" });
+
+    await user.click(within(dialog).getByRole("button", { name: "Cấp quyền Admin" }));
+
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent("role update failed");
+    expect(dialog).toBeInTheDocument();
+  });
+
+  it("keeps subscription failure persistent after the existing dialog closes", async () => {
+    const user = userEvent.setup();
+    adminServiceMock.adminUpdateUserSubscription.mockRejectedValueOnce(
+      new Error("subscription update failed"),
+    );
+    await renderPage();
+    await user.click(await screen.findByRole("button", { name: "Nâng lên gói Plus" }));
+    const dialog = await screen.findByRole("alertdialog", { name: "Nâng lên gói Plus?" });
+
+    await user.click(within(dialog).getByRole("button", { name: "Nâng lên Plus" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("subscription update failed");
+    expect(screen.queryByRole("alertdialog", { name: "Nâng lên gói Plus?" })).not.toBeInTheDocument();
   });
 });
