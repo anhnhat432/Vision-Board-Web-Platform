@@ -527,7 +527,7 @@ export function SmartGoalStepShell({
           </summary>
           <div className="mt-4 grid gap-3 border-t border-app-line pt-4 sm:grid-cols-2 lg:grid-cols-3">
             {SMART_STEPS.map((stepItem) => (
-              <div key={stepItem.key} className="rounded-[11px] border border-app-line bg-app-bg-subtle p-3.5 text-xs">
+              <div key={stepItem.key} className="rounded-control border border-app-line bg-app-bg-subtle p-3.5 text-xs">
                 <p className="mb-1 text-[11px] font-extrabold text-app-accent">{stepItem.label}</p>
                 <p className="break-words leading-relaxed text-app-ink-soft">
                   {formatStepDraft(stepItem.key, smartData) || "Chưa có nội dung..."}

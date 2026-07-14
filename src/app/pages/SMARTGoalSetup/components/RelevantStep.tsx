@@ -166,7 +166,7 @@ export function RelevantStep({
         ) : null}
       </div>
 
-      <div className="rounded-[14px] border border-app-line bg-app-accent-subtle/20 p-3.5 space-y-3">
+      <div className="rounded-card border border-app-line bg-app-accent-subtle/20 p-3.5 space-y-3">
         <div>
           <p className="text-[11px] font-semibold text-app-accent mb-2 flex items-center gap-1.5 select-none">
             <Heart className="h-3.5 w-3.5" aria-hidden="true" /> Gợi ý lý do nhanh

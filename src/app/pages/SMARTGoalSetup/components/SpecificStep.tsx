@@ -245,7 +245,7 @@ export function SpecificStep({
                   }));
                   setHasBlurredGoalStatement(true);
                 }}
-                  className="min-h-11 rounded-[14px] border border-app-line bg-app-surface px-3 py-2 text-left text-xs font-semibold leading-5 text-app-ink-soft transition-all duration-150 hover:border-app-accent/30 hover:bg-app-surface hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/35"
+                  className="min-h-11 rounded-card border border-app-line bg-app-surface px-3 py-2 text-left text-xs font-semibold leading-5 text-app-ink-soft transition-all duration-150 hover:border-app-accent/30 hover:bg-app-surface hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/35"
               >
                   {suggestion}
               </button>
@@ -315,7 +315,7 @@ export function SpecificStep({
       </details>
 
       {intentArchetype && intentArchetype !== "other" ? (
-        <div className="rounded-[14px] border border-app-line bg-app-surface p-3.5">
+        <div className="rounded-card border border-app-line bg-app-surface p-3.5">
           <button
             type="button"
             onClick={() => setShowGoalExamples(!showGoalExamples)}

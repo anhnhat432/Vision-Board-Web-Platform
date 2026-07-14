@@ -151,7 +151,7 @@ Mọi thay đổi tuân thủ AGENTS.md: nhỏ, có kiểu, tập trung; không 
     - `axe-core` (jest-axe/vitest-axe) trên Light_Mode và Dark_Mode; toggle `html.dark` không cần reload; viewport 320–767px assert `scrollWidth <= clientWidth`; Primary_CTA `min-h`/`min-w` ≥ 44px
     - _Requirements: 8.3, 8.4, 8.6, 8.7, 12.3, 12.4_
 
-- [ ] 13. Checkpoint cuối - Chuỗi kiểm chứng frontend
+- [x] 13. Checkpoint cuối - Chuỗi kiểm chứng frontend
   - Ensure all tests pass, ask the user if questions arise.
   - Chạy tuần tự `npm run typecheck` → `npm run lint` → `npm run test:run` → `npm run build`; grep guard `VisionBoardGallery.tsx` còn sót `duration-500/700/1000`, `animate-pulse`, `blur-[120px]`, `perspective`, `hover:scale-`
   - _Requirements: 12.1_

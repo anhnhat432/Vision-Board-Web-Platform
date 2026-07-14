@@ -3,7 +3,7 @@ import type { Request, Response } from "express";
 import { planService } from "../services/planService";
 import { successResponse } from "../utils/apiResponse";
 import { ConflictError } from "../utils/conflictError";
-import { requireAuthUser } from "./controllerHelpers";
+import { getParam, requireAuthUser } from "./controllerHelpers";
 
 export async function createPlan(req: Request, res: Response): Promise<void> {
   const user = requireAuthUser(req);
@@ -19,13 +19,13 @@ export async function getPlans(req: Request, res: Response): Promise<void> {
 
 export async function getPlanById(req: Request, res: Response): Promise<void> {
   const user = requireAuthUser(req);
-  const details = await planService.getPlanDetails(user.uid, req.params.id);
+  const details = await planService.getPlanDetails(user.uid, getParam(req, "id"));
   res.status(200).json(successResponse(details));
 }
 
 export async function deletePlan(req: Request, res: Response): Promise<void> {
   const user = requireAuthUser(req);
-  await planService.deletePlanForUser(user.uid, req.params.id);
+  await planService.deletePlanForUser(user.uid, getParam(req, "id"));
   res.status(200).json(successResponse({ deleted: true }));
 }
 
@@ -33,7 +33,7 @@ export async function updatePlan(req: Request, res: Response): Promise<void> {
   const user = requireAuthUser(req);
 
   try {
-    const plan = await planService.updatePlan(user.uid, req.params.id, req.body ?? {});
+    const plan = await planService.updatePlan(user.uid, getParam(req, "id"), req.body ?? {});
     res.status(200).json(successResponse(plan));
   } catch (error) {
     if (error instanceof ConflictError) {

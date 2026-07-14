@@ -41,7 +41,7 @@ interface AccordionSectionProps {
 
 function AccordionSection({ id, title, icon, isOpen, onToggle, children }: AccordionSectionProps) {
   return (
-    <div className="rounded-[14px] border border-app-line/70 bg-app-surface/40 overflow-hidden">
+    <div className="rounded-card border border-app-line/70 bg-app-surface/40 overflow-hidden">
       <button
         id={id}
         type="button"
@@ -396,7 +396,7 @@ export function AchievableStep({
         </div>
       </AccordionSection>
 
-      <details className="group rounded-[14px] border border-app-line bg-app-bg-subtle p-3.5 select-none">
+      <details className="group rounded-card border border-app-line bg-app-bg-subtle p-3.5 select-none">
         <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-3 text-[12px] font-bold text-app-ink-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/35 [&::-webkit-details-marker]:hidden">
           <span className="flex items-center gap-1.5">
             <Lightbulb className="h-3.5 w-3.5 text-app-accent" aria-hidden="true" /> Mẹo chọn nguồn lực thực tế

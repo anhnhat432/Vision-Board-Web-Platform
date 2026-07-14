@@ -55,7 +55,6 @@ const KNOWN_PREEXISTING_ALLOWLIST: readonly string[] = [
   "src/features/dashboard/v2/ActiveGoalsCard.tsx :: motion-duration :: duration-500",
   "src/features/dashboard/v2/BalanceCard.tsx :: motion-duration :: duration-500",
   "src/features/dashboard/v2/DailyStoicCard.tsx :: motion-duration :: duration-700",
-  "src/features/dashboard/v2/DashboardHero.tsx :: motion-duration :: duration-500",
   "src/features/dashboard/v2/DreamToPlanPreview.tsx :: motion-duration :: duration-500",
   "src/features/dashboard/v2/HeroMockupAnimated.tsx :: motion-duration :: duration-1000",
   "src/features/dashboard/v2/HeroMockupAnimated.tsx :: motion-duration :: duration-500",

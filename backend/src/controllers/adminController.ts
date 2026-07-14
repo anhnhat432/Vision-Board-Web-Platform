@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from "express";
 import type { FilterQuery } from "mongoose";
 
-import { requireAuthUser } from "./controllerHelpers";
+import { getParam, getQuery, requireAuthUser } from "./controllerHelpers";
 import { billingService } from "../services/billingServiceInstance";
 import { BillingEventModel } from "../models/BillingEventModel";
 import { BillingSubscriptionModel } from "../models/BillingSubscriptionModel";
@@ -556,7 +556,7 @@ export async function getAdminPaymentOrders(req: Request, res: Response, next: N
 
 export async function reconcileAdminPaymentOrderPayerSource(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const orderId = req.params.orderId?.trim().toUpperCase();
+    const orderId = getParam(req, "orderId").trim().toUpperCase();
     const order = await PaymentOrderModel.findOne({ orderId });
     if (!order) {
       throw new ApiError(404, "Payment order not found.", undefined, "payment_order_not_found");
@@ -729,7 +729,7 @@ export async function sendExpiringBillingReminders(req: Request, res: Response, 
 export async function completePaymentOrderManually(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const adminUser = requireAuthUser(req);
-    const orderId = req.params.orderId?.trim().toUpperCase();
+    const orderId = getParam(req, "orderId").trim().toUpperCase();
     const manualCompletionNote = normalizeManualCompletionNote(
       req.body?.manualCompletionNote ?? req.body?.adminNote ?? req.body?.note,
     );
@@ -944,7 +944,7 @@ export async function getAdminUsers(req: Request, res: Response, next: NextFunct
 
 export async function getAdminUserDetail(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const uid = req.params.uid?.trim();
+    const uid = getParam(req, "uid").trim();
     if (!uid) {
       throw new ApiError(400, "User uid is required.", undefined, "missing_uid");
     }
@@ -1053,7 +1053,7 @@ export async function getAdminUserDetail(req: Request, res: Response, next: Next
 
 export async function updateAdminUserRole(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    const uid = req.params.uid?.trim();
+    const uid = getParam(req, "uid").trim();
     if (!uid) {
       throw new ApiError(400, "User uid is required.", undefined, "missing_uid");
     }
@@ -1126,7 +1126,7 @@ export async function updateAdminUserSubscription(
   next: NextFunction,
 ): Promise<void> {
   try {
-    const uid = req.params.uid?.trim();
+    const uid = getParam(req, "uid").trim();
     if (!uid) {
       throw new ApiError(400, "User uid is required.", undefined, "missing_uid");
     }

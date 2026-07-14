@@ -317,7 +317,7 @@ export function MeasurableStep({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 bg-app-surface p-4 rounded-[14px] border border-app-line/60 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 bg-app-surface p-4 rounded-card border border-app-line/60 sm:grid-cols-2">
         <div>
           <label htmlFor="smart-baseline" className={labelClass}>
             Mức xuất phát <span className="text-app-ink-muted font-normal">(Tùy chọn)</span>
@@ -406,7 +406,7 @@ export function MeasurableStep({
       </div>
 
       {hasTarget && (
-        <div className="rounded-[14px] border border-app-line bg-app-bg-subtle/50 p-4 shadow-sm space-y-3">
+        <div className="rounded-card border border-app-line bg-app-bg-subtle/50 p-4 shadow-sm space-y-3">
           <div className="flex items-center justify-between text-xs font-semibold select-none">
             <span className="text-app-ink-soft">Khoảng cách mục tiêu</span>
             <span className="text-app-accent font-extrabold">
@@ -437,7 +437,7 @@ export function MeasurableStep({
       )}
 
       {/* Suggestions + tips */}
-      <div className="rounded-[14px] border border-app-line bg-app-accent-subtle/20 p-3.5 space-y-3">
+      <div className="rounded-card border border-app-line bg-app-accent-subtle/20 p-3.5 space-y-3">
         <div>
           <p className="text-[11px] font-semibold text-app-accent mb-2 flex items-center gap-1.5 select-none">
             <BarChart3 className="h-3.5 w-3.5" aria-hidden="true" /> Gợi ý đo lường nhanh
@@ -511,7 +511,7 @@ export function MeasurableStep({
           data-testid="smart-intent-metric-hint"
           id="smart-metric-intent-hint"
           role="note"
-          className="flex items-start gap-2 rounded-[14px] border border-app-line bg-app-bg p-3 text-xs leading-relaxed text-app-ink-soft"
+          className="flex items-start gap-2 rounded-card border border-app-line bg-app-bg p-3 text-xs leading-relaxed text-app-ink-soft"
         >
           <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
           <span>

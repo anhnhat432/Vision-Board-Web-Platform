@@ -33,7 +33,7 @@ const boardArb: fc.Arbitrary<VisionBoard> = fc.record({
   id: fc.string(),
   name: fc.string(),
   year: fc.constantFrom("2023", "2024", "2025", "2026"),
-  createdAt: fc.date().map((d) => d.toISOString()),
+  createdAt: fc.date({ noInvalidDate: true }).map((d) => d.toISOString()),
   items: fc.array(itemArb, { maxLength: 8 }),
 });
 

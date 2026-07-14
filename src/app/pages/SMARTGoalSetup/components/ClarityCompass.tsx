@@ -84,7 +84,7 @@ export function ClarityCompass({
               type="button"
               onClick={() => onJumpToStep(item.stepKey)}
               className={cn(
-                "flex w-full items-center justify-between gap-3 rounded-[14px] border px-3 py-2.5 text-left text-xs font-bold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
+                "flex w-full items-center justify-between gap-3 rounded-card border px-3 py-2.5 text-left text-xs font-bold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30",
                 item.done
                   ? "border-app-accent/15 bg-app-accent-subtle/45 text-app-accent"
                   : "border-app-line bg-app-bg-subtle text-app-ink-muted hover:bg-app-surface hover:text-app-ink",

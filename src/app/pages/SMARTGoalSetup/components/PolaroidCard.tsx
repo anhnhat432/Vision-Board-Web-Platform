@@ -129,7 +129,7 @@ export function PolaroidCard({
           <li
             key={item.label}
             className={cn(
-              "flex min-h-10 items-center justify-center gap-1.5 rounded-[14px] border px-2 text-center text-[10px] font-extrabold leading-tight",
+              "flex min-h-10 items-center justify-center gap-1.5 rounded-card border px-2 text-center text-[10px] font-extrabold leading-tight",
               item.done
                 ? "border-app-accent/20 bg-app-accent-subtle text-app-accent"
                 : "border-app-line bg-app-surface/80 text-app-ink-muted",
