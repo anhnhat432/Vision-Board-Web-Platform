@@ -1,5 +1,5 @@
-import { Percent, Plus, Loader2, RefreshCw, X, ArrowLeft, ArrowRight } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { ArrowLeft, ArrowRight, Loader2, Percent, Plus, RefreshCw, Search } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import {
@@ -12,10 +12,14 @@ import {
   type AdminDiscountCreatePayload,
   type AdminDiscountSummary,
 } from "@/services/adminService";
+import { AdminDataPanel } from "../components/admin/AdminDataPanel";
 import { AdminEmptyState } from "../components/admin/AdminEmptyState";
+import { AdminFeedbackBanner } from "../components/admin/AdminFeedbackBanner";
+import { AdminPagination } from "../components/admin/AdminPagination";
 import { AdminPageHeader } from "../components/admin/AdminPageHeader";
 import { useAdminSearch } from "../components/admin/AdminSearchContext";
 import { AdminStatusBadge } from "../components/admin/AdminStatusBadge";
+import { AdminToolbar } from "../components/admin/AdminToolbar";
 import { formatDate, formatVnd, getErrorMessage } from "../components/admin/utils";
 import {
   AlertDialog,
@@ -42,7 +46,7 @@ import { Label } from "../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { Switch } from "../components/ui/switch";
 import { Checkbox } from "../components/ui/checkbox";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "../components/ui/table";
 
 const DISCOUNT_TYPE_LABELS: Record<string, string> = {
   coupon: "Coupon",
@@ -78,8 +82,11 @@ export function AdminDiscountsPage() {
 
   const [items, setItems] = useState<AdminDiscountSummary[]>([]);
   const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [mutationError, setMutationError] = useState<string | null>(null);
 
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("");
@@ -90,6 +97,7 @@ export function AdminDiscountsPage() {
   const [form, setForm] = useState<AdminDiscountCreatePayload>({ ...DEFAULT_FORM });
   const [submitting, setSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState<FormStep>(1);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const [deleteTarget, setDeleteTarget] = useState<AdminDiscountSummary | null>(null);
 
@@ -98,8 +106,13 @@ export function AdminDiscountsPage() {
   const [usages, setUsages] = useState<AdminCouponUsageSummary[]>([]);
   const [usagesTotal, setUsagesTotal] = useState(0);
   const [usagesLoading, setUsagesLoading] = useState(false);
+  const [usagesError, setUsagesError] = useState<string | null>(null);
+  const limit = 100;
 
-  const handleSearchChange = useCallback((next: string) => setQuery(next), []);
+  const handleSearchChange = useCallback((next: string) => {
+    setPage(1);
+    setQuery(next);
+  }, []);
   useAdminSearch(query, handleSearchChange, "Tìm mã, tên discount");
 
   const loadDiscounts = useCallback(async () => {
@@ -110,23 +123,24 @@ export function AdminDiscountsPage() {
         q: query,
         type: typeFilter || undefined,
         active: showInactive ? undefined : true,
-        limit: 100,
+        page,
+        limit,
       });
+      const boundedPages = Math.max(1, result.totalPages);
+      if (page > boundedPages) {
+        setPage(boundedPages);
+        return;
+      }
       setItems(result.items);
       setTotal(result.total);
+      setPage(result.page);
+      setTotalPages(boundedPages);
     } catch (err) {
       setError(getErrorMessage(err, "Không thể tải danh sách giảm giá."));
     } finally {
       setLoading(false);
     }
-  }, [query, typeFilter, showInactive]);
-
-  const queryRef = useRef(query);
-  queryRef.current = query;
-  const typeRef = useRef(typeFilter);
-  typeRef.current = typeFilter;
-  const inactiveRef = useRef(showInactive);
-  inactiveRef.current = showInactive;
+  }, [page, query, showInactive, typeFilter]);
 
   useEffect(() => {
     if (authLoading || userProfileLoading) return;
@@ -138,6 +152,7 @@ export function AdminDiscountsPage() {
   }, [authLoading, isAdmin, user, userProfileLoading, loadDiscounts]);
 
   const openCreate = () => {
+    setFormError(null);
     setEditing(null);
     setCurrentStep(1);
     setForm({
@@ -148,6 +163,7 @@ export function AdminDiscountsPage() {
   };
 
   const openEdit = (d: AdminDiscountSummary) => {
+    setFormError(null);
     setEditing(d);
     setCurrentStep(1);
     setForm({
@@ -171,6 +187,7 @@ export function AdminDiscountsPage() {
       toast.error("Vui lòng nhập mã và tên.");
       return;
     }
+    setFormError(null);
     setSubmitting(true);
     try {
       if (editing) {
@@ -183,35 +200,38 @@ export function AdminDiscountsPage() {
       setFormOpen(false);
       await loadDiscounts();
     } catch (err) {
-      toast.error(getErrorMessage(err, "Không thể lưu discount."));
+      setFormError(getErrorMessage(err, "Không thể lưu discount."));
     } finally {
       setSubmitting(false);
     }
   };
 
   const handleToggleActive = async (d: AdminDiscountSummary) => {
+    setMutationError(null);
     try {
       await adminUpdateDiscount(d._id, { active: !d.active });
       toast.success(d.active ? "Đã vô hiệu hóa." : "Đã kích hoạt.");
       await loadDiscounts();
     } catch (err) {
-      toast.error(getErrorMessage(err, "Không thể thay đổi trạng thái."));
+      setMutationError(getErrorMessage(err, "Không thể thay đổi trạng thái."));
     }
   };
 
   const confirmDelete = async () => {
     if (!deleteTarget) return;
+    setMutationError(null);
     try {
       await adminDeleteDiscount(deleteTarget._id);
       toast.success("Đã vô hiệu hóa discount.");
       setDeleteTarget(null);
       await loadDiscounts();
     } catch (err) {
-      toast.error(getErrorMessage(err, "Không thể xóa discount."));
+      setMutationError(getErrorMessage(err, "Không thể xóa discount."));
     }
   };
 
   const openUsages = async (d: AdminDiscountSummary) => {
+    setUsagesError(null);
     setUsagesDiscount(d);
     setUsagesOpen(true);
     setUsagesLoading(true);
@@ -220,7 +240,7 @@ export function AdminDiscountsPage() {
       setUsages(result.items);
       setUsagesTotal(result.total);
     } catch (err) {
-      toast.error(getErrorMessage(err, "Không thể tải lịch sử sử dụng."));
+      setUsagesError(getErrorMessage(err, "Không thể tải lịch sử sử dụng."));
     } finally {
       setUsagesLoading(false);
     }
@@ -254,13 +274,54 @@ export function AdminDiscountsPage() {
         description="Tạo và quản lý mã giảm giá (coupon) và đợt sale."
       />
 
-      <div className="flex flex-wrap items-center gap-3">
-        <Button onClick={openCreate} disabled={!isAdmin}>
-          <Plus className="mr-2 h-4 w-4" />
-          Tạo mới
-        </Button>
-        <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v === "all" ? "" : v)}>
-          <SelectTrigger className="w-[160px]">
+      <AdminToolbar
+        label="Bộ lọc giảm giá"
+        meta={`${total.toLocaleString("vi-VN")} discount`}
+        actions={
+          <>
+            <Button type="button" onClick={openCreate} disabled={!isAdmin}>
+              <Plus className="mr-2 h-4 w-4" aria-hidden="true" />
+              Tạo mới
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => void loadDiscounts()}
+              disabled={loading}
+            >
+              <RefreshCw
+                className={`mr-2 h-4 w-4 ${loading ? "animate-spin motion-reduce:animate-none" : ""}`}
+                aria-hidden="true"
+              />
+              Tải lại
+            </Button>
+          </>
+        }
+      >
+        <div className="relative w-full sm:max-w-md md:hidden">
+          <Search
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted"
+            aria-hidden="true"
+          />
+          <Input
+            type="search"
+            aria-label="Tìm kiếm giảm giá"
+            autoComplete="off"
+            placeholder="Tìm mã, tên discount"
+            value={query}
+            onChange={(event) => handleSearchChange(event.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <Select
+          value={typeFilter || "all"}
+          onValueChange={(value) => {
+            setPage(1);
+            setTypeFilter(value === "all" ? "" : value);
+          }}
+        >
+          <SelectTrigger className="w-[160px]" aria-label="Loại discount">
             <SelectValue placeholder="Tất cả loại" />
           </SelectTrigger>
           <SelectContent>
@@ -273,49 +334,71 @@ export function AdminDiscountsPage() {
           <Switch
             id="show-inactive"
             checked={showInactive}
-            onCheckedChange={setShowInactive}
+            onCheckedChange={(checked) => {
+              setPage(1);
+              setShowInactive(checked);
+            }}
           />
-          <Label htmlFor="show-inactive" className="text-sm text-app-ink-muted cursor-pointer">
+          <Label htmlFor="show-inactive" className="cursor-pointer text-sm text-app-ink-muted">
             Hiện đã tắt
           </Label>
         </div>
-        <Button variant="outline" size="sm" onClick={loadDiscounts} disabled={loading}>
-          <RefreshCw className={`mr-2 h-4 w-4 ${loading ? "animate-spin" : ""}`} />
-          Tải lại
-        </Button>
-      </div>
+      </AdminToolbar>
 
-      {loading && (
-        <div className="flex items-center gap-3 py-8 text-app-ink-muted">
-          <Loader2 className="h-5 w-5 animate-spin" />
-          <span>Đang tải...</span>
-        </div>
-      )}
-
-      {error && !loading && (
-        <AdminEmptyState icon={X} title={error} />
-      )}
-
-      {!loading && !error && items.length === 0 && (
-        <AdminEmptyState
-          icon={Percent}
-          title="Chưa có discount nào."
+      {error ? (
+        <AdminFeedbackBanner
+          tone="error"
+          summary={error}
+          action={
+            <Button type="button" variant="outline" size="sm" onClick={() => void loadDiscounts()}>
+              Thử lại
+            </Button>
+          }
         />
-      )}
+      ) : null}
 
-      {!loading && !error && items.length > 0 && (
-        <div className="rounded-card border border-app-line bg-app-surface">
-          <Table>
+      {mutationError && deleteTarget === null ? (
+        <AdminFeedbackBanner
+          tone="error"
+          summary={mutationError}
+          onDismiss={() => setMutationError(null)}
+          dismissLabel="Đóng lỗi cập nhật discount"
+        />
+      ) : null}
+
+      <AdminDataPanel
+        title="Danh sách discount"
+        description="Mã, loại, giá trị, thời gian hiệu lực, lượt dùng và trạng thái."
+        busy={loading}
+      >
+        {loading && items.length === 0 ? (
+          <div className="flex items-center gap-3 p-8 text-app-ink-muted" role="status">
+            <Loader2 className="h-5 w-5 animate-spin motion-reduce:animate-none" />
+            <span>Đang tải discount...</span>
+          </div>
+        ) : items.length === 0 ? (
+          <div className="p-4">
+            <AdminEmptyState icon={Percent} title="Chưa có discount nào." />
+          </div>
+        ) : (
+          <Table containerClassName="rounded-none border-0 shadow-none">
+            <TableCaption className="sr-only">Danh sách discount</TableCaption>
             <TableHeader>
               <TableRow>
-                <TableHead>Loại</TableHead>
-                <TableHead>Mã</TableHead>
-                <TableHead>Tên</TableHead>
-                <TableHead>Giảm</TableHead>
-                <TableHead>Đã dùng</TableHead>
-                <TableHead>Hiệu lực</TableHead>
-                <TableHead>Trạng thái</TableHead>
-                <TableHead />
+                <TableHead scope="col">Loại</TableHead>
+                <TableHead scope="col">Mã</TableHead>
+                <TableHead scope="col">Tên</TableHead>
+                <TableHead scope="col" className="text-right">
+                  Giảm
+                </TableHead>
+                <TableHead scope="col" className="text-right">
+                  Đã dùng
+                </TableHead>
+                <TableHead scope="col">Hiệu lực</TableHead>
+                <TableHead scope="col">Trạng thái</TableHead>
+                <TableHead scope="col" className="text-right">
+                  Hành động
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -328,7 +411,7 @@ export function AdminDiscountsPage() {
                   </TableCell>
                   <TableCell className="font-mono text-sm uppercase">{d.code}</TableCell>
                   <TableCell className="max-w-[200px] truncate text-sm">{d.name}</TableCell>
-                  <TableCell className="text-sm font-medium">
+                  <TableCell className="text-right text-sm font-medium tabular-nums">
                     {getDiscountLabel(d)}
                     {d.minAmount ? (
                       <span className="ml-1 text-xs text-app-ink-muted">
@@ -336,18 +419,19 @@ export function AdminDiscountsPage() {
                       </span>
                     ) : null}
                   </TableCell>
-                  <TableCell className="text-sm">
+                  <TableCell className="text-right text-sm tabular-nums">
                     {getUsageLabel(d)}
-                    {d.type === "coupon" && (
+                    {d.type === "coupon" ? (
                       <Button
+                        type="button"
                         variant="ghost"
                         size="sm"
                         className="ml-1 h-auto p-0 text-xs text-app-accent"
-                        onClick={() => openUsages(d)}
+                        onClick={() => void openUsages(d)}
                       >
                         Chi tiết
                       </Button>
-                    )}
+                    ) : null}
                   </TableCell>
                   <TableCell className="text-xs text-app-ink-muted">
                     {formatDate(d.startsAt)}
@@ -360,28 +444,33 @@ export function AdminDiscountsPage() {
                       ) : (
                         <AdminStatusBadge tone="expired">Đã tắt</AdminStatusBadge>
                       )}
-                      {d.active && isExpired(d) && (
+                      {d.active && isExpired(d) ? (
                         <AdminStatusBadge tone="pending">Hết hạn</AdminStatusBadge>
-                      )}
+                      ) : null}
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="sm" onClick={() => openEdit(d)}>
+                    <div className="flex items-center justify-end gap-1">
+                      <Button type="button" variant="ghost" size="sm" onClick={() => openEdit(d)}>
                         Sửa
                       </Button>
                       <Button
+                        type="button"
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleToggleActive(d)}
+                        onClick={() => void handleToggleActive(d)}
                       >
                         {d.active ? "Tắt" : "Bật"}
                       </Button>
                       <Button
+                        type="button"
                         variant="ghost"
                         size="sm"
                         className="text-app-status-error"
-                        onClick={() => setDeleteTarget(d)}
+                        onClick={() => {
+                          setMutationError(null);
+                          setDeleteTarget(d);
+                        }}
                       >
                         Xóa
                       </Button>
@@ -391,14 +480,30 @@ export function AdminDiscountsPage() {
               ))}
             </TableBody>
           </Table>
-          <div className="border-t border-app-line px-4 py-3 text-sm text-app-ink-muted">
-            {total} discount
-          </div>
-        </div>
-      )}
+        )}
+      </AdminDataPanel>
+
+      {totalPages > 1 ? (
+        <AdminPagination
+          page={page}
+          totalPages={totalPages}
+          disabled={loading}
+          itemLabel="discount"
+          onPageChange={setPage}
+        />
+      ) : null}
 
       {/* Create/Edit Dialog */}
-      <Dialog open={formOpen} onOpenChange={(v) => { setFormOpen(v); if (!v) setCurrentStep(1); }}>
+      <Dialog
+        open={formOpen}
+        onOpenChange={(open) => {
+          setFormOpen(open);
+          if (!open) {
+            setCurrentStep(1);
+            setFormError(null);
+          }
+        }}
+      >
         <DialogContent className="max-w-xl">
           <DialogHeader>
             <DialogTitle>{editing ? "Sửa discount" : "Tạo discount mới"}</DialogTitle>
@@ -411,6 +516,15 @@ export function AdminDiscountsPage() {
               </span>
             </DialogDescription>
           </DialogHeader>
+
+          {formError ? (
+            <AdminFeedbackBanner
+              tone="error"
+              summary={formError}
+              onDismiss={() => setFormError(null)}
+              dismissLabel="Đóng lỗi lưu discount"
+            />
+          ) : null}
 
           {/* Step progress bar */}
           <div className="flex gap-1.5">
@@ -466,8 +580,9 @@ export function AdminDiscountsPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label>Mã code</Label>
+                  <Label htmlFor="discount-code">Mã code</Label>
                   <Input
+                    id="discount-code"
                     value={form.code}
                     onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })}
                     placeholder="VD: SUMMER2026"
@@ -477,8 +592,9 @@ export function AdminDiscountsPage() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label>Tên hiển thị</Label>
+                  <Label htmlFor="discount-name">Tên hiển thị</Label>
                   <Input
+                    id="discount-name"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                     placeholder="VD: Giảm 30% ra mắt"
@@ -675,7 +791,16 @@ export function AdminDiscountsPage() {
                 Quay lại
               </Button>
             )}
-            <Button variant="outline" size="sm" onClick={() => { setFormOpen(false); setCurrentStep(1); }}>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setFormOpen(false);
+                setCurrentStep(1);
+                setFormError(null);
+              }}
+            >
               Hủy
             </Button>
             <div className="flex-1" />
@@ -703,15 +828,29 @@ export function AdminDiscountsPage() {
               Hành động này không xóa dữ liệu nhưng discount sẽ không còn áp dụng được.
             </AlertDialogDescription>
           </AlertDialogHeader>
+          {mutationError ? (
+            <AdminFeedbackBanner
+              tone="error"
+              summary={mutationError}
+              onDismiss={() => setMutationError(null)}
+              dismissLabel="Đóng lỗi cập nhật discount"
+            />
+          ) : null}
           <AlertDialogFooter>
             <AlertDialogCancel>Hủy</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>Vô hiệu hóa</AlertDialogAction>
+            <AlertDialogAction onClick={() => void confirmDelete()}>Vô hiệu hóa</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
       {/* Usages Dialog */}
-      <Dialog open={usagesOpen} onOpenChange={setUsagesOpen}>
+      <Dialog
+        open={usagesOpen}
+        onOpenChange={(open) => {
+          setUsagesOpen(open);
+          if (!open) setUsagesError(null);
+        }}
+      >
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Lịch sử sử dụng: {usagesDiscount?.code}</DialogTitle>
@@ -719,9 +858,10 @@ export function AdminDiscountsPage() {
               {usagesTotal} lượt sử dụng
             </DialogDescription>
           </DialogHeader>
+          {usagesError ? <AdminFeedbackBanner tone="error" summary={usagesError} /> : null}
           {usagesLoading ? (
-            <div className="flex items-center gap-3 py-8">
-              <Loader2 className="h-5 w-5 animate-spin" />
+            <div className="flex items-center gap-3 py-8" role="status">
+              <Loader2 className="h-5 w-5 animate-spin motion-reduce:animate-none" />
               <span>Đang tải...</span>
             </div>
           ) : usages.length === 0 ? (
