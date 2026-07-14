@@ -46,11 +46,11 @@ function StatSkeleton() {
   return (
     <div className={`${adminSurface.card} p-5`}>
       <div className="flex items-start gap-4">
-        <div className="h-11 w-11 shrink-0 animate-pulse rounded-xl bg-app-accent-soft" />
+        <div className="h-11 w-11 shrink-0 animate-pulse rounded-xl bg-app-accent-soft motion-reduce:animate-none" />
         <div className="flex-1 space-y-2">
-          <div className="h-3 w-24 animate-pulse rounded bg-app-accent-soft" />
-          <div className="h-6 w-20 animate-pulse rounded bg-app-accent-soft" />
-          <div className="h-3 w-32 animate-pulse rounded bg-app-accent-soft" />
+          <div className="h-3 w-24 animate-pulse rounded bg-app-accent-soft motion-reduce:animate-none" />
+          <div className="h-6 w-20 animate-pulse rounded bg-app-accent-soft motion-reduce:animate-none" />
+          <div className="h-3 w-32 animate-pulse rounded bg-app-accent-soft motion-reduce:animate-none" />
         </div>
       </div>
     </div>
@@ -110,7 +110,10 @@ function ReminderBanner({
           onClick={onRun}
         >
           {loading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <Loader2
+              className="h-4 w-4 animate-spin motion-reduce:animate-none"
+              aria-hidden="true"
+            />
           ) : (
             <Bell className="h-4 w-4" />
           )}
@@ -139,7 +142,7 @@ function RecentPaymentList({
       {payments.slice(0, 5).map((payment) => (
         <li
           key={payment.orderId}
-          className="flex flex-wrap items-center justify-between gap-3 py-3 transition-colors hover:bg-app-bg-subtle/30 -mx-2 px-2 rounded-lg"
+          className="-mx-2 flex flex-wrap items-center justify-between gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-app-bg-subtle/30 motion-reduce:transition-none"
         >
           <div className="min-w-0">
             <p className="font-mono text-xs font-semibold text-app-ink">
@@ -173,7 +176,7 @@ function RecentUserList({ users }: { users: AdminUserSummary[] }) {
       {users.slice(0, 5).map((user) => (
         <li
           key={user.firebaseUid}
-          className="flex flex-wrap items-center justify-between gap-3 py-3 transition-colors hover:bg-app-bg-subtle/30 -mx-2 px-2 rounded-lg"
+          className="-mx-2 flex flex-wrap items-center justify-between gap-3 rounded-lg px-2 py-3 transition-colors hover:bg-app-bg-subtle/30 motion-reduce:transition-none"
         >
           <div className="min-w-0 flex items-center gap-3">
             {/* Avatar placeholder */}
@@ -332,12 +335,15 @@ export function AdminDashboardPage() {
           <Button
             type="button"
             variant="outline"
-            className="gap-2 rounded-xl border-app-line bg-app-bg-subtle text-app-ink hover:bg-app-accent-soft hover:text-app-ink transition-colors duration-150"
+            className="gap-2 rounded-xl border-app-line bg-app-bg-subtle text-app-ink transition-colors duration-150 hover:bg-app-accent-soft hover:text-app-ink motion-reduce:transition-none"
             disabled={loading}
             onClick={() => void loadData()}
           >
             {loading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2
+                className="h-4 w-4 animate-spin motion-reduce:animate-none"
+                aria-hidden="true"
+              />
             ) : (
               <RefreshCw className="h-4 w-4" />
             )}

@@ -227,7 +227,11 @@ export function AdminCatalogPage() {
                       >
                         {uploading === item.itemId ? (
                           <span className="inline-flex items-center gap-1">
-                            <Loader2 className="h-3 w-3 animate-spin motion-reduce:animate-none" /> Đang upload…
+                            <Loader2
+                              className="h-3 w-3 animate-spin motion-reduce:animate-none"
+                              aria-hidden="true"
+                            />{" "}
+                            Đang upload…
                           </span>
                         ) : (
                           "Đổi ảnh"
@@ -315,7 +319,10 @@ export function AdminCatalogPage() {
 
       {loading && items.length === 0 ? (
         <div className="flex min-h-[40vh] items-center justify-center" role="status">
-          <Loader2 className="h-6 w-6 animate-spin text-app-ink-muted motion-reduce:animate-none" />
+          <Loader2
+            className="h-6 w-6 animate-spin text-app-ink-muted motion-reduce:animate-none"
+            aria-hidden="true"
+          />
           <span className="sr-only">Đang tải catalog</span>
         </div>
       ) : (

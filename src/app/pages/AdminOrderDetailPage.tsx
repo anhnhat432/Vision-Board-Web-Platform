@@ -228,7 +228,7 @@ export function AdminOrderDetailPage() {
     <div className="space-y-6">
       <Link
         to="/admin/orders"
-        className="inline-flex items-center gap-1 text-sm text-app-ink-muted hover:text-app-ink transition-colors"
+        className="inline-flex items-center gap-1 text-sm text-app-ink-muted transition-colors hover:text-app-ink motion-reduce:transition-none"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         Quay lại danh sách

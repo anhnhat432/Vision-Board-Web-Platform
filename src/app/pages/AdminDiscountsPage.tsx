@@ -373,7 +373,10 @@ export function AdminDiscountsPage() {
       >
         {loading && items.length === 0 ? (
           <div className="flex items-center gap-3 p-8 text-app-ink-muted" role="status">
-            <Loader2 className="h-5 w-5 animate-spin motion-reduce:animate-none" />
+            <Loader2
+              className="h-5 w-5 animate-spin motion-reduce:animate-none"
+              aria-hidden="true"
+            />
             <span>Đang tải discount...</span>
           </div>
         ) : items.length === 0 ? (
@@ -531,7 +534,7 @@ export function AdminDiscountsPage() {
             {([1, 2, 3] as FormStep[]).map((s) => (
               <div
                 key={s}
-                className={`h-1 flex-1 rounded-full transition-colors ${
+                className={`h-1 flex-1 rounded-full transition-colors motion-reduce:transition-none ${
                   s <= currentStep ? "bg-app-accent" : "bg-app-line"
                 }`}
               />
@@ -861,7 +864,10 @@ export function AdminDiscountsPage() {
           {usagesError ? <AdminFeedbackBanner tone="error" summary={usagesError} /> : null}
           {usagesLoading ? (
             <div className="flex items-center gap-3 py-8" role="status">
-              <Loader2 className="h-5 w-5 animate-spin motion-reduce:animate-none" />
+              <Loader2
+                className="h-5 w-5 animate-spin motion-reduce:animate-none"
+                aria-hidden="true"
+              />
               <span>Đang tải...</span>
             </div>
           ) : usages.length === 0 ? (

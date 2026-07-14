@@ -50,28 +50,28 @@ function UserRowSkeleton() {
   return (
     <tr>
       <td className="px-4 py-3.5">
-        <div className="h-4 w-4 animate-pulse rounded bg-app-accent-soft" />
+        <div className="h-4 w-4 animate-pulse rounded bg-app-accent-soft motion-reduce:animate-none" />
       </td>
       <td className="px-4 py-3.5">
         <div className="flex items-center gap-3">
-          <div className="h-8 w-8 animate-pulse rounded-full bg-app-accent-soft" />
+          <div className="h-8 w-8 animate-pulse rounded-full bg-app-accent-soft motion-reduce:animate-none" />
           <div className="space-y-1.5">
-            <div className="h-4 w-32 animate-pulse rounded bg-app-accent-soft" />
-            <div className="h-3 w-40 animate-pulse rounded bg-app-accent-soft" />
+            <div className="h-4 w-32 animate-pulse rounded bg-app-accent-soft motion-reduce:animate-none" />
+            <div className="h-3 w-40 animate-pulse rounded bg-app-accent-soft motion-reduce:animate-none" />
           </div>
         </div>
       </td>
       <td className="px-4 py-3.5">
-        <div className="h-5 w-32 animate-pulse rounded-full bg-app-accent-soft" />
+        <div className="h-5 w-32 animate-pulse rounded-full bg-app-accent-soft motion-reduce:animate-none" />
       </td>
       <td className="px-4 py-3.5">
-        <div className="h-4 w-16 animate-pulse rounded bg-app-accent-soft" />
+        <div className="h-4 w-16 animate-pulse rounded bg-app-accent-soft motion-reduce:animate-none" />
       </td>
       <td className="px-4 py-3.5">
-        <div className="h-5 w-12 animate-pulse rounded-full bg-app-accent-soft" />
+        <div className="h-5 w-12 animate-pulse rounded-full bg-app-accent-soft motion-reduce:animate-none" />
       </td>
       <td className="px-4 py-3.5">
-        <div className="h-4 w-20 animate-pulse rounded bg-app-accent-soft" />
+        <div className="h-4 w-20 animate-pulse rounded bg-app-accent-soft motion-reduce:animate-none" />
       </td>
     </tr>
   );
@@ -364,7 +364,7 @@ export function AdminUsersPage() {
               className={
                 roleFilter === role
                   ? "rounded-lg bg-app-accent text-white shadow-sm hover:bg-app-accent-hover"
-                  : "rounded-lg border-app-line/60 hover:bg-app-accent-soft hover:text-app-ink transition-colors duration-150"
+                  : "rounded-lg border-app-line/60 transition-colors duration-150 hover:bg-app-accent-soft hover:text-app-ink motion-reduce:transition-none"
               }
               onClick={() => handleRoleFilter(role)}
             >
@@ -497,7 +497,7 @@ export function AdminUsersPage() {
                           {(user.displayName || user.email || "?").charAt(0).toUpperCase()}
                         </span>
                         <div className="min-w-0">
-                          <p className="font-medium text-app-ink group-hover:text-app-accent transition-colors duration-150 truncate max-w-[200px]">
+                          <p className="max-w-[200px] truncate font-medium text-app-ink transition-colors duration-150 group-hover:text-app-accent motion-reduce:transition-none">
                             {user.displayName || user.email}
                           </p>
                           <p className="text-xs text-app-ink-muted truncate max-w-[200px]">{user.email}</p>
@@ -544,7 +544,7 @@ export function AdminUsersPage() {
               size="sm"
               disabled={page <= 1}
               onClick={() => handlePageChange(page - 1)}
-              className="gap-1 rounded-lg border-app-line/60 hover:bg-app-accent-soft hover:text-app-ink transition-colors duration-150"
+              className="gap-1 rounded-lg border-app-line/60 transition-colors duration-150 hover:bg-app-accent-soft hover:text-app-ink motion-reduce:transition-none"
             >
               <ChevronLeft className="h-4 w-4" />
               Trước
@@ -555,7 +555,7 @@ export function AdminUsersPage() {
               size="sm"
               disabled={page >= totalPages}
               onClick={() => handlePageChange(page + 1)}
-              className="gap-1 rounded-lg border-app-line/60 hover:bg-app-accent-soft hover:text-app-ink transition-colors duration-150"
+              className="gap-1 rounded-lg border-app-line/60 transition-colors duration-150 hover:bg-app-accent-soft hover:text-app-ink motion-reduce:transition-none"
             >
               Sau
               <ChevronRight className="h-4 w-4" />

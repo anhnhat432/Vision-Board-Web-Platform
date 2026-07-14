@@ -455,7 +455,14 @@ export function AdminOrdersPage() {
               disabled={loading}
               onClick={() => void loadOrders()}
             >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+              {loading ? (
+                <Loader2
+                  className="h-4 w-4 animate-spin motion-reduce:animate-none"
+                  aria-hidden="true"
+                />
+              ) : (
+                <RefreshCw className="h-4 w-4" />
+              )}
               Tải lại
             </Button>
           </div>
@@ -669,7 +676,12 @@ export function AdminOrdersPage() {
               </Button>
             </div>
           ) : null}
-          {bulkBusy ? <Loader2 className="ml-2 h-4 w-4 animate-spin text-app-ink-muted motion-reduce:animate-none" /> : null}
+          {bulkBusy ? (
+            <Loader2
+              className="ml-2 h-4 w-4 animate-spin text-app-ink-muted motion-reduce:animate-none"
+              aria-hidden="true"
+            />
+          ) : null}
         </div>
       ) : null}
 
@@ -741,7 +753,7 @@ export function AdminOrdersPage() {
                         {(order.fullName || "?").charAt(0).toUpperCase()}
                       </span>
                       <div className="min-w-0">
-                        <p className="text-base font-semibold text-app-ink group-hover:text-app-accent transition-colors duration-150">{order.fullName}</p>
+                        <p className="text-base font-semibold text-app-ink transition-colors duration-150 group-hover:text-app-accent motion-reduce:transition-none">{order.fullName}</p>
                         <p className="mt-0.5 text-xs text-app-ink-muted">
                           {order.email} · {order.phone || "—"}
                         </p>
@@ -944,7 +956,10 @@ export function AdminOrdersPage() {
             >
               {editSaving ? (
                 <>
-                  <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />
+                  <Loader2
+                    className="mr-1 h-3.5 w-3.5 animate-spin motion-reduce:animate-none"
+                    aria-hidden="true"
+                  />
                   Đang lưu...
                 </>
               ) : (

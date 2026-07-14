@@ -368,7 +368,14 @@ export function AdminPaymentsPage() {
               disabled={loading}
               onClick={() => void loadPayments(debouncedQuery, statusFilter, operationalScope, page)}
             >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+              {loading ? (
+                <Loader2
+                  className="h-4 w-4 animate-spin motion-reduce:animate-none"
+                  aria-hidden="true"
+                />
+              ) : (
+                <RefreshCw className="h-4 w-4" />
+              )}
               Tải lại
             </Button>
           </div>
@@ -467,7 +474,10 @@ export function AdminPaymentsPage() {
       >
       {loading && items.length === 0 ? (
         <div className="flex min-h-[40vh] items-center justify-center" role="status">
-          <Loader2 className="h-6 w-6 animate-spin text-app-ink-muted motion-reduce:animate-none" />
+          <Loader2
+            className="h-6 w-6 animate-spin text-app-ink-muted motion-reduce:animate-none"
+            aria-hidden="true"
+          />
           <span className="sr-only">Đang tải thanh toán</span>
         </div>
       ) : items.length === 0 ? (
@@ -564,7 +574,12 @@ export function AdminPaymentsPage() {
                           disabled={busyOrderId === payment.orderId}
                           onClick={() => handleManualComplete(payment.orderId)}
                         >
-                          {busyOrderId === payment.orderId ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : null}
+                          {busyOrderId === payment.orderId ? (
+                            <Loader2
+                              className="mr-1 h-3.5 w-3.5 animate-spin motion-reduce:animate-none"
+                              aria-hidden="true"
+                            />
+                          ) : null}
                           Mở Plus thủ công
                         </Button>
                       ) : null}
@@ -577,7 +592,12 @@ export function AdminPaymentsPage() {
                           disabled={busyOrderId === payment.orderId}
                           onClick={() => void handleReconcilePayerSource(payment.orderId)}
                         >
-                          {busyOrderId === payment.orderId ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : null}
+                          {busyOrderId === payment.orderId ? (
+                            <Loader2
+                              className="mr-1 h-3.5 w-3.5 animate-spin motion-reduce:animate-none"
+                              aria-hidden="true"
+                            />
+                          ) : null}
                           Đối chiếu PayOS
                         </Button>
                       ) : null}

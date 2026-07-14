@@ -91,7 +91,14 @@ export function AdminSubscriptionsPage() {
         description={`${total.toLocaleString("vi-VN")} gói đăng ký`}
         actions={
           <Button type="button" variant="outline" className="gap-2 border-app-line bg-app-bg-subtle text-app-ink hover:bg-app-accent-soft" disabled={loading} onClick={() => void load(page, statusFilter, planFilter, operationalScope)}>
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+            {loading ? (
+              <Loader2
+                className="h-4 w-4 animate-spin motion-reduce:animate-none"
+                aria-hidden="true"
+              />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
             Tải lại
           </Button>
         }
@@ -167,13 +174,13 @@ export function AdminSubscriptionsPage() {
               {loading && items.length === 0 ? (
                 Array.from({ length: 5 }, (_, i) => `subscription-skeleton-${i}`).map((skeletonKey) => (
                   <tr key={skeletonKey}>
-                    <td className="px-4 py-3"><div className="h-4 w-32 animate-pulse rounded bg-app-accent-soft" /></td>
-                    <td className="px-4 py-3"><div className="h-4 w-12 animate-pulse rounded bg-app-accent-soft" /></td>
-                    <td className="px-4 py-3"><div className="h-5 w-20 animate-pulse rounded-full bg-app-accent-soft" /></td>
-                    <td className="px-4 py-3"><div className="h-4 w-16 animate-pulse rounded bg-app-accent-soft" /></td>
-                    <td className="px-4 py-3"><div className="h-4 w-24 animate-pulse rounded bg-app-accent-soft" /></td>
-                    <td className="px-4 py-3"><div className="h-4 w-20 animate-pulse rounded bg-app-accent-soft" /></td>
-                    <td className="px-4 py-3"><div className="h-4 w-28 animate-pulse rounded bg-app-accent-soft" /></td>
+                    <td className="px-4 py-3"><div className="h-4 w-32 animate-pulse rounded bg-app-accent-soft motion-reduce:animate-none" /></td>
+                    <td className="px-4 py-3"><div className="h-4 w-12 animate-pulse rounded bg-app-accent-soft motion-reduce:animate-none" /></td>
+                    <td className="px-4 py-3"><div className="h-5 w-20 animate-pulse rounded-full bg-app-accent-soft motion-reduce:animate-none" /></td>
+                    <td className="px-4 py-3"><div className="h-4 w-16 animate-pulse rounded bg-app-accent-soft motion-reduce:animate-none" /></td>
+                    <td className="px-4 py-3"><div className="h-4 w-24 animate-pulse rounded bg-app-accent-soft motion-reduce:animate-none" /></td>
+                    <td className="px-4 py-3"><div className="h-4 w-20 animate-pulse rounded bg-app-accent-soft motion-reduce:animate-none" /></td>
+                    <td className="px-4 py-3"><div className="h-4 w-28 animate-pulse rounded bg-app-accent-soft motion-reduce:animate-none" /></td>
                   </tr>
                 ))
               ) : items.length === 0 ? (

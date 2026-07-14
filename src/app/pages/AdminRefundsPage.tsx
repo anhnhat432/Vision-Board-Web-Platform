@@ -119,7 +119,14 @@ export function AdminRefundsPage() {
             disabled={loading}
             onClick={() => void loadRefunds()}
           >
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+            {loading ? (
+              <Loader2
+                className="h-4 w-4 animate-spin motion-reduce:animate-none"
+                aria-hidden="true"
+              />
+            ) : (
+              <RefreshCw className="h-4 w-4" />
+            )}
             Tải lại
           </Button>
         }
@@ -159,7 +166,10 @@ export function AdminRefundsPage() {
       >
       {loading && items.length === 0 ? (
         <div className="flex min-h-[40vh] items-center justify-center" role="status">
-          <Loader2 className="h-6 w-6 animate-spin text-app-ink-muted motion-reduce:animate-none" />
+          <Loader2
+            className="h-6 w-6 animate-spin text-app-ink-muted motion-reduce:animate-none"
+            aria-hidden="true"
+          />
           <span className="sr-only">Đang tải yêu cầu hoàn tiền</span>
         </div>
       ) : items.length === 0 ? (
@@ -192,7 +202,12 @@ export function AdminRefundsPage() {
                     disabled={busyId === request.id}
                     onClick={() => openConfirm(request, "completed")}
                   >
-                    {busyId === request.id ? <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" /> : null}
+                    {busyId === request.id ? (
+                      <Loader2
+                        className="mr-1 h-3.5 w-3.5 animate-spin motion-reduce:animate-none"
+                        aria-hidden="true"
+                      />
+                    ) : null}
                     Đã hoàn tiền
                   </Button>
                   <Button

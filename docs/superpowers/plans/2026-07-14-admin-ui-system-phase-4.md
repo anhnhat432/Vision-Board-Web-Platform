@@ -23,7 +23,7 @@
 
 ## File Structure
 
-- Create `src/app/components/admin/AdminHardening.contract.test.ts` for narrow cross-Admin source invariants.
+- Create `src/app/components/admin/AdminHardening.contract.test.tsx` for narrow cross-Admin source invariants.
 - Modify existing Admin pages/components only where the contract reports a finding.
 - Create `src/app/components/admin/AdminLayout.test.tsx` for loading live-region semantics.
 - Modify `src/app/pages/AdminDashboardPage.test.tsx` and `src/app/pages/AdminDashboardPage.tsx` for persistent reminder transport failures.
@@ -32,7 +32,7 @@
 ### Task 1: Enforce Reduced Motion And Decorative Loader Semantics
 
 **Files:**
-- Create: `src/app/components/admin/AdminHardening.contract.test.ts`
+- Create: `src/app/components/admin/AdminHardening.contract.test.tsx`
 - Modify: `src/app/components/admin/AdminLayout.tsx`
 - Modify: `src/app/pages/AdminCatalogPage.tsx`
 - Modify: `src/app/pages/AdminDashboardPage.tsx`
@@ -51,7 +51,7 @@
 
 - [ ] **Step 1: Create the source scanner and failing motion tests**
 
-Create `AdminHardening.contract.test.ts` with:
+Create `AdminHardening.contract.test.tsx` with:
 
 ```ts
 import { readdirSync, readFileSync } from "node:fs";
@@ -78,7 +78,7 @@ const files = [
 ].sort();
 
 function label(file: string): string {
-  return relative(appDir, file).replaceAll("\\", "/");
+  return relative(appDir, file).replace(/\\/g, "/");
 }
 
 function lineNumber(source: string, index: number): number {
@@ -142,7 +142,7 @@ describe("Admin hardening contract", () => {
 - [ ] **Step 2: Run the contract and verify RED**
 
 ```powershell
-npm.cmd run test:ui -- src/app/components/admin/AdminHardening.contract.test.ts
+npm.cmd run test:ui -- src/app/components/admin/AdminHardening.contract.test.tsx
 ```
 
 Expected: both tests fail and list the audited Admin file/line findings.
@@ -171,7 +171,7 @@ Do not change loading booleans, button disabled state, mutation handlers, text, 
 - [ ] **Step 4: Verify GREEN and existing focused pages**
 
 ```powershell
-npm.cmd run test:ui -- src/app/components/admin/AdminHardening.contract.test.ts src/app/pages/AdminDashboardPage.test.tsx src/app/pages/AdminOrdersPage.test.tsx src/app/pages/AdminPaymentsPage.test.tsx src/app/pages/AdminRefundsPage.dialog.test.tsx src/app/pages/AdminSubscriptionsPage.test.tsx src/app/pages/AdminUsersPage.test.tsx
+npm.cmd run test:ui -- src/app/components/admin/AdminHardening.contract.test.tsx src/app/pages/AdminDashboardPage.test.tsx src/app/pages/AdminOrdersPage.test.tsx src/app/pages/AdminPaymentsPage.test.tsx src/app/pages/AdminRefundsPage.dialog.test.tsx src/app/pages/AdminSubscriptionsPage.test.tsx src/app/pages/AdminUsersPage.test.tsx
 ```
 
 Expected: the contract and all touched page tests pass.
@@ -179,14 +179,14 @@ Expected: the contract and all touched page tests pass.
 - [ ] **Step 5: Commit the motion slice**
 
 ```powershell
-git add -- src/app/components/admin/AdminHardening.contract.test.ts src/app/components/admin/AdminLayout.tsx src/app/pages/AdminCatalogPage.tsx src/app/pages/AdminDashboardPage.tsx src/app/pages/AdminDiscountsPage.tsx src/app/pages/AdminOrderDetailPage.tsx src/app/pages/AdminOrdersPage.tsx src/app/pages/AdminPaymentsPage.tsx src/app/pages/AdminRefundsPage.tsx src/app/pages/AdminSubscriptionsPage.tsx src/app/pages/AdminUserDetailPage.tsx src/app/pages/AdminUsersPage.tsx
+git add -- src/app/components/admin/AdminHardening.contract.test.tsx src/app/components/admin/AdminLayout.tsx src/app/pages/AdminCatalogPage.tsx src/app/pages/AdminDashboardPage.tsx src/app/pages/AdminDiscountsPage.tsx src/app/pages/AdminOrderDetailPage.tsx src/app/pages/AdminOrdersPage.tsx src/app/pages/AdminPaymentsPage.tsx src/app/pages/AdminRefundsPage.tsx src/app/pages/AdminSubscriptionsPage.tsx src/app/pages/AdminUserDetailPage.tsx src/app/pages/AdminUsersPage.tsx
 git commit -m "fix(admin): respect reduced motion across routes"
 ```
 
 ### Task 2: Complete Table And Theme Semantics
 
 **Files:**
-- Modify: `src/app/components/admin/AdminHardening.contract.test.ts`
+- Modify: `src/app/components/admin/AdminHardening.contract.test.tsx`
 - Modify: `src/app/components/admin/AdminLayout.tsx`
 - Modify: `src/app/components/admin/AdminOperationalClassificationDialog.tsx`
 - Modify: `src/app/components/admin/AdminSidebar.tsx`
@@ -245,7 +245,7 @@ Add inside the existing `describe` block:
 - [ ] **Step 2: Run only the new cases and verify RED**
 
 ```powershell
-npm.cmd run test:ui -- src/app/components/admin/AdminHardening.contract.test.ts -t "column header|single-theme"
+npm.cmd run test:ui -- src/app/components/admin/AdminHardening.contract.test.tsx -t "column header|single-theme"
 ```
 
 Expected: four header findings and the exact audited theme findings fail.
@@ -292,7 +292,7 @@ Apply the same token intent to Admin access icons, Sidebar logout hover, Order c
 - [ ] **Step 5: Verify the contract and focused semantic surfaces**
 
 ```powershell
-npm.cmd run test:ui -- src/app/components/admin/AdminHardening.contract.test.ts src/app/components/admin/AdminOperationalClassification.test.tsx src/app/components/admin/AdminSidebar.test.tsx src/app/pages/AdminDiscountsPage.test.tsx src/app/pages/AdminEmailHistoryPage.test.tsx src/app/pages/AdminOrderDetailPage.test.tsx src/app/pages/AdminOrdersPage.test.tsx src/app/pages/AdminPaymentsPage.test.tsx src/app/pages/AdminRefundsPage.dialog.test.tsx src/app/pages/AdminSalesReportPage.test.tsx src/app/pages/AdminUserDetailPage.dialog.test.tsx src/app/pages/AdminUsersPage.test.tsx
+npm.cmd run test:ui -- src/app/components/admin/AdminHardening.contract.test.tsx src/app/components/admin/AdminOperationalClassification.test.tsx src/app/components/admin/AdminSidebar.test.tsx src/app/pages/AdminDiscountsPage.test.tsx src/app/pages/AdminEmailHistoryPage.test.tsx src/app/pages/AdminOrderDetailPage.test.tsx src/app/pages/AdminOrdersPage.test.tsx src/app/pages/AdminPaymentsPage.test.tsx src/app/pages/AdminRefundsPage.dialog.test.tsx src/app/pages/AdminSalesReportPage.test.tsx src/app/pages/AdminUserDetailPage.dialog.test.tsx src/app/pages/AdminUsersPage.test.tsx
 ```
 
 Expected: all files pass with no contract findings.
@@ -300,7 +300,7 @@ Expected: all files pass with no contract findings.
 - [ ] **Step 6: Commit the theme/table slice**
 
 ```powershell
-git add -- src/app/components/admin/AdminHardening.contract.test.ts src/app/components/admin/AdminLayout.tsx src/app/components/admin/AdminOperationalClassificationDialog.tsx src/app/components/admin/AdminSidebar.tsx src/app/components/admin/sales/AdminSalesRevenueChart.tsx src/app/components/admin/sales/AdminSalesReviewDialog.tsx src/app/pages/AdminDiscountsPage.tsx src/app/pages/AdminEmailHistoryPage.tsx src/app/pages/AdminOrderDetailPage.tsx src/app/pages/AdminOrdersPage.tsx src/app/pages/AdminPaymentsPage.tsx src/app/pages/AdminRefundsPage.tsx src/app/pages/AdminUserDetailPage.tsx src/app/pages/AdminUsersPage.tsx
+git add -- src/app/components/admin/AdminHardening.contract.test.tsx src/app/components/admin/AdminLayout.tsx src/app/components/admin/AdminOperationalClassificationDialog.tsx src/app/components/admin/AdminSidebar.tsx src/app/components/admin/sales/AdminSalesRevenueChart.tsx src/app/components/admin/sales/AdminSalesReviewDialog.tsx src/app/pages/AdminDiscountsPage.tsx src/app/pages/AdminEmailHistoryPage.tsx src/app/pages/AdminOrderDetailPage.tsx src/app/pages/AdminOrdersPage.tsx src/app/pages/AdminPaymentsPage.tsx src/app/pages/AdminRefundsPage.tsx src/app/pages/AdminUserDetailPage.tsx src/app/pages/AdminUsersPage.tsx
 git commit -m "fix(admin): align semantic theme and table headers"
 ```
 
@@ -598,7 +598,7 @@ Render immediately after `ReminderBanner`:
 - [ ] **Step 5: Verify GREEN and focused Dashboard behavior**
 
 ```powershell
-npm.cmd run test:ui -- src/app/pages/AdminDashboardPage.test.tsx src/app/components/admin/AdminHardening.contract.test.ts
+npm.cmd run test:ui -- src/app/pages/AdminDashboardPage.test.tsx src/app/components/admin/AdminHardening.contract.test.tsx
 ```
 
 Expected: all Dashboard and hardening contract tests pass without `act(...)` warnings.
@@ -623,7 +623,7 @@ git commit -m "fix(admin): persist reminder delivery failures"
 - [ ] **Step 1: Run the focused Phase 4 set**
 
 ```powershell
-npm.cmd run test:ui -- src/app/components/admin/AdminHardening.contract.test.ts src/app/components/admin/AdminLayout.test.tsx src/app/components/admin/AdminOperationalClassification.test.tsx src/app/components/admin/AdminSidebar.test.tsx src/app/pages/AdminDashboardPage.test.tsx src/app/pages/AdminDiscountsPage.test.tsx src/app/pages/AdminEmailHistoryPage.test.tsx src/app/pages/AdminOrderDetailPage.test.tsx src/app/pages/AdminOrdersPage.test.tsx src/app/pages/AdminPaymentsPage.test.tsx src/app/pages/AdminRefundsPage.dialog.test.tsx src/app/pages/AdminSalesReportPage.test.tsx src/app/pages/AdminSubscriptionsPage.test.tsx src/app/pages/AdminUserDetailPage.dialog.test.tsx src/app/pages/AdminUsersPage.test.tsx
+npm.cmd run test:ui -- src/app/components/admin/AdminHardening.contract.test.tsx src/app/components/admin/AdminLayout.test.tsx src/app/components/admin/AdminOperationalClassification.test.tsx src/app/components/admin/AdminSidebar.test.tsx src/app/pages/AdminDashboardPage.test.tsx src/app/pages/AdminDiscountsPage.test.tsx src/app/pages/AdminEmailHistoryPage.test.tsx src/app/pages/AdminOrderDetailPage.test.tsx src/app/pages/AdminOrdersPage.test.tsx src/app/pages/AdminPaymentsPage.test.tsx src/app/pages/AdminRefundsPage.dialog.test.tsx src/app/pages/AdminSalesReportPage.test.tsx src/app/pages/AdminSubscriptionsPage.test.tsx src/app/pages/AdminUserDetailPage.dialog.test.tsx src/app/pages/AdminUsersPage.test.tsx
 ```
 
 Record exact file/test counts and any non-failing warnings.

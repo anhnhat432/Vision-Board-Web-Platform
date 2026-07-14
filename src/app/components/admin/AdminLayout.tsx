@@ -73,7 +73,12 @@ export function AdminLayout() {
   if (authLoading) {
     return (
       <AdminStatusCard
-        icon={<Loader2 className="h-7 w-7 animate-spin text-app-ink-soft" />}
+        icon={
+          <Loader2
+            className="h-7 w-7 animate-spin text-app-ink-soft motion-reduce:animate-none"
+            aria-hidden="true"
+          />
+        }
         title="Đang kiểm tra đăng nhập"
         description="Hệ thống đang xác thực phiên quản trị hiện tại."
       />
@@ -87,7 +92,12 @@ export function AdminLayout() {
   if (userProfileLoading) {
     return (
       <AdminStatusCard
-        icon={<Loader2 className="h-7 w-7 animate-spin text-app-ink-soft" />}
+        icon={
+          <Loader2
+            className="h-7 w-7 animate-spin text-app-ink-soft motion-reduce:animate-none"
+            aria-hidden="true"
+          />
+        }
         title="Đang tải quyền quản trị"
         description="Hệ thống đang kiểm tra hồ sơ và vai trò của tài khoản này."
       />

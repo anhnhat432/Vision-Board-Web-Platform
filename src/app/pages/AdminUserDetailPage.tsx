@@ -271,7 +271,7 @@ export function AdminUserDetailPage() {
     <div className="space-y-6">
       <Link
         to="/admin/users"
-        className="inline-flex items-center gap-1 text-sm text-app-ink-muted hover:text-app-ink transition-colors"
+        className="inline-flex items-center gap-1 text-sm text-app-ink-muted transition-colors hover:text-app-ink motion-reduce:transition-none"
       >
         <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         Quay lại danh sách
@@ -419,7 +419,7 @@ export function AdminUserDetailPage() {
                 type="button"
                 variant="outline"
                 size="sm"
-                className="w-full gap-1.5 border-app-line text-app-ink-muted hover:bg-rose-50 hover:text-rose-600 hover:border-rose-300 dark:hover:bg-rose-500/10 dark:hover:text-rose-400 dark:hover:border-rose-500/30 transition-colors duration-150"
+                className="w-full gap-1.5 border-app-line text-app-ink-muted transition-colors duration-150 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600 motion-reduce:transition-none dark:hover:border-rose-500/30 dark:hover:bg-rose-500/10 dark:hover:text-rose-400"
                 disabled={subUpdating}
                 onClick={() => openSubConfirm("FREE")}
               >
@@ -435,7 +435,7 @@ export function AdminUserDetailPage() {
                 type="button"
                 variant="default"
                 size="sm"
-                className="w-full gap-1.5 bg-app-accent text-white shadow-sm hover:bg-app-accent-hover transition-colors duration-150"
+                className="w-full gap-1.5 bg-app-accent text-white shadow-sm transition-colors duration-150 hover:bg-app-accent-hover motion-reduce:transition-none"
                 disabled={subUpdating}
                 onClick={() => openSubConfirm("PLUS")}
               >
