@@ -64,6 +64,39 @@ describe("AdminPaymentsPage operational classification", () => {
     );
   });
 
+  it("renders a labelled payment toolbar and accessible table", async () => {
+    await renderPage();
+
+    expect(await screen.findByRole("region", { name: "Bộ lọc thanh toán" })).toBeInTheDocument();
+    expect(screen.getByRole("searchbox", { name: "Tìm kiếm thanh toán" })).toBeInTheDocument();
+    const table = screen.getByRole("table", { name: "Danh sách thanh toán tự động" });
+    expect(table).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: "Số tiền" })).toHaveAttribute("scope", "col");
+    expect(screen.getByRole("navigation", { name: "Phân trang thanh toán" })).toBeInTheDocument();
+  });
+
+  it("keeps the last safe payment rows after a refresh error", async () => {
+    let mainListCalls = 0;
+    service.adminListPaymentOrders.mockImplementation(
+      (params: { limit?: number; status?: string }) => {
+        if (params.limit === 1) {
+          return Promise.resolve({ ...response(), total: 3 });
+        }
+        mainListCalls += 1;
+        return mainListCalls === 1
+          ? Promise.resolve(response())
+          : Promise.reject(new Error("Payment refresh timeout"));
+      },
+    );
+
+    await renderPage();
+    expect(await screen.findByText("VBPAY1")).toBeInTheDocument();
+    await userEvent.setup().click(screen.getByRole("button", { name: "Tải lại" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Payment refresh timeout");
+    expect(screen.getByText("VBPAY1")).toBeInTheDocument();
+  });
+
   it("reclassifies without optimistic row changes and reloads the server page", async () => {
     const user = userEvent.setup();
     await renderPage();

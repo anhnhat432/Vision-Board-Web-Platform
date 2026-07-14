@@ -1,4 +1,4 @@
-import { CreditCard, Download, Loader2, RefreshCw } from "lucide-react";
+import { CreditCard, Download, Loader2, RefreshCw, Search } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useAuthContext } from "@/lib/auth/AuthContext";
@@ -12,7 +12,10 @@ import {
   adminListPaymentOrders,
   adminReconcilePaymentOrderPayerSource,
 } from "@/services/adminService";
+import { AdminDataPanel } from "../components/admin/AdminDataPanel";
 import { AdminEmptyState } from "../components/admin/AdminEmptyState";
+import { AdminFeedbackBanner } from "../components/admin/AdminFeedbackBanner";
+import { AdminPagination } from "../components/admin/AdminPagination";
 import { AdminPageHeader } from "../components/admin/AdminPageHeader";
 import {
   AdminPaymentPayerEvidenceDialog,
@@ -21,6 +24,7 @@ import {
 import { useAdminPendingCounts } from "../components/admin/AdminPendingCountsContext";
 import { useAdminSearch } from "../components/admin/AdminSearchContext";
 import { AdminStatusBadge } from "../components/admin/AdminStatusBadge";
+import { AdminToolbar } from "../components/admin/AdminToolbar";
 import { AdminOperationalClassificationBadge, getAdminOperationalClassificationSourceLabel } from "../components/admin/AdminOperationalClassificationBadge";
 import { AdminOperationalClassificationDialog } from "../components/admin/AdminOperationalClassificationDialog";
 import { AdminOperationalScopeFilter } from "../components/admin/AdminOperationalScopeFilter";
@@ -42,9 +46,11 @@ import {
   AlertDialogTitle,
 } from "../components/ui/alert-dialog";
 import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
 import {
   Table,
   TableBody,
+  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -370,20 +376,46 @@ export function AdminPaymentsPage() {
       />
 
       {error ? (
-        <div className="rounded-[var(--r-card)] border border-rose-500/30 bg-rose-500/10 p-5 text-sm text-rose-200">
-          <p className="font-semibold">Không tải được dữ liệu</p>
-          <p className="mt-1 leading-6 text-rose-100/80">{error}</p>
-          <Button
-            type="button"
-            variant="outline"
-            className="mt-4 border-app-line bg-app-bg-subtle text-app-ink hover:bg-app-accent-soft hover:text-app-ink"
-            onClick={() => void loadPayments(debouncedQuery, statusFilter, operationalScope, page)}
-          >
-            Thử lại
-          </Button>
-        </div>
+        <AdminFeedbackBanner
+          tone="error"
+          summary={
+            <div>
+              <p className="font-semibold">Không tải được dữ liệu thanh toán</p>
+              <p className="mt-1 font-normal">{error}</p>
+            </div>
+          }
+          action={
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => void loadPayments(debouncedQuery, statusFilter, operationalScope, page)}
+            >
+              Thử lại
+            </Button>
+          }
+        />
       ) : null}
 
+      <AdminToolbar
+        label="Bộ lọc thanh toán"
+        meta={`Hiển thị ${items.length.toLocaleString("vi-VN")} / ${total.toLocaleString("vi-VN")} đơn`}
+      >
+        <div className="relative w-full sm:max-w-md md:hidden">
+          <Search
+            className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted"
+            aria-hidden="true"
+          />
+          <Input
+            type="search"
+            aria-label="Tìm kiếm thanh toán"
+            autoComplete="off"
+            placeholder="Tìm mã đơn, email, mã giao dịch"
+            value={query}
+            onChange={(event) => handleSearchChange(event.target.value)}
+            className="pl-9"
+          />
+        </div>
       <div className="flex flex-wrap gap-2" role="tablist" aria-label="Lọc nhanh theo trạng thái">
         {PAYMENT_STATUS_FILTERS.map((status) => {
           const active = statusFilter === status;
@@ -398,7 +430,7 @@ export function AdminPaymentsPage() {
                 resetToFirstPage();
                 setStatusFilter(status);
               }}
-              className={`rounded-[var(--r-pill)] border px-3 py-1.5 text-xs font-medium transition-colors ${
+              className={`rounded-[var(--r-pill)] border px-3 py-1.5 text-xs font-medium transition-colors motion-reduce:transition-none ${
                 active
                   ? "border-app-accent/40 bg-app-accent-soft text-app-accent"
                   : "border-app-line bg-app-surface text-app-ink-soft hover:bg-app-accent-soft hover:text-app-ink"
@@ -419,39 +451,49 @@ export function AdminPaymentsPage() {
           }}
         />
       </div>
+      </AdminToolbar>
 
       <p className="text-sm text-app-ink-muted">
-        Hiển thị {items.length.toLocaleString("vi-VN")} / {total.toLocaleString("vi-VN")} đơn. Chỉ bấm{" "}
+        Chỉ bấm{" "}
         <span className="text-app-ink-soft">Mở Plus thủ công</span> sau khi đối chiếu trong cổng thanh toán hoặc app ngân
         hàng.
         {query ? <span className="ml-1 text-app-ink-muted">Đang lọc theo "{query}".</span> : null}
       </p>
 
+      <AdminDataPanel
+        title="Danh sách thanh toán tự động"
+        description="Đối chiếu số tiền, provider, nguồn tiền, phân loại và hành động an toàn."
+        busy={loading}
+      >
       {loading && items.length === 0 ? (
-        <div className="flex min-h-[40vh] items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin text-app-ink-muted" />
+        <div className="flex min-h-[40vh] items-center justify-center" role="status">
+          <Loader2 className="h-6 w-6 animate-spin text-app-ink-muted motion-reduce:animate-none" />
+          <span className="sr-only">Đang tải thanh toán</span>
         </div>
       ) : items.length === 0 ? (
-        <AdminEmptyState
-          icon={CreditCard}
-          title="Không có đơn thanh toán phù hợp"
-          description="Thử thay đổi bộ lọc hoặc xoá từ khoá tìm kiếm trên thanh tiêu đề."
-        />
+        <div className="p-4">
+          <AdminEmptyState
+            icon={CreditCard}
+            title="Không có đơn thanh toán phù hợp"
+            description="Thử thay đổi bộ lọc hoặc xoá từ khoá tìm kiếm."
+          />
+        </div>
       ) : (
         <Table
-          containerClassName="rounded-[var(--r-card)] border-app-line bg-app-surface shadow-none"
+          containerClassName="rounded-none border-0 shadow-none"
           className="text-app-ink-soft"
         >
+          <TableCaption className="sr-only">Danh sách thanh toán tự động</TableCaption>
           <TableHeader className="sticky top-0 bg-app-bg-subtle text-app-ink-soft [&_tr]:border-b [&_tr]:border-app-line">
             <TableRow className="border-app-line hover:bg-transparent">
-              <TableHead className="text-app-ink-muted">Mã đơn</TableHead>
-              <TableHead className="text-app-ink-muted">Người dùng</TableHead>
-              <TableHead className="text-app-ink-muted">Số tiền</TableHead>
-              <TableHead className="text-app-ink-muted">Trạng thái</TableHead>
-              <TableHead className="text-app-ink-muted">Phân loại</TableHead>
-              <TableHead className="text-app-ink-muted">Nguồn tiền</TableHead>
-              <TableHead className="text-app-ink-muted">Tạo lúc</TableHead>
-              <TableHead className="text-right text-app-ink-muted">Hành động</TableHead>
+              <TableHead scope="col" className="text-app-ink-muted">Mã đơn</TableHead>
+              <TableHead scope="col" className="text-app-ink-muted">Người dùng</TableHead>
+              <TableHead scope="col" className="text-right text-app-ink-muted">Số tiền</TableHead>
+              <TableHead scope="col" className="text-app-ink-muted">Trạng thái</TableHead>
+              <TableHead scope="col" className="text-app-ink-muted">Phân loại</TableHead>
+              <TableHead scope="col" className="text-app-ink-muted">Nguồn tiền</TableHead>
+              <TableHead scope="col" className="text-app-ink-muted">Tạo lúc</TableHead>
+              <TableHead scope="col" className="text-right text-app-ink-muted">Hành động</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody className="divide-y divide-white/10">
@@ -469,7 +511,7 @@ export function AdminPaymentsPage() {
                       <p className="mt-1 truncate text-xs text-app-ink-muted">TX: {payment.cassoTransactionId}</p>
                     ) : null}
                   </TableCell>
-                  <TableCell className="text-app-ink-soft">
+                  <TableCell className="text-right text-app-ink-soft">
                     <p className="truncate text-sm font-medium">{getPaymentOwnerLabel(payment)}</p>
                     <p className="mt-0.5 truncate text-xs text-app-ink-muted">{payment.userId}</p>
                   </TableCell>
@@ -560,17 +602,16 @@ export function AdminPaymentsPage() {
           </TableBody>
         </Table>
       )}
+      </AdminDataPanel>
 
       {totalPages > 1 ? (
-        <nav className="flex items-center justify-end gap-2" aria-label="Phân trang thanh toán">
-          <Button type="button" variant="outline" disabled={loading || page <= 1} onClick={() => setPage((value) => value - 1)}>
-            Trang trước
-          </Button>
-          <span className="text-sm text-app-ink-muted">Trang {page}/{totalPages}</span>
-          <Button type="button" variant="outline" disabled={loading || page >= totalPages} onClick={() => setPage((value) => value + 1)}>
-            Trang sau
-          </Button>
-        </nav>
+        <AdminPagination
+          page={page}
+          totalPages={totalPages}
+          disabled={loading}
+          itemLabel="thanh toán"
+          onPageChange={setPage}
+        />
       ) : null}
 
       <AlertDialog
