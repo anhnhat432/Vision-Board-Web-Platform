@@ -5,12 +5,23 @@ import {
   type AdminEmailEventItem,
   adminListEmailEvents,
 } from "@/services/adminService";
+import { AdminDataPanel } from "../components/admin/AdminDataPanel";
 import { AdminEmptyState } from "../components/admin/AdminEmptyState";
+import { AdminFeedbackBanner } from "../components/admin/AdminFeedbackBanner";
 import { AdminPageHeader } from "../components/admin/AdminPageHeader";
+import { AdminPagination } from "../components/admin/AdminPagination";
 import { AdminStatusBadge } from "../components/admin/AdminStatusBadge";
-import { adminSurface } from "../components/admin/tokens";
 import { formatDate, getErrorMessage } from "../components/admin/utils";
 import { Button } from "../components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../components/ui/table";
 
 const EMAIL_STATUS_TONES: Record<string, "completed" | "pending" | "failed" | "expired"> = {
   sent: "completed",
@@ -70,76 +81,116 @@ export function AdminEmailHistoryPage() {
         title="Lịch sử Email"
         description={`${total.toLocaleString("vi-VN")} email nhắc hạn đã xử lý`}
         actions={
-          <Button type="button" variant="outline" className="gap-2 border-app-line bg-app-bg-subtle text-app-ink hover:bg-app-accent-soft" disabled={loading} onClick={() => void load(page)}>
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
+          <Button
+            type="button"
+            variant="outline"
+            className="gap-2 border-app-line bg-app-bg-subtle text-app-ink hover:bg-app-accent-soft"
+            disabled={loading}
+            onClick={() => void load(page)}
+          >
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden="true" />
+            ) : (
+              <RefreshCw className="h-4 w-4" aria-hidden="true" />
+            )}
             Tải lại
           </Button>
         }
       />
 
       {error ? (
-        <div className="rounded-[var(--r-card)] border border-rose-300 bg-rose-50 p-4 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10">
-          {error}
-          <Button type="button" variant="ghost" size="sm" className="ml-2 underline" onClick={() => void load(page)}>Thử lại</Button>
-        </div>
+        <AdminFeedbackBanner
+          tone="error"
+          summary={error}
+          action={
+            <Button type="button" variant="outline" size="sm" onClick={() => void load(page)}>
+              Thử lại
+            </Button>
+          }
+        />
       ) : null}
 
-      <div className={`${adminSurface.card} overflow-hidden`}>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead>
-              <tr className="border-b border-app-line bg-gradient-to-r from-app-bg-subtle/80 to-app-bg-subtle/40">
-                <th className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">Người nhận</th>
-                <th className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">Trạng thái</th>
-                <th className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">Lỗi</th>
-                <th className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">Xử lý lúc</th>
-                <th className="px-4 py-3 font-semibold text-app-ink-soft text-xs uppercase tracking-wider">Tạo lúc</th>
-              </tr>
-            </thead>
-            <tbody>
+      <AdminDataPanel
+        title="Email đã xử lý"
+        description={`Hiển thị ${items.length.toLocaleString("vi-VN")} / ${total.toLocaleString("vi-VN")} email`}
+        busy={loading}
+      >
+        <Table containerClassName="rounded-none border-0 shadow-none" className="text-app-ink-soft">
+          <TableCaption className="sr-only">Lịch sử email</TableCaption>
+          <TableHeader>
+            <TableRow className="hover:bg-transparent">
+              <TableHead scope="col">Người nhận</TableHead>
+              <TableHead scope="col">Trạng thái</TableHead>
+              <TableHead scope="col">Lỗi</TableHead>
+              <TableHead scope="col">Xử lý lúc</TableHead>
+              <TableHead scope="col">Tạo lúc</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
               {loading && items.length === 0 ? (
                 Array.from({ length: 5 }, (_, i) => `email-history-skeleton-${i}`).map((skeletonKey) => (
-                  <tr key={skeletonKey}>
-                    <td className="px-4 py-3"><div className="h-4 w-32 animate-pulse rounded bg-app-accent-soft" /></td>
-                    <td className="px-4 py-3"><div className="h-5 w-20 animate-pulse rounded-full bg-app-accent-soft" /></td>
-                    <td className="px-4 py-3"><div className="h-4 w-24 animate-pulse rounded bg-app-accent-soft" /></td>
-                    <td className="px-4 py-3"><div className="h-4 w-20 animate-pulse rounded bg-app-accent-soft" /></td>
-                    <td className="px-4 py-3"><div className="h-4 w-20 animate-pulse rounded bg-app-accent-soft" /></td>
-                  </tr>
+                  <TableRow key={skeletonKey}>
+                    <TableCell>
+                      <div className="h-4 w-32 animate-pulse rounded bg-app-accent-soft motion-reduce:animate-none" />
+                    </TableCell>
+                    <TableCell>
+                      <div className="h-5 w-20 animate-pulse rounded-full bg-app-accent-soft motion-reduce:animate-none" />
+                    </TableCell>
+                    <TableCell>
+                      <div className="h-4 w-24 animate-pulse rounded bg-app-accent-soft motion-reduce:animate-none" />
+                    </TableCell>
+                    <TableCell>
+                      <div className="h-4 w-20 animate-pulse rounded bg-app-accent-soft motion-reduce:animate-none" />
+                    </TableCell>
+                    <TableCell>
+                      <div className="h-4 w-20 animate-pulse rounded bg-app-accent-soft motion-reduce:animate-none" />
+                    </TableCell>
+                  </TableRow>
                 ))
               ) : items.length === 0 ? (
-                <tr><td colSpan={5}><AdminEmptyState icon={Mail} title="Chưa có email nào" description="Email nhắc hạn sẽ xuất hiện ở đây sau khi admin gửi." /></td></tr>
+                <TableRow className="hover:bg-transparent">
+                  <TableCell colSpan={5} className="whitespace-normal p-4">
+                    <AdminEmptyState
+                      icon={Mail}
+                      title="Chưa có email nào"
+                      description="Email nhắc hạn sẽ xuất hiện ở đây sau khi admin gửi."
+                    />
+                  </TableCell>
+                </TableRow>
               ) : (
                 items.map((evt) => (
-                  <tr key={evt.id} className="border-b border-app-line/50 last:border-0 hover:bg-app-accent-soft/20 transition-colors duration-100">
-                    <td className="px-4 py-3">
+                  <TableRow key={evt.id}>
+                    <TableCell>
                       <p className="font-medium text-app-ink text-xs">{evt.userDisplayName || evt.userEmail}</p>
                       <p className="text-xs text-app-ink-muted">{evt.userEmail}</p>
-                    </td>
-                    <td className="px-4 py-3">
+                    </TableCell>
+                    <TableCell>
                       <AdminStatusBadge tone={EMAIL_STATUS_TONES[evt.status] ?? "neutral"}>
                         {EMAIL_STATUS_LABELS[evt.status] ?? evt.status}
                       </AdminStatusBadge>
-                    </td>
-                    <td className="px-4 py-3 text-xs text-rose-500 max-w-[200px] truncate">{evt.error || "—"}</td>
-                    <td className="px-4 py-3 text-xs text-app-ink-soft">{evt.processedAt ? formatDate(evt.processedAt) : "—"}</td>
-                    <td className="px-4 py-3 text-xs text-app-ink-muted">{formatDate(evt.createdAt)}</td>
-                  </tr>
+                    </TableCell>
+                    <TableCell className="max-w-[200px] truncate text-xs text-rose-500">
+                      {evt.error || "—"}
+                    </TableCell>
+                    <TableCell className="text-xs text-app-ink-soft">
+                      {evt.processedAt ? formatDate(evt.processedAt) : "—"}
+                    </TableCell>
+                    <TableCell className="text-xs text-app-ink-muted">{formatDate(evt.createdAt)}</TableCell>
+                  </TableRow>
                 ))
               )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+          </TableBody>
+        </Table>
+      </AdminDataPanel>
 
       {totalPages > 1 ? (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-app-ink-muted">Trang {page} / {totalPages}</p>
-          <div className="flex gap-2">
-            <Button type="button" variant="outline" size="sm" disabled={page <= 1} onClick={() => void load(page - 1)}>Trước</Button>
-            <Button type="button" variant="outline" size="sm" disabled={page >= totalPages} onClick={() => void load(page + 1)}>Sau</Button>
-          </div>
-        </div>
+        <AdminPagination
+          page={page}
+          totalPages={totalPages}
+          disabled={loading}
+          itemLabel="email"
+          onPageChange={(nextPage) => void load(nextPage)}
+        />
       ) : null}
     </div>
   );
