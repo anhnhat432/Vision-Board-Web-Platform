@@ -668,3 +668,48 @@ git commit -m "docs(admin): record phase 4 verification"
 ```
 
 Do not create an empty documentation commit. The worktree must be clean at the final checkpoint.
+
+---
+
+## Execution Record — 2026-07-14
+
+### Design and implementation commits
+
+- `54bc6a74 docs(admin): design phase 4 hardening`
+- `492c7a71 docs(admin): plan phase 4 hardening`
+- `325451cb fix(admin): respect reduced motion across routes`
+- `2f97c18b fix(admin): align semantic theme and table headers`
+- `10cfb721 fix(admin): announce loading access states`
+- `f6614b5d fix(admin): persist reminder delivery failures`
+
+### TDD and focused evidence
+
+- `AdminHardening.contract.test.tsx` was observed RED with `44` motion/transition findings and `19` animated-loader findings before Task 1 production edits, then passed `2/2` tests.
+- The contract was extended and observed RED with `7` table-header findings and `19` audited single-theme semantic findings before Task 2 production edits, then passed `4/4` tests.
+- `AdminLayout.test.tsx` was observed RED because both loading gates lacked a `status` role, then passed `2/2` tests after the opt-in live-region change.
+- `AdminDashboardPage.test.tsx` was observed RED for both toast-only reminder failure cases, then passed `6/6` tests with persistent retry feedback and retained result data.
+- Final focused Phase 4 set: `15/15` files and `95/95` tests passed.
+- Earlier focused page runs retained pre-existing non-failing React `act(...)` warnings in `AdminPaymentsPage.test.tsx` and the existing `AdminPendingCountsProvider` harness warning in `AdminRefundsPage.dialog.test.tsx`; the final silent focused run passed all cases.
+
+### Final automated gates
+
+- TypeScript: `npm.cmd run typecheck` exited `0` after the final production edit.
+- Biome: `npm.cmd run lint` exited `0`, checked `1036` files, and reported one non-failing existing `useTemplate` info at `src/app/components/admin/AdminPagination.tsx:27`.
+- Fast unit suite: `npm.cmd run test:run` exited `0`; `138/138` files and `1361/1361` tests passed. The concise verification invocation emitted Vitest's non-failing deprecation notice for the `basic` reporter.
+- Production build: `npm.cmd run build` exited `0`, transformed `3066` modules, and completed in `12.75s`.
+- Route gate: `npm.cmd run test:ui -- src/app/routes.test.tsx` passed `1/1` file and `17/17` tests. Motion emitted its known reduced-motion informational warning during the non-admin Sales Report case.
+
+### Hardening results
+
+- Every audited Admin spinner, pulse skeleton, and explicit transition now has the approved reduced-motion fallback.
+- Every audited animated `Loader2` is decorative when adjacent visible copy already names the state.
+- Every Admin column header found by the contract has `scope="col"`; the discount-usage table also has an accessible caption.
+- Audited destructive, warning, and error presentation now uses `app-status-*` tokens instead of classes that were legible in only one theme.
+- Admin auth/profile loading gates expose polite status semantics without changing error, access-denied, redirect, retry, or logout behavior.
+- Dashboard reminder transport failures remain visible in-page, retry the unchanged `{ daysAhead: 7 }` request, and retain the previous run result.
+
+### Scope and manual QA
+
+- `git diff --check origin/main...HEAD` and `git diff --check 54bc6a74^ HEAD` reported no whitespace errors.
+- The Phase 4 range contains only the approved Admin hardening spec/plan, two focused tests, and Admin UI presentation files. No backend, service-contract, package, lockfile, auth, billing, entitlement, classification, localStorage, sync, or route behavior changed.
+- Authenticated manual visual QA is not claimed. This worktree/session has no reusable Firebase Admin login, Playwright storage state, or Admin credentials, so protected routes could not be inspected at approximately 1440px, 1024px, and 390px in light and dark themes.
