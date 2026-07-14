@@ -591,3 +591,40 @@ git commit -m "docs(admin): record phase 3 verification"
 ```
 
 Do not create an empty documentation commit. Do not start Phase 4 until this record is committed and the worktree is clean.
+
+---
+
+## Execution Record — 2026-07-14
+
+### Implementation commits
+
+- `39516c27 feat(admin): align catalog operations workspace`
+- `b88c0d56 feat(admin): align email history workspace`
+- `2f857db5 feat(admin): align system settings status`
+- `916ffef7 feat(admin): align audit log workspace`
+- `acbf4694 feat(admin): align order detail workspace`
+- `5b961734 feat(admin): align user detail workspace`
+- `a30bbf20 fix(admin): keep access states above welcome guidance`
+
+The integration hotfix suppresses the automatic new-user welcome guide on `/admin/*`. The existing non-admin Sales Report route test reproduced that the Radix dialog hid the Admin access-denied state from the accessibility tree; after the minimal shell change, the complete route file passed twice without changing route registration, authorization, or report loading behavior.
+
+### Automated verification
+
+- Focused Phase 3 UI set: `6/6` files and `23/23` tests passed.
+- TypeScript: `npm.cmd run typecheck` exited `0`.
+- Biome: `npm.cmd run lint` exited `0`, checked `1034` files, and reported one non-failing existing `useTemplate` info at `src/app/components/admin/AdminPagination.tsx:27`.
+- Fast test suite: `npm.cmd run test:run` exited `0`; the suite contains `138` files and `1361` tests.
+- Production build: `npm.cmd run build` exited `0`, transformed `3066` modules, and completed in `17.53s`.
+- Route gate: `npm.cmd run test:ui -- src/app/routes.test.tsx` passed twice with `1/1` file and `17/17` tests. Motion emitted its known reduced-motion informational warning during the non-admin Sales Report case.
+- Targeted shell lint: `biome lint src/app/components/root-layout/AppShellLayout.tsx` checked one file with no fixes or findings.
+
+### Scope and repository checks
+
+- `git diff --check origin/main...HEAD` and `git diff --check f9ab73cd^ HEAD` reported no whitespace errors.
+- The Phase 3 range contains the approved six page slices and tests, the Phase 3 design/plan documents, and the single shared-shell integration hotfix described above.
+- No backend, admin service contract, package, lockfile, auth, billing, entitlement, localStorage, sync, or business-data behavior changed.
+- The isolated worktree was clean after the implementation commits and before this execution record was added.
+
+### Manual QA status
+
+Authenticated manual visual QA is not claimed. This worktree has no reusable Firebase admin session, Playwright storage state, or admin credentials, so the six protected routes could not be inspected at approximately 1440px, 1024px, and 390px in light and dark themes. Phase 4 must retain this as an explicit verification blocker unless an authenticated session becomes available.
