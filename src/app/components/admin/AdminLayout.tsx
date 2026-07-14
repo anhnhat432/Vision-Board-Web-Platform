@@ -63,7 +63,7 @@ export function AdminLayout() {
   if (!isConfigured) {
     return (
       <AdminStatusCard
-        icon={<AlertTriangle className="h-7 w-7 text-amber-300" />}
+        icon={<AlertTriangle className="h-7 w-7 text-app-status-warning" />}
         title="Chưa cấu hình đăng nhập"
         description="Trang quản trị cần đăng nhập và máy chủ sản xuất để kiểm soát hệ thống."
       />
@@ -107,7 +107,7 @@ export function AdminLayout() {
   if (!userProfile) {
     return (
       <AdminStatusCard
-        icon={<AlertTriangle className="h-7 w-7 text-amber-300" />}
+        icon={<AlertTriangle className="h-7 w-7 text-app-status-warning" />}
         title="Không tải được hồ sơ"
         description={
           userProfileError ||
@@ -137,7 +137,7 @@ export function AdminLayout() {
   if (userProfile.role !== "admin") {
     return (
       <AdminStatusCard
-        icon={<AlertTriangle className="h-7 w-7 text-rose-300" />}
+        icon={<AlertTriangle className="h-7 w-7 text-app-status-error" />}
         title="Không có quyền quản trị"
         description="Tài khoản này chưa có quyền quản trị, hoặc hồ sơ chưa được làm mới sau khi bạn cập nhật quyền."
         action={

@@ -67,8 +67,8 @@ const PAYER_SOURCE_LABELS = {
 } as const;
 
 const PAYER_SOURCE_CLASS_NAMES = {
-  internal: "text-amber-700 dark:text-amber-300",
-  external: "text-emerald-700 dark:text-emerald-300",
+  internal: "text-app-status-warning",
+  external: "text-app-status-success",
   unknown: "text-app-ink-muted",
 } as const;
 

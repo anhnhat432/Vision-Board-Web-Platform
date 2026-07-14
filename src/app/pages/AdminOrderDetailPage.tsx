@@ -430,13 +430,13 @@ export function AdminOrderDetailPage() {
               {order.cancelledAt ? (
                 <div>
                   <span className="text-app-ink-muted">Hủy lúc:</span>{" "}
-                  <span className="text-rose-500">{formatDate(order.cancelledAt)}</span>
+                  <span className="text-app-status-error">{formatDate(order.cancelledAt)}</span>
                 </div>
               ) : null}
               {order.deliveredAt ? (
                 <div>
                   <span className="text-app-ink-muted">Giao lúc:</span>{" "}
-                  <span className="text-emerald-500">{formatDate(order.deliveredAt)}</span>
+                  <span className="text-app-status-success">{formatDate(order.deliveredAt)}</span>
                 </div>
               ) : null}
             </div>

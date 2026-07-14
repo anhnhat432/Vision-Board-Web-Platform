@@ -419,7 +419,7 @@ export function AdminUserDetailPage() {
                 type="button"
                 variant="outline"
                 size="sm"
-                className="w-full gap-1.5 border-app-line text-app-ink-muted transition-colors duration-150 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600 motion-reduce:transition-none dark:hover:border-rose-500/30 dark:hover:bg-rose-500/10 dark:hover:text-rose-400"
+                className="w-full gap-1.5 border-app-line text-app-ink-muted transition-colors duration-150 hover:border-app-status-error/30 hover:bg-app-status-error/10 hover:text-app-status-error motion-reduce:transition-none"
                 disabled={subUpdating}
                 onClick={() => openSubConfirm("FREE")}
               >

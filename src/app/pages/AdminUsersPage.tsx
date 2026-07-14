@@ -402,7 +402,7 @@ export function AdminUsersPage() {
             </Button>
           ) : null}
           {selectionMessage ? (
-            <p role="status" aria-live="polite" className="text-sm text-amber-700">
+            <p role="status" aria-live="polite" className="text-sm text-app-status-warning">
               {selectionMessage}
             </p>
           ) : null}
@@ -416,14 +416,14 @@ export function AdminUsersPage() {
       {error ? (
         <div
           role="alert"
-          className="rounded-[var(--r-card)] border border-rose-300 bg-rose-50 p-4 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200"
+          className="rounded-[var(--r-card)] border border-app-status-error/30 bg-app-status-error/10 p-4 text-sm text-app-status-error"
         >
           {error}
           <Button
             type="button"
             variant="ghost"
             size="sm"
-            className="ml-2 text-rose-700 dark:text-rose-200 underline"
+            className="ml-2 text-app-status-error underline"
             onClick={() => void loadUsers(activeParams)}
           >
             Thử lại

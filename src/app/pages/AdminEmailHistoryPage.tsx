@@ -169,7 +169,7 @@ export function AdminEmailHistoryPage() {
                         {EMAIL_STATUS_LABELS[evt.status] ?? evt.status}
                       </AdminStatusBadge>
                     </TableCell>
-                    <TableCell className="max-w-[200px] truncate text-xs text-rose-500">
+                    <TableCell className="max-w-[200px] truncate text-xs text-app-status-error">
                       {evt.error || "—"}
                     </TableCell>
                     <TableCell className="text-xs text-app-ink-soft">

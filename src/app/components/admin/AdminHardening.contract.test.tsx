@@ -75,4 +75,34 @@ describe("Admin hardening contract", () => {
 
     expect(violations).toEqual([]);
   });
+
+  it("gives every Admin column header an explicit scope", () => {
+    const violations = findTagViolations(
+      /<(?:th|TableHead)\b[^>]*>/g,
+      (tag) => !tag.includes('scope="col"'),
+    );
+
+    expect(violations).toEqual([]);
+  });
+
+  it("does not use the audited single-theme semantic classes", () => {
+    const forbidden = [
+      "text-rose-200",
+      "text-rose-100",
+      "text-red-700",
+      "text-rose-600",
+      "text-rose-500",
+      "text-amber-700",
+      "text-amber-900",
+      "text-amber-300",
+      "text-rose-300",
+      "border-amber-200",
+      "bg-amber-50",
+    ];
+    const violations = findLineViolations((line) =>
+      forbidden.some((className) => line.includes(className)),
+    ).filter((finding) => !finding.startsWith("components/admin/AdminStatusBadge.tsx:"));
+
+    expect(violations).toEqual([]);
+  });
 });

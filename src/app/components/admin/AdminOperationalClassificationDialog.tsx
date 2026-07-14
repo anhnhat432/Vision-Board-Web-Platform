@@ -167,12 +167,12 @@ export function AdminOperationalClassificationDialog({
 
         <div className="grid gap-4">
           {targetType === "user" ? (
-            <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+            <p className="rounded-lg border border-app-status-warning/30 bg-app-status-warning/10 p-3 text-sm text-app-status-warning">
               Phân loại tài khoản sẽ áp dụng cho Plus, thanh toán và in ấn trong báo cáo.
             </p>
           ) : null}
           {disableRealCategory && disabledRealCategoryReason ? (
-            <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+            <p className="rounded-lg border border-app-status-warning/30 bg-app-status-warning/10 p-3 text-sm text-app-status-warning">
               {disabledRealCategoryReason}
             </p>
           ) : null}
@@ -230,7 +230,7 @@ export function AdminOperationalClassificationDialog({
           <p className="text-xs text-app-ink-soft">
             Không nhập mật khẩu, secret, thông tin ngân hàng hoặc dữ liệu khách hàng không cần thiết vào ghi chú.
           </p>
-          {currentError ? <p role="alert" className="text-sm text-red-700">{currentError}</p> : null}
+          {currentError ? <p role="alert" className="text-sm text-app-status-error">{currentError}</p> : null}
         </div>
 
         <AlertDialogFooter>

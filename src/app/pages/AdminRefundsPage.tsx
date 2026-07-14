@@ -214,7 +214,7 @@ export function AdminRefundsPage() {
                     type="button"
                     size="sm"
                     variant="outline"
-                    className="border-rose-500/30 bg-rose-500/10 text-rose-200 hover:bg-rose-500/20 hover:text-rose-100"
+                    className="border-app-status-error/30 bg-app-status-error/10 text-app-status-error hover:bg-app-status-error/20 hover:text-app-status-error"
                     disabled={busyId === request.id}
                     onClick={() => openConfirm(request, "rejected")}
                   >

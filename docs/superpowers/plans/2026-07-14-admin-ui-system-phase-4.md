@@ -248,7 +248,7 @@ Add inside the existing `describe` block:
 npm.cmd run test:ui -- src/app/components/admin/AdminHardening.contract.test.tsx -t "column header|single-theme"
 ```
 
-Expected: four header findings and the exact audited theme findings fail.
+Expected: seven header findings and the exact audited theme findings fail.
 
 - [ ] **Step 3: Fix table relationships**
 

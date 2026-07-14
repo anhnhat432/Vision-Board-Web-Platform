@@ -875,11 +875,12 @@ export function AdminDiscountsPage() {
           ) : (
             <div className="max-h-96 overflow-y-auto">
               <Table>
+                <TableCaption className="sr-only">Lịch sử sử dụng discount</TableCaption>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Người dùng</TableHead>
-                    <TableHead>Đơn hàng</TableHead>
-                    <TableHead>Thời gian</TableHead>
+                    <TableHead scope="col">Người dùng</TableHead>
+                    <TableHead scope="col">Đơn hàng</TableHead>
+                    <TableHead scope="col">Thời gian</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

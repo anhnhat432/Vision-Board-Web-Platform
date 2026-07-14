@@ -180,7 +180,7 @@ export function AdminSidebar({ email, onLogout, pendingCounts, onNavigate }: Adm
         <Button
           type="button"
           variant="ghost"
-          className="w-full justify-start gap-2 rounded-lg text-app-ink-muted transition-colors duration-150 hover:bg-rose-50 hover:text-rose-600 motion-reduce:transition-none dark:hover:bg-rose-500/10 dark:hover:text-rose-400"
+          className="w-full justify-start gap-2 rounded-lg text-app-ink-muted transition-colors duration-150 hover:bg-app-status-error/10 hover:text-app-status-error motion-reduce:transition-none"
           onClick={onLogout}
         >
           <LogOut className="h-4 w-4" />

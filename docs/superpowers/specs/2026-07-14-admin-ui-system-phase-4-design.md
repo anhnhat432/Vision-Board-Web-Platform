@@ -18,7 +18,7 @@ The source audit across production `Admin*.tsx` pages and Admin components found
 - `31` `animate-spin` or `animate-pulse` occurrences without `motion-reduce:animate-none`;
 - `13` explicit transitions without `motion-reduce:transition-none`;
 - `19` animated `Loader2` icons without `aria-hidden="true"` even when visible text already names the operation;
-- `4` table header cells without `scope="col"` in the discount-usage dialog and the Sales Report fallback table;
+- `7` table header cells without `scope="col"` in the discount-usage dialog and the Sales Report fallback table;
 - destructive actions in Orders and Refunds that use `text-rose-200` in light mode, plus warning/error copy that bypasses the existing `app-status-*` theme tokens;
 - Dashboard reminder-run transport failures communicated only through a toast even though this is a multi-record Admin operation.
 
