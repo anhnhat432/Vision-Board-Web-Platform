@@ -210,7 +210,7 @@ function getScoreFeedback(score: number): { emoji: string; text: string; color: 
   if (score <= 4) return { emoji: "🌿", text: "Còn nhiều chỗ để phát triển", color: "var(--app-status-warning)" };
   if (score <= 6) return { emoji: "🍀", text: "Tạm ổn, có thể tốt hơn", color: "var(--app-status-warning)" };
   if (score <= 8) return { emoji: "🌳", text: "Khá tốt, giữ vững nhé", color: "var(--app-status-success)" };
-  return { emoji: "✨", text: "Tuyệt vời!", color: "#16A34A" };
+  return { emoji: "✨", text: "Tuyệt vời!", color: "var(--app-status-success)" };
 }
 
 export function Onboarding() {
@@ -506,7 +506,7 @@ export function Onboarding() {
           ) : (
             <>
               {isReturning ? (
-                <div className="flex items-start gap-3 rounded-[14px] border border-app-accent/20 bg-app-accent-subtle px-4 py-3.5 sm:items-center sm:px-[18px]">
+                <div className="flex items-start gap-3 rounded-card border border-app-accent/20 bg-app-accent-subtle px-4 py-3.5 sm:items-center sm:px-[18px]">
                   <svg
                     width="18"
                     height="18"
@@ -522,7 +522,7 @@ export function Onboarding() {
                     <path d="M21.801 10A10 10 0 1 1 17 3.335" />
                     <path d="m9 11 3 3L22 4" />
                   </svg>
-                  <span className="text-[13px] leading-relaxed text-[#3F4A3F]">
+                  <span className="text-[13px] leading-relaxed text-app-ink-soft">
                     <strong className="font-semibold text-app-accent">Cập nhật điểm hiện tại.</strong> Điểm cũ đã được
                     tải sẵn, bạn chỉ điều chỉnh phần thay đổi, không tạo lại từ đầu.
                   </span>
@@ -644,7 +644,7 @@ export function Onboarding() {
           </aside>
 
           <div className="order-1 min-w-0 space-y-4 sm:space-y-[18px] lg:order-1">
-            <div className="rounded-card border border-app-line/60 bg-white px-4 py-4 sm:rounded-[20px] sm:px-6 sm:py-[22px]">
+            <div className="rounded-card border border-app-line/60 bg-app-surface px-4 py-4 sm:rounded-[20px] sm:px-6 sm:py-[22px]">
               <p className="mb-3 text-[10px] font-extrabold uppercase tracking-[0.1em] text-app-ink-muted sm:mb-[14px]">
                 Chọn lĩnh vực đang rà
               </p>
@@ -693,12 +693,12 @@ export function Onboarding() {
                   initial={prefersReducedMotion ? {} : { opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.25, ease: "easeOut" }}
-                  className="rounded-card border border-app-line/60 bg-white px-4 py-5 sm:rounded-[20px] sm:px-[26px] sm:py-6"
+                  className="rounded-card border border-app-line/60 bg-app-surface px-4 py-5 sm:rounded-[20px] sm:px-[26px] sm:py-6"
                 >
                   <div className="mb-4 flex items-start justify-between gap-3 sm:mb-5 sm:items-center sm:gap-4">
                     <div className="flex min-w-0 items-center gap-3 sm:gap-[14px]">
                       <span
-                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-control sm:h-12 sm:w-12 sm:rounded-[13px]"
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-control sm:h-12 sm:w-12 sm:rounded-control"
                         style={{ background: designStyle.bg, color: designStyle.accent }}
                       >
                         <AreaIcon className="h-5 w-5 sm:h-[22px] sm:w-[22px]" aria-hidden="true" />
@@ -718,7 +718,7 @@ export function Onboarding() {
                       </div>
                     </div>
                     <div
-                      className="shrink-0 rounded-control border border-app-line/60 px-3 py-[9px] text-right sm:rounded-[13px] sm:px-4 sm:py-[11px]"
+                      className="shrink-0 rounded-control border border-app-line/60 px-3 py-[9px] text-right sm:rounded-control sm:px-4 sm:py-[11px]"
                       style={{ background: "var(--app-bg-subtle)" }}
                     >
                       <p className="mb-[3px] text-[9.5px] font-bold uppercase tracking-[0.08em] text-app-ink-muted">
@@ -734,7 +734,7 @@ export function Onboarding() {
                     </div>
                   </div>
 
-                  <div className="mb-5 rounded-[13px] border border-app-line/60 bg-app-bg-subtle p-4 sm:mb-[22px] sm:rounded-[14px] sm:p-[18px_20px]">
+                  <div className="mb-5 rounded-control border border-app-line/60 bg-app-bg-subtle p-4 sm:mb-[22px] sm:p-[18px_20px]">
                     <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.1em] text-app-ink-muted sm:mb-[9px]">
                       Câu hỏi đánh giá
                     </p>
@@ -790,7 +790,7 @@ export function Onboarding() {
                       {isMobile ? (
                         <button
                           type="button"
-                          className="inline-flex items-center gap-1.5 rounded-full border border-app-line/60 bg-app-bg-subtle px-3 py-1.5 text-[11px] font-semibold text-app-ink-soft transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+                          className="inline-flex items-center gap-1.5 rounded-full border border-app-line/60 bg-app-bg-subtle px-3 py-1.5 text-[11px] font-semibold text-app-ink-soft transition-colors hover:bg-app-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
                           onClick={() => setIsScoreGuideOpen((current) => !current)}
                           aria-expanded={isScoreGuideOpen}
                           aria-controls="onboarding-score-guide"
@@ -805,7 +805,7 @@ export function Onboarding() {
                       ) : null}
                     </div>
                     {isMobile ? (
-                      <div className="flex items-center gap-[11px] rounded-[11px] border border-app-accent/20 bg-app-accent-subtle p-[11px_14px]">
+                      <div className="flex items-center gap-[11px] rounded-control border border-app-accent/20 bg-app-accent-subtle p-[11px_14px]">
                         <span className="shrink-0 rounded-[7px] bg-app-accent px-[9px] py-[3px] font-mono text-[11.5px] font-bold text-white">
                           {getActiveScoreAnchor(area.score)?.range}
                         </span>
@@ -830,17 +830,17 @@ export function Onboarding() {
                         return (
                           <div
                             key={anchor.range}
-                            className="flex items-center gap-[11px] rounded-[11px] border p-[11px_14px]"
+                            className="flex items-center gap-[11px] rounded-control border p-[11px_14px]"
                             style={{
                               borderColor: isActive ? "var(--app-accent-border, rgba(12,94,58,0.3))" : "var(--app-line)",
-                              background: isActive ? "var(--app-accent-subtle)" : "#fff",
+                              background: isActive ? "var(--app-accent-subtle)" : "var(--app-surface)",
                             }}
                           >
                             <span
                               className="shrink-0 rounded-[7px] px-[9px] py-[3px] font-mono text-[11.5px] font-bold"
                               style={{
                                 background: isActive ? "var(--app-accent)" : "var(--app-bg)",
-                                color: isActive ? "#fff" : "#8C887C",
+                                color: isActive ? "#fff" : "var(--app-ink-muted)",
                               }}
                             >
                               {anchor.range}
@@ -864,7 +864,7 @@ export function Onboarding() {
                   <div className="mb-[11px] flex items-center justify-between">
                     <span className="text-[13px] font-semibold text-app-ink">Hoặc kéo thanh trượt</span>
                     <span
-                      className="inline-flex items-center rounded-[999px] border border-[rgba(231,164,0,0.25)] px-[11px] py-1 font-mono text-xs font-semibold"
+                      className="inline-flex items-center rounded-pill border border-[rgba(231,164,0,0.25)] px-[11px] py-1 font-mono text-xs font-semibold"
                       style={{ background: "#FFF8DE", color: "#9A7B00" }}
                     >
                       {area.score}đ · {getActiveScoreAnchor(area.score)?.label}
@@ -873,7 +873,7 @@ export function Onboarding() {
                   <div className="mb-[22px] flex items-center gap-3 sm:mb-[26px] sm:gap-[14px]">
                     <button
                       type="button"
-                      className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-app-line/60 bg-white font-[inherit] text-[20px] font-semibold text-app-ink-soft transition-colors hover:bg-app-bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:h-10 sm:w-10"
+                      className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-app-line/60 bg-app-surface font-[inherit] text-[20px] font-semibold text-app-ink-soft transition-colors hover:bg-app-bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:h-10 sm:w-10"
                       onClick={() => handleScoreChangeWrapped(index, [Math.max(0, area.score - 1)])}
                       aria-label="Giảm 1 điểm"
                     >
@@ -893,7 +893,7 @@ export function Onboarding() {
                     />
                     <button
                       type="button"
-                      className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-app-line/60 bg-white font-[inherit] text-[20px] font-semibold text-app-ink-soft transition-colors hover:bg-app-bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:h-10 sm:w-10"
+                      className="flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full border border-app-line/60 bg-app-surface font-[inherit] text-[20px] font-semibold text-app-ink-soft transition-colors hover:bg-app-bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:h-10 sm:w-10"
                       onClick={() => handleScoreChangeWrapped(index, [Math.min(10, area.score + 1)])}
                       aria-label="Tăng 1 điểm"
                     >
@@ -904,7 +904,7 @@ export function Onboarding() {
                   <div className="flex flex-col gap-3 border-t border-app-line/60 pt-5 sm:flex-row sm:items-center sm:justify-between">
                     <button
                       type="button"
-                      className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-[11px] border border-app-line/60 bg-white px-[18px] py-[11px] font-[inherit] text-[13px] font-semibold text-app-ink-soft transition-colors hover:bg-app-bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto sm:justify-start"
+                      className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-control border border-app-line/60 bg-app-surface px-[18px] py-[11px] font-[inherit] text-[13px] font-semibold text-app-ink-soft transition-colors hover:bg-app-bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto sm:justify-start"
                       disabled={index === 0}
                       onClick={() => setActiveAreaIndex(index - 1)}
                     >
@@ -928,7 +928,7 @@ export function Onboarding() {
                     <div className="flex w-full min-w-0 flex-col-reverse gap-2.5 sm:w-auto sm:flex-row sm:items-center sm:gap-[14px]">
                       <button
                         type="button"
-                        className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-[11px] border border-app-line/60 bg-white px-4 py-2.5 font-[inherit] text-[13px] font-semibold text-app-ink-muted transition-colors hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:min-h-0 sm:w-auto sm:justify-start sm:rounded-none sm:border-none sm:bg-transparent sm:px-0 sm:py-0"
+                        className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-control border border-app-line/60 bg-app-surface px-4 py-2.5 font-[inherit] text-[13px] font-semibold text-app-ink-muted transition-colors hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:min-h-0 sm:w-auto sm:justify-start sm:rounded-none sm:border-none sm:bg-transparent sm:px-0 sm:py-0"
                         onClick={() => {
                           handleSkipArea(index);
                           if (index < 7) setActiveAreaIndex(index + 1);
@@ -940,7 +940,7 @@ export function Onboarding() {
                       <motion.button
                         type="button"
                         whileTap={prefersReducedMotion ? {} : { scale: 0.97 }}
-                        className="dof-primary inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-[9px] rounded-[11px] border-none px-[22px] py-3 font-[inherit] text-[13.5px] font-bold text-white transition-[transform,box-shadow] duration-[0.18s] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:min-h-0 sm:w-auto"
+                        className="dof-primary inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-[9px] rounded-control border-none px-[22px] py-3 font-[inherit] text-[13.5px] font-bold text-white transition-[transform,box-shadow] duration-[0.18s] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:min-h-0 sm:w-auto"
                         style={{
                           background: designStyle.accent,
                           boxShadow: `0 12px 26px -14px ${designStyle.accent}cc`,
@@ -967,7 +967,7 @@ export function Onboarding() {
               <div
                 role="status"
                 aria-live="polite"
-                className="flex items-start gap-3 rounded-[14px] border border-app-accent/20 bg-app-accent-subtle p-4"
+                className="flex items-start gap-3 rounded-card border border-app-accent/20 bg-app-accent-subtle p-4"
               >
                 <svg
                   width="16"
@@ -985,7 +985,7 @@ export function Onboarding() {
                   <path d="M12 16v-4" />
                   <path d="M12 8h.01" />
                 </svg>
-                <p className="text-[13px] font-medium leading-[var(--text-lg--line-height)] text-[#3F4A3F]">
+                <p className="text-[13px] font-medium leading-[var(--text-lg--line-height)] text-app-ink-soft">
                   Còn <strong className="font-semibold text-app-accent">{remainingAreaCount} khía cạnh</strong> chưa
                   chấm. Bạn có thể chọn trọng tâm với điểm mặc định 5 cho phần còn lại.
                 </p>
@@ -996,12 +996,12 @@ export function Onboarding() {
 
         <footer
           data-onboarding-bottom-nav
-          className="sticky bottom-0 z-10 -mx-4 flex flex-col gap-3 border-t border-app-line/60 bg-app-bg/80 px-4 py-4 backdrop-blur-sm sm:mx-0 sm:flex-row sm:items-center sm:justify-between sm:gap-[14px] sm:rounded-t-card sm:bg-white/80 sm:px-6"
+          className="sticky bottom-0 z-10 -mx-4 flex flex-col gap-3 border-t border-app-line/60 bg-app-bg/80 px-4 py-4 backdrop-blur-sm sm:mx-0 sm:flex-row sm:items-center sm:justify-between sm:gap-[14px] sm:rounded-t-card sm:bg-app-surface/80 sm:px-6"
         >
           <div className="flex w-full flex-col gap-2.5 sm:w-auto sm:flex-row sm:items-center sm:gap-4">
             <button
               type="button"
-              className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-[11px] border border-app-line/60 bg-white px-[18px] py-3 font-[inherit] text-[13px] font-semibold text-app-ink-soft transition-colors hover:bg-app-bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto sm:justify-start"
+              className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-control border border-app-line/60 bg-app-surface px-[18px] py-3 font-[inherit] text-[13px] font-semibold text-app-ink-soft transition-colors hover:bg-app-bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto sm:justify-start"
               onClick={() => setStep("welcome")}
             >
               <svg
@@ -1022,7 +1022,7 @@ export function Onboarding() {
             </button>
             <button
               type="button"
-              className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-[11px] px-4 py-2.5 font-[inherit] text-[13px] font-semibold text-app-ink-muted transition-colors hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:min-h-0 sm:w-auto sm:justify-start sm:px-0 sm:py-0"
+              className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-control px-4 py-2.5 font-[inherit] text-[13px] font-semibold text-app-ink-muted transition-colors hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:min-h-0 sm:w-auto sm:justify-start sm:px-0 sm:py-0"
               onClick={handleDefer}
             >
               Để sau
@@ -1031,7 +1031,7 @@ export function Onboarding() {
           <button
             id="btn-complete-onboarding"
             type="button"
-            className="dof-primary inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-[9px] rounded-[13px] border-none bg-app-accent px-[26px] py-[13px] font-[inherit] text-[14px] font-bold text-white shadow-[0_14px_30px_-14px_rgba(12,94,58,0.8)] transition-[transform,box-shadow] duration-[0.18s] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto"
+            className="dof-primary inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-[9px] rounded-control border-none bg-app-accent px-[26px] py-[13px] font-[inherit] text-[14px] font-bold text-white shadow-[0_14px_30px_-14px_rgba(12,94,58,0.8)] transition-[transform,box-shadow] duration-[0.18s] hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto"
             onClick={canCompleteAssessment ? handleComplete : handleDeferAssessment}
           >
             Chọn trọng tâm

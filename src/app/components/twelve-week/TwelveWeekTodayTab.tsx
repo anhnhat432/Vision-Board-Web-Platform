@@ -933,7 +933,7 @@ export function TwelveWeekTodayTab({
                   )}
                 </details>
               )}
-              <div className="rounded-[14px] border border-app-line dark:border-app-line bg-app-bg-subtle p-[16px_18px]">
+              <div className="rounded-card border border-app-line dark:border-app-line bg-app-bg-subtle p-[16px_18px]">
                 <div className="flex items-center justify-between mb-[9px]">
                   <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-app-ink-muted">
                     Tiến độ tuần {currentWeek}

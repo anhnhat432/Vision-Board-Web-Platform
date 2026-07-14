@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 
-import { requireAuthUser } from "./controllerHelpers";
+import { getParam, requireAuthUser } from "./controllerHelpers";
 import { createRefundRequest, getRefundPolicyConfig, listRefundRequests, resolveRefundRequest } from "../services/refundService";
 import type { RefundRequestStatus } from "../models/refundRequestModel";
 import { ApiError } from "../utils/apiError";

@@ -507,15 +507,15 @@ export function LifeBalance() {
             </p>
           </div>
           <div className="min-w-0 overflow-hidden rounded-[16px] border border-[rgba(176,103,60,0.22)] bg-[#F4ECDD] p-3 dark:border-app-line dark:bg-app-bg-subtle sm:rounded-card sm:p-5 md:p-6">
-            <p className="mb-2 text-[8.5px] font-bold uppercase leading-[1.35] tracking-[0.12em] text-[#A07A4A] sm:mb-3.5 sm:text-[10px]">
+            <p className="mb-2 text-[8.5px] font-bold uppercase leading-[1.35] tracking-[0.12em] text-[#A07A4A] dark:text-app-ink-muted sm:mb-3.5 sm:text-[10px]">
               <span className="sm:hidden">Ưu tiên</span>
               <span className="hidden sm:inline">Lĩnh vực cần ưu tiên</span>
             </p>
-            <p className="font-[family-name:var(--app-font-serif)] text-[25px] font-extrabold leading-none text-[#8A5A2B] sm:text-[38px]">
+            <p className="font-[family-name:var(--app-font-serif)] text-[25px] font-extrabold leading-none text-[#8A5A2B] dark:text-app-ink sm:text-[38px]">
               <CountUp value={weakestArea.score} />
-              <span className="ml-0.5 text-xs font-bold text-[#B79B72] sm:ml-1 sm:text-lg">/10</span>
+              <span className="ml-0.5 text-xs font-bold text-[#B79B72] dark:text-app-ink-muted sm:ml-1 sm:text-lg">/10</span>
             </p>
-            <p className="mt-2.5 flex min-w-0 items-center gap-1.5 text-[11px] font-semibold leading-snug text-[#8A5A2B] sm:mt-3.5 sm:text-[13px]">
+            <p className="mt-2.5 flex min-w-0 items-center gap-1.5 text-[11px] font-semibold leading-snug text-[#8A5A2B] dark:text-app-ink sm:mt-3.5 sm:text-[13px]">
               <span
                 className="inline-block h-2 w-2 shrink-0 rounded-full"
                 style={{ backgroundColor: getAreaColorConfig(weakestArea.name).accent }}
@@ -578,10 +578,10 @@ export function LifeBalance() {
                       <Target className="h-5 w-5" aria-hidden="true" />
                     </span>
                     <div className="min-w-0">
-                      <h2 className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-[#8A5A2B]">
+                      <h2 className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-[#8A5A2B] dark:text-app-ink">
                         Trọng tâm hành động đề xuất
                       </h2>
-                      <p className="text-xs text-[#A07A4A] mt-0.5">Tìm ra điểm nghẽn cuộc sống</p>
+                      <p className="text-xs text-[#A07A4A] dark:text-app-ink-muted mt-0.5">Tìm ra điểm nghẽn cuộc sống</p>
                     </div>
                   </header>
                   <p className="text-[13.5px] text-app-ink-soft mb-3 flex items-center gap-2 flex-wrap">
@@ -606,7 +606,7 @@ export function LifeBalance() {
                   </p>
                   <div className="flex items-start gap-3 bg-white dark:bg-app-surface border border-app-accent/15 rounded-[13px] p-3.5">
                     <Sparkles className="h-4.5 w-4.5 shrink-0 text-app-accent mt-0.5" aria-hidden="true" />
-                    <p className="max-w-[68ch] break-words text-xs leading-relaxed text-[#3F4A3F]">
+                    <p className="max-w-[68ch] break-words text-xs leading-relaxed text-app-ink-soft">
                       <strong className="text-app-accent">Hành động đề xuất:</strong>{" "}
                       {getFocusInsight(weakestArea, lifeAreas, getLifeAreaLabel(weakestArea.name)).tip}
                     </p>
@@ -629,7 +629,7 @@ export function LifeBalance() {
                           Cập nhật Bánh xe cuộc sống hằng tuần
                         </h3>
                       </div>
-                      <p className="text-[13px] leading-relaxed text-[#5C6B58] mb-4">
+                      <p className="text-[13px] leading-relaxed text-app-ink-soft mb-4">
                         Dành 1 phút phản tư nhanh và chấm điểm lại 8 khía cạnh để luôn làm chủ nhịp điệu cuộc sống.
                       </p>
                       <motion.button

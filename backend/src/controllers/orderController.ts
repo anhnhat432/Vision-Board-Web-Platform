@@ -5,7 +5,7 @@ import { recordCouponUsage } from "../services/discountService";
 import { getPaymentProviderAdapter } from "../services/paymentProviderRegistry";
 import { ApiError } from "../utils/apiError";
 import { successResponse } from "../utils/apiResponse";
-import { requireAuthUser } from "./controllerHelpers";
+import { getParam, getQuery, requireAuthUser } from "./controllerHelpers";
 
 function buildPhysicalOrderPaymentDiscount(physicalOrder: Awaited<ReturnType<typeof orderService.getOrder>>) {
   if (!physicalOrder.discount) return undefined;
@@ -49,13 +49,13 @@ export async function getOrders(req: Request, res: Response): Promise<void> {
 
 export async function getOrderById(req: Request, res: Response): Promise<void> {
   const user = requireAuthUser(req);
-  const order = await orderService.getOrder(user.uid, req.params.id);
+  const order = await orderService.getOrder(user.uid, getParam(req, "id"));
   res.status(200).json(successResponse(order));
 }
 
 export async function cancelOrder(req: Request, res: Response): Promise<void> {
   const user = requireAuthUser(req);
-  const order = await orderService.cancelOrder(user.uid, req.params.id);
+  const order = await orderService.cancelOrder(user.uid, getParam(req, "id"));
   res.status(200).json(successResponse(order));
 }
 
@@ -67,19 +67,19 @@ export async function adminGetOrders(req: Request, res: Response): Promise<void>
 
 export async function adminGetOrder(req: Request, res: Response): Promise<void> {
   requireAuthUser(req);
-  const order = await orderService.adminGetOrder(req.params.id);
+  const order = await orderService.adminGetOrder(getParam(req, "id"));
   res.status(200).json(successResponse(order));
 }
 
 export async function adminUpdateOrderStatus(req: Request, res: Response): Promise<void> {
   const user = requireAuthUser(req);
-  const order = await orderService.adminUpdateStatus(user.uid, req.params.id, req.body ?? {});
+  const order = await orderService.adminUpdateStatus(user.uid, getParam(req, "id"), req.body ?? {});
   res.status(200).json(successResponse(order));
 }
 
 export async function adminUpdateOrder(req: Request, res: Response): Promise<void> {
   requireAuthUser(req);
-  const order = await orderService.adminUpdateOrder(req.params.id, req.body ?? {});
+  const order = await orderService.adminUpdateOrder(getParam(req, "id"), req.body ?? {});
   res.status(200).json(successResponse(order));
 }
 
@@ -94,7 +94,7 @@ export async function adminUpdateOrder(req: Request, res: Response): Promise<voi
  */
 export async function createKitPaymentSession(req: Request, res: Response): Promise<void> {
   const user = requireAuthUser(req);
-  const orderId = req.params.id;
+  const orderId = getParam(req, "id");
 
   const physicalOrder = await orderService.getOrder(user.uid, orderId);
 
