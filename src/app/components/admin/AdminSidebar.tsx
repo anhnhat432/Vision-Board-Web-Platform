@@ -15,7 +15,7 @@ import {
 import type { ComponentType } from "react";
 import { NavLink } from "react-router";
 
-import { getAppMode, type AppMode } from "../../utils/app-mode";
+import { type AppMode, getAppMode } from "../../utils/app-mode";
 import { Button } from "../ui/button";
 import { cn } from "../ui/utils";
 
@@ -122,8 +122,9 @@ export function AdminSidebar({ email, onLogout, pendingCounts, onNavigate }: Adm
               <section key={group.id} aria-labelledby={headingId}>
                 <h2
                   id={headingId}
-                  className="mb-1.5 px-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-app-ink-muted"
+                  className="mb-2 flex items-center gap-2 rounded-[var(--r-control)] border border-app-line/60 bg-app-bg-subtle/70 px-2.5 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-app-ink-soft"
                 >
+                  <span className="h-3 w-0.5 rounded-full bg-app-accent" aria-hidden="true" />
                   {group.label}
                 </h2>
                 <div className="space-y-0.5">
@@ -153,10 +154,7 @@ export function AdminSidebar({ email, onLogout, pendingCounts, onNavigate }: Adm
                               />
                             ) : null}
                             <item.icon
-                              className={cn(
-                                "h-4 w-4 shrink-0",
-                                isActive ? "text-app-accent" : "text-app-ink-muted",
-                              )}
+                              className={cn("h-4 w-4 shrink-0", isActive ? "text-app-accent" : "text-app-ink-muted")}
                             />
                             <span className="flex-1 truncate">{item.label}</span>
                             {typeof badge === "number" && badge > 0 ? (
