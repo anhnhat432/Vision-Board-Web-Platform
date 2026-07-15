@@ -153,32 +153,56 @@ export function WeeklyReviewSummary({
           <p className="text-xs text-app-ink-soft leading-relaxed font-sans">{scoreInterpretation.advice}</p>
         </div>
 
-        {/* Tactic indicators compact grid */}
-        {mergedIndicators.length > 0 && (
-          <div className="space-y-3 pt-2 relative z-10">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted block">
-              Tiến độ hành động đã cam kết
-            </span>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {/* Tactic rows */}
+        {mergedIndicators.length > 0 ? (
+          <section className="relative z-10 rounded-card border border-app-line bg-app-surface">
+            <div className="flex items-center justify-between border-b border-app-line px-4 py-4 sm:px-5">
+              <h4 className="text-[15px] font-bold text-app-ink">Tiến độ hành động đã cam kết</h4>
+              <span className="text-sm font-semibold text-app-accent">{mergedIndicators.length} việc</span>
+            </div>
+            <div data-testid="weekly-tactics-list" className="divide-y divide-app-line">
               {mergedIndicators.map((indicator) => {
-                const { total, completed, percent } = getTacticProgress(indicator);
+                const { total, completed, percent, status } = getTacticProgress(indicator);
+                const statusLabel =
+                  status === "Done"
+                    ? "Hoàn thành"
+                    : status === "Behind"
+                      ? "Trễ hạn"
+                      : status === "In Progress"
+                        ? "Đang tiến hành"
+                        : "Chưa bắt đầu";
+                const statusClassName =
+                  status === "Done"
+                    ? "text-app-status-success"
+                    : status === "Behind"
+                      ? "text-app-status-error"
+                      : status === "In Progress"
+                        ? "text-app-status-warning"
+                        : "text-app-ink-muted";
+
                 return (
                   <div
                     key={indicator.id || indicator.name}
-                    className="flex items-center justify-between text-xs text-app-ink bg-app-bg-subtle/30 p-3 rounded-xl border border-app-line hover:bg-app-accent-subtle/15 transition-colors duration-200"
+                    className="grid min-w-0 gap-3 px-4 py-4 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center sm:px-5"
                   >
-                    <span className="min-w-0 max-w-[70%] break-words font-semibold leading-snug">
-                      {indicator.name}
+                    <div className="min-w-0">
+                      <p className="break-words text-[15px] font-semibold text-app-ink">{indicator.name}</p>
+                      <p className="mt-1 text-sm text-app-ink-soft">
+                        {completed}/{total || indicator.target || 1} {indicator.unit || "lần"}
+                      </p>
+                    </div>
+                    <span className="text-sm font-semibold text-app-ink-soft">
+                      {indicator.isCore ? "Cốt lõi" : "Tùy chọn"}
                     </span>
-                    <span className="font-mono text-[10px] text-app-accent font-bold shrink-0 bg-app-surface px-2.5 py-1 rounded-lg border border-app-line">
-                      {completed}/{total} ({percent}%)
+                    <span className={`text-sm font-bold ${statusClassName}`}>
+                      <span className="font-mono tabular-nums">{percent}%</span> · {statusLabel}
                     </span>
                   </div>
                 );
               })}
             </div>
-          </div>
-        )}
+          </section>
+        ) : null}
 
         <div className="grid gap-4 pt-2 sm:grid-cols-2 relative z-10">
           {/* Commitments kept/missed */}
@@ -284,7 +308,7 @@ export function WeeklyReviewSummary({
           <Button
             type="button"
             variant="outline"
-            className="min-h-11 rounded-xl border border-app-line bg-app-surface px-4.5 py-2.5 text-xs font-bold text-app-ink-soft transition-all hover:bg-app-bg weekly-btn-press inline-flex items-center gap-1.5"
+            className="min-h-11 rounded-xl border border-app-line bg-app-surface px-4.5 py-2.5 text-xs font-bold text-app-ink-soft transition-[background-color,color,border-color,box-shadow,opacity,transform] hover:bg-app-bg inline-flex items-center gap-1.5"
             onClick={onEditReview}
           >
             <Pencil className="h-3.5 w-3.5" />
@@ -295,7 +319,7 @@ export function WeeklyReviewSummary({
 
       {/* Next Week Action Card */}
       {nextWeekRecommendation && (
-        <div className="space-y-3 rounded-card-lg border border-app-warm-border/10 bg-app-warm-soft/20 p-4 shadow-xs weekly-card-lift sm:space-y-4 sm:p-5">
+        <div className="space-y-3 rounded-card-lg border border-app-warm-border/10 bg-app-warm-soft/20 p-4 sm:space-y-4 sm:p-5">
           <div className="space-y-1">
             <span className="text-[10px] font-bold uppercase tracking-wider text-app-warm block">
               Chuẩn bị tuần sau
@@ -308,7 +332,7 @@ export function WeeklyReviewSummary({
             {onAcceptNextWeekRecommendation && (
               <Button
                 type="button"
-                className="min-h-11 rounded-card bg-app-warm px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-app-warm-hover weekly-btn-press"
+                className="min-h-11 rounded-card bg-app-warm px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-app-warm-hover"
                 onClick={onAcceptNextWeekRecommendation}
               >
                 Áp dụng gợi ý tuần sau
@@ -318,7 +342,7 @@ export function WeeklyReviewSummary({
               <Button
                 type="button"
                 variant="outline"
-                className="min-h-11 rounded-card border-app-line bg-app-surface px-4 py-2 text-xs font-semibold text-app-ink-soft hover:bg-app-bg weekly-btn-press"
+                className="min-h-11 rounded-card border-app-line bg-app-surface px-4 py-2 text-xs font-semibold text-app-ink-soft hover:bg-app-bg"
                 onClick={onOpenTodayTab}
               >
                 Quay lại hôm nay
