@@ -121,16 +121,31 @@ afterEach(() => {
 });
 
 describe("TwelveWeekTodayTab — primary task hero", () => {
-  it("renders the compact mobile status strip before the hero and work grid", () => {
+  it("renders the primary action before secondary status and work regions", () => {
     render(<TwelveWeekTodayTab {...makeProps()} />);
 
-    const strip = screen.getByTestId("today-dashboard-cards");
     const hero = screen.getByTestId("today-primary-hero");
+    const strip = screen.getByTestId("today-dashboard-cards");
     const workGrid = screen.getByTestId("today-main-work-grid");
 
-    expect(strip).toHaveClass("order-0");
-    expect(strip.compareDocumentPosition(hero)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    expect(hero.compareDocumentPosition(workGrid)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(hero.compareDocumentPosition(strip)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(strip.compareDocumentPosition(workGrid)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  it("uses h2 for the primary task because the command bar owns h1", () => {
+    render(<TwelveWeekTodayTab {...makeProps()} />);
+
+    expect(screen.queryByRole("heading", { level: 1 })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: "Viết draft 800 từ" })).toBeInTheDocument();
+  });
+
+  it("uses a 7/5 cockpit grid and sticky desktop check-in", () => {
+    render(<TwelveWeekTodayTab {...makeProps()} />);
+
+    expect(screen.getByTestId("today-main-work-grid")).toHaveClass(
+      "lg:grid-cols-[minmax(0,7fr)_minmax(320px,5fr)]",
+    );
+    expect(screen.getByTestId("today-check-in-column")).toHaveClass("lg:sticky", "lg:top-28");
   });
 
   it("lets status chip text wrap instead of truncating on mobile", () => {
