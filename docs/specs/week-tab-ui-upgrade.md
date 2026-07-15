@@ -32,6 +32,11 @@ Mixed surface (12-week execution = core product flow). UI-only; no storage/sync/
    - TwelveWeekRescueNudge → compact: bỏ "•"+badge border noise, headline serif, suggestion 1 dòng (title truncate + hint truncate + button "Làm" inline), 245→226px.
    - WeeklyReviewForm → siết padding/spacing: hero p-8→p-6, body space-y-7→6, step card padding 1.5rem→1.25rem; body 1762→1694px, hero 315→299px.
    Giữ testid/data-suggestion-id/aria. Verify Playwright (rail circle 36/44px, rescue suggestion-id intact) + typecheck/lint/1395 test/build OK.
+7. Refine sau ảnh user:
+   - Rail: tuần đã review chốt hiện "✓" thay vì % (tránh checkmark + "0%" gây khó hiểu).
+   - WeeklyReviewForm readiness box: từ 4 cột dày → dạng hàng ngang chip gọn (127px, -34px).
+   - Step cards: bỏ shadow, border nhạt 40% opacity thay vì 1.5px solid line (nhẹ hơn).
+   Verify typecheck/lint/1395 test/build OK.
 
 ## Risks
 - Stepper restructure đụng JSX map → cần `Fragment` key; test không assert line structure → an toàn.

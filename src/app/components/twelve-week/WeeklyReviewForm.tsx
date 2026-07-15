@@ -268,7 +268,7 @@ export function WeeklyReviewForm({
 
         <div id="weekly-review-flow" data-testid="weekly-review-flow" className="space-y-6">
           {/* Step 1: Execution Score */}
-          <div data-testid="wam-section-score" className="weekly-review-step-card shadow-3xs hover:border-app-line-strong transition-all">
+          <div data-testid="wam-section-score" className="weekly-review-step-card hover:border-app-line-strong transition-all">
             <div
               data-testid="weekly-review-step-score"
               data-done="true"
@@ -313,7 +313,7 @@ export function WeeklyReviewForm({
           />
 
           {/* Step 2: Commitment Check */}
-          <div data-testid="wam-section-commitments" className="weekly-review-step-card shadow-3xs hover:border-app-line-strong transition-all">
+          <div data-testid="wam-section-commitments" className="weekly-review-step-card hover:border-app-line-strong transition-all">
             <div
               data-testid="weekly-review-step-commitments"
               data-done={allPreviousCommitmentsAnswered ? "true" : "false"}
@@ -394,7 +394,7 @@ export function WeeklyReviewForm({
           </div>
 
           {/* Step 3: Breakdown / Lesson */}
-          <div data-testid="wam-section-insights" className="weekly-review-step-card shadow-3xs hover:border-app-line-strong transition-all">
+          <div data-testid="wam-section-insights" className="weekly-review-step-card hover:border-app-line-strong transition-all">
             <div
               data-testid="weekly-review-step-insights"
               data-done={weeklyForm.insights.trim().length > 0 ? "true" : "false"}
@@ -422,7 +422,7 @@ export function WeeklyReviewForm({
           </div>
 
           {/* Step 4: Next Week Commitments */}
-          <div data-testid="wam-section-next-commitments" className="weekly-review-step-card shadow-3xs hover:border-app-line-strong transition-all">
+          <div data-testid="wam-section-next-commitments" className="weekly-review-step-card hover:border-app-line-strong transition-all">
             <div
               data-testid="weekly-review-step-next"
               data-done={hasNextWeekCommitment ? "true" : "false"}
@@ -451,29 +451,29 @@ export function WeeklyReviewForm({
         {/* Review readiness indicator */}
         <div
           data-testid="weekly-review-readiness"
-          className="space-y-3.5 weekly-readiness-box px-4 py-4.5 text-xs text-app-ink-soft"
+          className="weekly-readiness-box rounded-xl border border-app-line/40 bg-app-bg-subtle/30 px-4 py-3 text-xs text-app-ink-soft"
         >
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div className="min-w-0 space-y-1">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0 space-y-0.5">
               <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">
                 Checklist trước khi lưu
               </p>
               <p className="text-sm font-semibold text-app-ink">{reviewStatusTitle}</p>
               <p className="max-w-[65ch] text-xs leading-relaxed text-app-ink-soft">{reviewStatusHint}</p>
             </div>
-            <div className="shrink-0 rounded-xl border border-app-line/45 bg-app-surface px-4 py-2.5 sm:text-right shadow-3xs">
-              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-app-ink-muted leading-none">Tiến độ review</p>
-              <p className="text-lg font-serif font-bold text-app-accent mt-1 leading-none">{reviewReadyCount}/4</p>
+            <div className="shrink-0 rounded-lg border border-app-line/40 bg-app-surface px-3 py-1.5 text-right shadow-3xs">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-app-ink-muted leading-none">Tiến độ review</p>
+              <p className="text-base font-serif font-bold text-app-accent mt-0.5 leading-none">{reviewReadyCount}/4</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+          <div className="mt-3 flex flex-wrap items-center gap-2">
             {reviewReadinessItems.map((item) => (
               <div
                 key={item.key}
                 data-testid={`weekly-review-check-${item.key}`}
                 className={cn(
-                  "flex min-w-0 items-center gap-2.5 rounded-xl border px-3 py-2.5 text-xs font-semibold transition-all",
+                  "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold transition-all",
                   item.done
                     ? "border-app-accent/20 bg-app-accent-soft text-app-ink shadow-3xs"
                     : "border-app-line bg-app-surface text-app-ink-soft",
@@ -481,11 +481,11 @@ export function WeeklyReviewForm({
               >
                 <span
                   className={cn(
-                    "h-2 w-2 shrink-0 rounded-full",
+                    "h-1.5 w-1.5 shrink-0 rounded-full",
                     item.done ? "bg-app-accent shadow-[0_0_6px_rgba(42,84,71,0.35)]" : "bg-app-line-strong/50",
                   )}
                 />
-                <span className="min-w-0 break-words leading-snug">{item.label}</span>
+                <span className="min-w-0 truncate leading-snug">{item.label}</span>
               </div>
             ))}
           </div>

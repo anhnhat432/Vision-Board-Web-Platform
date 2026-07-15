@@ -103,7 +103,7 @@ export function WeeklyRail({
                     isSelected ? "text-app-ink" : "text-app-ink-soft",
                   )}
                 >
-                  {completion.isEmpty ? "—" : `${completion.percent}%`}
+                  {isCompleted ? "✓" : completion.isEmpty ? "—" : `${completion.percent}%`}
                 </span>
               </button>
             );

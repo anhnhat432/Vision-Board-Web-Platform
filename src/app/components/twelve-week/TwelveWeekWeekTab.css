@@ -410,7 +410,7 @@ html.dark .weekly-action-card-inprogress {
 /* Review Form Cards */
 .weekly-review-step-card {
   background: var(--app-surface);
-  border: 1.5px solid var(--app-line);
+  border: 1px solid color-mix(in srgb, var(--app-line) 40%, transparent);
   border-radius: var(--app-radius-card, 18px);
   padding: 1.25rem;
   transition: all 0.24s ease;
