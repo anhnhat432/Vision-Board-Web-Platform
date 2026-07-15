@@ -1,6 +1,7 @@
 import type { ComponentProps } from "react";
 import "@testing-library/jest-dom/vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { TwelveWeekSystem } from "@/app/utils/storage-types";
@@ -110,7 +111,39 @@ describe("TwelveWeekProgressTab", () => {
     expect(targetHelp).toHaveClass("h-11", "w-11", "sm:h-8", "sm:w-8");
   });
 
-  it("renders execution heatmap cells as accessible touch targets", () => {
+  it("renders one narrative h2 and no nested page h1", () => {
+    render(<TwelveWeekProgressTab {...makeProps()} />);
+
+    expect(screen.queryByRole("heading", { level: 1 })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent(/nhịp|tuần/i);
+  });
+
+  it("shows exactly three primary metrics and the shared cycle rail", () => {
+    render(<TwelveWeekProgressTab {...makeProps()} />);
+
+    expect(screen.getAllByTestId("progress-primary-metric")).toHaveLength(3);
+    expect(screen.getByTestId("twelve-week-cycle-rail")).toBeInTheDocument();
+  });
+
+  it("keeps advanced analytics collapsed until requested", async () => {
+    const user = userEvent.setup();
+    render(
+      <TwelveWeekProgressTab
+        {...makeProps({
+          executionHeatmap: [
+            { weekNumber: 1, dayOfWeek: 0, dateKey: "2026-05-04", total: 2, completed: 1, percent: 50 },
+          ],
+        })}
+      />,
+    );
+
+    expect(screen.queryByRole("button", { name: "2026-05-04: hoàn thành 1 trên 2 việc" })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Mở phân tích nâng cao" }));
+    expect(screen.getByRole("button", { name: "2026-05-04: hoàn thành 1 trên 2 việc" })).toBeInTheDocument();
+  });
+
+  it("renders execution heatmap cells as accessible touch targets", async () => {
+    const user = userEvent.setup();
     render(
       <TwelveWeekProgressTab
         {...makeProps({
@@ -128,6 +161,7 @@ describe("TwelveWeekProgressTab", () => {
       />,
     );
 
+    await user.click(screen.getByRole("button", { name: "Mở phân tích nâng cao" }));
     const cell = screen.getByRole("button", { name: "2026-05-04: hoàn thành 1 trên 2 việc" });
     expect(cell).toHaveClass("h-11", "w-11", "sm:h-9", "sm:w-9");
     expect(cell).not.toHaveAttribute("title");
