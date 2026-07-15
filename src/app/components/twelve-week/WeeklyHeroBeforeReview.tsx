@@ -138,31 +138,35 @@ export function WeeklyHeroBeforeReview({
 
         {/* Score focal area */}
         <div className="relative z-10 pt-6 mt-5 border-t border-app-line/40">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-            {/* Left: Big score */}
-            <div className="flex items-center gap-4.5">
-              <div className="flex-1">
-                <span className="text-[10px] font-bold text-app-ink-soft uppercase tracking-wider block mb-1">
-                  Điểm thực thi
+          <div className="grid grid-cols-1 gap-6 items-center sm:grid-cols-[auto_1fr]">
+            {/* Left: Score ring */}
+            <div className="flex flex-col items-center gap-2">
+              {weekCompletion.isEmpty ? (
+                <span
+                  data-testid="weekly-lead-score"
+                  className="text-sm font-semibold text-app-ink-muted font-sans"
+                >
+                  Chưa có việc nào
                 </span>
-                {weekCompletion.isEmpty ? (
-                  <span
+              ) : (
+                <div
+                  className="relative flex h-40 w-40 items-center justify-center rounded-full"
+                  style={{ background: `conic-gradient(var(--app-accent) ${leadScoreValue}%, var(--app-line) 0)` }}
+                  role="img"
+                  aria-label={`Điểm thực thi ${leadScoreValue} phần trăm`}
+                >
+                  <div className="absolute inset-2 rounded-full bg-app-surface" />
+                  <CountUp
                     data-testid="weekly-lead-score"
-                    className="text-sm font-semibold text-app-ink-muted font-sans"
-                  >
-                    Chưa có việc nào
-                  </span>
-                ) : (
-                  <div className="flex items-baseline gap-1">
-                    <CountUp
-                      data-testid="weekly-lead-score"
-                      value={leadScoreValue}
-                      suffix="%"
-                      className="weekly-score-animate font-serif text-6xl sm:text-7xl font-extrabold text-app-accent leading-none tracking-tighter"
-                    />
-                  </div>
-                )}
-              </div>
+                    value={leadScoreValue}
+                    suffix="%"
+                    className="weekly-score-animate relative z-10 font-serif text-5xl font-extrabold text-app-accent leading-none tracking-tighter"
+                  />
+                </div>
+              )}
+              <span className="text-[10px] font-bold text-app-ink-soft uppercase tracking-wider">
+                Điểm thực thi
+              </span>
             </div>
 
             {/* Right: Interpretation & progress */}
@@ -189,6 +193,23 @@ export function WeeklyHeroBeforeReview({
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Folded review CTA footer */}
+          <div className="mt-5 flex flex-col gap-3 border-t border-app-line/40 pt-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0 space-y-1">
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">Chuẩn bị review</p>
+              <p className="text-xs leading-relaxed text-app-ink-soft">
+                Review chính thức mở vào {getReviewDayLabel(reviewDay)}. Bắt đầu sớm để chốt nhận xét trước khi tuần kết thúc.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="min-h-11 rounded-card border border-app-line bg-app-surface px-4.5 py-2.5 text-xs font-semibold text-app-ink shadow-2xs transition-all hover:bg-app-bg weekly-btn-press sm:shrink-0"
+              onClick={onStartEarlyReview}
+            >
+              Bắt đầu review sớm
+            </button>
           </div>
         </div>
       </div>
@@ -298,23 +319,7 @@ export function WeeklyHeroBeforeReview({
         )}
       </div>
 
-      {/* Review reminder / Next action */}
-      <div className="flex flex-col gap-4 rounded-card-lg border border-app-line/40 bg-app-bg/20 p-4 weekly-card-lift sm:flex-row sm:items-center sm:justify-between sm:p-5">
-        <div className="min-w-0 space-y-1">
-          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">Chuẩn bị review</p>
-          <p className="text-sm font-semibold leading-snug text-app-ink">Nhìn lại và đánh giá tuần</p>
-          <p className="max-w-[65ch] text-xs leading-relaxed text-app-ink-soft">
-            Review chính thức mở vào {getReviewDayLabel(reviewDay)}. Bạn có thể bắt đầu sớm nếu muốn chốt nhận xét trước khi tuần kết thúc.
-          </p>
-        </div>
-        <button
-          type="button"
-          className="min-h-11 w-full rounded-card border border-app-line bg-app-surface px-4.5 py-2.5 text-xs font-semibold text-app-ink shadow-2xs transition-all hover:bg-app-bg weekly-btn-press sm:w-auto sm:shrink-0"
-          onClick={onStartEarlyReview}
-        >
-          Bắt đầu review sớm
-        </button>
-      </div>
+      {/* Review reminder folded into hero footer above — separate card removed to reduce vertical bloat. */}
     </div>
   );
 }
