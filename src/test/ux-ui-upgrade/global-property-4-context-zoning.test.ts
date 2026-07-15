@@ -299,7 +299,6 @@ const WARM_AS_STATUS_ALLOWLIST: readonly string[] = [
   "src/app/components/twelve-week/TwelveWeekPlanAccessSection.tsx",
   "src/app/components/twelve-week/TwelveWeekPremiumInsightSection.tsx",
   "src/app/components/twelve-week/TwelveWeekProgressTab.tsx",
-  "src/app/components/twelve-week/TwelveWeekSettingsTab.tsx",
   "src/app/components/twelve-week/TwelveWeekTodayTab.tsx",
   "src/app/components/twelve-week/WeeklyEmptyFuture.tsx",
   "src/app/components/twelve-week/ZenJourneyMap.tsx",

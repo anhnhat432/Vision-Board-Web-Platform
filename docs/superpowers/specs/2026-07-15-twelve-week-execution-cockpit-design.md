@@ -1,7 +1,7 @@
 # Thiết kế Execution Cockpit cho hệ thống 12 tuần
 
 - Ngày: 2026-07-15
-- Trạng thái: Chờ duyệt spec bằng văn bản
+- Trạng thái: Đã triển khai và xác minh
 - Phân loại: Shell
 - Route: `/12-week-system`
 
@@ -328,3 +328,38 @@ Visual QA bắt buộc ở 1440x900 và 390x844 cho cả bốn tab. Script basel
 - Cycle rail là visual signature xuyên suốt.
 - Public footer không xuất hiện trong execution workspace.
 - Palette và typography dùng token hiện có; không thêm theme hoặc dependency mới.
+
+## 19. Kết quả triển khai
+
+Execution Cockpit đã được triển khai trên nhánh `feat/week-tab-ui-upgrade` theo các vertical slice: command bar, shell/tab navigation, notice priority, Today, Week, Progress, Settings và visual QA.
+
+Kết quả chính:
+
+- Command bar gọn thay thế hero chu kỳ lớn; tab navigation sticky và không làm tràn body trên mobile.
+- Today ưu tiên primary task; Week dùng shared cycle rail và layout phẳng hơn.
+- Progress mở đầu bằng narrative, ba metric chính và analytics đóng mặc định.
+- Settings được gom thành ba nhóm semantic, giữ nguyên callback và `AlertDialog`.
+- Public footer được ẩn trong execution workspace; route legal/support vẫn giữ nguyên.
+- Không thay đổi route, storage schema/key, migration, sync, auth, billing, entitlement hoặc API contract.
+- Không thêm dependency.
+
+Xác minh:
+
+```bash
+npm run check
+npm run smoke:core-quality
+npx playwright test e2e/visual-qa.spec.ts --grep "Execution Cockpit"
+```
+
+- `npm run check`: 149 test files, 1395 tests, lint 1031 files và production build đều pass.
+- `npm run smoke:core-quality`: toàn bộ core funnel pass.
+- Execution Cockpit visual QA: 3/3 test pass ở desktop 1440x900, mobile 390x844, dark mode và reduced motion.
+- QA kiểm tra một `h1`, tab label không bị clip, primary action của Today nằm trong viewport đầu và không có horizontal body overflow.
+
+Ảnh xác minh:
+
+- `docs/specs/core-flow-ui-upgrade/screenshots/after/12-week-system_desktop.png`
+- `docs/specs/core-flow-ui-upgrade/screenshots/after/12-week-system_mobile.png`
+- Ảnh từng tab và dark/reduced-motion được tạo tại `output/playwright/visual-qa/`.
+
+Phạm vi này chỉ hoàn tất triển khai và xác minh cục bộ; chưa thực hiện production deployment.
