@@ -2,7 +2,6 @@ import { useEffect, useId, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/app/components/ui/dialog";
 import { Skeleton } from "@/app/components/ui/skeleton";
-import { CoreFlowProgress } from "@/app/components/CoreFlowProgress";
 import { ScreenGuide } from "@/app/components/ScreenGuide";
 import { SCREEN_GUIDES } from "@/app/components/screen-guides";
 import { SpotlightTour, type SpotlightTourStep } from "@/app/components/SpotlightTour";
@@ -52,7 +51,8 @@ import { isApiBaseUrlConfigured } from "@/lib/api/apiClient";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { useCelebration } from "@/app/components/celebration/useCelebration";
 import { claimCelebrationOnce, getCycleCelebrationStorageKey } from "@/lib/effects/celebrationTriggers";
-import { TwelveWeekDashboardHeader, TwelveWeekDashboardState, TwelveWeekGoalSwitcher } from "./12WeekSystem/components";
+import { TwelveWeekCommandBar } from "./12WeekSystem/TwelveWeekCommandBar";
+import { TwelveWeekDashboardState, TwelveWeekGoalSwitcher } from "./12WeekSystem/components";
 import { buildBackendSyncKey, getLatestCheckIn, getSyncBadgeClass, getSyncBadgeLabel } from "./12WeekSystem/helpers";
 // Import refactored subcomponents
 import { TwelveWeekSystemDialogs } from "./12WeekSystem/TwelveWeekSystemDialogs";
@@ -78,8 +78,8 @@ const TWELVE_WEEK_SYSTEM_TOUR_STEPS: SpotlightTourStep[] = [
   {
     id: "overview",
     targetId: "twelve-week-header-card",
-    title: "Nhìn khối tổng quan trước",
-    description: "Khối đầu trang cho biết tuần hiện tại, việc ưu tiên và trạng thái giữ nhịp của cả chu kỳ.",
+    title: "Đọc command bar trước",
+    description: "Thanh đầu trang gom mục tiêu, tuần hiện tại, tiến độ, trạng thái đồng bộ và hành động chính.",
   },
   {
     id: "tabs",
@@ -1006,7 +1006,10 @@ export function TwelveWeekSystem() {
   }
 
   return (
-    <div className="mx-auto max-w-[1080px] px-4 pt-6 pb-16 md:px-9 flex flex-col gap-[18px]">
+    <div
+      data-testid="twelve-week-system-page"
+      className="mx-auto flex w-full max-w-[1180px] min-w-0 flex-col gap-4 px-4 pb-16 pt-4 sm:px-6 lg:px-8"
+    >
       {/* 1. Subcomponent Dialogs Container */}
       <TwelveWeekSystemDialogs
         isUpgradeDialogOpen={isUpgradeDialogOpen}
@@ -1036,60 +1039,50 @@ export function TwelveWeekSystem() {
         isDeletingData={isDeletingData}
       />
 
-      <div className="space-y-5">
-        <CoreFlowProgress currentStepId="today" onExit={() => navigate("/")} />
-        <div className="flex justify-end">
-          <ScreenGuide {...SCREEN_GUIDES.twelveWeekSystem} />
-        </div>
-
-        {/* 2. Page Header component */}
-        <div id="twelve-week-header-card">
-          <TwelveWeekDashboardHeader
-            activeGoal={activeGoal}
-            system={system}
-            activePlanCode={activePlanCode}
-            currentWeek={currentWeek}
-            syncBadgeClass={syncBadgeClass}
-            syncBadgeLabel={syncBadgeLabel}
-            reviewDueToday={reviewDueToday}
-            todayRemainingCount={todayRemainingCount}
-            todayCompletedCount={todayCompletedCount}
-            weekCompletion={weekCompletion}
-            reviewStatusLabel={reviewStatusLabel}
-            firstPriorityTask={firstPriorityTask}
-            onOpenFocusTab={() => handleTabChange(reviewDueToday ? "week" : "today")}
-            onOpenGoals={() => navigate("/goals")}
-            onRenameGoal={handleRenameActiveGoal}
-          />
-        </div>
-
-        {/* 3. Goal Switcher select list */}
-        <TwelveWeekGoalSwitcher allGoals={allGoals} activeGoalId={activeGoal.id} onLoadGoal={loadGoalData} />
-
-        {/* 4. Subcomponent Notifications & Notices Container */}
-        <TwelveWeekSystemNotices
-          navigate={navigate}
-          handleTabChange={handleTabChange}
-          setActiveTab={setActiveTab}
-          activePlanCode={activePlanCode}
-          shouldShowWeeklyReviewBanner={shouldShowWeeklyReviewBanner}
-          handleSnoozeWeeklyReview={handleSnoozeWeeklyReview}
-          hasIncompletePlanStructure={hasIncompletePlanStructure}
-          planHasNoLeadMetrics={planHasNoLeadMetrics}
-          planHasNoTasks={planHasNoTasks}
-          hasBackendSyncIssue={hasBackendSyncIssue}
-          backendSyncIssueMessage={backendSyncIssueMessage}
-          isBackendSyncing={isBackendSyncing}
-          handleRunOutboxSync={handleRunOutboxSync}
-          activeTriggers={activeTriggers}
-          dismissedTriggerKind={dismissedTriggerKind}
-          setDismissedTriggerKind={setDismissedTriggerKind}
-          handleOpenUpgradeDialog={handleOpenUpgradeDialog}
-        />
-      </div>
+      <TwelveWeekCommandBar
+        activeGoal={activeGoal}
+        system={system}
+        activePlanCode={activePlanCode}
+        currentWeek={currentWeek}
+        syncBadgeClassName={syncBadgeClass}
+        syncBadgeLabel={syncBadgeLabel}
+        reviewDueToday={reviewDueToday}
+        todayRemainingCount={todayRemainingCount}
+        todayCompletedCount={todayCompletedCount}
+        weekCompletion={weekCompletion}
+        onPrimaryAction={() => handleTabChange(reviewDueToday ? "week" : "today")}
+        onOpenGoals={() => navigate("/goals")}
+        onExit={() => navigate("/")}
+        onRenameGoal={handleRenameActiveGoal}
+        goalSwitcher={
+          <TwelveWeekGoalSwitcher allGoals={allGoals} activeGoalId={activeGoal.id} onLoadGoal={loadGoalData} />
+        }
+        guideControl={<ScreenGuide {...SCREEN_GUIDES.twelveWeekSystem} />}
+      />
 
       {/* 5. Subcomponent Tabs and Main Tab Panels Container */}
       <TwelveWeekSystemTabs
+        noticeSlot={
+          <TwelveWeekSystemNotices
+            navigate={navigate}
+            handleTabChange={handleTabChange}
+            setActiveTab={setActiveTab}
+            activePlanCode={activePlanCode}
+            shouldShowWeeklyReviewBanner={shouldShowWeeklyReviewBanner}
+            handleSnoozeWeeklyReview={handleSnoozeWeeklyReview}
+            hasIncompletePlanStructure={hasIncompletePlanStructure}
+            planHasNoLeadMetrics={planHasNoLeadMetrics}
+            planHasNoTasks={planHasNoTasks}
+            hasBackendSyncIssue={hasBackendSyncIssue}
+            backendSyncIssueMessage={backendSyncIssueMessage}
+            isBackendSyncing={isBackendSyncing}
+            handleRunOutboxSync={handleRunOutboxSync}
+            activeTriggers={activeTriggers}
+            dismissedTriggerKind={dismissedTriggerKind}
+            setDismissedTriggerKind={setDismissedTriggerKind}
+            handleOpenUpgradeDialog={handleOpenUpgradeDialog}
+          />
+        }
         activeTab={activeTab}
         handleTabChange={handleTabChange}
         setActiveTab={setActiveTab}

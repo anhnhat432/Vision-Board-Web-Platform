@@ -99,4 +99,18 @@ describe("12WeekSystem weekly review banner", () => {
       expect(screen.queryByRole("dialog", { name: /Thiết lập kế hoạch thành công/i })).not.toBeInTheDocument();
     });
   });
+
+  it("renders the compact cockpit shell without the full core-flow progress", async () => {
+    seedTwelveWeekGoal({ reviewDay: "Wednesday" });
+
+    renderAppRoute("/12-week-system");
+
+    expect(await screen.findByTestId("twelve-week-command-bar")).toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "Tiến độ đường chính" })).not.toBeInTheDocument();
+
+    const cockpitNavigation = screen.getByRole("navigation", { name: "Điều hướng hệ 12 tuần" });
+    expect(cockpitNavigation).toHaveClass("sticky");
+    expect(within(cockpitNavigation).getByRole("tablist")).toHaveClass("grid", "grid-cols-4");
+    expect(screen.getByTestId("twelve-week-notice-slot")).toBeInTheDocument();
+  });
 });

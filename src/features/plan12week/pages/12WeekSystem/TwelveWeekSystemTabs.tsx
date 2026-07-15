@@ -1,5 +1,5 @@
 import { BarChart3, CalendarDays, ListTodo, type LucideIcon, Settings2 } from "lucide-react";
-import { Suspense } from "react";
+import { type ReactNode, Suspense } from "react";
 import type { NavigateFunction } from "react-router";
 import { motion } from "motion/react";
 import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
@@ -56,6 +56,7 @@ const TWELVE_WEEK_SECTION_TABS = [
 ] satisfies Array<{ value: string; label: string; icon: LucideIcon }>;
 
 interface TwelveWeekSystemTabsProps {
+  noticeSlot?: ReactNode;
   activeTab: string;
   handleTabChange: (value: string) => void;
   setActiveTab: (value: string) => void;
@@ -196,6 +197,7 @@ interface TwelveWeekSystemTabsProps {
 }
 
 export function TwelveWeekSystemTabs({
+  noticeSlot,
   activeTab,
   handleTabChange,
   setActiveTab,
@@ -337,15 +339,18 @@ export function TwelveWeekSystemTabs({
 
   return (
     <>
-      <nav id="twelve-week-tabs-nav" className="mt-3 sm:mt-4" aria-label="Điều hướng hệ 12 tuần">
-        <Tabs value={activeTab} onValueChange={handleTabChange} className="block overflow-x-auto scrollbar-none">
+      <nav
+        id="twelve-week-tabs-nav"
+        className="sticky top-[60px] z-30 rounded-[18px] border border-app-line/70 bg-app-bg/[0.92] p-1 shadow-app-sm backdrop-blur-md lg:top-[58px]"
+        aria-label="Điều hướng hệ 12 tuần"
+      >
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="block min-w-0">
           <TabsList
             aria-label="Điều hướng hệ 12 tuần"
-            className="inline-flex w-fit gap-1 rounded-[18px] border border-app-line/70 bg-app-surface/88 p-1.5 shadow-[var(--app-shadow-sm)]"
+            className="grid w-full grid-cols-4 gap-1 overflow-visible rounded-[14px] border-0 bg-app-surface p-1"
           >
             {TWELVE_WEEK_SECTION_TABS.map(({ value, label, icon: Icon }) => {
               const hasDot = (value === "today" && showTodayDot) || (value === "week" && showWeekDot);
-              const isActive = activeTab === value;
               return (
                 <TabsTrigger
                   key={value}
@@ -354,22 +359,14 @@ export function TwelveWeekSystemTabs({
                   value={value}
                   aria-controls={tabPanelId}
                   aria-label={`Mở tab ${label}`}
-                  className="relative z-10 flex min-h-11 flex-none cursor-pointer items-center justify-center gap-1.5 rounded-[13px] px-3.5 py-2 text-[12px] font-bold leading-tight text-app-ink-soft transition-all duration-150 data-[state=active]:bg-transparent data-[state=active]:text-white hover:data-[state=inactive]:bg-app-bg hover:data-[state=inactive]:text-app-ink sm:min-h-11 sm:gap-2 sm:px-[18px] sm:py-[10px] sm:text-[13px]"
+                  className="relative flex min-h-11 min-w-0 cursor-pointer items-center justify-center gap-1 rounded-control px-1.5 py-2 text-xs font-bold leading-tight text-app-ink-soft transition-[background-color,color,box-shadow] duration-150 data-[state=active]:bg-app-accent data-[state=active]:text-app-ink-on-accent data-[state=active]:shadow-app-sm hover:data-[state=inactive]:bg-app-bg hover:data-[state=inactive]:text-app-ink sm:gap-2 sm:px-4 sm:text-sm"
                 >
                   <Icon className="h-[15px] w-[15px] shrink-0" aria-hidden="true" />
-                  <span>{label}</span>
+                  <span className="min-w-0 truncate">{label}</span>
                   {hasDot && (
-                    <span className="absolute right-1.5 top-1.5 z-20 flex h-2 w-2">
-                      <span className="absolute inline-flex h-full w-full rounded-full bg-app-status-warning opacity-70 motion-safe:animate-ping" />
+                    <span className="absolute right-1 top-1 flex h-2 w-2 sm:right-1.5 sm:top-1.5">
                       <span className="relative inline-flex h-2 w-2 rounded-full bg-app-status-warning" />
                     </span>
-                  )}
-                  {isActive && (
-                    <motion.div
-                      layoutId="activeTwelveWeekTabIndicator"
-                      className="absolute inset-0 -z-10 rounded-[13px] bg-app-accent shadow-[var(--app-shadow-sm)]"
-                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                    />
                   )}
                 </TabsTrigger>
               );
@@ -378,9 +375,13 @@ export function TwelveWeekSystemTabs({
         </Tabs>
       </nav>
 
+      <div data-testid="twelve-week-notice-slot" className="min-w-0" aria-live="polite">
+        {noticeSlot}
+      </div>
+
       {/* Main content sections */}
       <div
-        className="mt-3 space-y-5"
+        className="min-w-0 space-y-5"
         role="tabpanel"
         id={tabPanelId}
         aria-labelledby={`${tabPanelId}-${activeTab}-tab`}
@@ -460,7 +461,10 @@ export function TwelveWeekSystemTabs({
 
         {/* WEEK SECTION */}
         {!isCycleReviewMode && activeTab === "week" && (
-          <TabErrorBoundary fallbackTitle="Tab Tuần gặp lỗi">
+          <TabErrorBoundary
+            fallbackTitle="Tab Tuần gặp lỗi"
+            secondaryAction={{ label: "Quay về Hôm nay", onClick: () => setActiveTab("today") }}
+          >
             <Suspense
               fallback={
                 <TwelveWeekTabFallback
@@ -512,7 +516,10 @@ export function TwelveWeekSystemTabs({
 
         {/* PROGRESS SECTION */}
         {!isCycleReviewMode && activeTab === "progress" && (
-          <TabErrorBoundary fallbackTitle="Tab Tiến độ gặp lỗi">
+          <TabErrorBoundary
+            fallbackTitle="Tab Tiến độ gặp lỗi"
+            secondaryAction={{ label: "Quay về Hôm nay", onClick: () => setActiveTab("today") }}
+          >
             <Suspense
               fallback={
                 <TwelveWeekTabFallback
@@ -586,7 +593,10 @@ export function TwelveWeekSystemTabs({
 
         {/* SETTINGS SECTION */}
         {activeTab === "settings" && (
-          <TabErrorBoundary fallbackTitle="Tab Cài đặt chu kỳ gặp lỗi">
+          <TabErrorBoundary
+            fallbackTitle="Tab Cài đặt chu kỳ gặp lỗi"
+            secondaryAction={{ label: "Quay về Hôm nay", onClick: () => setActiveTab("today") }}
+          >
             <Suspense
               fallback={
                 <TwelveWeekTabFallback

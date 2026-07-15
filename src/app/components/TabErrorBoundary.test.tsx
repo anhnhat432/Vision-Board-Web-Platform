@@ -94,4 +94,19 @@ describe("TabErrorBoundary", () => {
     expect(screen.getByText("Tab content recovered")).toBeInTheDocument();
     expect(consoleError).toHaveBeenCalled();
   });
+
+  it("offers a safe secondary action back to Today", async () => {
+    const user = userEvent.setup();
+    const onBack = vi.fn();
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    render(
+      <TabErrorBoundary secondaryAction={{ label: "Quay về Hôm nay", onClick: onBack }}>
+        <ThrowingTab message="temporary crash" />
+      </TabErrorBoundary>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "Quay về Hôm nay" }));
+    expect(onBack).toHaveBeenCalledOnce();
+  });
 });
