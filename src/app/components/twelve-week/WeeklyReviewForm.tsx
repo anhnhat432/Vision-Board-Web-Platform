@@ -142,7 +142,7 @@ export function WeeklyReviewForm({
   return (
     <div className="space-y-5 sm:space-y-6">
       {/* Form Hero Card */}
-      <div className="relative overflow-hidden rounded-[var(--app-radius-card-lg)] border border-app-line/70 bg-app-surface p-5 shadow-[var(--app-shadow-card)] sm:p-8">
+      <div className="relative overflow-hidden rounded-[var(--app-radius-card-lg)] border border-app-line/70 bg-app-surface p-4 shadow-[var(--app-shadow-card)] sm:p-6">
         {/* Header metadata */}
         <div className="relative z-10 flex flex-wrap items-center justify-between gap-2.5 text-[10px] font-bold uppercase tracking-widest text-app-ink-muted">
           <span className="font-serif text-xs font-bold tracking-normal normal-case text-app-accent bg-app-accent-soft/75 px-3 py-1 rounded-lg border border-app-line/20">
@@ -214,7 +214,7 @@ export function WeeklyReviewForm({
       </div>
 
       {/* Review Form Card */}
-      <div className="relative space-y-6 rounded-[var(--app-radius-card-lg)] border border-app-line/70 bg-app-surface p-5 shadow-[var(--app-shadow-card)] sm:space-y-7 sm:p-8">
+      <div className="relative space-y-5 rounded-[var(--app-radius-card-lg)] border border-app-line/70 bg-app-surface p-4 shadow-[var(--app-shadow-card)] sm:space-y-6 sm:p-6">
         <div className="space-y-1.5 border-b border-app-line/70 pb-4">
           <div className="flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-app-warm" />

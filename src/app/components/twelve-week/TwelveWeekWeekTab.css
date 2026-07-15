@@ -412,7 +412,7 @@ html.dark .weekly-action-card-inprogress {
   background: var(--app-surface);
   border: 1.5px solid var(--app-line);
   border-radius: var(--app-radius-card, 18px);
-  padding: 1.5rem;
+  padding: 1.25rem;
   transition: all 0.24s ease;
 }
 

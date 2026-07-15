@@ -27,6 +27,11 @@ Mixed surface (12-week execution = core product flow). UI-only; no storage/sync/
 3. Declutter: xoá WeeklyReviewSummary "insights teaser" filler card.
 4. Verify: typecheck, lint, test:run, build.
 5. Layout redesign (WeeklyHeroBeforeReview): thay score number lớn bằng conic-gradient progress ring 160px (focal premium, center number text-5xl + CountUp); gập "Chuẩn bị review" CTA từ card riêng vào footer hero (giảm 1 block, bớt scroll dọc). Audit Playwright (demo data inject, tuần 4 @57%) xác nhận ring render đúng, mobile footer flex-col + button full-width. Verify typecheck/lint/1395 test/build OK.
+6. Redesign 3 vùng user chỉ (giữ logic):
+   - WeeklyRail → dot-timeline: 12 node tròn (36px, current 44px) trên track line thay 12 card dày; W#/Check/Lock trong node, % dưới, "Hiện tại" badge trên current, state qua fill/border (success/error/accent/dashed).
+   - TwelveWeekRescueNudge → compact: bỏ "•"+badge border noise, headline serif, suggestion 1 dòng (title truncate + hint truncate + button "Làm" inline), 245→226px.
+   - WeeklyReviewForm → siết padding/spacing: hero p-8→p-6, body space-y-7→6, step card padding 1.5rem→1.25rem; body 1762→1694px, hero 315→299px.
+   Giữ testid/data-suggestion-id/aria. Verify Playwright (rail circle 36/44px, rescue suggestion-id intact) + typecheck/lint/1395 test/build OK.
 
 ## Risks
 - Stepper restructure đụng JSX map → cần `Fragment` key; test không assert line structure → an toàn.
