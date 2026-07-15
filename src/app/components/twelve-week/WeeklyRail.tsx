@@ -69,17 +69,12 @@ export function WeeklyRail({
                 type="button"
                 className={cn(
                   "snap-start flex flex-col items-center justify-start gap-1.5 cursor-pointer relative",
-                  "min-w-[44px] flex-1 pt-5 pb-1",
+                  "min-w-[44px] flex-1 py-2",
                 )}
                 onClick={() => onSelectWeek(weekNo)}
                 aria-label={`Chọn tuần ${weekNo}`}
                 aria-current={isSelected ? "true" : undefined}
               >
-                {isSystemCurrent && (
-                  <span className="absolute -top-1 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-full bg-app-accent px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-white shadow-sm">
-                    Hiện tại
-                  </span>
-                )}
                 <span
                   className={cn(
                     "relative flex items-center justify-center rounded-full transition-all duration-200",
@@ -102,7 +97,7 @@ export function WeeklyRail({
                     isSelected ? "text-app-ink" : "text-app-ink-soft",
                   )}
                 >
-                  {isCompleted ? "✓" : completion.isEmpty ? "—" : `${completion.percent}%`}
+                  {isCompleted ? "" : completion.isEmpty ? "—" : `${completion.percent}%`}
                 </span>
               </button>
             );
