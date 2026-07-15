@@ -254,9 +254,6 @@ const KNOWN_INTENTIONAL_DRIFT: readonly string[] = [
   "src/app/pages/Onboarding/components/LifeAtlasWheel.tsx :: #7c5cfc", // DESIGN_WEDGE_COLORS (education)
   "src/app/pages/LifeInsight.tsx :: bg-violet", // life-area accent palette
   // --- (a) Màu trạng thái admin (side surface) ---
-  "src/app/pages/AdminOrderDetailPage.tsx :: bg-violet", // badge "Ảnh"
-  "src/app/pages/AdminDashboardPage.tsx :: bg-violet", // stat icon (plus)
-  "src/app/components/admin/tokens.ts :: bg-violet", // statIconBg.plus
   "src/app/components/admin/AdminStatusBadge.tsx :: bg-violet", // status "printing"
   // --- (b) Gradient trang trí theme.css (product-visual / marketing / hero) ---
   "src/styles/theme.css :: #2563eb", // gradient xanh dương trang trí
