@@ -514,6 +514,7 @@ export function RootLayout() {
   const accountStatus = userProfileError ? "Lỗi hồ sơ" : accountEmail || "Tài khoản đã đăng nhập";
   const normalizedPathname = normalizePathname(location.pathname);
   const isPublicLanding = !user && normalizedPathname === "/";
+  const isTwelveWeekExecutionWorkspace = normalizedPathname.startsWith("/12-week-system");
   const suppressAutoWelcomeGuide =
     normalizedPathname.startsWith("/admin") ||
     normalizedPathname.startsWith("/vision-board") ||
@@ -1604,10 +1605,10 @@ export function RootLayout() {
                 {pageMeta.label}
               </div>
               {pageTransitionContent}
-              {isSignedOutVisitor && !isPublicLanding ? <AppPublicFooter /> : null}
+              {isSignedOutVisitor && !isPublicLanding && !isTwelveWeekExecutionWorkspace ? <AppPublicFooter /> : null}
             </main>
 
-            {user ? (
+            {user && !isTwelveWeekExecutionWorkspace ? (
               <footer className="mx-auto max-w-7xl px-4 pb-24 text-xs tracking-tight text-app-ink-muted sm:px-6 md:pb-8 lg:px-8">
                 <div className="flex flex-col items-center gap-3 border-t border-app-line pt-4 md:flex-row md:justify-between">
                   <div className="flex items-center justify-center gap-2 md:justify-start">

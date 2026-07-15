@@ -164,7 +164,7 @@ export function TwelveWeekGoalSwitcher({
     <div className="flex">
       <Select value={activeGoalId} onValueChange={onLoadGoal}>
         <SelectTrigger
-          className="h-auto w-full max-w-full rounded-[14px] border-app-line bg-app-surface px-4 py-2.5 text-[14px] font-semibold text-app-ink shadow-2xs hover:bg-app-bg/50 focus-visible:border-app-accent focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto sm:max-w-md transition-all"
+          className="h-auto w-full max-w-full rounded-[14px] border-app-line bg-app-surface px-4 py-2.5 text-[14px] font-semibold text-app-ink shadow-2xs transition-[background-color,border-color,box-shadow] hover:bg-app-bg/50 focus-visible:border-app-accent focus-visible:ring-2 focus-visible:ring-app-accent/30 sm:w-auto sm:max-w-md"
           aria-label="Chọn mục tiêu 12 tuần"
         >
           <SelectValue placeholder="Chọn mục tiêu" />
@@ -243,7 +243,7 @@ export function TwelveWeekRescueTriggerBanner({
         <div className="flex w-full shrink-0 items-center gap-2.5 sm:w-auto pt-2 sm:pt-0">
           <button
             type="button"
-            className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-app-status-warning px-5 py-2.5 text-xs font-bold text-white transition-all duration-150 hover:bg-app-status-warning/90 hover:opacity-95 hover:shadow-2xs sm:flex-none"
+            className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl bg-app-status-warning px-5 py-2.5 text-xs font-bold text-white transition-[background-color,box-shadow,opacity,transform] duration-150 hover:bg-app-status-warning/90 hover:opacity-95 hover:shadow-2xs active:scale-[0.98] sm:flex-none"
             onClick={() => {
               const action = isUpgradeTrigger ? "upgrade" : "navigate_system";
               onActionTaken(trigger, action);
@@ -255,7 +255,7 @@ export function TwelveWeekRescueTriggerBanner({
           </button>
           <button
             type="button"
-            className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl border border-app-line/80 bg-app-surface px-5 py-2.5 text-xs font-semibold text-app-ink-soft transition-all duration-150 hover:bg-app-bg hover:text-app-ink hover:shadow-3xs sm:flex-none"
+            className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl border border-app-line/80 bg-app-surface px-5 py-2.5 text-xs font-semibold text-app-ink-soft transition-[background-color,border-color,box-shadow,color,transform] duration-150 hover:bg-app-bg hover:text-app-ink hover:shadow-3xs active:scale-[0.98] sm:flex-none"
             onClick={() => onDismiss(trigger.kind)}
           >
             Bỏ qua

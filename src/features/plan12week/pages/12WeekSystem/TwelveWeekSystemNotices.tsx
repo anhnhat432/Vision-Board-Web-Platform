@@ -62,10 +62,19 @@ export function TwelveWeekSystemNotices({
   handleOpenUpgradeDialog,
 }: TwelveWeekSystemNoticesProps) {
   const activeTrigger = activeTriggers.filter((trigger) => trigger.kind !== dismissedTriggerKind)[0] ?? null;
+  const visibleNoticeKind = hasBackendSyncIssue
+    ? "sync"
+    : shouldShowWeeklyReviewBanner
+      ? "review"
+      : hasIncompletePlanStructure
+        ? "plan"
+        : activeTrigger
+          ? "rescue"
+          : null;
 
   return (
-    <div className="space-y-4">
-      {shouldShowWeeklyReviewBanner && (
+    <div>
+      {visibleNoticeKind === "review" && (
         <TwelveWeekDashboardNotice
           tone="warning"
           title="Đến lúc chốt review tuần"
@@ -73,14 +82,14 @@ export function TwelveWeekSystemNotices({
         >
           <button
             type="button"
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-app-status-warning px-5 py-2 text-xs font-bold text-white transition-all duration-150 hover:bg-app-status-warning/90 hover:shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-status-warning/30 sm:w-auto"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-app-status-warning px-5 py-2 text-xs font-bold text-white transition-[background-color,box-shadow,transform] duration-150 hover:bg-app-status-warning/90 hover:shadow-2xs active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-status-warning/30 sm:w-auto"
             onClick={() => handleTabChange("week")}
           >
             Mở review tuần
           </button>
           <button
             type="button"
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-app-line/80 bg-app-surface px-5 py-2 text-xs font-semibold text-app-ink transition-all duration-150 hover:bg-app-bg hover:shadow-3xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-status-warning/30 sm:w-auto"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-app-line/80 bg-app-surface px-5 py-2 text-xs font-semibold text-app-ink transition-[background-color,border-color,box-shadow,transform] duration-150 hover:bg-app-bg hover:shadow-3xs active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-status-warning/30 sm:w-auto"
             onClick={handleSnoozeWeeklyReview}
           >
             Nhắc lại sau 24h
@@ -88,7 +97,7 @@ export function TwelveWeekSystemNotices({
         </TwelveWeekDashboardNotice>
       )}
 
-      {hasIncompletePlanStructure && (
+      {visibleNoticeKind === "plan" && (
         <TwelveWeekDashboardNotice
           tone="warning"
           title="Chu kỳ chưa đầy đủ cấu trúc"
@@ -102,14 +111,14 @@ export function TwelveWeekSystemNotices({
         >
           <button
             type="button"
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-app-status-warning px-5 py-2 text-xs font-bold text-white transition-all duration-150 hover:bg-app-status-warning/90 hover:shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-status-warning/30 sm:w-auto"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-app-status-warning px-5 py-2 text-xs font-bold text-white transition-[background-color,box-shadow,transform] duration-150 hover:bg-app-status-warning/90 hover:shadow-2xs active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-status-warning/30 sm:w-auto"
             onClick={() => navigate("/life-insight")}
           >
             Thiết lập lại chu kỳ
           </button>
           <button
             type="button"
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-app-line/80 bg-app-surface px-5 py-2 text-xs font-semibold text-app-ink transition-all duration-150 hover:bg-app-bg hover:shadow-3xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-status-warning/30 sm:w-auto"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-app-line/80 bg-app-surface px-5 py-2 text-xs font-semibold text-app-ink transition-[background-color,border-color,box-shadow,transform] duration-150 hover:bg-app-bg hover:shadow-3xs active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-status-warning/30 sm:w-auto"
             onClick={() => handleTabChange("settings")}
           >
             Mở cài đặt
@@ -117,7 +126,7 @@ export function TwelveWeekSystemNotices({
         </TwelveWeekDashboardNotice>
       )}
 
-      {hasBackendSyncIssue && (
+      {visibleNoticeKind === "sync" && (
         <TwelveWeekDashboardNotice
           tone="error"
           title="Chưa sao lưu được dữ liệu đám mây"
@@ -125,7 +134,7 @@ export function TwelveWeekSystemNotices({
         >
           <button
             type="button"
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-app-status-error px-5 py-2 text-xs font-bold text-white transition-all duration-150 hover:bg-app-status-error/90 hover:shadow-2xs disabled:pointer-events-none disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-status-error/30 sm:w-auto"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-app-status-error px-5 py-2 text-xs font-bold text-white transition-[background-color,box-shadow,opacity,transform] duration-150 hover:bg-app-status-error/90 hover:shadow-2xs active:scale-[0.98] disabled:pointer-events-none disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-status-error/30 sm:w-auto"
             disabled={isBackendSyncing}
             onClick={handleRunOutboxSync}
           >
@@ -133,7 +142,7 @@ export function TwelveWeekSystemNotices({
           </button>
           <button
             type="button"
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-app-line/80 bg-app-surface px-5 py-2 text-xs font-semibold text-app-ink transition-all duration-150 hover:bg-app-bg hover:shadow-3xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-danger-border)] sm:w-auto"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-app-line/80 bg-app-surface px-5 py-2 text-xs font-semibold text-app-ink transition-[background-color,border-color,box-shadow,transform] duration-150 hover:bg-app-bg hover:shadow-3xs active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-danger-border)] sm:w-auto"
             onClick={() => handleTabChange("settings")}
           >
             Xem trạng thái sync
@@ -141,30 +150,32 @@ export function TwelveWeekSystemNotices({
         </TwelveWeekDashboardNotice>
       )}
 
-      <TwelveWeekRescueTriggerBanner
-        trigger={activeTrigger}
-        onTriggerFired={(trigger) => {
-          trackRescueTriggerFired({
-            kind: trigger.kind,
-            severity: trigger.severity,
-            currentPlan: activePlanCode,
-          });
-        }}
-        onActionTaken={(trigger, action) => {
-          trackRescueActionTaken({
-            kind: trigger.kind,
-            action,
-            currentPlan: activePlanCode,
-          });
-        }}
-        onOpenUpgrade={() => handleOpenUpgradeDialog("plan", "PLUS")}
-        onOpenToday={() => setActiveTab("today")}
-        onDismiss={(kind) => {
-          dismissRescueTrigger(kind);
-          trackRescueTriggerDismissed({ kind, currentPlan: activePlanCode });
-          setDismissedTriggerKind(kind);
-        }}
-      />
+      {visibleNoticeKind === "rescue" ? (
+        <TwelveWeekRescueTriggerBanner
+          trigger={activeTrigger}
+          onTriggerFired={(trigger) => {
+            trackRescueTriggerFired({
+              kind: trigger.kind,
+              severity: trigger.severity,
+              currentPlan: activePlanCode,
+            });
+          }}
+          onActionTaken={(trigger, action) => {
+            trackRescueActionTaken({
+              kind: trigger.kind,
+              action,
+              currentPlan: activePlanCode,
+            });
+          }}
+          onOpenUpgrade={() => handleOpenUpgradeDialog("plan", "PLUS")}
+          onOpenToday={() => setActiveTab("today")}
+          onDismiss={(kind) => {
+            dismissRescueTrigger(kind);
+            trackRescueTriggerDismissed({ kind, currentPlan: activePlanCode });
+            setDismissedTriggerKind(kind);
+          }}
+        />
+      ) : null}
     </div>
   );
 }
