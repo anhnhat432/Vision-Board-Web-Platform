@@ -49,6 +49,17 @@ describe("production smoke harness guards", () => {
     expect(smokeScript).toContain('await tryClickButtonByNormalizedText(page, "van luu som");');
   });
 
+  it("classifies unanswered previous commitments before weekly review submit", () => {
+    expect(smokeScript).toContain("async function classifyVisiblePreviousCommitments(page)");
+    expect(smokeScript).toContain('[data-testid="weekly-review-step-commitments"]:visible');
+    expect(smokeScript).toContain('getByRole("button", { name: "Đã giữ", exact: true })');
+
+    const classifyIndex = smokeScript.indexOf("await classifyVisiblePreviousCommitments(page);");
+    const submitIndex = smokeScript.indexOf('await clickButtonByNormalizedText(page, "chot review tuan nay");');
+    expect(classifyIndex).toBeGreaterThan(0);
+    expect(submitIndex).toBeGreaterThan(classifyIndex);
+  });
+
   it("waits for visible weekly review UI instead of a hidden score container", () => {
     expect(smokeScript).toContain('page.locator("#weekly-insights").waitFor');
     expect(smokeScript).toContain('page.locator("#weekly-next-commitments").waitFor');

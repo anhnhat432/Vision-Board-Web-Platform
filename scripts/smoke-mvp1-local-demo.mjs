@@ -492,23 +492,21 @@ async function assertSignedOutHome() {
   assertTextIncludesAny(
     state,
     [
-      "trai nghiem demo mien phi",
-      "dung thu mien phi",
-      "dung duoc ngay khong can dang nhap",
-      "dung thu lo trinh 4 buoc",
-      "bien muc tieu lon thanh ke hoach 12 tuan",
+      "bien uoc mo thanh ke hoach",
+      "lo trinh 12 tuan co co so khoa hoc",
+      "hanh trinh 4 buoc gat hai ket qua",
     ],
     "signed-out dashboard",
   );
   assertTextIncludesAny(
     state,
     [
-      "bat dau demo ngay tren trinh duyet nay",
-      "dang ky khi ban muon gan tien do voi tai khoan",
-      "mo trang la dung duoc khong can email",
-      "dong bo khi san sang",
+      "thiet lap chu ky 12 tuan ngay",
+      "thiet lap trong 3 phut",
+      "nhan ngay banh xe cuoc song",
+      "xem lo trinh",
     ],
-    "signed-out dashboard demo disclosure",
+    "signed-out dashboard onboarding promise",
   );
   assertTextExcludes(
     state,
@@ -524,9 +522,7 @@ async function assertSignedOutHome() {
 
 async function startDemoFlowFromDashboard() {
   await clickButton([
-    "trai nghiem demo mien phi",
-    "dung thu mien phi",
-    "dung thu lo trinh 4 buoc",
+    "thiet lap chu ky 12 tuan ngay",
     "bat dau life balance",
   ]);
   await waitFor(
@@ -1041,7 +1037,7 @@ async function assertTwelveWeekSystemReady() {
   );
   await waitFor(
     "Today tab useful content",
-    `${bodyIncludes("hang viec hom nay")} && ${bodyIncludes("check-in 30 giay")}`,
+    `document.querySelector('[data-tour-id="system-today-queue"]') && ${bodyIncludes("hang viec hom nay")}`,
     {
       timeoutMs: 75_000,
     },
@@ -1092,6 +1088,7 @@ async function exerciseTodayAndReviewTabs() {
   ).catch(async () => {
     log("Tab click did not switch to Week; opening the Week tab URL directly");
     await openPage("/12-week-system?tab=week");
+    await clickButtonIfPresent("bat dau review som");
     await waitFor(
       "Week tab URL",
       `document.querySelector("#weekly-insights") && document.querySelector("#weekly-next-commitments")`,

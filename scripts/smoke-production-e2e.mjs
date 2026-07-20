@@ -1158,6 +1158,28 @@ async function hasVisibleWeeklyReviewForm(page) {
   return page.locator('[data-testid="weekly-review-flow"]:visible').first().isVisible().catch(() => false);
 }
 
+async function classifyVisiblePreviousCommitments(page) {
+  const step = page.locator('[data-testid="weekly-review-step-commitments"]:visible').first();
+  if (!(await step.isVisible().catch(() => false))) return 0;
+
+  const keptButtons = step.getByRole("button", { name: "Đã giữ", exact: true });
+  const buttonCount = await keptButtons.count();
+  let classifiedCount = 0;
+
+  for (let index = 0; index < buttonCount; index += 1) {
+    const button = keptButtons.nth(index);
+    const alreadyPressed = (await button.getAttribute("aria-pressed")) === "true";
+    if (alreadyPressed || !(await button.isEnabled())) continue;
+    await button.click();
+    classifiedCount += 1;
+  }
+
+  await page
+    .locator('[data-testid="weekly-review-step-commitments"][data-done="true"]:visible')
+    .waitFor({ timeout: DEFAULT_TIMEOUT_MS });
+  return classifiedCount;
+}
+
 async function readWeeklyReviewSurface(page) {
   return page.evaluate(() => {
     const normalize = (value) =>
@@ -1844,6 +1866,10 @@ async function exerciseTwelveWeekSaveReloadAndSync(page, apiEvents) {
   await ensureWeeklyReviewFormVisible(page);
   await page.locator("#weekly-insights").waitFor({ timeout: DEFAULT_TIMEOUT_MS });
   await page.locator("#weekly-next-commitments").waitFor({ timeout: DEFAULT_TIMEOUT_MS });
+  const classifiedCommitments = await classifyVisiblePreviousCommitments(page);
+  if (classifiedCommitments > 0) {
+    log(`Classified ${classifiedCommitments} previous weekly commitment(s) before submit`);
+  }
   await page.locator("#weekly-insights").fill(WEEKLY_REVIEW_OUTPUT);
   await page.locator("#weekly-next-commitments").fill(WEEKLY_REVIEW_PRIORITY);
   await page.locator("#weekly-next-commitments").press("Enter");
