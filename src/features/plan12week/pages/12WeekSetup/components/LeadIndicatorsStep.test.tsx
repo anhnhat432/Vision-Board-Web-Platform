@@ -185,6 +185,28 @@ describe("LeadIndicatorsStep commitment model", () => {
 });
 
 describe("LeadIndicatorsStepLab Phase 1 polish", () => {
+  it("keeps advanced commitment fields collapsed until the user asks to edit them", () => {
+    render(
+      <LeadIndicatorsStepLab
+        draft={makeDraft([makeIndicator({ id: "a" }), makeIndicator({ id: "b", name: "Weekly review" })])}
+        showValidationErrors={false}
+        coreCount={2}
+        optionalCount={0}
+        setupGuideSupport={null}
+        setupGuideTemplate={null}
+        selectedTemplate={null}
+        weekOneTaskPreview={[]}
+        weekOneTaskWarning={null}
+        weekOneTaskGroups={[]}
+        onAddIndicator={vi.fn()}
+        onRemoveIndicator={vi.fn()}
+        onIndicatorChange={vi.fn()}
+      />,
+    );
+
+    expect(screen.getAllByRole("button", { name: "Cài đặt nâng cao" })[0]).toHaveAttribute("aria-expanded", "false");
+  });
+
   it("associates empty tactic-name validation with the input", () => {
     const draft = makeDraft([makeIndicator({ id: "a", name: "" }), makeIndicator({ id: "b", name: "Weekly review" })]);
 
@@ -212,7 +234,8 @@ describe("LeadIndicatorsStepLab Phase 1 polish", () => {
     expect(document.getElementById("tactic-name-error-0")).toHaveAttribute("role", "alert");
   });
 
-  it("opens the first indicator commitment accordion by default and shows all commitment prompts", () => {
+  it("keeps commitment details collapsed until the user asks to edit them", async () => {
+    const user = userEvent.setup();
     const onSubmit = vi.fn();
 
     render(
@@ -223,10 +246,11 @@ describe("LeadIndicatorsStepLab Phase 1 polish", () => {
     );
 
     const advancedButtons = screen.getAllByRole("button", { name: "Cài đặt nâng cao" });
-    expect(advancedButtons[0]).toHaveAttribute("aria-expanded", "true");
+    expect(advancedButtons[0]).toHaveAttribute("aria-expanded", "false");
     expect(advancedButtons[1]).toHaveAttribute("aria-expanded", "false");
-    expect(screen.getByRole("button", { name: /Thêm chỉ số/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Thêm việc của riêng bạn/i })).toBeInTheDocument();
 
+    await user.click(advancedButtons[0]);
     expect(screen.getByLabelText("Tôi thực sự muốn điều này vì...")).toBeInTheDocument();
     expect(screen.getByLabelText("Tôi sẵn sàng trả giá gì...")).toBeInTheDocument();
     expect(screen.getByLabelText("Tôi sẽ làm thế nào (cụ thể)...")).toBeInTheDocument();
@@ -245,6 +269,7 @@ describe("LeadIndicatorsStepLab Phase 1 polish", () => {
       />,
     );
 
+    await user.click(screen.getAllByRole("button", { name: "Cài đặt nâng cao" })[0]);
     await user.type(screen.getByLabelText("Tôi sẽ tự thưởng gì khi giữ được..."), "Một buổi nghỉ không màn hình.");
     await user.click(screen.getByRole("button", { name: "Submit lab draft" }));
 
