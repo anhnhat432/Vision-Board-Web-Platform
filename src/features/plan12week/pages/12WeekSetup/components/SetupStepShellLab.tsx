@@ -39,18 +39,18 @@ const STEP_META: Array<{
   eyebrow: string;
   caption: string;
 }> = [
-  { icon: Target, eyebrow: "Đích đến", caption: "Chốt kết quả đủ rõ và chọn bộ khung mẫu hành động phù hợp." },
+  { icon: Target, eyebrow: "Đích đến", caption: "Chốt trạng thái bạn muốn thấy ở tuần 12." },
   {
     icon: Activity,
     eyebrow: "Hành động",
-    caption: "Chọn việc lặp lại hằng tuần và xác định mức cam kết cụ thể cho từng việc.",
+    caption: "Chọn những việc nhỏ bạn có thể giữ đều.",
   },
   {
     icon: CalendarDays,
-    eyebrow: "Lịch trình",
-    caption: "Sắp xếp lịch 7 ngày trực quan và điều chỉnh nhịp độ, thời gian rảnh.",
+    eyebrow: "Lịch tuần",
+    caption: "Chọn nhịp bắt đầu và ngày xem lại.",
   },
-  { icon: Flag, eyebrow: "Hoàn tất", caption: "Xem trước giao diện check-in Today thực tế và kích hoạt hành trình." },
+  { icon: Flag, eyebrow: "Kích hoạt", caption: "Xem tuần đầu rồi bắt đầu hành động." },
 ];
 
 export function SetupStepShellLab({

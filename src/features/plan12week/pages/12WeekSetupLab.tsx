@@ -24,7 +24,6 @@ import {
   clearGoalPlanningDrafts,
   formatDateInputValue,
   getCurrentPlan,
-  getLifeAreaLabel,
   getUserData,
   type LeadIndicatorCommitment,
   type PricingPlanCode,
@@ -57,6 +56,7 @@ import { buildDefaultFeasibilityAnswers, buildQuickPlanFeasibilityResult } from 
 import { LeadIndicatorsStepLab } from "./12WeekSetup/components/LeadIndicatorsStepLab";
 import { OutcomeStepLab } from "./12WeekSetup/components/OutcomeStepLab";
 import { ScheduleStepLab } from "./12WeekSetup/components/ScheduleStepLab";
+import { SetupSummaryCard } from "./12WeekSetup/components/SetupSummaryCard";
 import { SetupStepShellLab } from "./12WeekSetup/components/SetupStepShellLab";
 import { STEPS } from "./12WeekSetup/constantsLab";
 import {
@@ -610,20 +610,20 @@ export function TwelveWeekSetupLab() {
     Boolean(auth.userProfile);
   const currentStepDescription =
     currentStep === 0
-      ? "Làm rõ trạng thái bạn muốn đạt được khi 12 tuần kết thúc."
+      ? "Mô tả trạng thái cuối chu kỳ, không phải danh sách việc cần làm mỗi ngày."
       : currentStep === 1
-        ? "Chọn 2-4 hành động lặp lại hằng tuần để dẫn dắt đến kết quả mong muốn."
+        ? "Chọn những việc nhỏ bạn có thể làm đều để kéo mình tới đích."
         : currentStep === 2
-          ? "Chọn ngày khởi hành, ngày nhìn lại và tùy biến lịch 7 ngày ưu tiên."
-          : "Xem trước giao diện check-in Hôm nay thực tế và kích hoạt để bắt đầu.";
+          ? "Chọn nhịp bắt đầu, các ngày hành động và ngày xem lại tuần."
+          : "Xem tuần đầu rồi kích hoạt để bắt đầu từ màn Hôm nay.";
   const currentStepWhy =
     currentStep === 0
-      ? "Kết quả rõ giúp biết khi nào về đích — và tránh đổi đích giữa chu kỳ vì cảm xúc."
+      ? "Đích đến rõ giúp bạn biết khi nào đã đủ và tránh đổi hướng giữa chu kỳ."
       : currentStep === 1
-        ? "Hành động lặp lại là thứ bạn kiểm soát hoàn toàn hằng ngày, tạo nên sự tích lũy lớn."
+        ? "Việc bạn chủ động làm đều sẽ tạo ra tiến bộ dễ nhìn thấy hơn."
         : currentStep === 2
-          ? "Ngày bắt đầu chuẩn bị tinh thần và lịch review giúp bạn duy trì nhịp độ kỷ luật tự nhiên."
-          : "Kế hoạch Hôm nay mô phỏng giao diện check-in thực tế. Sau khi kích hoạt, bạn sẽ bắt đầu ngay tuần 1.";
+          ? "Một nhịp vừa sức giúp kế hoạch sống được cùng lịch thật của bạn."
+          : "Sau khi kích hoạt, bạn sẽ vào Hôm nay để bắt đầu việc đầu tiên.";
 
   if (isRealMode() && auth.authLoading) {
     return (
@@ -1259,7 +1259,7 @@ export function TwelveWeekSetupLab() {
 
   return (
     <PageShell maxWidth="xl">
-      <ScreenGuide {...SCREEN_GUIDES.twelveWeekSetup} autoOpen />
+      <ScreenGuide {...SCREEN_GUIDES.twelveWeekSetup} autoOpen={false} />
       <div className="space-y-5 sm:space-y-6">
         <UpgradePaywallDialog
           open={isPaywallOpen}
@@ -1284,72 +1284,12 @@ export function TwelveWeekSetupLab() {
           compactOnMobile
         />
 
-        {/* Tiêu đề chính tối giản */}
-        <section aria-labelledby="twelve-week-setup-title" className="space-y-3 sm:space-y-4">
-          {/* Banner visual anchor ở trên */}
-          <div className="h-20 w-full overflow-hidden rounded-card border border-app-line bg-app-bg shadow-app-sm sm:h-auto sm:aspect-[16/5]">
-            <picture className="block h-full w-full">
-              <source srcSet="/twelve_week_roadmap.webp" type="image/webp" />
-              <img
-                src="/twelve_week_roadmap.png"
-                alt="Lộ trình hành trình 12 tuần"
-                className="w-full h-full object-cover"
-                loading="lazy"
-                decoding="async"
-              />
-            </picture>
-          </div>
-
-          <div className="flex flex-col gap-2.5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-app-ink-muted">
-                {getLifeAreaLabel(focusArea)} · Thiết lập kế hoạch 12 tuần
-              </p>
-              <h1
-                id="twelve-week-setup-title"
-                className="mt-2 max-w-3xl font-serif text-[27px] font-medium leading-[1.06] tracking-tight text-app-ink sm:mt-3 sm:text-4xl sm:leading-tight"
-              >
-                Tạo kế hoạch 12 tuần
-              </h1>
-            </div>
-            {isSavingDraft ? (
-              <span className="flex items-center gap-1.5 text-[10px] font-bold text-app-ink-muted shrink-0 select-none self-start sm:self-auto">
-                <span className="h-2 w-2 rounded-full bg-app-accent animate-pulse" />
-                Đang lưu nháp tự động...
-              </span>
-            ) : (
-              <span className="flex items-center gap-1.5 text-[10px] font-bold text-app-status-success shrink-0 select-none self-start sm:self-auto">
-                <span className="h-2 w-2 rounded-full bg-app-status-success" />
-                Đã lưu nháp an toàn
-              </span>
-            )}
-          </div>
-
-          <div className="mt-2.5 flex max-w-2xl items-start gap-2.5 rounded-xl border border-app-line/60 bg-app-bg-subtle/50 p-3 shadow-3xs dark:bg-app-bg-subtle/10 sm:mt-3.5 sm:p-3.5">
-            <span
-              className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-app-accent text-xs"
-              aria-hidden="true"
-            >
-              🎯
-            </span>
-            <div className="min-w-0">
-              <p className="text-[10px] uppercase font-bold text-app-accent tracking-wider">Mục tiêu đang thiết lập</p>
-              <p className="mt-0.5 break-words text-xs font-medium leading-relaxed text-app-ink">
-                {smartGoal.specific.trim() || "mục tiêu của bạn"}
-              </p>
-            </div>
-          </div>
-
-          {aspirationalVision && (
-            <p className="mt-3.5 max-w-2xl text-sm leading-6 text-app-ink-soft">
-              Kế hoạch 12 tuần này phục vụ tầm nhìn 3 năm: {aspirationalVision.summary}
-            </p>
-          )}
-          <p className="mt-1.5 hidden max-w-2xl text-sm leading-6 text-app-ink-soft sm:block">
-            Dựa trên mục tiêu SMART của bạn, chúng tôi đã tự động chia nhỏ mốc lộ trình và điền sẵn kế hoạch. Bạn chỉ
-            cần xem lại và bấm tiếp tục.
-          </p>
-        </section>
+        <SetupSummaryCard
+          focusArea={focusArea}
+          goalTitle={smartGoal.specific.trim() || "mục tiêu của bạn"}
+          isSavingDraft={isSavingDraft}
+          aspirationalVisionSummary={aspirationalVision?.summary}
+        />
 
         {/* Giao diện 1 cột trung tâm "Journey Card Layout" */}
         <div className="mx-auto max-w-2xl space-y-4 lg:max-w-3xl sm:space-y-6">
