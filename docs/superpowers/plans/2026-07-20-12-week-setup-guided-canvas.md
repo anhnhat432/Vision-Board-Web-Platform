@@ -66,7 +66,7 @@ expect(screen.getByRole("button", { name: "Kích hoạt kế hoạch" })).toBeIn
 Run:
 
 ~~~bash
-npm run test:run -- src/app/pages/12WeekSetup.guided-canvas.test.tsx src/features/plan12week/pages/12WeekSetup/components/GuidedCanvasCopy.test.tsx src/app/pages/core-funnel-a11y.test.tsx src/test/ux-ui-upgrade/core-flow-content-order.test.tsx
+npm run test:ui -- src/app/pages/12WeekSetup.guided-canvas.test.tsx src/features/plan12week/pages/12WeekSetup/components/GuidedCanvasCopy.test.tsx src/app/pages/core-funnel-a11y.test.tsx src/test/ux-ui-upgrade/core-flow-content-order.test.tsx
 ~~~
 
 Expected: FAIL because the current route still renders the roadmap image, the old goal label, duplicate SMART explanation, and current step copy.
@@ -125,7 +125,7 @@ Keep CoreFlowProgress and UpgradePaywallDialog behavior unchanged.
 - [ ] Step 5: Run:
 
 ~~~bash
-npm run test:run -- src/app/pages/12WeekSetup.guided-canvas.test.tsx src/app/pages/core-funnel-a11y.test.tsx src/test/ux-ui-upgrade/core-flow-content-order.test.tsx
+npm run test:ui -- src/app/pages/12WeekSetup.guided-canvas.test.tsx src/app/pages/core-funnel-a11y.test.tsx src/test/ux-ui-upgrade/core-flow-content-order.test.tsx
 npm run typecheck
 ~~~
 
@@ -159,7 +159,7 @@ git commit -m "feat: simplify twelve-week setup header"
 - [ ] Step 4: Run:
 
 ~~~bash
-npm run test:run -- src/features/plan12week/pages/12WeekSetup/components/LeadIndicatorsStep.test.tsx src/features/plan12week/pages/12WeekSetup/components/GuidedCanvasCopy.test.tsx
+npm run test:ui -- src/features/plan12week/pages/12WeekSetup/components/LeadIndicatorsStep.test.tsx src/features/plan12week/pages/12WeekSetup/components/GuidedCanvasCopy.test.tsx
 ~~~
 
 Expected: existing commitment/validation tests and new copy/order tests pass.
@@ -193,7 +193,7 @@ git commit -m "feat: streamline twelve-week actions setup"
 - [ ] Step 4: Run:
 
 ~~~bash
-npm run test:run -- src/features/plan12week/pages/12WeekSetup/components/ScheduleStep.test.tsx src/features/plan12week/pages/12WeekSetup/components/GuidedCanvasCopy.test.tsx src/app/pages/core-funnel-a11y.test.tsx
+npm run test:ui -- src/features/plan12week/pages/12WeekSetup/components/ScheduleStep.test.tsx src/features/plan12week/pages/12WeekSetup/components/GuidedCanvasCopy.test.tsx src/app/pages/core-funnel-a11y.test.tsx
 ~~~
 
 Expected: date constraints, validation, accessibility, and activation-copy tests pass.
@@ -225,6 +225,7 @@ git commit -m "feat: clarify twelve-week activation preview"
 npm run typecheck
 npm run lint
 npm run test:run
+npm run test:ui
 npm run build
 ~~~
 
