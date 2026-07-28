@@ -1,5 +1,5 @@
-import { Calendar, CheckCircle2, Sparkles } from "lucide-react";
-import { useMemo } from "react";
+import { CalendarDays, CheckCircle2, ChevronDown, Flag, Sparkles, Target } from "lucide-react";
+import { useMemo, useState } from "react";
 import { formatDateInputValue } from "@/app/utils/storage-date-utils";
 import { getArchetypeForIntent, getUserIntentId, hasActionableArchetypeHint } from "@/app/utils/user-intent";
 import { buildLeadIndicatorSchedules } from "@/features/plan12week/pages/12WeekSetup/helpers";
@@ -15,11 +15,6 @@ interface PlanPreviewStepLabProps {
   feasibility: PendingFeasibilityResult;
   focusArea: string;
   selectedTemplate: { id: string; name: string } | null;
-  onBack?: () => void;
-  onSubmit?: () => void;
-  onChange?: <K extends keyof TwelveWeekSetupDraft>(key: K, value: TwelveWeekSetupDraft[K]) => void;
-  validationMessage?: string | null;
-  canConfirm?: boolean;
 }
 
 export function PlanPreviewStepLab({
@@ -28,12 +23,8 @@ export function PlanPreviewStepLab({
   feasibility: _feasibility,
   focusArea: _focusArea,
   selectedTemplate: _selectedTemplate,
-  onBack: _onBack,
-  onSubmit: _onSubmit,
-  onChange: _onChange,
-  validationMessage,
-  canConfirm = true,
 }: PlanPreviewStepLabProps) {
+  const [showFullRoadmap, setShowFullRoadmap] = useState(false);
   const archetype = useMemo((): GoalArchetype | null => {
     const intent = getUserIntentId();
     if (!intent || !hasActionableArchetypeHint(intent)) return null;
@@ -73,7 +64,7 @@ export function PlanPreviewStepLab({
         taskDate.setDate(weekStart.getDate() + dayOffset);
         const title = `${indicator.name} #${taskIndex + 1}`;
         weekOneTasks.push({
-          id: `task_${indicator.id}_${Date.now()}_${dayOffset}`,
+          id: `task_${indicator.id}_${dayOffset}_${taskIndex}`,
           title,
           scheduledDate: formatDateInputValue(taskDate),
           isCore: indicator.type === "core",
@@ -93,14 +84,16 @@ export function PlanPreviewStepLab({
       let expectedOutput = "";
 
       if (weekNumber === 1) {
-        focus = defaults?.weekOneFocus || "";
-        expectedOutput = defaults ? `${defaults.weekOneExpectedOutput}\n\nViệc đầu tiên: ${firstAction}` : "";
+        focus = defaults?.weekOneFocus || "Giữ nhịp vừa sức và hoàn thành việc đầu tiên.";
+        expectedOutput = defaults
+          ? `${defaults.weekOneExpectedOutput}\n\nViệc đầu tiên: ${firstAction}`
+          : draft.week12Outcome;
       } else if (weekNumber === 4) {
-        expectedOutput = defaults?.milestoneTemplates.week4 || "";
+        expectedOutput = defaults?.milestoneTemplates.week4 || draft.week4Milestone;
       } else if (weekNumber === 8) {
-        expectedOutput = defaults?.milestoneTemplates.week8 || "";
+        expectedOutput = defaults?.milestoneTemplates.week8 || draft.week8Milestone;
       } else if (weekNumber === 12) {
-        expectedOutput = defaults?.milestoneTemplates.week12 || "";
+        expectedOutput = defaults?.milestoneTemplates.week12 || draft.week12Outcome;
       }
 
       return {
@@ -118,6 +111,9 @@ export function PlanPreviewStepLab({
     };
   }, [
     draft.vision12Week,
+    draft.week4Milestone,
+    draft.week8Milestone,
+    draft.week12Outcome,
     draft.leadIndicators,
     draft.preferredDays,
     draft.dailyTimeBudget,
@@ -131,117 +127,73 @@ export function PlanPreviewStepLab({
   }, [draft.leadIndicators]);
 
   return (
-    <div className="space-y-6 select-none animate-in fade-in duration-300">
-      {/* 📱 MOCKUP ĐIỆN THOẠI TODAY SIMULATION (Nhân vật chính tạo cảm hứng) */}
-      <section className="mx-auto max-w-sm overflow-hidden rounded-[24px] border-[8px] border-app-ink bg-app-bg p-[3px] shadow-app-lg motion-safe:animate-in motion-safe:slide-in-from-bottom-5 duration-500 relative group">
-        {/* Notch giả lập iPhone */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-4.5 bg-app-ink rounded-b-xl z-20 flex items-center justify-around px-2 text-[10px] text-app-surface/50 font-bold select-none">
-          <span>09:41</span>
-          <div className="w-2.5 h-2.5 bg-app-surface rounded-full border border-app-line/20" />
-          <span>🔋 100%</span>
-        </div>
-
-        {/* Nội dung màn hình giả lập */}
-        <div className="rounded-[18px] bg-app-bg-subtle p-5 pt-8 min-h-[360px] text-xs text-app-ink relative z-10 flex flex-col justify-between">
-          <div className="space-y-4">
-            {/* Header giả lập */}
-            <div className="flex items-center justify-between border-b border-app-line/40 pb-2.5 pt-1">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-app-accent">Hôm nay · Today</p>
-                <h5 className="font-serif text-base font-semibold text-app-ink">Ngày khởi động 🚀</h5>
-              </div>
-              <Sparkles className="h-5 w-5 text-app-accent animate-pulse" />
-            </div>
-
-            {/* Đích đến 12 tuần mini */}
-            <div className="rounded-card bg-app-surface p-3 shadow-app-sm border border-app-line/60">
-              <span className="text-[10px] font-bold text-app-accent uppercase tracking-wider">
-                🏆 Đích đến Tuần 12 của bạn
-              </span>
-              <p className="mt-0.5 break-words text-xs font-semibold italic leading-relaxed text-app-ink">
-                “{draft.week12Outcome || "Kế hoạch 12 tuần mơ ước…"}”
-              </p>
-            </div>
-
-            {/* Checklist giả lập */}
-            <div className="space-y-2">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">
-                Nhiệm vụ cần check-in hôm nay:
-              </p>
-
-              {firstTwoTasks.length > 0 ? (
-                firstTwoTasks.map((tactic) => (
-                  <div
-                    key={tactic.id}
-                    className="w-full rounded-card border border-app-line bg-app-surface hover:bg-app-accent-subtle/30 p-3 flex items-center justify-between shadow-app-sm transition-all duration-200 text-left hover:border-app-accent/20"
-                  >
-                    <div className="min-w-0 pr-2">
-                      <p className="break-words text-xs font-semibold leading-normal text-app-ink">{tactic.name}</p>
-                      <p className="text-[10px] text-app-ink-soft mt-0.5 font-medium">
-                        Mục tiêu: {tactic.target} {tactic.unit}
-                      </p>
-                    </div>
-                    <CheckCircle2 className="h-5 w-5 text-app-line-strong shrink-0 hover:text-app-accent hover:scale-105 transition-all" />
-                  </div>
-                ))
-              ) : (
-                <div className="rounded-card border border-dashed border-app-line p-4 text-center text-app-ink-muted">
-                  Chưa có hành động lặp lại
-                </div>
-              )}
-            </div>
-
-            {/* Thanh tiến độ */}
-            <div className="space-y-1.5 pt-1.5">
-              <div className="flex justify-between text-[10px] font-bold text-app-ink-muted">
-                <span>TIẾN ĐỘ TUẦN 1</span>
-                <span>0% / 100%</span>
-              </div>
-              <div className="w-full bg-app-accent-soft h-2 rounded-pill overflow-hidden">
-                <div className="bg-app-accent w-1/12 h-full rounded-pill animate-pulse" />
-              </div>
-            </div>
+    <div className="space-y-4 animate-in fade-in duration-300">
+      <section className="rounded-[1.75rem] border border-app-accent/20 bg-[radial-gradient(circle_at_top_right,rgba(175,124,65,0.16),transparent_45%),linear-gradient(135deg,var(--color-app-bg-subtle),var(--color-app-surface))] px-5 py-5 shadow-app-sm sm:px-6">
+        <p className="text-xs font-bold uppercase tracking-[0.16em] text-app-accent">Sẵn sàng bắt đầu</p>
+        <div className="mt-3 flex gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-app-accent-soft text-app-accent">
+            <Sparkles className="h-5 w-5" aria-hidden="true" />
           </div>
-
-          {/* Footer mockup */}
-          <div className="border-t border-app-line/40 pt-3 flex items-center justify-between text-[10px] font-bold text-app-ink-muted uppercase">
-            <span className="flex items-center gap-1">
-              <Calendar className="h-3.5 w-3.5 text-app-accent" /> Tuần 1 / 12
-            </span>
-            <span className="text-app-accent">Nhịp thực thi: 100% 🔥</span>
+          <div>
+            <h3 className="font-serif text-xl font-semibold leading-snug text-app-ink">Tuần đầu của bạn đã có nhịp.</h3>
+            <p className="mt-1.5 text-sm leading-relaxed text-app-ink-soft">
+              Sau khi kích hoạt, bạn sẽ vào màn Hôm nay để bắt đầu việc đầu tiên.
+            </p>
           </div>
         </div>
       </section>
 
-      {/* Chữ truyền cảm hứng */}
-      <div className="text-center max-w-md mx-auto space-y-1.5">
-        <h4 className="font-serif text-lg font-semibold text-app-ink leading-snug">
-          Giao diện check-in Today của bạn đã sẵn sàng!
-        </h4>
-        <p className="text-xs text-app-ink-soft leading-relaxed font-medium">
-          Giao diện minh họa trên điện thoại tái hiện chính xác những gì bạn sẽ trải nghiệm hằng ngày. Bấm Kích hoạt ở
-          dưới để bắt đầu tuần đầu tiên rực rỡ nhé!
-        </p>
-      </div>
+      <section className="rounded-card border border-app-line bg-app-surface p-4 shadow-app-sm sm:p-5">
+        <div className="flex gap-3">
+          <Target className="mt-0.5 h-5 w-5 shrink-0 text-app-accent" aria-hidden="true" />
+          <div className="min-w-0">
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-app-ink-muted">Đích đến tuần 12</p>
+            <p className="mt-1.5 break-words font-serif text-lg font-semibold leading-snug text-app-ink">
+              “{draft.week12Outcome || "Bạn sẽ tạo nên một kết quả đáng tự hào."}”
+            </p>
+          </div>
+        </div>
+      </section>
 
-      {/* 🗺️ BẢN ĐỒ CHI TIẾT 12 TUẦN (Mở rộng/Xem thêm ở dưới) */}
-      <div className="border-t border-app-line/60 pt-6">
-        <PlanPreviewLab draft={draft} previewPlan={previewPlan} />
-      </div>
+      <section className="rounded-card border border-app-line bg-app-surface p-4 shadow-app-sm sm:p-5">
+        <div className="flex items-start gap-3">
+          <CalendarDays className="mt-0.5 h-5 w-5 shrink-0 text-app-accent" aria-hidden="true" />
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-bold uppercase tracking-[0.14em] text-app-ink-muted">Tuần 1 · Bước khởi động</p>
+            <p className="mt-1.5 text-sm font-semibold leading-relaxed text-app-ink">{previewPlan.weeks[0]?.focus}</p>
+            <div className="mt-3 space-y-2">
+              {firstTwoTasks.length > 0 ? (
+                firstTwoTasks.map((tactic) => (
+                  <div key={tactic.id} className="flex items-center gap-2 text-sm text-app-ink-soft">
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-app-accent" aria-hidden="true" />
+                    <p className="break-words">{tactic.name}</p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm leading-relaxed text-app-ink-soft">Các hành động lặp lại của bạn sẽ xuất hiện ở đây.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
 
-      {validationMessage ? (
-        <p
-          role="alert"
-          className="rounded-card border border-app-status-error/30 bg-app-status-error/5 px-3.5 py-2.5 text-xs font-semibold text-app-status-error"
+      <section className="overflow-hidden rounded-card border border-app-line bg-app-surface shadow-app-sm">
+        <button
+          type="button"
+          aria-expanded={showFullRoadmap}
+          aria-controls="full-plan-roadmap"
+          className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left text-sm font-bold text-app-ink transition-colors hover:bg-app-bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-inset sm:px-5"
+          onClick={() => setShowFullRoadmap((current) => !current)}
         >
-          {validationMessage}
-        </p>
-      ) : null}
-      {!canConfirm && !validationMessage ? (
-        <p className="rounded-card border border-app-line bg-app-bg-subtle px-3.5 py-2.5 text-xs text-app-ink-soft font-medium">
-          Kiểm tra lại các bước trước khi lưu kế hoạch.
-        </p>
-      ) : null}
+          <span className="flex items-center gap-2"><Flag className="h-4 w-4 text-app-accent" aria-hidden="true" />Xem toàn bộ lộ trình 12 tuần</span>
+          <ChevronDown className={showFullRoadmap ? "h-4 w-4 shrink-0 rotate-180 transition-transform" : "h-4 w-4 shrink-0 transition-transform"} aria-hidden="true" />
+        </button>
+        {showFullRoadmap ? (
+          <div id="full-plan-roadmap" className="border-t border-app-line px-4 py-4 sm:px-5">
+            <PlanPreviewLab draft={draft} previewPlan={previewPlan} />
+          </div>
+        ) : null}
+      </section>
     </div>
   );
 }

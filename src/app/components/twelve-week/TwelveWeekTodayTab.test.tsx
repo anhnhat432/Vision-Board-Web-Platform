@@ -161,6 +161,15 @@ describe("TwelveWeekTodayTab — primary task hero", () => {
     }
   });
 
+  it("groups the current-day status into a labelled region", () => {
+    render(<TwelveWeekTodayTab {...makeProps()} />);
+
+    expect(screen.getByRole("region", { name: "Tình trạng hôm nay" })).toHaveAttribute(
+      "data-testid",
+      "today-dashboard-cards",
+    );
+  });
+
   it("renders 'Ưu tiên duy nhất' headline when there is an open primary task", () => {
     render(<TwelveWeekTodayTab {...makeProps()} />);
     expect(screen.getByTestId("today-primary-hero")).toBeInTheDocument();

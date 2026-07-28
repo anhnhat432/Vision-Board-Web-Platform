@@ -349,7 +349,7 @@ export function TwelveWeekSystemTabs({
             aria-label="Điều hướng hệ 12 tuần"
             className="grid w-full grid-cols-4 gap-1 overflow-visible rounded-[14px] border-0 bg-app-surface p-1"
           >
-            {TWELVE_WEEK_SECTION_TABS.map(({ value, label }) => {
+            {TWELVE_WEEK_SECTION_TABS.map(({ value, label, icon: Icon }) => {
               const hasDot = (value === "today" && showTodayDot) || (value === "week" && showWeekDot);
               return (
                 <TabsTrigger
@@ -359,8 +359,9 @@ export function TwelveWeekSystemTabs({
                   value={value}
                   aria-controls={tabPanelId}
                   aria-label={`Mở tab ${label}`}
-                  className="relative flex min-h-11 min-w-0 cursor-pointer items-center justify-center gap-0 rounded-control px-1 py-2 text-xs font-bold leading-tight text-app-ink-soft transition-[background-color,color,box-shadow] duration-150 data-[state=active]:bg-app-accent data-[state=active]:text-app-ink-on-accent data-[state=active]:shadow-app-sm hover:data-[state=inactive]:bg-app-bg hover:data-[state=inactive]:text-app-ink sm:gap-2 sm:px-4 sm:text-sm"
+                  className="relative flex min-h-11 min-w-0 cursor-pointer items-center justify-center gap-1 rounded-control px-1 py-2 text-xs font-bold leading-tight text-app-ink-soft transition-[background-color,color,box-shadow] duration-150 data-[state=active]:bg-app-accent data-[state=active]:text-app-ink-on-accent data-[state=active]:shadow-app-sm hover:data-[state=inactive]:bg-app-bg hover:data-[state=inactive]:text-app-ink sm:gap-2 sm:px-4 sm:text-sm"
                 >
+                  <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                   <span className="min-w-0 truncate">{label}</span>
                   {hasDot && (
                     <span className="absolute right-1 top-1 flex h-2 w-2 sm:right-1.5 sm:top-1.5">

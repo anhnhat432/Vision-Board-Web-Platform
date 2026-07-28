@@ -41,7 +41,7 @@ export function WeeklyRail({
           Nhịp độ chu kỳ 12 tuần
         </h2>
         <span className="rounded-full bg-app-accent-soft px-3 py-1 text-xs font-bold text-app-accent">
-          Tuần {currentWeek}
+          Tuần {currentWeek} đang là trọng tâm
         </span>
       </div>
       <TwelveWeekCycleRail

@@ -258,7 +258,8 @@ export function TwelveWeekProgressTab({
   return (
     <div className="min-w-0 space-y-5 pt-1">
       <section
-        className={`grid min-w-0 gap-4 rounded-card border border-app-line bg-app-surface p-5 shadow-app-sm sm:p-6 ${
+        aria-label="Tiến độ và hướng đi"
+        className={`grid min-w-0 gap-4 rounded-[1.5rem] border border-app-line bg-app-surface p-5 shadow-app-sm sm:p-6 ${
           nextActionHandler ? "md:grid-cols-[minmax(0,1fr)_280px] md:items-end" : ""
         }`}
       >

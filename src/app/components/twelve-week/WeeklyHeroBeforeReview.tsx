@@ -73,7 +73,7 @@ export function WeeklyHeroBeforeReview({
   return (
     <div className="space-y-5 sm:space-y-6">
       {/* Hero Score Card */}
-      <section className="rounded-card border border-app-line bg-app-surface p-5 sm:p-6">
+      <section aria-label="Tiêu điểm tuần" className="rounded-[1.5rem] border border-app-line bg-app-surface p-5 shadow-app-sm sm:p-6">
         {/* Header metadata */}
         <div className="relative z-10 flex flex-wrap items-center justify-between gap-2.5 text-[10px] font-bold uppercase tracking-widest text-app-ink-muted">
           <span className="font-serif text-xs font-bold tracking-normal normal-case text-app-accent bg-app-accent-soft/75 px-3 py-1 rounded-lg border border-app-line/20">
@@ -178,7 +178,7 @@ export function WeeklyHeroBeforeReview({
             </div>
             <button
               type="button"
-              className="min-h-11 rounded-card border border-app-line bg-app-surface px-4.5 py-2.5 text-xs font-semibold text-app-ink shadow-2xs transition-[background-color,color,border-color,box-shadow,opacity,transform] hover:bg-app-bg sm:shrink-0"
+              className="min-h-11 rounded-control bg-app-accent px-4.5 py-2.5 text-xs font-bold text-white shadow-app-sm transition-[background-color,color,box-shadow,opacity,transform] hover:bg-app-accent-hover active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:shrink-0"
               onClick={onStartEarlyReview}
             >
               Bắt đầu review sớm

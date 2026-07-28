@@ -1368,8 +1368,6 @@ export function TwelveWeekSetupLab() {
                 feasibility={feasibility}
                 focusArea={focusArea}
                 selectedTemplate={selectedTemplate}
-                validationMessage={currentStepValidationError}
-                canConfirm={!currentStepValidationError}
               />
             ) : null}
           </SetupStepShellLab>

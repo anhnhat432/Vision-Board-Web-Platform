@@ -30,8 +30,8 @@ function SettingsGroup({
   return (
     <section
       aria-labelledby={id}
-      className={`rounded-card border bg-app-surface p-4 sm:p-6 ${
-        warning ? "border-app-status-warning/30" : "border-app-line"
+      className={`border-b bg-app-surface px-1 py-5 first:pt-1 last:border-b-0 sm:px-2 sm:py-7 ${
+        warning ? "border-app-status-warning/30" : "border-app-line/70"
       }`}
     >
       <h2 id={id} className="font-serif text-xl font-bold text-app-ink">

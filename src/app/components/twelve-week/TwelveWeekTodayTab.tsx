@@ -566,8 +566,9 @@ export function TwelveWeekTodayTab({
       {reviewDuePrompt}
 
       {/* ── Status chips (nhịp hôm nay) — bổ sung cho bảng tiến độ ở header, không lặp lại ── */}
-      <div
+      <section
         data-testid="today-dashboard-cards"
+        aria-label="Tình trạng hôm nay"
         className="grid grid-cols-2 gap-2 rounded-card border border-app-line/70 bg-app-surface/78 p-1.5 shadow-[var(--app-shadow-sm)] sm:flex sm:flex-wrap sm:gap-2.5"
       >
         <span className="inline-flex min-w-0 items-center gap-2 rounded-full border border-app-accent/20 bg-app-accent-soft/45 px-3 py-1.5 text-[11px] font-semibold text-app-accent sm:px-3.5 sm:text-xs">
@@ -607,7 +608,7 @@ export function TwelveWeekTodayTab({
             {reviewDueToday ? "Review tuần đến hạn" : "Review tuần đã xong"}
           </span>
         </span>
-      </div>
+      </section>
 
       {missedTasks.length > 0 && (
         <div
