@@ -211,9 +211,9 @@ VBABCDEFGH
 
 Do not set live Casso tokens or bank details in source files. Put them in Render/host environment variables.
 
-### Optional: error monitoring with Sentry
+### Production error monitoring with Sentry
 
-Sentry is optional. If DSN values are blank, both apps run normally without sending events.
+For `VITE_APP_MODE=real` production deployments, `VITE_SENTRY_DSN` is required so startup, auth bootstrap, and sync failures remain observable. A blank DSN is supported only for local or demo operation.
 
 Frontend env:
 
