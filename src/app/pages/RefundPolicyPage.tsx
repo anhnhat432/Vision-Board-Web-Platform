@@ -1,5 +1,6 @@
 import { BadgeCheck, Clock, Mail, ReceiptText, RefreshCw } from "lucide-react";
 import { Link } from "react-router";
+import { PageBackLink } from "../components/PageBackLink";
 
 const SUPPORT_EMAIL = import.meta.env.VITE_BILLING_SUPPORT_EMAIL?.trim() || "support@dearourfuture.com";
 const REFUND_WINDOW_DAYS = Number.parseInt(import.meta.env.VITE_REFUND_WINDOW_DAYS?.trim() || "7", 10);
@@ -15,10 +16,11 @@ export function RefundPolicyPage() {
   const refundMaxUsedPercent = getSafePositiveNumber(REFUND_MAX_USED_PERCENT, 25);
 
   return (
-    <article className="mx-auto max-w-3xl space-y-8 px-4 py-8 sm:px-6">
-      <header className="surface-raised overflow-hidden rounded-2xl border border-app-line bg-app-surface p-6 sm:p-7">
+    <article className="mx-auto max-w-3xl space-y-section px-4 py-8 sm:px-6">
+      <PageBackLink fallback="/" className="mb-2" />
+      <header className="surface-raised overflow-hidden rounded-card border border-app-line bg-app-surface p-card-pad sm:p-7">
         <div className="flex items-start gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-app-accent-soft text-app-accent">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-pill bg-app-accent-soft text-app-accent">
             <RefreshCw className="h-6 w-6" />
           </div>
           <div className="min-w-0 space-y-2">
@@ -35,24 +37,24 @@ export function RefundPolicyPage() {
       </header>
 
       <section className="grid gap-4 sm:grid-cols-3">
-        <div className="rounded-[var(--r-card)] border border-app-status-success/30 bg-app-status-success/10 p-4">
+        <div className="rounded-card border border-app-status-success/30 bg-app-status-success/10 p-4">
           <BadgeCheck className="h-5 w-5 text-app-status-success" />
           <p className="mt-3 text-sm font-semibold text-app-ink">Có hoàn tiền</p>
           <p className="mt-1 text-xs leading-5 text-app-ink-soft">Xét duyệt thủ công, không tự động.</p>
         </div>
-        <div className="rounded-[var(--r-card)] border border-app-status-info/30 bg-app-status-info/10 p-4">
+        <div className="rounded-card border border-app-status-info/30 bg-app-status-info/10 p-4">
           <Clock className="h-5 w-5 text-app-status-info" />
           <p className="mt-3 text-sm font-semibold text-app-ink">3-7 ngày làm việc</p>
           <p className="mt-1 text-xs leading-5 text-app-ink-soft">Thời gian xử lý sau khi nhận đủ thông tin.</p>
         </div>
-        <div className="rounded-[var(--r-card)] border border-app-line bg-app-bg-subtle p-4">
+        <div className="rounded-card border border-app-line bg-app-bg-subtle p-4">
           <ReceiptText className="h-5 w-5 text-app-accent" />
           <p className="mt-3 text-sm font-semibold text-app-ink">Cần mã đơn hàng</p>
           <p className="mt-1 text-xs leading-5 text-app-ink-soft">Mã đơn giúp đối chiếu thanh toán chính xác.</p>
         </div>
       </section>
 
-      <section className="surface-raised space-y-3 rounded-2xl border border-app-line bg-app-surface p-6 sm:p-7">
+      <section className="surface-raised space-y-3 rounded-card border border-app-line bg-app-surface p-card-pad sm:p-7">
         <h2 className="font-serif text-xl font-medium text-app-ink">1. Điều kiện hoàn tiền</h2>
         <p className="text-sm leading-7 text-app-ink-soft">
           Chúng tôi cho phép hoàn tiền trong <strong>{refundWindowDays} ngày</strong> kể từ ngày thanh toán nếu bạn chưa
@@ -69,7 +71,7 @@ export function RefundPolicyPage() {
         </ul>
       </section>
 
-      <section className="surface-raised space-y-3 rounded-2xl border border-app-line bg-app-surface p-6 sm:p-7">
+      <section className="surface-raised space-y-3 rounded-card border border-app-line bg-app-surface p-card-pad sm:p-7">
         <h2 className="font-serif text-xl font-medium text-app-ink">2. Cách gửi yêu cầu</h2>
         <p className="text-sm leading-7 text-app-ink-soft">
           Cách nhanh nhất là mở trang{" "}
@@ -96,7 +98,7 @@ export function RefundPolicyPage() {
         </p>
       </section>
 
-      <section className="space-y-3 rounded-[var(--r-card)] border border-app-status-warning/30 bg-app-status-warning/10 p-5">
+      <section className="space-y-3 rounded-card border border-app-status-warning/30 bg-app-status-warning/10 p-5">
         <h2 className="flex items-center gap-2 font-serif text-xl font-medium text-app-ink">
           <Mail className="h-5 w-5 text-app-status-warning" />
           Quy trình xử lý thủ công
@@ -112,7 +114,7 @@ export function RefundPolicyPage() {
         </p>
       </section>
 
-      <section className="surface-raised space-y-3 rounded-2xl border border-app-line bg-app-surface p-6 sm:p-7">
+      <section className="surface-raised space-y-3 rounded-card border border-app-line bg-app-surface p-card-pad sm:p-7">
         <h2 className="font-serif text-xl font-medium text-app-ink">3. Hủy gói và chu kỳ chưa dùng</h2>
         <p className="text-sm leading-7 text-app-ink-soft">
           Plus chạy theo chu kỳ bạn đã thanh toán. Nếu tài khoản của bạn có lịch gia hạn và bạn không muốn tiếp tục,

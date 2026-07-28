@@ -453,7 +453,7 @@ export function SpotlightTour({ open, onOpenChange, title, description, steps }:
           {targetRect ? (
             <div
               aria-hidden="true"
-              className="pointer-events-none fixed rounded-[18px] border border-app-line/85 bg-app-surface/8 shadow-[0_0_0_9999px_rgba(15,23,42,0.03),0_0_0_2px_rgba(91,165,144,0.06),0_12px_32px_rgba(15,23,42,0.10)] dark:border-app-line/70 dark:bg-app-bg-subtle dark:shadow-[0_0_0_9999px_rgba(0,0,0,0.14),0_0_0_2px_rgba(91,165,144,0.08),0_12px_32px_rgba(0,0,0,0.22)]"
+              className="pointer-events-none fixed rounded-card border border-app-line/85 bg-app-surface/8 shadow-[0_0_0_9999px_rgba(15,23,42,0.03),0_0_0_2px_rgba(91,165,144,0.06),0_12px_32px_rgba(15,23,42,0.10)] dark:border-app-line/70 dark:bg-app-bg-subtle dark:shadow-[0_0_0_9999px_rgba(0,0,0,0.14),0_0_0_2px_var(--app-accent-subtle),0_12px_32px_rgba(0,0,0,0.22)]"
               style={{
                 height: targetRect.height,
                 left: targetRect.left,
@@ -466,7 +466,7 @@ export function SpotlightTour({ open, onOpenChange, title, description, steps }:
           <DialogPrimitive.Content
             aria-describedby={`spotlight-tour-description-${step.id}`}
             aria-labelledby={`spotlight-tour-title-${step.id}`}
-            className="fixed max-h-[calc(100vh-2rem)] transform-gpu overflow-y-auto rounded-[22px] border border-app-line bg-app-surface/98 text-app-ink shadow-app-lg ring-1 ring-app-line/70 [contain:layout_paint_style] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+            className="fixed max-h-[calc(100vh-2rem)] transform-gpu overflow-y-auto rounded-card-lg border border-app-line bg-app-surface/98 text-app-ink shadow-app-lg ring-1 ring-app-line/70 [contain:layout_paint_style] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
             onEscapeKeyDown={(event) => {
               event.preventDefault();
               closeTour();

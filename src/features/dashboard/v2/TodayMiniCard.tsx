@@ -23,7 +23,7 @@ export function TodayMiniCard(props: TodayMiniCardProps) {
 
   return (
     <section
-      className="overflow-hidden rounded-[20px] glass-panel glass-panel-hover"
+      className="overflow-hidden rounded-card glass-panel glass-panel-hover"
       aria-labelledby="dashboard-today-mini-title"
     >
       <div className="border-b border-app-line bg-gradient-to-b from-app-accent-subtle to-app-surface px-5 py-4">
@@ -51,7 +51,7 @@ export function TodayMiniCard(props: TodayMiniCardProps) {
                 {completedCount}/{totalCount} việc
               </motion.span>
             </div>
-            <p className="font-serif text-[12.5px] italic text-app-ink-soft">{hint}</p>
+            <p className="font-serif text-[12px] italic leading-relaxed text-app-ink-soft">{hint}</p>
           </div>
           {companion ? <div className="flex shrink-0 justify-end md:block md:self-start">{companion}</div> : null}
         </div>

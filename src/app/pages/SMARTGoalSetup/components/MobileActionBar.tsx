@@ -61,7 +61,7 @@ export function MobileActionBar({
         </div>
         <button
           type="button"
-          className="inline-flex min-h-[52px] w-full cursor-pointer items-center justify-center gap-2 rounded-[18px] bg-app-accent px-5 py-3 text-[15px] font-extrabold leading-tight text-white shadow-app-md transition-all duration-200 hover:bg-app-accent-hover active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/35 focus-visible:ring-offset-2"
+          className="inline-flex min-h-[52px] w-full cursor-pointer items-center justify-center gap-2 rounded-card bg-app-accent px-5 py-3 text-[15px] font-extrabold leading-tight text-white shadow-app-md transition-all duration-200 hover:bg-app-accent-hover active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/35 focus-visible:ring-offset-2"
           onClick={onNext}
         >
           {primaryCtaLabel}
@@ -71,7 +71,7 @@ export function MobileActionBar({
           <button
             type="button"
             className={cn(
-              "inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-[14px] px-3 py-2 text-[12px] font-bold leading-tight text-app-ink-muted transition-all duration-200 hover:bg-app-bg-subtle hover:text-app-ink active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/35",
+              "inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-card px-3 py-2 text-[12px] font-bold leading-tight text-app-ink-muted transition-all duration-200 hover:bg-app-bg-subtle hover:text-app-ink active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/35",
               !showFinalSecondaryCta && "col-span-2",
             )}
             onClick={onBack}
@@ -82,7 +82,7 @@ export function MobileActionBar({
           {showFinalSecondaryCta ? (
             <button
               type="button"
-              className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-[14px] border border-app-line bg-app-surface px-3 py-2 text-[12px] font-bold leading-tight text-app-ink-soft transition-all duration-200 hover:bg-app-bg-subtle active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/35"
+              className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-card border border-app-line bg-app-surface px-3 py-2 text-[12px] font-bold leading-tight text-app-ink-soft transition-all duration-200 hover:bg-app-bg-subtle active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/35"
               onClick={onFinalSecondaryAction}
             >
               <ShieldCheck className="h-4 w-4" aria-hidden="true" />

@@ -34,7 +34,7 @@ export const SectionHeader = forwardRef<HTMLDivElement, SectionHeaderProps>(
           className: cn(
             "font-serif font-extrabold tracking-[-0.03em] m-0",
             as === "h1" && "text-[clamp(32px,4.5vw,56px)] leading-[0.98] tracking-[-0.035em]",
-            as === "h2" && "text-[clamp(26px,3.4vw,40px)] leading-[1.08]",
+            as === "h2" && "text-[clamp(26px,3.4vw,40px)] leading-[var(--text-5xl--line-height)]",
             as === "h3" && "text-[clamp(22px,2.8vw,32px)] leading-[1.12]",
           ),
           style: { color: "var(--app-ink)" },

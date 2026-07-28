@@ -6,6 +6,7 @@ import { Card, CardContent } from "./ui/card";
 interface Props {
   children: ReactNode;
   fallbackTitle?: string;
+  secondaryAction?: { label: string; onClick: () => void };
 }
 
 interface State {
@@ -61,14 +62,20 @@ export class TabErrorBoundary extends Component<Props, State> {
             </p>
             <p className="text-base font-semibold text-app-ink">Phần này không tải được. Hãy thử lại.</p>
             <p className="mx-auto max-w-xl text-sm leading-7 text-app-ink-muted">{SAFE_TAB_ERROR_DESCRIPTION}</p>
-            <Button
-              variant="outline"
-              size="sm"
-              className="mt-2"
-              onClick={() => this.setState({ hasError: false, error: null })}
-            >
-              Thử lại
-            </Button>
+            <div className="mt-2 flex flex-wrap justify-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => this.setState({ hasError: false, error: null })}
+              >
+                Thử lại
+              </Button>
+              {this.props.secondaryAction ? (
+                <Button variant="ghost" size="sm" onClick={this.props.secondaryAction.onClick}>
+                  {this.props.secondaryAction.label}
+                </Button>
+              ) : null}
+            </div>
           </CardContent>
         </Card>
       );

@@ -18,8 +18,10 @@ export type DashboardWidgetId =
 /**
  * Cột trình bày trong từng nhóm. Đây là thông tin *layout thuần* (không đổi
  * nguồn dữ liệu / điều kiện hiển thị), giữ nguyên bố cục bento hiện có:
- * - `lead`: cột trái nổi bật của nhóm core_flow (Today).
- * - `stack`: cột phải xếp dọc của nhóm core_flow.
+ * - `lead`: cột trái nổi bật của nhóm core_flow (Today — card cao nhất, đứng
+ *   một mình để cân bằng với nhóm 3 card bên phải).
+ * - `stack`: cột phải xếp dọc của nhóm core_flow (Next action + Active goals +
+ *   Reflection prompt).
  * - `main`: cột chính (rộng) của nhóm secondary.
  * - `side`: cột phụ của nhóm secondary.
  */

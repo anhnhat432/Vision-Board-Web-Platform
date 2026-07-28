@@ -57,7 +57,7 @@ export function HeroSection({
               initial={reduceMotion ? {} : { opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-              className="font-serif text-[clamp(28px,4vw,44px)] font-bold leading-[1.08] tracking-tight text-app-ink"
+              className="font-serif text-[clamp(28px,4vw,44px)] font-bold leading-[var(--text-5xl--line-height)] tracking-tight text-app-ink"
             >
               Bản đồ cuộc sống
 của bạn bắt đầu từ đây
@@ -67,7 +67,7 @@ của bạn bắt đầu từ đây
               initial={reduceMotion ? {} : { opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-              className="max-w-[50ch] text-[14px] leading-[1.6] text-app-ink-soft sm:text-[15px]"
+              className="max-w-[50ch] text-[14px] leading-[var(--text-base--line-height)] text-app-ink-soft sm:text-[15px]"
             >
               Rà 8 lĩnh vực để nhìn ra nơi cần chăm sóc đầu tiên, rồi chuyển thành Life Insight rõ ràng cho chặng 12 tuần.
             </motion.p>

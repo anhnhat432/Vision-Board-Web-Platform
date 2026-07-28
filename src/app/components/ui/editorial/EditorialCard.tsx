@@ -36,7 +36,7 @@ export const EditorialCard = forwardRef<HTMLDivElement, EditorialCardProps>(
         tone === "accent" && "bg-app-accent text-white",
         tone === "muted" && "bg-app-bg-subtle border border-dashed border-app-line-strong",
         interactive && [
-          "transition-[transform,box-shadow] duration-[240ms] ease-[cubic-bezier(0.22,1,0.36,1)]",
+          "transition-[transform,box-shadow] duration-[var(--duration-base)] ease-[var(--ease-emphasized)]",
           "hover:shadow-[0_24px_52px_-28px_rgba(23,21,15,0.32)] hover:-translate-y-0.5",
           "motion-reduce:transition-none motion-reduce:hover:transform-none motion-reduce:hover:shadow-[var(--app-shadow-card)]",
         ],

@@ -85,7 +85,6 @@ import {
   createImportValidationRequestId,
   getErrorMessage,
   getImportValidationReportFromError,
-  getRouteTone,
   isRecord,
 } from "./helpers";
 import { useEntitlementsAutoSync } from "./hooks/useEntitlementsAutoSync";
@@ -507,7 +506,6 @@ export function RootLayout() {
     getNavItemsForState(isSignedOutVisitor);
   const isDesktopMoreNavActive = desktopMoreOpen || secondaryNavItems.some((item) => isActive(item.path));
   const isMoreNavActive = mobileMenuOpen || secondaryNavItems.some((item) => isActive(item.path));
-  const routeTone = getRouteTone(location.pathname);
   const accountLabel = userProfile?.displayName || user?.displayName || user?.email || "Khách";
   const accountEmail = user?.email || userProfile?.email || "";
   const currentAccountPlanCode = getCurrentPlan(guideUserData);
@@ -516,6 +514,7 @@ export function RootLayout() {
   const accountStatus = userProfileError ? "Lỗi hồ sơ" : accountEmail || "Tài khoản đã đăng nhập";
   const normalizedPathname = normalizePathname(location.pathname);
   const isPublicLanding = !user && normalizedPathname === "/";
+  const isTwelveWeekExecutionWorkspace = normalizedPathname.startsWith("/12-week-system");
   const suppressAutoWelcomeGuide =
     normalizedPathname.startsWith("/admin") ||
     normalizedPathname.startsWith("/vision-board") ||
@@ -972,7 +971,7 @@ export function RootLayout() {
       <AutoCloudSyncProvider>
         <AssistantPageContextProvider>
           <ScreenGuideContext.Provider value={true}>
-          <div className="app-shell min-h-screen bg-app-bg" data-route-tone={routeTone}>
+          <div className="app-shell min-h-screen bg-app-bg">
             <OfflineBanner />
             <a href="#main-content" className="skip-to-content">
               Bỏ qua điều hướng
@@ -1042,7 +1041,7 @@ export function RootLayout() {
   return (
     <AutoCloudSyncProvider>
       <AssistantPageContextProvider>
-        <div className="app-shell min-h-screen" data-route-tone={routeTone}>
+        <div className="app-shell min-h-screen">
           <OfflineBanner />
           <a href="#main-content" className="skip-to-content">
             Bỏ qua điều hướng
@@ -1606,10 +1605,10 @@ export function RootLayout() {
                 {pageMeta.label}
               </div>
               {pageTransitionContent}
-              {isSignedOutVisitor && !isPublicLanding ? <AppPublicFooter /> : null}
+              {isSignedOutVisitor && !isPublicLanding && !isTwelveWeekExecutionWorkspace ? <AppPublicFooter /> : null}
             </main>
 
-            {user ? (
+            {user && !isTwelveWeekExecutionWorkspace ? (
               <footer className="mx-auto max-w-7xl px-4 pb-24 text-xs tracking-tight text-app-ink-muted sm:px-6 md:pb-8 lg:px-8">
                 <div className="flex flex-col items-center gap-3 border-t border-app-line pt-4 md:flex-row md:justify-between">
                   <div className="flex items-center justify-center gap-2 md:justify-start">
@@ -1673,7 +1672,7 @@ export function RootLayout() {
             <nav
               className="bottom-nav md:hidden"
               aria-label="Điều hướng dưới"
-              style={{ animation: "bottom-nav-rise 0.38s cubic-bezier(0.22,1,0.36,1) both" }}
+              style={{ animation: "bottom-nav-rise 0.38s var(--ease-emphasized) both" }}
             >
               <div className="bottom-nav-inner bg-app-surface border-t border-app-line/75 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] rounded-t-2xl p-2 pb-[calc(0.4rem+env(safe-area-inset-bottom,0))]">
                 {bottomNavItems.map((item) => {

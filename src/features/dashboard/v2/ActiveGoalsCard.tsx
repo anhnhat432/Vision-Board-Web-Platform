@@ -1,11 +1,13 @@
 import { ArrowRight, Plus, Target } from "lucide-react";
+import { motion, useReducedMotion } from "motion/react";
 
+import { CountUp } from "@/app/components/ui/count-up";
 import {
-  calculateGoalProgress,
-  type Goal,
-  getLifeAreaLabel,
-  getTwelveWeekCurrentWeek,
-  getTwelveWeekWeekCompletion,
+	calculateGoalProgress,
+	type Goal,
+	getLifeAreaLabel,
+	getTwelveWeekCurrentWeek,
+	getTwelveWeekWeekCompletion,
 } from "@/app/utils/storage";
 
 interface ActiveGoalsCardProps {
@@ -52,10 +54,11 @@ function getWeekLabel(goal: Goal): string {
 export function ActiveGoalsCard({ goals, maxGoals = 3, onSelectGoal, onAddGoal }: ActiveGoalsCardProps) {
   const visibleGoals = goals.slice(0, maxGoals);
   const isAtLimit = goals.length >= maxGoals;
+  const reduceMotion = useReducedMotion() ?? false;
 
   return (
     <section
-      className="rounded-[20px] glass-panel glass-panel-hover p-[22px]"
+      className="rounded-card glass-panel glass-panel-hover p-[22px]"
       aria-labelledby="dashboard-active-goals-title"
     >
       <div className="mb-4 flex flex-col gap-3 border-b border-app-line pb-3.5 sm:flex-row sm:items-center sm:justify-between">
@@ -128,15 +131,17 @@ export function ActiveGoalsCard({ goals, maxGoals = 3, onSelectGoal, onAddGoal }
                     </div>
                   </div>
                   <span className="shrink-0 font-serif text-[18px] font-extrabold text-app-accent tabular-nums">
-                    {progress}%
+                    <CountUp value={progress} suffix="%" />
                   </span>
                 </div>
 
                 <div className="flex items-center gap-3.5">
                   <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-app-bg-subtle" aria-hidden="true">
-                    <div
-                      className="h-full rounded-full bg-app-accent transition-all duration-500 ease-out"
-                      style={{ width: `${Math.max(progress, 2)}%` }}
+                    <motion.div
+                      className="h-full rounded-full bg-app-accent"
+                      initial={reduceMotion ? false : { width: "0%" }}
+                      animate={{ width: `${Math.max(progress, 2)}%` }}
+                      transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                     />
                   </div>
                   <span className="inline-flex shrink-0 items-center gap-0.5 text-xs font-bold text-app-accent">

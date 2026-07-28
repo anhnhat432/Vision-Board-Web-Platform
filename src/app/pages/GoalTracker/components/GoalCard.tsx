@@ -1,4 +1,4 @@
-import { ArrowRight, Award, Calendar, CheckCircle2, Circle, RotateCcw, Trash2 } from "lucide-react";
+import { ArrowRight, Award, Calendar, CheckCircle2, Circle, ListChecks, RotateCcw, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { getGoalArchetypeIcon } from "@/app/components/illustrations";
 import type { Goal, PricingPlanCode } from "@/app/utils/storage";
@@ -81,16 +81,16 @@ export function GoalCard({
         <div className="backface-hidden w-full" aria-hidden={isFlipped}>
           <SpotlightCard
             className={cn(
-              "relative overflow-hidden rounded-[24px] border p-0 shadow-[var(--app-shadow-card)] transition-[border-color,box-shadow] duration-300 hover:border-app-accent/25 hover:shadow-[var(--app-shadow-md)]",
+              "relative overflow-hidden rounded-[24px] border p-0 shadow-[var(--app-shadow-card)]",
               cardToneClass,
               completionLiftClass,
             )}
           >
-            <div className="grid min-w-0 lg:grid-cols-[minmax(0,1.28fr)_minmax(300px,0.72fr)]">
+            <div className="grid min-w-0 lg:grid-cols-[minmax(0,1.28fr)_minmax(280px,0.72fr)]">
               <div className="min-w-0 space-y-5 px-5 py-5 sm:px-6 sm:py-6 lg:border-r lg:border-app-line/45">
                 <div className="flex min-w-0 items-start gap-4">
-                  <div className="mt-0.5 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-app-accent/12 bg-app-accent-soft/65 text-app-accent">
-                    <GoalArchetypeIcon className="h-5 w-5" />
+                  <div className="mt-0.5 flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-app-accent text-white shadow-[var(--app-shadow-sm)]">
+                    <GoalArchetypeIcon className="h-[22px] w-[22px]" />
                   </div>
                   <div className="min-w-0 flex-1 space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
@@ -131,25 +131,25 @@ export function GoalCard({
                 </div>
 
                 {system && (
-                  <div className="space-y-3 rounded-[18px] border border-app-line/60 bg-app-surface/72 p-4">
+                  <div className="space-y-3 rounded-card border border-app-line/60 bg-app-surface/72 p-4">
                     <StreakHeatmap system={system} />
                     <WeeklyQuestLine system={system} />
                   </div>
                 )}
 
-                <div className="space-y-2.5 rounded-[18px] border border-app-line/60 bg-app-bg-subtle/45 p-4">
+                <div className="space-y-3 rounded-card border border-app-accent/15 bg-app-accent-subtle/30 p-4">
                   <div className="flex items-end justify-between gap-3">
                     <div>
-                      <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-app-ink-muted">Tiến độ</span>
+                      <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-app-accent">Tiến độ</span>
                       <p className="mt-1 text-xs font-medium text-app-ink-soft">Tổng tiến triển của mục tiêu</p>
                     </div>
-                    <span className="font-serif text-3xl font-extrabold leading-none text-app-accent tabular-nums">
+                    <span className="font-serif text-[32px] font-extrabold leading-none text-app-accent tabular-nums">
                       <CountUp value={progress} suffix="%" />
                     </span>
                   </div>
-                  <div className="h-2 overflow-hidden rounded-full bg-app-line/35" aria-hidden="true">
+                  <div className="h-2.5 overflow-hidden rounded-full bg-app-line/30" aria-hidden="true">
                     <div
-                      className="h-full rounded-full bg-app-accent transition-all duration-500 ease-out will-change-[width]"
+                      className="h-full rounded-full bg-gradient-to-r from-app-accent to-app-accent-hover transition-all duration-500 ease-out will-change-[width]"
                       style={{ width: `${progress}%` }}
                     />
                   </div>
@@ -184,12 +184,17 @@ export function GoalCard({
               </div>
 
               <div className="flex min-w-0 flex-col bg-app-bg-subtle/35 px-5 py-5 sm:px-6 sm:py-6 lg:bg-app-surface/45">
-                <div className="mb-4 flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-app-ink-muted">
-                      {system ? "Việc hôm nay" : "Nhiệm vụ chưa xong"}
-                    </p>
-                    <p className="mt-1 text-xs font-medium text-app-ink-soft">Ưu tiên các bước còn mở</p>
+                <div className="mb-4 flex items-center justify-between gap-3 border-b border-app-line/50 pb-3">
+                  <div className="flex items-center gap-2.5">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-app-accent-soft/60 text-app-accent">
+                      <ListChecks className="h-4 w-4" aria-hidden="true" />
+                    </span>
+                    <div>
+                      <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-app-ink-muted">
+                        {system ? "Việc hôm nay" : "Nhiệm vụ chưa xong"}
+                      </p>
+                      <p className="mt-0.5 text-xs font-medium text-app-ink-soft">Ưu tiên các bước còn mở</p>
+                    </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="rounded-full border border-app-accent/14 bg-app-accent-soft/45 px-2.5 py-1 font-mono text-[12px] font-bold tabular-nums text-app-accent">
@@ -210,12 +215,12 @@ export function GoalCard({
                   {displayTasks.map((task) => (
                     <div
                       key={task.id}
-                      className="group/task flex items-center gap-3 rounded-2xl border border-app-line/55 bg-app-surface px-3.5 py-3 transition-all duration-200 hover:border-app-accent/20 hover:bg-app-accent-subtle/12"
+                      className="group/task flex items-center gap-3 rounded-2xl border border-app-line/55 bg-app-surface px-3.5 py-3 transition-colors duration-150 hover:border-app-accent/25 hover:bg-app-accent-subtle/12 motion-reduce:transition-none"
                     >
                       <button
                         type="button"
                         onClick={() => handleToggleTask(goal.id, task.id)}
-                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-app-line/70 bg-app-bg-subtle text-app-ink-muted transition-colors hover:border-app-accent/45 hover:text-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-app-line/70 bg-app-bg-subtle text-app-ink-muted transition-colors duration-150 hover:border-app-accent/45 hover:text-app-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30 motion-reduce:transition-none"
                         aria-label={task.completed ? "Hủy chốt việc" : "Chốt việc"}
                       >
                         {task.completed ? (
@@ -226,7 +231,7 @@ export function GoalCard({
                       </button>
                       <span
                         className={cn(
-                          "min-w-0 truncate text-[13px] font-semibold leading-snug transition-all duration-200",
+                          "min-w-0 truncate text-[13px] font-semibold leading-snug transition-all duration-200 motion-reduce:transition-none",
                           task.completed ? "text-app-ink-muted opacity-60 line-through" : "text-app-ink",
                         )}
                       >
@@ -247,12 +252,12 @@ export function GoalCard({
                 {system && (
                   <button
                     type="button"
-                    className="group/more mt-5 inline-flex min-h-11 items-center gap-1.5 self-start rounded-full px-1 text-[12.5px] font-bold text-app-accent transition-colors duration-150 hover:text-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/25"
+                    className="group/more mt-5 inline-flex min-h-11 items-center gap-1.5 self-start rounded-full px-1 text-[12.5px] font-bold text-app-accent transition-all duration-200 hover:text-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/25 motion-reduce:transition-none"
                     onClick={() => openTwelveWeekCenter(goal.id)}
                   >
                     <span>Xem toàn bộ chu kỳ</span>
                     <ArrowRight
-                      className="h-3.5 w-3.5 transform transition-transform duration-200 group-hover/more:translate-x-0.5"
+                      className="h-3.5 w-3.5 transform transition-transform duration-200 group-hover/more:translate-x-0.5 motion-reduce:transition-none"
                       aria-hidden="true"
                     />
                   </button>

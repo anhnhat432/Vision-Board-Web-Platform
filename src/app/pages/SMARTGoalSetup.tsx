@@ -628,13 +628,13 @@ export function SMARTGoalSetup() {
                 <div className="flex shrink-0 flex-wrap gap-1.5">
                   <Link
                     to="/vision"
-                    className="inline-flex min-h-9 items-center justify-center rounded-[12px] border border-app-accent/15 bg-app-accent-subtle px-3 py-1.5 text-xs font-bold text-app-accent transition-colors duration-150 hover:bg-app-accent-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                    className="inline-flex min-h-9 items-center justify-center rounded-control border border-app-accent/15 bg-app-accent-subtle px-3 py-1.5 text-xs font-bold text-app-accent transition-colors duration-150 hover:bg-app-accent-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                   >
                     Mở tầm nhìn
                   </Link>
                   <button
                     type="button"
-                    className="inline-flex min-h-9 items-center justify-center rounded-[12px] px-3 py-1.5 text-xs font-bold text-app-ink-muted transition-colors duration-150 hover:bg-app-bg-subtle hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                    className="inline-flex min-h-9 items-center justify-center rounded-control px-3 py-1.5 text-xs font-bold text-app-ink-muted transition-colors duration-150 hover:bg-app-bg-subtle hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                     onClick={() => setIsVisionPromptDismissed(true)}
                   >
                     Bỏ qua

@@ -39,18 +39,18 @@ const STEP_META: Array<{
   eyebrow: string;
   caption: string;
 }> = [
-  { icon: Target, eyebrow: "Đích đến", caption: "Chốt kết quả đủ rõ và chọn bộ khung mẫu hành động phù hợp." },
+  { icon: Target, eyebrow: "Đích đến", caption: "Chốt trạng thái bạn muốn thấy ở tuần 12." },
   {
     icon: Activity,
     eyebrow: "Hành động",
-    caption: "Chọn việc lặp lại hằng tuần và xác định mức cam kết cụ thể cho từng việc.",
+    caption: "Chọn những việc nhỏ bạn có thể giữ đều.",
   },
   {
     icon: CalendarDays,
-    eyebrow: "Lịch trình",
-    caption: "Sắp xếp lịch 7 ngày trực quan và điều chỉnh nhịp độ, thời gian rảnh.",
+    eyebrow: "Lịch tuần",
+    caption: "Chọn nhịp bắt đầu và ngày xem lại.",
   },
-  { icon: Flag, eyebrow: "Hoàn tất", caption: "Xem trước giao diện check-in Today thực tế và kích hoạt hành trình." },
+  { icon: Flag, eyebrow: "Kích hoạt", caption: "Xem tuần đầu rồi bắt đầu hành động." },
 ];
 
 export function SetupStepShellLab({
@@ -300,7 +300,7 @@ export function SetupStepShellLab({
                 whileHover={prefersReducedMotion ? undefined : { scale: 1.015 }}
                 whileTap={prefersReducedMotion ? undefined : { scale: 0.985 }}
                 type="button"
-                aria-label="Lưu kế hoạch"
+                aria-label="Kích hoạt kế hoạch"
                 className="inline-flex min-h-12 flex-[2] sm:flex-none items-center justify-center gap-1.5 rounded-control bg-app-accent hover:bg-app-accent-hover px-5 py-3 text-xs font-bold text-white transition-all duration-150 active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-app-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:w-auto sm:min-h-11 sm:py-2"
                 onClick={handleSubmitClick}
                 disabled={isSubmitting || isSubmitDisabled}
@@ -311,7 +311,7 @@ export function SetupStepShellLab({
                 ) : (
                   <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
                 )}
-                {isSubmitting ? "Đang khởi tạo..." : "Kích hoạt 🚀"}
+                {isSubmitting ? "Đang khởi tạo..." : "Kích hoạt kế hoạch"}
               </motion.button>
             ) : (
               <motion.button
@@ -370,7 +370,7 @@ export function SetupStepShellLab({
             {isLastStep ? (
               <button
                 type="button"
-                aria-label="Lưu kế hoạch"
+                aria-label="Kích hoạt kế hoạch"
                 className="inline-flex min-h-11 flex-[2] items-center justify-center gap-1.5 rounded-control bg-app-accent px-5 py-2.5 text-xs font-bold text-white transition-all duration-150 hover:bg-app-accent-hover active:scale-[0.97] disabled:cursor-not-allowed disabled:bg-app-ink-muted disabled:opacity-70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
                 onClick={handleSubmitClick}
                 disabled={isSubmitting || isSubmitDisabled}
@@ -382,7 +382,7 @@ export function SetupStepShellLab({
                   <CheckCircle2 className="h-4 w-4" aria-hidden="true" />
                 )}
                 <span className="min-w-0 whitespace-normal break-words text-center leading-tight">
-                  {isSubmitting ? "Đang khởi tạo..." : "Kích hoạt"}
+                  {isSubmitting ? "Đang khởi tạo..." : "Kích hoạt kế hoạch"}
                 </span>
               </button>
             ) : (

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router";
+import { PageBackLink } from "../components/PageBackLink";
 import { EmptyState } from "@/app/components/states/EmptyState";
 import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
 import { celebrateLarge } from "@/lib/effects/celebrate";
@@ -166,6 +167,7 @@ function AchievementsContent() {
   return (
     <div className="min-h-screen bg-app-bg-subtle">
       <main className="achievements-stagger mx-auto max-w-[1100px] px-9 py-[30px] pb-16">
+        <PageBackLink fallback="/" className="mb-4" />
 
         {/* ── Hero ── */}
         <div className="mb-6">
@@ -178,7 +180,7 @@ function AchievementsContent() {
           >
             Cột mốc của bạn
           </h1>
-          <p className="max-w-[54ch] text-[14.5px] leading-[1.55] text-app-ink-soft">
+          <p className="max-w-[54ch] text-[14.5px] leading-[var(--text-sm--line-height)] text-app-ink-soft">
             Nơi ghi lại những dấu hiệu nhỏ cho thấy bạn đã bắt đầu, duy trì và đi xa hơn hôm qua.
           </p>
         </div>
@@ -193,7 +195,7 @@ function AchievementsContent() {
               <span className="font-serif text-[38px] font-extrabold leading-none text-app-ink tabular-nums">
                 {totalAchievementCount}
               </span>
-              <span className="mb-0.5 flex h-[34px] w-[34px] items-center justify-center rounded-[10px] bg-app-accent-subtle text-app-accent">
+              <span className="mb-0.5 flex h-[34px] w-[34px] items-center justify-center rounded-input bg-app-accent-subtle text-app-accent">
                 <Award className="h-[18px] w-[18px]" strokeWidth={2} />
               </span>
             </div>
@@ -208,7 +210,7 @@ function AchievementsContent() {
               <span className="font-serif text-[38px] font-extrabold leading-none text-app-ink tabular-nums">
                 {unlockedCount}
               </span>
-              <span className="mb-0.5 flex h-[34px] w-[34px] items-center justify-center rounded-[10px] bg-app-accent-subtle text-app-accent">
+              <span className="mb-0.5 flex h-[34px] w-[34px] items-center justify-center rounded-input bg-app-accent-subtle text-app-accent">
                 <Unlock className="h-[18px] w-[18px]" strokeWidth={2} />
               </span>
             </div>
@@ -311,7 +313,7 @@ function AchievementsContent() {
 
                   {/* Title */}
                   <h3
-                    className={`mb-1.5 text-[15px] font-bold leading-[1.3] ${
+                    className={`mb-1.5 text-[15px] font-bold leading-[var(--text-2xl--line-height)] ${
                       isUnlocked ? "text-app-ink" : "text-app-ink-muted"
                     }`}
                   >
@@ -320,7 +322,7 @@ function AchievementsContent() {
 
                   {/* Description */}
                   <p
-                    className={`mb-4 text-[12.5px] leading-[1.5] ${
+                    className={`mb-4 text-[12.5px] leading-[var(--text-lg--line-height)] ${
                       isUnlocked ? "text-app-ink-soft" : "text-app-ink-muted"
                     }`}
                   >

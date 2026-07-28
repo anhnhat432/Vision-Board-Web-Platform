@@ -1,4 +1,4 @@
-import { AlertCircle, Compass, Eye, EyeOff, Loader2, LogOut, RefreshCw, ShieldCheck, Target } from "lucide-react";
+import { AlertCircle, ArrowLeft, Compass, Eye, EyeOff, Loader2, LogOut, RefreshCw, ShieldCheck, Target } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -399,6 +399,14 @@ export function LoginPage() {
       </a>
       {/* Top bar */}
       <header className="relative flex w-full items-center justify-center px-4 py-7" style={reveal(0)}>
+        <Link
+          to="/"
+          aria-label="Quay về trang chủ"
+          className="absolute left-4 top-1/2 inline-flex -translate-y-1/2 items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-app-ink-soft transition-colors hover:bg-app-accent-soft hover:text-app-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span className="hidden sm:inline">Quay về trang chủ</span>
+        </Link>
         <div className="flex flex-col items-center gap-2">
           <div className="flex items-center gap-2.5">
             <div className="flex size-10 items-center justify-center rounded-xl bg-app-accent text-white shadow-app-sm ring-1 ring-app-accent/25">
@@ -421,7 +429,7 @@ export function LoginPage() {
             {/* Left column - Hero panel (desktop only) */}
             <div className="hidden lg:block" style={reveal(80)}>
               <div
-                className="relative flex h-full flex-col overflow-hidden rounded-[22px] border border-white/10 p-9 text-white shadow-[0_40px_90px_-50px_rgba(12,55,38,0.85)]"
+                className="relative flex h-full flex-col overflow-hidden rounded-card-lg border border-white/10 p-9 text-white shadow-[0_40px_90px_-50px_rgba(12,55,38,0.85)]"
                 style={{
                   background:
                     "linear-gradient(150deg, var(--app-accent-active) 0%, var(--app-accent) 55%, var(--app-accent-hover) 100%)",

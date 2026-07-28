@@ -429,13 +429,13 @@ export function LifeBalance() {
         {/* HERO */}
         <header className="page-enter max-w-3xl">
           <div className="mb-2.5 flex items-center gap-2 sm:mb-3">
-            <span className="inline-block w-2 h-2 rounded-full bg-[#0C5E3A]" />
-            <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-[#0C5E3A]">Bánh xe cuộc sống</p>
+            <span className="inline-block w-2 h-2 rounded-full bg-app-accent" />
+            <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-app-accent">Bánh xe cuộc sống</p>
           </div>
           <h1 className="mb-2.5 font-[family-name:var(--app-font-serif)] text-[clamp(28px,3.2vw,38px)] font-extrabold leading-[1.06] text-app-ink sm:mb-3 sm:leading-[1.02]">
             Bức tranh hiện tại của bạn
           </h1>
-          <p className="mb-3.5 max-w-[54ch] text-[13px] leading-[1.55] text-app-ink-soft sm:mb-4 sm:text-sm">
+          <p className="mb-3.5 max-w-[54ch] text-[13px] leading-[var(--text-sm--line-height)] text-app-ink-soft sm:mb-4 sm:text-sm">
             Nhìn 8 lĩnh vực để biết bạn đang mạnh ở đâu, mỏng ở đâu.
           </p>
           <div className="flex flex-wrap items-center gap-2">
@@ -459,7 +459,7 @@ export function LifeBalance() {
               </span>
             ) : null}
             {historyCount > 0 ? (
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#EDF7E0] dark:bg-[#1A2216] border border-[rgba(12,94,58,0.18)] dark:border-[rgba(91,165,144,0.25)] px-3 py-1.5 text-xs font-semibold text-[#0C5E3A] dark:text-[#5BA590]">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-app-accent-subtle dark:bg-[#1A2216] border border-[rgba(12,94,58,0.18)] dark:border-[rgba(91,165,144,0.25)] px-3 py-1.5 text-xs font-semibold text-app-accent dark:text-app-accent">
                 <span className="font-mono">{historyCount}</span> lần ghi nhận
               </span>
             ) : null}
@@ -474,7 +474,7 @@ export function LifeBalance() {
 
         {/* KPI ROW */}
         <section data-life-balance-kpi-grid className="mt-5 grid grid-cols-3 gap-2 sm:mt-6 sm:gap-4">
-          <div className="min-w-0 overflow-hidden rounded-[16px] border border-app-line bg-white p-3 dark:bg-app-surface sm:rounded-[18px] sm:p-5 md:p-6">
+          <div className="min-w-0 overflow-hidden rounded-[16px] border border-app-line bg-white p-3 dark:bg-app-surface sm:rounded-card sm:p-5 md:p-6">
             <p className="mb-2 text-[8.5px] font-bold uppercase leading-[1.35] tracking-[0.12em] text-app-ink-muted sm:mb-3.5 sm:text-[10px]">
               Trung bình
             </p>
@@ -484,12 +484,12 @@ export function LifeBalance() {
             </p>
             <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-app-bg sm:mt-3.5 sm:h-[7px]">
               <div
-                className="h-full rounded-full bg-[#0C5E3A] transition-all duration-300 ease-out"
+                className="h-full rounded-full bg-app-accent transition-all duration-300 ease-out"
                 style={{ width: `${avgPercent}%` }}
               />
             </div>
           </div>
-          <div className="min-w-0 overflow-hidden rounded-[16px] border border-app-line bg-white p-3 dark:bg-app-surface sm:rounded-[18px] sm:p-5 md:p-6">
+          <div className="min-w-0 overflow-hidden rounded-[16px] border border-app-line bg-white p-3 dark:bg-app-surface sm:rounded-card sm:p-5 md:p-6">
             <p className="mb-2 text-[8.5px] font-bold uppercase leading-[1.35] tracking-[0.12em] text-app-ink-muted sm:mb-3.5 sm:text-[10px]">
               <span className="sm:hidden">Mạnh nhất</span>
               <span className="hidden sm:inline">Lĩnh vực mạnh nhất</span>
@@ -498,7 +498,7 @@ export function LifeBalance() {
               <CountUp value={strongestArea.score} />
               <span className="ml-0.5 text-xs font-bold text-app-ink-muted sm:ml-1 sm:text-lg">/10</span>
             </p>
-            <p className="mt-2.5 flex min-w-0 items-center gap-1.5 text-[11px] font-semibold leading-snug text-[#0C5E3A] sm:mt-3.5 sm:text-[13px]">
+            <p className="mt-2.5 flex min-w-0 items-center gap-1.5 text-[11px] font-semibold leading-snug text-app-accent sm:mt-3.5 sm:text-[13px]">
               <span
                 className="inline-block h-2 w-2 shrink-0 rounded-full"
                 style={{ backgroundColor: getAreaColorConfig(strongestArea.name).accent }}
@@ -506,16 +506,16 @@ export function LifeBalance() {
               <span className="min-w-0 break-words">{getLifeAreaLabel(strongestArea.name)}</span>
             </p>
           </div>
-          <div className="min-w-0 overflow-hidden rounded-[16px] border border-[rgba(176,103,60,0.22)] bg-[#F4ECDD] p-3 dark:border-app-line dark:bg-app-bg-subtle sm:rounded-[18px] sm:p-5 md:p-6">
-            <p className="mb-2 text-[8.5px] font-bold uppercase leading-[1.35] tracking-[0.12em] text-[#A07A4A] sm:mb-3.5 sm:text-[10px]">
+          <div className="min-w-0 overflow-hidden rounded-[16px] border border-[rgba(176,103,60,0.22)] bg-[#F4ECDD] p-3 dark:border-app-line dark:bg-app-bg-subtle sm:rounded-card sm:p-5 md:p-6">
+            <p className="mb-2 text-[8.5px] font-bold uppercase leading-[1.35] tracking-[0.12em] text-[#A07A4A] dark:text-app-ink-muted sm:mb-3.5 sm:text-[10px]">
               <span className="sm:hidden">Ưu tiên</span>
               <span className="hidden sm:inline">Lĩnh vực cần ưu tiên</span>
             </p>
-            <p className="font-[family-name:var(--app-font-serif)] text-[25px] font-extrabold leading-none text-[#8A5A2B] sm:text-[38px]">
+            <p className="font-[family-name:var(--app-font-serif)] text-[25px] font-extrabold leading-none text-[#8A5A2B] dark:text-app-ink sm:text-[38px]">
               <CountUp value={weakestArea.score} />
-              <span className="ml-0.5 text-xs font-bold text-[#B79B72] sm:ml-1 sm:text-lg">/10</span>
+              <span className="ml-0.5 text-xs font-bold text-[#B79B72] dark:text-app-ink-muted sm:ml-1 sm:text-lg">/10</span>
             </p>
-            <p className="mt-2.5 flex min-w-0 items-center gap-1.5 text-[11px] font-semibold leading-snug text-[#8A5A2B] sm:mt-3.5 sm:text-[13px]">
+            <p className="mt-2.5 flex min-w-0 items-center gap-1.5 text-[11px] font-semibold leading-snug text-[#8A5A2B] dark:text-app-ink sm:mt-3.5 sm:text-[13px]">
               <span
                 className="inline-block h-2 w-2 shrink-0 rounded-full"
                 style={{ backgroundColor: getAreaColorConfig(weakestArea.name).accent }}
@@ -578,10 +578,10 @@ export function LifeBalance() {
                       <Target className="h-5 w-5" aria-hidden="true" />
                     </span>
                     <div className="min-w-0">
-                      <h2 className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-[#8A5A2B]">
+                      <h2 className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-[#8A5A2B] dark:text-app-ink">
                         Trọng tâm hành động đề xuất
                       </h2>
-                      <p className="text-xs text-[#A07A4A] mt-0.5">Tìm ra điểm nghẽn cuộc sống</p>
+                      <p className="text-xs text-[#A07A4A] dark:text-app-ink-muted mt-0.5">Tìm ra điểm nghẽn cuộc sống</p>
                     </div>
                   </header>
                   <p className="text-[13.5px] text-app-ink-soft mb-3 flex items-center gap-2 flex-wrap">
@@ -604,10 +604,10 @@ export function LifeBalance() {
                   <p className="text-[13px] leading-relaxed text-app-ink-muted mb-4">
                     {getFocusInsight(weakestArea, lifeAreas, getLifeAreaLabel(weakestArea.name)).reason}
                   </p>
-                  <div className="flex items-start gap-3 bg-white dark:bg-app-surface border border-[rgba(12,94,58,0.16)] rounded-[13px] p-3.5">
-                    <Sparkles className="h-4.5 w-4.5 shrink-0 text-[#0C5E3A] mt-0.5" aria-hidden="true" />
-                    <p className="max-w-[68ch] break-words text-xs leading-relaxed text-[#3F4A3F]">
-                      <strong className="text-[#0C5E3A]">Hành động đề xuất:</strong>{" "}
+                  <div className="flex items-start gap-3 bg-white dark:bg-app-surface border border-app-accent/15 rounded-[13px] p-3.5">
+                    <Sparkles className="h-4.5 w-4.5 shrink-0 text-app-accent mt-0.5" aria-hidden="true" />
+                    <p className="max-w-[68ch] break-words text-xs leading-relaxed text-app-ink-soft">
+                      <strong className="text-app-accent">Hành động đề xuất:</strong>{" "}
                       {getFocusInsight(weakestArea, lifeAreas, getLifeAreaLabel(weakestArea.name)).tip}
                     </p>
                   </div>
@@ -620,16 +620,16 @@ export function LifeBalance() {
                   <>
                     {/* Check-in banner */}
                     <section className="rounded-[20px] border border-[rgba(12,94,58,0.18)] bg-[#EDF5EA] p-4 dark:border-[rgba(91,165,144,0.25)] dark:bg-[#1A2218] md:p-6">
-                      <p className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-[#0C5E3A] mb-3">
+                      <p className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-app-accent mb-3">
                         Check-in cân bằng
                       </p>
                       <div className="flex items-center gap-2.5 mb-3">
-                        <Compass className="h-5 w-5 shrink-0 text-[#0C5E3A]" aria-hidden="true" />
+                        <Compass className="h-5 w-5 shrink-0 text-app-accent" aria-hidden="true" />
                         <h3 className="font-[family-name:var(--app-font-serif)] text-lg font-bold text-app-ink tracking-[-0.01em]">
                           Cập nhật Bánh xe cuộc sống hằng tuần
                         </h3>
                       </div>
-                      <p className="text-[13px] leading-relaxed text-[#5C6B58] mb-4">
+                      <p className="text-[13px] leading-relaxed text-app-ink-soft mb-4">
                         Dành 1 phút phản tư nhanh và chấm điểm lại 8 khía cạnh để luôn làm chủ nhịp điệu cuộc sống.
                       </p>
                       <motion.button
@@ -637,7 +637,7 @@ export function LifeBalance() {
                         whileTap={{ scale: 0.98 }}
                         type="button"
                         onClick={handleStartCheckIn}
-                        className="flex min-h-11 w-full items-center justify-center gap-2.5 rounded-[13px] bg-[#0C5E3A] px-4 py-3 text-sm font-bold text-white shadow-[0_12px_26px_-14px_rgba(12,94,58,0.75)] transition-colors hover:bg-[#0a4f30] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
+                        className="flex min-h-11 w-full items-center justify-center gap-2.5 rounded-[13px] bg-app-accent px-4 py-3 text-sm font-bold text-white shadow-[0_12px_26px_-14px_rgba(12,94,58,0.75)] transition-colors hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2"
                       >
                         Bắt đầu Check-in nhanh
                         <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -686,7 +686,7 @@ export function LifeBalance() {
                       <div className="flex justify-end mt-4 pt-3 border-t border-app-line/50">
                         <Link
                           to="/onboarding"
-                          className="inline-flex min-h-11 items-center gap-1.5 rounded-control px-3 py-2 text-xs font-bold text-[#0C5E3A] hover:text-[#0a4f30] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                          className="inline-flex min-h-11 items-center gap-1.5 rounded-control px-3 py-2 text-xs font-bold text-app-accent hover:text-app-accent-hover hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
                         >
                           Làm lại khảo sát toàn diện
                           <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -699,7 +699,7 @@ export function LifeBalance() {
                   <section className="rounded-[20px] border border-[rgba(12,94,58,0.18)] bg-white p-4 shadow-md dark:bg-app-surface md:p-6">
                     <header className="mb-1 border-b border-app-line/60 pb-3.5 sm:pb-4">
                       <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-[#0C5E3A]">
+                        <h3 className="text-[11px] font-extrabold uppercase tracking-[0.1em] text-app-accent">
                           Đang Check-in
                         </h3>
                         <span className="text-[10px] font-bold text-app-ink-muted font-mono">
@@ -708,7 +708,7 @@ export function LifeBalance() {
                       </div>
                       <div className="w-full bg-app-line rounded-full h-1.5 overflow-hidden">
                         <div
-                          className="bg-[#0C5E3A] h-1.5 rounded-full transition-all duration-300"
+                          className="bg-app-accent h-1.5 rounded-full transition-all duration-300"
                           style={{ width: `${Math.round((changedAreaCount / lifeAreas.length) * 100)}%` }}
                         />
                       </div>
@@ -741,7 +741,7 @@ export function LifeBalance() {
                         whileTap={{ scale: 0.985 }}
                         type="button"
                         onClick={handleFinishCheckIn}
-                        className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-1.5 rounded-full bg-[#0C5E3A] px-6 py-2.5 text-xs font-bold text-white shadow-md transition-all hover:bg-[#0a4f30] sm:w-auto"
+                        className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-1.5 rounded-full bg-app-accent px-6 py-2.5 text-xs font-bold text-white shadow-md transition-all hover:bg-app-accent-hover sm:w-auto"
                       >
                         Lưu & Xem kết quả
                         <Save className="h-4 w-4" aria-hidden="true" />
@@ -1022,7 +1022,7 @@ const LifeAreaRow = memo(function LifeAreaRow({
         <span
           className={cn(
             "break-words rounded-full px-1.5 py-0.5 transition-colors",
-            area.score <= 2 && "bg-[#0C5E3A]/15 text-[#0C5E3A]",
+            area.score <= 2 && "bg-app-accent/15 text-app-accent",
           )}
         >
           1–2 Rất chật vật
@@ -1030,7 +1030,7 @@ const LifeAreaRow = memo(function LifeAreaRow({
         <span
           className={cn(
             "break-words rounded-full px-1.5 py-0.5 transition-colors",
-            area.score >= 3 && area.score <= 4 && "bg-[#0C5E3A]/15 text-[#0C5E3A]",
+            area.score >= 3 && area.score <= 4 && "bg-app-accent/15 text-app-accent",
           )}
         >
           3–4 Thiếu ổn định
@@ -1038,7 +1038,7 @@ const LifeAreaRow = memo(function LifeAreaRow({
         <span
           className={cn(
             "break-words rounded-full px-1.5 py-0.5 transition-colors",
-            area.score >= 5 && area.score <= 6 && "bg-[#0C5E3A]/15 text-[#0C5E3A]",
+            area.score >= 5 && area.score <= 6 && "bg-app-accent/15 text-app-accent",
           )}
         >
           5–6 Tạm ổn
@@ -1046,7 +1046,7 @@ const LifeAreaRow = memo(function LifeAreaRow({
         <span
           className={cn(
             "break-words rounded-full px-1.5 py-0.5 transition-colors",
-            area.score >= 7 && area.score <= 8 && "bg-[#0C5E3A]/15 text-[#0C5E3A]",
+            area.score >= 7 && area.score <= 8 && "bg-app-accent/15 text-app-accent",
           )}
         >
           7–8 Khá tốt
@@ -1054,7 +1054,7 @@ const LifeAreaRow = memo(function LifeAreaRow({
         <span
           className={cn(
             "break-words rounded-full px-1.5 py-0.5 transition-colors",
-            area.score >= 9 && "bg-[#0C5E3A]/15 text-[#0C5E3A]",
+            area.score >= 9 && "bg-app-accent/15 text-app-accent",
           )}
         >
           9–10 Rất tốt

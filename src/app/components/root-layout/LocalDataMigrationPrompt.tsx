@@ -178,7 +178,7 @@ export function LocalDataMigrationPrompt({
     >
       <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-[var(--r-tile)] bg-sky-50 text-sky-700">
+          <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-[var(--r-tile)] bg-app-accent-soft text-app-accent">
             <Database className="h-5 w-5" />
           </div>
           <DialogTitle>Chuyển dữ liệu cũ vào tài khoản?</DialogTitle>
@@ -255,11 +255,11 @@ export function LocalDataMigrationPrompt({
 
         {hasTwelveWeekData ? (
           <section
-            className="rounded-[var(--r-card)] border border-sky-100 bg-sky-50/70 p-4"
+            className="rounded-[var(--r-card)] border border-app-accent/20 bg-app-accent-subtle p-4"
             aria-label="Đồng bộ dữ liệu tài khoản"
           >
             <div className="flex items-start gap-3">
-              <Cloud className="mt-0.5 h-4 w-4 shrink-0 text-sky-700" />
+              <Cloud className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" />
               <div className="min-w-0 flex-1 space-y-3">
                 <div>
                   <p className="text-sm font-semibold text-app-ink">Đồng bộ dữ liệu 12 tuần lên tài khoản</p>
@@ -309,7 +309,7 @@ export function LocalDataMigrationPrompt({
 
                 {/* Confirmation dialog inline */}
                 {showCloudImportConfirm && canRunCloudImport && !cloudWriteLoading ? (
-                  <div className="rounded-[var(--r-tile)] border border-sky-200 bg-app-surface p-3 space-y-3">
+                  <div className="rounded-[var(--r-tile)] border border-app-accent/30 bg-app-surface p-3 space-y-3">
                     <p className="text-sm font-medium text-app-ink">Xác nhận đồng bộ</p>
                     <p className="text-xs leading-5 text-app-ink-soft">
                       Dữ liệu 12 tuần sẽ được gửi lên tài khoản. Bản trên thiết bị vẫn được giữ nguyên. Nên tải bản sao
@@ -397,7 +397,6 @@ export function LocalDataMigrationPrompt({
                     type="button"
                     onClick={() => setShowCloudImportConfirm(true)}
                     disabled={!canRunCloudImport || showCloudImportConfirm}
-                    className="bg-sky-600 hover:bg-sky-700 text-white"
                   >
                     {cloudWriteLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
                     Đồng bộ lên tài khoản

@@ -1,6 +1,6 @@
-import { AlertCircle, Calendar, Target } from "lucide-react";
+import { Calendar, Target } from "lucide-react";
+import { CountUp } from "../ui/count-up";
 import { Progress } from "../ui/progress";
-import { cn } from "../ui/utils";
 import type { LeadIndicator } from "../../utils/storage-types";
 import type { ExecutionInsight } from "@/features/plan12week/logic";
 import { interpretWeeklyExecutionScore } from "@/features/plan12week/logic";
@@ -40,29 +40,13 @@ interface WeeklyHeroBeforeReviewProps {
 const tacticStatusStyle = (status: string) => {
   switch (status) {
     case "Done":
-      return {
-        dot: "bg-app-status-success",
-        badge: "border-app-status-success/30 bg-app-status-success/10 text-app-status-success",
-        label: "Hoàn thành",
-      };
+      return { badge: "text-app-status-success", label: "Hoàn thành" };
     case "Behind":
-      return {
-        dot: "bg-app-status-error",
-        badge: "border-app-status-error/30 bg-app-status-error/10 text-app-status-error",
-        label: "Trễ hạn",
-      };
+      return { badge: "text-app-status-error", label: "Trễ hạn" };
     case "In Progress":
-      return {
-        dot: "bg-app-status-warning",
-        badge: "border-app-status-warning/30 bg-app-status-warning/10 text-app-status-warning",
-        label: "Đang tiến hành",
-      };
+      return { badge: "text-app-status-warning", label: "Đang tiến hành" };
     default:
-      return {
-        dot: "bg-app-ink-muted",
-        badge: "border-app-line/40 bg-app-bg-subtle text-app-ink-muted",
-        label: "Chưa bắt đầu",
-      };
+      return { badge: "text-app-ink-muted", label: "Chưa bắt đầu" };
   }
 };
 
@@ -89,17 +73,7 @@ export function WeeklyHeroBeforeReview({
   return (
     <div className="space-y-5 sm:space-y-6">
       {/* Hero Score Card */}
-      <div className="relative overflow-hidden rounded-card-lg border border-app-line bg-app-surface p-6 shadow-app-card weekly-card-lift sm:p-8">
-        {/* Decorative pin */}
-        <div className="absolute -top-2.5 left-1/2 z-20 flex -translate-x-1/2 items-center justify-center pointer-events-none select-none">
-          <div className="w-3.5 h-3.5 rounded-full bg-app-warm shadow-[inset_0_-1px_2px_rgba(0,0,0,0.2),0_1.5px_3px_rgba(0,0,0,0.15)] border border-white/20 flex items-center justify-center">
-            <div className="w-1.5 h-1.5 bg-white/40 rounded-full" />
-          </div>
-        </div>
-
-        {/* Soft accent glow */}
-        <div className="absolute -top-1/2 -right-1/4 w-2/3 h-full bg-radial-gradient from-app-accent-soft/40 to-transparent rounded-full pointer-events-none" />
-
+      <section aria-label="Tiêu điểm tuần" className="rounded-[1.5rem] border border-app-line bg-app-surface p-5 shadow-app-sm sm:p-6">
         {/* Header metadata */}
         <div className="relative z-10 flex flex-wrap items-center justify-between gap-2.5 text-[10px] font-bold uppercase tracking-widest text-app-ink-muted">
           <span className="font-serif text-xs font-bold tracking-normal normal-case text-app-accent bg-app-accent-soft/75 px-3 py-1 rounded-lg border border-app-line/20">
@@ -137,31 +111,35 @@ export function WeeklyHeroBeforeReview({
 
         {/* Score focal area */}
         <div className="relative z-10 pt-6 mt-5 border-t border-app-line/40">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-            {/* Left: Big score */}
-            <div className="flex items-center gap-4.5">
-              <div className="flex-1">
-                <span className="text-[10px] font-bold text-app-ink-soft uppercase tracking-wider block mb-1">
-                  Điểm thực thi
+          <div className="grid grid-cols-1 gap-6 items-center sm:grid-cols-[auto_1fr]">
+            {/* Left: Score ring */}
+            <div className="flex flex-col items-center gap-2">
+              {weekCompletion.isEmpty ? (
+                <span
+                  data-testid="weekly-lead-score"
+                  className="text-sm font-semibold text-app-ink-muted font-sans"
+                >
+                  Chưa có việc nào
                 </span>
-                {weekCompletion.isEmpty ? (
-                  <span
+              ) : (
+                <div
+                  className="relative flex h-40 w-40 items-center justify-center rounded-full"
+                  style={{ background: `conic-gradient(var(--app-accent) ${leadScoreValue}%, var(--app-line) 0)` }}
+                  role="img"
+                  aria-label={`Điểm thực thi ${leadScoreValue} phần trăm`}
+                >
+                  <div className="absolute inset-2 rounded-full bg-app-surface" />
+                  <CountUp
                     data-testid="weekly-lead-score"
-                    className="text-sm font-semibold text-app-ink-muted font-sans"
-                  >
-                    Chưa có việc nào
-                  </span>
-                ) : (
-                  <div className="flex items-baseline gap-1">
-                    <span
-                      data-testid="weekly-lead-score"
-                      className="weekly-score-animate font-serif text-6xl sm:text-7xl font-extrabold text-app-accent leading-none tracking-tighter"
-                    >
-                      {leadScoreValue}%
-                    </span>
-                  </div>
-                )}
-              </div>
+                    value={leadScoreValue}
+                    suffix="%"
+                    className="weekly-score-animate relative z-10 font-serif text-5xl font-extrabold text-app-accent leading-none tracking-tighter"
+                  />
+                </div>
+              )}
+              <span className="text-[10px] font-bold text-app-ink-soft uppercase tracking-wider">
+                Điểm thực thi
+              </span>
             </div>
 
             {/* Right: Interpretation & progress */}
@@ -189,131 +167,68 @@ export function WeeklyHeroBeforeReview({
               </div>
             )}
           </div>
-        </div>
-      </div>
 
-      {/* Tactic Indicator Grid */}
-      <div className="relative rounded-card border border-app-line/45 bg-app-surface p-6 sm:p-8 shadow-app-sm space-y-5 weekly-card-lift">
-        {/* Washi tape */}
-        <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-28 h-5.5 bg-app-warm-soft/40 backdrop-blur-[0.5px] rotate-[1deg] border border-dashed border-app-warm-border/40 shadow-[0_1px_2px_rgba(0,0,0,0.01)] pointer-events-none select-none z-20" />
-
-        <div className="flex items-center justify-between border-b border-app-line/30 pb-3.5 pt-1">
-          <div className="flex items-center gap-2">
-            <span className="inline-block w-1.5 h-3.5 bg-app-accent rounded-full" />
-            <h3 className="text-lg font-bold text-app-ink font-serif">Hành động cam kết</h3>
+          {/* Folded review CTA footer */}
+          <div className="mt-5 flex flex-col gap-3 border-t border-app-line/40 pt-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0 space-y-1">
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">Chuẩn bị review</p>
+              <p className="text-xs leading-relaxed text-app-ink-soft">
+                Review chính thức mở vào {getReviewDayLabel(reviewDay)}. Bắt đầu sớm để chốt nhận xét trước khi tuần kết thúc.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="min-h-11 rounded-control bg-app-accent px-4.5 py-2.5 text-xs font-bold text-white shadow-app-sm transition-[background-color,color,box-shadow,opacity,transform] hover:bg-app-accent-hover active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 sm:shrink-0"
+              onClick={onStartEarlyReview}
+            >
+              Bắt đầu review sớm
+            </button>
           </div>
-          <span className="text-xs text-app-accent font-bold bg-app-accent-soft px-3 py-1 rounded-lg border border-app-line/10">
-            {mergedIndicators.length} việc
-          </span>
+        </div>
+      </section>
+
+      {/* Tactic rows */}
+      <section className="rounded-card border border-app-line bg-app-surface">
+        <div className="flex items-center justify-between border-b border-app-line px-4 py-4 sm:px-5">
+          <h3 className="text-lg font-bold text-app-ink">Hành động cam kết</h3>
+          <span className="text-sm font-semibold text-app-accent">{mergedIndicators.length} việc</span>
         </div>
 
         {mergedIndicators.length === 0 ? (
-          <div className="py-10 text-center space-y-2">
-            <div className="w-12 h-12 mx-auto rounded-full bg-app-bg-subtle flex items-center justify-center">
-              <AlertCircle className="h-5 w-5 text-app-ink-muted" />
-            </div>
-            <p className="text-xs text-app-ink-muted max-w-xs mx-auto leading-relaxed">
-              Chưa có hành động cam kết nào cho tuần này. Khi các hành động lặp lại được lên lịch ở Hôm nay, chúng
-              sẽ hiển thị ở đây.
-            </p>
-          </div>
+          <p className="px-4 py-8 text-center text-[15px] leading-relaxed text-app-ink-soft">
+            Chưa có hành động cam kết nào cho tuần này.
+          </p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {mergedIndicators.map((indicator, idx) => {
+          <div data-testid="weekly-tactics-list" className="divide-y divide-app-line">
+            {mergedIndicators.map((indicator) => {
               const { total, completed, percent, status } = getTacticProgress(indicator);
-              const st = tacticStatusStyle(status);
-
-              let statusCardClass = "weekly-action-card-notstarted";
-              if (status === "Done") {
-                statusCardClass = "weekly-action-card-done";
-              } else if (status === "Behind") {
-                statusCardClass = "weekly-action-card-behind";
-              } else if (status === "In Progress") {
-                statusCardClass = "weekly-action-card-inprogress";
-              }
+              const statusInfo = tacticStatusStyle(status);
 
               return (
                 <div
                   key={indicator.id || indicator.name}
-                  className={cn(
-                    "weekly-stagger-item weekly-card-lift group flex flex-col gap-3 p-4 rounded-xl weekly-action-card shadow-3xs",
-                    statusCardClass
-                  )}
-                  style={{ "--stagger-index": idx + 1 } as React.CSSProperties}
+                  className="grid min-w-0 gap-3 px-4 py-4 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center sm:px-5"
                 >
-                  {/* Top row: name + core/optional badge */}
-                  <div className="flex items-start justify-between gap-3 min-w-0">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span
-                        data-tactic-status={status}
-                        className={`weekly-status-dot h-2 w-2 rounded-full shrink-0 ${st.dot}`}
-                      />
-                      <span className="min-w-0 break-words text-sm font-semibold leading-snug text-app-ink tactic-name">
-                        {indicator.name}
-                      </span>
-                    </div>
-                    <span
-                      className={cn(
-                        "shrink-0 rounded-md text-[9px] px-2 py-0.5 font-bold uppercase tracking-wider border",
-                        indicator.isCore
-                          ? "bg-app-status-success/10 text-app-status-success border-app-status-success/20"
-                          : "bg-app-status-warning/10 text-app-status-warning border-app-status-warning/20"
-                      )}
-                    >
-                      {indicator.isCore ? "Cốt lõi" : "Tùy chọn"}
-                    </span>
+                  <div className="min-w-0">
+                    <p className="break-words text-[15px] font-semibold text-app-ink">{indicator.name}</p>
+                    <p className="mt-1 text-sm text-app-ink-soft">
+                      {completed}/{total || indicator.target || 1} {indicator.unit || "lần"}
+                    </p>
                   </div>
-
-                  {/* Middle row: progress + status */}
-                  <div className="flex items-center justify-between gap-3 mt-1">
-                    <div className="flex items-center gap-2 text-xs text-app-ink-soft font-medium">
-                      <span>
-                        {completed}/{total || indicator.target || 1} {indicator.unit || "lần"}
-                      </span>
-                      {!weekCompletion.isEmpty && (
-                        <span className="font-mono font-bold text-app-accent bg-app-accent-soft/60 px-2 py-0.5 rounded text-[10px]">
-                          {percent}%
-                        </span>
-                      )}
-                    </div>
-                    <span className={cn("text-[9px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider", st.badge)}>
-                      {st.label}
-                    </span>
-                  </div>
-
-                  {/* Mini progress bar */}
-                  {!weekCompletion.isEmpty && total > 0 && (
-                    <div className="w-full h-1 bg-app-bg/50 rounded-full overflow-hidden mt-1">
-                      <div
-                        className={cn("h-full rounded-full transition-all duration-500", st.dot)}
-                        style={{ width: `${percent}%` }}
-                      />
-                    </div>
-                  )}
+                  <span className="text-sm font-semibold text-app-ink-soft">
+                    {indicator.isCore ? "Cốt lõi" : "Tùy chọn"}
+                  </span>
+                  <span className={`text-sm font-bold ${statusInfo.badge}`}>
+                    <span className="font-mono tabular-nums">{percent}%</span> · {statusInfo.label}
+                  </span>
                 </div>
               );
             })}
           </div>
         )}
-      </div>
+      </section>
 
-      {/* Review reminder / Next action */}
-      <div className="flex flex-col gap-4 rounded-card-lg border border-app-line/40 bg-app-bg/20 p-4 weekly-card-lift sm:flex-row sm:items-center sm:justify-between sm:p-5">
-        <div className="min-w-0 space-y-1">
-          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">Chuẩn bị review</p>
-          <p className="text-sm font-semibold leading-snug text-app-ink">Nhìn lại và đánh giá tuần</p>
-          <p className="max-w-[65ch] text-xs leading-relaxed text-app-ink-soft">
-            Review chính thức mở vào {getReviewDayLabel(reviewDay)}. Bạn có thể bắt đầu sớm nếu muốn chốt nhận xét trước khi tuần kết thúc.
-          </p>
-        </div>
-        <button
-          type="button"
-          className="min-h-11 w-full rounded-card border border-app-line bg-app-surface px-4.5 py-2.5 text-xs font-semibold text-app-ink shadow-2xs transition-all hover:bg-app-bg weekly-btn-press sm:w-auto sm:shrink-0"
-          onClick={onStartEarlyReview}
-        >
-          Bắt đầu review sớm
-        </button>
-      </div>
+      {/* Review reminder folded into hero footer above — separate card removed to reduce vertical bloat. */}
     </div>
   );
 }

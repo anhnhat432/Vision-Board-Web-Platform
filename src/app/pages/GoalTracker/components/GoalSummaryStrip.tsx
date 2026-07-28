@@ -26,7 +26,9 @@ export function GoalSummaryStrip({
       value: totalGoals,
       note: `${completedGoals} hoàn thành`,
       icon: Target,
-      iconBg: "bg-app-accent-subtle text-app-accent",
+      iconBg: "bg-app-accent text-white",
+      tintClass: "bg-app-accent-subtle/40",
+      barClass: "bg-app-accent",
       monoNoteNum: completedGoals,
     },
     {
@@ -35,7 +37,9 @@ export function GoalSummaryStrip({
       isFraction: true,
       note: `${completionRate}% hoàn thành`,
       icon: CheckCircle2,
-      iconBg: "bg-app-accent-subtle text-app-accent",
+      iconBg: "bg-app-accent text-white",
+      tintClass: "bg-app-accent-subtle/40",
+      barClass: "bg-app-accent",
       monoNoteNum: completionRate,
     },
     {
@@ -43,17 +47,21 @@ export function GoalSummaryStrip({
       value: activeSystems,
       note: "đang chạy",
       icon: Zap,
-      iconBg: "bg-[#FFF8DE] text-[#E7B400]",
+      iconBg: "bg-[#E7B400] text-white",
+      tintClass: "bg-[#FFF8DE]/60",
+      barClass: "bg-[#E7B400]",
     },
     {
       title: "Cần chú ý",
       value: needsAttention,
       note: "quá hạn / review",
       icon: AlertTriangle,
-      iconBg: "bg-[#FFEDE8] text-[#FF5C3E]",
+      iconBg: "bg-app-energy text-white",
+      tintClass: "bg-[#FFEDE8]/60",
+      barClass: "bg-app-energy",
       attention: true,
     },
-  ];
+  ] as const;
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-[14px] items-stretch" data-tour-id="goaltracker-summary">
@@ -66,42 +74,52 @@ export function GoalSummaryStrip({
         const fracDen = fracParts[1] ?? "";
         const monoNoteNumVal = (item as typeof item & { monoNoteNum?: number }).monoNoteNum;
         const isAttention = (item as typeof item & { attention?: boolean }).attention;
+        const isActiveAttention = isAttention && needsAttention > 0;
         return (
           <div
             key={item.title}
             className={cn(
-              "h-full rounded-[18px] border px-5 py-[18px] flex flex-col transition-all duration-300",
-              isAttention && needsAttention > 0
-                ? "border-app-status-error/40 bg-app-status-error/[0.04] hover:border-app-status-error/60 hover:shadow-[var(--app-shadow-md)]"
-                : "border-[rgba(23,21,15,0.08)] bg-app-surface hover:border-app-accent/20 hover:shadow-[var(--app-shadow-md)]",
+              "relative h-full overflow-hidden rounded-card border px-5 pt-[22px] pb-[18px] flex flex-col",
+              isActiveAttention
+                ? "border-app-status-error/35 bg-app-status-error/[0.05]"
+                : cn("border-app-line/70", item.tintClass),
             )}
           >
-            <div
+            <span
               className={cn(
-                "flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[10px] mb-3",
-                item.iconBg,
+                "absolute inset-x-0 top-0 h-[3px]",
+                isActiveAttention ? "bg-app-status-error" : item.barClass,
               )}
-            >
-              <Icon className="h-[18px] w-[18px]" />
+              aria-hidden="true"
+            />
+            <div className="mb-3 flex items-center justify-between">
+              <div
+                className={cn(
+                  "flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-input shadow-[var(--app-shadow-sm)]",
+                  isActiveAttention ? "bg-app-status-error text-white" : item.iconBg,
+                )}
+              >
+                <Icon className="h-[19px] w-[19px]" />
+              </div>
+              <p
+                className={cn(
+                  "text-[10px] font-bold uppercase tracking-[0.12em]",
+                  isActiveAttention ? "text-app-status-error" : "text-app-ink-muted",
+                )}
+              >
+                {item.title}
+              </p>
             </div>
             <p
               className={cn(
-                "text-[10px] font-bold uppercase tracking-[0.1em] mb-1",
-                isAttention && needsAttention > 0 ? "text-app-status-error" : "text-[#A8A296]",
-              )}
-            >
-              {item.title}
-            </p>
-            <p
-              className={cn(
-                "font-serif text-[28px] font-extrabold leading-none",
-                isAttention && needsAttention > 0 ? "text-app-status-error" : "text-app-ink",
+                "font-serif text-[34px] font-extrabold leading-none tabular-nums",
+                isActiveAttention ? "text-app-status-error" : "text-app-ink",
               )}
             >
               {hasFraction ? (
                 <>
                   {fracNum}
-                  <span className="text-base text-app-ink-muted">/{fracDen}</span>
+                  <span className="text-lg text-app-ink-muted">/{fracDen}</span>
                 </>
               ) : (
                 item.value
@@ -109,8 +127,8 @@ export function GoalSummaryStrip({
             </p>
             <p
               className={cn(
-                "mt-1.5 text-[11px] font-medium leading-tight",
-                isAttention && needsAttention > 0 ? "text-app-status-error/80" : "text-[#8C887C]",
+                "mt-2 text-[11.5px] font-semibold leading-tight",
+                isActiveAttention ? "text-app-status-error/80" : "text-app-ink-soft",
               )}
             >
               {monoNoteNumVal !== undefined ? (

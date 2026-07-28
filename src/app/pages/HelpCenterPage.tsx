@@ -3,6 +3,7 @@ import { Eye, PenLine, Scale, Settings as SettingsIcon } from "lucide-react";
 import { Images, Palette } from "lucide-react";
 import { Link } from "react-router";
 import { AppPublicFooter } from "../components/layout/AppPublicFooter";
+import { PageBackLink } from "../components/PageBackLink";
 import { SCREEN_GUIDES } from "../components/screen-guides";
 
 const SUPPORT_EMAIL = import.meta.env.VITE_BILLING_SUPPORT_EMAIL?.trim() || "support@dearourfuture.com";
@@ -184,10 +185,11 @@ const FAQ_ITEMS: { question: string; answer: string; link?: string; linkLabel?: 
 export function HelpCenterPage() {
   return (
     <div className="bg-app-bg">
-      <div className="mx-auto max-w-3xl space-y-8 px-4 py-8 sm:px-6">
-        <header className="surface-raised overflow-hidden rounded-2xl border border-app-line bg-app-surface p-6 sm:p-7">
+      <div className="mx-auto max-w-3xl space-y-section px-4 py-8 sm:px-6">
+        <PageBackLink fallback="/" className="mb-2" />
+        <header className="surface-raised overflow-hidden rounded-card border border-app-line bg-app-surface p-card-pad sm:p-7">
           <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-app-accent-soft text-app-accent">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-pill bg-app-accent-soft text-app-accent">
               <LifeBuoy className="h-6 w-6" />
             </div>
             <div className="min-w-0 space-y-2">
@@ -224,10 +226,10 @@ export function HelpCenterPage() {
           <section
             key={section.id}
             id={section.id}
-            className="surface-raised scroll-mt-24 space-y-4 rounded-2xl border border-app-line bg-app-surface p-6 sm:p-7"
+            className="surface-raised scroll-mt-24 space-y-4 rounded-card border border-app-line bg-app-surface p-card-pad sm:p-7"
           >
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-control)] bg-app-accent-soft text-app-accent">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-control bg-app-accent-soft text-app-accent">
                 <section.icon className="h-5 w-5" />
               </div>
               <div>
@@ -253,7 +255,7 @@ export function HelpCenterPage() {
             </ol>
 
             {section.tip ? (
-              <p className="rounded-[var(--r-control)] border border-app-line bg-app-bg px-4 py-3 text-sm leading-6 text-app-ink-soft">
+              <p className="rounded-control border border-app-line bg-app-bg px-4 py-3 text-sm leading-6 text-app-ink-soft">
                 <span className="font-semibold text-app-ink">Mẹo: </span>
                 {section.tip}
               </p>
@@ -262,7 +264,7 @@ export function HelpCenterPage() {
             {section.cta ? (
               <Link
                 to={section.cta.to}
-                className="inline-flex min-h-11 items-center justify-center rounded-lg bg-app-accent px-4 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
+                className="inline-flex min-h-11 items-center justify-center rounded-control bg-app-accent px-4 py-2 text-sm font-medium text-white transition-colors duration-150 hover:bg-app-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/30"
               >
                 {section.cta.label}
               </Link>
@@ -272,10 +274,10 @@ export function HelpCenterPage() {
 
         <section
           id="faq"
-          className="surface-raised scroll-mt-24 space-y-4 rounded-2xl border border-app-line bg-app-surface p-6 sm:p-7"
+          className="surface-raised scroll-mt-24 space-y-4 rounded-card border border-app-line bg-app-surface p-card-pad sm:p-7"
         >
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[var(--r-control)] bg-app-accent-soft text-app-accent">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-control bg-app-accent-soft text-app-accent">
               <HelpCircle className="h-5 w-5" />
             </div>
             <div>
@@ -286,7 +288,7 @@ export function HelpCenterPage() {
 
           <dl className="space-y-4">
             {FAQ_ITEMS.map((item) => (
-              <div key={item.question} className="rounded-[var(--r-control)] border border-app-line bg-app-bg p-4">
+              <div key={item.question} className="rounded-control border border-app-line bg-app-bg p-4">
                 <dt className="flex items-start gap-2 text-sm font-semibold text-app-ink">
                   <BookOpen className="mt-0.5 h-4 w-4 shrink-0 text-app-accent" />
                   {item.question}

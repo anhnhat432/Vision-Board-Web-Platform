@@ -395,7 +395,7 @@ export function TwelveWeekWeekTab({
             >
               {isSavingReview ? (
                 <>
-                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-1.5 h-4 w-4 motion-safe:animate-spin" />
                   Đang lưu…
                 </>
               ) : (
@@ -432,13 +432,14 @@ export function TwelveWeekWeekTab({
             weekNo={selectedWeek}
             currentWeek={system.currentWeek}
             system={system}
+            onSelectWeek={setSelectedWeek}
           />
         </StaggerSection>
       ) : (
         <>
           {selectedWeek < system.currentWeek && !reviewIsCompleted && (
             <StaggerSection>
-              <div className="flex items-center gap-3 rounded-xl border border-app-status-error/20 bg-app-status-error/5 p-4 text-xs text-app-status-error relative overflow-hidden weekly-card-lift">
+              <div className="relative flex items-center gap-3 overflow-hidden rounded-xl border border-app-status-error/20 bg-app-status-error/5 p-4 text-[15px] text-app-status-error">
                 <AlertCircle className="h-4.5 w-4.5 shrink-0" />
                 <span className="leading-relaxed font-serif font-medium">
                   Tuần {selectedWeek} đã kết thúc mà không được chốt đánh giá tuần. Bạn vẫn có thể xem lại điểm thực thi và chi tiết hành động bên dưới.

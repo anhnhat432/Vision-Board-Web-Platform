@@ -24,7 +24,7 @@ export function GoalFilterChips({ activeFilter, setActiveFilter, counts }: GoalF
   ] as const;
 
   return (
-    <div className="flex gap-2 overflow-x-auto rounded-[18px] border border-app-line/70 bg-app-surface/80 p-1.5 shadow-[var(--app-shadow-sm)] scrollbar-none sm:flex-wrap sm:overflow-visible">
+    <div className="flex gap-2 overflow-x-auto rounded-card border border-app-line/70 bg-app-surface/80 p-1.5 shadow-[var(--app-shadow-sm)] scrollbar-none sm:flex-wrap sm:overflow-visible">
       {chips.map((chip) => {
         const isActive = activeFilter === chip.id;
         return (
@@ -33,11 +33,10 @@ export function GoalFilterChips({ activeFilter, setActiveFilter, counts }: GoalF
             type="button"
             onClick={() => setActiveFilter(chip.id)}
             className={cn(
-              "inline-flex min-h-10 flex-none items-center justify-center gap-2 rounded-full border px-3.5 py-2 text-[12.5px] font-semibold transition-all duration-150 sm:flex-initial",
-              "active:scale-[0.98]",
+              "inline-flex min-h-10 flex-none items-center justify-center gap-2 rounded-full border px-3.5 py-2 text-[12.5px] font-semibold transition-colors duration-150 sm:flex-initial motion-reduce:transition-none",
               isActive
                 ? "border-app-accent bg-app-accent text-white shadow-[var(--app-shadow-sm)]"
-                : "border-transparent bg-transparent text-app-ink-soft hover:bg-app-bg hover:text-app-ink",
+                : "border-app-line/70 bg-app-surface text-app-ink-soft hover:bg-app-bg hover:text-app-ink",
             )}
           >
             <span>{chip.label}</span>

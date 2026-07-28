@@ -511,6 +511,21 @@ describe("TwelveWeekSetup preview readability", () => {
     expect(tactic).not.toHaveClass("truncate");
   });
 
+  it("keeps activation actions in the step shell instead of the preview", () => {
+    render(
+      <PlanPreviewStepLab
+        draft={makeFeatureSetupDraft()}
+        smartGoal={makePendingSmartGoal()}
+        feasibility={makeFeasibilityResult()}
+        focusArea="Career"
+        selectedTemplate={null}
+      />,
+    );
+
+    expect(screen.queryByRole("button", { name: /Lưu kế hoạch|Kích hoạt kế hoạch/i })).not.toBeInTheDocument();
+    expect(screen.getByText(/Sau khi kích hoạt, bạn sẽ vào màn Hôm nay/i)).toBeInTheDocument();
+  });
+
   it("keeps tactic remove controls touch-sized", () => {
     render(
       <TacticsEditor
@@ -529,6 +544,24 @@ describe("TwelveWeekSetup preview readability", () => {
 });
 
 describe("TwelveWeekSetup StepShellLab — mobile action bar", () => {
+  it("uses the same explicit activation name in both action bars", () => {
+    render(
+      <SetupStepShellLab
+        title="Xem trước và kích hoạt"
+        description="Kiểm tra tuần đầu."
+        currentStep={3}
+        stepCount={4}
+        onBack={() => {}}
+        onNext={() => {}}
+        onSubmit={() => {}}
+      >
+        <div>Activation preview</div>
+      </SetupStepShellLab>,
+    );
+
+    expect(document.querySelectorAll('[aria-label="Kích hoạt kế hoạch"]')).toHaveLength(2);
+  });
+
   it("keeps validation feedback above the fixed mobile action bar and reserves bottom space", () => {
     setViewportWidth(375);
 

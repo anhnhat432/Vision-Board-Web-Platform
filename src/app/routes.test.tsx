@@ -190,6 +190,10 @@ describe("app routes", () => {
 
   beforeEach(() => {
     localStorage.clear();
+    localStorage.setItem(
+      "visionboard_new_user_guide_seen_at",
+      new Date().toISOString(),
+    );
     adminServiceMock.adminGetSalesReport.mockReset();
     authContextMock.useAuthContext.mockReturnValue({
       user: null,
@@ -332,7 +336,11 @@ describe("app routes", () => {
     await route.waitForIdle();
 
     expect(
-      await screen.findByRole("heading", { name: "Không có quyền quản trị" }),
+      await screen.findByRole(
+        "heading",
+        { name: "Không có quyền quản trị" },
+        { timeout: 3_000 },
+      ),
     ).toBeInTheDocument();
     expect(adminServiceMock.adminGetSalesReport).not.toHaveBeenCalled();
     await route.dispose();

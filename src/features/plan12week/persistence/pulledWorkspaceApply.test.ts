@@ -1,10 +1,19 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { UserData } from "@/app/utils/storage-types";
 import type { TwelveWeekPulledWorkspace, TwelveWeekPullResponse } from "@/services/syncService";
 import { applyPulledWorkspaceToUserData } from "./pulledWorkspaceApply";
 
 const baseNow = "2026-04-30T00:00:00.000Z";
+
+beforeEach(() => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date(baseNow));
+});
+
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 function createUserData(): UserData {
   return {

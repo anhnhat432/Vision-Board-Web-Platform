@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import { CalendarCheck, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/app/components/ui/button";
+import { PageBackLink } from "@/app/components/PageBackLink";
 import {
   AlertDialog,
   AlertDialogContent,
@@ -434,6 +435,7 @@ export function OrderPage() {
   return (
     <div className="order-page bg-[var(--order-bg)] min-h-screen">
       <div className="mx-auto max-w-[1180px] px-4 py-[22px] sm:px-9 sm:py-[22px] flex flex-col gap-[18px]">
+        <PageBackLink fallback="/goals" label="Quay lại mục tiêu" ariaLabel="Quay lại danh sách mục tiêu" />
         <OrderHero />
 
         <OrderProgressBar

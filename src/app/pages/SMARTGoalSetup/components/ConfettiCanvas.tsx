@@ -16,7 +16,8 @@ export function ConfettiCanvas() {
     window.addEventListener("resize", handleResize);
     handleResize();
 
-    const colors = ["#fbbf24", "#34d399", "#60a5fa", "#f472b6", "#a78bfa", "#f87171"];
+    // Festive palette căn chỉnh về Forest Green (thay drift blue/violet bằng sắc xanh rừng).
+    const colors = ["#fbbf24", "#34d399", "#3a7261", "#f472b6", "#5ba590", "#f87171"];
     const particles = Array.from({ length: 65 }).map(() => ({
       x: Math.random() * canvas.width,
       y: -10 - Math.random() * 20,

@@ -144,7 +144,7 @@ export function LeadIndicatorsStepLab({
   const [expandedCommitments, setExpandedCommitments] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
     if (draft.leadIndicators[0]) {
-      initial[draft.leadIndicators[0].id] = true;
+      initial[draft.leadIndicators[0].id] = false;
     }
     return initial;
   });
@@ -156,17 +156,17 @@ export function LeadIndicatorsStepLab({
         <div>
           <h3 className="text-xs font-extrabold uppercase tracking-wider text-app-accent flex items-center gap-1.5">
             <Activity className="h-4 w-4 shrink-0" />
-            <span>2-4 Hành động lặp lại (Lead Indicators)</span>
+            <span>Chọn 2–3 việc sẽ kéo bạn tới đó</span>
           </h3>
           <p className="mt-0.5 text-[11px] text-app-ink-muted leading-relaxed">
-            Hành động bạn hoàn toàn tự chủ và lặp lại đều đặn mỗi tuần để dẫn dắt đến kết quả lớn.
+            Chọn việc nhỏ bạn có thể chủ động làm đều trong tuần.
           </p>
         </div>
         <motion.button
           whileHover={prefersReducedMotion ? undefined : { scale: 1.05 }}
           whileTap={prefersReducedMotion ? undefined : { scale: 0.95 }}
           type="button"
-          aria-label="Thêm chỉ số"
+          aria-label="Thêm việc của riêng bạn"
           onClick={() => {
             soundService.success();
             onAddIndicator();
@@ -175,7 +175,7 @@ export function LeadIndicatorsStepLab({
           className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl bg-app-accent text-white hover:bg-app-accent-hover disabled:opacity-50 transition-all px-3.5 py-1.5 text-xs font-bold shrink-0 focus-visible:ring-2 focus-visible:ring-app-accent focus-visible:ring-offset-2 focus:outline-none"
         >
           <Plus className="h-4 w-4" />
-          Thêm việc
+          Thêm việc của riêng bạn
         </motion.button>
       </div>
 
@@ -185,16 +185,16 @@ export function LeadIndicatorsStepLab({
           💡
         </span>
         <div className="space-y-1">
-          <p className="font-bold text-app-accent">Cách chọn hành động tốt nhất (Lead Indicators):</p>
+          <p className="font-bold text-app-accent">Một việc lặp lại tốt là việc bạn kiểm soát được.</p>
           <p className="leading-relaxed opacity-95">
-            Chọn việc nhỏ nằm trong tầm kiểm soát hoàn toàn của bạn và lặp lại đều đặn mỗi tuần.
+            Hãy bắt đầu với 2–3 việc đủ nhẹ để giữ nhịp, thay vì cố làm thật nhiều.
           </p>
           <div className="grid gap-2 grid-cols-1 sm:grid-cols-2 pt-1.5">
             <div className="text-[11px] leading-relaxed text-app-status-error font-medium">
-              ❌ <strong>Tránh ghi (Kết quả):</strong> Giảm 5kg, đọc hết 10 cuốn sách, đạt IELTS 7.0…
+              ❌ <strong>Tránh ghi:</strong> Giảm 5kg, đạt IELTS 7.0…
             </div>
             <div className="text-[11px] leading-relaxed text-app-status-success font-medium">
-              ✅ <strong>Nên ghi (Hành động):</strong> Tập gym 3 buổi, đọc sách 30 trang/ngày, làm 5 đề thi/tuần…
+              ✅ <strong>Nên ghi:</strong> Tập gym 3 buổi, làm 5 đề thi/tuần…
             </div>
           </div>
         </div>
@@ -215,7 +215,7 @@ export function LeadIndicatorsStepLab({
                   {index + 1}
                 </span>
                 <h4 id={`tactic-card-title-${index}`} className="text-xs font-bold text-app-ink">
-                  Hành động lặp lại tuần
+                  Việc lặp lại số {index + 1}
                 </h4>
               </div>
               {draft.leadIndicators.length > 2 && (

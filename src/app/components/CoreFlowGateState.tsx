@@ -35,7 +35,7 @@ export function CoreFlowGateState({
           <div className="grid gap-0 md:grid-cols-[0.9fr_1.1fr]">
             <div className="flex min-h-[180px] items-center justify-center border-b border-app-line bg-app-bg-subtle p-8 md:border-b-0 md:border-r">
               <div className="relative flex h-28 w-28 items-center justify-center rounded-[28px] border border-app-line bg-app-surface shadow-app-sm">
-                <div className="absolute inset-3 rounded-[22px] bg-app-accent-subtle" aria-hidden="true" />
+                <div className="absolute inset-3 rounded-card-lg bg-app-accent-subtle" aria-hidden="true" />
                 {loading ? (
                   <Loader2 className="relative h-8 w-8 animate-spin text-app-accent" aria-hidden="true" />
                 ) : (

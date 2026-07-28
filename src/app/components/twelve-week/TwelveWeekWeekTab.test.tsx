@@ -110,6 +110,38 @@ function StatefulWeekTab({ initialCommitments = [] }: { initialCommitments?: str
 }
 
 describe("TwelveWeekWeekTab review flow", () => {
+  it("uses the shared cycle rail and flat tactic rows before review", () => {
+    render(
+      <TwelveWeekWeekTab
+        {...makeProps({
+          reviewDueToday: false,
+          system: makeSystem({
+            taskInstances: [
+              {
+                id: "task_week_3",
+                weekNumber: 3,
+                scheduledDate: "2026-05-08",
+                title: "Viết draft",
+                leadIndicatorName: "Viết blog",
+                tacticId: "indicator_1",
+                isCore: true,
+                completed: true,
+              },
+            ],
+          }),
+          coreIndicators: [{ id: "indicator_1", name: "Viết blog", target: "2", unit: "bài" }],
+        })}
+      />,
+    );
+
+    expect(screen.getByTestId("twelve-week-cycle-rail")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Tuần 3, tuần hiện tại/i })).toHaveAttribute(
+      "aria-current",
+      "step",
+    );
+    expect(screen.getByTestId("weekly-tactics-list")).toHaveClass("divide-y", "divide-app-line");
+  });
+
   it("shows four WAM review steps and a readiness summary", () => {
     render(
       <TwelveWeekWeekTab

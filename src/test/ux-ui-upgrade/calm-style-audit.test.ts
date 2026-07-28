@@ -40,7 +40,6 @@ import {
  */
 const KNOWN_PREEXISTING_ALLOWLIST: readonly string[] = [
   // --- Progress-bar / transition dài trong hero, preview, card (marketing/animation) ---
-  "src/app/components/twelve-week/WeeklyHeroBeforeReview.tsx :: motion-duration :: duration-500",
   "src/app/components/twelve-week/ZenJourneyMap.tsx :: motion-duration :: duration-500",
   "src/app/components/ui/input-otp.tsx :: motion-duration :: duration-1000",
   "src/app/pages/FeasibilityCheck/components/ResultStep.tsx :: motion-duration :: duration-500",
@@ -52,18 +51,13 @@ const KNOWN_PREEXISTING_ALLOWLIST: readonly string[] = [
   "src/app/pages/SMARTGoalSetup/components/AnvilForgingEffect.tsx :: motion-duration :: duration-500",
   "src/app/pages/SMARTGoalSetup/components/QualityFeedbackPanel.tsx :: motion-duration :: duration-500",
   "src/app/pages/SMARTGoalSetup/components/SmartGoalHero.tsx :: motion-duration :: duration-500",
-  "src/app/pages/VisionBoardGallery.tsx :: motion-duration :: duration-500",
-  "src/features/dashboard/v2/ActiveGoalsCard.tsx :: motion-duration :: duration-500",
   "src/features/dashboard/v2/BalanceCard.tsx :: motion-duration :: duration-500",
   "src/features/dashboard/v2/DailyStoicCard.tsx :: motion-duration :: duration-700",
-  "src/features/dashboard/v2/DashboardHero.tsx :: motion-duration :: duration-500",
   "src/features/dashboard/v2/DreamToPlanPreview.tsx :: motion-duration :: duration-500",
   "src/features/dashboard/v2/HeroMockupAnimated.tsx :: motion-duration :: duration-1000",
   "src/features/dashboard/v2/HeroMockupAnimated.tsx :: motion-duration :: duration-500",
   "src/features/dashboard/v2/NewUserSetupView.tsx :: motion-duration :: duration-500",
-  "src/features/plan12week/components/PlanPreviewStepLab.tsx :: motion-duration :: duration-500",
   "src/features/plan12week/pages/12WeekSetup/components/ScheduleStepLab.tsx :: motion-duration :: duration-400",
-  "src/features/plan12week/pages/12WeekSystem/components.tsx :: motion-duration :: duration-1000",
   // --- Hiệu ứng 3D pre-existing (flip card / coin / balance scale — ngoài phạm vi task) ---
   "src/app/pages/Achievements/components/Stoic3DCoin.tsx :: transform-3d :: perspective",
   "src/app/pages/Achievements/components/Stoic3DCoin.tsx :: transform-3d :: preserve-3d",
@@ -83,7 +77,6 @@ const KNOWN_PREEXISTING_ALLOWLIST: readonly string[] = [
   "src/app/pages/GoalTracker/components/constants.ts :: transform-3d :: preserve-3d",
   "src/app/pages/GoalTracker/components/constants.ts :: transform-3d :: rotate-y-180",
   "src/app/pages/GoalTracker/components/constants.ts :: transform-3d :: rotateY(",
-  "src/app/pages/VisionBoardGallery.tsx :: transform-3d :: perspective",
   "src/features/dashboard/v2/DailyStoicCard.tsx :: transform-3d :: perspective",
   "src/features/dashboard/v2/DailyStoicCard.tsx :: transform-3d :: preserve-3d",
   "src/features/dashboard/v2/DailyStoicCard.tsx :: transform-3d :: rotateY(",

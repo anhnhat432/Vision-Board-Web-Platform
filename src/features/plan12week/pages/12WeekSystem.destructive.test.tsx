@@ -50,8 +50,8 @@ describe("12-week destructive confirmations", () => {
     const settingsTab = await screen.findByRole("tab", { name: /Cài đặt/i });
     await user.click(settingsTab);
 
-    // Wait for the Settings Tab to fully render
-    await screen.findByText("Cài đặt mục tiêu");
+    // Wait for the destructive settings group to fully render
+    await screen.findByRole("heading", { name: "Dữ liệu và nguy hiểm" });
 
     // Click "Xóa dữ liệu tài khoản" button to open AlertDialog
     const deleteCloudBtn = await screen.findByRole("button", { name: /Xóa dữ liệu tài khoản/i });
@@ -97,15 +97,8 @@ describe("12-week destructive confirmations", () => {
     const settingsTab = await screen.findByRole("tab", { name: /Cài đặt/i });
     await user.click(settingsTab);
 
-    // Wait for the Settings Tab to fully render
-    await screen.findByText("Cài đặt mục tiêu");
-
-    // Mở rộng details panel Dữ liệu & quyền riêng tư trước bằng cách set open=true (vì click summary không tự động toggle open trong jsdom)
-    const privacySummary = await screen.findByText("Dữ liệu & quyền riêng tư");
-    const detailsEl = privacySummary.closest("details");
-    if (detailsEl) {
-      detailsEl.setAttribute("open", "true");
-    }
+    // Wait for the destructive settings group to fully render
+    await screen.findByRole("heading", { name: "Dữ liệu và nguy hiểm" });
 
     // Click "Xóa tài khoản" button to open DeleteDataConfirmationDialog (lấy nút đầu tiên vì có 2 nút trùng tên)
     const deleteAccountBtns = await screen.findAllByRole("button", { name: /Xóa tài khoản/i });
@@ -150,13 +143,7 @@ describe("12-week destructive confirmations", () => {
 
     const settingsTab = await screen.findByRole("tab", { name: /Cài đặt/i });
     await user.click(settingsTab);
-    await screen.findByText("Cài đặt mục tiêu");
-
-    const privacySummary = await screen.findByText("Dữ liệu & quyền riêng tư");
-    const detailsEl = privacySummary.closest("details");
-    if (detailsEl) {
-      detailsEl.setAttribute("open", "true");
-    }
+    await screen.findByRole("heading", { name: "Dữ liệu và nguy hiểm" });
 
     const deleteAccountBtns = await screen.findAllByRole("button", { name: /Xóa tài khoản/i });
     await user.click(deleteAccountBtns[0]);

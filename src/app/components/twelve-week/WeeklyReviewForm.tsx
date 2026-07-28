@@ -1,6 +1,8 @@
 import { Check, Loader2 } from "lucide-react";
+import { Fragment } from "react";
 import { interpretWeeklyExecutionScore } from "@/features/plan12week/logic";
 import { Button } from "../ui/button";
+import { CountUp } from "../ui/count-up";
 import { Label } from "../ui/label";
 import { Progress } from "../ui/progress";
 import { Textarea } from "../ui/textarea";
@@ -140,7 +142,7 @@ export function WeeklyReviewForm({
   return (
     <div className="space-y-5 sm:space-y-6">
       {/* Form Hero Card */}
-      <div className="relative overflow-hidden rounded-[var(--app-radius-card-lg)] border border-app-line/70 bg-app-surface p-5 shadow-[var(--app-shadow-card)] sm:p-8">
+      <div className="relative overflow-hidden rounded-[var(--app-radius-card-lg)] border border-app-line/70 bg-app-surface p-4 shadow-[var(--app-shadow-card)] sm:p-6">
         {/* Header metadata */}
         <div className="relative z-10 flex flex-wrap items-center justify-between gap-2.5 text-[10px] font-bold uppercase tracking-widest text-app-ink-muted">
           <span className="font-serif text-xs font-bold tracking-normal normal-case text-app-accent bg-app-accent-soft/75 px-3 py-1 rounded-lg border border-app-line/20">
@@ -179,9 +181,12 @@ export function WeeklyReviewForm({
                   Chưa có việc
                 </span>
               ) : (
-                <span data-testid="weekly-lead-score" className="font-bold text-app-accent">
-                  {leadScoreValue}%
-                </span>
+                <CountUp
+                  data-testid="weekly-lead-score"
+                  value={leadScoreValue}
+                  suffix="%"
+                  className="font-bold text-app-accent"
+                />
               )}
             </div>
             {!weekCompletion.isEmpty && (
@@ -193,9 +198,12 @@ export function WeeklyReviewForm({
             <div className="flex flex-1 flex-col justify-between space-y-1.5 border-t border-app-line/30 pt-3 sm:border-l sm:border-t-0 sm:pl-6 sm:pt-0">
               <div className="flex items-baseline justify-between text-xs font-semibold text-app-ink-soft">
                 <span className="font-serif">Chỉ số kết quả</span>
-                <span data-testid="weekly-lag-score" className="font-bold text-app-ink">
-                  {lagScoreValue}%
-                </span>
+                <CountUp
+                  data-testid="weekly-lag-score"
+                  value={lagScoreValue ?? 0}
+                  suffix="%"
+                  className="font-bold text-app-ink"
+                />
               </div>
               <span className="min-w-0 break-words text-xs font-medium leading-snug text-app-ink-muted">
                 {system.lagMetric.name}: {lagMetricValue}
@@ -206,7 +214,7 @@ export function WeeklyReviewForm({
       </div>
 
       {/* Review Form Card */}
-      <div className="relative space-y-6 rounded-[var(--app-radius-card-lg)] border border-app-line/70 bg-app-surface p-5 shadow-[var(--app-shadow-card)] sm:space-y-7 sm:p-8">
+      <div className="relative space-y-5 rounded-[var(--app-radius-card-lg)] border border-app-line/70 bg-app-surface p-4 shadow-[var(--app-shadow-card)] sm:space-y-6 sm:p-6">
         <div className="space-y-1.5 border-b border-app-line/70 pb-4">
           <div className="flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-app-warm" />
@@ -218,48 +226,49 @@ export function WeeklyReviewForm({
         </div>
 
         {/* Step Progress Indicator */}
-        <div className="px-1">
-          <div className="weekly-step-progress">
-            {reviewReadinessItems.map((item, idx) => {
-              const isFirstPending = !item.done && reviewReadinessItems.slice(0, idx).every((prev) => prev.done);
-              const isActive = isFirstPending;
-              const dotClass = item.done
-                ? "weekly-step-dot weekly-step-dot--done"
-                : isActive
-                  ? "weekly-step-dot weekly-step-dot--active"
-                  : "weekly-step-dot weekly-step-dot--pending";
-              const labelClass = item.done
-                ? "weekly-step-label weekly-step-label--done"
-                : isActive
-                  ? "weekly-step-label weekly-step-label--active"
-                  : "weekly-step-label";
+          <div className="px-1">
+            <div className="weekly-step-progress">
+              {reviewReadinessItems.map((item, idx) => {
+                const isFirstPending = !item.done && reviewReadinessItems.slice(0, idx).every((prev) => prev.done);
+                const isActive = isFirstPending;
+                const dotClass = item.done
+                  ? "weekly-step-dot weekly-step-dot--done"
+                  : isActive
+                    ? "weekly-step-dot weekly-step-dot--active"
+                    : "weekly-step-dot weekly-step-dot--pending";
+                const labelClass = item.done
+                  ? "weekly-step-label weekly-step-label--done"
+                  : isActive
+                    ? "weekly-step-label weekly-step-label--active"
+                    : "weekly-step-label";
 
-              return (
-                <div key={item.key} className="flex flex-1 flex-col items-center">
-                  {idx > 0 && (
-                    <div
-                      className={cn(
-                        "weekly-step-line absolute",
-                        reviewReadinessItems[idx - 1]?.done ? "weekly-step-line--done" : "",
-                      )}
-                      style={{ left: `${(idx / 4) * 100}%`, width: `${100 / 4}%`, top: "14px" }}
-                    />
-                  )}
-                  <div className={dotClass}>
-                    {item.done ? <Check className="h-3 w-3" /> : idx + 1}
-                  </div>
-                  <span className={cn(labelClass, "mt-1.5")}>{item.label}</span>
-                </div>
-              );
-            })}
+                return (
+                  <Fragment key={item.key}>
+                    {idx > 0 && (
+                      <div
+                        className={cn(
+                          "weekly-step-line",
+                          reviewReadinessItems[idx - 1]?.done ? "weekly-step-line--done" : "",
+                        )}
+                      />
+                    )}
+                    <div className="flex flex-col items-center">
+                      <div className={dotClass}>
+                        {item.done ? <Check className="h-3 w-3" /> : idx + 1}
+                      </div>
+                      <span className={cn(labelClass, "mt-1.5")}>{item.label}</span>
+                    </div>
+                  </Fragment>
+                );
+              })}
+            </div>
           </div>
-        </div>
 
         <TwelveWeekEmotionFlow system={system} currentWeekRange={currentWeekRange} currentWeek={currentWeekLimit} />
 
         <div id="weekly-review-flow" data-testid="weekly-review-flow" className="space-y-6">
           {/* Step 1: Execution Score */}
-          <div data-testid="wam-section-score" className="weekly-review-step-card shadow-3xs hover:border-app-line-strong transition-all">
+          <div data-testid="wam-section-score" className="weekly-review-step-card hover:border-app-line-strong transition-all">
             <div
               data-testid="weekly-review-step-score"
               data-done="true"
@@ -278,9 +287,11 @@ export function WeeklyReviewForm({
                     Chưa có việc trong tuần này
                   </span>
                 ) : (
-                  <span className="text-4xl font-serif font-extrabold text-app-accent leading-none">
-                    {leadScoreValue}%
-                  </span>
+                  <CountUp
+                    value={leadScoreValue}
+                    suffix="%"
+                    className="text-4xl font-serif font-extrabold text-app-accent leading-none"
+                  />
                 )}
                 {!weekCompletion.isEmpty && (
                   <div className="text-xs text-app-ink-soft leading-snug border-l border-app-line/60 pl-4 py-0.5">
@@ -302,7 +313,7 @@ export function WeeklyReviewForm({
           />
 
           {/* Step 2: Commitment Check */}
-          <div data-testid="wam-section-commitments" className="weekly-review-step-card shadow-3xs hover:border-app-line-strong transition-all">
+          <div data-testid="wam-section-commitments" className="weekly-review-step-card hover:border-app-line-strong transition-all">
             <div
               data-testid="weekly-review-step-commitments"
               data-done={allPreviousCommitmentsAnswered ? "true" : "false"}
@@ -383,7 +394,7 @@ export function WeeklyReviewForm({
           </div>
 
           {/* Step 3: Breakdown / Lesson */}
-          <div data-testid="wam-section-insights" className="weekly-review-step-card shadow-3xs hover:border-app-line-strong transition-all">
+          <div data-testid="wam-section-insights" className="weekly-review-step-card hover:border-app-line-strong transition-all">
             <div
               data-testid="weekly-review-step-insights"
               data-done={weeklyForm.insights.trim().length > 0 ? "true" : "false"}
@@ -411,7 +422,7 @@ export function WeeklyReviewForm({
           </div>
 
           {/* Step 4: Next Week Commitments */}
-          <div data-testid="wam-section-next-commitments" className="weekly-review-step-card shadow-3xs hover:border-app-line-strong transition-all">
+          <div data-testid="wam-section-next-commitments" className="weekly-review-step-card hover:border-app-line-strong transition-all">
             <div
               data-testid="weekly-review-step-next"
               data-done={hasNextWeekCommitment ? "true" : "false"}
@@ -440,29 +451,29 @@ export function WeeklyReviewForm({
         {/* Review readiness indicator */}
         <div
           data-testid="weekly-review-readiness"
-          className="space-y-3.5 weekly-readiness-box px-4 py-4.5 text-xs text-app-ink-soft"
+          className="weekly-readiness-box rounded-xl border border-app-line/40 bg-app-bg-subtle/30 px-4 py-3 text-xs text-app-ink-soft"
         >
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div className="min-w-0 space-y-1">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="min-w-0 space-y-0.5">
               <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">
                 Checklist trước khi lưu
               </p>
               <p className="text-sm font-semibold text-app-ink">{reviewStatusTitle}</p>
               <p className="max-w-[65ch] text-xs leading-relaxed text-app-ink-soft">{reviewStatusHint}</p>
             </div>
-            <div className="shrink-0 rounded-xl border border-app-line/45 bg-app-surface px-4 py-2.5 sm:text-right shadow-3xs">
-              <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-app-ink-muted leading-none">Tiến độ review</p>
-              <p className="text-lg font-serif font-bold text-app-accent mt-1 leading-none">{reviewReadyCount}/4</p>
+            <div className="shrink-0 rounded-lg border border-app-line/40 bg-app-surface px-3 py-1.5 text-right shadow-3xs">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-app-ink-muted leading-none">Tiến độ review</p>
+              <p className="text-base font-serif font-bold text-app-accent mt-0.5 leading-none">{reviewReadyCount}/4</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
+          <div className="mt-3 flex flex-wrap items-center gap-2">
             {reviewReadinessItems.map((item) => (
               <div
                 key={item.key}
                 data-testid={`weekly-review-check-${item.key}`}
                 className={cn(
-                  "flex min-w-0 items-center gap-2.5 rounded-xl border px-3 py-2.5 text-xs font-semibold transition-all",
+                  "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold transition-all",
                   item.done
                     ? "border-app-accent/20 bg-app-accent-soft text-app-ink shadow-3xs"
                     : "border-app-line bg-app-surface text-app-ink-soft",
@@ -470,11 +481,11 @@ export function WeeklyReviewForm({
               >
                 <span
                   className={cn(
-                    "h-2 w-2 shrink-0 rounded-full",
+                    "h-1.5 w-1.5 shrink-0 rounded-full",
                     item.done ? "bg-app-accent shadow-[0_0_6px_rgba(42,84,71,0.35)]" : "bg-app-line-strong/50",
                   )}
                 />
-                <span className="min-w-0 break-words leading-snug">{item.label}</span>
+                <span className="min-w-0 truncate leading-snug">{item.label}</span>
               </div>
             ))}
           </div>

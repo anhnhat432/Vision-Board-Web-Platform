@@ -23,6 +23,7 @@ import { ScreenStateView } from "@/app/components/states/ScreenStateView";
 import { useScreenDataState } from "@/app/components/states/useScreenDataState";
 import { TabErrorBoundary } from "@/app/components/TabErrorBoundary";
 import { emptyNarratives } from "../components/empty-states/narratives";
+import { PageBackLink } from "../components/PageBackLink";
 import { ScreenGuide } from "../components/ScreenGuide";
 import { SCREEN_GUIDES } from "../components/screen-guides";
 import {
@@ -368,6 +369,7 @@ function ReflectionJournalContent() {
     <div className="mx-auto max-w-6xl space-y-6 px-4 pb-12 pt-8 sm:px-6 lg:px-8">
       <WaterReflectionPool />
       <ScreenGuide {...SCREEN_GUIDES.reflectionJournal} autoOpen />
+      <PageBackLink fallback="/" className="mb-1" />
       <AlertDialog
         open={Boolean(reflectionToDelete)}
         onOpenChange={(open) => {
@@ -396,7 +398,7 @@ function ReflectionJournalContent() {
       {/* Hero Section */}
       <section
         data-reflection-journal-hero
-        className="relative grid grid-cols-[1fr_88px] items-start gap-4 overflow-hidden rounded-[22px] border border-app-line bg-app-surface p-5 page-enter sm:gap-7 sm:p-9 md:grid-cols-[1fr_360px] md:items-center"
+        className="relative grid grid-cols-[1fr_88px] items-start gap-4 overflow-hidden rounded-card-lg border border-app-line bg-app-surface p-5 page-enter sm:gap-7 sm:p-9 md:grid-cols-[1fr_360px] md:items-center"
       >
         <div className="min-w-0">
           <div className="flex min-w-0 items-center gap-2 mb-3.5 break-words text-[10px] font-extrabold uppercase tracking-[0.14em] text-app-warm">
@@ -431,7 +433,7 @@ function ReflectionJournalContent() {
             </Button>
           </div>
         </div>
-        <div className="relative h-24 w-24 overflow-hidden rounded-[18px] self-start shadow-[0_18px_34px_-24px_rgba(23,21,15,0.5)] animate-[float_5s_ease-in-out_infinite] motion-reduce:animate-none md:h-auto md:w-auto md:self-stretch md:min-h-[210px] md:shadow-[0_24px_48px_-28px_rgba(23,21,15,0.5)]">
+        <div className="relative h-24 w-24 overflow-hidden rounded-card self-start shadow-[0_18px_34px_-24px_rgba(23,21,15,0.5)] animate-[float_5s_ease-in-out_infinite] motion-reduce:animate-none md:h-auto md:w-auto md:self-stretch md:min-h-[210px] md:shadow-[0_24px_48px_-28px_rgba(23,21,15,0.5)]">
           <img
             src="/reflection_journal.png"
             alt="Nhật ký phản tư"
@@ -458,21 +460,21 @@ function ReflectionJournalContent() {
         </header>
 
         {/* Search + Filters */}
-        <div className="rounded-[18px] border border-app-line bg-app-surface p-3.5 shadow-3xs sm:p-4">
+        <div className="rounded-card border border-app-line bg-app-surface p-3.5 shadow-3xs sm:p-4">
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#A8A296]" aria-hidden="true" />
+            <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-app-ink-muted" aria-hidden="true" />
             <Input
               type="search"
               aria-label="Tìm kiếm nhật ký"
               placeholder="Tìm kiếm nhật ký…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-12 rounded-[13px] border-app-line bg-app-bg/45 pl-[42px] text-[13.5px] placeholder:text-[#A8A296]"
+              className="h-12 rounded-control border-app-line bg-app-bg/45 pl-[42px] text-[13.5px] placeholder:text-app-ink-muted"
             />
           </div>
           <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
             <div className="min-w-0 space-y-2">
-              <span className="block text-[10px] font-bold uppercase tracking-[0.1em] text-[#A8A296]">Loại</span>
+              <span className="block text-[10px] font-bold uppercase tracking-[0.1em] text-app-ink-muted">Loại</span>
               <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap">
                 {(["all", "weekly-review", "freeform"] as const).map((type) => {
                   const isActive = filterType === type;
@@ -496,7 +498,7 @@ function ReflectionJournalContent() {
             </div>
 
             <div className="min-w-0 space-y-2">
-              <span className="block text-[10px] font-bold uppercase tracking-[0.1em] text-[#A8A296]">Tâm trạng</span>
+              <span className="block text-[10px] font-bold uppercase tracking-[0.1em] text-app-ink-muted">Tâm trạng</span>
               <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
                 {(["", "happy", "neutral", "sad"] as const).map((mood) => {
                   const labels: Record<string, string> = {
@@ -728,7 +730,7 @@ function ReflectionJournalContent() {
 
               {/* Prompt Cards */}
               <div className="w-full max-w-[660px] border-t border-app-line pt-6">
-                <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#A8A296] mb-3.5">
+                <div className="text-[10px] font-bold uppercase tracking-[0.12em] text-app-ink-muted mb-3.5">
                   Gợi ý mở đầu
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -737,6 +739,10 @@ function ReflectionJournalContent() {
                       {
                         title: "Điều tôi học được",
                         hint: "Một bài học hoặc nhận ra hôm nay.",
+                        // Palette icon prompt trang trí (3 tông green/warm/gold cho biến
+                        // thể trực quan); giữ literal có chủ đích — Reflection context chỉ
+                        // dùng token warm, nên cặp green này để dạng màu trang trí (xem
+                        // allowlist Property 2 / quy tắc color-context zoning).
                         iconBg: "#EDF7E0",
                         iconColor: "#0C5E3A",
                         prompt: "Điều gì hôm nay khiến bạn tự hào về bản thân?",
@@ -768,7 +774,7 @@ function ReflectionJournalContent() {
                         }));
                         saveDraft(item.prompt);
                       }}
-                      className="min-h-28 text-left bg-[#FAF8F3] dark:bg-app-bg border border-app-line rounded-[14px] p-4 cursor-pointer transition-all duration-150 hover:border-app-warm/50 hover:bg-[#FBF5EF] dark:hover:bg-app-warm-soft/20 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm focus-visible:ring-offset-2"
+                      className="min-h-28 text-left bg-app-bg-subtle dark:bg-app-bg border border-app-line rounded-[14px] p-4 cursor-pointer transition-all duration-150 hover:border-app-warm/50 hover:bg-[#FBF5EF] dark:hover:bg-app-warm-soft/20 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-warm focus-visible:ring-offset-2"
                     >
                       <span
                         className="flex w-[30px] h-[30px] rounded-[9px] items-center justify-center mb-2.5"
@@ -972,7 +978,7 @@ function ReflectionJournalContent() {
               <div>
                 <div className="font-serif text-[40px] font-extrabold leading-none text-app-ink tabular-nums">
                   <MotionCountUp value={weekCompletion.completed} />
-                  <span className="text-lg font-bold text-[#A8A296]"> / {weekCompletion.total}</span>
+                  <span className="text-lg font-bold text-app-ink-muted"> / {weekCompletion.total}</span>
                 </div>
                 <div className="mt-1.5 text-[11.5px] font-medium text-[#7A6E5E] dark:text-app-ink-soft">
                   task hoàn thành

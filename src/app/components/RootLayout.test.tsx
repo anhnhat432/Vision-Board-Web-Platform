@@ -803,6 +803,23 @@ describe("RootLayout onboarding redirect", () => {
     });
   });
 
+  it("hides the account footer only inside the 12-week execution workspace", async () => {
+    seedAuthenticatedCompletedWorkspace();
+    setAuthContext({
+      user: { uid: "user_test", email: "test@example.com" },
+      userProfile: { id: "profile_test", email: "test@example.com" },
+    });
+
+    const execution = renderAppShell("/12-week-system");
+    expect(await screen.findByTestId("twelve-week-system-page")).toBeInTheDocument();
+    expect(screen.queryByRole("contentinfo")).not.toBeInTheDocument();
+
+    execution.ui.unmount();
+    renderAppShell("/settings");
+    expect(await screen.findByTestId("settings-page")).toBeInTheDocument();
+    expect(screen.getByRole("contentinfo")).toBeInTheDocument();
+  });
+
   it("shows the sync status pill in the mobile account dropdown", async () => {
     seedPlusSubscription();
     autoCloudSyncMock.useAutoCloudSync.mockReturnValue({

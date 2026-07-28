@@ -202,7 +202,7 @@ export function CompletionBridge({
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="w-full max-w-lg rounded-[18px] border border-app-accent/10 bg-app-accent-soft/30 p-4 text-left shadow-sm sm:p-5"
+                  className="w-full max-w-lg rounded-card border border-app-accent/10 bg-app-accent-soft/30 p-4 text-left shadow-sm sm:p-5"
                 >
                   <p className="mb-2 flex items-center gap-1.5 text-[12px] font-extrabold text-app-accent">
                     <Target className="h-3.5 w-3.5" aria-hidden="true" />
@@ -243,7 +243,7 @@ export function CompletionBridge({
                     <button
                       type="button"
                       onClick={onCheckFeasibility}
-                      className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-[12px] border border-app-line bg-app-surface px-5 py-2.5 text-sm font-semibold text-app-ink transition-all duration-200 hover:bg-app-bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40"
+                      className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-control border border-app-line bg-app-surface px-5 py-2.5 text-sm font-semibold text-app-ink transition-all duration-200 hover:bg-app-bg-subtle focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40"
                     >
                       Kiểm tra khả thi nâng cao
                     </button>
@@ -251,7 +251,7 @@ export function CompletionBridge({
                   <button
                     type="button"
                     onClick={onContinue}
-                    className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-[12px] bg-app-accent px-5 py-2.5 text-sm font-bold text-white shadow-[0_4px_14px_rgba(12,94,58,0.3)] transition-all duration-200 hover:shadow-[0_8px_24px_rgba(12,94,58,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40"
+                    className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-control bg-app-accent px-5 py-2.5 text-sm font-bold text-white shadow-[0_4px_14px_rgba(12,94,58,0.3)] transition-all duration-200 hover:shadow-[0_8px_24px_rgba(12,94,58,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40"
                   >
                     Tiếp tục tạo kế hoạch 12 tuần
                     <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -281,7 +281,8 @@ export function CompletionBridge({
             const delay = Math.random() * 0.5;
             const duration = 1.5 + Math.random() * 1.5;
             const key = `${size}-${left}-${delay}-${duration}`;
-            const colors = ["#10b981", "#34d399", "#818cf8", "#a78bfa", "#fbbf24", "#f472b6"];
+            // Festive palette căn chỉnh về Forest Green (thay drift indigo/violet bằng sắc xanh rừng).
+            const colors = ["#10b981", "#34d399", "#3a7261", "#5ba590", "#fbbf24", "#f472b6"];
             const color = colors[Math.floor(Math.random() * colors.length)] ?? colors[0];
             return (
               <motion.div

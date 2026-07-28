@@ -1,6 +1,7 @@
 import { HelpCircle, LifeBuoy } from "lucide-react";
 import { Link } from "react-router";
 import { AppPublicFooter } from "../components/layout/AppPublicFooter";
+import { PageBackLink } from "../components/PageBackLink";
 import { Card, CardContent, CardDescription, CardHeader } from "../components/ui/card";
 
 const SUPPORT_EMAIL = import.meta.env.VITE_BILLING_SUPPORT_EMAIL?.trim() || "support@dearourfuture.com";
@@ -33,15 +34,16 @@ const FAQ_ITEMS = [
 export function BillingFAQPage() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-      <Card className="overflow-hidden rounded-2xl border-app-line bg-app-surface">
+      <PageBackLink href="/billing/plan" label="Quay lại trang gói" ariaLabel="Quay lại trang gói" className="mb-3" />
+      <Card className="overflow-hidden rounded-card border-app-line bg-app-surface">
         <CardHeader className="border-b border-app-line bg-app-bg">
           <div className="flex items-start gap-4">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[var(--r-pill)] bg-app-accent-soft text-app-accent">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-pill bg-app-accent-soft text-app-accent">
               <HelpCircle className="h-6 w-6" />
             </div>
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-app-accent">Thanh toán Plus</p>
-              <h1 className="mt-2 font-serif text-3xl font-semibold tracking-tight text-app-ink">
+              <h1 className="mt-2 font-serif text-3xl font-medium tracking-tight text-app-ink">
                 Câu hỏi thường gặp
               </h1>
               <CardDescription className="mt-2 max-w-2xl text-sm leading-7 text-app-ink-soft">

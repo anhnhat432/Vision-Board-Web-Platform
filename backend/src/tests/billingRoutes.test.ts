@@ -29,6 +29,19 @@ interface MockableDiscountModel {
 }
 
 const originalDiscountFind = DiscountModel.find;
+const originalFrontendOrigin = process.env.FRONTEND_ORIGIN;
+
+function setCheckoutTestFrontendOrigin(): void {
+  process.env.FRONTEND_ORIGIN = "https://example.com";
+}
+
+function restoreFrontendOrigin(): void {
+  if (originalFrontendOrigin === undefined) {
+    delete process.env.FRONTEND_ORIGIN;
+    return;
+  }
+  process.env.FRONTEND_ORIGIN = originalFrontendOrigin;
+}
 
 function mockDiscountFindThrows(message = "DiscountModel.find should be skipped when Mongo is disconnected."): void {
   (DiscountModel as unknown as MockableDiscountModel).find = () => {
@@ -285,6 +298,7 @@ describe("POST /api/billing/checkout-session", () => {
   beforeEach(() => {
     _resetAdapterCacheForTesting();
     restoreDiscountModel();
+    setCheckoutTestFrontendOrigin();
     delete process.env.BILLING_PROVIDER;
     delete process.env.BILLING_PAID_DISABLED;
     delete process.env.CASSO_WEBHOOK_SECRET;
@@ -297,6 +311,7 @@ describe("POST /api/billing/checkout-session", () => {
   afterEach(() => {
     _resetAdapterCacheForTesting();
     restoreDiscountModel();
+    restoreFrontendOrigin();
     delete process.env.BILLING_PROVIDER;
     delete process.env.BILLING_PAID_DISABLED;
     delete process.env.CASSO_WEBHOOK_SECRET;
@@ -481,6 +496,7 @@ describe("POST /api/billing/public-checkout-session", () => {
   beforeEach(() => {
     _resetAdapterCacheForTesting();
     restoreDiscountModel();
+    setCheckoutTestFrontendOrigin();
     delete process.env.BILLING_PROVIDER;
     delete process.env.BILLING_PAID_DISABLED;
     delete process.env.CASSO_WEBHOOK_SECRET;
@@ -493,6 +509,7 @@ describe("POST /api/billing/public-checkout-session", () => {
   afterEach(() => {
     _resetAdapterCacheForTesting();
     restoreDiscountModel();
+    restoreFrontendOrigin();
     delete process.env.BILLING_PROVIDER;
     delete process.env.BILLING_PAID_DISABLED;
     delete process.env.CASSO_WEBHOOK_SECRET;
