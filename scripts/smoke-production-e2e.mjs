@@ -1910,9 +1910,24 @@ async function exerciseTwelveWeekSaveReloadAndSync(page, apiEvents) {
   log(`12-week queue after manual sync: ${JSON.stringify(await getSyncQueueDebug(page))}`);
   log(`12-week snapshots after manual sync: ${JSON.stringify(await getGoalSnapshots(page))}`);
 
+  const metricsHydrationStartedAt = Date.now();
   await page.goto(`${BASE_URL}/12-week-system`, { waitUntil: "domcontentloaded" });
   await page.reload({ waitUntil: "domcontentloaded" });
   await waitForSystemLoaded(page);
+  await waitForApiSuccessWithRateLimitRetry(
+    page,
+    apiEvents,
+    /\/api\/weeks\/[^/]+\/metrics(?:\?|$)/,
+    "12-week metric hydration",
+    {
+      after: metricsHydrationStartedAt,
+      timeoutMs: DEFAULT_TIMEOUT_MS,
+      onRateLimitRetry: async () => {
+        await page.reload({ waitUntil: "domcontentloaded" });
+        await waitForSystemLoaded(page);
+      },
+    },
+  );
   await waitForGoalSnapshot(page, "12-week state persisted after reload", (snapshot) => {
     const hasExpectedCheckIn = [snapshot.latestDailyCheckIn, ...(snapshot.dailyCheckIns ?? [])].some(
       (checkIn) => checkIn?.optionalNote === CHECKIN_NOTE,

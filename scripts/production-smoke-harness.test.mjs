@@ -139,6 +139,14 @@ describe("production smoke harness guards", () => {
     );
   });
 
+  it("retries rate-limited 12-week metric hydration and never allowlists it", () => {
+    expect(smokeScript).toContain("const metricsHydrationStartedAt = Date.now();");
+    expect(smokeScript).toContain('/\\/api\\/weeks\\/[^/]+\\/metrics(?:\\?|$)/');
+    expect(smokeScript).toContain('"12-week metric hydration"');
+    expect(smokeScript).toContain('await page.reload({ waitUntil: "domcontentloaded" });');
+    expect(smokeScript).not.toContain('pathname === "/api/weeks/:weekId/metrics"');
+  });
+
   it("accepts hosted PayOS checkout after checkout-session creation", () => {
     expect(smokeScript).toContain("async function waitForCheckoutDestination(page, apiEvents, after)");
     expect(smokeScript).toContain('kind: "hosted-payos"');
