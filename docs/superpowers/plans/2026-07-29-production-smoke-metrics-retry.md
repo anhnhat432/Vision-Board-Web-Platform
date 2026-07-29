@@ -4,7 +4,7 @@
 
 **Goal:** Make the full production smoke retry and prove 12-week metrics hydration after a rate-limited response instead of failing at final aggregation.
 
-**Architecture:** Keep the existing `waitForApiSuccessWithRateLimitRetry` helper as the single retry mechanism. Add one metrics-specific proof after a deliberate 12-week-system reload; its retry callback reloads the same route after the server-provided cooldown. The final aggregation sees the first 429 as handled, but only after the metrics route returns 2xx.
+**Architecture:** Keep the existing `waitForApiSuccessWithRateLimitRetry` helper as the single retry mechanism. When the 12-week flow records a metrics 429, reissue that exact authenticated request after the server-provided cooldown and require the metrics route to return 2xx. When no metrics 429 is recorded, do not manufacture a request. The final aggregation sees a metrics 429 as handled only after the retry path is entered.
 
 **Tech Stack:** Node.js 20, Playwright API in the production smoke harness, Vitest, Vite documentation.
 
@@ -62,30 +62,15 @@ Do not commit the intentionally failing state; retain it in the worktree for the
 - Consumes: `waitForApiSuccessWithRateLimitRetry(page, apiEvents, pattern, label, options)` and `DEFAULT_TIMEOUT_MS`.
 - Produces: a handled first metrics 429 only when a later `GET /api/weeks/:weekId/metrics` response is 2xx.
 
-- [ ] **Step 1: Add the smallest metrics-specific retry proof**
+- [ ] **Step 1: Add the smallest observed-metrics retry proof**
 
-Replace the final reload block in `exerciseTwelveWeekSaveReloadAndSync` with this sequence before the existing persisted-state assertion:
+After the manual sync queue is idle, inspect the recorded `GET /api/weeks/:weekId/metrics` events since `syncStartedAt`. If no 429 was observed, continue to the persisted-state assertion. If a 429 was observed, wait for `Retry-After`, reissue the exact authenticated metrics request, and require a later GET 2xx through `waitForApiSuccessWithRateLimitRetry`.
 
 ```js
-  const metricsHydrationStartedAt = Date.now();
-  await page.goto(`${BASE_URL}/12-week-system`, { waitUntil: "domcontentloaded" });
-  await page.reload({ waitUntil: "domcontentloaded" });
-  await waitForSystemLoaded(page);
-  await waitForApiSuccessWithRateLimitRetry(
-    page,
-    apiEvents,
-    /\/api\/weeks\/[^/]+\/metrics(?:\?|$)/,
-    "12-week metric hydration",
-    {
-      after: metricsHydrationStartedAt,
-      timeoutMs: DEFAULT_TIMEOUT_MS,
-      onRateLimitRetry: async () => {
-        await page.reload({ waitUntil: "domcontentloaded" });
-        await waitForSystemLoaded(page);
-      },
-    },
-  );
+  await retryRateLimitedMetricHydration(page, apiEvents, syncStartedAt, getLatestApiAuthorization);
 ```
+
+The recorder retains the latest API authorization header only in process memory. Never add it to diagnostics or logs. The metrics retry must filter for `GET` rather than treating a CORS preflight response as proof.
 
 - [ ] **Step 2: Run the focused test to verify green**
 
