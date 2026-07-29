@@ -356,6 +356,13 @@ function compactApiResponseBody(text) {
 function installNetworkRecorder(page) {
   const apiEvents = [];
   const requestFailures = [];
+  let latestApiAuthorization = "";
+
+  page.on("request", (request) => {
+    if (!isApiUrl(request.url())) return;
+    const authorization = request.headers().authorization;
+    if (authorization) latestApiAuthorization = authorization;
+  });
 
   page.on("response", async (response) => {
     const url = response.url();
@@ -367,6 +374,7 @@ function installNetworkRecorder(page) {
       status: response.status(),
       url,
     };
+    apiEvents.push(event);
 
     if (event.status >= 400 || /\/api\/sync\/12-week\/mutations(?:\?|$)/.test(url)) {
       event.contentType = response.headers()["content-type"] ?? "";
@@ -376,8 +384,6 @@ function installNetworkRecorder(page) {
         event.responseBodyError = error instanceof Error ? error.message : String(error);
       }
     }
-
-    apiEvents.push(event);
   });
 
   page.on("requestfailed", (request) => {
@@ -391,7 +397,11 @@ function installNetworkRecorder(page) {
     });
   });
 
-  return { apiEvents, requestFailures };
+  return {
+    apiEvents,
+    requestFailures,
+    getLatestApiAuthorization: () => latestApiAuthorization,
+  };
 }
 
 async function waitForCondition(label, predicate, timeoutMs = DEFAULT_TIMEOUT_MS, intervalMs = 500) {
@@ -445,6 +455,7 @@ function getRetryAfterMs(event, fallbackMs = 10_000) {
 
 async function waitForApiSuccessWithRateLimitRetry(page, apiEvents, pattern, label, options = {}) {
   const after = options.after ?? 0;
+  const method = options.method?.toUpperCase();
   const onRateLimitRetry = options.onRateLimitRetry;
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   let cursor = after;
@@ -453,19 +464,33 @@ async function waitForApiSuccessWithRateLimitRetry(page, apiEvents, pattern, lab
     label,
     async () => {
       const failed = apiEvents.find(
-        (event) => event.at >= after && pattern.test(event.url) && event.status >= 400 && event.status !== 429,
+        (event) =>
+          event.at >= after &&
+          (!method || event.method.toUpperCase() === method) &&
+          pattern.test(event.url) &&
+          event.status >= 400 &&
+          event.status !== 429,
       );
       if (failed) {
         throw new Error(formatApiFailure(label, failed));
       }
 
       const success = apiEvents.find(
-        (event) => event.at >= after && pattern.test(event.url) && event.status >= 200 && event.status < 300,
+        (event) =>
+          event.at >= after &&
+          (!method || event.method.toUpperCase() === method) &&
+          pattern.test(event.url) &&
+          event.status >= 200 &&
+          event.status < 300,
       );
       if (success) return success;
 
       const rateLimited = apiEvents.find(
-        (event) => event.at >= cursor && pattern.test(event.url) && event.status === 429,
+        (event) =>
+          event.at >= cursor &&
+          (!method || event.method.toUpperCase() === method) &&
+          pattern.test(event.url) &&
+          event.status === 429,
       );
       if (!rateLimited) return false;
 
@@ -483,6 +508,45 @@ async function waitForApiSuccessWithRateLimitRetry(page, apiEvents, pattern, lab
     },
     timeoutMs,
   );
+}
+
+function findRateLimitedApiEvent(apiEvents, pattern, after, method) {
+  const expectedMethod = method?.toUpperCase();
+  return apiEvents.find(
+    (event) =>
+      event.at >= after &&
+      (!expectedMethod || event.method.toUpperCase() === expectedMethod) &&
+      pattern.test(event.url) &&
+      event.status === 429,
+  );
+}
+
+async function retryRateLimitedMetricHydration(page, apiEvents, after, getLatestApiAuthorization) {
+  const metricsPattern = /\/api\/weeks\/[^/]+\/metrics(?:\?|$)/;
+  const metricRateLimit = findRateLimitedApiEvent(apiEvents, metricsPattern, after, "GET");
+  if (!metricRateLimit) return;
+
+  const authorization = getLatestApiAuthorization();
+  if (!authorization) {
+    throw new Error("Cannot retry 12-week metric hydration because the authenticated API authorization header is unavailable.");
+  }
+
+  const requestMetrics = async () => {
+    await page.evaluate(async ({ url, authorization }) => {
+      await fetch(url, { headers: { authorization } });
+    }, { url: metricRateLimit.url, authorization });
+  };
+
+  metricRateLimit.handledByRateLimitRetry = "12-week metric hydration";
+  const retryStartedAt = metricRateLimit.at + 1;
+  await page.waitForTimeout(getRetryAfterMs(metricRateLimit));
+  await requestMetrics();
+  await waitForApiSuccessWithRateLimitRetry(page, apiEvents, metricsPattern, "12-week metric hydration", {
+    after: retryStartedAt,
+    method: "GET",
+    timeoutMs: DEFAULT_TIMEOUT_MS,
+    onRateLimitRetry: requestMetrics,
+  });
 }
 
 function getRecentRateLimit(apiEvents, after) {
@@ -1840,7 +1904,7 @@ async function assertLoginRecoverySurface(page) {
   await assertNoHorizontalOverflow(page, "login recovery surface desktop");
 }
 
-async function exerciseTwelveWeekSaveReloadAndSync(page, apiEvents) {
+async function exerciseTwelveWeekSaveReloadAndSync(page, apiEvents, getLatestApiAuthorization) {
   // Tài khoản smoke dùng dữ liệu cloud thật (đã đăng nhập + sync). Không seed
   // localStorage nữa vì pull cloud sẽ ghi đè; thao tác trực tiếp trên plan cloud.
   await page.goto(`${BASE_URL}/12-week-system`, { waitUntil: "domcontentloaded" });
@@ -1898,6 +1962,7 @@ async function exerciseTwelveWeekSaveReloadAndSync(page, apiEvents) {
     },
   );
   await waitForSyncQueueIdle(page);
+  await retryRateLimitedMetricHydration(page, apiEvents, syncStartedAt, getLatestApiAuthorization);
   const mutationSyncEvents = apiEvents
     .filter((event) => event.at >= syncStartedAt && /\/api\/sync\/12-week\/mutations(?:\?|$)/.test(event.url))
     .map((event) => ({
@@ -1910,24 +1975,9 @@ async function exerciseTwelveWeekSaveReloadAndSync(page, apiEvents) {
   log(`12-week queue after manual sync: ${JSON.stringify(await getSyncQueueDebug(page))}`);
   log(`12-week snapshots after manual sync: ${JSON.stringify(await getGoalSnapshots(page))}`);
 
-  const metricsHydrationStartedAt = Date.now();
   await page.goto(`${BASE_URL}/12-week-system`, { waitUntil: "domcontentloaded" });
   await page.reload({ waitUntil: "domcontentloaded" });
   await waitForSystemLoaded(page);
-  await waitForApiSuccessWithRateLimitRetry(
-    page,
-    apiEvents,
-    /\/api\/weeks\/[^/]+\/metrics(?:\?|$)/,
-    "12-week metric hydration",
-    {
-      after: metricsHydrationStartedAt,
-      timeoutMs: DEFAULT_TIMEOUT_MS,
-      onRateLimitRetry: async () => {
-        await page.reload({ waitUntil: "domcontentloaded" });
-        await waitForSystemLoaded(page);
-      },
-    },
-  );
   await waitForGoalSnapshot(page, "12-week state persisted after reload", (snapshot) => {
     const hasExpectedCheckIn = [snapshot.latestDailyCheckIn, ...(snapshot.dailyCheckIns ?? [])].some(
       (checkIn) => checkIn?.optionalNote === CHECKIN_NOTE,
@@ -2092,7 +2142,7 @@ async function run() {
   });
   const page = await context.newPage();
   const pageErrors = [];
-  const { apiEvents, requestFailures } = installNetworkRecorder(page);
+  const { apiEvents, requestFailures, getLatestApiAuthorization } = installNetworkRecorder(page);
 
   page.setDefaultTimeout(DEFAULT_TIMEOUT_MS);
   page.setDefaultNavigationTimeout(DEFAULT_TIMEOUT_MS);
@@ -2143,7 +2193,7 @@ async function run() {
     });
 
     await step("12-week save, reload, and backend sync", async () => {
-      await exerciseTwelveWeekSaveReloadAndSync(page, apiEvents);
+      await exerciseTwelveWeekSaveReloadAndSync(page, apiEvents, getLatestApiAuthorization);
     });
 
     await step("Billing management and VietQR checkout", async () => {

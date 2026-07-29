@@ -111,7 +111,7 @@ describe("production smoke harness guards", () => {
   it("retries rate-limited billing payment history before checkout creation", () => {
     expect(smokeScript).toContain('retryAfter: response.headers()["retry-after"] ?? ""');
     expect(smokeScript).toContain("async function waitForApiSuccessWithRateLimitRetry(page, apiEvents, pattern, label");
-    expect(smokeScript).toContain("event.status >= 400 && event.status !== 429");
+    expect(smokeScript).toContain("event.status !== 429");
     expect(smokeScript).toContain("rateLimited.handledByRateLimitRetry = label;");
     expect(smokeScript).toContain("event.status === 429 && !event.handledByRateLimitRetry");
     expect(smokeScript).toContain("function markRateLimitHandled(event, label)");
@@ -139,11 +139,18 @@ describe("production smoke harness guards", () => {
     );
   });
 
-  it("retries rate-limited 12-week metric hydration and never allowlists it", () => {
-    expect(smokeScript).toContain("const metricsHydrationStartedAt = Date.now();");
+  it("retries an observed rate-limited 12-week metric request and never allowlists it", () => {
+    expect(smokeScript).toContain("function findRateLimitedApiEvent(apiEvents, pattern, after, method)");
+    expect(smokeScript).toContain(
+      "async function retryRateLimitedMetricHydration(page, apiEvents, after, getLatestApiAuthorization)",
+    );
     expect(smokeScript).toContain('/\\/api\\/weeks\\/[^/]+\\/metrics(?:\\?|$)/');
     expect(smokeScript).toContain('"12-week metric hydration"');
-    expect(smokeScript).toContain('await page.reload({ waitUntil: "domcontentloaded" });');
+    expect(smokeScript).toContain("const metricRateLimit = findRateLimitedApiEvent(");
+    expect(smokeScript).toContain("await page.evaluate(async ({ url, authorization }) => {");
+    expect(smokeScript).toContain(
+      "await retryRateLimitedMetricHydration(page, apiEvents, syncStartedAt, getLatestApiAuthorization);",
+    );
     expect(smokeScript).not.toContain('pathname === "/api/weeks/:weekId/metrics"');
   });
 
