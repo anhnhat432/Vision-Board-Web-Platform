@@ -790,7 +790,7 @@ describe("production billing surfaces", () => {
   it(
     "localizes payment history rate-limit errors",
     async () => {
-      stubRealBillingEnv(
+      const apiClient = stubRealBillingEnv(
         "Nhà cung cấp thanh toán",
         {
           planCode: "FREE",
@@ -825,31 +825,124 @@ describe("production billing surfaces", () => {
         ),
       ).toBeInTheDocument();
       expect(screen.queryByText(/Too many requests/i)).not.toBeInTheDocument();
+      expect(
+        apiClient.get.mock.calls.filter(
+          ([path]) => path === "/billing/payment-history",
+        ),
+      ).toHaveLength(1);
+    },
+    UI_TEST_TIMEOUT_MS,
+  );
+
+  it.each([401, 403])(
+    "does not automatically retry payment history HTTP %s",
+    async (status) => {
+      const apiClient = stubRealBillingEnv(
+        "Nhà cung cấp thanh toán",
+        {
+          planCode: "FREE",
+          status: "none",
+          entitlements: [],
+          currentPeriodEnd: null,
+          cancelAtPeriodEnd: false,
+        },
+        { error: { message: "Request rejected", status } },
+      );
+      stubAuthContext({ email: "billing-user@example.test" });
+      const { BillingPlan } = await import("./BillingPlan");
+
+      const router = createMemoryRouter(
+        [{ path: "/billing/plan", element: <BillingPlan /> }],
+        { initialEntries: ["/billing/plan"] },
+      );
+      render(<RouterProvider router={router} />);
+
+      await screen.findByText("Request rejected");
+      expect(
+        apiClient.get.mock.calls.filter(
+          ([path]) => path === "/billing/payment-history",
+        ),
+      ).toHaveLength(1);
+    },
+    UI_TEST_TIMEOUT_MS,
+  );
+
+  it.each([
+    {
+      label: "network error",
+      error: { message: "Network failed", isNetworkError: true },
+    },
+    {
+      label: "HTTP 503",
+      error: { message: "Service unavailable", status: 503 },
+    },
+  ])(
+    "automatically retries payment history after $label",
+    async ({ error }) => {
+      const apiClient = stubRealBillingEnv("Nhà cung cấp thanh toán");
+      const originalGet = apiClient.get.getMockImplementation();
+      let historyAttempts = 0;
+      apiClient.get.mockImplementation(
+        (path: string, options?: { signal?: AbortSignal }) => {
+          if (path !== "/billing/payment-history") {
+            return originalGet?.(path, options) ?? Promise.resolve({ orders: [] });
+          }
+          historyAttempts += 1;
+          return historyAttempts === 1
+            ? Promise.reject(error)
+            : Promise.resolve({ orders: [] });
+        },
+      );
+      stubAuthContext({ email: "billing-user@example.test" });
+      const { BillingPlan } = await import("./BillingPlan");
+
+      const router = createMemoryRouter(
+        [{ path: "/billing/plan", element: <BillingPlan /> }],
+        { initialEntries: ["/billing/plan"] },
+      );
+      render(<RouterProvider router={router} />);
+
+      await screen.findByText("Chưa có giao dịch nào.");
+      expect(screen.getByTestId("billing-payment-history")).toHaveAttribute(
+        "data-payment-history-state",
+        "empty",
+      );
+      expect(historyAttempts).toBe(2);
+      expect(screen.queryByText(error.message)).not.toBeInTheDocument();
     },
     UI_TEST_TIMEOUT_MS,
   );
 
   it(
-    "marks payment history as a retryable error when the request times out",
+    "automatically retries one timed-out payment history request and recovers",
     async () => {
       vi.useFakeTimers();
       const apiClient = stubRealBillingEnv("Nhà cung cấp thanh toán");
       const originalGet = apiClient.get.getMockImplementation();
+      let paymentHistoryAttempt = 0;
+      let resolveRetry: ((value: unknown) => void) | undefined;
       apiClient.get.mockImplementation(
         (path: string, options?: { signal?: AbortSignal }) => {
           if (path === "/billing/payment-history") {
-            return new Promise((_resolve, reject) => {
-              options?.signal?.addEventListener(
-                "abort",
-                () =>
-                  reject(
-                    new DOMException("The operation timed out.", "AbortError"),
-                  ),
-                { once: true },
-              );
+            paymentHistoryAttempt += 1;
+            if (paymentHistoryAttempt === 1) {
+              return new Promise((_resolve, reject) => {
+                options?.signal?.addEventListener(
+                  "abort",
+                  () =>
+                    reject(
+                      new DOMException("The operation timed out.", "AbortError"),
+                    ),
+                  { once: true },
+                );
+              });
+            }
+
+            return new Promise((resolve) => {
+              resolveRetry = resolve;
             });
           }
-          return originalGet?.(path) ?? Promise.resolve({ orders: [] });
+          return originalGet?.(path, options) ?? Promise.resolve({ orders: [] });
         },
       );
       stubAuthContext({ email: "billing-user@example.test" });
@@ -876,6 +969,100 @@ describe("production billing surfaces", () => {
       await act(async () => {
         vi.advanceTimersByTime(PAYMENT_HISTORY_REQUEST_TIMEOUT_MS);
         await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(paymentHistorySection).toHaveAttribute(
+        "data-payment-history-state",
+        "retrying",
+      );
+      expect(
+        screen.getByText(/Đang kết nối lại để tải lịch sử thanh toán/i),
+      ).toBeInTheDocument();
+      expect(paymentHistoryAttempt).toBe(2);
+
+      await act(async () => {
+        resolveRetry?.({
+          orders: [
+            {
+              orderId: "VBRETRY001",
+              planCode: "PLUS",
+              billingCycle: "twelve_week",
+              amount: 99_000,
+              currency: "VND",
+              status: "completed",
+              provider: "payos",
+              createdAt: "2026-07-31T00:00:00.000Z",
+              completedAt: "2026-07-31T00:01:00.000Z",
+              expiresAt: null,
+              receiptSentAt: null,
+              refundRequest: null,
+            },
+          ],
+        });
+        await Promise.resolve();
+      });
+
+      expect(paymentHistorySection).toHaveAttribute(
+        "data-payment-history-state",
+        "ready",
+      );
+      expect(screen.getByText("VBRETRY001")).toBeInTheDocument();
+      expect(
+        screen.queryByText(/Không thể tải lịch sử thanh toán sau vài giây/i),
+      ).not.toBeInTheDocument();
+    },
+    UI_TEST_TIMEOUT_MS,
+  );
+
+  it(
+    "marks payment history as a retryable error after both attempts time out",
+    async () => {
+      vi.useFakeTimers();
+      const apiClient = stubRealBillingEnv("Nhà cung cấp thanh toán");
+      const originalGet = apiClient.get.getMockImplementation();
+      apiClient.get.mockImplementation(
+        (path: string, options?: { signal?: AbortSignal }) => {
+          if (path === "/billing/payment-history") {
+            return new Promise((_resolve, reject) => {
+              options?.signal?.addEventListener(
+                "abort",
+                () =>
+                  reject(
+                    new DOMException("The operation timed out.", "AbortError"),
+                  ),
+                { once: true },
+              );
+            });
+          }
+          return originalGet?.(path, options) ?? Promise.resolve({ orders: [] });
+        },
+      );
+      stubAuthContext({ email: "billing-user@example.test" });
+      const { PAYMENT_HISTORY_REQUEST_TIMEOUT_MS } =
+        await import("@/features/billing/usePaymentHistory");
+      const { BillingPlan } = await import("./BillingPlan");
+
+      const router = createMemoryRouter(
+        [{ path: "/billing/plan", element: <BillingPlan /> }],
+        { initialEntries: ["/billing/plan"] },
+      );
+      render(<RouterProvider router={router} />);
+
+      const paymentHistorySection = screen.getByTestId(
+        "billing-payment-history",
+      );
+
+      await act(async () => {
+        vi.advanceTimersByTime(PAYMENT_HISTORY_REQUEST_TIMEOUT_MS);
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      await act(async () => {
+        vi.advanceTimersByTime(PAYMENT_HISTORY_REQUEST_TIMEOUT_MS);
+        await Promise.resolve();
+        await Promise.resolve();
       });
 
       expect(
@@ -888,6 +1075,11 @@ describe("production billing surfaces", () => {
       expect(
         screen.getByRole("button", { name: "Thử lại" }),
       ).toBeInTheDocument();
+      expect(
+        apiClient.get.mock.calls.filter(
+          ([path]) => path === "/billing/payment-history",
+        ),
+      ).toHaveLength(2);
     },
     UI_TEST_TIMEOUT_MS,
   );

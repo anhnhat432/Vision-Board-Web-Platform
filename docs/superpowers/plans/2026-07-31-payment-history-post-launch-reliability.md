@@ -26,6 +26,7 @@
 **Files:**
 - Modify: `src/app/pages/billing-production-surfaces.test.tsx:832`
 - Modify: `src/features/billing/usePaymentHistory.ts:1`
+- Modify: `src/features/billing/BillingPlanPage.tsx:195`
 
 **Interfaces:**
 - Consumes: `apiClient.get<PaymentHistoryResponse>("/billing/payment-history", { signal })`, `toAppError(error)`, and `isBillingNetworkError(error)`.
@@ -239,6 +240,15 @@ return {
 };
 ```
 
+In `BillingPlanPage.tsx`, destructure `isRetryingPaymentHistory`, resolve `data-payment-history-state="retrying"` before the generic loading state, and render:
+
+```tsx
+<Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+{isRetryingPaymentHistory
+  ? "Đang kết nối lại để tải lịch sử thanh toán..."
+  : "Đang tải lịch sử thanh toán..."}
+```
+
 - [ ] **Step 4: Run the focused UI test and verify GREEN**
 
 Run:
@@ -252,55 +262,21 @@ Expected: all billing production surface tests pass, including one automatic rec
 - [ ] **Step 5: Commit the retry behavior**
 
 ```bash
-git add src/features/billing/usePaymentHistory.ts src/app/pages/billing-production-surfaces.test.tsx
+git add src/features/billing/usePaymentHistory.ts src/features/billing/BillingPlanPage.tsx src/app/pages/billing-production-surfaces.test.tsx
 git commit -m "fix: retry transient payment history loads"
 ```
 
-### Task 2: Present the retry state and align production documentation
+### Task 2: Align production documentation
 
 **Files:**
-- Modify: `src/features/billing/BillingPlanPage.tsx:195`
 - Modify: `guidelines/CURRENT_PROJECT_STATUS.md:1`
 - Modify: `docs/ops/billing-plan-smoke-timeout-follow-up.md:1`
 
 **Interfaces:**
-- Consumes: `UsePaymentHistoryResult.isRetryingPaymentHistory`.
-- Produces: `data-payment-history-state="retrying"` and account-safe reconnecting copy.
+- Consumes: the verified retry behavior and live PayOS evidence.
+- Produces: current production documentation that distinguishes active host configuration from checked-in safe fallbacks.
 
-- [ ] **Step 1: Wire the retry state into `BillingPlanPage`**
-
-Destructure the new flag:
-
-```ts
-const {
-  paymentHistory,
-  setPaymentHistory,
-  isLoadingPaymentHistory,
-  isRetryingPaymentHistory,
-  paymentHistoryError,
-  loadPaymentHistory,
-} = usePaymentHistory(canLoadPaymentHistory);
-```
-
-Resolve the stable state marker before the generic loading state:
-
-```ts
-: isRetryingPaymentHistory
-  ? "retrying"
-  : isLoadingPaymentHistory
-    ? "loading"
-```
-
-Replace the loading message with state-aware copy while keeping the same accessible text container:
-
-```tsx
-<Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-{isRetryingPaymentHistory
-  ? "Đang kết nối lại để tải lịch sử thanh toán..."
-  : "Đang tải lịch sử thanh toán..."}
-```
-
-- [ ] **Step 2: Update current production truth without changing safe fallback env files**
+- [ ] **Step 1: Update current production truth without changing safe fallback env files**
 
 In `guidelines/CURRENT_PROJECT_STATUS.md`:
 
@@ -311,7 +287,7 @@ In `guidelines/CURRENT_PROJECT_STATUS.md`:
 
 At the top of `docs/ops/billing-plan-smoke-timeout-follow-up.md`, add a dated post-launch update that preserves the older Casso and kill-switch sections as historical evidence. Do not rewrite old dated decisions as if they were current.
 
-- [ ] **Step 3: Run focused tests and documentation checks**
+- [ ] **Step 2: Run focused tests and documentation checks**
 
 Run:
 
@@ -323,10 +299,10 @@ rg -n "PayOS|payment-history|host env|safe fallback" guidelines/CURRENT_PROJECT_
 
 Expected: UI tests pass; no whitespace errors; both current-status documents distinguish live host state from checked-in fallback values.
 
-- [ ] **Step 4: Commit UI and documentation alignment**
+- [ ] **Step 3: Commit documentation alignment**
 
 ```bash
-git add src/features/billing/BillingPlanPage.tsx guidelines/CURRENT_PROJECT_STATUS.md docs/ops/billing-plan-smoke-timeout-follow-up.md
+git add guidelines/CURRENT_PROJECT_STATUS.md docs/ops/billing-plan-smoke-timeout-follow-up.md
 git commit -m "docs: align billing status with live PayOS"
 ```
 
