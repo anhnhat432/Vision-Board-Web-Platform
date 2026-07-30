@@ -580,6 +580,20 @@ function isExpectedBackgroundRateLimit(event) {
   }
 }
 
+function isHandledBillingRateLimitPageError(message, apiEvents) {
+  if (message !== "Too many requests. Please wait a moment and try again.") return false;
+
+  return apiEvents.some((event) => {
+    if (event.status !== 429 || event.handledByRateLimitRetry !== "billing payment history") return false;
+
+    try {
+      return new URL(event.url).pathname === "/api/billing/payment-history";
+    } catch {
+      return false;
+    }
+  });
+}
+
 async function waitForPath(page, expectedPath, label, apiEvents, after, timeoutMs = DEFAULT_TIMEOUT_MS) {
   try {
     return await waitForCondition(
@@ -2220,8 +2234,11 @@ async function run() {
       throw new Error(`Severe API failures:\n${severeApiFailures.map((item) => JSON.stringify(item)).join("\n")}`);
     }
 
-    if (pageErrors.length > 0) {
-      throw new Error(`Browser page errors:\n${pageErrors.join("\n")}`);
+    const unhandledPageErrors = pageErrors.filter(
+      (message) => !isHandledBillingRateLimitPageError(message, apiEvents),
+    );
+    if (unhandledPageErrors.length > 0) {
+      throw new Error(`Browser page errors:\n${unhandledPageErrors.join("\n")}`);
     }
 
     log("Production smoke passed");
