@@ -11,7 +11,7 @@ const PASSWORD = process.env.LWW_E2E_PASSWORD;
 const TIMESTAMP = Date.now();
 const TEST_PREFIX = `[LWW-E2E-${TIMESTAMP}]`;
 const PROOF_GOAL_ID = "lww_e2e_goal";
-const PROOF_TASK_ID = "lww_e2e_task";
+const PROOF_TASK_ID = "tw_task_1_lww_e2e_lead_0";
 const USER_DATA_STORAGE_KEY = "visionboard_user_data";
 const AUTH_OWNER_STORAGE_KEY = "visionboard_user_data:auth_owner_uid";
 const USER_DATA_UPDATED_EVENT_NAME = "visionboard:user-data-updated";
@@ -150,7 +150,7 @@ async function bootstrapLwwGoal(
       const startDate = formatDateKey(weekStart);
       const endDate = formatDateKey(addDays(weekStart, 83));
       const today = formatDateKey(now);
-      const leadIndicatorName = `${proofSeed.goalTitle} Lead`;
+      const leadIndicatorName = proofSeed.taskTitle;
       const leadIndicatorId = "lww_e2e_lead";
 
       const weeklyPlans = Array.from({ length: 12 }, (_, index) => ({
