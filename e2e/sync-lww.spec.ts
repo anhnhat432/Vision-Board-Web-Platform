@@ -15,6 +15,8 @@ const PROOF_TASK_ID = "lww_e2e_task";
 const USER_DATA_STORAGE_KEY = "visionboard_user_data";
 const AUTH_OWNER_STORAGE_KEY = "visionboard_user_data:auth_owner_uid";
 const USER_DATA_UPDATED_EVENT_NAME = "visionboard:user-data-updated";
+const MANUAL_SYNC_MIN_INTERVAL_MS = 5_000;
+const lastObservedCloudPullAt = new WeakMap<Page, number>();
 
 interface LwwProofGoal {
   goalId: string;
@@ -35,17 +37,54 @@ function isSafeLwwEmail(email: string) {
 
 // ── Helpers ───────────────────────────────────────────────────────
 
+function rememberCloudPull(page: Page) {
+  lastObservedCloudPullAt.set(page, Date.now());
+}
+
+async function waitForManualSyncWindow(page: Page) {
+  const lastPullAt = lastObservedCloudPullAt.get(page);
+  if (lastPullAt === undefined) return;
+
+  await expect
+    .poll(() => Date.now() - lastPullAt, {
+      timeout: MANUAL_SYNC_MIN_INTERVAL_MS + 2_000,
+      intervals: [100, 250, 500],
+    })
+    .toBeGreaterThanOrEqual(MANUAL_SYNC_MIN_INTERVAL_MS);
+}
+
 async function loginPage(page: Page, email: string, password: string) {
   await page.goto("/login?next=%2Fsettings");
   await expect(
     page.getByPlaceholder(/email/i).or(page.locator("#login-email")),
   ).toBeVisible({ timeout: 15_000 });
 
+  const initialPullResponsePromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === "GET" &&
+      /\/sync\/12-week\/pull$/.test(new URL(response.url()).pathname),
+    { timeout: 60_000 },
+  );
   await page.fill("#login-email", email);
   await page.fill("#login-password", password);
   await page.getByRole("button", { name: /đăng nhập|sign in/i }).click();
 
   await expect(page).not.toHaveURL(/\/login/, { timeout: 30_000 });
+  const initialPullResponse = await initialPullResponsePromise;
+  expect(
+    initialPullResponse.ok(),
+    `Initial 12-week pull responded ${initialPullResponse.status()}`,
+  ).toBe(true);
+  rememberCloudPull(page);
+  await expect(
+    page.getByRole("button", {
+      name: "Kiểm tra sao lưu",
+      exact: true,
+    }),
+  ).toBeEnabled({ timeout: 60_000 });
+  await expect(page.getByTestId("settings-sync-last-result")).toBeVisible({
+    timeout: 60_000,
+  });
 }
 
 async function primeProofGuidanceState(page: Page) {
@@ -395,7 +434,6 @@ async function syncProofGoalToCloud(
   readApiDiagnostics: () => ApiResponseDiagnostic[],
 ) {
   await enqueueBootstrapMutationsFromUi(page, seed);
-  await triggerManualCloudSync(page);
 
   try {
     await expect
@@ -435,6 +473,7 @@ async function triggerManualCloudSync(
     exact: true,
   });
   await expect(syncButton).toBeVisible({ timeout: 30_000 });
+  await waitForManualSyncWindow(page);
   await expect(syncButton).toBeEnabled({ timeout: 30_000 });
 
   const pullResponsePromise = page.waitForResponse(
@@ -450,6 +489,7 @@ async function triggerManualCloudSync(
     pullResponse.ok(),
     `12-week pull responded ${pullResponse.status()}`,
   ).toBe(true);
+  rememberCloudPull(page);
   await expect(syncButton).toBeEnabled({ timeout: timeoutMs });
   await expect(page.getByTestId("settings-sync-last-result")).toBeVisible({
     timeout: timeoutMs,
@@ -468,6 +508,10 @@ async function openProofGoal(page: Page, seed: LwwProofGoal) {
 
 async function pullProofGoal(page: Page, seed: LwwProofGoal) {
   await triggerManualCloudSync(page);
+  await waitForProofGoal(page, seed);
+}
+
+async function waitForProofGoal(page: Page, seed: LwwProofGoal) {
   await expect
     .poll(
       () =>
@@ -613,10 +657,7 @@ async function prepareLwwScenario(
     primeProofGuidanceState(pageA),
     primeProofGuidanceState(pageB),
   ]);
-  await Promise.all([
-    loginPage(pageA, EMAIL!, PASSWORD!),
-    loginPage(pageB, EMAIL!, PASSWORD!),
-  ]);
+  await loginPage(pageA, EMAIL!, PASSWORD!);
 
   const apiDiagnostics = captureApiResponseDiagnostics(pageA);
   try {
@@ -626,7 +667,8 @@ async function prepareLwwScenario(
       seed,
       apiDiagnostics.read,
     );
-    await pullProofGoal(pageB, seed);
+    await loginPage(pageB, EMAIL!, PASSWORD!);
+    await waitForProofGoal(pageB, seed);
 
     expect(await getTaskCompletedState(pageA, seed.taskTitle)).toBe(false);
     expect(await getTaskCompletedState(pageB, seed.taskTitle)).toBe(false);

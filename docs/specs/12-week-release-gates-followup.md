@@ -34,6 +34,8 @@
 10. WHEN an LWW scenario bootstraps its proof goal, THE harness SHALL arm same-origin API diagnostics before publishing, require a successful `/api/sync/12-week/mutations` response, and report non-sensitive mutation metadata if the queue does not drain.
 11. WHEN the account-deletion proof enters Settings, THE harness SHALL suppress both the contextual Settings guide and the global new-user guide before authentication so neither dialog can intercept the destructive-flow controls.
 12. WHEN the expected LWW bootstrap mutation-sync response does not arrive, THE harness SHALL report only same-origin API method, path, status, current route, and non-sensitive mutation metadata; it SHALL NOT log request or response bodies, headers, credentials, or secret values.
+13. WHEN an LWW context authenticates, THE harness SHALL wait for its initial successful 12-week pull before writing a proof snapshot so login-time auto-sync cannot overwrite the bootstrap state.
+14. WHEN publishing the LWW bootstrap, THE harness SHALL wait for the UI-generated mutation batch and an idle queue without invoking a rate-limited manual full sync; the second context SHALL authenticate only after publication and use its initial pull to load the proof goal.
 
 ## 5. Data, Storage, and Sync Constraints
 
@@ -66,6 +68,7 @@
 - [ ] account deletion proof suppresses the contextual and global welcome guides before authentication
 - [ ] account deletion post-delete allowlist includes only observed safe public or auth-gated routes
 - [ ] LWW bootstrap failures expose safe endpoint/status diagnostics without payloads, headers, credentials, or secrets
+- [ ] LWW bootstrap waits for login-time auto-sync before seeding and publishes through mutation sync before the second context authenticates
 - [ ] no secret value is read, copied, committed, or logged
 
 ## 9. Verification Plan

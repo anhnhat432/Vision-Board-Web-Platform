@@ -80,13 +80,25 @@ describe("GitHub workflow safety guards", () => {
     const prepareStart = harness.indexOf("async function prepareLwwScenario");
     const prepareEnd = harness.indexOf("// ── Tests", prepareStart);
     const prepareScenario = harness.slice(prepareStart, prepareEnd);
+    const syncStart = harness.indexOf("async function syncProofGoalToCloud");
+    const syncEnd = harness.indexOf("async function triggerManualCloudSync", syncStart);
+    const syncBootstrap = harness.slice(syncStart, syncEnd);
     const observerIndex = prepareScenario.indexOf("captureApiResponseDiagnostics(pageA)");
     const bootstrapIndex = prepareScenario.indexOf("bootstrapLwwGoal(pageA, scenarioTitle)");
+    const loginPageAIndex = prepareScenario.indexOf("loginPage(pageA, EMAIL!, PASSWORD!)");
+    const loginPageBIndex = prepareScenario.indexOf("loginPage(pageB, EMAIL!, PASSWORD!)");
 
     expect(prepareStart).toBeGreaterThan(-1);
+    expect(syncStart).toBeGreaterThan(-1);
     expect(observerIndex).toBeGreaterThan(-1);
     expect(bootstrapIndex).toBeGreaterThan(-1);
+    expect(loginPageAIndex).toBeGreaterThan(-1);
+    expect(loginPageBIndex).toBeGreaterThan(-1);
+    expect(loginPageAIndex).toBeLessThan(bootstrapIndex);
+    expect(bootstrapIndex).toBeLessThan(loginPageBIndex);
     expect(observerIndex).toBeLessThan(bootstrapIndex);
+    expect(harness).toContain("initialPullResponsePromise");
+    expect(syncBootstrap).not.toContain("triggerManualCloudSync(page)");
     expect(harness).toContain('response.path === "/api/sync/12-week/mutations"');
     expect(harness).toContain('name: "Chọn nhịp tuần"');
     expect(harness).toContain('getByRole("option", { name: "Nhẹ hơn", exact: true })');
@@ -103,6 +115,20 @@ describe("GitHub workflow safety guards", () => {
     expect(harness).not.toContain("payload: item.payload");
     expect(harness).not.toContain("response.body()");
     expect(harness).not.toContain("response.headers()");
+  });
+
+  it("waits for the real manual-sync floor instead of clicking during a rate-limited no-op window", () => {
+    const harness = readFileSync(path.resolve("e2e", "sync-lww.spec.ts"), "utf8");
+    const triggerStart = harness.indexOf("async function triggerManualCloudSync");
+    const triggerEnd = harness.indexOf("async function openProofGoal", triggerStart);
+    const triggerManualSync = harness.slice(triggerStart, triggerEnd);
+
+    expect(triggerStart).toBeGreaterThan(-1);
+    expect(harness).toContain("const MANUAL_SYNC_MIN_INTERVAL_MS = 5_000");
+    expect(harness).toContain("rememberCloudPull(page)");
+    expect(triggerManualSync.indexOf("waitForManualSyncWindow(page)")).toBeLessThan(
+      triggerManualSync.indexOf("const pullResponsePromise"),
+    );
   });
 
   it("keeps LWW staging smoke overwrite opt-in and dedicated marker guards", () => {
