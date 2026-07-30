@@ -27,13 +27,13 @@
 3. WHEN preview environment metadata is incomplete, THE release process SHALL stop before dispatching destructive account-deletion or LWW workflows.
 4. WHEN all local gates and preview proofs pass, THE release process MAY open a focused follow-up PR; it SHALL NOT merge or trigger production deployment automatically.
 5. WHEN the account-deletion proof first enters Settings, THE harness SHALL mark the Settings guide as seen before navigation so responsive guide hydration cannot intercept the destructive-flow controls.
-6. WHEN an LWW proof scenario starts, THE harness SHALL bootstrap a normalized 12-week goal from the authenticated local snapshot, mirror it to the active auth-scoped key, wait for the real plan snapshot sync, and pull it into the second context before mutating the task.
+6. WHEN an LWW proof scenario starts, THE harness SHALL bootstrap a normalized 12-week goal from the authenticated local snapshot, mirror it to the active auth-scoped key, enqueue the initial plan and task through real UI controls, drain the mutation-sync queue, and pull it into the second context before exercising conflict resolution.
 7. WHILE exercising LWW resolution, THE harness SHALL use the real task checkbox and cloud-sync UI; it SHALL NOT depend on the product's first-time goal-creation route or broad text locators.
 8. WHEN the account-deletion proof seeds its local marker, THE harness SHALL preserve the authenticated snapshot, mirror the marker to the active auth-scoped key, reload Settings, and verify the marker still exists before destructive confirmation.
-9. WHEN account deletion succeeds in real mode, THE harness SHALL accept `/`, `/onboarding`, or `/login?next=/onboarding` as safe post-delete routes while still requiring the remote `DELETE` response to succeed before local marker cleanup.
-10. WHEN an LWW scenario bootstraps its proof goal, THE harness SHALL keep both contexts outside the execution route, arm the bulk-sync response observer before publishing the local snapshot, and report non-sensitive mutation metadata if the queue does not drain.
+9. WHEN account deletion succeeds in real mode, THE harness SHALL accept `/`, `/onboarding`, `/login?next=/onboarding`, or the observed auth-gated `/login?next=/settings` route while still requiring the remote `DELETE` response to succeed before local marker cleanup.
+10. WHEN an LWW scenario bootstraps its proof goal, THE harness SHALL arm same-origin API diagnostics before publishing, require a successful `/api/sync/12-week/mutations` response, and report non-sensitive mutation metadata if the queue does not drain.
 11. WHEN the account-deletion proof enters Settings, THE harness SHALL suppress both the contextual Settings guide and the global new-user guide before authentication so neither dialog can intercept the destructive-flow controls.
-12. WHEN the expected LWW bootstrap bulk-sync response does not arrive, THE harness SHALL report only same-origin API method, path, status, current route, and non-sensitive mutation metadata; it SHALL NOT log request or response bodies, headers, credentials, or secret values.
+12. WHEN the expected LWW bootstrap mutation-sync response does not arrive, THE harness SHALL report only same-origin API method, path, status, current route, and non-sensitive mutation metadata; it SHALL NOT log request or response bodies, headers, credentials, or secret values.
 
 ## 5. Data, Storage, and Sync Constraints
 
@@ -64,6 +64,7 @@
 - [ ] account deletion and LWW harness regressions no longer depend on responsive guide timing or the removed inline goal-creation UI
 - [ ] account deletion marker survives authenticated Settings hydration before deletion and is absent after a successful remote delete
 - [ ] account deletion proof suppresses the contextual and global welcome guides before authentication
+- [ ] account deletion post-delete allowlist includes only observed safe public or auth-gated routes
 - [ ] LWW bootstrap failures expose safe endpoint/status diagnostics without payloads, headers, credentials, or secrets
 - [ ] no secret value is read, copied, committed, or logged
 

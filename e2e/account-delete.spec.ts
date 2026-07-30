@@ -32,7 +32,8 @@ function isSafePostDeleteUrl(value: string) {
     url.pathname === "/" ||
     url.pathname === "/onboarding" ||
     (url.pathname === "/login" &&
-      url.searchParams.get("next") === "/onboarding")
+      (url.searchParams.get("next") === "/onboarding" ||
+        url.searchParams.get("next") === "/settings"))
   );
 }
 

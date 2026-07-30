@@ -294,7 +294,12 @@ async function readPendingMutationQueueDiagnostics(page: Page) {
 
     for (let index = 0; index < localStorage.length; index += 1) {
       const key = localStorage.key(index);
-      if (!key?.startsWith("visionboard_data_mutation_queue")) continue;
+      if (!key) continue;
+      const isQueueStoreKey =
+        key === "visionboard_data_mutation_queue" ||
+        key === "visionboard_data_mutation_queue:anonymous" ||
+        key.startsWith("visionboard_data_mutation_queue:auth:");
+      if (!isQueueStoreKey) continue;
 
       const raw = localStorage.getItem(key);
       if (!raw) continue;
@@ -365,47 +370,58 @@ async function waitForMutationQueueIdle(
     .toEqual([]);
 }
 
-function waitForPlanSnapshotBulkSync(page: Page) {
-  return page.waitForResponse(
-    (response) =>
-      response.request().method() === "POST" &&
-      /\/plans\/[^/]+\/bulk-sync$/.test(new URL(response.url()).pathname),
-    { timeout: 60_000 },
-  );
+async function enqueueBootstrapMutationsFromUi(
+  page: Page,
+  seed: LwwProofGoal,
+) {
+  await openSystemTab(page, "settings");
+  const loadPreference = page.getByRole("combobox", {
+    name: "Chọn nhịp tuần",
+  });
+  await expect(loadPreference).toBeVisible({ timeout: 30_000 });
+  await loadPreference.click();
+  await page
+    .getByRole("option", { name: "Nhẹ hơn", exact: true })
+    .click();
+
+  await openSystemTab(page, "today");
+  await toggleTask(page, seed.taskTitle, true);
+  await toggleTask(page, seed.taskTitle, false);
 }
 
 async function syncProofGoalToCloud(
   page: Page,
   seed: LwwProofGoal,
-  bulkSyncResponsePromise: ReturnType<typeof waitForPlanSnapshotBulkSync>,
   readApiDiagnostics: () => ApiResponseDiagnostic[],
 ) {
-  await page.goto("/12-week-system?tab=today");
-  await getProofTaskCheckbox(page, seed.taskTitle);
+  await enqueueBootstrapMutationsFromUi(page, seed);
+  await triggerManualCloudSync(page);
 
-  let bulkSyncResponse: Awaited<
-    ReturnType<typeof waitForPlanSnapshotBulkSync>
-  >;
   try {
-    bulkSyncResponse = await bulkSyncResponsePromise;
+    await expect
+      .poll(
+        () =>
+          readApiDiagnostics().some(
+            (response) =>
+              response.method === "POST" &&
+              response.path === "/api/sync/12-week/mutations" &&
+              response.status >= 200 &&
+              response.status < 300,
+          ),
+        { timeout: 30_000, intervals: [500, 1000, 2000] },
+      )
+      .toBe(true);
   } catch {
     const currentUrl = new URL(page.url());
     const queue = await readPendingMutationQueueDiagnostics(page);
     throw new Error(
-      `Expected LWW bootstrap bulk-sync response did not arrive: ${JSON.stringify({
+      `Expected LWW bootstrap mutation-sync response did not arrive: ${JSON.stringify({
         route: `${currentUrl.pathname}${currentUrl.search}`,
         apiResponses: readApiDiagnostics(),
         pendingMutations: queue,
       })}`,
     );
   }
-  expect(
-    bulkSyncResponse.ok(),
-    `Plan snapshot bulk sync responded ${bulkSyncResponse.status()}`,
-  ).toBe(true);
-  await expect(
-    page.getByText("Đã lưu & đồng bộ", { exact: true }).first(),
-  ).toBeVisible({ timeout: 30_000 });
   await waitForMutationQueueIdle(page);
 }
 
@@ -603,13 +619,11 @@ async function prepareLwwScenario(
   ]);
 
   const apiDiagnostics = captureApiResponseDiagnostics(pageA);
-  const bulkSyncResponsePromise = waitForPlanSnapshotBulkSync(pageA);
   try {
     const seed = await bootstrapLwwGoal(pageA, scenarioTitle);
     await syncProofGoalToCloud(
       pageA,
       seed,
-      bulkSyncResponsePromise,
       apiDiagnostics.read,
     );
     await pullProofGoal(pageB, seed);

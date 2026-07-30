@@ -57,6 +57,7 @@ describe("GitHub workflow safety guards", () => {
     expect(harness).toContain('url.pathname === "/onboarding"');
     expect(harness).toContain('url.pathname === "/login"');
     expect(harness).toContain('url.searchParams.get("next") === "/onboarding"');
+    expect(harness).toContain('url.searchParams.get("next") === "/settings"');
     expect(harness).not.toContain("toHaveURL(/\\/$/");
   });
 
@@ -74,19 +75,26 @@ describe("GitHub workflow safety guards", () => {
     expect(harness).not.toContain("getByText(/12 tuần|tactic|task/i)");
   });
 
-  it("arms LWW bulk-sync observation before bootstrap and reports pending queue metadata", () => {
+  it("bootstraps LWW through mutation sync and reports pending queue metadata", () => {
     const harness = readFileSync(path.resolve("e2e", "sync-lww.spec.ts"), "utf8");
     const prepareStart = harness.indexOf("async function prepareLwwScenario");
     const prepareEnd = harness.indexOf("// ── Tests", prepareStart);
     const prepareScenario = harness.slice(prepareStart, prepareEnd);
-    const observerIndex = prepareScenario.indexOf("waitForPlanSnapshotBulkSync(pageA)");
+    const observerIndex = prepareScenario.indexOf("captureApiResponseDiagnostics(pageA)");
     const bootstrapIndex = prepareScenario.indexOf("bootstrapLwwGoal(pageA, scenarioTitle)");
 
     expect(prepareStart).toBeGreaterThan(-1);
     expect(observerIndex).toBeGreaterThan(-1);
     expect(bootstrapIndex).toBeGreaterThan(-1);
     expect(observerIndex).toBeLessThan(bootstrapIndex);
+    expect(harness).toContain('response.path === "/api/sync/12-week/mutations"');
+    expect(harness).toContain('name: "Chọn nhịp tuần"');
+    expect(harness).toContain('getByRole("option", { name: "Nhẹ hơn", exact: true })');
+    expect(harness).not.toContain("waitForPlanSnapshotBulkSync");
+    expect(harness).not.toContain("/bulk-sync$");
     expect(harness).toContain("readPendingMutationQueueDiagnostics");
+    expect(harness).toContain('key === "visionboard_data_mutation_queue:anonymous"');
+    expect(harness).toContain('key.startsWith("visionboard_data_mutation_queue:auth:")');
     expect(harness).toContain("errorCode: item.error?.code");
     expect(harness).toContain("captureApiResponseDiagnostics");
     expect(harness).toContain("method: response.request().method()");
