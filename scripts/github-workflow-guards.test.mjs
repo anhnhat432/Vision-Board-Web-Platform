@@ -117,6 +117,28 @@ describe("GitHub workflow safety guards", () => {
     expect(harness).not.toContain("response.headers()");
   });
 
+  it("reports only safe proof-task metadata when the LWW bootstrap task is not visible", () => {
+    const harness = readFileSync(path.resolve("e2e", "sync-lww.spec.ts"), "utf8");
+    const diagnosticsStart = harness.indexOf("async function readProofTaskDiagnostics");
+    const diagnosticsEnd = harness.indexOf("async function waitForMutationQueueIdle", diagnosticsStart);
+    const diagnostics = harness.slice(diagnosticsStart, diagnosticsEnd);
+
+    expect(diagnosticsStart).toBeGreaterThan(-1);
+    expect(diagnostics).toContain("route:");
+    expect(diagnostics).toContain("goalPresent:");
+    expect(diagnostics).toContain("taskPresent:");
+    expect(diagnostics).toContain("taskCount:");
+    expect(diagnostics).toContain("currentWeek:");
+    expect(diagnostics).toContain("scheduledDateMatchesToday:");
+    expect(diagnostics).toContain("latestGoalPointerMatches:");
+    expect(diagnostics).toContain("authScopedSnapshotMatches:");
+    expect(diagnostics).toContain("visibleCheckboxCount:");
+    expect(diagnostics).not.toContain("rawSnapshot");
+    expect(diagnostics).not.toContain("taskTitle");
+    expect(diagnostics).not.toContain("payload");
+    expect(diagnostics).not.toContain("headers");
+  });
+
   it("waits for the real manual-sync floor instead of clicking during a rate-limited no-op window", () => {
     const harness = readFileSync(path.resolve("e2e", "sync-lww.spec.ts"), "utf8");
     const triggerStart = harness.indexOf("async function triggerManualCloudSync");

@@ -397,6 +397,86 @@ function captureApiResponseDiagnostics(page: Page) {
   };
 }
 
+async function readProofTaskDiagnostics(page: Page, seed: LwwProofGoal) {
+  const storageState = await page.evaluate(
+    ({ authOwnerStorageKey, goalId, taskId, userDataStorageKey }) => {
+      type StoredData = {
+        goals?: Array<{
+          id?: string;
+          twelveWeekSystem?: {
+            currentWeek?: number;
+            taskInstances?: Array<{
+              id?: string;
+              scheduledDate?: string;
+            }>;
+          };
+        }>;
+      };
+      const parseStoredData = (raw: string | null): StoredData | null => {
+        if (!raw) return null;
+        try {
+          return JSON.parse(raw) as StoredData;
+        } catch {
+          return null;
+        }
+      };
+      const findGoal = (data: StoredData | null) =>
+        data?.goals?.find((candidate) => candidate.id === goalId);
+      const formatDateKey = (date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      };
+
+      const data = parseStoredData(localStorage.getItem(userDataStorageKey));
+      const goal = findGoal(data);
+      const task = goal?.twelveWeekSystem?.taskInstances?.find(
+        (candidate) => candidate.id === taskId,
+      );
+      const ownerUid = localStorage.getItem(authOwnerStorageKey)?.trim();
+      const scopedData = ownerUid
+        ? parseStoredData(
+            localStorage.getItem(
+              `${userDataStorageKey}:auth:${encodeURIComponent(ownerUid)}`,
+            ),
+          )
+        : null;
+      const scopedGoal = findGoal(scopedData);
+      const scopedTask = scopedGoal?.twelveWeekSystem?.taskInstances?.find(
+        (candidate) => candidate.id === taskId,
+      );
+
+      return {
+        goalPresent: Boolean(goal),
+        taskPresent: Boolean(task),
+        taskCount: goal?.twelveWeekSystem?.taskInstances?.length ?? 0,
+        currentWeek: goal?.twelveWeekSystem?.currentWeek ?? null,
+        scheduledDateMatchesToday:
+          Boolean(task?.scheduledDate) &&
+          task?.scheduledDate === formatDateKey(new Date()),
+        latestGoalPointerMatches:
+          localStorage.getItem("latest_12_week_goal_id") === goalId &&
+          localStorage.getItem("latest_12_week_system_goal_id") === goalId,
+        authScopedSnapshotMatches: Boolean(scopedGoal && scopedTask),
+      };
+    },
+    {
+      authOwnerStorageKey: AUTH_OWNER_STORAGE_KEY,
+      goalId: seed.goalId,
+      taskId: seed.taskId,
+      userDataStorageKey: USER_DATA_STORAGE_KEY,
+    },
+  );
+
+  const currentUrl = new URL(page.url());
+  return {
+    route: `${currentUrl.pathname}${currentUrl.search}`,
+    ...storageState,
+    visibleCheckboxCount: await page.locator('[role="checkbox"]:visible').count(),
+  };
+}
+
 async function waitForMutationQueueIdle(
   page: Page,
   timeoutMs: number = 45_000,
@@ -424,6 +504,14 @@ async function enqueueBootstrapMutationsFromUi(
     .click();
 
   await openSystemTab(page, "today");
+  try {
+    await getProofTaskCheckbox(page, seed.taskTitle);
+  } catch {
+    const diagnostics = await readProofTaskDiagnostics(page, seed);
+    throw new Error(
+      `LWW bootstrap task was not visible: ${JSON.stringify(diagnostics)}`,
+    );
+  }
   await toggleTask(page, seed.taskTitle, true);
   await toggleTask(page, seed.taskTitle, false);
 }
