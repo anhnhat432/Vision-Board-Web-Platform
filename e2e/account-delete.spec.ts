@@ -17,6 +17,8 @@ const { email: EMAIL, password: PASSWORD } =
     env: process.env,
   });
 const LOCAL_MARKER = `account-delete-e2e-${TIMESTAMP}`;
+const SETTINGS_GUIDE_SEEN_STORAGE_KEY =
+  "visionboard_screen_guide_seen:settings";
 
 function isSafeDeleteEmail(email: string) {
   return /(^|[+._-])delete([+._-]|@)/i.test(email);
@@ -106,18 +108,10 @@ async function localMarkerExists(page: Page) {
   }, LOCAL_MARKER);
 }
 
-async function dismissSettingsScreenGuide(page: Page) {
-  const guide = page.getByRole("dialog", {
-    name: "Quản lý dữ liệu và tài khoản",
-  });
-  const opened = await guide
-    .waitFor({ state: "visible", timeout: 5_000 })
-    .then(() => true)
-    .catch(() => false);
-  if (!opened) return;
-
-  await guide.getByRole("button", { name: "Tôi đã hiểu" }).click();
-  await expect(guide).toBeHidden();
+async function primeSettingsGuideSeenState(page: Page) {
+  await page.addInitScript((storageKey) => {
+    localStorage.setItem(storageKey, "true");
+  }, SETTINGS_GUIDE_SEEN_STORAGE_KEY);
 }
 
 test.describe("staging account deletion", () => {
@@ -137,12 +131,12 @@ test.describe("staging account deletion", () => {
   test("deletes a disposable account remotely before clearing local data", async ({
     page,
   }) => {
+    await primeSettingsGuideSeenState(page);
     await authenticateDisposableAccount(page);
     await seedLocalMarker(page);
     expect(await localMarkerExists(page)).toBe(true);
 
     await page.goto(`${BASE_URL}/settings`);
-    await dismissSettingsScreenGuide(page);
     await expect(page.getByTestId("settings-delete-account-open")).toBeVisible({
       timeout: 20_000,
     });

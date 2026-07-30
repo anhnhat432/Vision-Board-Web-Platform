@@ -30,12 +30,27 @@ describe("GitHub workflow safety guards", () => {
     expect(harness).toContain("resolveAccountDeleteE2ECredentials");
   });
 
-  it("dismisses the auto-open Settings guide before account deletion", () => {
+  it("marks the Settings guide seen before account-deletion navigation", () => {
     const harness = readFileSync(path.resolve("e2e", "account-delete.spec.ts"), "utf8");
 
-    expect(harness).toContain("dismissSettingsScreenGuide");
-    expect(harness).toContain('"Quản lý dữ liệu và tài khoản"');
-    expect(harness).toContain('"Tôi đã hiểu"');
+    expect(harness).toContain("primeSettingsGuideSeenState");
+    expect(harness).toContain('page.addInitScript((storageKey) =>');
+    expect(harness).toContain('"visionboard_screen_guide_seen:settings"');
+    expect(harness).not.toContain("dismissSettingsScreenGuide");
+  });
+
+  it("bootstraps LWW proof data without the removed inline goal-creation UI", () => {
+    const harness = readFileSync(path.resolve("e2e", "sync-lww.spec.ts"), "utf8");
+
+    expect(harness).toContain("bootstrapLwwGoal");
+    expect(harness).toContain("syncProofGoalToCloud");
+    expect(harness).toContain("pullProofGoal");
+    expect(harness).toContain('"visionboard_user_data:auth_owner_uid"');
+    expect(harness).toContain('"visionboard:user-data-updated"');
+    expect(harness).toContain('getByRole("checkbox", {');
+    expect(harness).toContain("`Hoàn thành việc: ${taskTitle}`");
+    expect(harness).not.toContain("createGoalWithTask");
+    expect(harness).not.toContain("getByText(/12 tuần|tactic|task/i)");
   });
 
   it("keeps LWW staging smoke overwrite opt-in and dedicated marker guards", () => {

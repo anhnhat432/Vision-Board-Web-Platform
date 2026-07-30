@@ -1,4 +1,4 @@
-import type { Locator, Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
 
 const BASE_URL = process.env.LWW_E2E_URL?.replace(/\/$/, "");
@@ -10,6 +10,18 @@ const EMAIL = process.env.LWW_E2E_EMAIL;
 const PASSWORD = process.env.LWW_E2E_PASSWORD;
 const TIMESTAMP = Date.now();
 const TEST_PREFIX = `[LWW-E2E-${TIMESTAMP}]`;
+const PROOF_GOAL_ID = "lww_e2e_goal";
+const PROOF_TASK_ID = "lww_e2e_task";
+const USER_DATA_STORAGE_KEY = "visionboard_user_data";
+const AUTH_OWNER_STORAGE_KEY = "visionboard_user_data:auth_owner_uid";
+const USER_DATA_UPDATED_EVENT_NAME = "visionboard:user-data-updated";
+
+interface LwwProofGoal {
+  goalId: string;
+  goalTitle: string;
+  taskId: string;
+  taskTitle: string;
+}
 
 function isSafeLwwEmail(email: string) {
   return /(^|[+._-])lww([+._-]|@)/i.test(email);
@@ -30,45 +42,191 @@ async function loginPage(page: Page, email: string, password: string) {
   await expect(page).not.toHaveURL(/\/login/, { timeout: 30_000 });
 }
 
-async function createGoalWithTask(page: Page, title: string) {
-  await page.goto("/12-week-system");
-  await page.waitForLoadState("networkidle");
-
-  const createBtn = page.getByRole("button", { name: /mở trung tâm 12 tuần|tạo mới|setup/i });
-  if (await createBtn.isVisible({ timeout: 10_000 })) {
-    await createBtn.click();
-  }
-
-  await expect(page.getByText(/12 tuần|tactic|task/i)).toBeVisible({
-    timeout: 30_000,
+async function primeProofGuidanceState(page: Page) {
+  await page.addInitScript(() => {
+    localStorage.setItem("visionboard_screen_guide_seen:settings", "true");
+    localStorage.setItem("visionboard_screen_guide_seen:twelve-week-system", "true");
+    localStorage.setItem("visionboard_page_tour_seen:twelve-week-system", "true");
+    localStorage.setItem(
+      "visionboard_first_run_guidance_completed_at",
+      new Date().toISOString(),
+    );
   });
-
-  const goalTitle = `${TEST_PREFIX} ${title}`;
-  
-  const goalNameInput = page.locator('input[aria-label*="mục tiêu"][aria-label*="12"], input[id*="goal"], input[id*="vision"]');
-  if (await goalNameInput.count() > 0) {
-    await goalNameInput.first().fill(goalTitle);
-  } else {
-    const textInput = page.locator("input[type='text']");
-    if (await textInput.count() > 0) {
-      await textInput.first().fill(goalTitle);
-    }
-  }
-
-  await expect(page.getByText(goalTitle)).toBeVisible({ timeout: 15_000 });
-  return goalTitle;
 }
 
-async function waitForPageText(page: Page, text: string, timeoutMs: number = 30_000) {
-  await expect
-    .poll(
-      async () => {
-        const bodyText = (await page.textContent("body")) || "";
-        return bodyText.includes(text);
-      },
-      { timeout: timeoutMs, intervals: [500, 1000, 2000] },
-    )
-    .toBe(true);
+async function bootstrapLwwGoal(
+  page: Page,
+  scenarioTitle: string,
+): Promise<LwwProofGoal> {
+  const seed: LwwProofGoal = {
+    goalId: PROOF_GOAL_ID,
+    goalTitle: `${TEST_PREFIX} ${scenarioTitle}`,
+    taskId: PROOF_TASK_ID,
+    taskTitle: `${TEST_PREFIX} ${scenarioTitle} Task`,
+  };
+
+  await page.evaluate(
+    ({
+      authOwnerStorageKey,
+      userDataStorageKey,
+      userDataUpdatedEventName,
+      seed: proofSeed,
+    }) => {
+      const raw = localStorage.getItem(userDataStorageKey);
+      const ownerUid = localStorage.getItem(authOwnerStorageKey)?.trim();
+      if (!raw || !ownerUid) {
+        throw new Error(
+          "Authenticated local snapshot was not ready for LWW bootstrap.",
+        );
+      }
+
+      const currentData = JSON.parse(raw) as {
+        goals?: Array<{ id?: string }>;
+      } & Record<string, unknown>;
+      if (!Array.isArray(currentData.goals)) {
+        throw new Error("Authenticated local snapshot has no goals array.");
+      }
+
+      const formatDateKey = (date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      };
+      const addDays = (date: Date, amount: number) => {
+        const next = new Date(date);
+        next.setDate(next.getDate() + amount);
+        return next;
+      };
+
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      const weekStart = addDays(now, -((now.getDay() + 6) % 7));
+      const startDate = formatDateKey(weekStart);
+      const endDate = formatDateKey(addDays(weekStart, 83));
+      const today = formatDateKey(now);
+      const leadIndicatorName = `${proofSeed.goalTitle} Lead`;
+      const leadIndicatorId = "lww_e2e_lead";
+
+      const weeklyPlans = Array.from({ length: 12 }, (_, index) => ({
+        weekNumber: index + 1,
+        phaseName:
+          index < 4 ? "Foundation" : index < 8 ? "Build" : "Finish",
+        focus: proofSeed.goalTitle,
+        milestone: index === 11 ? proofSeed.goalTitle : "",
+        completed: false,
+      }));
+      const scoreboard = Array.from({ length: 12 }, (_, index) => ({
+        weekNumber: index + 1,
+        leadCompletionPercent: 0,
+        mainMetricProgress: "",
+        outputDone: "",
+        reviewDone: false,
+        weeklyScore: 0,
+      }));
+
+      const goal = {
+        id: proofSeed.goalId,
+        category: "Career",
+        focusArea: "Career",
+        title: proofSeed.goalTitle,
+        description: proofSeed.goalTitle,
+        deadline: endDate,
+        tasks: [],
+        feasibilityResult: "realistic",
+        readinessScore: 20,
+        createdAt: new Date().toISOString(),
+        twelveWeekSystem: {
+          goalType: "Project Completion",
+          vision12Week: proofSeed.goalTitle,
+          lagMetric: {
+            name: "LWW proof completion",
+            unit: "state",
+            target: "1",
+            currentValue: "",
+          },
+          leadIndicators: [
+            {
+              id: leadIndicatorId,
+              name: leadIndicatorName,
+              target: "1",
+              unit: "task/week",
+              type: "core",
+              priority: 1,
+              schedule: [6],
+            },
+          ],
+          milestones: {
+            week4: "",
+            week8: "",
+            week12: proofSeed.goalTitle,
+          },
+          successEvidence: proofSeed.goalTitle,
+          reviewDay: "Sunday",
+          week12Outcome: proofSeed.goalTitle,
+          startDate,
+          endDate,
+          timezone: "Asia/Ho_Chi_Minh",
+          weekStartsOn: "Monday",
+          status: "active",
+          dailyReminderTime: "19:00",
+          tacticLoadPreference: "balanced",
+          reentryCount: 0,
+          currentWeek: 1,
+          totalWeeks: 12,
+          weeklyPlans,
+          taskInstances: [
+            {
+              id: proofSeed.taskId,
+              title: proofSeed.taskTitle,
+              leadIndicatorName,
+              isCore: true,
+              completed: false,
+              weekNumber: 1,
+              scheduledDate: today,
+              tacticId: leadIndicatorId,
+              lastModifiedAt: 0,
+            },
+          ],
+          dailyCheckIns: [],
+          weeklyReviews: [],
+          scoreboard,
+        },
+      };
+
+      const nextData = {
+        ...currentData,
+        goals: [
+          ...currentData.goals.filter(
+            (candidate) => candidate.id !== proofSeed.goalId,
+          ),
+          goal,
+        ],
+        onboardingCompleted: true,
+        isHydratedFromDemo: false,
+      };
+      const serialized = JSON.stringify(nextData);
+      localStorage.setItem(userDataStorageKey, serialized);
+      localStorage.setItem(
+        `${userDataStorageKey}:auth:${encodeURIComponent(ownerUid)}`,
+        serialized,
+      );
+      localStorage.setItem("latest_12_week_goal_id", proofSeed.goalId);
+      localStorage.setItem(
+        "latest_12_week_system_goal_id",
+        proofSeed.goalId,
+      );
+      window.dispatchEvent(new CustomEvent(userDataUpdatedEventName));
+    },
+    {
+      authOwnerStorageKey: AUTH_OWNER_STORAGE_KEY,
+      userDataStorageKey: USER_DATA_STORAGE_KEY,
+      userDataUpdatedEventName: USER_DATA_UPDATED_EVENT_NAME,
+      seed,
+    },
+  );
+
+  return seed;
 }
 
 async function openSystemTab(page: Page, tab: "today" | "settings") {
@@ -88,174 +246,210 @@ async function openSystemTab(page: Page, tab: "today" | "settings") {
   }
 }
 
-async function getTodayTaskCheckbox(page: Page): Promise<Locator | null> {
-  await openSystemTab(page, "today");
-
-  const todayShell = page.locator("[data-twelve-week-today-shell]");
-  const scopedCheckbox = todayShell.getByRole("checkbox").first();
-  if ((await scopedCheckbox.count()) > 0) return scopedCheckbox;
-
-  const fallback = page
-    .locator('[data-testid="today-main-work-grid"] [role="checkbox"], [data-testid="today-main-work-grid"] input[type="checkbox"]')
-    .first();
-  if ((await fallback.count()) > 0) return fallback;
-
-  return null;
-}
-
-async function readCheckboxState(checkbox: Locator): Promise<boolean> {
-  return checkbox.isChecked();
-}
-
-async function toggleTask(page: Page, completed: boolean) {
-  const stableCheckbox = await getTodayTaskCheckbox(page);
-  if (stableCheckbox) {
-    const isCurrentlyCompleted = await readCheckboxState(stableCheckbox);
-    if (completed !== isCurrentlyCompleted) {
-      await stableCheckbox.click();
-      await expect
-        .poll(async () => readCheckboxState(stableCheckbox), { timeout: 10_000, intervals: [250, 500, 1000] })
-        .toBe(completed);
-    }
-    return;
-  }
-
-  await page.click('[role="tab"][name*="Hôm nay"]')
-    .catch(() => page.goto("/12-week-system?tab=today"));
-
-  const checkbox = page
-    .locator('[role="checkbox"], input[type="checkbox"]')
-    .filter({ hasText: /task|việc|action|tactic/i })
-    .first();
-
-  if (await checkbox.count() > 0) {
-    const isChecked = await checkbox.inputValue();
-    const shouldCheck = completed;
-    const isCurrentlyCompleted = isChecked === "true";
-
-    if (shouldCheck && !isCurrentlyCompleted) {
-      await checkbox.click();
-    } else if (!shouldCheck && isCurrentlyCompleted) {
-      await checkbox.click();
-    }
-  }
-}
-
-async function deleteGoal(page: Page) {
-  let acceptedBrowserDialog = false;
-  page.once("dialog", async (dialog) => {
-    acceptedBrowserDialog = true;
-    await dialog.accept();
+async function getProofTaskCheckbox(page: Page, taskTitle: string) {
+  const checkbox = page.getByRole("checkbox", {
+    name: `Hoàn thành việc: ${taskTitle}`,
   });
-
-  await openSystemTab(page, "settings");
-
-  const deleteCloudBtn = page.getByRole("button", {
-    name: /x.a d. li.u t.i kho.n|delete cloud|delete workspace/i,
-  });
-  if (await deleteCloudBtn.count()) {
-    await deleteCloudBtn.first().click();
-    if (!acceptedBrowserDialog) {
-      const dialog = page.locator('[role="alertdialog"], [role="dialog"]').last();
-      await expect(dialog).toBeVisible({ timeout: 10_000 });
-
-      const confirmationCheckbox = page.locator("#cloud-delete-confirm-checkbox, #delete-cloud-confirm-checkbox").first();
-      if ((await confirmationCheckbox.count()) > 0 && !(await confirmationCheckbox.isChecked())) {
-        await confirmationCheckbox.click();
-      }
-
-      const confirmationInput = page.locator("#cloud-delete-text-input, input[placeholder='XOACLOUD']").first();
-      if ((await confirmationInput.count()) > 0) {
-        await confirmationInput.fill("XOACLOUD");
-      }
-
-      const confirmButton = dialog.getByRole("button", { name: /x.a d. li.u|delete/i }).last();
-      await expect(confirmButton).toBeEnabled({ timeout: 10_000 });
-      await confirmButton.click();
-      await expect(dialog).toBeHidden({ timeout: 15_000 });
-    }
-    return;
-  }
-
-  await page.goto("/12-week-system");
-  await page.waitForLoadState("networkidle");
-
-  const settingsTab = page.getByRole("tab", { name: /cài đặt|setting/i });
-  if (await settingsTab.count() > 0) {
-    await settingsTab.click();
-  }
-
-  const deleteBtn = page.getByRole("button", { name: /xóa|delete|remove/i });
-  if (await deleteBtn.count() > 0) {
-    await deleteBtn.click();
-    
-    page.once("dialog", (dialog) => dialog.accept());
-    
-    await page.waitForTimeout(2_000);
-  }
+  await expect(checkbox).toBeVisible({ timeout: 30_000 });
+  return checkbox;
 }
 
-async function waitSyncIdle(page: Page, timeoutMs: number = 30_000) {
+async function toggleTask(
+  page: Page,
+  taskTitle: string,
+  completed: boolean,
+) {
+  const checkbox = await getProofTaskCheckbox(page, taskTitle);
+  if ((await checkbox.isChecked()) === completed) return;
+
+  await checkbox.click();
+  await expect
+    .poll(() => checkbox.isChecked(), {
+      timeout: 10_000,
+      intervals: [250, 500, 1000],
+    })
+    .toBe(completed);
+}
+
+async function waitForMutationQueueIdle(
+  page: Page,
+  timeoutMs: number = 45_000,
+) {
   await expect
     .poll(
-      async () => {
-        const pendingQueueCount = await page.evaluate((prefix) => {
-          const pendingStatuses = new Set(["pending", "in_flight", "retry_scheduled"]);
-          let pendingCount = 0;
+      () =>
+        page.evaluate(() => {
+          const pendingStatuses = new Set([
+            "pending",
+            "in_flight",
+            "retry_scheduled",
+          ]);
 
           for (let index = 0; index < localStorage.length; index += 1) {
             const key = localStorage.key(index);
-            if (!key?.startsWith(prefix)) continue;
+            if (!key?.startsWith("visionboard_data_mutation_queue")) continue;
 
             const raw = localStorage.getItem(key);
             if (!raw) continue;
 
             try {
-              const parsed = JSON.parse(raw);
-              const items = Array.isArray(parsed?.items) ? parsed.items : [];
-              pendingCount += items.filter((item: { status?: string }) => pendingStatuses.has(item.status ?? "")).length;
-            } catch (_error) {
-              pendingCount += 1;
+              const parsed = JSON.parse(raw) as {
+                items?: Array<{ status?: string }>;
+              };
+              if (
+                (parsed.items ?? []).some((item) =>
+                  pendingStatuses.has(item.status ?? ""),
+                )
+              ) {
+                return false;
+              }
+            } catch {
+              return false;
             }
           }
 
-          return pendingCount;
-        }, "visionboard_data_mutation_queue");
-
-        if (pendingQueueCount > 0) return false;
-
-        const queueRaw = await page.evaluate((key) => {
-          const raw = localStorage.getItem(key);
-          return raw ? JSON.parse(raw) : null;
-        }, "visionboard_data_mutation_queue:auth:");
-
-        if (queueRaw?.items) {
-          const pendingItems = queueRaw.items.filter(
-            (item: { status: string }) =>
-              item.status === "pending" || item.status === "in_flight"
-          );
-          if (pendingItems.length > 0) return false;
-        }
-
-        const text = await page.textContent("body") || "";
-        const syncingKeywords = ["đang sao lưu", "đang đồng bộ", "syncing", "uploading"];
-        const isSyncing = syncingKeywords.some((k) =>
-          text.toLowerCase().includes(k)
-        );
-        if (isSyncing) return false;
-
-        const pillText = await page.locator('[class*="sync"], [data-sync], [class*="pill"]').allTextContents();
-        const pillAllText = pillText.join(" ").toLowerCase();
-        const isPillSyncing = ["đang", "syncing", "pending", "uploading"].some((k) =>
-          pillAllText.includes(k) && !pillAllText.includes("ok") && !pillAllText.includes("idle")
-        );
-        if (isPillSyncing) return false;
-
-        return true;
-      },
-      { timeout: timeoutMs, intervals: [500, 1000, 2000] }
+          return true;
+        }),
+      { timeout: timeoutMs, intervals: [500, 1000, 2000] },
     )
     .toBe(true);
+}
+
+async function syncProofGoalToCloud(page: Page, seed: LwwProofGoal) {
+  const bulkSyncResponsePromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === "POST" &&
+      /\/plans\/[^/]+\/bulk-sync$/.test(new URL(response.url()).pathname),
+    { timeout: 60_000 },
+  );
+
+  await page.goto("/12-week-system?tab=today");
+  await getProofTaskCheckbox(page, seed.taskTitle);
+
+  const bulkSyncResponse = await bulkSyncResponsePromise;
+  expect(
+    bulkSyncResponse.ok(),
+    `Plan snapshot bulk sync responded ${bulkSyncResponse.status()}`,
+  ).toBe(true);
+  await expect(
+    page.getByText("Đã lưu & đồng bộ", { exact: true }).first(),
+  ).toBeVisible({ timeout: 30_000 });
+  await waitForMutationQueueIdle(page);
+}
+
+async function triggerManualCloudSync(
+  page: Page,
+  timeoutMs: number = 60_000,
+) {
+  await page.goto("/settings");
+  const syncButton = page.getByRole("button", {
+    name: "Kiểm tra sao lưu",
+    exact: true,
+  });
+  await expect(syncButton).toBeVisible({ timeout: 30_000 });
+  await expect(syncButton).toBeEnabled({ timeout: 30_000 });
+
+  const pullResponsePromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === "GET" &&
+      /\/sync\/12-week\/pull$/.test(new URL(response.url()).pathname),
+    { timeout: timeoutMs },
+  );
+  await syncButton.click();
+
+  const pullResponse = await pullResponsePromise;
+  expect(
+    pullResponse.ok(),
+    `12-week pull responded ${pullResponse.status()}`,
+  ).toBe(true);
+  await expect(syncButton).toBeEnabled({ timeout: timeoutMs });
+  await expect(page.getByTestId("settings-sync-last-result")).toBeVisible({
+    timeout: timeoutMs,
+  });
+  await waitForMutationQueueIdle(page, timeoutMs);
+}
+
+async function openProofGoal(page: Page, seed: LwwProofGoal) {
+  await page.evaluate((goalId) => {
+    localStorage.setItem("latest_12_week_goal_id", goalId);
+    localStorage.setItem("latest_12_week_system_goal_id", goalId);
+  }, seed.goalId);
+  await page.goto("/12-week-system?tab=today");
+  await getProofTaskCheckbox(page, seed.taskTitle);
+}
+
+async function pullProofGoal(page: Page, seed: LwwProofGoal) {
+  await triggerManualCloudSync(page);
+  await expect
+    .poll(
+      () =>
+        page.evaluate(
+          ({ goalId, taskId, taskTitle, userDataStorageKey }) => {
+            const raw = localStorage.getItem(userDataStorageKey);
+            if (!raw) return false;
+            const data = JSON.parse(raw) as {
+              goals?: Array<{
+                id?: string;
+                twelveWeekSystem?: {
+                  taskInstances?: Array<{ id?: string; title?: string }>;
+                };
+              }>;
+            };
+            const goal = data.goals?.find(
+              (candidate) => candidate.id === goalId,
+            );
+            return Boolean(
+              goal?.twelveWeekSystem?.taskInstances?.some(
+                (task) => task.id === taskId && task.title === taskTitle,
+              ),
+            );
+          },
+          {
+            goalId: seed.goalId,
+            taskId: seed.taskId,
+            taskTitle: seed.taskTitle,
+            userDataStorageKey: USER_DATA_STORAGE_KEY,
+          },
+        ),
+      { timeout: 45_000, intervals: [500, 1000, 2000] },
+    )
+    .toBe(true);
+  await openProofGoal(page, seed);
+}
+
+async function deleteProofWorkspace(page: Page) {
+  await openSystemTab(page, "settings");
+  const deleteCloudButton = page.getByRole("button", {
+    name: "Xóa dữ liệu tài khoản",
+    exact: true,
+  });
+  await expect(deleteCloudButton).toBeVisible({ timeout: 30_000 });
+  await deleteCloudButton.click();
+
+  const dialog = page.getByRole("alertdialog", {
+    name: "Xóa dữ liệu 12 tuần đã đồng bộ?",
+  });
+  await expect(dialog).toBeVisible({ timeout: 15_000 });
+  await dialog.locator("#delete-cloud-confirm-checkbox").click();
+  const confirmButton = dialog.getByRole("button", {
+    name: "Xóa dữ liệu đã đồng bộ",
+    exact: true,
+  });
+  await expect(confirmButton).toBeEnabled();
+
+  const deleteResponsePromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === "DELETE" &&
+      /\/sync\/12-week\/workspace$/.test(new URL(response.url()).pathname),
+    { timeout: 45_000 },
+  );
+  await confirmButton.click();
+  const deleteResponse = await deleteResponsePromise;
+  expect(
+    deleteResponse.ok(),
+    `Delete cloud workspace responded ${deleteResponse.status()}`,
+  ).toBe(true);
+  await expect(dialog).toBeHidden({ timeout: 30_000 });
 }
 
 async function expectNoConflictDialog(page: Page) {
@@ -277,32 +471,38 @@ async function expectNoConflictDialog(page: Page) {
   expect(dialogOpen, "No dialog should be open").toBe(0);
 }
 
-async function waitForGoalToDisappear(page: Page, timeoutMs: number = 30_000) {
+async function waitForGoalToDisappear(
+  page: Page,
+  goalId: string,
+  timeoutMs: number = 45_000,
+) {
   await expect
     .poll(
-      async () => {
-        const text = await page.textContent("body") || "";
-        return !text.includes(TEST_PREFIX);
-      },
+      () =>
+        page.evaluate(
+          ({ proofGoalId, userDataStorageKey }) => {
+            const raw = localStorage.getItem(userDataStorageKey);
+            if (!raw) return true;
+            const data = JSON.parse(raw) as {
+              goals?: Array<{ id?: string }>;
+            };
+            return !data.goals?.some((goal) => goal.id === proofGoalId);
+          },
+          {
+            proofGoalId: goalId,
+            userDataStorageKey: USER_DATA_STORAGE_KEY,
+          },
+        ),
       { timeout: timeoutMs, intervals: [1000, 2000, 3000] }
     )
     .toBe(true);
 }
 
-async function getTaskCompletedState(page: Page): Promise<boolean | null> {
-  const stableCheckbox = await getTodayTaskCheckbox(page);
-  if (stableCheckbox) {
-    return readCheckboxState(stableCheckbox);
-  }
-
-  const checkbox = page
-    .locator('[role="checkbox"], input[type="checkbox"]')
-    .filter({ hasText: /task|việc|action|tactic/i })
-    .first();
-
-  if (await checkbox.count() === 0) return null;
-
-  return await checkbox.isChecked();
+async function getTaskCompletedState(
+  page: Page,
+  taskTitle: string,
+): Promise<boolean> {
+  return (await getProofTaskCheckbox(page, taskTitle)).isChecked();
 }
 
 async function captureConsoleLogs(page: Page): Promise<string[]> {
@@ -316,6 +516,29 @@ async function captureConsoleLogs(page: Page): Promise<string[]> {
   return logs;
 }
 
+async function prepareLwwScenario(
+  pageA: Page,
+  pageB: Page,
+  scenarioTitle: string,
+): Promise<LwwProofGoal> {
+  await Promise.all([
+    primeProofGuidanceState(pageA),
+    primeProofGuidanceState(pageB),
+  ]);
+  await Promise.all([
+    loginPage(pageA, EMAIL!, PASSWORD!),
+    loginPage(pageB, EMAIL!, PASSWORD!),
+  ]);
+
+  const seed = await bootstrapLwwGoal(pageA, scenarioTitle);
+  await syncProofGoalToCloud(pageA, seed);
+  await pullProofGoal(pageB, seed);
+
+  expect(await getTaskCompletedState(pageA, seed.taskTitle)).toBe(false);
+  expect(await getTaskCompletedState(pageB, seed.taskTitle)).toBe(false);
+  return seed;
+}
+
 // ── Tests ─────────────────────────────────────────────────────────
 
 test.describe("LWW auto-resolve sync", () => {
@@ -323,7 +546,7 @@ test.describe("LWW auto-resolve sync", () => {
     !BASE_URL || !ALLOW_OVERWRITE || !EMAIL || !PASSWORD,
     "Set LWW_E2E_URL, LWW_E2E_ALLOW=OVERWRITE_TEST_WORKSPACE, LWW_E2E_EMAIL, and LWW_E2E_PASSWORD to run",
   );
-  test.setTimeout(120_000);
+  test.setTimeout(240_000);
 
   test.beforeAll(() => {
     if (!EMAIL || !isSafeLwwEmail(EMAIL)) {
@@ -342,36 +565,34 @@ test.describe("LWW auto-resolve sync", () => {
     const consoleLogsA = await captureConsoleLogs(pageA);
 
     try {
-      await loginPage(pageA, EMAIL, PASSWORD);
-      await loginPage(pageB, EMAIL, PASSWORD);
+      const seed = await prepareLwwScenario(
+        pageA,
+        pageB,
+        "Local Wins Goal",
+      );
 
-      await createGoalWithTask(pageA, "Local Wins Goal");
-      await waitSyncIdle(pageA);
-
-      await pageB.goto("/12-week-system");
-      await waitForPageText(pageB, TEST_PREFIX);
-
-      await toggleTask(pageA, true);
+      await toggleTask(pageA, seed.taskTitle, true);
+      await triggerManualCloudSync(pageA);
+      await pullProofGoal(pageB, seed);
+      await openProofGoal(pageA, seed);
       await contextA.setOffline(true);
 
-      await waitSyncIdle(pageB);
+      await toggleTask(pageB, seed.taskTitle, false);
+      await triggerManualCloudSync(pageB);
 
-      await toggleTask(pageB, false);
-      await waitSyncIdle(pageB);
-
-      await toggleTask(pageA, true);
-
+      await toggleTask(pageA, seed.taskTitle, false);
+      await pageA.waitForTimeout(25);
+      await toggleTask(pageA, seed.taskTitle, true);
       await contextA.setOffline(false);
-      await waitSyncIdle(pageA, 45_000);
-
-      await pageB.reload();
-      await waitSyncIdle(pageB);
+      await triggerManualCloudSync(pageA);
+      await openProofGoal(pageA, seed);
+      await pullProofGoal(pageB, seed);
 
       await expectNoConflictDialog(pageA);
       await expectNoConflictDialog(pageB);
 
-      const stateA = await getTaskCompletedState(pageA);
-      const stateB = await getTaskCompletedState(pageB);
+      const stateA = await getTaskCompletedState(pageA, seed.taskTitle);
+      const stateB = await getTaskCompletedState(pageB, seed.taskTitle);
 
       expect(stateA).toBe(true);
       expect(stateB).toBe(true);
@@ -381,8 +602,7 @@ test.describe("LWW auto-resolve sync", () => {
       );
       expect(hasLwwLog).toBe(true);
     } finally {
-      await contextA.close();
-      await contextB.close();
+      await Promise.all([contextA.close(), contextB.close()]);
     }
   });
 
@@ -391,37 +611,40 @@ test.describe("LWW auto-resolve sync", () => {
     const contextB = await newProofContext();
     const pageA = await contextA.newPage();
     const pageB = await contextB.newPage();
+    const consoleLogsA = await captureConsoleLogs(pageA);
 
     try {
-      await loginPage(pageA, EMAIL, PASSWORD);
-      await loginPage(pageB, EMAIL, PASSWORD);
-
-      await createGoalWithTask(pageA, "Cloud Wins Goal");
-      await waitSyncIdle(pageA);
-
-      await toggleTask(pageA, true);
-      await waitSyncIdle(pageA);
-
+      const seed = await prepareLwwScenario(
+        pageA,
+        pageB,
+        "Cloud Wins Goal",
+      );
       await contextA.setOffline(true);
+      await toggleTask(pageA, seed.taskTitle, true);
 
-      await toggleTask(pageB, false);
-      await waitSyncIdle(pageB, 45_000);
+      await toggleTask(pageB, seed.taskTitle, true);
+      await triggerManualCloudSync(pageB);
+      await openProofGoal(pageB, seed);
+      await toggleTask(pageB, seed.taskTitle, false);
+      await triggerManualCloudSync(pageB);
 
       await contextA.setOffline(false);
-      await pageA.reload();
-      await waitSyncIdle(pageA, 45_000);
+      await triggerManualCloudSync(pageA);
+      await openProofGoal(pageA, seed);
+      await pullProofGoal(pageB, seed);
 
       await expectNoConflictDialog(pageA);
       await expectNoConflictDialog(pageB);
 
-      const stateA = await getTaskCompletedState(pageA);
-      const stateB = await getTaskCompletedState(pageB);
+      const stateA = await getTaskCompletedState(pageA, seed.taskTitle);
+      const stateB = await getTaskCompletedState(pageB, seed.taskTitle);
 
       expect(stateA).toBe(false);
       expect(stateB).toBe(false);
+
+      expect(consoleLogsA.some((log) => log.includes("resolved"))).toBe(true);
     } finally {
-      await contextA.close();
-      await contextB.close();
+      await Promise.all([contextA.close(), contextB.close()]);
     }
   });
 
@@ -432,31 +655,26 @@ test.describe("LWW auto-resolve sync", () => {
     const pageB = await contextB.newPage();
 
     try {
-      await loginPage(pageA, EMAIL, PASSWORD);
-      await loginPage(pageB, EMAIL, PASSWORD);
-
-      await createGoalWithTask(pageA, "Tombstone Goal");
-      await waitSyncIdle(pageA);
-
-      await toggleTask(pageA, true);
-
+      const seed = await prepareLwwScenario(
+        pageA,
+        pageB,
+        "Tombstone Goal",
+      );
       await contextA.setOffline(true);
+      await toggleTask(pageA, seed.taskTitle, true);
 
-      await deleteGoal(pageB);
-      await waitSyncIdle(pageB, 45_000);
+      await deleteProofWorkspace(pageB);
 
       await contextA.setOffline(false);
-      await pageA.reload();
-      await waitSyncIdle(pageA, 45_000);
+      await triggerManualCloudSync(pageA);
+      await triggerManualCloudSync(pageB);
 
+      await waitForGoalToDisappear(pageA, seed.goalId);
+      await waitForGoalToDisappear(pageB, seed.goalId);
       await expectNoConflictDialog(pageA);
       await expectNoConflictDialog(pageB);
-
-      await waitForGoalToDisappear(pageA, 30_000);
-      await waitForGoalToDisappear(pageB, 30_000);
     } finally {
-      await contextA.close();
-      await contextB.close();
+      await Promise.all([contextA.close(), contextB.close()]);
     }
   });
 });

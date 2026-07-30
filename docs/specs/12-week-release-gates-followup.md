@@ -26,6 +26,9 @@
 2. WHEN a real-mode proof preview is built, THE deployment SHALL receive the required `VITE_FIREBASE_*`, API, billing-mode, and sync configuration without exposing values in the repository, terminal output, screenshots, or workflow inputs.
 3. WHEN preview environment metadata is incomplete, THE release process SHALL stop before dispatching destructive account-deletion or LWW workflows.
 4. WHEN all local gates and preview proofs pass, THE release process MAY open a focused follow-up PR; it SHALL NOT merge or trigger production deployment automatically.
+5. WHEN the account-deletion proof first enters Settings, THE harness SHALL mark the Settings guide as seen before navigation so responsive guide hydration cannot intercept the destructive-flow controls.
+6. WHEN an LWW proof scenario starts, THE harness SHALL bootstrap a normalized 12-week goal from the authenticated local snapshot, mirror it to the active auth-scoped key, wait for the real plan snapshot sync, and pull it into the second context before mutating the task.
+7. WHILE exercising LWW resolution, THE harness SHALL use the real task checkbox and cloud-sync UI; it SHALL NOT depend on the product's first-time goal-creation route or broad text locators.
 
 ## 5. Data, Storage, and Sync Constraints
 
@@ -53,6 +56,7 @@
 - [ ] `typecheck`, `lint`, `test:run`, and `build` pass on the clean branch
 - [ ] preview metadata contains the required real-mode auth/sync variable names for the proof branch
 - [ ] core funnel, email verification, account deletion, and LWW proof results are recorded
+- [ ] account deletion and LWW harness regressions no longer depend on responsive guide timing or the removed inline goal-creation UI
 - [ ] no secret value is read, copied, committed, or logged
 
 ## 9. Verification Plan
