@@ -834,7 +834,7 @@ describe("production billing surfaces", () => {
     UI_TEST_TIMEOUT_MS,
   );
 
-  it.each([401, 403])(
+  it.each([400, 401, 403])(
     "does not automatically retry payment history HTTP %s",
     async (status) => {
       const apiClient = stubRealBillingEnv(
@@ -1016,7 +1016,7 @@ describe("production billing surfaces", () => {
   );
 
   it(
-    "marks payment history as a retryable error after both attempts time out",
+    "shows a retryable error after two timeouts and starts a fresh cycle manually",
     async () => {
       vi.useFakeTimers();
       const apiClient = stubRealBillingEnv("Nhà cung cấp thanh toán");
@@ -1080,6 +1080,41 @@ describe("production billing surfaces", () => {
           ([path]) => path === "/billing/payment-history",
         ),
       ).toHaveLength(2);
+
+      let manualHistoryAttempts = 0;
+      apiClient.get.mockImplementation(
+        (path: string, options?: { signal?: AbortSignal }) => {
+          if (path === "/billing/payment-history") {
+            manualHistoryAttempts += 1;
+            return manualHistoryAttempts === 1
+              ? Promise.reject({
+                  message: "Network failed",
+                  isNetworkError: true,
+                })
+              : Promise.resolve({ orders: [] });
+          }
+          return originalGet?.(path, options) ?? Promise.resolve({ orders: [] });
+        },
+      );
+
+      await act(async () => {
+        screen.getByRole("button", { name: "Thử lại" }).click();
+        await Promise.resolve();
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+
+      expect(paymentHistorySection).toHaveAttribute(
+        "data-payment-history-state",
+        "empty",
+      );
+      expect(screen.getByText("Chưa có giao dịch nào.")).toBeInTheDocument();
+      expect(manualHistoryAttempts).toBe(2);
+      expect(
+        apiClient.get.mock.calls.filter(
+          ([path]) => path === "/billing/payment-history",
+        ),
+      ).toHaveLength(4);
     },
     UI_TEST_TIMEOUT_MS,
   );

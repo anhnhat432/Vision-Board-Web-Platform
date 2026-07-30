@@ -76,14 +76,14 @@ The confirmed behavioral failure is therefore a transient first-attempt latency 
 
 ## 9. Acceptance Criteria
 
-- [ ] A first timeout followed by success performs two calls and renders payment history without showing the final error.
-- [ ] A first network or `5xx` failure followed by success performs two calls and renders payment history.
-- [ ] During the second attempt, the section exposes `data-payment-history-state="retrying"` with reconnecting copy.
-- [ ] Two transient failures end in the current safe error state with `Thử lại`.
-- [ ] `401`, `403`, and `429` failures perform one call only and retain their existing handling.
-- [ ] Signed-out and unverified-email states perform no protected history call.
-- [ ] Monitoring metadata remains privacy-safe.
-- [ ] Demo mode behavior and all entitlement/payment authority tests remain unchanged.
+- [x] A first timeout followed by success performs two calls and renders payment history without showing the final error.
+- [x] A first network or `5xx` failure followed by success performs two calls and renders payment history.
+- [x] During the second attempt, the section exposes `data-payment-history-state="retrying"` with reconnecting copy.
+- [x] Two transient failures end in the current safe error state with `Thử lại`.
+- [x] `401`, `403`, and `429` failures perform one call only and retain their existing handling.
+- [x] Signed-out and unverified-email states perform no protected history call.
+- [x] Monitoring metadata remains privacy-safe.
+- [x] Demo mode behavior and all entitlement/payment authority tests remain unchanged.
 
 ## 10. Verification Plan
 
@@ -99,12 +99,25 @@ npm --prefix backend run build
 node --test backend/dist/tests/billingRoutes.test.js
 ```
 
+Verification evidence recorded on 2026-07-31:
+
+- `npm run test:ui -- src/app/pages/billing-production-surfaces.test.tsx`: `32/32` tests passed, including timeout recovery, network/`5xx` recovery, retrying state, manual fresh retry cycle, and no-retry `400`/`401`/`403`/`429` cases.
+- `npm run test:production-core:unit`: `45/45` tests passed, including app-mode, billing monitoring privacy, entitlement authority, auth, and demo-copy boundaries.
+- `npm run typecheck`: passed.
+- `npm run lint`: exited `0`; one pre-existing informational `useTemplate` finding remains in `src/app/components/admin/AdminPagination.tsx`.
+- `npm run build`: passed.
+- `npm --prefix backend run typecheck` and `npm --prefix backend run build`: passed with isolated test env values.
+- `node --test backend/dist/tests/billingRoutes.test.js`: `53/53` tests passed.
+- Static security review confirmed the retry is limited to the authenticated idempotent GET, creates at most two attempts per cycle, and sends only `surface` / `action` context for this path without email, account id, order id, provider payload, or exact amount metadata.
+
 Production acceptance after deployment:
 
-1. Open `/billing/plan` with a signed-in Plus account after a backend idle window.
-2. Confirm the section moves through `loading` or `retrying` to `ready` without manual intervention.
-3. Confirm the displayed entitlement and payment records remain account-bound and unchanged.
-4. Record endpoint status/latency from deployment monitoring without copying tokens or payment payloads.
+- [ ] Open `/billing/plan` with a signed-in Plus account after a backend idle window.
+- [ ] Confirm the section moves through `loading` or `retrying` to `ready` without manual intervention.
+- [ ] Confirm the displayed entitlement and payment records remain account-bound and unchanged.
+- [ ] Record endpoint status/latency from deployment monitoring without copying tokens or payment payloads.
+
+These production checks remain pending until this branch is deployed to a real-mode preview or production target.
 
 ## 11. Documentation Updates
 
