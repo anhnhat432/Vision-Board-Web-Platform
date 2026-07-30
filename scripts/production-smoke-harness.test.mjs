@@ -139,6 +139,16 @@ describe("production smoke harness guards", () => {
     );
   });
 
+  it("drops only billing page errors linked to a handled payment-history retry", () => {
+    expect(smokeScript).toContain("function isHandledBillingRateLimitPageError(message, apiEvents)");
+    expect(smokeScript).toContain('message !== "Too many requests. Please wait a moment and try again."');
+    expect(smokeScript).toContain('event.handledByRateLimitRetry !== "billing payment history"');
+    expect(smokeScript).toContain('new URL(event.url).pathname === "/api/billing/payment-history"');
+    expect(smokeScript).toContain("const unhandledPageErrors = pageErrors.filter(");
+    expect(smokeScript).toContain("!isHandledBillingRateLimitPageError(message, apiEvents)");
+    expect(smokeScript).toContain("if (unhandledPageErrors.length > 0)");
+  });
+
   it("retries an observed rate-limited 12-week metric request and never allowlists it", () => {
     expect(smokeScript).toContain("function findRateLimitedApiEvent(apiEvents, pattern, after, method)");
     expect(smokeScript).toContain(
