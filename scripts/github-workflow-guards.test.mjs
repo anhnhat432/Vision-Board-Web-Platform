@@ -77,6 +77,23 @@ describe("GitHub workflow safety guards", () => {
     expect(harness).not.toContain("getByText(/12 tuần|tactic|task/i)");
   });
 
+  it("keeps the LWW bootstrap in the authenticated SPA session", () => {
+    const harness = readFileSync(path.resolve("e2e", "sync-lww.spec.ts"), "utf8");
+    const bootstrapStart = harness.indexOf("async function bootstrapLwwGoal");
+    const bootstrapEnd = harness.indexOf("async function openSystemTab", bootstrapStart);
+    const bootstrap = harness.slice(bootstrapStart, bootstrapEnd);
+    const openTabStart = harness.indexOf("async function openSystemTab");
+    const openTabEnd = harness.indexOf("async function getProofTaskCheckbox", openTabStart);
+    const openTab = harness.slice(openTabStart, openTabEnd);
+
+    expect(bootstrapStart).toBeGreaterThan(-1);
+    expect(openTabStart).toBeGreaterThan(-1);
+    expect(bootstrap).toContain('new StorageEvent("storage", {');
+    expect(bootstrap).toContain("key: userDataStorageKey");
+    expect(openTab).toContain('locator(\'a[href="/12-week-system"]:visible\')');
+    expect(openTab).not.toContain("page.goto(");
+  });
+
   it("bootstraps LWW through mutation sync and reports pending queue metadata", () => {
     const harness = readFileSync(path.resolve("e2e", "sync-lww.spec.ts"), "utf8");
     const prepareStart = harness.indexOf("async function prepareLwwScenario");

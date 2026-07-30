@@ -261,6 +261,13 @@ async function bootstrapLwwGoal(
         "latest_12_week_system_goal_id",
         proofSeed.goalId,
       );
+      window.dispatchEvent(
+        new StorageEvent("storage", {
+          key: userDataStorageKey,
+          newValue: serialized,
+          storageArea: localStorage,
+        }),
+      );
       window.dispatchEvent(new CustomEvent(userDataUpdatedEventName));
     },
     {
@@ -275,8 +282,16 @@ async function bootstrapLwwGoal(
 }
 
 async function openSystemTab(page: Page, tab: "today" | "settings") {
-  await page.goto(`/12-week-system?tab=${tab}`);
-  await page.waitForLoadState("networkidle");
+  if (new URL(page.url()).pathname !== "/12-week-system") {
+    const systemLink = page
+      .locator('a[href="/12-week-system"]:visible')
+      .first();
+    await expect(systemLink).toBeVisible({ timeout: 30_000 });
+    await systemLink.click();
+    await expect(page).toHaveURL(/\/12-week-system(?:\?|$)/, {
+      timeout: 30_000,
+    });
+  }
 
   const tabByTourId = page.locator(`[data-tour-id="twelve-week-tab-${tab}"]`);
   if ((await tabByTourId.count()) > 0) {
