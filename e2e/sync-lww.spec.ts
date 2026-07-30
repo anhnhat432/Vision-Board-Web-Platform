@@ -1,6 +1,9 @@
-import { test, expect, type Locator, type Page } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 const BASE_URL = process.env.LWW_E2E_URL?.replace(/\/$/, "");
+test.use({ proofBaseURL: BASE_URL });
+
 const ALLOW_OVERWRITE =
   process.env.LWW_E2E_ALLOW === "OVERWRITE_TEST_WORKSPACE";
 const EMAIL = process.env.LWW_E2E_EMAIL;

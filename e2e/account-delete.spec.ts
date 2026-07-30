@@ -1,6 +1,9 @@
-import { expect, test, type Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 const BASE_URL = process.env.ACCOUNT_DELETE_E2E_URL?.replace(/\/$/, "");
+test.use({ proofBaseURL: BASE_URL });
+
 const ALLOW_DELETE =
   process.env.ACCOUNT_DELETE_E2E_ALLOW === "DELETE_TEST_ACCOUNT";
 const AUTH_MODE =

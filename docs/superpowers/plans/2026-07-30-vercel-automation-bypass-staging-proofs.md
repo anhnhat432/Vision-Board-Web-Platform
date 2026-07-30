@@ -207,7 +207,7 @@ Expected: FAIL because the origin-scoped fixture and regression contract do not 
 
 Keep `playwright.config.ts` responsible only for disabling traces when the secret is configured. Do not use `use.extraHTTPHeaders`, because Playwright forwards those headers to Firebase and every other origin.
 
-Create an auto fixture in `e2e/fixtures.ts` that intercepts requests before navigation, compares parsed `URL.origin` values, and adds the two bypass headers only when the request origin exactly matches `baseURL`. Re-export `test` and `expect`, then switch the email verification, account deletion, and LWW specs to that fixture. Add helper tests proving that the preview origin receives headers while `https://identitytoolkit.googleapis.com` and deceptive lookalike origins do not.
+Create an auto fixture in `e2e/fixtures.ts` that intercepts only requests whose parsed `URL.origin` exactly matches the spec's `proofBaseURL`. Fetch each matched request with the two bypass headers and `maxRedirects: 0`, then fulfill the route from that response; this prevents Playwright from carrying overridden headers across a redirect. Re-export `test` and `expect`, then switch the email verification, account deletion, and LWW specs to that fixture. Add helper tests proving that the preview origin receives headers while `https://identitytoolkit.googleapis.com` and deceptive lookalike origins do not.
 
 - [ ] **Step 4: Inject and validate the secret in every workflow**
 

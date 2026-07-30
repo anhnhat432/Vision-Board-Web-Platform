@@ -144,6 +144,11 @@ describe("GitHub workflow safety guards", () => {
       "lww-e2e-staging.yml",
     ];
     const playwrightConfig = readFileSync(path.resolve("playwright.config.ts"), "utf8");
+    const protectedPlaywrightSpecs = [
+      "email-verification.spec.ts",
+      "account-delete.spec.ts",
+      "sync-lww.spec.ts",
+    ];
 
     for (const workflowName of workflowNames) {
       const workflow = readWorkflow(workflowName);
@@ -160,7 +165,21 @@ describe("GitHub workflow safety guards", () => {
     expect(playwrightConfig).toContain(
       "const vercelAutomationBypassHeaders = getVercelAutomationBypassHeaders(process.env);",
     );
-    expect(playwrightConfig).toContain("extraHTTPHeaders: vercelAutomationBypassHeaders");
+    expect(playwrightConfig).not.toContain("extraHTTPHeaders:");
     expect(playwrightConfig).toContain('trace: vercelAutomationBypassHeaders ? "off" : "on-first-retry"');
+
+    for (const specName of protectedPlaywrightSpecs) {
+      const spec = readFileSync(path.resolve("e2e", specName), "utf8");
+      expect(spec).toContain('from "./fixtures"');
+    }
+  });
+
+  it("prevents Playwright bypass headers from following redirects", () => {
+    const fixture = readFileSync(path.resolve("e2e", "fixtures.ts"), "utf8");
+
+    expect(fixture).toContain("await route.fetch({");
+    expect(fixture).toContain("maxRedirects: 0");
+    expect(fixture).toContain("await route.fulfill({ response });");
+    expect(fixture).not.toContain("route.continue({");
   });
 });
