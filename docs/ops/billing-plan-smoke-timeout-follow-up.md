@@ -1,7 +1,29 @@
 # Billing `/billing/plan` Smoke Timeout — Follow-up
 
-Status: **PARTIALLY MITIGATED — local readiness shipped, live smoke rerun pending**
+Status: **POST-LAUNCH RELIABILITY FIX — transient first-attempt timeout reproduced**
 Scope: billing surface only. Not attributed to release `d8b35b71` (12-week setup route replacement).
+
+## Post-launch production update (2026-07-31)
+
+- Production is live on the public domain, checkout is open through PayOS, and the inspected account retained an active Plus entitlement.
+- The first `/billing/plan` visit reproduced `data-payment-history-state="error"` after the eight-second client deadline while the Plus entitlement remained active.
+- A later visit in the same session returned the completed payment record with `data-payment-history-state="ready"`.
+- Warm backend health and public checkout-info requests completed in under one second.
+- `/billing/payment-history` reads the local MongoDB mirror and does not call PayOS on the request path.
+
+Decision for the current fix:
+
+- Keep the existing eight-second deadline per attempt.
+- Retry the protected idempotent GET exactly once after a timeout, network failure, or HTTP `5xx`.
+- Expose a visible `retrying` state during the second attempt.
+- Do not retry `401`, `403`, `429`, or other non-transient `4xx` responses.
+- Preserve the existing final error and manual `Thử lại` action if both transient attempts fail.
+
+Configuration note:
+
+- Checked-in `.env.production` and `render.yaml` values remain safe fallbacks and historical deployment declarations.
+- Active Vercel/Render host env vars override those files. On 2026-07-31 the live backend reported PayOS even though older checked-in fallback text still referenced Casso or a disabled checkout.
+- The dated Casso migration and kill-switch sections below remain historical evidence; they are not the current production provider status.
 
 ## Latest deployed evidence (2026-06-26)
 
