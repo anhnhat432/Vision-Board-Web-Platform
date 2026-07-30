@@ -17,11 +17,23 @@ const { email: EMAIL, password: PASSWORD } =
     env: process.env,
   });
 const LOCAL_MARKER = `account-delete-e2e-${TIMESTAMP}`;
+const USER_DATA_STORAGE_KEY = "visionboard_user_data";
+const AUTH_OWNER_STORAGE_KEY = "visionboard_user_data:auth_owner_uid";
 const SETTINGS_GUIDE_SEEN_STORAGE_KEY =
   "visionboard_screen_guide_seen:settings";
 
 function isSafeDeleteEmail(email: string) {
   return /(^|[+._-])delete([+._-]|@)/i.test(email);
+}
+
+function isSafePostDeleteUrl(value: string) {
+  const url = new URL(value);
+  return (
+    url.pathname === "/" ||
+    url.pathname === "/onboarding" ||
+    (url.pathname === "/login" &&
+      url.searchParams.get("next") === "/onboarding")
+  );
 }
 
 async function submitEmailAuth(
@@ -80,20 +92,45 @@ async function authenticateDisposableAccount(page: Page) {
 }
 
 async function seedLocalMarker(page: Page) {
-  await page.evaluate((marker) => {
-    const data = {
-      storageVersion: 5,
-      aspirationalVision: { summary: marker },
-      onboardingCompleted: true,
-      goals: [],
-      visionBoards: [],
-      achievements: [],
-      reflections: [],
-      eventLog: [],
-      syncOutbox: [],
-    };
-    localStorage.setItem("visionboard_user_data", JSON.stringify(data));
-  }, LOCAL_MARKER);
+  await page.evaluate(
+    ({ authOwnerStorageKey, marker, userDataStorageKey }) => {
+      const raw = localStorage.getItem(userDataStorageKey);
+      const ownerUid = localStorage.getItem(authOwnerStorageKey)?.trim();
+      if (!raw || !ownerUid) {
+        throw new Error(
+          "Authenticated local snapshot was not ready for account-delete proof.",
+        );
+      }
+
+      const currentData = JSON.parse(raw) as {
+        aspirationalVision?: Record<string, unknown>;
+      } & Record<string, unknown>;
+      const aspirationalVision =
+        currentData.aspirationalVision &&
+        typeof currentData.aspirationalVision === "object"
+          ? currentData.aspirationalVision
+          : {};
+      const data = {
+        ...currentData,
+        aspirationalVision: {
+          ...aspirationalVision,
+          summary: marker,
+        },
+        onboardingCompleted: true,
+      };
+      const serialized = JSON.stringify(data);
+      localStorage.setItem(userDataStorageKey, serialized);
+      localStorage.setItem(
+        `${userDataStorageKey}:auth:${encodeURIComponent(ownerUid)}`,
+        serialized,
+      );
+    },
+    {
+      authOwnerStorageKey: AUTH_OWNER_STORAGE_KEY,
+      marker: LOCAL_MARKER,
+      userDataStorageKey: USER_DATA_STORAGE_KEY,
+    },
+  );
 }
 
 async function localMarkerExists(page: Page) {
@@ -137,6 +174,7 @@ test.describe("staging account deletion", () => {
     expect(await localMarkerExists(page)).toBe(true);
 
     await page.goto(`${BASE_URL}/settings`);
+    expect(await localMarkerExists(page)).toBe(true);
     await expect(page.getByTestId("settings-delete-account-open")).toBeVisible({
       timeout: 20_000,
     });
@@ -164,7 +202,9 @@ test.describe("staging account deletion", () => {
       `DELETE account responded ${deleteResponse.status()}`,
     ).toBe(true);
 
-    await expect(page).toHaveURL(/\/$/, { timeout: 45_000 });
+    await expect
+      .poll(() => isSafePostDeleteUrl(page.url()), { timeout: 45_000 })
+      .toBe(true);
     expect(await localMarkerExists(page)).toBe(false);
   });
 });

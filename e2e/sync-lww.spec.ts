@@ -30,7 +30,7 @@ function isSafeLwwEmail(email: string) {
 // ── Helpers ───────────────────────────────────────────────────────
 
 async function loginPage(page: Page, email: string, password: string) {
-  await page.goto("/login?next=%2F12-week-system");
+  await page.goto("/login?next=%2Fsettings");
   await expect(
     page.getByPlaceholder(/email/i).or(page.locator("#login-email")),
   ).toBeVisible({ timeout: 15_000 });
@@ -271,58 +271,92 @@ async function toggleTask(
     .toBe(completed);
 }
 
+async function readPendingMutationQueueDiagnostics(page: Page) {
+  return page.evaluate(() => {
+    const pendingStatuses = new Set([
+      "pending",
+      "in_flight",
+      "retry_scheduled",
+    ]);
+    const diagnostics: Array<{
+      storageKey: string;
+      id?: string;
+      kind?: string;
+      status?: string;
+      attemptCount?: number;
+      errorCode?: string;
+      nextRetryAt?: string;
+    }> = [];
+
+    for (let index = 0; index < localStorage.length; index += 1) {
+      const key = localStorage.key(index);
+      if (!key?.startsWith("visionboard_data_mutation_queue")) continue;
+
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+
+      try {
+        const parsed = JSON.parse(raw) as {
+          items?: Array<{
+            id?: string;
+            kind?: string;
+            status?: string;
+            attemptCount?: number;
+            error?: { code?: string };
+            nextRetryAt?: string;
+          }>;
+        };
+        for (const item of parsed.items ?? []) {
+          if (!pendingStatuses.has(item.status ?? "")) continue;
+          diagnostics.push({
+            storageKey: key,
+            id: item.id,
+            kind: item.kind,
+            status: item.status,
+            attemptCount: item.attemptCount,
+            errorCode: item.error?.code,
+            nextRetryAt: item.nextRetryAt,
+          });
+        }
+      } catch {
+        diagnostics.push({
+          storageKey: key,
+          status: "invalid_json",
+          errorCode: "invalid_json",
+        });
+      }
+    }
+
+    return diagnostics;
+  });
+}
+
 async function waitForMutationQueueIdle(
   page: Page,
   timeoutMs: number = 45_000,
 ) {
   await expect
     .poll(
-      () =>
-        page.evaluate(() => {
-          const pendingStatuses = new Set([
-            "pending",
-            "in_flight",
-            "retry_scheduled",
-          ]);
-
-          for (let index = 0; index < localStorage.length; index += 1) {
-            const key = localStorage.key(index);
-            if (!key?.startsWith("visionboard_data_mutation_queue")) continue;
-
-            const raw = localStorage.getItem(key);
-            if (!raw) continue;
-
-            try {
-              const parsed = JSON.parse(raw) as {
-                items?: Array<{ status?: string }>;
-              };
-              if (
-                (parsed.items ?? []).some((item) =>
-                  pendingStatuses.has(item.status ?? ""),
-                )
-              ) {
-                return false;
-              }
-            } catch {
-              return false;
-            }
-          }
-
-          return true;
-        }),
+      () => readPendingMutationQueueDiagnostics(page),
       { timeout: timeoutMs, intervals: [500, 1000, 2000] },
     )
-    .toBe(true);
+    .toEqual([]);
 }
 
-async function syncProofGoalToCloud(page: Page, seed: LwwProofGoal) {
-  const bulkSyncResponsePromise = page.waitForResponse(
+function waitForPlanSnapshotBulkSync(page: Page) {
+  return page.waitForResponse(
     (response) =>
       response.request().method() === "POST" &&
       /\/plans\/[^/]+\/bulk-sync$/.test(new URL(response.url()).pathname),
     { timeout: 60_000 },
   );
+}
 
+async function syncProofGoalToCloud(
+  page: Page,
+  seed: LwwProofGoal,
+  bulkSyncResponsePromise: ReturnType<typeof waitForPlanSnapshotBulkSync>,
+) {
   await page.goto("/12-week-system?tab=today");
   await getProofTaskCheckbox(page, seed.taskTitle);
 
@@ -530,8 +564,9 @@ async function prepareLwwScenario(
     loginPage(pageB, EMAIL!, PASSWORD!),
   ]);
 
+  const bulkSyncResponsePromise = waitForPlanSnapshotBulkSync(pageA);
   const seed = await bootstrapLwwGoal(pageA, scenarioTitle);
-  await syncProofGoalToCloud(pageA, seed);
+  await syncProofGoalToCloud(pageA, seed, bulkSyncResponsePromise);
   await pullProofGoal(pageB, seed);
 
   expect(await getTaskCompletedState(pageA, seed.taskTitle)).toBe(false);

@@ -39,6 +39,25 @@ describe("GitHub workflow safety guards", () => {
     expect(harness).not.toContain("dismissSettingsScreenGuide");
   });
 
+  it("keeps the account-deletion marker in the active auth-scoped snapshot across Settings reload", () => {
+    const harness = readFileSync(path.resolve("e2e", "account-delete.spec.ts"), "utf8");
+
+    expect(harness).toContain('const AUTH_OWNER_STORAGE_KEY = "visionboard_user_data:auth_owner_uid"');
+    expect(harness).toContain("Authenticated local snapshot was not ready for account-delete proof.");
+    expect(harness).toContain("`${userDataStorageKey}:auth:${encodeURIComponent(ownerUid)}`");
+    expect(harness.match(/expect\(await localMarkerExists\(page\)\)\.toBe\(true\);/g)).toHaveLength(2);
+  });
+
+  it("accepts real-mode safe-start redirects after account deletion", () => {
+    const harness = readFileSync(path.resolve("e2e", "account-delete.spec.ts"), "utf8");
+
+    expect(harness).toContain("isSafePostDeleteUrl");
+    expect(harness).toContain('url.pathname === "/onboarding"');
+    expect(harness).toContain('url.pathname === "/login"');
+    expect(harness).toContain('url.searchParams.get("next") === "/onboarding"');
+    expect(harness).not.toContain("toHaveURL(/\\/$/");
+  });
+
   it("bootstraps LWW proof data without the removed inline goal-creation UI", () => {
     const harness = readFileSync(path.resolve("e2e", "sync-lww.spec.ts"), "utf8");
 
@@ -51,6 +70,23 @@ describe("GitHub workflow safety guards", () => {
     expect(harness).toContain("`Hoàn thành việc: ${taskTitle}`");
     expect(harness).not.toContain("createGoalWithTask");
     expect(harness).not.toContain("getByText(/12 tuần|tactic|task/i)");
+  });
+
+  it("arms LWW bulk-sync observation before bootstrap and reports pending queue metadata", () => {
+    const harness = readFileSync(path.resolve("e2e", "sync-lww.spec.ts"), "utf8");
+    const prepareStart = harness.indexOf("async function prepareLwwScenario");
+    const prepareEnd = harness.indexOf("// ── Tests", prepareStart);
+    const prepareScenario = harness.slice(prepareStart, prepareEnd);
+    const observerIndex = prepareScenario.indexOf("waitForPlanSnapshotBulkSync(pageA)");
+    const bootstrapIndex = prepareScenario.indexOf("bootstrapLwwGoal(pageA, scenarioTitle)");
+
+    expect(prepareStart).toBeGreaterThan(-1);
+    expect(observerIndex).toBeGreaterThan(-1);
+    expect(bootstrapIndex).toBeGreaterThan(-1);
+    expect(observerIndex).toBeLessThan(bootstrapIndex);
+    expect(harness).toContain("readPendingMutationQueueDiagnostics");
+    expect(harness).toContain("errorCode: item.error?.code");
+    expect(harness).not.toContain("payload: item.payload");
   });
 
   it("keeps LWW staging smoke overwrite opt-in and dedicated marker guards", () => {
