@@ -28,10 +28,10 @@ describe("agent-browser bypass config", () => {
     expect(config).toBeDefined();
     const rawConfig = await readFile(config.configPath, "utf8");
     expect(JSON.parse(rawConfig)).toEqual({
-      headers: {
+      headers: JSON.stringify({
         "x-vercel-protection-bypass": "test-bypass-secret",
         "x-vercel-set-bypass-cookie": "true",
-      },
+      }),
     });
 
     if (process.platform !== "win32") {

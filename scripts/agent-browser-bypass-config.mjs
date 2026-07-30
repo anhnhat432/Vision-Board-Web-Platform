@@ -17,7 +17,7 @@ export async function createAgentBrowserBypassConfig({ env = process.env, tempRo
   const configPath = path.join(directoryPath, "agent-browser.json");
 
   try {
-    await writeFile(configPath, `${JSON.stringify({ headers })}\n`, {
+    await writeFile(configPath, `${JSON.stringify({ headers: JSON.stringify(headers) })}\n`, {
       encoding: "utf8",
       mode: 0o600,
     });

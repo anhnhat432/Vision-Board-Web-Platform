@@ -43,7 +43,7 @@
 3. WHEN the bypass secret is absent during a local run, THE shared helper SHALL return no bypass headers and SHALL preserve the current unprotected-target behavior.
 4. WHEN Playwright creates a browser context for email verification, account deletion, or LWW proof, THE configuration SHALL add the shared bypass headers through `use.extraHTTPHeaders`.
 5. WHILE Playwright is using the bypass secret, THE configuration SHALL disable request traces so the secret cannot be retained in trace data; screenshots and videos SHALL remain usable because they do not contain request headers.
-6. WHEN the core-funnel harness uses `agent-browser` with a bypass secret, THE harness SHALL write the headers to a uniquely named temporary config with owner-only permissions, pass only its path through `AGENT_BROWSER_CONFIG`, and delete the temporary directory in a `finally` path.
+6. WHEN the core-funnel harness uses `agent-browser` with a bypass secret, THE harness SHALL write the approved header map as the JSON-encoded string value of the temporary config's top-level `headers` option, use owner-only permissions, pass only the config path through `AGENT_BROWSER_CONFIG`, and delete the temporary directory in a `finally` path.
 7. THE core-funnel harness SHALL NOT pass the secret through `--headers`, a URL query parameter, a shareable bypass link, or a process argument.
 8. WHEN browser execution finishes, fails, or times out, THE core-funnel harness SHALL attempt temporary-config cleanup without replacing the original proof failure.
 9. WHEN release documentation describes protected-preview proof, THE docs SHALL name the required GitHub secret and SHALL describe only secret-name readiness, never the secret value.
