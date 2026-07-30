@@ -42,4 +42,16 @@ describe("core funnel quality harness guards", () => {
     expect(script).toContain("Target is real-mode auth-gated for /12-week-system.");
     expect(script).toContain("assertCoreQualityTargetAccessible");
   });
+
+  it("uses a temporary agent-browser config without exposing the secret on the command line", () => {
+    const script = readFileSync(path.resolve("scripts", "smoke-core-quality.mjs"), "utf8");
+
+    expect(script).toContain("createAgentBrowserBypassConfig");
+    expect(script).toContain("removeAgentBrowserBypassConfig");
+    expect(script).toContain("delete childEnvironment.VERCEL_AUTOMATION_BYPASS_SECRET");
+    expect(script).toContain("childEnvironment.AGENT_BROWSER_CONFIG = agentBrowserBypassConfig.configPath");
+    expect(script).not.toContain('["--headers"');
+    expect(script).not.toContain('"--headers", process.env.VERCEL_AUTOMATION_BYPASS_SECRET');
+    expect(script).toContain("Failed to remove temporary agent-browser bypass configuration.");
+  });
 });
