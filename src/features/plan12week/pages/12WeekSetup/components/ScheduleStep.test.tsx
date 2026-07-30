@@ -111,6 +111,26 @@ describe("ScheduleStep validation", () => {
     expect(desktopChip).not.toHaveClass("truncate");
   });
 
+  it("starts with a plain-language week rhythm and collapsed advanced options", () => {
+    render(
+      <ScheduleStepLab
+        draft={makeDraft()}
+        cycleStartDate="2026-05-05"
+        cycleEndDate="2026-07-27"
+        setupGuideSupport={null}
+        setupGuideTemplate={null}
+        hasPreviewTasks={false}
+        weekOneTaskPreview={[]}
+        weekOneTaskWarning={null}
+        onChange={vi.fn()}
+        todayDateKey="2026-05-09"
+      />,
+    );
+
+    expect(screen.getByRole("heading", { name: "Đặt nhịp cho tuần đầu" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Tùy chỉnh thêm/i })).toHaveAttribute("aria-expanded", "false");
+  });
+
   it("exposes pressed state for lab schedule selections", async () => {
     const user = userEvent.setup();
 
@@ -146,7 +166,7 @@ describe("ScheduleStep validation", () => {
 
     expect(screen.getByRole("button", { name: /Đã ghim ưu tiên/i })).toHaveAttribute("aria-pressed", "true");
 
-    await user.click(screen.getByRole("button", { name: /Tùy chỉnh nâng cao/i }));
+    await user.click(screen.getByRole("button", { name: /Tùy chỉnh thêm/i }));
 
     expect(screen.getByRole("button", { name: /30 phút/i })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByRole("button", { name: /Cân bằng/i })).toHaveAttribute("aria-pressed", "true");
