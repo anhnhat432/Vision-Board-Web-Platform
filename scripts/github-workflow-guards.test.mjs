@@ -184,4 +184,14 @@ describe("GitHub workflow safety guards", () => {
     expect(fixture).toContain("await route.fulfill({ response });");
     expect(fixture).not.toContain("route.continue({");
   });
+
+  it("installs the scoped Vercel bypass on every LWW browser context", () => {
+    const fixture = readFileSync(path.resolve("e2e", "fixtures.ts"), "utf8");
+    const lwwHarness = readFileSync(path.resolve("e2e", "sync-lww.spec.ts"), "utf8");
+
+    expect(fixture).toContain("newProofContext");
+    expect(fixture).toContain("installVercelAutomationBypassRoute");
+    expect(lwwHarness).not.toContain("browser.newContext()");
+    expect(lwwHarness.match(/await newProofContext\(\)/g)).toHaveLength(6);
+  });
 });

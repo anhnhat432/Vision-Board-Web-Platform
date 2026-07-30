@@ -333,9 +333,9 @@ test.describe("LWW auto-resolve sync", () => {
     }
   });
 
-  test("local wins when local mutation is newer", async ({ browser }) => {
-    const contextA = await browser.newContext();
-    const contextB = await browser.newContext();
+  test("local wins when local mutation is newer", async ({ newProofContext }) => {
+    const contextA = await newProofContext();
+    const contextB = await newProofContext();
     const pageA = await contextA.newPage();
     const pageB = await contextB.newPage();
 
@@ -386,9 +386,9 @@ test.describe("LWW auto-resolve sync", () => {
     }
   });
 
-  test("cloud wins when cloud is newer", async ({ browser }) => {
-    const contextA = await browser.newContext();
-    const contextB = await browser.newContext();
+  test("cloud wins when cloud is newer", async ({ newProofContext }) => {
+    const contextA = await newProofContext();
+    const contextB = await newProofContext();
     const pageA = await contextA.newPage();
     const pageB = await contextB.newPage();
 
@@ -425,9 +425,9 @@ test.describe("LWW auto-resolve sync", () => {
     }
   });
 
-  test("tombstone wins over pending mutation", async ({ browser }) => {
-    const contextA = await browser.newContext();
-    const contextB = await browser.newContext();
+  test("tombstone wins over pending mutation", async ({ newProofContext }) => {
+    const contextA = await newProofContext();
+    const contextB = await newProofContext();
     const pageA = await contextA.newPage();
     const pageB = await contextB.newPage();
 
