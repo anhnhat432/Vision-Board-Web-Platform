@@ -148,6 +148,12 @@ async function localMarkerExists(page: Page) {
 async function primeSettingsGuideSeenState(page: Page) {
   await page.addInitScript((storageKey) => {
     localStorage.setItem(storageKey, "true");
+    const seenAt = new Date().toISOString();
+    localStorage.setItem("visionboard_new_user_guide_seen_at", seenAt);
+    localStorage.setItem(
+      "visionboard_first_run_guidance_completed_at",
+      seenAt,
+    );
   }, SETTINGS_GUIDE_SEEN_STORAGE_KEY);
 }
 
@@ -202,9 +208,16 @@ test.describe("staging account deletion", () => {
       `DELETE account responded ${deleteResponse.status()}`,
     ).toBe(true);
 
-    await expect
-      .poll(() => isSafePostDeleteUrl(page.url()), { timeout: 45_000 })
-      .toBe(true);
+    try {
+      await expect
+        .poll(() => isSafePostDeleteUrl(page.url()), { timeout: 45_000 })
+        .toBe(true);
+    } catch {
+      const currentUrl = new URL(page.url());
+      throw new Error(
+        `Account deletion reached an unexpected post-delete route: ${currentUrl.pathname}${currentUrl.search}`,
+      );
+    }
     expect(await localMarkerExists(page)).toBe(false);
   });
 });

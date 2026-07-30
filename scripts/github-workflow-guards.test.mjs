@@ -36,6 +36,8 @@ describe("GitHub workflow safety guards", () => {
     expect(harness).toContain("primeSettingsGuideSeenState");
     expect(harness).toContain('page.addInitScript((storageKey) =>');
     expect(harness).toContain('"visionboard_screen_guide_seen:settings"');
+    expect(harness).toContain('"visionboard_new_user_guide_seen_at"');
+    expect(harness).toContain('"visionboard_first_run_guidance_completed_at"');
     expect(harness).not.toContain("dismissSettingsScreenGuide");
   });
 
@@ -86,7 +88,13 @@ describe("GitHub workflow safety guards", () => {
     expect(observerIndex).toBeLessThan(bootstrapIndex);
     expect(harness).toContain("readPendingMutationQueueDiagnostics");
     expect(harness).toContain("errorCode: item.error?.code");
+    expect(harness).toContain("captureApiResponseDiagnostics");
+    expect(harness).toContain("method: response.request().method()");
+    expect(harness).toContain("path: url.pathname");
+    expect(harness).toContain("status: response.status()");
     expect(harness).not.toContain("payload: item.payload");
+    expect(harness).not.toContain("response.body()");
+    expect(harness).not.toContain("response.headers()");
   });
 
   it("keeps LWW staging smoke overwrite opt-in and dedicated marker guards", () => {

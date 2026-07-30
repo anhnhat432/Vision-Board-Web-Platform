@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import type { Page, Response } from "@playwright/test";
 import { expect, test } from "./fixtures";
 
 const BASE_URL = process.env.LWW_E2E_URL?.replace(/\/$/, "");
@@ -21,6 +21,12 @@ interface LwwProofGoal {
   goalTitle: string;
   taskId: string;
   taskTitle: string;
+}
+
+interface ApiResponseDiagnostic {
+  method: string;
+  path: string;
+  status: number;
 }
 
 function isSafeLwwEmail(email: string) {
@@ -279,8 +285,6 @@ async function readPendingMutationQueueDiagnostics(page: Page) {
       "retry_scheduled",
     ]);
     const diagnostics: Array<{
-      storageKey: string;
-      id?: string;
       kind?: string;
       status?: string;
       attemptCount?: number;
@@ -309,8 +313,6 @@ async function readPendingMutationQueueDiagnostics(page: Page) {
         for (const item of parsed.items ?? []) {
           if (!pendingStatuses.has(item.status ?? "")) continue;
           diagnostics.push({
-            storageKey: key,
-            id: item.id,
             kind: item.kind,
             status: item.status,
             attemptCount: item.attemptCount,
@@ -320,7 +322,6 @@ async function readPendingMutationQueueDiagnostics(page: Page) {
         }
       } catch {
         diagnostics.push({
-          storageKey: key,
           status: "invalid_json",
           errorCode: "invalid_json",
         });
@@ -329,6 +330,27 @@ async function readPendingMutationQueueDiagnostics(page: Page) {
 
     return diagnostics;
   });
+}
+
+function captureApiResponseDiagnostics(page: Page) {
+  const diagnostics: ApiResponseDiagnostic[] = [];
+  const onResponse = (response: Response) => {
+    const url = new URL(response.url());
+    if (!url.pathname.startsWith("/api/")) return;
+
+    diagnostics.push({
+      method: response.request().method(),
+      path: url.pathname,
+      status: response.status(),
+    });
+    if (diagnostics.length > 20) diagnostics.shift();
+  };
+
+  page.on("response", onResponse);
+  return {
+    read: () => [...diagnostics],
+    stop: () => page.off("response", onResponse),
+  };
 }
 
 async function waitForMutationQueueIdle(
@@ -356,11 +378,27 @@ async function syncProofGoalToCloud(
   page: Page,
   seed: LwwProofGoal,
   bulkSyncResponsePromise: ReturnType<typeof waitForPlanSnapshotBulkSync>,
+  readApiDiagnostics: () => ApiResponseDiagnostic[],
 ) {
   await page.goto("/12-week-system?tab=today");
   await getProofTaskCheckbox(page, seed.taskTitle);
 
-  const bulkSyncResponse = await bulkSyncResponsePromise;
+  let bulkSyncResponse: Awaited<
+    ReturnType<typeof waitForPlanSnapshotBulkSync>
+  >;
+  try {
+    bulkSyncResponse = await bulkSyncResponsePromise;
+  } catch {
+    const currentUrl = new URL(page.url());
+    const queue = await readPendingMutationQueueDiagnostics(page);
+    throw new Error(
+      `Expected LWW bootstrap bulk-sync response did not arrive: ${JSON.stringify({
+        route: `${currentUrl.pathname}${currentUrl.search}`,
+        apiResponses: readApiDiagnostics(),
+        pendingMutations: queue,
+      })}`,
+    );
+  }
   expect(
     bulkSyncResponse.ok(),
     `Plan snapshot bulk sync responded ${bulkSyncResponse.status()}`,
@@ -564,14 +602,24 @@ async function prepareLwwScenario(
     loginPage(pageB, EMAIL!, PASSWORD!),
   ]);
 
+  const apiDiagnostics = captureApiResponseDiagnostics(pageA);
   const bulkSyncResponsePromise = waitForPlanSnapshotBulkSync(pageA);
-  const seed = await bootstrapLwwGoal(pageA, scenarioTitle);
-  await syncProofGoalToCloud(pageA, seed, bulkSyncResponsePromise);
-  await pullProofGoal(pageB, seed);
+  try {
+    const seed = await bootstrapLwwGoal(pageA, scenarioTitle);
+    await syncProofGoalToCloud(
+      pageA,
+      seed,
+      bulkSyncResponsePromise,
+      apiDiagnostics.read,
+    );
+    await pullProofGoal(pageB, seed);
 
-  expect(await getTaskCompletedState(pageA, seed.taskTitle)).toBe(false);
-  expect(await getTaskCompletedState(pageB, seed.taskTitle)).toBe(false);
-  return seed;
+    expect(await getTaskCompletedState(pageA, seed.taskTitle)).toBe(false);
+    expect(await getTaskCompletedState(pageB, seed.taskTitle)).toBe(false);
+    return seed;
+  } finally {
+    apiDiagnostics.stop();
+  }
 }
 
 // ── Tests ─────────────────────────────────────────────────────────
