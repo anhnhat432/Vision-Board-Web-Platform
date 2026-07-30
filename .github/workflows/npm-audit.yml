@@ -22,7 +22,7 @@ jobs:
         with:
           node-version-file: ".nvmrc"
           cache: npm
-      - run: npm audit --audit-level=high --omit=dev || (echo "::warning::Frontend has high or critical vulnerabilities in production deps." && exit 1)
+      - run: npm run audit:prod
 
   backend:
     name: Backend audit
@@ -35,4 +35,4 @@ jobs:
           node-version-file: ".nvmrc"
           cache: npm
           cache-dependency-path: backend/package-lock.json
-      - run: npm --prefix backend audit --audit-level=high --omit=dev || (echo "::warning::Backend has high or critical vulnerabilities in production deps." && exit 1)
+      - run: npm run audit:prod:backend

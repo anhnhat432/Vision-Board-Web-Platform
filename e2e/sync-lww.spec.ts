@@ -16,8 +16,8 @@ function isSafeLwwEmail(email: string) {
 
 async function loginPage(page: Page, email: string, password: string) {
   await page.goto("/login?next=%2F12-week-system");
-  await expect(page.getByPlaceholder(/email/i)).or(
-    page.locator("#login-email")
+  await expect(
+    page.getByPlaceholder(/email/i).or(page.locator("#login-email")),
   ).toBeVisible({ timeout: 15_000 });
 
   await page.fill("#login-email", email);

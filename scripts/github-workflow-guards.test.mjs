@@ -30,12 +30,15 @@ describe("GitHub workflow safety guards", () => {
 
   it("keeps LWW staging smoke overwrite opt-in and dedicated marker guards", () => {
     const workflow = readWorkflow("lww-e2e-staging.yml");
+    const harness = readFileSync(path.resolve("e2e", "sync-lww.spec.ts"), "utf8");
     const runbook = readFileSync(path.resolve("docs", "ops", "staging-proof-runbook.md"), "utf8");
     const checklist = readFileSync(path.resolve("guidelines", "SOFT_LAUNCH_CHECKLIST.md"), "utf8");
 
     expect(workflow).toContain("Use a staging or production-like URL for LWW proof, not localhost.");
     expect(workflow).toContain('LWW_E2E_ALLOW}" != "OVERWRITE_TEST_WORKSPACE"');
     expect(workflow).toContain("LWW_E2E_EMAIL must be a dedicated overwrite-safe address");
+    expect(harness).toContain("page.getByPlaceholder(/email/i).or(");
+    expect(harness).not.toContain("expect(page.getByPlaceholder(/email/i)).or(");
     expect(runbook).toContain("allow_overwrite=OVERWRITE_TEST_WORKSPACE");
     expect(runbook).toContain("Target rule: use staging/preview or production-like URL only; the workflow rejects `localhost` and `127.0.0.1`.");
     expect(runbook).toContain("Marker rule: `LWW_E2E_EMAIL` must include `+lww`");

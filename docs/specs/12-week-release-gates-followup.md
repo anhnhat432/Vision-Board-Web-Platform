@@ -1,0 +1,76 @@
+# 12-Week Release Gates Follow-up
+
+## 1. Context & Goal
+
+- Feature / bug: the merged 12-week UI release still has a failing production-dependency audit, while its Vercel preview cannot initialize Firebase because the client variables are scoped to an older preview branch.
+- Why now: preview proof for authentication, account deletion, and LWW sync cannot run until the release target is both security-gated and configured as a real-mode staging target.
+- User impact: do not promote another production change until the current code passes local/CI gates and the preview proofs have recorded evidence.
+- Modes affected: `real` preview/staging; production behavior must remain unchanged by this follow-up.
+
+## 2. Surface Classification
+
+- Type: `Core`
+- Touched domains: dependency security, Vercel preview environment metadata, auth/sync proof gates.
+- Existing invariants that must not break: no secrets in source or logs; no localStorage, API, entitlement, auth, sync, or route contract changes; no production redeploy before preview proof passes.
+
+## 3. Actors & Entry Points
+
+- Primary actor: release operator.
+- Secondary actor(s): reviewer evaluating the launch gate.
+- Route(s): `/login`, `/settings`, `/12-week-system`, and deployed core-funnel routes exercised by the proof workflows.
+- API / hook / store touchpoints: existing Firebase client initialization and existing GitHub Actions proof workflows only.
+
+## 4. Functional Requirements
+
+1. WHEN the frontend and backend production dependency audits run, THE system SHALL fail on every high or critical advisory except the exact frontend-only `GHSA-qwww-vcr4-c8h2` exception, which applies only to unstable RSC APIs that this Vite SPA does not use.
+2. WHEN a real-mode proof preview is built, THE deployment SHALL receive the required `VITE_FIREBASE_*`, API, billing-mode, and sync configuration without exposing values in the repository, terminal output, screenshots, or workflow inputs.
+3. WHEN preview environment metadata is incomplete, THE release process SHALL stop before dispatching destructive account-deletion or LWW workflows.
+4. WHEN all local gates and preview proofs pass, THE release process MAY open a focused follow-up PR; it SHALL NOT merge or trigger production deployment automatically.
+
+## 5. Data, Storage, and Sync Constraints
+
+- localStorage keys / shapes touched: none.
+- migration or normalization needed: none.
+- backend models or API contracts touched: none.
+- sync ordering guarantees: unchanged.
+- rollback / restore concerns: dependency changes are isolated to manifests and lockfiles; Vercel environment scope changes must not overwrite secret values.
+
+## 6. Non-functional Requirements
+
+- performance / latency: no intentional runtime behavior change.
+- accessibility: existing UI test coverage must remain green.
+- observability / logging: record only environment variable names, scope, target URL, commit SHA, and workflow URLs.
+- security / privacy: keep secret values concealed; use disposable or marker-safe QA accounts required by each workflow; keep the React Router exception package-, advisory-, and frontend-specific.
+
+## 7. Out of Scope
+
+- Billing provider selection between PayOS and Casso.
+- UI redesign, storage/sync semantics, auth behavior, or production deployment.
+
+## 8. Acceptance Criteria
+
+- [ ] frontend and backend production audit guard passes, with no exception beyond frontend `react-router` advisory `GHSA-qwww-vcr4-c8h2`
+- [ ] `typecheck`, `lint`, `test:run`, and `build` pass on the clean branch
+- [ ] preview metadata contains the required real-mode auth/sync variable names for the proof branch
+- [ ] core funnel, email verification, account deletion, and LWW proof results are recorded
+- [ ] no secret value is read, copied, committed, or logged
+
+## 9. Verification Plan
+
+```bash
+npm run audit:prod
+npm run audit:prod:backend
+npm run typecheck
+npm run lint
+npm run test:run
+npm run build
+npm --prefix backend run check
+npm run proof:readiness
+```
+
+Then run the four deployed workflows from `docs/ops/staging-proof-runbook.md` only after the preview metadata check passes.
+
+## 10. Open Questions / Follow-ups
+
+- Confirm whether Vercel should broaden the existing branch-specific Preview variables or maintain a dedicated long-lived staging branch.
+- Keep provider billing selection as a separate production decision.
