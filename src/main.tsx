@@ -1,6 +1,10 @@
 import { createRoot } from "react-dom/client";
 import { cleanupLegacyAssistantHistory } from "./app/features/assistant/cleanupLegacyHistory";
-import { getConfiguredGaMeasurementId, isGaMeasurementId } from "./app/utils/analytics-config";
+import {
+  createGtagCommandQueue,
+  getConfiguredGaMeasurementId,
+  isGaMeasurementId,
+} from "./app/utils/analytics-config";
 import { getAppMode } from "./app/utils/app-mode";
 import { installChunkLoadRecovery } from "./app/utils/chunkLoad";
 import { reportProductionRuntimeEnvReadiness } from "./app/utils/production-runtime-env";
@@ -44,9 +48,7 @@ if (appMode === "real" && analyticsMode === "ga4" && isGaMeasurementId(gaMeasure
   document.head.appendChild(gtagScript);
 
   window.dataLayer = window.dataLayer ?? [];
-  window.gtag = (...args: unknown[]) => {
-    window.dataLayer?.push(args as unknown as Record<string, unknown> & { event?: unknown });
-  };
+  window.gtag = createGtagCommandQueue(window.dataLayer);
   window.gtag("js", new Date());
   window.gtag("config", gaMeasurementId, { send_page_view: false });
 }
