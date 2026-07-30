@@ -106,6 +106,20 @@ async function localMarkerExists(page: Page) {
   }, LOCAL_MARKER);
 }
 
+async function dismissSettingsScreenGuide(page: Page) {
+  const guide = page.getByRole("dialog", {
+    name: "Quản lý dữ liệu và tài khoản",
+  });
+  const opened = await guide
+    .waitFor({ state: "visible", timeout: 5_000 })
+    .then(() => true)
+    .catch(() => false);
+  if (!opened) return;
+
+  await guide.getByRole("button", { name: "Tôi đã hiểu" }).click();
+  await expect(guide).toBeHidden();
+}
+
 test.describe("staging account deletion", () => {
   test.skip(
     !BASE_URL || !ALLOW_DELETE,
@@ -128,6 +142,7 @@ test.describe("staging account deletion", () => {
     expect(await localMarkerExists(page)).toBe(true);
 
     await page.goto(`${BASE_URL}/settings`);
+    await dismissSettingsScreenGuide(page);
     await expect(page.getByTestId("settings-delete-account-open")).toBeVisible({
       timeout: 20_000,
     });

@@ -30,6 +30,14 @@ describe("GitHub workflow safety guards", () => {
     expect(harness).toContain("resolveAccountDeleteE2ECredentials");
   });
 
+  it("dismisses the auto-open Settings guide before account deletion", () => {
+    const harness = readFileSync(path.resolve("e2e", "account-delete.spec.ts"), "utf8");
+
+    expect(harness).toContain("dismissSettingsScreenGuide");
+    expect(harness).toContain('"Quản lý dữ liệu và tài khoản"');
+    expect(harness).toContain('"Tôi đã hiểu"');
+  });
+
   it("keeps LWW staging smoke overwrite opt-in and dedicated marker guards", () => {
     const workflow = readWorkflow("lww-e2e-staging.yml");
     const harness = readFileSync(path.resolve("e2e", "sync-lww.spec.ts"), "utf8");
