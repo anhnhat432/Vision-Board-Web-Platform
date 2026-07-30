@@ -1,4 +1,5 @@
 import type { Page } from "@playwright/test";
+import { resolveAccountDeleteE2ECredentials } from "../scripts/account-delete-e2e-credentials.mjs";
 import { expect, test } from "./fixtures";
 
 const BASE_URL = process.env.ACCOUNT_DELETE_E2E_URL?.replace(/\/$/, "");
@@ -9,10 +10,12 @@ const ALLOW_DELETE =
 const AUTH_MODE =
   process.env.ACCOUNT_DELETE_E2E_AUTH_MODE?.trim().toLowerCase() || "signup";
 const TIMESTAMP = Date.now();
-const GENERATED_EMAIL = `codex.qa+delete-${TIMESTAMP}@example.com`;
-const EMAIL = process.env.ACCOUNT_DELETE_E2E_EMAIL?.trim() || GENERATED_EMAIL;
-const PASSWORD =
-  process.env.ACCOUNT_DELETE_E2E_PASSWORD || `CodexDelete${TIMESTAMP}!`;
+const { email: EMAIL, password: PASSWORD } =
+  resolveAccountDeleteE2ECredentials({
+    authMode: AUTH_MODE,
+    timestamp: TIMESTAMP,
+    env: process.env,
+  });
 const LOCAL_MARKER = `account-delete-e2e-${TIMESTAMP}`;
 
 function isSafeDeleteEmail(email: string) {

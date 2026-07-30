@@ -770,7 +770,7 @@ $realPreviewUrl = "https://vision-board-web-platform-git-codex-3263d1-anhnhat432
 
 gh workflow run core-funnel-quality-staging.yml --ref $proofRef -f target_url=$demoPreviewUrl
 gh workflow run email-verification-e2e-staging.yml --ref $proofRef -f target_url=$realPreviewUrl -f allow_create=CREATE_TEST_ACCOUNT
-gh workflow run account-delete-e2e-staging.yml --ref $proofRef -f target_url=$realPreviewUrl -f allow_delete=DELETE_TEST_ACCOUNT -f auth_mode=signin
+gh workflow run account-delete-e2e-staging.yml --ref $proofRef -f target_url=$realPreviewUrl -f allow_delete=DELETE_TEST_ACCOUNT -f auth_mode=signup
 gh workflow run lww-e2e-staging.yml --ref $proofRef -f target_url=$realPreviewUrl -f allow_overwrite=OVERWRITE_TEST_WORKSPACE
 ```
 

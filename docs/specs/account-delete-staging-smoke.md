@@ -29,6 +29,8 @@
 5. WHEN backend deletion succeeds, THE test SHALL verify local marker data is removed and the app returns to a safe start route.
 6. WHEN the staging workflow wrapper receives `auth_mode`, THE workflow SHALL reject values other than `signin` or `signup` before launching Playwright.
 7. WHERE the workflow target is for deployed launch proof, THE workflow SHALL reject `localhost` and `127.0.0.1` so local-only URLs cannot satisfy staging evidence.
+8. WHEN `auth_mode=signup`, THE test SHALL generate a fresh delete-marked email and a password that satisfies the current signup form even when fixed account-delete secrets are configured.
+9. WHEN `auth_mode=signin`, THE test SHALL continue using the configured disposable email and password.
 
 ## 5. Data, Storage, and Sync Constraints
 
@@ -62,6 +64,7 @@
 - [x] launch and pre-deploy checklists include the account-delete staging workflow as a required proof gate.
 - [x] staging workflow rejects invalid `auth_mode` values before browser startup.
 - [x] staging workflow rejects localhost and loopback targets before browser startup.
+- [ ] signup mode ignores stale fixed credentials and creates a fresh disposable account for the destructive proof.
 
 ## 9. Verification Plan
 

@@ -233,7 +233,7 @@ gh workflow run email-verification-e2e-staging.yml --ref $env:PROOF_REF -f targe
 ```
 
 ```powershell
-gh workflow run account-delete-e2e-staging.yml --ref $env:PROOF_REF -f target_url=$env:STAGING_URL -f allow_delete=DELETE_TEST_ACCOUNT -f auth_mode=signin
+gh workflow run account-delete-e2e-staging.yml --ref $env:PROOF_REF -f target_url=$env:STAGING_URL -f allow_delete=DELETE_TEST_ACCOUNT -f auth_mode=signup
 ```
 
 ```powershell

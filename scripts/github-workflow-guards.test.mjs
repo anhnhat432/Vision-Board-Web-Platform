@@ -19,6 +19,7 @@ describe("GitHub workflow safety guards", () => {
 
   it("keeps account deletion staging smoke destructive opt-in and disposable", () => {
     const workflow = readWorkflow("account-delete-e2e-staging.yml");
+    const harness = readFileSync(path.resolve("e2e", "account-delete.spec.ts"), "utf8");
 
     expect(workflow).toContain("Use a staging or production-like URL for account-delete proof, not localhost.");
     expect(workflow).toContain('ACCOUNT_DELETE_E2E_ALLOW}" != "DELETE_TEST_ACCOUNT"');
@@ -26,6 +27,7 @@ describe("GitHub workflow safety guards", () => {
     expect(workflow).toContain('ACCOUNT_DELETE_E2E_AUTH_MODE}" != "signup"');
     expect(workflow).toContain("ACCOUNT_DELETE_E2E_EMAIL must be a disposable address");
     expect(workflow).toContain("npm run test:e2e:account-delete");
+    expect(harness).toContain("resolveAccountDeleteE2ECredentials");
   });
 
   it("keeps LWW staging smoke overwrite opt-in and dedicated marker guards", () => {
