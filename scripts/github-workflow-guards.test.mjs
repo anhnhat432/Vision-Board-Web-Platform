@@ -129,4 +129,32 @@ describe("GitHub workflow safety guards", () => {
     expect(checklist).toContain("must be configured as a complete pair");
     expect(currentStatus).toContain("generated disposable signup path is used");
   });
+
+  it("wires the Vercel automation bypass into all protected-preview proofs", () => {
+    const workflowNames = [
+      "core-funnel-quality-staging.yml",
+      "email-verification-e2e-staging.yml",
+      "account-delete-e2e-staging.yml",
+      "lww-e2e-staging.yml",
+    ];
+    const playwrightConfig = readFileSync(path.resolve("playwright.config.ts"), "utf8");
+
+    for (const workflowName of workflowNames) {
+      const workflow = readWorkflow(workflowName);
+      expect(workflow).toContain("VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}");
+      expect(workflow).toContain('if [ -z "${VERCEL_AUTOMATION_BYPASS_SECRET}" ]; then');
+      expect(workflow).toContain(
+        "Set repository secret VERCEL_AUTOMATION_BYPASS_SECRET before running protected-preview proof.",
+      );
+    }
+
+    expect(playwrightConfig).toContain(
+      'import { getVercelAutomationBypassHeaders } from "./scripts/vercel-automation-bypass.mjs";',
+    );
+    expect(playwrightConfig).toContain(
+      "const vercelAutomationBypassHeaders = getVercelAutomationBypassHeaders(process.env);",
+    );
+    expect(playwrightConfig).toContain("extraHTTPHeaders: vercelAutomationBypassHeaders");
+    expect(playwrightConfig).toContain('trace: vercelAutomationBypassHeaders ? "off" : "on-first-retry"');
+  });
 });

@@ -1,4 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
+import { getVercelAutomationBypassHeaders } from "./scripts/vercel-automation-bypass.mjs";
+
+const vercelAutomationBypassHeaders = getVercelAutomationBypassHeaders(process.env);
 
 export default defineConfig({
   testDir: "./e2e",
@@ -9,7 +12,8 @@ export default defineConfig({
   reporter: "html",
   use: {
     baseURL: process.env.LWW_E2E_URL || "http://localhost:5173",
-    trace: "on-first-retry",
+    extraHTTPHeaders: vercelAutomationBypassHeaders,
+    trace: vercelAutomationBypassHeaders ? "off" : "on-first-retry",
     screenshot: "only-on-failure",
     video: "retain-on-failure",
   },
