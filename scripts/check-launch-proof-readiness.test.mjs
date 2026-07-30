@@ -12,6 +12,7 @@ const requiredSecretNames = [
   "ACCOUNT_DELETE_E2E_PASSWORD",
   "LWW_E2E_EMAIL",
   "LWW_E2E_PASSWORD",
+  "VERCEL_AUTOMATION_BYPASS_SECRET",
 ];
 
 const activeWorkflows = [

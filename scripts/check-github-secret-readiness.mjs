@@ -6,6 +6,11 @@ const injectedSecretJson = process.env.GITHUB_SECRET_READINESS_JSON;
 
 const REQUIRED_GATES = [
   {
+    gate: "vercel_protected_previews",
+    label: "Vercel protected previews",
+    secrets: ["VERCEL_AUTOMATION_BYPASS_SECRET"],
+  },
+  {
     gate: "production_smoke",
     label: "Production smoke",
     secrets: ["PROD_SMOKE_EMAIL", "PROD_SMOKE_PASSWORD"],

@@ -48,6 +48,7 @@
 8. WHEN browser execution finishes, fails, or times out, THE core-funnel harness SHALL attempt temporary-config cleanup without replacing the original proof failure.
 9. WHEN release documentation describes protected-preview proof, THE docs SHALL name the required GitHub secret and SHALL describe only secret-name readiness, never the secret value.
 10. WHEN the four workflows pass, THE release operator SHALL record the workflow URLs, target URLs, commit SHA, date, and conclusions before `proof:readiness` can be treated as launch evidence.
+11. WHEN `npm run proof:secrets` runs before protected-preview proof, THE readiness audit SHALL fail if `VERCEL_AUTOMATION_BYPASS_SECRET` is absent.
 
 ## 5. Data, Storage, and Sync Constraints
 
@@ -86,6 +87,7 @@
 
 - [ ] one shared helper returns no headers when the secret is absent and exactly two approved headers when present
 - [ ] all four proof workflows inject and validate `VERCEL_AUTOMATION_BYPASS_SECRET`
+- [ ] `npm run proof:secrets` reports the bypass secret as a required name without reading its value
 - [ ] Playwright proofs reach protected previews through `extraHTTPHeaders`
 - [ ] Playwright trace collection is disabled only while bypass headers are active
 - [ ] core funnel uses a temporary `AGENT_BROWSER_CONFIG` file with owner-only permissions and guaranteed cleanup

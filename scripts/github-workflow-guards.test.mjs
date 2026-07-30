@@ -108,13 +108,19 @@ describe("GitHub workflow safety guards", () => {
     expect(workflow).toContain("Core quality smoke is local-first/demo-only; use production-smoke-e2e.yml for real-mode production proof.");
     expect(workflow).toContain("npm run smoke:core-quality");
     expect(runbook).toContain("Workflow: `.github/workflows/core-funnel-quality-staging.yml`");
-    expect(runbook).toContain("Target rule: use an accessible demo/staging URL with `VITE_APP_MODE=demo` and no Vercel Deployment Protection.");
+    expect(runbook).toContain("Required secret: `VERCEL_AUTOMATION_BYPASS_SECRET`");
+    expect(runbook).toContain(
+      "Target rule: use the protected demo preview with `VITE_APP_MODE=demo`; keep Vercel Deployment Protection and `Require Log In` enabled.",
+    );
     expect(runbook).toContain('$env:CORE_QUALITY_URL="https://your-accessible-demo-preview.example"');
     expect(runbook).toContain("gh workflow run core-funnel-quality-staging.yml --ref $env:PROOF_REF -f target_url=$env:CORE_QUALITY_URL");
     expect(runbook).toContain("gh run list --workflow core-funnel-quality-staging.yml --event workflow_dispatch --limit 1");
     expect(checklist).toContain(".github/workflows/core-funnel-quality-staging.yml");
-    expect(checklist).toContain("accessible demo/staging target");
+    expect(checklist).toContain("VERCEL_AUTOMATION_BYPASS_SECRET");
+    expect(checklist).toContain("keep `Require Log In` enabled");
     expect(currentStatus).toContain("Deployed core-funnel proof workflow now exists at `.github/workflows/core-funnel-quality-staging.yml`");
+    expect(currentStatus).toContain("Automation Bypass secret");
+    expect(currentStatus).toContain("Deployment Protection remains enabled");
   });
 
   it("keeps staging proof docs aligned with email verification fixed-secret pair rule", () => {

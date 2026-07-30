@@ -1,6 +1,6 @@
 # Staging Proof Runbook
 
-Use this runbook before soft launch when the staging or preview deployment is configured with `VITE_APP_MODE=real`, Firebase, backend API, and production-like billing flags.
+Use this runbook before soft launch. Auth, account-deletion, and LWW proofs use the protected real-mode preview with Firebase and backend API configuration. Core-funnel proof uses the protected demo preview.
 
 Do not paste secrets into docs, issue comments, screenshots, or terminal transcripts. Store credentials as GitHub repository secrets or set local env vars only for one trusted operator session.
 
@@ -8,7 +8,7 @@ Do not paste secrets into docs, issue comments, screenshots, or terminal transcr
 
 - Frontend URL: staging or preview URL that serves the deployed SPA.
 - Backend: same frontend must point to the staging/preview backend through `VITE_API_BASE_URL`.
-- Mode: `VITE_APP_MODE=real`.
+- Mode: `VITE_APP_MODE=real` for auth/sync/destructive proofs; `VITE_APP_MODE=demo` for core-funnel proof.
 - Firebase: email/password auth enabled for the staging project.
 - Test accounts: disposable only. Do not use admin, owner, shared QA, or real customer accounts.
 - Workflow runtime: staging and production proof workflows use `node-version-file: ".nvmrc"` so GitHub Actions follows the same Node major as the release workflow and backend production target.
@@ -21,6 +21,7 @@ docs, screenshots, or PR comments.
 
 | Gate | Secret | Required before run | Account marker / safety rule | Evidence when ready |
 | --- | --- | --- | --- | --- |
+| All four protected-preview proofs | `VERCEL_AUTOMATION_BYPASS_SECRET` | Yes | Copy the existing Vercel Automation Bypass secret into GitHub Actions; never expose its value in commands, docs, screenshots, or logs | Secret name exists in GitHub and Vercel Deployment Protection remains enabled |
 | Email verification | `EMAIL_VERIFICATION_E2E_EMAIL` | Optional; set for fixed QA account | If set, must include `+verify`, `.verify`, `_verify`, or `-verify` | Secret exists or workflow will generate a disposable account |
 | Email verification | `EMAIL_VERIFICATION_E2E_PASSWORD` | Optional; required only with fixed email | Disposable credential only | Secret exists or generated-account path is accepted |
 | Account deletion | `ACCOUNT_DELETE_E2E_EMAIL` | Yes | Must include `+delete`, `.delete`, `_delete`, or `-delete` | Secret exists and marker checked by workflow |
@@ -34,11 +35,17 @@ Blocking rule: do not treat workflow presence as launch evidence. A gate is
 proved only after the workflow or equivalent local command runs against the
 target URL and the result is recorded.
 
+Live readiness refresh on 2026-07-30: `npm run proof:secrets` reports
+`VERCEL_AUTOMATION_BYPASS_SECRET` missing by name. Protected-preview dispatch
+remains blocked until the existing Vercel secret is copied into GitHub Actions.
+
 Core funnel deployed proof workflow:
 
 - Workflow: `.github/workflows/core-funnel-quality-staging.yml`
 - Required input: `target_url`
-- Target rule: use an accessible demo/staging URL with `VITE_APP_MODE=demo` and no Vercel Deployment Protection.
+- Required secret: `VERCEL_AUTOMATION_BYPASS_SECRET`
+- Target rule: use the protected demo preview with `VITE_APP_MODE=demo`; keep Vercel Deployment Protection and `Require Log In` enabled.
+- Security rule: GitHub Actions sends the Vercel bypass headers from the repository secret. Do not use query-string bypass links or `--headers` command arguments.
 - Production rule: do not use `https://vision-board-web-platform.vercel.app`; real-mode production proof belongs to `.github/workflows/production-smoke-e2e.yml`.
 - Behavior: runs `npm run smoke:core-quality` against the supplied deployed URL to cover SMART goal quality, feasibility recommendation, 12-week setup output, Today action, daily check-in, weekly review, and Progress trend.
 
@@ -111,7 +118,7 @@ Only workflow metadata was inspected; no workflow was dispatched.
 | Gate | Default-branch workflow status | Launch impact |
 | --- | --- | --- |
 | Production smoke | `.github/workflows/production-smoke-e2e.yml` is available and active | Latest default-branch scheduled run `28995039420` failed on commit `6ad15aca67c264cbf8ae544dbc45100b6939db01` because the 12-week backend-sync proof hit HTTP 429 on `GET /api/weeks/:weekId/metrics`; rerun after deploying the local retry fix before D-1 |
-| Core-funnel deployed proof | `.github/workflows/core-funnel-quality-staging.yml` is available and active | Requires an accessible demo/staging target with `VITE_APP_MODE=demo`, no Deployment Protection, and recorded pass evidence |
+| Core-funnel deployed proof | `.github/workflows/core-funnel-quality-staging.yml` is available and active | Requires the protected demo preview with `VITE_APP_MODE=demo`, `VERCEL_AUTOMATION_BYPASS_SECRET`, and recorded pass evidence |
 | Email verification staging | `.github/workflows/email-verification-e2e-staging.yml` is available and active | Requires staging dispatch with `allow_create=CREATE_TEST_ACCOUNT` and recorded pass evidence |
 | Account deletion staging | `.github/workflows/account-delete-e2e-staging.yml` is available and active | Requires destructive staging dispatch with `allow_delete=DELETE_TEST_ACCOUNT` and recorded pass evidence |
 | LWW sync staging | `.github/workflows/lww-e2e-staging.yml` is available and active | Requires overwrite-safe staging dispatch with `allow_overwrite=OVERWRITE_TEST_WORKSPACE` and recorded pass evidence |
@@ -128,6 +135,7 @@ Email verification workflow:
 
 - Workflow: `.github/workflows/email-verification-e2e-staging.yml`
 - Required input: `target_url`
+- Required protection secret: `VERCEL_AUTOMATION_BYPASS_SECRET`
 - Target rule: use staging/preview or production-like URL only; the workflow rejects `localhost` and `127.0.0.1`.
 - Required input: `allow_create=CREATE_TEST_ACCOUNT`
 - Optional secret: `EMAIL_VERIFICATION_E2E_EMAIL`
@@ -139,6 +147,7 @@ Account delete workflow:
 
 - Workflow: `.github/workflows/account-delete-e2e-staging.yml`
 - Required input: `target_url`
+- Required protection secret: `VERCEL_AUTOMATION_BYPASS_SECRET`
 - Target rule: use staging/preview or production-like URL only; the workflow rejects `localhost` and `127.0.0.1`.
 - Required input: `allow_delete=DELETE_TEST_ACCOUNT`
 - Optional input: `auth_mode=signin` or `auth_mode=signup`
@@ -151,6 +160,7 @@ LWW sync workflow:
 
 - Workflow: `.github/workflows/lww-e2e-staging.yml`
 - Required input: `target_url`
+- Required protection secret: `VERCEL_AUTOMATION_BYPASS_SECRET`
 - Target rule: use staging/preview or production-like URL only; the workflow rejects `localhost` and `127.0.0.1`.
 - Required input: `allow_overwrite=OVERWRITE_TEST_WORKSPACE`
 - Required secret: `LWW_E2E_EMAIL`
@@ -173,14 +183,14 @@ Production smoke workflow:
 0. Run local core-funnel preflight with `npm run smoke:core-quality` against a local dev server. This catches core-loop UI/storage regressions before spending staging credentials, but it is not D-2 launch evidence.
 1. Run `npm run proof:readiness`.
 2. Run environment checks and confirm real-mode staging for auth/sync/destructive workflows.
-3. Run deployed core-funnel quality workflow against an accessible demo/staging target.
+3. Run deployed core-funnel quality workflow against the protected demo preview.
 4. Run email verification staging workflow.
 5. Run account-delete staging workflow.
 6. Run LWW e2e staging workflow.
 7. Run quick production smoke against production after deploy and fixed QA credentials are configured.
 8. Run full production smoke after the quick smoke passes.
 
-This order proves the main local-first funnel on an accessible deployed demo target first, then signup/email guard, destructive lifecycle, cross-device sync, and finally the fast/full real-mode production billing trust gates.
+This order proves the main local-first funnel on the protected deployed demo target first, then signup/email guard, destructive lifecycle, cross-device sync, and finally the fast/full real-mode production billing trust gates.
 
 ## GitHub Actions Command Pack
 
@@ -299,7 +309,7 @@ $env:CORE_QUALITY_URL="https://your-accessible-demo-preview.example"
 gh workflow run core-funnel-quality-staging.yml --ref $env:PROOF_REF -f target_url=$env:CORE_QUALITY_URL
 ```
 
-Do not point this workflow at the production main domain or a Vercel-protected preview. The smoke is intentionally local-first/demo-only; use production smoke for real-mode production proof.
+Do not point this workflow at the production main domain. The protected demo preview is supported through `VERCEL_AUTOMATION_BYPASS_SECRET`; real-mode production proof remains in `production-smoke-e2e.yml`.
 
 Quick production smoke warmup:
 
@@ -390,4 +400,5 @@ Stop and do not launch if:
 - LWW workflow targets an email without the lww marker or runs without `OVERWRITE_TEST_WORKSPACE`.
 - LWW workflow uses a shared or real customer account.
 - Staging is not real mode.
+- `VERCEL_AUTOMATION_BYPASS_SECRET` is missing or a bypass value appears in a URL, command argument, log, screenshot, trace, or report.
 - Any run logs a raw secret, token, password, private key, or service account value.

@@ -23,6 +23,7 @@ describe("check-github-secret-readiness", () => {
       "ACCOUNT_DELETE_E2E_PASSWORD",
       "LWW_E2E_EMAIL",
       "LWW_E2E_PASSWORD",
+      "VERCEL_AUTOMATION_BYPASS_SECRET",
     ]);
 
     expect(result.status).toBe(0);
@@ -50,9 +51,26 @@ describe("check-github-secret-readiness", () => {
       "LWW_E2E_EMAIL",
       "LWW_E2E_PASSWORD",
       "EMAIL_VERIFICATION_E2E_EMAIL",
+      "VERCEL_AUTOMATION_BYPASS_SECRET",
     ]);
 
     expect(result.status).toBe(1);
     expect(result.stdout).toContain("FAIL Email verification staging: missing EMAIL_VERIFICATION_E2E_PASSWORD");
+  });
+
+  it("fails when the Vercel protection bypass secret is missing", () => {
+    const result = runSecretCheck([
+      "PROD_SMOKE_EMAIL",
+      "PROD_SMOKE_PASSWORD",
+      "ACCOUNT_DELETE_E2E_EMAIL",
+      "ACCOUNT_DELETE_E2E_PASSWORD",
+      "LWW_E2E_EMAIL",
+      "LWW_E2E_PASSWORD",
+    ]);
+
+    expect(result.status).toBe(1);
+    expect(result.stdout).toContain(
+      "FAIL Vercel protected previews: missing VERCEL_AUTOMATION_BYPASS_SECRET",
+    );
   });
 });

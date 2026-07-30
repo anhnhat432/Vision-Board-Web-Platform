@@ -31,6 +31,8 @@
 - Modify `scripts/smoke-core-quality.mjs`: install the temporary config path into the child environment, remove the raw secret from the child environment, and clean up reliably.
 - Modify `scripts/core-funnel-quality-harness.test.mjs`: lock the no-CLI-secret and cleanup integration contract.
 - Modify `scripts/github-workflow-guards.test.mjs`: lock all four workflow env/validation blocks and protected-preview docs.
+- Modify `scripts/check-github-secret-readiness.mjs`: treat the bypass secret name as required launch-proof configuration.
+- Modify `scripts/check-github-secret-readiness.test.mjs`: prove readiness blocks when the bypass secret name is absent.
 - Modify `.github/workflows/core-funnel-quality-staging.yml`: require the repository bypass secret for the demo preview.
 - Modify `.github/workflows/email-verification-e2e-staging.yml`: require the repository bypass secret for the real preview.
 - Modify `.github/workflows/account-delete-e2e-staging.yml`: require the repository bypass secret for the real preview.
@@ -536,6 +538,8 @@ git commit -m "test: secure core proof bypass config"
 **Files:**
 
 - Modify: `scripts/github-workflow-guards.test.mjs:101-132`
+- Modify: `scripts/check-github-secret-readiness.mjs:5-26`
+- Modify: `scripts/check-github-secret-readiness.test.mjs:16-75`
 - Modify: `docs/ops/staging-proof-runbook.md:17-44`
 - Modify: `docs/ops/staging-proof-runbook.md:111-183`
 - Modify: `docs/ops/staging-proof-runbook.md:295-302`
@@ -548,6 +552,8 @@ git commit -m "test: secure core proof bypass config"
 
 - Consumes: the four workflow env/validation contracts from Task 2
 - Produces: operator instructions that keep Deployment Protection enabled and require only the GitHub secret name
+
+**Critical-review correction:** The aggregate readiness path must require `VERCEL_AUTOMATION_BYPASS_SECRET`; otherwise `npm run proof:readiness` can report secret readiness while all four workflows are guaranteed to fail. Add a failing readiness test, add a `Vercel protected previews` required gate, and verify the new test passes before updating docs.
 
 - [ ] **Step 1: Change doc guard expectations first**
 
