@@ -90,7 +90,10 @@ describe("GitHub workflow safety guards", () => {
     expect(openTabStart).toBeGreaterThan(-1);
     expect(bootstrap).toContain('new StorageEvent("storage", {');
     expect(bootstrap).toContain("key: userDataStorageKey");
-    expect(openTab).toContain('locator(\'a[href="/12-week-system"]:visible\')');
+    expect(openTab).toContain('getByRole("button", {');
+    expect(openTab).toContain('name: "Hệ thống 12 tuần"');
+    expect(openTab).toContain("exact: true");
+    expect(openTab).not.toContain('locator(\'a[href="/12-week-system"]:visible\')');
     expect(openTab).not.toContain("page.goto(");
   });
 

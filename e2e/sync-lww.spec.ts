@@ -283,11 +283,12 @@ async function bootstrapLwwGoal(
 
 async function openSystemTab(page: Page, tab: "today" | "settings") {
   if (new URL(page.url()).pathname !== "/12-week-system") {
-    const systemLink = page
-      .locator('a[href="/12-week-system"]:visible')
-      .first();
-    await expect(systemLink).toBeVisible({ timeout: 30_000 });
-    await systemLink.click();
+    const systemButton = page.getByRole("button", {
+      name: "Hệ thống 12 tuần",
+      exact: true,
+    });
+    await expect(systemButton).toBeVisible({ timeout: 30_000 });
+    await systemButton.click();
     await expect(page).toHaveURL(/\/12-week-system(?:\?|$)/, {
       timeout: 30_000,
     });
