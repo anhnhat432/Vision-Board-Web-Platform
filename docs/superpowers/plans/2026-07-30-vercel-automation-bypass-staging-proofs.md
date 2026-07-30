@@ -145,6 +145,10 @@ git commit -m "test: define Vercel bypass header contract"
 **Files:**
 
 - Modify: `playwright.config.ts:1-15`
+- Create: `e2e/fixtures.ts`
+- Modify: `e2e/email-verification.spec.ts:1`
+- Modify: `e2e/account-delete.spec.ts:1`
+- Modify: `e2e/sync-lww.spec.ts:1`
 - Modify: `.github/workflows/core-funnel-quality-staging.yml:18-52`
 - Modify: `.github/workflows/email-verification-e2e-staging.yml:21-61`
 - Modify: `.github/workflows/account-delete-e2e-staging.yml:25-69`
@@ -154,7 +158,7 @@ git commit -m "test: define Vercel bypass header contract"
 **Interfaces:**
 
 - Consumes: `getVercelAutomationBypassHeaders(process.env)` and GitHub repository secret `VERCEL_AUTOMATION_BYPASS_SECRET`
-- Produces: Playwright `use.extraHTTPHeaders`; four workflows that fail clearly when the secret is missing
+- Produces: an origin-scoped Playwright fixture; four workflows that fail clearly when the secret is missing
 
 - [ ] **Step 1: Add failing workflow/config guards**
 
@@ -181,8 +185,11 @@ it("wires the Vercel automation bypass into all protected-preview proofs", () =>
     'import { getVercelAutomationBypassHeaders } from "./scripts/vercel-automation-bypass.mjs";',
   );
   expect(playwrightConfig).toContain("const vercelAutomationBypassHeaders = getVercelAutomationBypassHeaders(process.env);");
-  expect(playwrightConfig).toContain("extraHTTPHeaders: vercelAutomationBypassHeaders");
+  expect(playwrightConfig).not.toContain("extraHTTPHeaders:");
   expect(playwrightConfig).toContain('trace: vercelAutomationBypassHeaders ? "off" : "on-first-retry"');
+  expect(readFileSync(path.resolve("e2e", "fixtures.ts"), "utf8")).toContain(
+    "getVercelAutomationBypassHeadersForRequest",
+  );
 });
 ```
 
@@ -194,44 +201,13 @@ Run:
 npx vitest run scripts/github-workflow-guards.test.mjs
 ```
 
-Expected: FAIL because the four workflows and Playwright config do not reference the bypass secret.
+Expected: FAIL because the origin-scoped fixture and regression contract do not exist yet.
 
-- [ ] **Step 3: Apply the helper in Playwright**
+- [ ] **Step 3: Apply the helper through an origin-scoped Playwright fixture**
 
-Update `playwright.config.ts`:
+Keep `playwright.config.ts` responsible only for disabling traces when the secret is configured. Do not use `use.extraHTTPHeaders`, because Playwright forwards those headers to Firebase and every other origin.
 
-```ts
-import { defineConfig, devices } from "@playwright/test";
-import { getVercelAutomationBypassHeaders } from "./scripts/vercel-automation-bypass.mjs";
-
-const vercelAutomationBypassHeaders = getVercelAutomationBypassHeaders(process.env);
-
-export default defineConfig({
-  testDir: "./e2e",
-  fullyParallel: true,
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
-  reporter: "html",
-  use: {
-    baseURL: process.env.LWW_E2E_URL || "http://localhost:5173",
-    extraHTTPHeaders: vercelAutomationBypassHeaders,
-    trace: vercelAutomationBypassHeaders ? "off" : "on-first-retry",
-    screenshot: "only-on-failure",
-    video: "retain-on-failure",
-  },
-  projects: [
-    {
-      name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
-    },
-  ],
-  timeout: 90_000,
-  expect: {
-    timeout: 10_000,
-  },
-});
-```
+Create an auto fixture in `e2e/fixtures.ts` that intercepts requests before navigation, compares parsed `URL.origin` values, and adds the two bypass headers only when the request origin exactly matches `baseURL`. Re-export `test` and `expect`, then switch the email verification, account deletion, and LWW specs to that fixture. Add helper tests proving that the preview origin receives headers while `https://identitytoolkit.googleapis.com` and deceptive lookalike origins do not.
 
 - [ ] **Step 4: Inject and validate the secret in every workflow**
 
@@ -271,7 +247,7 @@ Expected: PASS.
 - [ ] **Step 6: Commit Playwright and workflow wiring**
 
 ```powershell
-git add -- playwright.config.ts scripts/github-workflow-guards.test.mjs .github/workflows/core-funnel-quality-staging.yml .github/workflows/email-verification-e2e-staging.yml .github/workflows/account-delete-e2e-staging.yml .github/workflows/lww-e2e-staging.yml
+git add -- playwright.config.ts e2e/fixtures.ts e2e/email-verification.spec.ts e2e/account-delete.spec.ts e2e/sync-lww.spec.ts scripts/vercel-automation-bypass.mjs scripts/vercel-automation-bypass.test.mjs scripts/github-workflow-guards.test.mjs .github/workflows/core-funnel-quality-staging.yml .github/workflows/email-verification-e2e-staging.yml .github/workflows/account-delete-e2e-staging.yml .github/workflows/lww-e2e-staging.yml
 git commit -m "ci: authorize protected preview proofs"
 ```
 

@@ -41,14 +41,15 @@
    - `x-vercel-protection-bypass`: the unmodified value read from `VERCEL_AUTOMATION_BYPASS_SECRET`
    - `x-vercel-set-bypass-cookie: true`
 3. WHEN the bypass secret is absent during a local run, THE shared helper SHALL return no bypass headers and SHALL preserve the current unprotected-target behavior.
-4. WHEN Playwright creates a browser context for email verification, account deletion, or LWW proof, THE configuration SHALL add the shared bypass headers through `use.extraHTTPHeaders`.
-5. WHILE Playwright is using the bypass secret, THE configuration SHALL disable request traces so the secret cannot be retained in trace data; screenshots and videos SHALL remain usable because they do not contain request headers.
-6. WHEN the core-funnel harness uses `agent-browser` with a bypass secret, THE harness SHALL write the approved header map as the JSON-encoded string value of the temporary config's top-level `headers` option, use owner-only permissions, pass only the config path through `AGENT_BROWSER_CONFIG`, and delete the temporary directory in a `finally` path.
-7. THE core-funnel harness SHALL NOT pass the secret through `--headers`, a URL query parameter, a shareable bypass link, or a process argument.
-8. WHEN browser execution finishes, fails, or times out, THE core-funnel harness SHALL attempt temporary-config cleanup without replacing the original proof failure.
-9. WHEN release documentation describes protected-preview proof, THE docs SHALL name the required GitHub secret and SHALL describe only secret-name readiness, never the secret value.
-10. WHEN the four workflows pass, THE release operator SHALL record the workflow URLs, target URLs, commit SHA, date, and conclusions before `proof:readiness` can be treated as launch evidence.
-11. WHEN `npm run proof:secrets` runs before protected-preview proof, THE readiness audit SHALL fail if `VERCEL_AUTOMATION_BYPASS_SECRET` is absent.
+4. WHEN Playwright requests a resource whose `URL.origin` exactly matches the configured preview `baseURL` origin, THE proof fixture SHALL add the shared bypass headers to that request.
+5. WHEN Playwright requests Firebase, Google APIs, or any other origin that differs from the configured preview `baseURL` origin, THE proof fixture SHALL NOT add either bypass header.
+6. WHILE Playwright is configured with the bypass secret, THE configuration SHALL disable request traces so the secret cannot be retained in trace data; screenshots and videos SHALL remain usable because they do not contain request headers.
+7. WHEN the core-funnel harness uses `agent-browser` with a bypass secret, THE harness SHALL write the approved header map as the JSON-encoded string value of the temporary config's top-level `headers` option, use owner-only permissions, pass only the config path through `AGENT_BROWSER_CONFIG`, and delete the temporary directory in a `finally` path.
+8. THE core-funnel harness SHALL NOT pass the secret through `--headers`, a URL query parameter, a shareable bypass link, or a process argument.
+9. WHEN browser execution finishes, fails, or times out, THE core-funnel harness SHALL attempt temporary-config cleanup without replacing the original proof failure.
+10. WHEN release documentation describes protected-preview proof, THE docs SHALL name the required GitHub secret and SHALL describe only secret-name readiness, never the secret value.
+11. WHEN the four workflows pass, THE release operator SHALL record the workflow URLs, target URLs, commit SHA, date, and conclusions before `proof:readiness` can be treated as launch evidence.
+12. WHEN `npm run proof:secrets` runs before protected-preview proof, THE readiness audit SHALL fail if `VERCEL_AUTOMATION_BYPASS_SECRET` is absent.
 
 ## 5. Data, Storage, and Sync Constraints
 
@@ -73,6 +74,7 @@
   - use GitHub repository secrets and GitHub masking.
   - do not print, reveal, persist, or upload the secret.
   - do not include the secret in process arguments, URLs, Playwright traces, or reusable artifacts.
+  - compare parsed URL origins exactly; never forward bypass headers to Firebase or another third-party origin.
   - temporary config permissions are owner read/write only where the operating system supports POSIX modes.
 - Compatibility: Node `20.x`, Windows local execution, and Ubuntu GitHub runners remain supported.
 
@@ -88,7 +90,8 @@
 - [ ] one shared helper returns no headers when the secret is absent and exactly two approved headers when present
 - [ ] all four proof workflows inject and validate `VERCEL_AUTOMATION_BYPASS_SECRET`
 - [ ] `npm run proof:secrets` reports the bypass secret as a required name without reading its value
-- [ ] Playwright proofs reach protected previews through `extraHTTPHeaders`
+- [ ] Playwright proofs attach bypass headers only to the exact configured preview origin
+- [ ] Firebase and all other cross-origin requests receive no Vercel bypass headers
 - [ ] Playwright trace collection is disabled only while bypass headers are active
 - [ ] core funnel uses a temporary `AGENT_BROWSER_CONFIG` file with owner-only permissions and guaranteed cleanup
 - [ ] no workflow or harness places the secret in a URL, CLI argument, log, trace, report, or committed file
