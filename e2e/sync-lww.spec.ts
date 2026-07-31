@@ -51,6 +51,46 @@ function isSafeLwwEmail(email: string) {
 
 // ── Helpers ───────────────────────────────────────────────────────
 
+async function createSafePullDiagnostics(page: Page, stage: string, response: Response) {
+  return {
+    scenario: test.info().title,
+    stage,
+    status: response.status(),
+    retryAfter: await response.headerValue("retry-after"),
+    ...(await readMutationQueueCountDiagnostics(page)),
+  };
+}
+
+async function createSafeConvergenceDiagnostics(
+  pageA: Page,
+  pageB: Page,
+  stage: string,
+  finalStateA: boolean,
+  finalStateB: boolean,
+) {
+  const [queueA, queueB] = await Promise.all([
+    readMutationQueueCountDiagnostics(pageA),
+    readMutationQueueCountDiagnostics(pageB),
+  ]);
+  return {
+    scenario: test.info().title,
+    stage,
+    queueA,
+    queueB,
+    finalStateA,
+    finalStateB,
+  };
+}
+
+async function expectTaskConvergence(pageA: Page, pageB: Page, taskTitle: string, expected: boolean) {
+  const [stateA, stateB] = await Promise.all([
+    getTaskCompletedState(pageA, taskTitle),
+    getTaskCompletedState(pageB, taskTitle),
+  ]);
+  const diagnostics = await createSafeConvergenceDiagnostics(pageA, pageB, "final-convergence", stateA, stateB);
+  expect({ stateA, stateB }, JSON.stringify(diagnostics)).toEqual({ stateA: expected, stateB: expected });
+}
+
 function rememberCloudPull(page: Page, response: Response) {
   lastObservedCloudPullAt.set(page, Date.now());
   const url = new URL(response.url());
@@ -100,9 +140,10 @@ async function loginPage(page: Page, email: string, password: string) {
 
   await expect(page).not.toHaveURL(/\/login/, { timeout: 30_000 });
   const initialPullResponse = await initialPullResponsePromise;
+  const pullDiagnostics = await createSafePullDiagnostics(page, "login-initial-pull", initialPullResponse);
   expect(
     initialPullResponse.ok(),
-    `Initial 12-week pull responded ${initialPullResponse.status()}`,
+    `Initial 12-week pull failed: ${JSON.stringify(pullDiagnostics)}`,
   ).toBe(true);
   rememberCloudPull(page, initialPullResponse);
   await expect(page).toHaveURL(/\/settings(?:[?#]|$)/, { timeout: 30_000 });
@@ -629,6 +670,14 @@ async function readPendingMutationQueueDiagnostics(page: Page) {
   });
 }
 
+async function readMutationQueueCountDiagnostics(page: Page) {
+  const pending = await readPendingMutationQueueDiagnostics(page);
+  return {
+    pendingCount: pending.filter((item) => item.status === "pending").length,
+    retryScheduledCount: pending.filter((item) => item.status === "retry_scheduled").length,
+  };
+}
+
 function captureApiResponseDiagnostics(page: Page) {
   const diagnostics: ApiResponseDiagnostic[] = [];
   const onResponse = (response: Response) => {
@@ -786,9 +835,10 @@ async function triggerManualCloudSync(
   await syncButton.click();
 
   const pullResponse = await pullResponsePromise;
+  const pullDiagnostics = await createSafePullDiagnostics(page, "manual-sync-pull", pullResponse);
   expect(
     pullResponse.ok(),
-    `12-week pull responded ${pullResponse.status()}`,
+    `12-week pull failed: ${JSON.stringify(pullDiagnostics)}`,
   ).toBe(true);
   rememberCloudPull(page, pullResponse);
   await expect(syncButton).toBeEnabled({ timeout: timeoutMs });
@@ -926,7 +976,7 @@ async function waitForGoalToDisappear(
             userDataStorageKey: USER_DATA_STORAGE_KEY,
           },
         ),
-      { timeout: timeoutMs, intervals: [1000, 2000, 3000] }
+      { timeout: timeoutMs, intervals: [1000, 2000, 3000] },
     )
     .toBe(true);
 }
@@ -1029,11 +1079,7 @@ test.describe("LWW auto-resolve sync", () => {
       await expectNoConflictDialog(pageA);
       await expectNoConflictDialog(pageB);
 
-      const stateA = await getTaskCompletedState(pageA, seed.taskTitle);
-      const stateB = await getTaskCompletedState(pageB, seed.taskTitle);
-
-      expect(stateA).toBe(true);
-      expect(stateB).toBe(true);
+      await expectTaskConvergence(pageA, pageB, seed.taskTitle, true);
 
       const hasLwwLog = consoleLogsA.some((log) =>
         log.includes("resolved")
@@ -1074,11 +1120,7 @@ test.describe("LWW auto-resolve sync", () => {
       await expectNoConflictDialog(pageA);
       await expectNoConflictDialog(pageB);
 
-      const stateA = await getTaskCompletedState(pageA, seed.taskTitle);
-      const stateB = await getTaskCompletedState(pageB, seed.taskTitle);
-
-      expect(stateA).toBe(false);
-      expect(stateB).toBe(false);
+      await expectTaskConvergence(pageA, pageB, seed.taskTitle, false);
 
       expect(consoleLogsA.some((log) => log.includes("resolved"))).toBe(true);
     } finally {

@@ -229,6 +229,25 @@ describe("GitHub workflow safety guards", () => {
     expect(checklist).toContain("LWW_E2E_ALLOW=OVERWRITE_TEST_WORKSPACE");
   });
 
+  it("runs LWW scenarios once, sequentially, and always preserves artifacts", () => {
+    const workflow = readWorkflow("lww-e2e-staging.yml");
+
+    expect(workflow).toContain('--retries=0');
+    expect(workflow).toContain('run_scenario "local-wins" "local wins when local mutation is newer"');
+    expect(workflow).toContain('run_scenario "cloud-wins" "cloud wins when cloud is newer"');
+    expect(workflow).toContain('run_scenario "tombstone" "tombstone wins over pending mutation"');
+    expect(workflow.match(/sleep 65/g)).toHaveLength(2);
+    expect(workflow).toContain('scenario_failed=0');
+    expect(workflow).toContain('scenario_failed=1');
+    expect(workflow).toContain('exit "${scenario_failed}"');
+    expect(workflow).toContain('PLAYWRIGHT_HTML_OUTPUT_DIR="playwright-report/${scenario_slug}"');
+    expect(workflow).toContain('--output="test-results/${scenario_slug}"');
+    expect(workflow).toContain("uses: actions/upload-artifact@v4");
+    expect(workflow).toContain("if: always()");
+    expect(workflow).toContain("playwright-report/");
+    expect(workflow).toContain("test-results/");
+  });
+
   it("keeps production smoke fixed-credential contract aligned", () => {
     const workflow = readWorkflow("production-smoke-e2e.yml");
     const runbook = readFileSync(path.resolve("docs", "ops", "staging-proof-runbook.md"), "utf8");
@@ -377,13 +396,33 @@ describe("GitHub workflow safety guards", () => {
     expect(lwwHarness.match(/await newProofContext\(\)/g)).toHaveLength(6);
   });
 
-  it("isolates legacy plan hydration without mocking LWW sync endpoints", () => {
+  it("isolates legacy plan execution without mocking LWW sync endpoints", () => {
     const fixture = readFileSync(path.resolve("e2e", "fixtures.ts"), "utf8");
 
-    expect(fixture).toContain("installLegacyPlanHydrationIsolation");
+    expect(fixture).toContain("installLegacyPlanExecutionIsolation");
+    expect(fixture).toContain("isLegacyPlanExecutionPath");
+    expect(fixture).toContain('/^\\/api\\/sync\\/12-week(?:\\/|$)/');
     expect(fixture).toContain('url.pathname === "/api/plans"');
-    expect(fixture).toContain('route.request().method() !== "GET"');
+    expect(fixture).toContain("\\/api\\/weeks");
+    expect(fixture).toContain("\\/api\\/tasks");
+    expect(fixture).toContain("\\/api\\/metrics");
     expect(fixture).toContain('JSON.stringify({ success: true, data: [] })');
-    expect(fixture).not.toContain('url.pathname.startsWith("/api/sync/12-week")');
+    expect(fixture).toContain('JSON.stringify({ success: true, data })');
+  });
+
+  it("keeps LWW failure diagnostics limited to safe convergence fields", () => {
+    const harness = readFileSync(path.resolve("e2e", "sync-lww.spec.ts"), "utf8");
+
+    expect(harness).toContain("createSafePullDiagnostics");
+    expect(harness).toContain("createSafeConvergenceDiagnostics");
+    expect(harness).toContain("scenario: test.info().title");
+    expect(harness).toContain("readMutationQueueCountDiagnostics");
+    expect(harness).toContain("pendingCount:");
+    expect(harness).toContain("retryScheduledCount:");
+    expect(harness).toContain('headerValue("retry-after")');
+    expect(harness).toContain("finalStateA:");
+    expect(harness).toContain("finalStateB:");
+    expect(harness).not.toContain("lww-safe-diagnostics");
+    expect(harness).not.toContain("pullResponse.headers()");
   });
 });

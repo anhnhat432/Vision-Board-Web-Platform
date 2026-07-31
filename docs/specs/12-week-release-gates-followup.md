@@ -43,6 +43,11 @@
 19. WHILE an LWW proof context is authenticating, THE harness SHALL isolate the unrelated legacy `GET /api/plans` hydration list with an empty success response; all `/api/sync/12-week/*` requests SHALL continue to use the deployed backend.
 20. BEFORE an LWW proof context authenticates, THE harness SHALL defer the first-time onboarding redirect for that browser session so the requested `/settings` destination remains available after login.
 21. WHEN an authenticated LWW context enters `/settings` or `/12-week-system`, THE harness SHALL use in-app navigation without reloading the document so the active auto-sync provider and its sync-floor state are preserved.
+22. WHEN the staging workflow runs LWW proof, THE workflow SHALL execute local-wins, cloud-wins, and tombstone as separate sequential Playwright invocations with `--retries=0` so a failed attempt cannot reuse an already-mutated import baseline.
+23. BETWEEN LWW scenarios, THE workflow SHALL wait at least 65 seconds to respect the protected API's per-user request window, SHALL continue to later scenarios after an earlier failure, and SHALL return a failing job after all three scenarios if any scenario failed.
+24. WHEN the LWW workflow succeeds or fails, THE workflow SHALL upload both `playwright-report/` and `test-results/` with `if: always()` so screenshots, video, and error context remain available after the runner exits.
+25. WHILE an LWW proof context is active, THE harness SHALL return deterministic proof-only success responses for the legacy execution transport under `/api/plans`, `/api/plans/*`, `/api/weeks/*`, `/api/tasks/*`, and `/api/metrics/*`; it SHALL NOT intercept, mock, or fulfill any `/api/sync/12-week/*` request.
+26. WHEN manual sync or final convergence fails, THE harness SHALL expose only the scenario/stage label, HTTP status, `Retry-After`, pending/retry-scheduled counts, and final context A/B booleans; it SHALL NOT expose credentials, payloads, response bodies, snapshots, titles, arbitrary headers, or PII.
 
 ## 5. Data, Storage, and Sync Constraints
 
@@ -76,11 +81,14 @@
 - [ ] account deletion post-delete allowlist includes only observed safe public or auth-gated routes
 - [ ] LWW bootstrap failures expose only safe import status, entity counts, and client-ID match diagnostics without payloads, headers, credentials, titles, or secrets
 - [ ] LWW bootstrap waits for login-time auto-sync before seeding, imports a complete authenticated baseline, and verifies it before the second context authenticates
-- [ ] LWW bootstrap import IDs and payload timestamps remain stable across Playwright retries so a repeated setup is idempotent
+- [ ] LWW scenarios run separately with Playwright retries disabled so failed attempts never reuse a mutated baseline
 - [ ] LWW bootstrap storage already contains the normalized 12-week task set, including the week-one proof task on the current local date
 - [ ] local-wins, cloud-wins, and tombstone proof mutations still originate from the real task checkbox UI and drain through the real mutation queue
 - [ ] accepted 12-week imports persist `importId` as the mutation-log idempotency key, avoiding production `idempotencyKey:null` duplicate-index failures
-- [ ] LWW proof contexts suppress only the legacy `GET /api/plans` fan-out while leaving every 12-week sync endpoint live
+- [ ] LWW proof contexts isolate only the legacy plan/week/task/metric execution transport while leaving every 12-week sync endpoint live
+- [ ] LWW scenarios run sequentially with at least 65 seconds between them and preserve the aggregate failing exit code
+- [ ] LWW workflow always uploads per-scenario `playwright-report/` and `test-results/` artifacts
+- [ ] LWW failures report only safe scenario/stage, status, `Retry-After`, queue-count, and final boolean diagnostics
 - [ ] LWW login defers the first-time onboarding redirect before authentication
 - [ ] LWW Settings and 12-week execution entry use in-app navigation and do not reload the auto-sync provider before manual sync
 - [ ] missing LWW proof tasks expose only safe boolean/count diagnostics at the Today boundary
@@ -98,6 +106,8 @@ npm run test:run
 npm run build
 npm --prefix backend run check
 npm run proof:readiness
+npx vitest run scripts/github-workflow-guards.test.mjs
+npx playwright test e2e/sync-lww.spec.ts --list
 ```
 
 Then run the four deployed workflows from `docs/ops/staging-proof-runbook.md` only after the preview metadata check passes.
