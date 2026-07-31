@@ -68,7 +68,7 @@ describe("GitHub workflow safety guards", () => {
     expect(harness).toContain("importLwwBaseline");
     expect(harness).toContain("pullProofGoal");
     expect(harness).toContain('"visionboard_user_data:auth_owner_uid"');
-    expect(harness).toContain('"visionboard:user-data-updated"');
+    expect(harness).toContain("reloadProofGoal");
     expect(harness).toContain('const PROOF_TASK_ID = "tw_task_1_lww_e2e_lead_0";');
     expect(harness).toContain("const leadIndicatorName = proofSeed.taskTitle;");
     expect(harness).toContain('getByRole("checkbox", {');
@@ -77,7 +77,7 @@ describe("GitHub workflow safety guards", () => {
     expect(harness).not.toContain("getByText(/12 tuần|tactic|task/i)");
   });
 
-  it("keeps the LWW bootstrap in the authenticated SPA session", () => {
+  it("reloads the authenticated SPA after the LWW baseline import", () => {
     const harness = readFileSync(path.resolve("e2e", "sync-lww.spec.ts"), "utf8");
     const bootstrapStart = harness.indexOf("async function bootstrapLwwGoal");
     const bootstrapEnd = harness.indexOf("async function openSystemTab", bootstrapStart);
@@ -88,8 +88,10 @@ describe("GitHub workflow safety guards", () => {
 
     expect(bootstrapStart).toBeGreaterThan(-1);
     expect(openTabStart).toBeGreaterThan(-1);
-    expect(bootstrap).toContain('new StorageEvent("storage", {');
-    expect(bootstrap).toContain("key: userDataStorageKey");
+    expect(bootstrap).toContain("localStorage.setItem(userDataStorageKey, serialized)");
+    expect(harness).toContain("process.env.GITHUB_RUN_ID?.trim()");
+    expect(bootstrap).toContain('createdAt: `${startDate}T00:00:00.000Z`');
+    expect(bootstrap).toContain("await page.reload()");
     expect(openTab).toContain('getByRole("button", {');
     expect(openTab).toContain('name: "Hệ thống 12 tuần"');
     expect(openTab).toContain("exact: true");
@@ -103,7 +105,7 @@ describe("GitHub workflow safety guards", () => {
     const prepareEnd = harness.indexOf("// ── Tests", prepareStart);
     const prepareScenario = harness.slice(prepareStart, prepareEnd);
     const importStart = harness.indexOf("async function importLwwBaseline");
-    const importEnd = harness.indexOf("async function activateLwwGoal", importStart);
+    const importEnd = harness.indexOf("async function reloadProofGoal", importStart);
     const importBootstrap = harness.slice(importStart, importEnd);
     const observerIndex = prepareScenario.indexOf("captureApiResponseDiagnostics(pageA)");
     const bootstrapIndex = prepareScenario.indexOf("bootstrapLwwGoal(pageA, scenarioTitle)");

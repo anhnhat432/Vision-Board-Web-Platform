@@ -13,18 +13,19 @@ const ALLOW_OVERWRITE =
   process.env.LWW_E2E_ALLOW === "OVERWRITE_TEST_WORKSPACE";
 const EMAIL = process.env.LWW_E2E_EMAIL;
 const PASSWORD = process.env.LWW_E2E_PASSWORD;
-const TIMESTAMP = Date.now();
-const TEST_PREFIX = `[LWW-E2E-${TIMESTAMP}]`;
+const RUN_ID =
+  process.env.LWW_E2E_RUN_ID?.trim() ||
+  process.env.GITHUB_RUN_ID?.trim() ||
+  String(Date.now());
+const TEST_PREFIX = `[LWW-E2E-${RUN_ID}]`;
 const PROOF_GOAL_ID = "lww_e2e_goal";
 const PROOF_LEAD_INDICATOR_ID = "lww_e2e_lead";
 const PROOF_TASK_ID = "tw_task_1_lww_e2e_lead_0";
 const USER_DATA_STORAGE_KEY = "visionboard_user_data";
 const AUTH_OWNER_STORAGE_KEY = "visionboard_user_data:auth_owner_uid";
-const USER_DATA_UPDATED_EVENT_NAME = "visionboard:user-data-updated";
 const MANUAL_SYNC_MIN_INTERVAL_MS = 5_000;
 const lastObservedCloudPullAt = new WeakMap<Page, number>();
 const observedApiBaseUrl = new WeakMap<Page, string>();
-let importSequence = 0;
 
 interface LwwProofIdentity {
   goalId: string;
@@ -121,7 +122,7 @@ async function bootstrapLwwGoal(
   page: Page,
   scenarioTitle: string,
 ): Promise<LwwProofGoal> {
-  const scenarioKey = `${TIMESTAMP}_${++importSequence}_${scenarioTitle
+  const scenarioKey = `${RUN_ID}_${scenarioTitle
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "_")}`;
   const seed: LwwProofIdentity = {
@@ -200,7 +201,7 @@ async function bootstrapLwwGoal(
         tasks: [],
         feasibilityResult: "realistic",
         readinessScore: 20,
-        createdAt: new Date().toISOString(),
+        createdAt: `${startDate}T00:00:00.000Z`,
         twelveWeekSystem: {
           goalType: "Project Completion",
           vision12Week: proofSeed.goalTitle,
@@ -449,27 +450,21 @@ async function importLwwBaseline(
   ).toBe(true);
 }
 
-async function activateLwwGoal(page: Page) {
-  await page.evaluate(
-    ({ userDataStorageKey, userDataUpdatedEventName }) => {
-      const serialized = localStorage.getItem(userDataStorageKey);
-      if (!serialized) {
-        throw new Error("LWW bootstrap snapshot was not available for UI activation.");
-      }
-      window.dispatchEvent(
-        new StorageEvent("storage", {
-          key: userDataStorageKey,
-          newValue: serialized,
-          storageArea: localStorage,
-        }),
-      );
-      window.dispatchEvent(new CustomEvent(userDataUpdatedEventName));
-    },
-    {
-      userDataStorageKey: USER_DATA_STORAGE_KEY,
-      userDataUpdatedEventName: USER_DATA_UPDATED_EVENT_NAME,
-    },
+async function reloadProofGoal(page: Page, seed: LwwProofGoal) {
+  const pullResponsePromise = page.waitForResponse(
+    (response) =>
+      response.request().method() === "GET" &&
+      /\/sync\/12-week\/pull$/.test(new URL(response.url()).pathname),
+    { timeout: 60_000 },
   );
+  await page.reload();
+  const pullResponse = await pullResponsePromise;
+  expect(
+    pullResponse.ok(),
+    `Reload 12-week pull responded ${pullResponse.status()}`,
+  ).toBe(true);
+  rememberCloudPull(page, pullResponse);
+  await waitForProofGoal(page, seed);
 }
 
 async function readSystemTabDiagnostics(
@@ -958,11 +953,7 @@ async function prepareLwwScenario(
   try {
     const seed = await bootstrapLwwGoal(pageA, scenarioTitle);
     await importLwwBaseline(pageA, seed, apiDiagnostics.read);
-    await activateLwwGoal(pageA);
-    await openSystemTab(pageA, "today");
-    await expect(
-      pageA.getByText(seed.goalTitle, { exact: true }).first(),
-    ).toBeVisible({ timeout: 30_000 });
+    await reloadProofGoal(pageA, seed);
     await loginPage(pageB, EMAIL!, PASSWORD!);
     await waitForProofGoal(pageB, seed);
 
