@@ -20,6 +20,7 @@ export interface SyncMutationResult {
   status:
     | "accepted"
     | "applied"
+    | "noop"
     | "duplicate"
     | "failed"
     | "failed_not_found"

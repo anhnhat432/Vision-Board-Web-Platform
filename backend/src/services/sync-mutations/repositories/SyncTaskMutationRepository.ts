@@ -18,6 +18,7 @@ export interface TaskCompletedChangedApplyInput {
 
 export interface AppliedTaskMutationEntity {
   id: string;
+  mutationApplied?: boolean;
   clientTaskId?: string;
   status: "todo" | "doing" | "done";
   completedAt?: Date;

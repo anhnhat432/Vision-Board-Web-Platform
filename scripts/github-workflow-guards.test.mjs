@@ -139,6 +139,7 @@ describe("GitHub workflow safety guards", () => {
     expect(harness).toContain("method: response.request().method()");
     expect(harness).toContain("path: url.pathname");
     expect(harness).toContain("status: response.status()");
+    expect(harness).toContain('dialog.getByPlaceholder("XOACLOUD").fill("XOACLOUD")');
     expect(harness).not.toContain("payload: item.payload");
     expect(harness).not.toContain("response.body()");
     expect(harness).not.toContain("response.headers()");

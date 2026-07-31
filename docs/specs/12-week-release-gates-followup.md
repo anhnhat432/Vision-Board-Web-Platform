@@ -48,6 +48,9 @@
 24. WHEN the LWW workflow succeeds or fails, THE workflow SHALL upload both `playwright-report/` and `test-results/` with `if: always()` so screenshots, video, and error context remain available after the runner exits.
 25. WHILE an LWW proof context is active, THE harness SHALL return deterministic proof-only success responses for the legacy execution transport under `/api/plans`, `/api/plans/*`, `/api/weeks/*`, `/api/tasks/*`, and `/api/metrics/*`; it SHALL NOT intercept, mock, or fulfill any `/api/sync/12-week/*` request.
 26. WHEN manual sync or final convergence fails, THE harness SHALL expose only the scenario/stage label, HTTP status, `Retry-After`, pending/retry-scheduled counts, and final context A/B booleans; it SHALL NOT expose credentials, payloads, response bodies, snapshots, titles, arbitrary headers, or PII.
+27. WHEN `task_completed_changed` mutations arrive out of order, THE backend SHALL compare their validated `clientTimestamp` values, break equal-timestamp ties by `mutationId`, apply only the winning mutation, and return a successful `noop` result for a losing mutation without changing task state or revision.
+28. AFTER a task mutation drain succeeds, THE next pull SHALL remain authoritative for that task; the frontend SHALL NOT preserve a recently applied task through the temporary skip-entity compatibility window used by check-ins, reviews, and metrics.
+29. WHEN the tombstone proof opens the cloud-workspace deletion dialog, THE harness SHALL complete both irreversible confirmation controls (checkbox and exact `XOACLOUD` text) before waiting for the real `/api/sync/12-week/workspace` delete response.
 
 ## 5. Data, Storage, and Sync Constraints
 
@@ -89,6 +92,9 @@
 - [ ] LWW scenarios run sequentially with at least 65 seconds between them and preserve the aggregate failing exit code
 - [ ] LWW workflow always uploads per-scenario `playwright-report/` and `test-results/` artifacts
 - [ ] LWW failures report only safe scenario/stage, status, `Retry-After`, queue-count, and final boolean diagnostics
+- [ ] out-of-order task mutations use client-timestamp LWW and stale mutations return `noop` without another write
+- [ ] a post-drain task pull applies the authoritative cloud state instead of restoring a recent local task value
+- [ ] tombstone proof completes both production delete confirmations before submitting the real delete request
 - [ ] LWW login defers the first-time onboarding redirect before authentication
 - [ ] LWW Settings and 12-week execution entry use in-app navigation and do not reload the auto-sync provider before manual sync
 - [ ] missing LWW proof tasks expose only safe boolean/count diagnostics at the Today boundary

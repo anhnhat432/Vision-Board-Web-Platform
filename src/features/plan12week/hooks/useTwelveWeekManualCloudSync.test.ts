@@ -746,6 +746,81 @@ describe("runTwelveWeekManualCloudSync", () => {
     expect(writtenData?.goals[0].twelveWeekSystem?.dailyCheckIns).toEqual([createLocalDailyCheckIn()]);
   });
 
+  it("applies a newer cloud task after a recently applied local task mutation", async () => {
+    const localData = createLocalDataWithDifferentTask();
+    const localTask = localData.goals[0].twelveWeekSystem?.taskInstances[0];
+    if (!localTask) throw new Error("Missing local task fixture");
+    localTask.completed = true;
+    localTask.completedAt = at(4);
+
+    let writtenData: UserData | undefined;
+    const drainMutations = vi.fn(async () => {
+      enqueueStoredMutation(
+        {
+          kind: "task_completed_changed",
+          goalId: "goal_1",
+          payload: {
+            taskId: localTask.id,
+            clientTaskId: localTask.id,
+            clientPlanId: "goal_1:12-week-system",
+            clientWeekId: "goal_1:week:1",
+            weekNumber: 1,
+            completed: true,
+            completedAt: at(4),
+            scheduledDate: localTask.scheduledDate,
+          },
+        },
+        {
+          ownerUid: "user_1",
+          storage: localStorage,
+          deviceId: "device_1",
+          now: at(4),
+          createId: () => "mutation_recent_task",
+        },
+      );
+      const store = readMutationQueueStore("user_1", { storage: localStorage, now: at(5) });
+      const appliedStore = markMutationSucceeded(
+        { ...store, lastDrainStartedAt: at(5) },
+        "mutation_recent_task",
+        { now: at(5) },
+      );
+      writeMutationQueueStore(
+        { ...appliedStore, lastDrainFinishedAt: at(5) },
+        { storage: localStorage, now: at(5) },
+      );
+      return {
+        status: "idle" as const,
+        skipReason: "empty" as const,
+        attemptedCount: 0,
+        succeededCount: 0,
+        duplicateCount: 0,
+        failedCount: 0,
+        pendingCount: 0,
+      };
+    });
+    const cloudWorkspace = createSafeCloudWorkspace();
+    cloudWorkspace.tasks[0].status = "todo";
+    cloudWorkspace.tasks[0].completedAt = undefined;
+    cloudWorkspace.tasks[0].syncUpdatedAt = at(6);
+
+    const result = await runTwelveWeekManualCloudSync({
+      ...baseOptions(),
+      drainMutations,
+      pullWorkspace: vi.fn(async () => createPullResponse(cloudWorkspace)),
+      readUserData: () => localData,
+      writeUserData: vi.fn((data: UserData) => {
+        writtenData = data;
+        return true;
+      }),
+      readCursor: () => null,
+      writeCursor: vi.fn(),
+      autoResolveAllConflicts: true,
+    });
+
+    expect(result.status).toBe("applied");
+    expect(writtenData?.goals[0].twelveWeekSystem?.taskInstances[0].completed).toBe(false);
+  });
+
   it("auto-resolves local-winning pending mutation without overwriting local task state", async () => {
     enqueueStoredMutation(
       {
