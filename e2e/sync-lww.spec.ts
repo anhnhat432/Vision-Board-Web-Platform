@@ -95,6 +95,7 @@ async function loginPage(page: Page, email: string, password: string) {
     `Initial 12-week pull responded ${initialPullResponse.status()}`,
   ).toBe(true);
   rememberCloudPull(page, initialPullResponse);
+  await page.goto("/settings");
   await expect(
     page.getByRole("button", {
       name: "Kiểm tra sao lưu",

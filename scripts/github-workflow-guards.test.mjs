@@ -180,6 +180,20 @@ describe("GitHub workflow safety guards", () => {
     );
   });
 
+  it("re-enters Settings after the initial LWW pull before requiring sync controls", () => {
+    const harness = readFileSync(path.resolve("e2e", "sync-lww.spec.ts"), "utf8");
+    const loginStart = harness.indexOf("async function loginPage");
+    const loginEnd = harness.indexOf("async function primeProofGuidanceState", loginStart);
+    const login = harness.slice(loginStart, loginEnd);
+    const pullAssertion = login.indexOf("initialPullResponse.ok()");
+    const settingsNavigation = login.indexOf('await page.goto("/settings")');
+    const syncControl = login.indexOf('name: "Kiểm tra sao lưu"');
+
+    expect(loginStart).toBeGreaterThan(-1);
+    expect(settingsNavigation).toBeGreaterThan(pullAssertion);
+    expect(syncControl).toBeGreaterThan(settingsNavigation);
+  });
+
   it("keeps LWW staging smoke overwrite opt-in and dedicated marker guards", () => {
     const workflow = readWorkflow("lww-e2e-staging.yml");
     const harness = readFileSync(path.resolve("e2e", "sync-lww.spec.ts"), "utf8");

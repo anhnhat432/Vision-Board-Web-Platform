@@ -41,6 +41,7 @@
 17. WHILE exercising local-wins, cloud-wins, and tombstone resolution after baseline import, THE harness SHALL create task state changes through the real checkbox UI and publish them through the real mutation queue; direct API import SHALL NOT replace any conflict mutation under proof.
 18. WHEN an authenticated 12-week import is accepted, THE backend SHALL persist the resolved `importId` as both the mutation ID and mutation-log idempotency key so repeated imports do not depend on legacy nullable-index behavior.
 19. WHILE an LWW proof context is authenticating, THE harness SHALL isolate the unrelated legacy `GET /api/plans` hydration list with an empty success response; all `/api/sync/12-week/*` requests SHALL continue to use the deployed backend.
+20. WHEN the initial authenticated 12-week pull succeeds, THE harness SHALL navigate to `/settings` before requiring the manual-sync controls so onboarding or post-login redirects do not hide the proof surface.
 
 ## 5. Data, Storage, and Sync Constraints
 
@@ -79,6 +80,7 @@
 - [ ] local-wins, cloud-wins, and tombstone proof mutations still originate from the real task checkbox UI and drain through the real mutation queue
 - [ ] accepted 12-week imports persist `importId` as the mutation-log idempotency key, avoiding production `idempotencyKey:null` duplicate-index failures
 - [ ] LWW proof contexts suppress only the legacy `GET /api/plans` fan-out while leaving every 12-week sync endpoint live
+- [ ] LWW login re-enters `/settings` after the successful initial pull before asserting manual-sync controls
 - [ ] missing LWW proof tasks expose only safe boolean/count diagnostics at the Today boundary
 - [ ] missing LWW tabs or settings controls expose only safe route/count/state diagnostics at the system-tab boundary
 - [ ] no secret value is read, copied, committed, or logged
