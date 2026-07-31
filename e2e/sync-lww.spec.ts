@@ -914,8 +914,10 @@ async function deleteProofWorkspace(page: Page) {
   });
   await expect(dialog).toBeVisible({ timeout: 15_000 });
   await dialog.getByPlaceholder("XOACLOUD").fill("XOACLOUD");
-  const confirmCheckbox = dialog.locator("#delete-cloud-confirm-checkbox");
-  await confirmCheckbox.check();
+  const confirmCheckbox = dialog.getByRole("checkbox", {
+    name: "Tôi hiểu hành động này là không thể rút lại và đồng ý xóa vĩnh viễn.",
+  });
+  await confirmCheckbox.click();
   await expect(confirmCheckbox).toBeChecked();
   const confirmButton = dialog.getByRole("button", {
     name: "Xóa dữ liệu đã đồng bộ",

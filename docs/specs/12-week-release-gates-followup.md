@@ -48,16 +48,18 @@
 24. WHEN the LWW workflow succeeds or fails, THE workflow SHALL upload both `playwright-report/` and `test-results/` with `if: always()` so screenshots, video, and error context remain available after the runner exits.
 25. WHILE an LWW proof context is active, THE harness SHALL return deterministic proof-only success responses for the legacy execution transport under `/api/plans`, `/api/plans/*`, `/api/weeks/*`, `/api/tasks/*`, and `/api/metrics/*`; it SHALL NOT intercept, mock, or fulfill any `/api/sync/12-week/*` request.
 26. WHEN manual sync or final convergence fails, THE harness SHALL expose only the scenario/stage label, HTTP status, `Retry-After`, pending/retry-scheduled counts, and final context A/B booleans; it SHALL NOT expose credentials, payloads, response bodies, snapshots, titles, arbitrary headers, or PII.
-27. WHEN `task_completed_changed` mutations arrive out of order, THE backend SHALL compare their validated `clientTimestamp` values, break equal-timestamp ties by `mutationId`, apply only the winning mutation, and return a successful `noop` result for a losing mutation without changing task state or revision.
+27. WHEN `task_completed_changed` mutations arrive out of order, THE backend SHALL compare their validated `clientTimestamp` values using a task-level client LWW timestamp, break equal-timestamp ties by `mutationId`, apply only the winning mutation, and return a successful `noop` result for a losing mutation without changing task state or revision.
 28. AFTER a task mutation drain succeeds, THE next pull SHALL remain authoritative for that task; the frontend SHALL NOT preserve a recently applied task through the temporary skip-entity compatibility window used by check-ins, reviews, and metrics.
 29. WHEN the tombstone proof opens the cloud-workspace deletion dialog, THE harness SHALL complete both irreversible confirmation controls (checkbox and exact `XOACLOUD` text) before waiting for the real `/api/sync/12-week/workspace` delete response.
+30. WHEN a task mutation is accepted or rejected by LWW, THE task's `syncUpdatedAt` SHALL remain a server processing timestamp used by delta pull, separate from the client timestamp used for winner selection, so a mutation processed after a pull cursor cannot disappear because the client clock lags the server clock.
+31. WHERE an existing task has no client LWW timestamp, THE first post-migration mutation SHALL be accepted and establish that timestamp because legacy `syncUpdatedAt` values may contain either server time or client time.
 
 ## 5. Data, Storage, and Sync Constraints
 
 - localStorage keys / shapes touched: none.
 - migration or normalization needed: none.
-- backend models or API contracts touched: none.
-- sync ordering guarantees: unchanged.
+- backend models or API contracts touched: add an optional internal task client-LWW timestamp; the public mutation response shape remains unchanged.
+- sync ordering guarantees: client time selects the task winner; server time controls delta visibility.
 - rollback / restore concerns: dependency changes are isolated to manifests and lockfiles; Vercel environment scope changes must not overwrite secret values.
 
 ## 6. Non-functional Requirements
@@ -93,6 +95,8 @@
 - [ ] LWW workflow always uploads per-scenario `playwright-report/` and `test-results/` artifacts
 - [ ] LWW failures report only safe scenario/stage, status, `Retry-After`, queue-count, and final boolean diagnostics
 - [ ] out-of-order task mutations use client-timestamp LWW and stale mutations return `noop` without another write
+- [ ] task LWW client timestamps are stored separately from server `syncUpdatedAt`, and lagging client clocks do not hide accepted mutations from delta pull
+- [ ] legacy tasks without the new client-LWW field accept one deterministic migration write before normal LWW comparison resumes
 - [ ] a post-drain task pull applies the authoritative cloud state instead of restoring a recent local task value
 - [ ] tombstone proof completes both production delete confirmations before submitting the real delete request
 - [ ] LWW login defers the first-time onboarding redirect before authentication
