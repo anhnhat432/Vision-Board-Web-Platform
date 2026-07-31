@@ -23,6 +23,7 @@ const AUTH_OWNER_STORAGE_KEY = "visionboard_user_data:auth_owner_uid";
 const USER_DATA_UPDATED_EVENT_NAME = "visionboard:user-data-updated";
 const MANUAL_SYNC_MIN_INTERVAL_MS = 5_000;
 const lastObservedCloudPullAt = new WeakMap<Page, number>();
+const observedApiBaseUrl = new WeakMap<Page, string>();
 let importSequence = 0;
 
 interface LwwProofIdentity {
@@ -49,8 +50,13 @@ function isSafeLwwEmail(email: string) {
 
 // ── Helpers ───────────────────────────────────────────────────────
 
-function rememberCloudPull(page: Page) {
+function rememberCloudPull(page: Page, response: Response) {
   lastObservedCloudPullAt.set(page, Date.now());
+  const url = new URL(response.url());
+  observedApiBaseUrl.set(
+    page,
+    `${url.origin}${url.pathname.replace(/\/sync\/12-week\/pull$/, "")}`,
+  );
 }
 
 async function waitForManualSyncWindow(page: Page) {
@@ -87,7 +93,7 @@ async function loginPage(page: Page, email: string, password: string) {
     initialPullResponse.ok(),
     `Initial 12-week pull responded ${initialPullResponse.status()}`,
   ).toBe(true);
-  rememberCloudPull(page);
+  rememberCloudPull(page, initialPullResponse);
   await expect(
     page.getByRole("button", {
       name: "Kiểm tra sao lưu",
@@ -319,8 +325,12 @@ async function importLwwBaseline(
   seed: LwwProofGoal,
   readApiDiagnostics: () => ApiResponseDiagnostic[],
 ) {
+  const apiBaseUrl = observedApiBaseUrl.get(page);
+  if (!apiBaseUrl) {
+    throw new Error("LWW bootstrap could not resolve the deployed backend API base URL.");
+  }
   const diagnostics = await page.evaluate(
-    async ({ importId, importPayload, proofIds }) => {
+    async ({ apiBaseUrl: backendApiBaseUrl, importId, importPayload, proofIds }) => {
       type EntityCounts = Partial<
         Record<"goals" | "plans" | "weeks" | "tasks" | "leadMetrics", number>
       >;
@@ -355,19 +365,22 @@ async function importLwwBaseline(
         };
       }
 
-      const importResponse = await fetch("/api/sync/12-week/import", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
+      const importResponse = await fetch(
+        `${backendApiBaseUrl}/sync/12-week/import`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            importId,
+            idempotencyKey: importId,
+            source: "account_scope_cloud_import",
+            workspace: { goals: [importPayload] },
+          }),
         },
-        body: JSON.stringify({
-          importId,
-          idempotencyKey: importId,
-          source: "account_scope_cloud_import",
-          workspace: { goals: [importPayload] },
-        }),
-      });
+      );
       const importEnvelope = await readJson<ImportData>(importResponse);
       const importData = importEnvelope.data;
       const counts = importData?.validation?.acceptedEntityCounts ?? {};
@@ -398,6 +411,7 @@ async function importLwwBaseline(
       return importDiagnostics;
     },
     {
+      apiBaseUrl,
       importId: seed.importId,
       importPayload: seed.importPayload,
       proofIds: {
@@ -769,7 +783,7 @@ async function triggerManualCloudSync(
     pullResponse.ok(),
     `12-week pull responded ${pullResponse.status()}`,
   ).toBe(true);
-  rememberCloudPull(page);
+  rememberCloudPull(page, pullResponse);
   await expect(syncButton).toBeEnabled({ timeout: timeoutMs });
   await expect(page.getByTestId("settings-sync-last-result")).toBeVisible({
     timeout: timeoutMs,

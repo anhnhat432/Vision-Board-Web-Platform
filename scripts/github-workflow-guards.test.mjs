@@ -121,7 +121,8 @@ describe("GitHub workflow safety guards", () => {
     expect(observerIndex).toBeLessThan(bootstrapIndex);
     expect(harness).toContain("initialPullResponsePromise");
     expect(importBootstrap).not.toContain("triggerManualCloudSync(page)");
-    expect(importBootstrap).toContain('fetch("/api/sync/12-week/import"');
+    expect(importBootstrap).toContain("observedApiBaseUrl.get(page)");
+    expect(importBootstrap).toContain('`${backendApiBaseUrl}/sync/12-week/import`');
     expect(importBootstrap).toContain('response.path === "/api/sync/12-week/import"');
     expect(harness).toContain("createTwelveWeekImportPayload");
     expect(harness).toContain("await toggleTask(pageA, seed.taskTitle, true)");
@@ -171,7 +172,7 @@ describe("GitHub workflow safety guards", () => {
 
     expect(triggerStart).toBeGreaterThan(-1);
     expect(harness).toContain("const MANUAL_SYNC_MIN_INTERVAL_MS = 5_000");
-    expect(harness).toContain("rememberCloudPull(page)");
+    expect(harness).toContain("rememberCloudPull(page,");
     expect(triggerManualSync.indexOf("waitForManualSyncWindow(page)")).toBeLessThan(
       triggerManualSync.indexOf("const pullResponsePromise"),
     );
