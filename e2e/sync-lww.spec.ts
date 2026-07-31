@@ -72,6 +72,15 @@ async function waitForManualSyncWindow(page: Page) {
     .toBeGreaterThanOrEqual(MANUAL_SYNC_MIN_INTERVAL_MS);
 }
 
+async function openSettingsWithoutReload(page: Page) {
+  if (new URL(page.url()).pathname === "/settings") return;
+
+  const settingsLink = page.locator('a[href="/settings"]:visible').first();
+  await expect(settingsLink).toBeVisible({ timeout: 30_000 });
+  await settingsLink.click();
+  await expect(page).toHaveURL(/\/settings(?:[?#]|$)/, { timeout: 30_000 });
+}
+
 async function loginPage(page: Page, email: string, password: string) {
   await page.goto("/login?next=%2Fsettings");
   await expect(
@@ -95,7 +104,7 @@ async function loginPage(page: Page, email: string, password: string) {
     `Initial 12-week pull responded ${initialPullResponse.status()}`,
   ).toBe(true);
   rememberCloudPull(page, initialPullResponse);
-  await page.goto("/settings");
+  await expect(page).toHaveURL(/\/settings(?:[?#]|$)/, { timeout: 30_000 });
   await expect(
     page.getByRole("button", {
       name: "Kiểm tra sao lưu",
@@ -109,6 +118,7 @@ async function loginPage(page: Page, email: string, password: string) {
 
 async function primeProofGuidanceState(page: Page) {
   await page.addInitScript(() => {
+    sessionStorage.setItem("onboarding-deferred", "1");
     localStorage.setItem("visionboard_screen_guide_seen:settings", "true");
     localStorage.setItem("visionboard_screen_guide_seen:twelve-week-system", "true");
     localStorage.setItem("visionboard_page_tour_seen:twelve-week-system", "true");
@@ -757,7 +767,7 @@ async function triggerManualCloudSync(
   page: Page,
   timeoutMs: number = 60_000,
 ) {
-  await page.goto("/settings");
+  await openSettingsWithoutReload(page);
   const syncButton = page.getByRole("button", {
     name: "Kiểm tra sao lưu",
     exact: true,
@@ -792,7 +802,7 @@ async function openProofGoal(page: Page, seed: LwwProofGoal) {
     localStorage.setItem("latest_12_week_goal_id", goalId);
     localStorage.setItem("latest_12_week_system_goal_id", goalId);
   }, seed.goalId);
-  await page.goto("/12-week-system?tab=today");
+  await openSystemTab(page, "today");
   await getProofTaskCheckbox(page, seed.taskTitle);
 }
 

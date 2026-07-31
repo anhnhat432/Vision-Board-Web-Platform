@@ -180,18 +180,29 @@ describe("GitHub workflow safety guards", () => {
     );
   });
 
-  it("re-enters Settings after the initial LWW pull before requiring sync controls", () => {
+  it("keeps LWW Settings routing inside the active auto-sync provider", () => {
     const harness = readFileSync(path.resolve("e2e", "sync-lww.spec.ts"), "utf8");
+    const guidanceStart = harness.indexOf("async function primeProofGuidanceState");
+    const guidanceEnd = harness.indexOf("async function bootstrapLwwGoal", guidanceStart);
+    const guidance = harness.slice(guidanceStart, guidanceEnd);
     const loginStart = harness.indexOf("async function loginPage");
     const loginEnd = harness.indexOf("async function primeProofGuidanceState", loginStart);
     const login = harness.slice(loginStart, loginEnd);
-    const pullAssertion = login.indexOf("initialPullResponse.ok()");
-    const settingsNavigation = login.indexOf('await page.goto("/settings")');
-    const syncControl = login.indexOf('name: "Kiểm tra sao lưu"');
+    const triggerStart = harness.indexOf("async function triggerManualCloudSync");
+    const triggerEnd = harness.indexOf("async function openProofGoal", triggerStart);
+    const triggerManualSync = harness.slice(triggerStart, triggerEnd);
+    const openProofGoalStart = harness.indexOf("async function openProofGoal");
+    const openProofGoalEnd = harness.indexOf("async function pullProofGoal", openProofGoalStart);
+    const openProofGoal = harness.slice(openProofGoalStart, openProofGoalEnd);
 
     expect(loginStart).toBeGreaterThan(-1);
-    expect(settingsNavigation).toBeGreaterThan(pullAssertion);
-    expect(syncControl).toBeGreaterThan(settingsNavigation);
+    expect(guidance).toContain('sessionStorage.setItem("onboarding-deferred", "1")');
+    expect(login).toContain("await expect(page).toHaveURL(/\\/settings");
+    expect(login).not.toContain('await page.goto("/settings")');
+    expect(triggerManualSync).toContain("await openSettingsWithoutReload(page)");
+    expect(triggerManualSync).not.toContain('await page.goto("/settings")');
+    expect(openProofGoal).toContain('await openSystemTab(page, "today")');
+    expect(openProofGoal).not.toContain('await page.goto("/12-week-system?tab=today")');
   });
 
   it("keeps LWW staging smoke overwrite opt-in and dedicated marker guards", () => {
