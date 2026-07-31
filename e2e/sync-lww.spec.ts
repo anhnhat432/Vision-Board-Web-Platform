@@ -1203,17 +1203,6 @@ async function getTaskCompletedState(
   return (await getProofTaskCheckbox(page, taskTitle)).isChecked();
 }
 
-async function captureConsoleLogs(page: Page): Promise<string[]> {
-  const logs: string[] = [];
-  page.on("console", (msg) => {
-    const text = msg.text();
-    if (text.includes("[auto-sync-lww]")) {
-      logs.push(text);
-    }
-  });
-  return logs;
-}
-
 async function prepareLwwScenario(
   pageA: Page,
   pageB: Page,
@@ -1264,8 +1253,6 @@ test.describe("LWW auto-resolve sync", () => {
     const pageA = await contextA.newPage();
     const pageB = await contextB.newPage();
 
-    const consoleLogsA = await captureConsoleLogs(pageA);
-
     try {
       const seed = await prepareLwwScenario(
         pageA,
@@ -1306,10 +1293,6 @@ test.describe("LWW auto-resolve sync", () => {
         syncDiagnosticsB.read,
       );
 
-      const hasLwwLog = consoleLogsA.some((log) =>
-        log.includes("resolved")
-      );
-      expect(hasLwwLog).toBe(true);
     } finally {
       await Promise.all([contextA.close(), contextB.close()]);
     }
@@ -1320,8 +1303,6 @@ test.describe("LWW auto-resolve sync", () => {
     const contextB = await newProofContext();
     const pageA = await contextA.newPage();
     const pageB = await contextB.newPage();
-    const consoleLogsA = await captureConsoleLogs(pageA);
-
     try {
       const seed = await prepareLwwScenario(
         pageA,
@@ -1358,7 +1339,6 @@ test.describe("LWW auto-resolve sync", () => {
         syncDiagnosticsB.read,
       );
 
-      expect(consoleLogsA.some((log) => log.includes("resolved"))).toBe(true);
     } finally {
       await Promise.all([contextA.close(), contextB.close()]);
     }

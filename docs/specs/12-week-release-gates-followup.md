@@ -57,12 +57,13 @@
 33. WHEN a mutation drain ends with no pending mutations and every failure is `failed_not_found`, THE manual sync SHALL continue to pull the authoritative cloud snapshot so a remote tombstone can remove stale local data; any retryable, validation, conflict, or mixed failure SHALL still stop before pull.
 34. WHEN a new LWW workflow starts after a previous tombstone scenario emptied the QA workspace, THE harness SHALL seed and import the next proof goal before navigating to a 12-week tab.
 35. BETWEEN sequential LWW scenarios, THE harness SHALL use short scenario-specific goal, plan, lead-indicator, and task client IDs so earlier baselines cannot collide with the current scenario's merge keys or diagnostics and every derived ID remains within backend validation limits.
+36. WHEN an authenticated user deletes the cloud 12-week workspace, THE backend SHALL soft-delete every active workspace entity with one server timestamp, return policy `soft_delete`, and expose those records as pull tombstones until the existing retention cleanup removes them.
 
 ## 5. Data, Storage, and Sync Constraints
 
 - localStorage keys / shapes touched: none; authoritative pulled tasks reuse the existing `lastModifiedAt` field.
 - migration or normalization needed: none.
-- backend models or API contracts touched: add an optional internal task client-LWW timestamp and an internal frontend drain diagnostic count; the public mutation response shape remains unchanged.
+- backend models or API contracts touched: add an optional internal task client-LWW timestamp and an internal frontend drain diagnostic count; workspace deletion policy changes from `hard_delete` to `soft_delete` so pull can expose tombstones.
 - sync ordering guarantees: client time selects the task winner; server time controls delta visibility.
 - rollback / restore concerns: dependency changes are isolated to manifests and lockfiles; Vercel environment scope changes must not overwrite secret values.
 
@@ -107,6 +108,7 @@
 - [ ] an all-`failed_not_found`, zero-pending drain continues to pull tombstones while all other drain failures remain blocking
 - [ ] a fresh workflow run can bootstrap after the previous run deleted the entire QA workspace
 - [ ] sequential LWW scenarios use distinct task and lead-indicator client IDs
+- [ ] deleting the cloud workspace returns `soft_delete` and the next pull exposes goal/plan/task tombstones
 - [ ] LWW login defers the first-time onboarding redirect before authentication
 - [ ] LWW Settings and 12-week execution entry use in-app navigation and do not reload the auto-sync provider before manual sync
 - [ ] missing LWW proof tasks expose only safe boolean/count diagnostics at the Today boundary
