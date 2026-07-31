@@ -64,11 +64,12 @@ export class TaskCompletedChangedHandler implements MutationHandlerStrategy {
     }
 
     // ─── Apply ────────────────────────────────────────────────
-    const syncUpdatedAt = mutation.clientTimestamp ?? processedAt;
+    const clientTimestamp = mutation.clientTimestamp ?? processedAt;
+    const syncUpdatedAt = processedAt;
     const completedAt = payload.completedAt
       ? new Date(payload.completedAt as string)
       : payload.completed
-        ? syncUpdatedAt
+        ? clientTimestamp
         : undefined;
 
     const clientWeekId =
@@ -106,6 +107,7 @@ export class TaskCompletedChangedHandler implements MutationHandlerStrategy {
       scheduledDate: scheduledDate && Number.isFinite(scheduledDate.valueOf()) ? scheduledDate : undefined,
       completed: payload.completed,
       completedAt,
+      clientTimestamp,
       syncUpdatedAt,
     });
 

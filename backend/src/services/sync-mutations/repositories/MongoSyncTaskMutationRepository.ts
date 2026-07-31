@@ -22,6 +22,7 @@ interface MongoTaskDoc {
   completedAt?: Date | null;
   revision?: number | null;
   lastMutationId?: string | null;
+  lastClientTimestamp?: Date | null;
   syncUpdatedAt?: Date | null;
 }
 
@@ -55,6 +56,7 @@ function mapTaskDoc(doc: MongoTaskDoc, mutationApplied = true): AppliedTaskMutat
     status: doc.status,
     completedAt: doc.completedAt ?? undefined,
     revision: doc.revision ?? undefined,
+    lastClientTimestamp: doc.lastClientTimestamp ?? undefined,
     syncUpdatedAt: doc.syncUpdatedAt ?? undefined,
   };
 }
@@ -92,8 +94,9 @@ export class MongoSyncTaskMutationRepository implements SyncTaskMutationReposito
         ? {
             $set: {
               status: "done",
-              completedAt: input.completedAt ?? input.syncUpdatedAt,
+              completedAt: input.completedAt ?? input.clientTimestamp,
               lastMutationId: input.mutationId,
+              lastClientTimestamp: input.clientTimestamp,
               syncUpdatedAt: input.syncUpdatedAt,
             },
             $inc: { revision: 1 },
@@ -102,6 +105,7 @@ export class MongoSyncTaskMutationRepository implements SyncTaskMutationReposito
             $set: {
               status: "todo",
               lastMutationId: input.mutationId,
+              lastClientTimestamp: input.clientTimestamp,
               syncUpdatedAt: input.syncUpdatedAt,
             },
             $unset: { completedAt: "" },
@@ -112,11 +116,11 @@ export class MongoSyncTaskMutationRepository implements SyncTaskMutationReposito
       withoutTombstones({
         _id: existingTask.id,
         $or: [
-          { syncUpdatedAt: null },
-          { syncUpdatedAt: { $lt: input.syncUpdatedAt } },
+          { lastClientTimestamp: null },
+          { lastClientTimestamp: { $lt: input.clientTimestamp } },
           {
             $and: [
-              { syncUpdatedAt: input.syncUpdatedAt },
+              { lastClientTimestamp: input.clientTimestamp },
               { $or: [{ lastMutationId: null }, { lastMutationId: { $lt: input.mutationId } }] },
             ],
           },
