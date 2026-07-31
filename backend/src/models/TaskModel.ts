@@ -82,6 +82,10 @@ const taskSchema = new Schema(
       required: false,
       trim: true,
     },
+    lastClientTimestamp: {
+      type: Date,
+      required: false,
+    },
     syncUpdatedAt: {
       type: Date,
       required: false,
