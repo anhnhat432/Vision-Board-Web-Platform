@@ -69,7 +69,12 @@ describe("GitHub workflow safety guards", () => {
     expect(harness).toContain("pullProofGoal");
     expect(harness).toContain('"visionboard_user_data:auth_owner_uid"');
     expect(harness).toContain("reloadProofGoal");
-    expect(harness).toContain('const PROOF_TASK_ID = "tw_task_1_lww_e2e_lead_0";');
+    expect(harness).toContain("function createScenarioKey(scenarioTitle: string)");
+    expect(harness).toContain('.slice(-10);');
+    expect(harness).toContain("const scenarioKey = createScenarioKey(scenarioTitle);");
+    expect(harness).toContain(
+      'taskId: `tw_task_1_${PROOF_LEAD_INDICATOR_ID}_${scenarioKey}_0`,',
+    );
     expect(harness).toContain("const leadIndicatorName = proofSeed.taskTitle;");
     expect(harness).toContain('getByRole("checkbox", {');
     expect(harness).toContain("`Hoàn thành việc: ${taskTitle}`");
