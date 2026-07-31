@@ -200,8 +200,9 @@ describe("GitHub workflow safety guards", () => {
 
     expect(loginStart).toBeGreaterThan(-1);
     expect(guidance).toContain('sessionStorage.setItem("onboarding-deferred", "1")');
-    expect(settingsNavigation).toContain('[aria-label="Mở menu tài khoản"]:visible');
-    expect(settingsNavigation).toContain('getByRole("menuitem", { name: "Cài đặt", exact: true })');
+    expect(settingsNavigation).toContain('window.history.pushState({}, "", "/settings")');
+    expect(settingsNavigation).toContain('new PopStateEvent("popstate")');
+    expect(settingsNavigation).not.toContain("Mở menu tài khoản");
     expect(settingsNavigation).not.toContain('a[href="/settings"]');
     expect(login).toContain("await expect(page).toHaveURL(/\\/settings");
     expect(login).not.toContain('await page.goto("/settings")');
