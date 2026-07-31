@@ -1,19 +1,40 @@
-import { expect, test, type Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
+import { resolveAccountDeleteE2ECredentials } from "../scripts/account-delete-e2e-credentials.mjs";
+import { expect, test } from "./fixtures";
 
 const BASE_URL = process.env.ACCOUNT_DELETE_E2E_URL?.replace(/\/$/, "");
+test.use({ proofBaseURL: BASE_URL });
+
 const ALLOW_DELETE =
   process.env.ACCOUNT_DELETE_E2E_ALLOW === "DELETE_TEST_ACCOUNT";
 const AUTH_MODE =
   process.env.ACCOUNT_DELETE_E2E_AUTH_MODE?.trim().toLowerCase() || "signup";
 const TIMESTAMP = Date.now();
-const GENERATED_EMAIL = `codex.qa+delete-${TIMESTAMP}@example.com`;
-const EMAIL = process.env.ACCOUNT_DELETE_E2E_EMAIL?.trim() || GENERATED_EMAIL;
-const PASSWORD =
-  process.env.ACCOUNT_DELETE_E2E_PASSWORD || `CodexDelete${TIMESTAMP}!`;
+const { email: EMAIL, password: PASSWORD } =
+  resolveAccountDeleteE2ECredentials({
+    authMode: AUTH_MODE,
+    timestamp: TIMESTAMP,
+    env: process.env,
+  });
 const LOCAL_MARKER = `account-delete-e2e-${TIMESTAMP}`;
+const USER_DATA_STORAGE_KEY = "visionboard_user_data";
+const AUTH_OWNER_STORAGE_KEY = "visionboard_user_data:auth_owner_uid";
+const SETTINGS_GUIDE_SEEN_STORAGE_KEY =
+  "visionboard_screen_guide_seen:settings";
 
 function isSafeDeleteEmail(email: string) {
   return /(^|[+._-])delete([+._-]|@)/i.test(email);
+}
+
+function isSafePostDeleteUrl(value: string) {
+  const url = new URL(value);
+  return (
+    url.pathname === "/" ||
+    url.pathname === "/onboarding" ||
+    (url.pathname === "/login" &&
+      (url.searchParams.get("next") === "/onboarding" ||
+        url.searchParams.get("next") === "/settings"))
+  );
 }
 
 async function submitEmailAuth(
@@ -72,20 +93,45 @@ async function authenticateDisposableAccount(page: Page) {
 }
 
 async function seedLocalMarker(page: Page) {
-  await page.evaluate((marker) => {
-    const data = {
-      storageVersion: 5,
-      aspirationalVision: { summary: marker },
-      onboardingCompleted: true,
-      goals: [],
-      visionBoards: [],
-      achievements: [],
-      reflections: [],
-      eventLog: [],
-      syncOutbox: [],
-    };
-    localStorage.setItem("visionboard_user_data", JSON.stringify(data));
-  }, LOCAL_MARKER);
+  await page.evaluate(
+    ({ authOwnerStorageKey, marker, userDataStorageKey }) => {
+      const raw = localStorage.getItem(userDataStorageKey);
+      const ownerUid = localStorage.getItem(authOwnerStorageKey)?.trim();
+      if (!raw || !ownerUid) {
+        throw new Error(
+          "Authenticated local snapshot was not ready for account-delete proof.",
+        );
+      }
+
+      const currentData = JSON.parse(raw) as {
+        aspirationalVision?: Record<string, unknown>;
+      } & Record<string, unknown>;
+      const aspirationalVision =
+        currentData.aspirationalVision &&
+        typeof currentData.aspirationalVision === "object"
+          ? currentData.aspirationalVision
+          : {};
+      const data = {
+        ...currentData,
+        aspirationalVision: {
+          ...aspirationalVision,
+          summary: marker,
+        },
+        onboardingCompleted: true,
+      };
+      const serialized = JSON.stringify(data);
+      localStorage.setItem(userDataStorageKey, serialized);
+      localStorage.setItem(
+        `${userDataStorageKey}:auth:${encodeURIComponent(ownerUid)}`,
+        serialized,
+      );
+    },
+    {
+      authOwnerStorageKey: AUTH_OWNER_STORAGE_KEY,
+      marker: LOCAL_MARKER,
+      userDataStorageKey: USER_DATA_STORAGE_KEY,
+    },
+  );
 }
 
 async function localMarkerExists(page: Page) {
@@ -98,6 +144,18 @@ async function localMarkerExists(page: Page) {
     }
     return false;
   }, LOCAL_MARKER);
+}
+
+async function primeSettingsGuideSeenState(page: Page) {
+  await page.addInitScript((storageKey) => {
+    localStorage.setItem(storageKey, "true");
+    const seenAt = new Date().toISOString();
+    localStorage.setItem("visionboard_new_user_guide_seen_at", seenAt);
+    localStorage.setItem(
+      "visionboard_first_run_guidance_completed_at",
+      seenAt,
+    );
+  }, SETTINGS_GUIDE_SEEN_STORAGE_KEY);
 }
 
 test.describe("staging account deletion", () => {
@@ -117,11 +175,13 @@ test.describe("staging account deletion", () => {
   test("deletes a disposable account remotely before clearing local data", async ({
     page,
   }) => {
+    await primeSettingsGuideSeenState(page);
     await authenticateDisposableAccount(page);
     await seedLocalMarker(page);
     expect(await localMarkerExists(page)).toBe(true);
 
     await page.goto(`${BASE_URL}/settings`);
+    expect(await localMarkerExists(page)).toBe(true);
     await expect(page.getByTestId("settings-delete-account-open")).toBeVisible({
       timeout: 20_000,
     });
@@ -149,7 +209,16 @@ test.describe("staging account deletion", () => {
       `DELETE account responded ${deleteResponse.status()}`,
     ).toBe(true);
 
-    await expect(page).toHaveURL(/\/$/, { timeout: 45_000 });
+    try {
+      await expect
+        .poll(() => isSafePostDeleteUrl(page.url()), { timeout: 45_000 })
+        .toBe(true);
+    } catch {
+      const currentUrl = new URL(page.url());
+      throw new Error(
+        `Account deletion reached an unexpected post-delete route: ${currentUrl.pathname}${currentUrl.search}`,
+      );
+    }
     expect(await localMarkerExists(page)).toBe(false);
   });
 });

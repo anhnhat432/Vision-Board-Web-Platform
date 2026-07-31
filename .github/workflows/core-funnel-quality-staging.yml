@@ -18,6 +18,7 @@ jobs:
     env:
       CORE_QUALITY_URL: ${{ github.event.inputs.target_url }}
       CORE_QUALITY_SESSION: gha-core-quality-${{ github.run_id }}
+      VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
@@ -34,6 +35,11 @@ jobs:
       - name: Validate target URL
         shell: bash
         run: |
+          if [ -z "${VERCEL_AUTOMATION_BYPASS_SECRET}" ]; then
+            echo "::error::Set repository secret VERCEL_AUTOMATION_BYPASS_SECRET before running protected-preview proof."
+            exit 1
+          fi
+
           if [ -z "${CORE_QUALITY_URL}" ]; then
             echo "::error::CORE_QUALITY_URL is required."
             exit 1

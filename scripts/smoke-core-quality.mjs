@@ -21,6 +21,12 @@
  */
 
 import { spawn } from "node:child_process";
+import {
+  createAgentBrowserBypassConfig,
+  removeAgentBrowserBypassConfig,
+} from "./agent-browser-bypass-config.mjs";
+
+let agentBrowserBypassConfig;
 
 const BASE_URL = (process.env.CORE_QUALITY_URL ?? process.env.MVP1_SMOKE_URL ?? "http://localhost:5173").replace(/\/$/, "");
 const PRODUCTION_REAL_MODE_URLS = new Set([
@@ -86,6 +92,20 @@ function quoteCmdArg(value) {
   return `"${String(value).replace(/"/g, '\\"')}"`;
 }
 
+function buildAgentBrowserEnvironment() {
+  const childEnvironment = {
+    ...process.env,
+    AGENT_BROWSER_DEFAULT_TIMEOUT: process.env.AGENT_BROWSER_DEFAULT_TIMEOUT ?? AGENT_BROWSER_DEFAULT_TIMEOUT_MS,
+  };
+  delete childEnvironment.VERCEL_AUTOMATION_BYPASS_SECRET;
+
+  if (agentBrowserBypassConfig) {
+    childEnvironment.AGENT_BROWSER_CONFIG = agentBrowserBypassConfig.configPath;
+  }
+
+  return childEnvironment;
+}
+
 function runAgentBrowser(args, { input, timeoutMs = 60_000 } = {}) {
   return new Promise((resolve, reject) => {
     const command = process.platform === "win32" ? "cmd.exe" : "npx";
@@ -100,10 +120,7 @@ function runAgentBrowser(args, { input, timeoutMs = 60_000 } = {}) {
         : ["agent-browser", "--session", SESSION, ...args];
     const child = spawn(command, commandArgs, {
       cwd: process.cwd(),
-      env: {
-        ...process.env,
-        AGENT_BROWSER_DEFAULT_TIMEOUT: process.env.AGENT_BROWSER_DEFAULT_TIMEOUT ?? AGENT_BROWSER_DEFAULT_TIMEOUT_MS,
-      },
+      env: buildAgentBrowserEnvironment(),
       stdio: ["pipe", "pipe", "pipe"],
       windowsVerbatimArguments: process.platform === "win32",
       windowsHide: true,
@@ -791,6 +808,8 @@ async function runStep(label, task) {
 
 async function main() {
   assertTargetSafeForEnvironment();
+  agentBrowserBypassConfig = await createAgentBrowserBypassConfig();
+  let proofError;
   log(`Target: ${BASE_URL}`);
   log(`Browser session: ${SESSION}`);
 
@@ -829,9 +848,23 @@ async function main() {
     await runStep("Browser error scan", assertNoBrowserErrors);
 
     log("✅ Core funnel quality smoke passed");
+  } catch (error) {
+    proofError = error;
+    throw error;
   } finally {
     await clearBrowserStorage().catch(() => undefined);
     await runAgentBrowser(["close"], { timeoutMs: 30_000 }).catch(() => undefined);
+    try {
+      await removeAgentBrowserBypassConfig(agentBrowserBypassConfig);
+    } catch {
+      if (proofError) {
+        console.error("[core-quality] Failed to remove temporary agent-browser bypass configuration.");
+      } else {
+        throw new Error("Failed to remove temporary agent-browser bypass configuration.");
+      }
+    } finally {
+      agentBrowserBypassConfig = undefined;
+    }
   }
 }
 

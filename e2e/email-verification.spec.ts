@@ -1,6 +1,9 @@
-import { expect, test, type Page } from "@playwright/test";
+import type { Page } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 const BASE_URL = process.env.EMAIL_VERIFICATION_E2E_URL?.replace(/\/$/, "");
+test.use({ proofBaseURL: BASE_URL });
+
 const ALLOW_CREATE = process.env.EMAIL_VERIFICATION_E2E_ALLOW === "CREATE_TEST_ACCOUNT";
 const TIMESTAMP = Date.now();
 const GENERATED_EMAIL = `codex.qa+verify-${TIMESTAMP}@example.com`;

@@ -1,15 +1,15 @@
 # Soft Launch Checklist — Vision Board Web Platform
 
-Last updated: 2026-07-09
+Last updated: 2026-07-30
 
-Status note 2026-07-09:
+Status note 2026-07-30:
 
 - Treat this checklist as a gate review, not as proof that old checkmarks are still current.
 - Authoritative current blockers are the D-2 proof ledger below plus `guidelines/CURRENT_PROJECT_STATUS.md`.
 - Known blockers right now:
   - Production smoke latest default-branch run `28995039420` failed on commit `6ad15aca67c264cbf8ae544dbc45100b6939db01` with HTTP 429 `rate_limited` during 12-week backend-sync proof. Local smoke harness retries that proof after `Retry-After`, but D-1 still needs a fresh passing production-smoke run after deployment.
   - Staging proof workflows are now available on the default branch, but email verification, account deletion, and LWW still need real staging runs with opt-in inputs.
-  - Deployed core-funnel proof still needs an accessible demo/staging target and recorded pass evidence.
+  - Live `npm run proof:secrets` on 2026-07-30 reports GitHub repository secret `VERCEL_AUTOMATION_BYPASS_SECRET` missing. The four deployed proof workflows remain blocked until it is configured, then they still need protected-preview runs and recorded pass evidence.
 - Treat historical tags such as `v1.0-production-ready` as historical markers only, not launch proof for current `main`.
 
 Purpose: hướng dẫn soft-launch cho ~200 user thật (sinh viên Việt Nam) sau khi Phase 1, 2, 4 đã ✅ và Phase 3 bảo mật fin được đóng.
@@ -79,8 +79,9 @@ Runbook: `docs/ops/staging-proof-runbook.md` lists the exact workflow inputs, re
 - [ ] Run local core-funnel preflight first:
   - `npm run dev -- --host 127.0.0.1 --port 4173`
   - `$env:CORE_QUALITY_URL="http://127.0.0.1:4173"; npm run smoke:core-quality`
-  - Treat this as local preflight only; D-2 still needs accessible demo/staging target evidence in the ledger.
-- [ ] Run GitHub Actions workflow `.github/workflows/core-funnel-quality-staging.yml` against an accessible demo/staging target (`VITE_APP_MODE=demo`, no Vercel Deployment Protection) with a non-local `target_url` to prove the main local-first core funnel on a deployed target. Do not point this workflow at the production real-mode domain; use production smoke for that.
+  - Treat this as local preflight only; D-2 still needs protected demo-preview evidence in the ledger.
+- [ ] Confirm GitHub repository secret `VERCEL_AUTOMATION_BYPASS_SECRET` exists by name; keep `Require Log In` enabled and do not publish a protection-bypass URL.
+- [ ] Run GitHub Actions workflow `.github/workflows/core-funnel-quality-staging.yml` against the protected demo preview (`VITE_APP_MODE=demo`) with `VERCEL_AUTOMATION_BYPASS_SECRET`. Keep `Require Log In` enabled and do not point this workflow at the production real-mode domain.
 
 - [ ] Chạy production smoke `npm run smoke:prod` từ máy local với credentials thật. Kỳ vọng pass.
 - [ ] Không chạy `npm run smoke:prod` với generated account mặc định. Chỉ set `PROD_SMOKE_ALLOW_GENERATED_ACCOUNT=1` nếu cố ý tạo 1 QA account mới cho run này.
@@ -107,7 +108,7 @@ Blocking rule: do not enter D-1 go/no-go while any required proof row below is s
 | Email verification staging | `.github/workflows/email-verification-e2e-staging.yml` passes with `allow_create=CREATE_TEST_ACCOUNT` | pending-staging-run | | | | Workflow is active on the default branch. Fixed secrets remain optional because the generated disposable signup path is available if staging Firebase allows signup. If fixed secrets are added, `EMAIL_VERIFICATION_E2E_EMAIL` and `EMAIL_VERIFICATION_E2E_PASSWORD` must be configured as a complete pair. |
 | Account deletion staging | `.github/workflows/account-delete-e2e-staging.yml` passes with `allow_delete=DELETE_TEST_ACCOUNT` and delete-marked disposable email | pending-staging-run | | | | Workflow is active on the default branch, and `ACCOUNT_DELETE_E2E_EMAIL` / `ACCOUNT_DELETE_E2E_PASSWORD` are configured by secret name. Actual destructive staging proof still needs explicit `DELETE_TEST_ACCOUNT` opt-in. |
 | LWW sync staging | `.github/workflows/lww-e2e-staging.yml` or equivalent local command passes with dedicated QA credentials | pending-staging-run | | | | Workflow is active on the default branch, and `LWW_E2E_EMAIL` / `LWW_E2E_PASSWORD` are configured by secret name. Actual overwrite proof still needs explicit `OVERWRITE_TEST_WORKSPACE` opt-in and an overwrite-safe test account. |
-| Manual core-flow smoke | `.github/workflows/core-funnel-quality-staging.yml` or equivalent deployed run proves Onboarding -> Life Balance -> Life Insight -> SMART Goal -> Feasibility -> 12-week setup -> Today action -> weekly review on an accessible demo/staging target | blocked-target-missing | | | | Local preflight `npm run smoke:core-quality` passed on 2026-06-26 and was re-verified on 2026-06-27. On 2026-07-07, run `28899920950` against production real-mode failed because `/12-week-system` redirected to `/login`; latest Vercel preview checked on 2026-07-08 redirected to Vercel login because Deployment Protection was enabled. Deployed evidence still requires an accessible demo/staging URL. |
+| Manual core-flow smoke | `.github/workflows/core-funnel-quality-staging.yml` proves Onboarding -> Life Balance -> Life Insight -> SMART Goal -> Feasibility -> 12-week setup -> Today action -> weekly review on the protected demo preview | pending-protected-preview-run | `https://vision-board-web-platform-git-codex-e17daa-anhnhat432s-projects.vercel.app` | | | Local preflight passed previously. The next run keeps Deployment Protection enabled and uses `VERCEL_AUTOMATION_BYPASS_SECRET`; the row remains pending until a successful workflow URL and commit SHA are recorded. |
 
 ## 3. D-1 — Final go/no-go
 

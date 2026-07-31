@@ -53,6 +53,11 @@ function normalizeDateKey(value: string | undefined): string {
   return Number.isFinite(parsed.valueOf()) ? formatDateInputValue(parsed) : trimmed;
 }
 
+function toLastModifiedAt(value: string | undefined): number {
+  const timestamp = value ? Date.parse(value) : NaN;
+  return Number.isFinite(timestamp) ? timestamp : 0;
+}
+
 function clampWeekNumber(value: number | undefined, totalWeeks: number): number {
   if (!Number.isFinite(value)) return 1;
   return Math.min(Math.max(Math.round(value ?? 1), 1), Math.max(totalWeeks, 1));
@@ -223,6 +228,7 @@ function buildTaskInstances(tasks: TwelveWeekPulledTask[], totalWeeks: number): 
       isCore: task.isCore !== false,
       completed: task.status === "done",
       completedAt: task.status === "done" ? task.completedAt : undefined,
+      lastModifiedAt: toLastModifiedAt(task.syncUpdatedAt),
       tacticId: task.tacticId,
       rescheduledFrom: task.rescheduledFrom,
     }))

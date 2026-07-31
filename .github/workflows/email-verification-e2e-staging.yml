@@ -23,6 +23,7 @@ jobs:
       EMAIL_VERIFICATION_E2E_ALLOW: ${{ github.event.inputs.allow_create }}
       EMAIL_VERIFICATION_E2E_EMAIL: ${{ secrets.EMAIL_VERIFICATION_E2E_EMAIL }}
       EMAIL_VERIFICATION_E2E_PASSWORD: ${{ secrets.EMAIL_VERIFICATION_E2E_PASSWORD }}
+      VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
@@ -39,6 +40,11 @@ jobs:
       - name: Validate disposable signup inputs
         shell: bash
         run: |
+          if [ -z "${VERCEL_AUTOMATION_BYPASS_SECRET}" ]; then
+            echo "::error::Set repository secret VERCEL_AUTOMATION_BYPASS_SECRET before running protected-preview proof."
+            exit 1
+          fi
+
           if [ -z "${EMAIL_VERIFICATION_E2E_URL}" ]; then
             echo "::error::target_url is required."
             exit 1

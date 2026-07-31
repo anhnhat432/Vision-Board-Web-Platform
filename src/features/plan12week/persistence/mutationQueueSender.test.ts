@@ -403,6 +403,7 @@ describe("mutation queue sender", () => {
 
     const item = readItem("user_1", "mutation_ownership_denied");
     expect(result.status).toBe("partial");
+    expect(result.failedNotFoundCount).toBe(1);
     expect(item.status).toBe("failed_terminal");
     expect(item.error?.code).toBe("ownership_denied");
     expect(item.error?.message).toBe("Không có quyền ghi task này.");

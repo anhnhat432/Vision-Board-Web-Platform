@@ -134,6 +134,12 @@ function createSkippedResult(
 }
 
 function isDrainFailure(result: MutationQueueSyncResult): boolean {
+  const allFailuresAreRemoteNotFound =
+    result.pendingCount === 0 &&
+    result.failedCount > 0 &&
+    result.failedNotFoundCount === result.failedCount;
+  if (allFailuresAreRemoteNotFound) return false;
+
   return (
     result.status === "partial" ||
     result.status === "error" ||
@@ -220,10 +226,9 @@ function getClientPlanIdFromAppliedMutation(item: DataMutationItem): string {
 
 function getAppliedMutationSkipEntityKey(item: DataMutationItem): string | null {
   switch (item.kind) {
-    case "task_completed_changed": {
-      const clientTaskId = (item.payload.clientTaskId ?? item.payload.taskId).trim();
-      return clientTaskId ? `task:${clientTaskId}` : null;
-    }
+    case "task_completed_changed":
+      // Task mutations use server-side LWW, so the immediate pull is authoritative.
+      return null;
     case "daily_check_in_upserted": {
       const date = normalizeDateKey(item.payload.date);
       if (!date) return null;
