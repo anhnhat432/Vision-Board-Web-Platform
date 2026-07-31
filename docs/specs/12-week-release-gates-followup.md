@@ -56,7 +56,7 @@
 32. WHEN an authoritative task pull is converted back to local execution data, THE frontend SHALL map the task `syncUpdatedAt` to the existing local `lastModifiedAt` field so the generic stale-save guard does not restore the pre-pull task state.
 33. WHEN a mutation drain ends with no pending mutations and every failure is `failed_not_found`, THE manual sync SHALL continue to pull the authoritative cloud snapshot so a remote tombstone can remove stale local data; any retryable, validation, conflict, or mixed failure SHALL still stop before pull.
 34. WHEN a new LWW workflow starts after a previous tombstone scenario emptied the QA workspace, THE harness SHALL seed and import the next proof goal before navigating to a 12-week tab.
-35. BETWEEN sequential LWW scenarios, THE harness SHALL use scenario-specific goal, plan, lead-indicator, and task client IDs so earlier baselines cannot collide with the current scenario's merge keys or diagnostics.
+35. BETWEEN sequential LWW scenarios, THE harness SHALL use short scenario-specific goal, plan, lead-indicator, and task client IDs so earlier baselines cannot collide with the current scenario's merge keys or diagnostics and every derived ID remains within backend validation limits.
 
 ## 5. Data, Storage, and Sync Constraints
 

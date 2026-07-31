@@ -68,6 +68,16 @@ function isSafeLwwEmail(email: string) {
   return /(^|[+._-])lww([+._-]|@)/i.test(email);
 }
 
+function createScenarioKey(scenarioTitle: string) {
+  const runSuffix = RUN_ID.toLowerCase().replace(/[^a-z0-9]+/g, "").slice(-10);
+  const titleSlug = scenarioTitle
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 12);
+  return `${runSuffix}_${titleSlug}`;
+}
+
 // ── Helpers ───────────────────────────────────────────────────────
 
 async function createSafePullDiagnostics(page: Page, stage: string, response: Response) {
@@ -221,9 +231,7 @@ async function bootstrapLwwGoal(
   page: Page,
   scenarioTitle: string,
 ): Promise<LwwProofGoal> {
-  const scenarioKey = `${RUN_ID}_${scenarioTitle
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "_")}`;
+  const scenarioKey = createScenarioKey(scenarioTitle);
   const seed: LwwProofIdentity = {
     goalId: `${PROOF_GOAL_ID}_${scenarioKey}`,
     goalTitle: `${TEST_PREFIX} ${scenarioTitle}`,
@@ -1150,29 +1158,42 @@ async function expectNoConflictDialog(page: Page) {
 
 async function waitForGoalToDisappear(
   page: Page,
-  goalId: string,
+  seed: LwwProofGoal,
+  diagnosticsContext: ManualSyncDiagnosticsContext,
   timeoutMs: number = 45_000,
 ) {
-  await expect
-    .poll(
-      () =>
-        page.evaluate(
-          ({ proofGoalId, userDataStorageKey }) => {
-            const raw = localStorage.getItem(userDataStorageKey);
-            if (!raw) return true;
-            const data = JSON.parse(raw) as {
-              goals?: Array<{ id?: string }>;
-            };
-            return !data.goals?.some((goal) => goal.id === proofGoalId);
-          },
-          {
-            proofGoalId: goalId,
-            userDataStorageKey: USER_DATA_STORAGE_KEY,
-          },
-        ),
-      { timeout: timeoutMs, intervals: [1000, 2000, 3000] },
-    )
-    .toBe(true);
+  try {
+    await expect
+      .poll(
+        () =>
+          page.evaluate(
+            ({ proofGoalId, userDataStorageKey }) => {
+              const raw = localStorage.getItem(userDataStorageKey);
+              if (!raw) return true;
+              const data = JSON.parse(raw) as {
+                goals?: Array<{ id?: string }>;
+              };
+              return !data.goals?.some((goal) => goal.id === proofGoalId);
+            },
+            {
+              proofGoalId: seed.goalId,
+              userDataStorageKey: USER_DATA_STORAGE_KEY,
+            },
+          ),
+        { timeout: timeoutMs, intervals: [1000, 2000, 3000] },
+      )
+      .toBe(true);
+  } catch (error) {
+    throw new Error(
+      `Tombstone did not remove proof goal: ${JSON.stringify({
+        scenario: test.info().title,
+        stage: "tombstone-final-storage",
+        storage: await readProofTaskDiagnostics(page, seed),
+        syncResponses: await diagnosticsContext.readSyncResponses(),
+      })}`,
+      { cause: error },
+    );
+  }
 }
 
 async function getTaskCompletedState(
@@ -1368,8 +1389,8 @@ test.describe("LWW auto-resolve sync", () => {
       await triggerManualCloudSync(pageA, 60_000, diagnosticsA);
       await triggerManualCloudSync(pageB, 60_000, diagnosticsB);
 
-      await waitForGoalToDisappear(pageA, seed.goalId);
-      await waitForGoalToDisappear(pageB, seed.goalId);
+      await waitForGoalToDisappear(pageA, seed, diagnosticsA);
+      await waitForGoalToDisappear(pageB, seed, diagnosticsB);
       await expectNoConflictDialog(pageA);
       await expectNoConflictDialog(pageB);
     } finally {
