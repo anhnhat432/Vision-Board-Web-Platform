@@ -45,6 +45,25 @@ interface ApiResponseDiagnostic {
   status: number;
 }
 
+interface LwwSyncResponseDiagnostic {
+  kind: "mutation" | "pull";
+  httpStatus: number;
+  parseError?: boolean;
+  batchStatus?: string | null;
+  targetMutationRequestCount?: number;
+  targetMutationStatuses?: string[];
+  mode?: string | null;
+  taskCount?: number;
+  targetTaskPresent?: boolean;
+  targetTaskCompleted?: boolean | null;
+  targetTaskTombstoned?: boolean;
+}
+
+interface ManualSyncDiagnosticsContext {
+  seed: LwwProofIdentity;
+  readSyncResponses: () => Promise<LwwSyncResponseDiagnostic[]>;
+}
+
 function isSafeLwwEmail(email: string) {
   return /(^|[+._-])lww([+._-]|@)/i.test(email);
 }
@@ -65,29 +84,56 @@ async function createSafeConvergenceDiagnostics(
   pageA: Page,
   pageB: Page,
   stage: string,
+  seed: LwwProofIdentity,
   finalStateA: boolean,
   finalStateB: boolean,
+  readSyncResponsesA: () => Promise<LwwSyncResponseDiagnostic[]>,
+  readSyncResponsesB: () => Promise<LwwSyncResponseDiagnostic[]>,
 ) {
-  const [queueA, queueB] = await Promise.all([
+  const [queueA, queueB, storageA, storageB, syncResponsesA, syncResponsesB] = await Promise.all([
     readMutationQueueCountDiagnostics(pageA),
     readMutationQueueCountDiagnostics(pageB),
+    readProofTaskDiagnostics(pageA, seed),
+    readProofTaskDiagnostics(pageB, seed),
+    readSyncResponsesA(),
+    readSyncResponsesB(),
   ]);
   return {
     scenario: test.info().title,
     stage,
     queueA,
     queueB,
+    storageA,
+    storageB,
+    syncResponsesA,
+    syncResponsesB,
     finalStateA,
     finalStateB,
   };
 }
 
-async function expectTaskConvergence(pageA: Page, pageB: Page, taskTitle: string, expected: boolean) {
+async function expectTaskConvergence(
+  pageA: Page,
+  pageB: Page,
+  seed: LwwProofIdentity,
+  expected: boolean,
+  readSyncResponsesA: () => Promise<LwwSyncResponseDiagnostic[]>,
+  readSyncResponsesB: () => Promise<LwwSyncResponseDiagnostic[]>,
+) {
   const [stateA, stateB] = await Promise.all([
-    getTaskCompletedState(pageA, taskTitle),
-    getTaskCompletedState(pageB, taskTitle),
+    getTaskCompletedState(pageA, seed.taskTitle),
+    getTaskCompletedState(pageB, seed.taskTitle),
   ]);
-  const diagnostics = await createSafeConvergenceDiagnostics(pageA, pageB, "final-convergence", stateA, stateB);
+  const diagnostics = await createSafeConvergenceDiagnostics(
+    pageA,
+    pageB,
+    "final-convergence",
+    seed,
+    stateA,
+    stateB,
+    readSyncResponsesA,
+    readSyncResponsesB,
+  );
   expect({ stateA, stateB }, JSON.stringify(diagnostics)).toEqual({ stateA: expected, stateB: expected });
 }
 
@@ -699,6 +745,120 @@ function captureApiResponseDiagnostics(page: Page) {
   };
 }
 
+function captureLwwSyncResponseDiagnostics(page: Page, seed: LwwProofIdentity) {
+  const diagnostics: LwwSyncResponseDiagnostic[] = [];
+  const pendingReads = new Set<Promise<void>>();
+
+  const captureResponse = async (response: Response) => {
+    const request = response.request();
+    const path = new URL(response.url()).pathname;
+    const isMutation = request.method() === "POST" && /\/sync\/12-week\/mutations$/.test(path);
+    const isPull = request.method() === "GET" && /\/sync\/12-week\/pull$/.test(path);
+    if (!isMutation && !isPull) return;
+
+    try {
+      const envelope = (await response.json()) as {
+        data?: Record<string, unknown>;
+        error?: { details?: Record<string, unknown> };
+      } & Record<string, unknown>;
+      const data = (envelope.data ?? envelope.error?.details ?? envelope) as Record<string, unknown>;
+
+      if (isMutation) {
+        const requestBody = JSON.parse(request.postData() ?? "{}") as {
+          mutations?: Array<{
+            mutationId?: string;
+            entity?: { clientTaskId?: string };
+            payload?: { clientTaskId?: string };
+          }>;
+        };
+        const targetMutationIds = new Set(
+          (requestBody.mutations ?? [])
+            .filter(
+              (mutation) =>
+                mutation.entity?.clientTaskId === seed.taskId ||
+                mutation.payload?.clientTaskId === seed.taskId,
+            )
+            .map((mutation) => mutation.mutationId)
+            .filter((mutationId): mutationId is string => Boolean(mutationId)),
+        );
+        const resultGroups = [data.results, data.accepted, data.duplicate, data.failed];
+        const statuses = new Set<string>();
+        for (const group of resultGroups) {
+          if (!Array.isArray(group)) continue;
+          for (const item of group) {
+            if (!item || typeof item !== "object") continue;
+            const result = item as { mutationId?: string; status?: string };
+            if (!result.mutationId || !targetMutationIds.has(result.mutationId)) continue;
+            if (result.status) statuses.add(result.status);
+          }
+        }
+
+        diagnostics.push({
+          kind: "mutation",
+          httpStatus: response.status(),
+          batchStatus: typeof data.status === "string" ? data.status : null,
+          targetMutationRequestCount: targetMutationIds.size,
+          targetMutationStatuses: [...statuses],
+        });
+        return;
+      }
+
+      const workspace =
+        data.workspace && typeof data.workspace === "object"
+          ? (data.workspace as { tasks?: unknown[] })
+          : {};
+      const tasks = Array.isArray(workspace.tasks) ? workspace.tasks : [];
+      const targetTask = tasks.find(
+        (item) =>
+          item &&
+          typeof item === "object" &&
+          (item as { clientTaskId?: string }).clientTaskId === seed.taskId,
+      ) as { status?: string } | undefined;
+      const tombstones =
+        data.tombstones && typeof data.tombstones === "object"
+          ? (data.tombstones as { tasks?: unknown[] })
+          : {};
+      const targetTaskTombstoned = (Array.isArray(tombstones.tasks) ? tombstones.tasks : []).some(
+        (item) =>
+          item &&
+          typeof item === "object" &&
+          (item as { clientId?: string }).clientId === seed.taskId,
+      );
+
+      diagnostics.push({
+        kind: "pull",
+        httpStatus: response.status(),
+        mode: typeof data.mode === "string" ? data.mode : null,
+        taskCount: tasks.length,
+        targetTaskPresent: Boolean(targetTask),
+        targetTaskCompleted: targetTask ? targetTask.status === "done" : null,
+        targetTaskTombstoned,
+      });
+    } catch {
+      diagnostics.push({
+        kind: isMutation ? "mutation" : "pull",
+        httpStatus: response.status(),
+        parseError: true,
+      });
+    }
+  };
+
+  const onResponse = (response: Response) => {
+    const read = captureResponse(response);
+    pendingReads.add(read);
+    void read.finally(() => pendingReads.delete(read));
+  };
+
+  page.on("response", onResponse);
+  return {
+    read: async () => {
+      await Promise.allSettled([...pendingReads]);
+      return [...diagnostics];
+    },
+    stop: () => page.off("response", onResponse),
+  };
+}
+
 async function readProofTaskDiagnostics(page: Page, seed: LwwProofIdentity) {
   const storageState = await page.evaluate(
     ({ authOwnerStorageKey, goalId, leadIndicatorId, taskId, taskTitle, userDataStorageKey }) => {
@@ -713,6 +873,7 @@ async function readProofTaskDiagnostics(page: Page, seed: LwwProofIdentity) {
               tacticId?: string;
               weekNumber?: number;
               scheduledDate?: string;
+              completed?: boolean;
             }>;
           };
         }>;
@@ -756,6 +917,7 @@ async function readProofTaskDiagnostics(page: Page, seed: LwwProofIdentity) {
       return {
         goalPresent: Boolean(goal),
         taskPresent: Boolean(task),
+        taskCompleted: task?.completed ?? null,
         taskCount: taskInstances.length,
         currentWeekTaskCount: taskInstances.filter(
           (candidate) => candidate.weekNumber === (goal?.twelveWeekSystem?.currentWeek ?? 1),
@@ -777,6 +939,7 @@ async function readProofTaskDiagnostics(page: Page, seed: LwwProofIdentity) {
           localStorage.getItem("latest_12_week_goal_id") === goalId &&
           localStorage.getItem("latest_12_week_system_goal_id") === goalId,
         authScopedSnapshotMatches: Boolean(scopedGoal && scopedTask),
+        authScopedTaskCompleted: scopedTask?.completed ?? null,
       };
     },
     {
@@ -816,6 +979,7 @@ async function waitForMutationQueueIdle(
 async function triggerManualCloudSync(
   page: Page,
   timeoutMs: number = 60_000,
+  diagnosticsContext?: ManualSyncDiagnosticsContext,
 ) {
   await openSettingsWithoutReload(page);
   const syncButton = page.getByRole("button", {
@@ -834,7 +998,27 @@ async function triggerManualCloudSync(
   );
   await syncButton.click();
 
-  const pullResponse = await pullResponsePromise;
+  let pullResponse: Response;
+  try {
+    pullResponse = await pullResponsePromise;
+  } catch (error) {
+    const diagnostics = diagnosticsContext
+      ? {
+          scenario: test.info().title,
+          stage: "manual-sync-before-pull",
+          queue: await readPendingMutationQueueDiagnostics(page),
+          storage: await readProofTaskDiagnostics(page, diagnosticsContext.seed),
+          syncResponses: await diagnosticsContext.readSyncResponses(),
+        }
+      : {
+          scenario: test.info().title,
+          stage: "manual-sync-before-pull",
+          queue: await readPendingMutationQueueDiagnostics(page),
+        };
+    throw new Error(`Manual 12-week sync did not reach pull: ${JSON.stringify(diagnostics)}`, {
+      cause: error,
+    });
+  }
   const pullDiagnostics = await createSafePullDiagnostics(page, "manual-sync-pull", pullResponse);
   expect(
     pullResponse.ok(),
@@ -857,8 +1041,12 @@ async function openProofGoal(page: Page, seed: LwwProofGoal) {
   await getProofTaskCheckbox(page, seed.taskTitle);
 }
 
-async function pullProofGoal(page: Page, seed: LwwProofGoal) {
-  await triggerManualCloudSync(page);
+async function pullProofGoal(
+  page: Page,
+  seed: LwwProofGoal,
+  diagnosticsContext: ManualSyncDiagnosticsContext,
+) {
+  await triggerManualCloudSync(page, 60_000, diagnosticsContext);
   await waitForProofGoal(page, seed);
 }
 
@@ -1063,28 +1251,39 @@ test.describe("LWW auto-resolve sync", () => {
         pageB,
         "Local Wins Goal",
       );
+      const syncDiagnosticsA = captureLwwSyncResponseDiagnostics(pageA, seed);
+      const syncDiagnosticsB = captureLwwSyncResponseDiagnostics(pageB, seed);
+      const diagnosticsA = { seed, readSyncResponses: syncDiagnosticsA.read };
+      const diagnosticsB = { seed, readSyncResponses: syncDiagnosticsB.read };
 
       await toggleTask(pageA, seed.taskTitle, true);
-      await triggerManualCloudSync(pageA);
-      await pullProofGoal(pageB, seed);
+      await triggerManualCloudSync(pageA, 60_000, diagnosticsA);
+      await pullProofGoal(pageB, seed, diagnosticsB);
       await openProofGoal(pageA, seed);
       await contextA.setOffline(true);
 
       await toggleTask(pageB, seed.taskTitle, false);
-      await triggerManualCloudSync(pageB);
+      await triggerManualCloudSync(pageB, 60_000, diagnosticsB);
 
       await toggleTask(pageA, seed.taskTitle, false);
       await pageA.waitForTimeout(25);
       await toggleTask(pageA, seed.taskTitle, true);
       await contextA.setOffline(false);
-      await triggerManualCloudSync(pageA);
+      await triggerManualCloudSync(pageA, 60_000, diagnosticsA);
       await openProofGoal(pageA, seed);
-      await pullProofGoal(pageB, seed);
+      await pullProofGoal(pageB, seed, diagnosticsB);
 
       await expectNoConflictDialog(pageA);
       await expectNoConflictDialog(pageB);
 
-      await expectTaskConvergence(pageA, pageB, seed.taskTitle, true);
+      await expectTaskConvergence(
+        pageA,
+        pageB,
+        seed,
+        true,
+        syncDiagnosticsA.read,
+        syncDiagnosticsB.read,
+      );
 
       const hasLwwLog = consoleLogsA.some((log) =>
         log.includes("resolved")
@@ -1108,24 +1307,35 @@ test.describe("LWW auto-resolve sync", () => {
         pageB,
         "Cloud Wins Goal",
       );
+      const syncDiagnosticsA = captureLwwSyncResponseDiagnostics(pageA, seed);
+      const syncDiagnosticsB = captureLwwSyncResponseDiagnostics(pageB, seed);
+      const diagnosticsA = { seed, readSyncResponses: syncDiagnosticsA.read };
+      const diagnosticsB = { seed, readSyncResponses: syncDiagnosticsB.read };
       await contextA.setOffline(true);
       await toggleTask(pageA, seed.taskTitle, true);
 
       await toggleTask(pageB, seed.taskTitle, true);
-      await triggerManualCloudSync(pageB);
+      await triggerManualCloudSync(pageB, 60_000, diagnosticsB);
       await openProofGoal(pageB, seed);
       await toggleTask(pageB, seed.taskTitle, false);
-      await triggerManualCloudSync(pageB);
+      await triggerManualCloudSync(pageB, 60_000, diagnosticsB);
 
       await contextA.setOffline(false);
-      await triggerManualCloudSync(pageA);
+      await triggerManualCloudSync(pageA, 60_000, diagnosticsA);
       await openProofGoal(pageA, seed);
-      await pullProofGoal(pageB, seed);
+      await pullProofGoal(pageB, seed, diagnosticsB);
 
       await expectNoConflictDialog(pageA);
       await expectNoConflictDialog(pageB);
 
-      await expectTaskConvergence(pageA, pageB, seed.taskTitle, false);
+      await expectTaskConvergence(
+        pageA,
+        pageB,
+        seed,
+        false,
+        syncDiagnosticsA.read,
+        syncDiagnosticsB.read,
+      );
 
       expect(consoleLogsA.some((log) => log.includes("resolved"))).toBe(true);
     } finally {
@@ -1145,14 +1355,18 @@ test.describe("LWW auto-resolve sync", () => {
         pageB,
         "Tombstone Goal",
       );
+      const syncDiagnosticsA = captureLwwSyncResponseDiagnostics(pageA, seed);
+      const syncDiagnosticsB = captureLwwSyncResponseDiagnostics(pageB, seed);
+      const diagnosticsA = { seed, readSyncResponses: syncDiagnosticsA.read };
+      const diagnosticsB = { seed, readSyncResponses: syncDiagnosticsB.read };
       await contextA.setOffline(true);
       await toggleTask(pageA, seed.taskTitle, true);
 
       await deleteProofWorkspace(pageB);
 
       await contextA.setOffline(false);
-      await triggerManualCloudSync(pageA);
-      await triggerManualCloudSync(pageB);
+      await triggerManualCloudSync(pageA, 60_000, diagnosticsA);
+      await triggerManualCloudSync(pageB, 60_000, diagnosticsB);
 
       await waitForGoalToDisappear(pageA, seed.goalId);
       await waitForGoalToDisappear(pageB, seed.goalId);
