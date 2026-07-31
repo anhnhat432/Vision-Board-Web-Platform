@@ -5,6 +5,10 @@ import { describe, expect, it } from "vitest";
 
 const modulePath = path.resolve("scripts", "check-production-dependency-audit.mjs");
 const workflow = readFileSync(path.resolve(".github", "workflows", "npm-audit.yml"), "utf8");
+const dependencyReviewWorkflow = readFileSync(
+  path.resolve(".github", "workflows", "dependency-review.yml"),
+  "utf8",
+);
 
 async function loadEvaluator() {
   expect(existsSync(modulePath)).toBe(true);
@@ -94,5 +98,10 @@ describe("production dependency audit policy", () => {
     expect(workflow).toContain("node scripts/check-production-dependency-audit.mjs frontend");
     expect(workflow).toContain("node scripts/check-production-dependency-audit.mjs backend");
     expect(workflow).not.toContain("npm audit --audit-level=high");
+  });
+
+  it("keeps the dependency review exception scoped behind the audit policy", () => {
+    expect(dependencyReviewWorkflow).toContain("allow-ghsas: GHSA-qwww-vcr4-c8h2");
+    expect(workflow).toContain("node scripts/check-production-dependency-audit.mjs frontend");
   });
 });

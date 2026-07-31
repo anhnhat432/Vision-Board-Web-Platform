@@ -20,6 +20,7 @@
 3. `WHEN the audit command or JSON parsing fails, THE system SHALL fail closed.`
 4. `WHILE auditing backend dependencies, THE system SHALL apply no advisory exceptions.`
 5. `WHEN an RSC marker is introduced, THE system SHALL stop accepting the React Router advisory.`
+6. `WHERE Dependency Review skips this advisory, THE frontend audit job SHALL independently enforce the reviewed version and non-RSC contract.`
 
 ## 4. Data & Security Constraints
 
@@ -39,4 +40,5 @@
 - [ ] Frontend production audit has no unapproved high/critical findings.
 - [ ] Backend production audit has zero findings.
 - [ ] Audit policy tests cover the non-RSC exception, RSC fail-closed behavior, and an unknown critical advisory.
+- [ ] Dependency Review and npm audit gates apply the same advisory identifier without weakening unknown high/critical findings.
 - [ ] Frontend and backend checks pass with regenerated lockfiles.
