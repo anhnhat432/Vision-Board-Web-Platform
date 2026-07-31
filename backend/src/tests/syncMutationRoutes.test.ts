@@ -113,6 +113,7 @@ interface TestTaskRecord extends AppliedTaskMutationEntity {
   weekId?: string;
   clientPlanId?: string;
   clientWeekId?: string;
+  lastMutationId?: string;
   title?: string;
   scheduledDate?: Date;
 }
@@ -173,17 +174,36 @@ function createSyncTaskMutationRepository() {
       const task = findTask(userId, input);
       if (!task) return null;
 
+      const incomingIsNewer =
+        !task.syncUpdatedAt ||
+        task.syncUpdatedAt < input.syncUpdatedAt ||
+        (task.syncUpdatedAt.getTime() === input.syncUpdatedAt.getTime() &&
+          input.mutationId > (task.lastMutationId ?? ""));
+      if (!incomingIsNewer) {
+        return {
+          id: task.id,
+          mutationApplied: false,
+          clientTaskId: task.clientTaskId,
+          status: task.status,
+          completedAt: task.completedAt,
+          revision: task.revision,
+          syncUpdatedAt: task.syncUpdatedAt,
+        };
+      }
+
       const nextTask: TestTaskRecord = {
         ...task,
         status: input.completed ? "done" : "todo",
         completedAt: input.completed ? input.completedAt ?? input.syncUpdatedAt : undefined,
         revision: (task.revision ?? 0) + 1,
+        lastMutationId: input.mutationId,
         syncUpdatedAt: input.syncUpdatedAt,
       };
       tasks.set(task.id, nextTask);
 
       return {
         id: nextTask.id,
+        mutationApplied: true,
         clientTaskId: nextTask.clientTaskId,
         status: nextTask.status,
         completedAt: nextTask.completedAt,
@@ -1398,6 +1418,50 @@ describe("12-week sync mutation route", () => {
     assert.equal(task?.status, "done");
     assert.equal(task?.revision, 2);
     assert.equal(task?.completedAt?.toISOString(), "2026-04-30T00:00:02.000Z");
+  });
+
+  it("keeps a newer task mutation when an older offline mutation arrives later", async () => {
+    const app = createRouteTestApp();
+    const newer = createValidMutation("dmq_lww_newer");
+    newer.mutations[0].clientTimestamp = "2026-04-30T00:00:05.000Z";
+    newer.mutations[0].payload.completed = false;
+    delete newer.mutations[0].payload.completedAt;
+    const older = createValidMutation("dmq_lww_older");
+    older.mutations[0].clientTimestamp = "2026-04-30T00:00:03.000Z";
+
+    const first = await requestJson(app, "POST", "/api/sync/12-week/mutations", { body: newer });
+    const second = await requestJson(app, "POST", "/api/sync/12-week/mutations", { body: older });
+    const firstData = getBatchResult(first);
+    const secondData = getBatchResult(second);
+    const task = syncTaskFixture?.getTask("64f000000000000000000001");
+
+    assert.equal(firstData.accepted[0].status, "applied");
+    assert.equal(secondData.accepted[0].status, "noop");
+    assert.equal(task?.status, "todo");
+    assert.equal(task?.revision, 2);
+    assert.equal(task?.syncUpdatedAt?.toISOString(), "2026-04-30T00:00:05.000Z");
+  });
+
+  it("uses mutationId as the deterministic tie-break for equal task timestamps", async () => {
+    const app = createRouteTestApp();
+    const winner = createValidMutation("dmq_lww_tie_z");
+    winner.mutations[0].clientTimestamp = "2026-04-30T00:00:05.000Z";
+    winner.mutations[0].payload.completed = false;
+    delete winner.mutations[0].payload.completedAt;
+    const loser = createValidMutation("dmq_lww_tie_a");
+    loser.mutations[0].clientTimestamp = "2026-04-30T00:00:05.000Z";
+
+    await requestJson(app, "POST", "/api/sync/12-week/mutations", { body: winner });
+    const response = await requestJson(app, "POST", "/api/sync/12-week/mutations", { body: loser });
+    const data = getBatchResult(response);
+    const task = syncTaskFixture?.getTask("64f000000000000000000001");
+
+    assert.equal(data.status, "applied");
+    assert.equal(data.appliedCount, 0);
+    assert.equal(data.skippedCount, 1);
+    assert.equal(data.accepted[0].status, "noop");
+    assert.equal(task?.status, "todo");
+    assert.equal(task?.revision, 2);
   });
 
   it("does not accept task_upsert until task creation persistence exists", async () => {
