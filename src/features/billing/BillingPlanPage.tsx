@@ -192,19 +192,27 @@ export function BillingPlan() {
   const emailNeedsVerification = authContext?.user ? !canRequestRefund(authContext.user) : false;
   const canLoadPaymentHistory = realMode && signedInUserId !== null && !emailNeedsVerification;
 
-  const { paymentHistory, setPaymentHistory, isLoadingPaymentHistory, paymentHistoryError, loadPaymentHistory } =
-    usePaymentHistory(canLoadPaymentHistory);
+  const {
+    paymentHistory,
+    setPaymentHistory,
+    isLoadingPaymentHistory,
+    isRetryingPaymentHistory,
+    paymentHistoryError,
+    loadPaymentHistory,
+  } = usePaymentHistory(canLoadPaymentHistory);
   const paymentHistoryState = !canLoadPaymentHistory
     ? signedInUserId === null
       ? "signed-out"
       : "email-unverified"
-    : isLoadingPaymentHistory
-      ? "loading"
-      : paymentHistoryError
-        ? "error"
-        : paymentHistory.length === 0
-          ? "empty"
-          : "ready";
+    : isRetryingPaymentHistory
+      ? "retrying"
+      : isLoadingPaymentHistory
+        ? "loading"
+        : paymentHistoryError
+          ? "error"
+          : paymentHistory.length === 0
+            ? "empty"
+            : "ready";
 
   const { checkoutReturnStatus, retry: retryCheckoutEntitlement } = useCheckoutReturn({
     isCheckoutReturn,
@@ -972,7 +980,10 @@ export function BillingPlan() {
           )}
           {canLoadPaymentHistory && isLoadingPaymentHistory && (
             <div className="flex items-center gap-3 rounded-[13px] border border-app-line bg-app-bg p-4 text-sm text-app-ink-muted">
-              <Loader2 className="h-4 w-4 animate-spin" />Đang tải lịch sử thanh toán...
+              <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+              {isRetryingPaymentHistory
+                ? "Đang kết nối lại để tải lịch sử thanh toán..."
+                : "Đang tải lịch sử thanh toán..."}
             </div>
           )}
           {canLoadPaymentHistory && !isLoadingPaymentHistory && paymentHistoryError && (

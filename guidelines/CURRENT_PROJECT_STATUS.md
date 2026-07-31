@@ -1,6 +1,6 @@
 # Current Project Status
 
-Last reviewed: 2026-07-13
+Last reviewed: 2026-07-31
 
 Purpose: this file records the current code-backed state of Vision Board Web Platform so humans and AI coding agents do not assume features are more complete than they are.
 
@@ -8,12 +8,14 @@ Purpose: this file records the current code-backed state of Vision Board Web Pla
 
 Vision Board Web Platform is a React/Vite full-stack web app for turning a broad life vision into SMART goals and a 12-week execution system.
 
+The product has launched to real users, the public demo has been delivered, and production payment is open through PayOS. Remaining proof and readiness items in this document are post-launch hardening work unless a row explicitly states that the live service is unavailable.
+
 The current product is local-first. Most user-facing data is still persisted in browser localStorage first. The backend exists and is used for authenticated sync in the 12-week planning domain, but it is not yet the single source of truth for the whole product.
 
 Important documentation nuance:
 
 - `README.md` correctly describes the product as full-stack, but the current architecture is still local-first with selective backend sync.
-- `.env.production` in repo is set to `VITE_APP_MODE=real` and `VITE_BILLING_PROVIDER_MODE=api_contract`. Vercel project-level env vars still win at build time, so the live deployment mode depends on those overrides. The MVP 1 demo override path is preserved through the rollback steps in `MVP_1_RELEASE_CHECKLIST.md`.
+- `.env.production` in repo is set to `VITE_APP_MODE=real` and `VITE_BILLING_PROVIDER_MODE=api_contract`. Checked-in `.env.production` and `render.yaml` values are safe fallback/deployment declarations, not a reliable snapshot of active hosts. Vercel and Render host env vars override them; live verification on 2026-07-31 showed PayOS checkout and an active Plus entitlement.
 - `backend/package.json` requires Node `20.x`; GitHub release, CI, audit, backup, and staging/production proof workflows resolve Node from `.nvmrc` (`20`) to reduce engine drift. Local commands may still use a newer installed Node and can show engine warnings.
 - 12-week setup route replacement is **Full GO** as of 2026-05-21. Current route behavior: `/12-week-setup` is the only setup route and renders `TwelveWeekSetupLab`. The `/12-week-setup-old` (legacy `TwelveWeekSetup`) and `/12-week-setup-lab` (QA reference) routes have been removed in 2026-05-22 cleanup; the legacy `12WeekSetup.tsx` page and its dedicated backend-sync test have also been deleted. The barrel re-export `src/app/pages/12WeekSetup.ts` now aliases `TwelveWeekSetup` to the current `TwelveWeekSetupLab` implementation so existing tests and app-flow helpers continue to work.
 
@@ -186,12 +188,12 @@ These areas should not be described as fully production-ready:
 
 - Demo mode does not require Firebase, backend, MongoDB, or real billing.
 - `.env.production` in repo now points at real mode, but Vercel/Render dashboard env overrides decide the actual deployed mode at build time.
-- Mock checkout is still used when the billing provider mode is `mock_provider`. Real Casso/VietQR routing only kicks in when the frontend env is `api_contract` and the backend returns a `casso` provider session.
+- Mock checkout remains demo-only when the billing provider mode is `mock_provider`. Production real mode uses `api_contract`; live verification on 2026-07-31 showed the backend reporting `payos` and the billing page presenting PayOS account management.
 - Local analytics/outbox is not the same as a durable server-side analytics pipeline.
 - Many product areas still rely on browser localStorage as the primary source of truth.
 - Some backend route surfaces exist before the whole product has been migrated to backend-first data ownership.
 - Production smoke e2e depends on repository secrets and the deployed environment being configured correctly.
-- `/billing/plan` payment-history hydration has local hardening in place: the page exposes `data-payment-history-state`, signed-out real-mode users do not call protected history, signed-in requests time out into a retryable visible error before the smoke ceiling, and the quick production smoke waits on the stable marker. Live warmed/cold production smoke rerun is still pending in `docs/ops/billing-plan-smoke-timeout-follow-up.md`; this does not prove paid subscription readiness.
+- `/billing/plan` exposes stable payment-history states and keeps signed-out/unverified users away from the protected endpoint. A post-launch production check on 2026-07-31 reproduced a transient first-attempt timeout followed by a successful warm retry. The current reliability change retries one timeout, network failure, or HTTP `5xx` exactly once, exposes `data-payment-history-state="retrying"`, and preserves single-attempt handling for `401`, `403`, and `429`.
 
 ## 7. What is not implemented yet
 
@@ -199,7 +201,7 @@ Not fully implemented or not proven production-ready:
 
 - Full backend-as-source-of-truth for every product area.
 - Field-complete 12-week sync is improved for supported local shapes: plan setup metadata round-trips through import/pull/apply, tombstones are applied for local entity shapes, and backend lead metric logs are explicitly flagged as unsupported instead of being silently dropped because `TwelveWeekSystem` has no per-metric log entity yet.
-- Paid subscription is not claimed live for production users. A small Casso/VietQR smoke transaction passed on 2026-05-10, but provider/billing readiness still needs production monitoring, support operations, Casso/webhook dashboard verification, and a live warmed/cold rerun of the hardened `/billing/plan` smoke.
+- PayOS checkout and Plus entitlement are live for production users. Remaining billing work is operational reliability: payment-history latency monitoring, PayOS webhook/entitlement reconciliation, support response, receipt/refund handling, and safe fallback flags for incidents.
 - Complete production analytics pipeline with verified GA4 setup.
 - End-to-end staging proof for account deletion has an opt-in Playwright harness (`npm run test:e2e:account-delete`) and an active default-branch GitHub Actions wrapper (`.github/workflows/account-delete-e2e-staging.yml`) with destructive safety guards. It still needs an actual staging run before launch to confirm deployed auth/session behavior after delete; local backend route tests cover Firebase Admin deletion success, `auth/user-not-found`, and non-idempotent failure handling.
 - End-to-end staging proof for signup email verification has an opt-in Playwright harness (`npm run test:e2e:email-verification`) and an active default-branch GitHub Actions wrapper (`.github/workflows/email-verification-e2e-staging.yml`). It still needs an actual staging run before launch to confirm deployed Firebase delivery and auth behavior.
@@ -306,15 +308,15 @@ FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY----
 FRONTEND_ORIGIN=http://localhost:5173
 ```
 
-## 10. MVP recommendation
+## 10. Post-launch recommendation
 
-The MVP should stay narrow:
+The live product should stay narrow while real usage is measured:
 
-1. Make the core flow fast, understandable, and calm.
-2. Keep demo mode stable for public demos and portfolio usage.
-3. Make real mode reliable only for the core 12-week planning/execution loop before expanding backend sync.
-4. Avoid adding new product modules until onboarding, SMART goal setup, feasibility, 12-week execution, and weekly review feel simple on mobile and desktop.
-5. Do not sell paid functionality until billing, entitlement authority, and account recovery/export are production-safe.
+1. Measure activation from signup to the first activated 12-week plan.
+2. Measure D1/D7 return and completion of the first weekly review before adding new modules.
+3. Keep demo mode stable without letting demo copy or routes enter production.
+4. Keep PayOS, entitlement, payment history, refund, export, deletion, and sync operations observable and recoverable.
+5. Improve the core flow from real drop-off evidence instead of broad visual or feature expansion.
 
 Recommended MVP promise:
 
@@ -328,6 +330,7 @@ Recommended MVP promise:
 
 P0:
 
+- Keep PayOS checkout, webhook-confirmed entitlement, and payment-history recovery reliable.
 - Keep the 12-week setup and execution loop stable.
 - Preserve local-first fallback whenever backend sync fails.
 - Keep demo mode independent from Firebase/backend.

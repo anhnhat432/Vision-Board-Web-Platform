@@ -123,8 +123,8 @@ describe("audit-production-deps", () => {
   it("keeps the GitHub audit workflow on the scoped guard", () => {
     const workflow = readFileSync(path.resolve(".github/workflows/npm-audit.yml"), "utf8");
 
-    expect(workflow).toContain("npm run audit:prod");
-    expect(workflow).toContain("npm run audit:prod:backend");
+    expect(workflow).toContain("node scripts/check-production-dependency-audit.mjs frontend");
+    expect(workflow).toContain("node scripts/check-production-dependency-audit.mjs backend");
     expect(workflow).not.toContain("npm audit --audit-level=high");
     expect(workflow).not.toContain("npm --prefix backend audit --audit-level=high");
   });

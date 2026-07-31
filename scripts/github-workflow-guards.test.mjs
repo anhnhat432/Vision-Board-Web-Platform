@@ -139,9 +139,11 @@ describe("GitHub workflow safety guards", () => {
     expect(harness).toContain("method: response.request().method()");
     expect(harness).toContain("path: url.pathname");
     expect(harness).toContain("status: response.status()");
-    expect(harness).toContain('const confirmCheckbox = dialog.locator("#delete-cloud-confirm-checkbox")');
-    expect(harness).toContain("await confirmCheckbox.check()");
+    expect(harness).toContain('const confirmCheckbox = dialog.getByRole("checkbox", {');
+    expect(harness).toContain('name: "Tôi hiểu hành động này là không thể rút lại và đồng ý xóa vĩnh viễn."');
+    expect(harness).toContain("await confirmCheckbox.click()");
     expect(harness).toContain("await expect(confirmCheckbox).toBeChecked()");
+    expect(harness).not.toContain('dialog.locator("#delete-cloud-confirm-checkbox")');
     expect(harness).toContain('dialog.getByPlaceholder("XOACLOUD").fill("XOACLOUD")');
     expect(harness).not.toContain("payload: item.payload");
     expect(harness).not.toContain("response.body()");

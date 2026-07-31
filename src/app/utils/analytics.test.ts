@@ -80,6 +80,25 @@ describe("analytics", () => {
     });
   });
 
+  it("uses the Firebase measurement id when the dedicated GA id is missing", () => {
+    vi.stubEnv("VITE_APP_MODE", "real");
+    vi.stubEnv("VITE_ANALYTICS_MODE", "ga4");
+    vi.stubEnv("VITE_GA_MEASUREMENT_ID", "");
+    vi.stubEnv("VITE_FIREBASE_MEASUREMENT_ID", "G-FIREBASE1");
+
+    trackAnalyticsEvent("progress_viewed", {
+      source: "dashboard",
+    });
+
+    expect(canSendRemoteAnalytics()).toBe(true);
+    expect(window.dataLayer).toContainEqual({
+      event: "progress_viewed",
+      app: "vision_board_web",
+      area: "12_week",
+      source: "dashboard",
+    });
+  });
+
   it("does not mirror remotely in demo mode even when GA4 env is configured", () => {
     vi.stubEnv("VITE_APP_MODE", "demo");
     vi.stubEnv("VITE_ANALYTICS_MODE", "ga4");

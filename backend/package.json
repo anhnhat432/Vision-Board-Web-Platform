@@ -25,17 +25,15 @@
     "@aws-sdk/client-s3": "^3.1053.0",
     "@payos/node": "^2.0.5",
     "@sentry/node": "^10.52.0",
-    "@vision-board/shared-types": "file:../shared-types",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "express-rate-limit": "^8.5.1",
     "firebase-admin": "^13.10.0",
     "helmet": "^8.1.0",
-    "mongoose": "^8.9.5",
+    "mongoose": "^8.24.2",
     "multer": "^2.1.1",
-    "nodemailer": "^9.0.1",
-    "vision-board-web-platform": "file:.."
+    "nodemailer": "^9.0.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
@@ -48,6 +46,7 @@
   },
   "overrides": {
     "@tootallnate/once": "^3.0.1",
+    "body-parser": "1.20.6",
     "protobufjs": "7.6.5",
     "uuid": "^11.1.1",
     "websocket-driver": "0.7.5"
