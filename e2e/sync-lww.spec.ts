@@ -1,4 +1,9 @@
 import type { Page, Response } from "@playwright/test";
+import type { Goal } from "../src/app/utils/storage-types";
+import {
+  createTwelveWeekImportPayload,
+  type TwelveWeekImportPayload,
+} from "../src/features/plan12week/persistence/twelveWeekImportPayload";
 import { expect, test } from "./fixtures";
 
 const BASE_URL = process.env.LWW_E2E_URL?.replace(/\/$/, "");
@@ -18,12 +23,18 @@ const AUTH_OWNER_STORAGE_KEY = "visionboard_user_data:auth_owner_uid";
 const USER_DATA_UPDATED_EVENT_NAME = "visionboard:user-data-updated";
 const MANUAL_SYNC_MIN_INTERVAL_MS = 5_000;
 const lastObservedCloudPullAt = new WeakMap<Page, number>();
+let importSequence = 0;
 
-interface LwwProofGoal {
+interface LwwProofIdentity {
   goalId: string;
   goalTitle: string;
   taskId: string;
   taskTitle: string;
+}
+
+interface LwwProofGoal extends LwwProofIdentity {
+  importId: string;
+  importPayload: TwelveWeekImportPayload;
 }
 
 interface ApiResponseDiagnostic {
@@ -104,8 +115,11 @@ async function bootstrapLwwGoal(
   page: Page,
   scenarioTitle: string,
 ): Promise<LwwProofGoal> {
-  const seed: LwwProofGoal = {
-    goalId: PROOF_GOAL_ID,
+  const scenarioKey = `${TIMESTAMP}_${++importSequence}_${scenarioTitle
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")}`;
+  const seed: LwwProofIdentity = {
+    goalId: `${PROOF_GOAL_ID}_${scenarioKey}`,
     goalTitle: `${TEST_PREFIX} ${scenarioTitle}`,
     taskId: PROOF_TASK_ID,
     taskTitle: `${TEST_PREFIX} ${scenarioTitle} Task`,
@@ -115,7 +129,6 @@ async function bootstrapLwwGoal(
     ({
       authOwnerStorageKey,
       userDataStorageKey,
-      userDataUpdatedEventName,
       seed: proofSeed,
     }) => {
       const raw = localStorage.getItem(userDataStorageKey);
@@ -262,19 +275,10 @@ async function bootstrapLwwGoal(
         "latest_12_week_system_goal_id",
         proofSeed.goalId,
       );
-      window.dispatchEvent(
-        new StorageEvent("storage", {
-          key: userDataStorageKey,
-          newValue: serialized,
-          storageArea: localStorage,
-        }),
-      );
-      window.dispatchEvent(new CustomEvent(userDataUpdatedEventName));
     },
     {
       authOwnerStorageKey: AUTH_OWNER_STORAGE_KEY,
       userDataStorageKey: USER_DATA_STORAGE_KEY,
-      userDataUpdatedEventName: USER_DATA_UPDATED_EVENT_NAME,
       seed,
     },
   );
@@ -287,7 +291,171 @@ async function bootstrapLwwGoal(
     authScopedSnapshotMatches: true,
   });
 
-  return seed;
+  const storedGoal = await page.evaluate(
+    ({ goalId, userDataStorageKey }) => {
+      const raw = localStorage.getItem(userDataStorageKey);
+      if (!raw) return null;
+      const data = JSON.parse(raw) as { goals?: Goal[] };
+      return data.goals?.find((goal) => goal.id === goalId) ?? null;
+    },
+    { goalId: seed.goalId, userDataStorageKey: USER_DATA_STORAGE_KEY },
+  );
+  const importPayload = storedGoal
+    ? createTwelveWeekImportPayload(storedGoal)
+    : null;
+  if (!importPayload) {
+    throw new Error("LWW bootstrap could not create a 12-week import fixture.");
+  }
+
+  return {
+    ...seed,
+    importId: `lww_e2e_import_${scenarioKey}`,
+    importPayload,
+  };
+}
+
+async function importLwwBaseline(
+  page: Page,
+  seed: LwwProofGoal,
+  readApiDiagnostics: () => ApiResponseDiagnostic[],
+) {
+  const diagnostics = await page.evaluate(
+    async ({ importId, importPayload, proofIds }) => {
+      type EntityCounts = Partial<
+        Record<"goals" | "plans" | "weeks" | "tasks" | "leadMetrics", number>
+      >;
+      type EntityLink = { clientId?: string };
+      type ImportData = {
+        status?: string;
+        validation?: { acceptedEntityCounts?: EntityCounts };
+        links?: Partial<
+          Record<"goals" | "plans" | "tasks", EntityLink[]>
+        >;
+      };
+      type Envelope<T> = { success?: boolean; data?: T };
+      const readJson = async <T>(response: globalThis.Response) => {
+        try {
+          return (await response.json()) as Envelope<T>;
+        } catch {
+          return {} as Envelope<T>;
+        }
+      };
+      const token = localStorage.getItem("firebase_id_token")?.trim();
+
+      if (!token) {
+        return {
+          tokenPresent: false,
+          importHttpStatus: 0,
+          importSuccess: false,
+          importStatus: null,
+          importCounts: { goals: 0, plans: 0, weeks: 0, tasks: 0, leadMetrics: 0 },
+          goalLinkMatches: false,
+          planLinkMatches: false,
+          taskLinkMatches: false,
+        };
+      }
+
+      const importResponse = await fetch("/api/sync/12-week/import", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          importId,
+          idempotencyKey: importId,
+          source: "account_scope_cloud_import",
+          workspace: { goals: [importPayload] },
+        }),
+      });
+      const importEnvelope = await readJson<ImportData>(importResponse);
+      const importData = importEnvelope.data;
+      const counts = importData?.validation?.acceptedEntityCounts ?? {};
+      const links = importData?.links ?? {};
+      const importDiagnostics = {
+        tokenPresent: true,
+        importHttpStatus: importResponse.status,
+        importSuccess: importResponse.ok && importEnvelope.success === true,
+        importStatus: importData?.status ?? null,
+        importCounts: {
+          goals: counts.goals ?? 0,
+          plans: counts.plans ?? 0,
+          weeks: counts.weeks ?? 0,
+          tasks: counts.tasks ?? 0,
+          leadMetrics: counts.leadMetrics ?? 0,
+        },
+        goalLinkMatches: (links.goals ?? []).some(
+          (link) => link.clientId === proofIds.goalId,
+        ),
+        planLinkMatches: (links.plans ?? []).some(
+          (link) => link.clientId === proofIds.planId,
+        ),
+        taskLinkMatches: (links.tasks ?? []).some(
+          (link) => link.clientId === proofIds.taskId,
+        ),
+      };
+
+      return importDiagnostics;
+    },
+    {
+      importId: seed.importId,
+      importPayload: seed.importPayload,
+      proofIds: {
+        goalId: seed.goalId,
+        planId: seed.importPayload.plan.clientPlanId,
+        taskId: seed.taskId,
+      },
+    },
+  );
+
+  expect(diagnostics).toMatchObject({
+    tokenPresent: true,
+    importHttpStatus: 200,
+    importSuccess: true,
+    importCounts: {
+      goals: 1,
+      plans: 1,
+      weeks: 12,
+      tasks: 12,
+      leadMetrics: 12,
+    },
+    goalLinkMatches: true,
+    planLinkMatches: true,
+    taskLinkMatches: true,
+  });
+  expect(["applied", "duplicate"]).toContain(diagnostics.importStatus);
+  expect(
+    readApiDiagnostics().some(
+      (response) =>
+        response.method === "POST" &&
+        response.path === "/api/sync/12-week/import" &&
+        response.status >= 200 &&
+        response.status < 300,
+    ),
+  ).toBe(true);
+}
+
+async function activateLwwGoal(page: Page) {
+  await page.evaluate(
+    ({ userDataStorageKey, userDataUpdatedEventName }) => {
+      const serialized = localStorage.getItem(userDataStorageKey);
+      if (!serialized) {
+        throw new Error("LWW bootstrap snapshot was not available for UI activation.");
+      }
+      window.dispatchEvent(
+        new StorageEvent("storage", {
+          key: userDataStorageKey,
+          newValue: serialized,
+          storageArea: localStorage,
+        }),
+      );
+      window.dispatchEvent(new CustomEvent(userDataUpdatedEventName));
+    },
+    {
+      userDataStorageKey: USER_DATA_STORAGE_KEY,
+      userDataUpdatedEventName: USER_DATA_UPDATED_EVENT_NAME,
+    },
+  );
 }
 
 async function readSystemTabDiagnostics(
@@ -461,7 +629,7 @@ function captureApiResponseDiagnostics(page: Page) {
   };
 }
 
-async function readProofTaskDiagnostics(page: Page, seed: LwwProofGoal) {
+async function readProofTaskDiagnostics(page: Page, seed: LwwProofIdentity) {
   const storageState = await page.evaluate(
     ({ authOwnerStorageKey, goalId, leadIndicatorId, taskId, taskTitle, userDataStorageKey }) => {
       type StoredData = {
@@ -573,87 +741,6 @@ async function waitForMutationQueueIdle(
       { timeout: timeoutMs, intervals: [500, 1000, 2000] },
     )
     .toEqual([]);
-}
-
-async function enqueueBootstrapMutationsFromUi(
-  page: Page,
-  seed: LwwProofGoal,
-) {
-  await openSystemTab(page, "settings");
-  const beforePreferenceChange = await readProofTaskDiagnostics(page, seed);
-  const loadPreference = page.getByRole("combobox", {
-    name: "Chọn nhịp tuần",
-  });
-  try {
-    await expect(loadPreference).toBeVisible({ timeout: 30_000 });
-  } catch {
-    throw new Error(
-      `LWW bootstrap settings control was not visible: ${JSON.stringify({
-        ...(await readSystemTabDiagnostics(page, "settings")),
-        proof: await readProofTaskDiagnostics(page, seed),
-      })}`,
-    );
-  }
-  await loadPreference.click();
-  await page
-    .getByRole("option", { name: "Nhẹ hơn", exact: true })
-    .click();
-  const afterPreferenceChange = await readProofTaskDiagnostics(page, seed);
-
-  await openSystemTab(page, "today");
-  try {
-    await getProofTaskCheckbox(page, seed.taskTitle);
-  } catch {
-    const diagnostics = await readProofTaskDiagnostics(page, seed);
-    throw new Error(
-      `LWW bootstrap task was not visible: ${JSON.stringify({
-        beforePreferenceChange,
-        afterPreferenceChange,
-        today: diagnostics,
-      })}`,
-    );
-  }
-  await toggleTask(page, seed.taskTitle, true);
-  await toggleTask(page, seed.taskTitle, false);
-}
-
-async function syncProofGoalToCloud(
-  page: Page,
-  seed: LwwProofGoal,
-  readApiDiagnostics: () => ApiResponseDiagnostic[],
-) {
-  try {
-    await enqueueBootstrapMutationsFromUi(page, seed);
-  } finally {
-    await page.context().setOffline(false);
-  }
-
-  try {
-    await expect
-      .poll(
-        () =>
-          readApiDiagnostics().some(
-            (response) =>
-              response.method === "POST" &&
-              response.path === "/api/sync/12-week/mutations" &&
-              response.status >= 200 &&
-              response.status < 300,
-          ),
-        { timeout: 30_000, intervals: [500, 1000, 2000] },
-      )
-      .toBe(true);
-  } catch {
-    const currentUrl = new URL(page.url());
-    const queue = await readPendingMutationQueueDiagnostics(page);
-    throw new Error(
-      `Expected LWW bootstrap mutation-sync response did not arrive: ${JSON.stringify({
-        route: `${currentUrl.pathname}${currentUrl.search}`,
-        apiResponses: readApiDiagnostics(),
-        pendingMutations: queue,
-      })}`,
-    );
-  }
-  await waitForMutationQueueIdle(page);
 }
 
 async function triggerManualCloudSync(
@@ -852,17 +939,16 @@ async function prepareLwwScenario(
   ]);
   await loginPage(pageA, EMAIL!, PASSWORD!);
   await openSystemTab(pageA, "settings");
-  await pageA.context().setOffline(true);
 
   const apiDiagnostics = captureApiResponseDiagnostics(pageA);
   try {
     const seed = await bootstrapLwwGoal(pageA, scenarioTitle);
-    await expect(pageA.getByText(seed.goalTitle, { exact: true }).first()).toBeVisible({ timeout: 30_000 });
-    await syncProofGoalToCloud(
-      pageA,
-      seed,
-      apiDiagnostics.read,
-    );
+    await importLwwBaseline(pageA, seed, apiDiagnostics.read);
+    await activateLwwGoal(pageA);
+    await openSystemTab(pageA, "today");
+    await expect(
+      pageA.getByText(seed.goalTitle, { exact: true }).first(),
+    ).toBeVisible({ timeout: 30_000 });
     await loginPage(pageB, EMAIL!, PASSWORD!);
     await waitForProofGoal(pageB, seed);
 
@@ -870,7 +956,6 @@ async function prepareLwwScenario(
     expect(await getTaskCompletedState(pageB, seed.taskTitle)).toBe(false);
     return seed;
   } finally {
-    await pageA.context().setOffline(false);
     apiDiagnostics.stop();
   }
 }

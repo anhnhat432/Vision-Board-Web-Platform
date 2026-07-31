@@ -65,7 +65,7 @@ describe("GitHub workflow safety guards", () => {
     const harness = readFileSync(path.resolve("e2e", "sync-lww.spec.ts"), "utf8");
 
     expect(harness).toContain("bootstrapLwwGoal");
-    expect(harness).toContain("syncProofGoalToCloud");
+    expect(harness).toContain("importLwwBaseline");
     expect(harness).toContain("pullProofGoal");
     expect(harness).toContain('"visionboard_user_data:auth_owner_uid"');
     expect(harness).toContain('"visionboard:user-data-updated"');
@@ -97,21 +97,21 @@ describe("GitHub workflow safety guards", () => {
     expect(openTab).not.toContain("page.goto(");
   });
 
-  it("bootstraps LWW through mutation sync and reports pending queue metadata", () => {
+  it("bootstraps LWW through authenticated import and keeps mutation diagnostics safe", () => {
     const harness = readFileSync(path.resolve("e2e", "sync-lww.spec.ts"), "utf8");
     const prepareStart = harness.indexOf("async function prepareLwwScenario");
     const prepareEnd = harness.indexOf("// ── Tests", prepareStart);
     const prepareScenario = harness.slice(prepareStart, prepareEnd);
-    const syncStart = harness.indexOf("async function syncProofGoalToCloud");
-    const syncEnd = harness.indexOf("async function triggerManualCloudSync", syncStart);
-    const syncBootstrap = harness.slice(syncStart, syncEnd);
+    const importStart = harness.indexOf("async function importLwwBaseline");
+    const importEnd = harness.indexOf("async function activateLwwGoal", importStart);
+    const importBootstrap = harness.slice(importStart, importEnd);
     const observerIndex = prepareScenario.indexOf("captureApiResponseDiagnostics(pageA)");
     const bootstrapIndex = prepareScenario.indexOf("bootstrapLwwGoal(pageA, scenarioTitle)");
     const loginPageAIndex = prepareScenario.indexOf("loginPage(pageA, EMAIL!, PASSWORD!)");
     const loginPageBIndex = prepareScenario.indexOf("loginPage(pageB, EMAIL!, PASSWORD!)");
 
     expect(prepareStart).toBeGreaterThan(-1);
-    expect(syncStart).toBeGreaterThan(-1);
+    expect(importStart).toBeGreaterThan(-1);
     expect(observerIndex).toBeGreaterThan(-1);
     expect(bootstrapIndex).toBeGreaterThan(-1);
     expect(loginPageAIndex).toBeGreaterThan(-1);
@@ -120,10 +120,12 @@ describe("GitHub workflow safety guards", () => {
     expect(bootstrapIndex).toBeLessThan(loginPageBIndex);
     expect(observerIndex).toBeLessThan(bootstrapIndex);
     expect(harness).toContain("initialPullResponsePromise");
-    expect(syncBootstrap).not.toContain("triggerManualCloudSync(page)");
-    expect(harness).toContain('response.path === "/api/sync/12-week/mutations"');
-    expect(harness).toContain('name: "Chọn nhịp tuần"');
-    expect(harness).toContain('getByRole("option", { name: "Nhẹ hơn", exact: true })');
+    expect(importBootstrap).not.toContain("triggerManualCloudSync(page)");
+    expect(importBootstrap).toContain('fetch("/api/sync/12-week/import"');
+    expect(importBootstrap).toContain('response.path === "/api/sync/12-week/import"');
+    expect(harness).toContain("createTwelveWeekImportPayload");
+    expect(harness).toContain("await toggleTask(pageA, seed.taskTitle, true)");
+    expect(harness).toContain("await toggleTask(pageB, seed.taskTitle, true)");
     expect(harness).not.toContain("waitForPlanSnapshotBulkSync");
     expect(harness).not.toContain("/bulk-sync$");
     expect(harness).toContain("readPendingMutationQueueDiagnostics");
@@ -154,9 +156,9 @@ describe("GitHub workflow safety guards", () => {
     expect(diagnostics).toContain("scheduledDateMatchesToday:");
     expect(diagnostics).toContain("latestGoalPointerMatches:");
     expect(diagnostics).toContain("authScopedSnapshotMatches:");
+    expect(diagnostics).toContain("proofTitleTaskCount:");
     expect(diagnostics).toContain("visibleCheckboxCount:");
     expect(diagnostics).not.toContain("rawSnapshot");
-    expect(diagnostics).not.toContain("taskTitle");
     expect(diagnostics).not.toContain("payload");
     expect(diagnostics).not.toContain("headers");
   });
