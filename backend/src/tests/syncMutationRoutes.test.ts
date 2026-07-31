@@ -587,7 +587,9 @@ function createSyncWorkspaceMutationRepository() {
   return { repository, getDailyCheckIn, getWeeklyReview, getLeadMetric, getPlan, getWeek };
 }
 
-function createTwelveWeekImportRepository(): TwelveWeekImportRepository {
+function createTwelveWeekImportRepository(
+  onCreateImportLog?: (data: CreateSyncMutationLogData) => void,
+): TwelveWeekImportRepository {
   const mutationLogRepository = createSyncMutationLogRepository();
   const goals = new Map<string, ImportedGoalEntity & { planId?: string }>();
   const plans = new Map<string, ImportedPlanEntity>();
@@ -638,7 +640,10 @@ function createTwelveWeekImportRepository(): TwelveWeekImportRepository {
 
   return {
     findImportLog: mutationLogRepository.findByUserAndMutationId,
-    createImportLog: mutationLogRepository.createMutationLog,
+    async createImportLog(data: CreateSyncMutationLogData) {
+      onCreateImportLog?.(data);
+      return mutationLogRepository.createMutationLog(data);
+    },
     async upsertGoal(data: ImportGoalData): Promise<UpsertResult<ImportedGoalEntity>> {
       const key = goalKey(data.userId, data.clientGoalId);
       const existing = goals.get(key);
@@ -2363,6 +2368,23 @@ describe("12-week import apply route", () => {
     assert.equal(result.skipped.leadMetrics, 0);
     assert.equal(result.skipped.dailyCheckIns, 0);
     assert.equal(result.skipped.weeklyReviews, 0);
+  });
+
+  it("persists the importId as the mutation-log idempotency key", async () => {
+    let createdLog: CreateSyncMutationLogData | undefined;
+    const importService = new TwelveWeekImportService(
+      createTwelveWeekImportRepository((data) => {
+        createdLog = data;
+      }),
+    );
+
+    await importService.importWorkspace(
+      ownerUserId,
+      createValidImportPayload("import_apply_log_idempotency_1"),
+    );
+
+    assert.equal(createdLog?.mutationId, "import_apply_log_idempotency_1");
+    assert.equal(createdLog?.idempotencyKey, "import_apply_log_idempotency_1");
   });
 
   it("returns duplicate without creating new records for a repeated importId and same payload", async () => {
