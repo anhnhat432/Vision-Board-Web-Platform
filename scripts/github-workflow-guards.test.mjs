@@ -344,4 +344,14 @@ describe("GitHub workflow safety guards", () => {
     expect(lwwHarness).not.toContain("browser.newContext()");
     expect(lwwHarness.match(/await newProofContext\(\)/g)).toHaveLength(6);
   });
+
+  it("isolates legacy plan hydration without mocking LWW sync endpoints", () => {
+    const fixture = readFileSync(path.resolve("e2e", "fixtures.ts"), "utf8");
+
+    expect(fixture).toContain("installLegacyPlanHydrationIsolation");
+    expect(fixture).toContain('url.pathname === "/api/plans"');
+    expect(fixture).toContain('route.request().method() !== "GET"');
+    expect(fixture).toContain('JSON.stringify({ success: true, data: [] })');
+    expect(fixture).not.toContain('url.pathname.startsWith("/api/sync/12-week")');
+  });
 });

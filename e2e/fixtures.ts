@@ -42,12 +42,31 @@ async function installVercelAutomationBypassRoute(
   );
 }
 
+async function installLegacyPlanHydrationIsolation(context: BrowserContext) {
+  await context.route(
+    (url) => url.pathname === "/api/plans",
+    async (route) => {
+      if (route.request().method() !== "GET") {
+        await route.fallback();
+        return;
+      }
+
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ success: true, data: [] }),
+      });
+    },
+  );
+}
+
 export const test = base.extend<VercelBypassFixtures>({
   newProofContext: async ({ browser, proofBaseURL }, use) => {
     await use(async () => {
       const context = await browser.newContext({ baseURL: proofBaseURL });
       try {
         await installVercelAutomationBypassRoute(context, proofBaseURL);
+        await installLegacyPlanHydrationIsolation(context);
         return context;
       } catch (error) {
         await context.close();
