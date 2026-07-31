@@ -622,7 +622,11 @@ async function syncProofGoalToCloud(
   seed: LwwProofGoal,
   readApiDiagnostics: () => ApiResponseDiagnostic[],
 ) {
-  await enqueueBootstrapMutationsFromUi(page, seed);
+  try {
+    await enqueueBootstrapMutationsFromUi(page, seed);
+  } finally {
+    await page.context().setOffline(false);
+  }
 
   try {
     await expect
@@ -847,10 +851,13 @@ async function prepareLwwScenario(
     primeProofGuidanceState(pageB),
   ]);
   await loginPage(pageA, EMAIL!, PASSWORD!);
+  await openSystemTab(pageA, "settings");
+  await pageA.context().setOffline(true);
 
   const apiDiagnostics = captureApiResponseDiagnostics(pageA);
   try {
     const seed = await bootstrapLwwGoal(pageA, scenarioTitle);
+    await expect(pageA.getByText(seed.goalTitle, { exact: true }).first()).toBeVisible({ timeout: 30_000 });
     await syncProofGoalToCloud(
       pageA,
       seed,
@@ -863,6 +870,7 @@ async function prepareLwwScenario(
     expect(await getTaskCompletedState(pageB, seed.taskTitle)).toBe(false);
     return seed;
   } finally {
+    await pageA.context().setOffline(false);
     apiDiagnostics.stop();
   }
 }
