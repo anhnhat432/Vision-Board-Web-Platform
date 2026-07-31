@@ -11,6 +11,7 @@ const PASSWORD = process.env.LWW_E2E_PASSWORD;
 const TIMESTAMP = Date.now();
 const TEST_PREFIX = `[LWW-E2E-${TIMESTAMP}]`;
 const PROOF_GOAL_ID = "lww_e2e_goal";
+const PROOF_LEAD_INDICATOR_ID = "lww_e2e_lead";
 const PROOF_TASK_ID = "tw_task_1_lww_e2e_lead_0";
 const USER_DATA_STORAGE_KEY = "visionboard_user_data";
 const AUTH_OWNER_STORAGE_KEY = "visionboard_user_data:auth_owner_uid";
@@ -462,7 +463,7 @@ function captureApiResponseDiagnostics(page: Page) {
 
 async function readProofTaskDiagnostics(page: Page, seed: LwwProofGoal) {
   const storageState = await page.evaluate(
-    ({ authOwnerStorageKey, goalId, taskId, userDataStorageKey }) => {
+    ({ authOwnerStorageKey, goalId, leadIndicatorId, taskId, taskTitle, userDataStorageKey }) => {
       type StoredData = {
         goals?: Array<{
           id?: string;
@@ -470,6 +471,9 @@ async function readProofTaskDiagnostics(page: Page, seed: LwwProofGoal) {
             currentWeek?: number;
             taskInstances?: Array<{
               id?: string;
+              title?: string;
+              tacticId?: string;
+              weekNumber?: number;
               scheduledDate?: string;
             }>;
           };
@@ -497,6 +501,7 @@ async function readProofTaskDiagnostics(page: Page, seed: LwwProofGoal) {
       const task = goal?.twelveWeekSystem?.taskInstances?.find(
         (candidate) => candidate.id === taskId,
       );
+      const taskInstances = goal?.twelveWeekSystem?.taskInstances ?? [];
       const ownerUid = localStorage.getItem(authOwnerStorageKey)?.trim();
       const scopedData = ownerUid
         ? parseStoredData(
@@ -513,7 +518,19 @@ async function readProofTaskDiagnostics(page: Page, seed: LwwProofGoal) {
       return {
         goalPresent: Boolean(goal),
         taskPresent: Boolean(task),
-        taskCount: goal?.twelveWeekSystem?.taskInstances?.length ?? 0,
+        taskCount: taskInstances.length,
+        currentWeekTaskCount: taskInstances.filter(
+          (candidate) => candidate.weekNumber === (goal?.twelveWeekSystem?.currentWeek ?? 1),
+        ).length,
+        todayTaskCount: taskInstances.filter(
+          (candidate) => candidate.scheduledDate === formatDateKey(new Date()),
+        ).length,
+        proofTacticTaskCount: taskInstances.filter(
+          (candidate) => candidate.tacticId === leadIndicatorId,
+        ).length,
+        proofTitleTaskCount: taskInstances.filter(
+          (candidate) => candidate.title === taskTitle,
+        ).length,
         currentWeek: goal?.twelveWeekSystem?.currentWeek ?? null,
         scheduledDateMatchesToday:
           Boolean(task?.scheduledDate) &&
@@ -527,7 +544,9 @@ async function readProofTaskDiagnostics(page: Page, seed: LwwProofGoal) {
     {
       authOwnerStorageKey: AUTH_OWNER_STORAGE_KEY,
       goalId: seed.goalId,
+      leadIndicatorId: PROOF_LEAD_INDICATOR_ID,
       taskId: seed.taskId,
+      taskTitle: seed.taskTitle,
       userDataStorageKey: USER_DATA_STORAGE_KEY,
     },
   );
@@ -536,6 +555,10 @@ async function readProofTaskDiagnostics(page: Page, seed: LwwProofGoal) {
   return {
     route: `${currentUrl.pathname}${currentUrl.search}`,
     ...storageState,
+    activeProofGoalVisible: await page.getByText(seed.goalTitle, { exact: true }).first().isVisible(),
+    proofTaskCheckboxCount: await page
+      .getByRole("checkbox", { name: `Hoàn thành việc: ${seed.taskTitle}` })
+      .count(),
     visibleCheckboxCount: await page.locator('[role="checkbox"]:visible').count(),
   };
 }
@@ -557,6 +580,7 @@ async function enqueueBootstrapMutationsFromUi(
   seed: LwwProofGoal,
 ) {
   await openSystemTab(page, "settings");
+  const beforePreferenceChange = await readProofTaskDiagnostics(page, seed);
   const loadPreference = page.getByRole("combobox", {
     name: "Chọn nhịp tuần",
   });
@@ -574,6 +598,7 @@ async function enqueueBootstrapMutationsFromUi(
   await page
     .getByRole("option", { name: "Nhẹ hơn", exact: true })
     .click();
+  const afterPreferenceChange = await readProofTaskDiagnostics(page, seed);
 
   await openSystemTab(page, "today");
   try {
@@ -581,7 +606,11 @@ async function enqueueBootstrapMutationsFromUi(
   } catch {
     const diagnostics = await readProofTaskDiagnostics(page, seed);
     throw new Error(
-      `LWW bootstrap task was not visible: ${JSON.stringify(diagnostics)}`,
+      `LWW bootstrap task was not visible: ${JSON.stringify({
+        beforePreferenceChange,
+        afterPreferenceChange,
+        today: diagnostics,
+      })}`,
     );
   }
   await toggleTask(page, seed.taskTitle, true);
