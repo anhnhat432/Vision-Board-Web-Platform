@@ -5,7 +5,7 @@ import { PlanModel } from "../models/PlanModel";
 import { TaskModel } from "../models/TaskModel";
 import { WeekModel } from "../models/WeekModel";
 import { WeekReviewModel } from "../models/WeekReviewModel";
-import { withoutTombstones } from "../utils/tombstone";
+import { softDeleteUpdate, withoutTombstones } from "../utils/tombstone";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -37,7 +37,7 @@ export interface WorkspaceExportResult {
 
 export interface WorkspaceDeleteResult {
   deletedAt: string;
-  policy: "hard_delete";
+  policy: "soft_delete";
   counts: {
     goals: number;
     plans: number;
@@ -140,67 +140,66 @@ class MongoTwelveWeekWorkspaceRepository implements TwelveWeekWorkspaceRepositor
   }
 
   async deleteWorkspace(userId: string): Promise<WorkspaceDeleteResult> {
-    // Project convention: models have deletedAt but the existing import/mutation
-    // flow does not use soft-delete lifecycle yet. We use hard delete here because:
-    //   1. No existing tombstone garbage-collection job exists.
-    //   2. The user explicitly requested workspace removal.
-    //   3. Billing/subscription/account records are NOT touched.
-    //
-    // Delete order: leaf entities first, then parents.
-
-    const plans = (await PlanModel.find({ userId }).select("_id").lean()) as Array<{ _id: unknown }>;
+    const deletedAt = new Date();
+    const plans = (await PlanModel.find(withoutTombstones({ userId })).select("_id").lean()) as Array<{
+      _id: unknown;
+    }>;
     const planIds = plans.map((p) => p._id);
 
     let weekIds: unknown[] = [];
     if (planIds.length > 0) {
-      const weeks = (await WeekModel.find({ planId: { $in: planIds } }).select("_id").lean()) as Array<{
-        _id: unknown;
-      }>;
+      const weeks = (await WeekModel.find(withoutTombstones({ planId: { $in: planIds } }))
+        .select("_id")
+        .lean()) as Array<{ _id: unknown }>;
       weekIds = weeks.map((w) => w._id);
     }
 
-    // Delete leaf entities
     const [taskResult, leadMetricResult, dailyCheckInResult, weeklyReviewResult] = await Promise.all([
       weekIds.length > 0
-        ? TaskModel.deleteMany({ weekId: { $in: weekIds } })
-        : Promise.resolve({ deletedCount: 0 }),
+        ? TaskModel.updateMany(withoutTombstones({ weekId: { $in: weekIds } }), softDeleteUpdate(deletedAt))
+        : Promise.resolve({ modifiedCount: 0 }),
       weekIds.length > 0
-        ? LeadMetricModel.deleteMany({ weekId: { $in: weekIds } })
-        : Promise.resolve({ deletedCount: 0 }),
+        ? LeadMetricModel.updateMany(withoutTombstones({ weekId: { $in: weekIds } }), softDeleteUpdate(deletedAt))
+        : Promise.resolve({ modifiedCount: 0 }),
       planIds.length > 0
-        ? DailyCheckInModel.deleteMany({ userId, planId: { $in: planIds } })
-        : Promise.resolve({ deletedCount: 0 }),
+        ? DailyCheckInModel.updateMany(
+            withoutTombstones({ userId, planId: { $in: planIds } }),
+            softDeleteUpdate(deletedAt),
+          )
+        : Promise.resolve({ modifiedCount: 0 }),
       weekIds.length > 0
-        ? WeekReviewModel.deleteMany({
-            $or: [
-              { userId, planId: { $in: planIds } },
-              { userId: { $exists: false }, weekId: { $in: weekIds } },
-              { userId: null, weekId: { $in: weekIds } },
-            ],
-          })
-        : Promise.resolve({ deletedCount: 0 }),
+        ? WeekReviewModel.updateMany(
+            withoutTombstones({
+              $or: [
+                { userId, planId: { $in: planIds } },
+                { userId: { $exists: false }, weekId: { $in: weekIds } },
+                { userId: null, weekId: { $in: weekIds } },
+              ],
+            }),
+            softDeleteUpdate(deletedAt),
+          )
+        : Promise.resolve({ modifiedCount: 0 }),
     ]);
 
-    // Delete parent entities
     const [weekResult, planResult, goalResult] = await Promise.all([
       planIds.length > 0
-        ? WeekModel.deleteMany({ planId: { $in: planIds } })
-        : Promise.resolve({ deletedCount: 0 }),
-      PlanModel.deleteMany({ userId }),
-      GoalModel.deleteMany({ userId }),
+        ? WeekModel.updateMany(withoutTombstones({ planId: { $in: planIds } }), softDeleteUpdate(deletedAt))
+        : Promise.resolve({ modifiedCount: 0 }),
+      PlanModel.updateMany(withoutTombstones({ userId }), softDeleteUpdate(deletedAt)),
+      GoalModel.updateMany(withoutTombstones({ userId }), softDeleteUpdate(deletedAt)),
     ]);
 
     return {
-      deletedAt: new Date().toISOString(),
-      policy: "hard_delete",
+      deletedAt: deletedAt.toISOString(),
+      policy: "soft_delete",
       counts: {
-        goals: goalResult.deletedCount ?? 0,
-        plans: planResult.deletedCount ?? 0,
-        weeks: weekResult.deletedCount ?? 0,
-        tasks: taskResult.deletedCount ?? 0,
-        leadMetrics: leadMetricResult.deletedCount ?? 0,
-        dailyCheckIns: dailyCheckInResult.deletedCount ?? 0,
-        weeklyReviews: weeklyReviewResult.deletedCount ?? 0,
+        goals: goalResult.modifiedCount ?? 0,
+        plans: planResult.modifiedCount ?? 0,
+        weeks: weekResult.modifiedCount ?? 0,
+        tasks: taskResult.modifiedCount ?? 0,
+        leadMetrics: leadMetricResult.modifiedCount ?? 0,
+        dailyCheckIns: dailyCheckInResult.modifiedCount ?? 0,
+        weeklyReviews: weeklyReviewResult.modifiedCount ?? 0,
       },
     };
   }
