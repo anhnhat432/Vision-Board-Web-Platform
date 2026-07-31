@@ -293,21 +293,22 @@ async function readSystemTabDiagnostics(
     '[data-tour-id^="twelve-week-tab-"][data-state="active"]',
   );
   const currentUrl = new URL(page.url());
+  const systemTabCount = await systemTabs.count();
+  const requestedTabCount = await requestedTab.count();
+  const activeTabCount = await activeTab.count();
 
   return {
     route: `${currentUrl.pathname}${currentUrl.search}`,
-    systemTabCount: await systemTabs.count(),
-    requestedTabCount: await requestedTab.count(),
+    systemTabCount,
+    requestedTabCount,
     requestedTabVisible:
-      (await requestedTab.count()) > 0
-        ? await requestedTab.first().isVisible()
-        : false,
+      requestedTabCount > 0 ? await requestedTab.first().isVisible() : false,
     requestedTabState:
-      (await requestedTab.count()) > 0
+      requestedTabCount > 0
         ? await requestedTab.first().getAttribute("data-state")
         : null,
     activeTabTourId:
-      (await activeTab.count()) > 0
+      activeTabCount > 0
         ? await activeTab.first().getAttribute("data-tour-id")
         : null,
     tabPanelVisible: await page.getByRole("tabpanel").isVisible(),
@@ -332,21 +333,17 @@ async function openSystemTab(page: Page, tab: "today" | "settings") {
   }
 
   const tabByTourId = page.locator(`[data-tour-id="twelve-week-tab-${tab}"]`);
-  if ((await tabByTourId.count()) > 0) {
-    await tabByTourId.first().click();
-    return;
+  try {
+    await expect(tabByTourId).toBeVisible({ timeout: 30_000 });
+    await tabByTourId.click();
+    await expect(tabByTourId).toHaveAttribute("data-state", "active", {
+      timeout: 10_000,
+    });
+  } catch {
+    throw new Error(
+      `LWW system tab was not available: ${JSON.stringify(await readSystemTabDiagnostics(page, tab))}`,
+    );
   }
-
-  const tabName = tab === "today" ? /today|h.m nay/i : /settings|c.i . .t/i;
-  const tabByRole = page.getByRole("tab", { name: tabName });
-  if ((await tabByRole.count()) > 0) {
-    await tabByRole.first().click();
-    return;
-  }
-
-  throw new Error(
-    `LWW system tab was not available: ${JSON.stringify(await readSystemTabDiagnostics(page, tab))}`,
-  );
 }
 
 async function getProofTaskCheckbox(page: Page, taskTitle: string) {
