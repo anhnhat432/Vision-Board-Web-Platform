@@ -22,6 +22,7 @@ import { otherUserId, ownerUserId } from "./testHelpers";
 interface FakeRecord {
   id: string;
   userId: string;
+  deletedAt?: string;
   title?: string;
   clientPlanId?: string;
   clientGoalId?: string;
@@ -58,13 +59,14 @@ function createInMemoryWorkspaceRepository() {
 
   const repository: TwelveWeekWorkspaceRepository = {
     async exportWorkspace(userId: string): Promise<WorkspaceExportResult> {
-      const userGoals = goals.filter((r) => r.userId === userId);
-      const userPlans = plans.filter((r) => r.userId === userId);
-      const userWeeks = weeks.filter((r) => r.userId === userId);
-      const userTasks = tasks.filter((r) => r.userId === userId);
-      const userLeadMetrics = leadMetrics.filter((r) => r.userId === userId);
-      const userDailyCheckIns = dailyCheckIns.filter((r) => r.userId === userId);
-      const userWeeklyReviews = weeklyReviews.filter((r) => r.userId === userId);
+      const isActiveForUser = (record: FakeRecord) => record.userId === userId && !record.deletedAt;
+      const userGoals = goals.filter(isActiveForUser);
+      const userPlans = plans.filter(isActiveForUser);
+      const userWeeks = weeks.filter(isActiveForUser);
+      const userTasks = tasks.filter(isActiveForUser);
+      const userLeadMetrics = leadMetrics.filter(isActiveForUser);
+      const userDailyCheckIns = dailyCheckIns.filter(isActiveForUser);
+      const userWeeklyReviews = weeklyReviews.filter(isActiveForUser);
 
       return {
         generatedAt: new Date().toISOString(),
@@ -92,32 +94,33 @@ function createInMemoryWorkspaceRepository() {
     },
     async deleteWorkspace(userId: string): Promise<WorkspaceDeleteResult> {
       const countBefore = {
-        goals: goals.filter((r) => r.userId === userId).length,
-        plans: plans.filter((r) => r.userId === userId).length,
-        weeks: weeks.filter((r) => r.userId === userId).length,
-        tasks: tasks.filter((r) => r.userId === userId).length,
-        leadMetrics: leadMetrics.filter((r) => r.userId === userId).length,
-        dailyCheckIns: dailyCheckIns.filter((r) => r.userId === userId).length,
-        weeklyReviews: weeklyReviews.filter((r) => r.userId === userId).length,
+        goals: goals.filter((r) => r.userId === userId && !r.deletedAt).length,
+        plans: plans.filter((r) => r.userId === userId && !r.deletedAt).length,
+        weeks: weeks.filter((r) => r.userId === userId && !r.deletedAt).length,
+        tasks: tasks.filter((r) => r.userId === userId && !r.deletedAt).length,
+        leadMetrics: leadMetrics.filter((r) => r.userId === userId && !r.deletedAt).length,
+        dailyCheckIns: dailyCheckIns.filter((r) => r.userId === userId && !r.deletedAt).length,
+        weeklyReviews: weeklyReviews.filter((r) => r.userId === userId && !r.deletedAt).length,
       };
 
-      const remove = (arr: FakeRecord[]) => {
-        for (let i = arr.length - 1; i >= 0; i--) {
-          if (arr[i].userId === userId) arr.splice(i, 1);
-        }
+      const deletedAt = new Date().toISOString();
+      const softDelete = (records: FakeRecord[]) => {
+        records.forEach((record) => {
+          if (record.userId === userId && !record.deletedAt) record.deletedAt = deletedAt;
+        });
       };
 
-      remove(tasks);
-      remove(leadMetrics);
-      remove(dailyCheckIns);
-      remove(weeklyReviews);
-      remove(weeks);
-      remove(plans);
-      remove(goals);
+      softDelete(tasks);
+      softDelete(leadMetrics);
+      softDelete(dailyCheckIns);
+      softDelete(weeklyReviews);
+      softDelete(weeks);
+      softDelete(plans);
+      softDelete(goals);
 
       return {
-        deletedAt: new Date().toISOString(),
-        policy: "hard_delete",
+        deletedAt,
+        policy: "soft_delete",
         counts: countBefore,
       };
     },
@@ -323,7 +326,7 @@ describe("DELETE /api/sync/12-week/workspace", () => {
     assert.equal(res.body.success, true);
 
     const data = res.body.data as unknown as WorkspaceDeleteResult;
-    assert.equal(data.policy, "hard_delete");
+    assert.equal(data.policy, "soft_delete");
     assert.ok(data.deletedAt);
     assert.equal(data.counts.goals, 1);
     assert.equal(data.counts.plans, 1);
@@ -332,6 +335,7 @@ describe("DELETE /api/sync/12-week/workspace", () => {
     assert.equal(data.counts.leadMetrics, 1);
     assert.equal(data.counts.dailyCheckIns, 1);
     assert.equal(data.counts.weeklyReviews, 1);
+    assert.equal(store.goals.filter((record) => record.userId === ownerUserId && Boolean(record.deletedAt)).length, 1);
   });
 
   it("user A delete does not affect user B workspace", async () => {
@@ -339,15 +343,15 @@ describe("DELETE /api/sync/12-week/workspace", () => {
     await requestJson(app, "DELETE", "/api/sync/12-week/workspace", { token: "owner-token" });
 
     // Verify owner data is gone
-    assert.equal(store.goals.filter((r) => r.userId === ownerUserId).length, 0);
-    assert.equal(store.tasks.filter((r) => r.userId === ownerUserId).length, 0);
+    assert.equal(store.goals.filter((r) => r.userId === ownerUserId && !r.deletedAt).length, 0);
+    assert.equal(store.tasks.filter((r) => r.userId === ownerUserId && !r.deletedAt).length, 0);
 
     // Verify other user data is untouched
-    assert.equal(store.goals.filter((r) => r.userId === otherUserId).length, 1);
-    assert.equal(store.plans.filter((r) => r.userId === otherUserId).length, 1);
-    assert.equal(store.tasks.filter((r) => r.userId === otherUserId).length, 1);
-    assert.equal(store.dailyCheckIns.filter((r) => r.userId === otherUserId).length, 1);
-    assert.equal(store.weeklyReviews.filter((r) => r.userId === otherUserId).length, 1);
+    assert.equal(store.goals.filter((r) => r.userId === otherUserId && !r.deletedAt).length, 1);
+    assert.equal(store.plans.filter((r) => r.userId === otherUserId && !r.deletedAt).length, 1);
+    assert.equal(store.tasks.filter((r) => r.userId === otherUserId && !r.deletedAt).length, 1);
+    assert.equal(store.dailyCheckIns.filter((r) => r.userId === otherUserId && !r.deletedAt).length, 1);
+    assert.equal(store.weeklyReviews.filter((r) => r.userId === otherUserId && !r.deletedAt).length, 1);
   });
 
   it("user A cannot delete user B workspace via their own token", async () => {
