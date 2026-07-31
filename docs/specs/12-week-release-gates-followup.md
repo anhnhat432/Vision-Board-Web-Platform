@@ -56,7 +56,7 @@
 32. WHEN an authoritative task pull is converted back to local execution data, THE frontend SHALL map the task `syncUpdatedAt` to the existing local `lastModifiedAt` field so the generic stale-save guard does not restore the pre-pull task state.
 33. WHEN a mutation drain ends with no pending mutations and every failure is `failed_not_found`, THE manual sync SHALL continue to pull the authoritative cloud snapshot so a remote tombstone can remove stale local data; any retryable, validation, conflict, or mixed failure SHALL still stop before pull.
 34. WHEN a new LWW workflow starts after a previous tombstone scenario emptied the QA workspace, THE harness SHALL seed and import the next proof goal before navigating to a 12-week tab.
-35. BETWEEN sequential LWW scenarios, THE harness SHALL use short scenario-specific goal, plan, lead-indicator, and task client IDs so earlier baselines cannot collide with the current scenario's merge keys or diagnostics and every derived ID remains within backend validation limits.
+35. BETWEEN sequential LWW scenarios and workflow runs, THE harness SHALL use short run-unique, scenario-specific goal, plan, lead-indicator, task, and import IDs so earlier baselines cannot collide with the current scenario's merge keys, idempotency key, or diagnostics and every derived ID remains within backend validation limits.
 36. WHEN an authenticated user deletes the cloud 12-week workspace, THE backend SHALL soft-delete every active workspace entity with one server timestamp, return policy `soft_delete`, and expose those records as pull tombstones until the existing retention cleanup removes them.
 
 ## 5. Data, Storage, and Sync Constraints
@@ -107,7 +107,7 @@
 - [ ] authoritative pulled tasks carry a comparable `lastModifiedAt` value and survive the generic stale-save merge guard
 - [ ] an all-`failed_not_found`, zero-pending drain continues to pull tombstones while all other drain failures remain blocking
 - [ ] a fresh workflow run can bootstrap after the previous run deleted the entire QA workspace
-- [ ] sequential LWW scenarios use distinct task and lead-indicator client IDs
+- [ ] sequential LWW scenarios and workflow runs use distinct import, task, and lead-indicator client IDs
 - [ ] deleting the cloud workspace returns `soft_delete` and the next pull exposes goal/plan/task tombstones
 - [ ] LWW login defers the first-time onboarding redirect before authentication
 - [ ] LWW Settings and 12-week execution entry use in-app navigation and do not reload the auto-sync provider before manual sync

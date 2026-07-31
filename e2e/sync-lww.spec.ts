@@ -69,7 +69,10 @@ function isSafeLwwEmail(email: string) {
 }
 
 function createScenarioKey(scenarioTitle: string) {
-  const runSuffix = RUN_ID.toLowerCase().replace(/[^a-z0-9]+/g, "").slice(-10);
+  const runParts = RUN_ID.toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+  const runId = runParts[0] ?? "run";
+  const attempt = runParts[1] ?? "0";
+  const runSuffix = `${runId.slice(-12)}${attempt.slice(0, 2)}`;
   const titleSlug = scenarioTitle
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "_")

@@ -70,7 +70,13 @@ describe("GitHub workflow safety guards", () => {
     expect(harness).toContain('"visionboard_user_data:auth_owner_uid"');
     expect(harness).toContain("reloadProofGoal");
     expect(harness).toContain("function createScenarioKey(scenarioTitle: string)");
-    expect(harness).toContain('.slice(-10);');
+    expect(harness).toContain("const runParts = RUN_ID.toLowerCase()");
+    expect(harness).toContain('const runId = runParts[0] ?? "run";');
+    expect(harness).toContain('const attempt = runParts[1] ?? "0";');
+    expect(harness).toContain(
+      'const runSuffix = `${runId.slice(-12)}${attempt.slice(0, 2)}`;',
+    );
+    expect(harness).not.toContain('replace(/[^a-z0-9]+/g, "").slice(-10)');
     expect(harness).toContain("const scenarioKey = createScenarioKey(scenarioTitle);");
     expect(harness).toContain(
       'taskId: `tw_task_1_${PROOF_LEAD_INDICATOR_ID}_${scenarioKey}_0`,',
