@@ -37,6 +37,7 @@
 13. WHEN an LWW context authenticates, THE harness SHALL wait for its initial successful 12-week pull before writing a proof snapshot so login-time auto-sync cannot overwrite the bootstrap state.
 14. WHEN publishing the LWW bootstrap, THE harness SHALL wait for the UI-generated mutation batch and an idle queue without invoking a rate-limited manual full sync; the second context SHALL authenticate only after publication and use its initial pull to load the proof goal.
 15. WHEN the LWW bootstrap task is not visible on Today, THE harness SHALL report only the current route, proof goal/task presence, task count, current week, scheduled-date match, latest-goal pointer match, auth-scoped snapshot match, and visible checkbox count; it SHALL NOT report raw snapshots, titles, payloads, headers, credentials, or secret values.
+16. WHEN the LWW harness cannot open a requested 12-week tab or render the bootstrap settings control, THE harness SHALL report only the current route, system-tab counts, requested/active tab state, tab-panel visibility, settings-control visibility, and the safe proof-presence diagnostics allowed by requirement 15; it SHALL NOT report raw snapshots, titles, payloads, headers, credentials, or secret values.
 
 ## 5. Data, Storage, and Sync Constraints
 
@@ -71,6 +72,7 @@
 - [ ] LWW bootstrap failures expose safe endpoint/status diagnostics without payloads, headers, credentials, or secrets
 - [ ] LWW bootstrap waits for login-time auto-sync before seeding and publishes through mutation sync before the second context authenticates
 - [ ] missing LWW proof tasks expose only safe boolean/count diagnostics at the Today boundary
+- [ ] missing LWW tabs or settings controls expose only safe route/count/state diagnostics at the system-tab boundary
 - [ ] no secret value is read, copied, committed, or logged
 
 ## 9. Verification Plan

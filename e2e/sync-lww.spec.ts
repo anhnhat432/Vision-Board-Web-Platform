@@ -281,6 +281,43 @@ async function bootstrapLwwGoal(
   return seed;
 }
 
+async function readSystemTabDiagnostics(
+  page: Page,
+  tab: "today" | "settings",
+) {
+  const systemTabs = page.locator('[data-tour-id^="twelve-week-tab-"]');
+  const requestedTab = page.locator(
+    `[data-tour-id="twelve-week-tab-${tab}"]`,
+  );
+  const activeTab = page.locator(
+    '[data-tour-id^="twelve-week-tab-"][data-state="active"]',
+  );
+  const currentUrl = new URL(page.url());
+
+  return {
+    route: `${currentUrl.pathname}${currentUrl.search}`,
+    systemTabCount: await systemTabs.count(),
+    requestedTabCount: await requestedTab.count(),
+    requestedTabVisible:
+      (await requestedTab.count()) > 0
+        ? await requestedTab.first().isVisible()
+        : false,
+    requestedTabState:
+      (await requestedTab.count()) > 0
+        ? await requestedTab.first().getAttribute("data-state")
+        : null,
+    activeTabTourId:
+      (await activeTab.count()) > 0
+        ? await activeTab.first().getAttribute("data-tour-id")
+        : null,
+    tabPanelVisible: await page.getByRole("tabpanel").isVisible(),
+    settingsPanelVisible: await page.locator("#cycle-settings-heading").isVisible(),
+    settingsControlVisible: await page
+      .getByRole("combobox", { name: "Chọn nhịp tuần" })
+      .isVisible(),
+  };
+}
+
 async function openSystemTab(page: Page, tab: "today" | "settings") {
   if (new URL(page.url()).pathname !== "/12-week-system") {
     const systemButton = page.getByRole("button", {
@@ -304,7 +341,12 @@ async function openSystemTab(page: Page, tab: "today" | "settings") {
   const tabByRole = page.getByRole("tab", { name: tabName });
   if ((await tabByRole.count()) > 0) {
     await tabByRole.first().click();
+    return;
   }
+
+  throw new Error(
+    `LWW system tab was not available: ${JSON.stringify(await readSystemTabDiagnostics(page, tab))}`,
+  );
 }
 
 async function getProofTaskCheckbox(page: Page, taskTitle: string) {
@@ -513,7 +555,16 @@ async function enqueueBootstrapMutationsFromUi(
   const loadPreference = page.getByRole("combobox", {
     name: "Chọn nhịp tuần",
   });
-  await expect(loadPreference).toBeVisible({ timeout: 30_000 });
+  try {
+    await expect(loadPreference).toBeVisible({ timeout: 30_000 });
+  } catch {
+    throw new Error(
+      `LWW bootstrap settings control was not visible: ${JSON.stringify({
+        ...(await readSystemTabDiagnostics(page, "settings")),
+        proof: await readProofTaskDiagnostics(page, seed),
+      })}`,
+    );
+  }
   await loadPreference.click();
   await page
     .getByRole("option", { name: "Nhẹ hơn", exact: true })
