@@ -1202,7 +1202,6 @@ async function prepareLwwScenario(
     primeProofGuidanceState(pageB),
   ]);
   await loginPage(pageA, EMAIL!, PASSWORD!);
-  await openSystemTab(pageA, "settings");
 
   const apiDiagnostics = captureApiResponseDiagnostics(pageA);
   try {
