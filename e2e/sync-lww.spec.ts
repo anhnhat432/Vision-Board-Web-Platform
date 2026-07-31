@@ -149,7 +149,7 @@ async function bootstrapLwwGoal(
       const weekStart = addDays(now, -((now.getDay() + 6) % 7));
       const startDate = formatDateKey(weekStart);
       const endDate = formatDateKey(addDays(weekStart, 83));
-      const today = formatDateKey(now);
+      const todayOffset = (now.getDay() + 6) % 7;
       const leadIndicatorName = proofSeed.taskTitle;
       const leadIndicatorId = "lww_e2e_lead";
 
@@ -198,7 +198,7 @@ async function bootstrapLwwGoal(
               unit: "task/week",
               type: "core",
               priority: 1,
-              schedule: [6],
+              schedule: [todayOffset],
             },
           ],
           milestones: {
@@ -220,19 +220,19 @@ async function bootstrapLwwGoal(
           currentWeek: 1,
           totalWeeks: 12,
           weeklyPlans,
-          taskInstances: [
-            {
-              id: proofSeed.taskId,
-              title: proofSeed.taskTitle,
-              leadIndicatorName,
-              isCore: true,
-              completed: false,
-              weekNumber: 1,
-              scheduledDate: today,
-              tacticId: leadIndicatorId,
-              lastModifiedAt: 0,
-            },
-          ],
+          taskInstances: Array.from({ length: 12 }, (_, index) => ({
+            id: `tw_task_${index + 1}_${leadIndicatorId}_0`,
+            title: proofSeed.taskTitle,
+            leadIndicatorName,
+            isCore: true,
+            completed: false,
+            weekNumber: index + 1,
+            scheduledDate: formatDateKey(
+              addDays(weekStart, index * 7 + todayOffset),
+            ),
+            tacticId: leadIndicatorId,
+            lastModifiedAt: 0,
+          })),
           dailyCheckIns: [],
           weeklyReviews: [],
           scoreboard,
@@ -277,6 +277,14 @@ async function bootstrapLwwGoal(
       seed,
     },
   );
+
+  expect(await readProofTaskDiagnostics(page, seed)).toMatchObject({
+    goalPresent: true,
+    taskPresent: true,
+    taskCount: 12,
+    scheduledDateMatchesToday: true,
+    authScopedSnapshotMatches: true,
+  });
 
   return seed;
 }

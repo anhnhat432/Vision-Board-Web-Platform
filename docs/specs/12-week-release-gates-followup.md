@@ -27,7 +27,7 @@
 3. WHEN preview environment metadata is incomplete, THE release process SHALL stop before dispatching destructive account-deletion or LWW workflows.
 4. WHEN all local gates and preview proofs pass, THE release process MAY open a focused follow-up PR; it SHALL NOT merge or trigger production deployment automatically.
 5. WHEN the account-deletion proof first enters Settings, THE harness SHALL mark the Settings guide as seen before navigation so responsive guide hydration cannot intercept the destructive-flow controls.
-6. WHEN an LWW proof scenario starts, THE harness SHALL bootstrap a normalized 12-week goal from the authenticated local snapshot, mirror it to the active auth-scoped key, enqueue the initial plan and task through real UI controls, drain the mutation-sync queue, and pull it into the second context before exercising conflict resolution.
+6. WHEN an LWW proof scenario starts, THE harness SHALL bootstrap a normalized 12-week goal from the authenticated local snapshot with deterministic task instances for all 12 weeks and the week-one proof task scheduled on the current local date, mirror it to the active auth-scoped key, enqueue the initial plan and task through real UI controls, drain the mutation-sync queue, and pull it into the second context before exercising conflict resolution.
 7. WHILE exercising LWW resolution, THE harness SHALL use the real task checkbox and cloud-sync UI; it SHALL NOT depend on the product's first-time goal-creation route or broad text locators.
 8. WHEN the account-deletion proof seeds its local marker, THE harness SHALL preserve the authenticated snapshot, mirror the marker to the active auth-scoped key, reload Settings, and verify the marker still exists before destructive confirmation.
 9. WHEN account deletion succeeds in real mode, THE harness SHALL accept `/`, `/onboarding`, `/login?next=/onboarding`, or the observed auth-gated `/login?next=/settings` route while still requiring the remote `DELETE` response to succeed before local marker cleanup.
@@ -71,6 +71,7 @@
 - [ ] account deletion post-delete allowlist includes only observed safe public or auth-gated routes
 - [ ] LWW bootstrap failures expose safe endpoint/status diagnostics without payloads, headers, credentials, or secrets
 - [ ] LWW bootstrap waits for login-time auto-sync before seeding and publishes through mutation sync before the second context authenticates
+- [ ] LWW bootstrap storage already contains the normalized 12-week task set, including the week-one proof task on the current local date
 - [ ] missing LWW proof tasks expose only safe boolean/count diagnostics at the Today boundary
 - [ ] missing LWW tabs or settings controls expose only safe route/count/state diagnostics at the system-tab boundary
 - [ ] no secret value is read, copied, committed, or logged
