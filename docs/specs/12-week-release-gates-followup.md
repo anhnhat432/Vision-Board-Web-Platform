@@ -11,7 +11,7 @@
 
 - Type: `Core`
 - Touched domains: dependency security, Vercel preview environment metadata, auth/sync proof gates.
-- Existing invariants that must not break: no secrets in source or logs; no localStorage, API, entitlement, auth, sync, or route contract changes; no production redeploy before preview proof passes.
+- Existing invariants that must not break: no secrets in source or logs; no localStorage key/shape, public API, entitlement, auth, or route contract changes; local saves remain available offline; no production redeploy before preview proof passes.
 
 ## 3. Actors & Entry Points
 
@@ -53,18 +53,22 @@
 29. WHEN the tombstone proof opens the cloud-workspace deletion dialog, THE harness SHALL complete both irreversible confirmation controls (checkbox and exact `XOACLOUD` text) before waiting for the real `/api/sync/12-week/workspace` delete response.
 30. WHEN a task mutation is accepted or rejected by LWW, THE task's `syncUpdatedAt` SHALL remain a server processing timestamp used by delta pull, separate from the client timestamp used for winner selection, so a mutation processed after a pull cursor cannot disappear because the client clock lags the server clock.
 31. WHERE an existing task has no client LWW timestamp, THE first post-migration mutation SHALL be accepted and establish that timestamp because legacy `syncUpdatedAt` values may contain either server time or client time.
+32. WHEN an authoritative task pull is converted back to local execution data, THE frontend SHALL map the task `syncUpdatedAt` to the existing local `lastModifiedAt` field so the generic stale-save guard does not restore the pre-pull task state.
+33. WHEN a mutation drain ends with no pending mutations and every failure is `failed_not_found`, THE manual sync SHALL continue to pull the authoritative cloud snapshot so a remote tombstone can remove stale local data; any retryable, validation, conflict, or mixed failure SHALL still stop before pull.
+34. WHEN a new LWW workflow starts after a previous tombstone scenario emptied the QA workspace, THE harness SHALL seed and import the next proof goal before navigating to a 12-week tab.
+35. BETWEEN sequential LWW scenarios, THE harness SHALL use scenario-specific goal, plan, lead-indicator, and task client IDs so earlier baselines cannot collide with the current scenario's merge keys or diagnostics.
 
 ## 5. Data, Storage, and Sync Constraints
 
-- localStorage keys / shapes touched: none.
+- localStorage keys / shapes touched: none; authoritative pulled tasks reuse the existing `lastModifiedAt` field.
 - migration or normalization needed: none.
-- backend models or API contracts touched: add an optional internal task client-LWW timestamp; the public mutation response shape remains unchanged.
+- backend models or API contracts touched: add an optional internal task client-LWW timestamp and an internal frontend drain diagnostic count; the public mutation response shape remains unchanged.
 - sync ordering guarantees: client time selects the task winner; server time controls delta visibility.
 - rollback / restore concerns: dependency changes are isolated to manifests and lockfiles; Vercel environment scope changes must not overwrite secret values.
 
 ## 6. Non-functional Requirements
 
-- performance / latency: no intentional runtime behavior change.
+- performance / latency: no new request or retry; only authoritative pull application after a terminal remote-not-found drain.
 - accessibility: existing UI test coverage must remain green.
 - observability / logging: record only environment variable names, scope, target URL, commit SHA, and workflow URLs.
 - security / privacy: keep secret values concealed; use disposable or marker-safe QA accounts required by each workflow; keep the React Router exception package-, advisory-, and frontend-specific.
@@ -72,7 +76,7 @@
 ## 7. Out of Scope
 
 - Billing provider selection between PayOS and Casso.
-- UI redesign, storage/sync semantics, auth behavior, or production deployment.
+- UI redesign, storage schema changes, broader sync architecture changes, auth behavior, or production deployment.
 
 ## 8. Acceptance Criteria
 
@@ -99,6 +103,10 @@
 - [ ] legacy tasks without the new client-LWW field accept one deterministic migration write before normal LWW comparison resumes
 - [ ] a post-drain task pull applies the authoritative cloud state instead of restoring a recent local task value
 - [ ] tombstone proof completes both production delete confirmations before submitting the real delete request
+- [ ] authoritative pulled tasks carry a comparable `lastModifiedAt` value and survive the generic stale-save merge guard
+- [ ] an all-`failed_not_found`, zero-pending drain continues to pull tombstones while all other drain failures remain blocking
+- [ ] a fresh workflow run can bootstrap after the previous run deleted the entire QA workspace
+- [ ] sequential LWW scenarios use distinct task and lead-indicator client IDs
 - [ ] LWW login defers the first-time onboarding redirect before authentication
 - [ ] LWW Settings and 12-week execution entry use in-app navigation and do not reload the auto-sync provider before manual sync
 - [ ] missing LWW proof tasks expose only safe boolean/count diagnostics at the Today boundary

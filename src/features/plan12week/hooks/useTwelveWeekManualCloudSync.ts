@@ -134,6 +134,12 @@ function createSkippedResult(
 }
 
 function isDrainFailure(result: MutationQueueSyncResult): boolean {
+  const allFailuresAreRemoteNotFound =
+    result.pendingCount === 0 &&
+    result.failedCount > 0 &&
+    result.failedNotFoundCount === result.failedCount;
+  if (allFailuresAreRemoteNotFound) return false;
+
   return (
     result.status === "partial" ||
     result.status === "error" ||

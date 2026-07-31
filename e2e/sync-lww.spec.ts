@@ -20,7 +20,6 @@ const RUN_ID =
 const TEST_PREFIX = `[LWW-E2E-${RUN_ID}]`;
 const PROOF_GOAL_ID = "lww_e2e_goal";
 const PROOF_LEAD_INDICATOR_ID = "lww_e2e_lead";
-const PROOF_TASK_ID = "tw_task_1_lww_e2e_lead_0";
 const USER_DATA_STORAGE_KEY = "visionboard_user_data";
 const AUTH_OWNER_STORAGE_KEY = "visionboard_user_data:auth_owner_uid";
 const MANUAL_SYNC_MIN_INTERVAL_MS = 5_000;
@@ -30,6 +29,7 @@ const observedApiBaseUrl = new WeakMap<Page, string>();
 interface LwwProofIdentity {
   goalId: string;
   goalTitle: string;
+  leadIndicatorId: string;
   taskId: string;
   taskTitle: string;
 }
@@ -227,7 +227,8 @@ async function bootstrapLwwGoal(
   const seed: LwwProofIdentity = {
     goalId: `${PROOF_GOAL_ID}_${scenarioKey}`,
     goalTitle: `${TEST_PREFIX} ${scenarioTitle}`,
-    taskId: PROOF_TASK_ID,
+    leadIndicatorId: `${PROOF_LEAD_INDICATOR_ID}_${scenarioKey}`,
+    taskId: `tw_task_1_${PROOF_LEAD_INDICATOR_ID}_${scenarioKey}_0`,
     taskTitle: `${TEST_PREFIX} ${scenarioTitle} Task`,
   };
 
@@ -271,7 +272,7 @@ async function bootstrapLwwGoal(
       const endDate = formatDateKey(addDays(weekStart, 83));
       const todayOffset = (now.getDay() + 6) % 7;
       const leadIndicatorName = proofSeed.taskTitle;
-      const leadIndicatorId = "lww_e2e_lead";
+      const leadIndicatorId = proofSeed.leadIndicatorId;
 
       const weeklyPlans = Array.from({ length: 12 }, (_, index) => ({
         weekNumber: index + 1,
@@ -945,7 +946,7 @@ async function readProofTaskDiagnostics(page: Page, seed: LwwProofIdentity) {
     {
       authOwnerStorageKey: AUTH_OWNER_STORAGE_KEY,
       goalId: seed.goalId,
-      leadIndicatorId: PROOF_LEAD_INDICATOR_ID,
+      leadIndicatorId: seed.leadIndicatorId,
       taskId: seed.taskId,
       taskTitle: seed.taskTitle,
       userDataStorageKey: USER_DATA_STORAGE_KEY,

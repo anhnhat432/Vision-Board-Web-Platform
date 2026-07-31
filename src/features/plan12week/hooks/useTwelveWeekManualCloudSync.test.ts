@@ -433,6 +433,45 @@ describe("runTwelveWeekManualCloudSync", () => {
     expect(writeUserData).not.toHaveBeenCalled();
   });
 
+  it("continues to pull a tombstone after every drained mutation is remote-not-found", async () => {
+    const localData = createLocalDataWithDifferentTask();
+    const pullResponse = createDeltaPullResponse(createEmptyWorkspace());
+    pullResponse.tombstones.goals = [
+      {
+        id: "backend_goal_1",
+        clientId: "goal_1",
+        deletedAt: at(6),
+      },
+    ];
+    const pullWorkspace = vi.fn(async () => pullResponse);
+    let writtenData: UserData | undefined;
+
+    const result = await runTwelveWeekManualCloudSync({
+      ...baseOptions(),
+      drainMutations: vi.fn(async () => ({
+        status: "partial" as const,
+        attemptedCount: 1,
+        succeededCount: 0,
+        duplicateCount: 0,
+        failedCount: 1,
+        failedNotFoundCount: 1,
+        pendingCount: 0,
+      })),
+      pullWorkspace,
+      readUserData: () => localData,
+      writeUserData: vi.fn((data: UserData) => {
+        writtenData = data;
+        return true;
+      }),
+      readCursor: () => "cursor_before",
+      writeCursor: vi.fn(),
+    });
+
+    expect(result.status).toBe("applied");
+    expect(pullWorkspace).toHaveBeenCalledTimes(1);
+    expect(writtenData?.goals).toEqual([]);
+  });
+
   it("does not pull or overwrite local data when queue drain is skipped because the browser is offline", async () => {
     const pullWorkspace = vi.fn();
     const writeUserData = vi.fn(() => true);
