@@ -39,6 +39,7 @@
 15. WHEN the LWW bootstrap task is not visible on Today, THE harness SHALL report only stage-labeled snapshots of the current route, proof goal/task presence, task count, current-week/today counts, proof tactic/title match counts, current week, scheduled-date match, latest-goal pointer match, auth-scoped snapshot match, active-proof-goal visibility, and visible checkbox count; it SHALL NOT report raw snapshots, titles, payloads, headers, credentials, or secret values.
 16. WHEN the LWW harness cannot open a requested 12-week tab or render the bootstrap settings control, THE harness SHALL report only the current route, system-tab counts, requested/active tab state, tab-panel visibility, settings-control visibility, and the safe proof-presence diagnostics allowed by requirement 15; it SHALL NOT report raw snapshots, titles, payloads, headers, credentials, or secret values.
 17. WHILE exercising local-wins, cloud-wins, and tombstone resolution after baseline import, THE harness SHALL create task state changes through the real checkbox UI and publish them through the real mutation queue; direct API import SHALL NOT replace any conflict mutation under proof.
+18. WHEN an authenticated 12-week import is accepted, THE backend SHALL persist the resolved `importId` as both the mutation ID and mutation-log idempotency key so repeated imports do not depend on legacy nullable-index behavior.
 
 ## 5. Data, Storage, and Sync Constraints
 
@@ -75,6 +76,7 @@
 - [ ] LWW bootstrap import IDs and payload timestamps remain stable across Playwright retries so a repeated setup is idempotent
 - [ ] LWW bootstrap storage already contains the normalized 12-week task set, including the week-one proof task on the current local date
 - [ ] local-wins, cloud-wins, and tombstone proof mutations still originate from the real task checkbox UI and drain through the real mutation queue
+- [ ] accepted 12-week imports persist `importId` as the mutation-log idempotency key, avoiding production `idempotencyKey:null` duplicate-index failures
 - [ ] missing LWW proof tasks expose only safe boolean/count diagnostics at the Today boundary
 - [ ] missing LWW tabs or settings controls expose only safe route/count/state diagnostics at the system-tab boundary
 - [ ] no secret value is read, copied, committed, or logged

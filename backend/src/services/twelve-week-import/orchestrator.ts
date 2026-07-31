@@ -70,6 +70,7 @@ export class TwelveWeekImportService {
       await this.repository.createImportLog({
         userId,
         mutationId: importId,
+        idempotencyKey: importId,
         type: "12_week_import",
         payloadHash,
         status: "accepted",
