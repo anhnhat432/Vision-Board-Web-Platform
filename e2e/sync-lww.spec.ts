@@ -75,9 +75,17 @@ async function waitForManualSyncWindow(page: Page) {
 async function openSettingsWithoutReload(page: Page) {
   if (new URL(page.url()).pathname === "/settings") return;
 
-  const settingsLink = page.locator('a[href="/settings"]:visible').first();
-  await expect(settingsLink).toBeVisible({ timeout: 30_000 });
-  await settingsLink.click();
+  const accountMenuTrigger = page
+    .locator(
+      '[aria-label="Mở menu tài khoản"]:visible, [aria-label="Mở menu tài khoản di động"]:visible',
+    )
+    .first();
+  await expect(accountMenuTrigger).toBeVisible({ timeout: 30_000 });
+  await accountMenuTrigger.click();
+
+  const settingsMenuItem = page.getByRole("menuitem", { name: "Cài đặt", exact: true });
+  await expect(settingsMenuItem).toBeVisible({ timeout: 10_000 });
+  await settingsMenuItem.click();
   await expect(page).toHaveURL(/\/settings(?:[?#]|$)/, { timeout: 30_000 });
 }
 

@@ -185,6 +185,9 @@ describe("GitHub workflow safety guards", () => {
     const guidanceStart = harness.indexOf("async function primeProofGuidanceState");
     const guidanceEnd = harness.indexOf("async function bootstrapLwwGoal", guidanceStart);
     const guidance = harness.slice(guidanceStart, guidanceEnd);
+    const settingsNavigationStart = harness.indexOf("async function openSettingsWithoutReload");
+    const settingsNavigationEnd = harness.indexOf("async function loginPage", settingsNavigationStart);
+    const settingsNavigation = harness.slice(settingsNavigationStart, settingsNavigationEnd);
     const loginStart = harness.indexOf("async function loginPage");
     const loginEnd = harness.indexOf("async function primeProofGuidanceState", loginStart);
     const login = harness.slice(loginStart, loginEnd);
@@ -197,6 +200,9 @@ describe("GitHub workflow safety guards", () => {
 
     expect(loginStart).toBeGreaterThan(-1);
     expect(guidance).toContain('sessionStorage.setItem("onboarding-deferred", "1")');
+    expect(settingsNavigation).toContain('[aria-label="Mở menu tài khoản"]:visible');
+    expect(settingsNavigation).toContain('getByRole("menuitem", { name: "Cài đặt", exact: true })');
+    expect(settingsNavigation).not.toContain('a[href="/settings"]');
     expect(login).toContain("await expect(page).toHaveURL(/\\/settings");
     expect(login).not.toContain('await page.goto("/settings")');
     expect(triggerManualSync).toContain("await openSettingsWithoutReload(page)");
