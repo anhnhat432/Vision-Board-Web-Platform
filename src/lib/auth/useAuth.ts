@@ -32,7 +32,7 @@ const DEFAULT_LOGIN_OPTIONS: Required<Pick<LoginOptions, "provider" | "mode">> =
   provider: "google",
   mode: "signin",
 };
-const FIREBASE_TOKEN_STORAGE_KEY = "firebase_id_token";
+const FIREBASE_SESSION_STORAGE_KEY = "firebase_id_token";
 
 let firebaseAuthModulePromise: Promise<FirebaseAuthModule> | null = null;
 
@@ -50,17 +50,13 @@ function isFirebaseAuthConfiguredFromEnv(): boolean {
   );
 }
 
-function readStoredFirebaseToken(): string | null {
-  if (typeof window === "undefined") return null;
+function hasStoredFirebaseSessionHint(): boolean {
+  if (typeof window === "undefined") return false;
   try {
-    return localStorage.getItem(FIREBASE_TOKEN_STORAGE_KEY);
+    return localStorage.getItem(FIREBASE_SESSION_STORAGE_KEY) !== null;
   } catch {
-    return null;
+    return false;
   }
-}
-
-function hasStoredFirebaseToken(): boolean {
-  return Boolean(readStoredFirebaseToken());
 }
 
 export async function recordSignupTermsAcceptance(now: Date = new Date()): Promise<UserProfile> {
@@ -116,9 +112,9 @@ export function resolveAuthErrorMessage(error: unknown): string {
 
 export function useAuth(): UseAuthResult {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(() => hasStoredFirebaseToken());
+  const [loading, setLoading] = useState(() => hasStoredFirebaseSessionHint());
   const [error, setError] = useState<string | null>(null);
-  const [shouldSubscribeAuth, setShouldSubscribeAuth] = useState(() => hasStoredFirebaseToken());
+  const [shouldSubscribeAuth, setShouldSubscribeAuth] = useState(() => hasStoredFirebaseSessionHint());
 
   const isConfigured = isFirebaseAuthConfiguredFromEnv();
 
@@ -250,7 +246,7 @@ export function useAuth(): UseAuthResult {
       setError(null);
 
       try {
-        if (!isConfigured) return readStoredFirebaseToken();
+        if (!isConfigured) return null;
         const { getFirebaseToken } = await loadFirebaseAuthModule();
         return await getFirebaseToken(forceRefresh);
       } catch (nextError) {
