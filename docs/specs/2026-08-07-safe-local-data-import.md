@@ -86,6 +86,7 @@ Import states:
 - `LOCAL-IMPORT-009`: `WHEN an import candidate is applied, THE system SHALL clear or unset isHydratedFromDemo so a restored file is not treated as untouched seeded demo data.`
 - `LOCAL-IMPORT-010`: `THE system SHALL preserve supported product-data identifiers and content from the normalized file, including goal, plan, task, reflection, wheel, and vision-board records.`
 - `LOCAL-IMPORT-011`: `THE system SHALL NOT import Firebase credentials, backend link-store ownership, billing-provider state, account roles, cloud cursors, mutation queues, or any storage key outside the validated UserData payload.`
+- `LOCAL-IMPORT-039`: `WHEN imported vision-board image content is prepared or rendered, THE system SHALL allow only HTTP(S) URLs or supported raster data URLs (PNG, JPEG, GIF, WEBP, or AVIF), SHALL render the existing fallback for rejected values, and SHALL NOT assign rejected text to an image src or DOM data attribute.`
 
 ### 4.3 Recovery and exact local replacement
 
@@ -228,6 +229,7 @@ Import states:
 - [ ] `LOCAL-IMPORT-006`: changing active data between preview and confirmation blocks replacement.
 - [ ] `LOCAL-IMPORT-007/011`: imported account-bound, operational, credential, and unsupported storage state is absent after replacement.
 - [ ] `LOCAL-IMPORT-008/009/010`: current identity is preserved, demo-seed status is cleared, and supported product records retain their identifiers/content.
+- [ ] `LOCAL-IMPORT-039`: unsafe imported vision-board image sources are cleared before persistence and rejected again at the shared image render boundary without leaking the rejected value into the DOM.
 - [ ] `LOCAL-IMPORT-012/013/015`: two-step confirmation precedes snapshot creation; snapshot failure leaves current state byte-for-byte unchanged.
 - [ ] `LOCAL-IMPORT-014/018`: recovery captures sanitized current product data plus only the matching owner's queue/cursor; active stale queue/cursor is cleared.
 - [ ] `LOCAL-IMPORT-016/017/020`: imported data replaces rather than merges, mirrors only to the active owner scope, and refreshes same/cross-tab consumers.

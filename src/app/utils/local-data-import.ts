@@ -1,4 +1,5 @@
 import { createSanitizedLocalUserDataBackup } from "./local-data-backup";
+import { getSafeImageSource } from "./image-source-safety";
 import { parseStoredUserData } from "./storage";
 import type { TwelveWeekSystem, UserData } from "./storage-types";
 
@@ -61,6 +62,18 @@ export function fingerprintLocalDataImport(data: UserData): string {
   return `${raw.length.toString(36)}-${(hash >>> 0).toString(36)}`;
 }
 
+function sanitizeImportedVisionBoardImageSources(data: UserData): UserData {
+  return {
+    ...data,
+    visionBoards: data.visionBoards.map((board) => ({
+      ...board,
+      items: board.items.map((item) =>
+        item.type === "image" ? { ...item, content: getSafeImageSource(item.content) ?? "" } : item,
+      ),
+    })),
+  };
+}
+
 export function prepareLocalDataImportCandidate(input: {
   fileName: string;
   sizeBytes: number;
@@ -74,7 +87,7 @@ export function prepareLocalDataImportCandidate(input: {
   const parsed = parseStoredUserData(input.text);
   if (!parsed) return { status: "invalid", reason: "invalid_backup" };
 
-  const sanitized = createSanitizedLocalUserDataBackup(parsed);
+  const sanitized = sanitizeImportedVisionBoardImageSources(createSanitizedLocalUserDataBackup(parsed));
   const data: UserData = {
     ...sanitized,
     userId: input.currentData.userId,
