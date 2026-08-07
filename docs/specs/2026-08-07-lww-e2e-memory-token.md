@@ -1,6 +1,6 @@
 # LWW E2E Memory-Only Authorization Spec
 
-Status: Review
+Status: Approved
 Approach: SDD first, then bounded ADD
 Specification depth: Standard
 Risk: Medium
@@ -140,4 +140,4 @@ gh workflow run lww-e2e-staging.yml \
 ## 12. Approval Boundary
 
 - Approved design direction: memory-only authorization captured from the Firebase-signed pull request.
-- This written spec remains in Review until the user confirms it before implementation planning begins.
+- The user approved this written spec on 2026-08-07; implementation planning may proceed.
