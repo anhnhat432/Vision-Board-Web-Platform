@@ -167,15 +167,6 @@ git diff -- scripts/production-smoke-harness.test.mjs scripts/smoke-production-e
 
 Expected: only the new regression and the body of `classifyVisiblePreviousCommitments` change. Confirm there is no `force: true`, localStorage write, route change, 429 filtering change, or shared helper refactor.
 
-- [ ] **Step 4: Commit the tested hotfix**
-
-```powershell
-git add scripts/production-smoke-harness.test.mjs scripts/smoke-production-e2e.mjs
-git commit -m "fix: stabilize weekly review smoke clicks"
-```
-
-Expected: one implementation commit containing only the two script files.
-
 ### Task 3: Run repository verification and prepare the draft pull request
 
 **Files:**
@@ -228,7 +219,16 @@ Verify all four layers explicitly:
 3. Safety compliance: no app/runtime contract, secret, localStorage, rate-limit, billing, auth, or backend change.
 4. Acceptance verification: the stale `keptButtons.nth(index)` + `button.click()` pattern is absent; live production proof remains pending until the workflow runs after an approved merge.
 
-- [ ] **Step 5: Push the branch and open a draft PR without merging**
+- [ ] **Step 5: Commit the fully verified hotfix**
+
+```powershell
+git add scripts/production-smoke-harness.test.mjs scripts/smoke-production-e2e.mjs
+git commit -m "fix: stabilize weekly review smoke clicks"
+```
+
+Expected: one implementation commit containing only the two script files, created after all local verification succeeds.
+
+- [ ] **Step 6: Push the branch and open a draft PR without merging**
 
 Run:
 
@@ -239,7 +239,7 @@ gh pr create --draft --base main --head fix/production-smoke-weekly-review-click
 
 Expected: push succeeds and GitHub returns the URL of a new draft PR. Do not merge the PR and do not deploy production.
 
-- [ ] **Step 6: Watch required PR checks and report evidence**
+- [ ] **Step 7: Watch required PR checks and report evidence**
 
 Run:
 
