@@ -24,6 +24,8 @@ interface UseCloudImportActionsOptions {
   demoMode: boolean;
   userUid: string | null;
   localDataMigrationCandidate: LocalDataMigrationCandidate | null;
+  trackingSource?: "local_data_migration_prompt" | "settings_file_import";
+  recordMigrationCompletion?: boolean;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -101,6 +103,8 @@ export function useCloudImportActions({
   demoMode,
   userUid,
   localDataMigrationCandidate,
+  trackingSource = "local_data_migration_prompt",
+  recordMigrationCompletion = true,
 }: UseCloudImportActionsOptions) {
   const apiConfigured = isApiBaseUrlConfigured();
   const dryRunFeatureEnabled = shouldEnable12WeekImportDryRun();
@@ -197,7 +201,7 @@ export function useCloudImportActions({
 
     trackAppEvent("cloud_import_started", undefined, {
       goalCount: String(importPayloads.length),
-      source: "local_data_migration_prompt",
+      source: trackingSource,
     });
 
     const importId = createCloudImportId();
@@ -214,7 +218,7 @@ export function useCloudImportActions({
       const response = await post12WeekImport(request);
       const succeeded = response.status === "applied" || response.status === "duplicate";
 
-      if (succeeded && localDataMigrationCandidate) {
+      if (succeeded && recordMigrationCompletion && localDataMigrationCandidate) {
         markCloudImportCompleted(userUid, localDataMigrationCandidate.fingerprint);
       }
 
@@ -249,7 +253,7 @@ export function useCloudImportActions({
             : "Không thể đồng bộ dữ liệu tài khoản lúc này. Dữ liệu trên thiết bị vẫn an toàn.",
       };
     }
-  }, [cloudImportUnavailableReason, localDataMigrationCandidate, userUid]);
+  }, [cloudImportUnavailableReason, localDataMigrationCandidate, recordMigrationCompletion, trackingSource, userUid]);
 
   return {
     cloudImportDryRunEnabled,
