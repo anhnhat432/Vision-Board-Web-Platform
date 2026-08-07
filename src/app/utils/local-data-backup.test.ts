@@ -194,11 +194,15 @@ describe("data export and local deletion", () => {
     saveUserData(createUserData());
     localStorage.setItem(APP_STORAGE_KEYS.pending12WeekPlanDraft, JSON.stringify({ draft: true }));
     localStorage.setItem("visionboard_data_mutation_queue:device_id", "device_1");
+    localStorage.setItem("visionboard_local_file_import_recovery:anonymous:test", JSON.stringify({ version: 1 }));
+    localStorage.setItem("visionboard_local_file_import_pending:auth:user_test", JSON.stringify({ version: 1 }));
 
     deleteAllUserData();
 
     expect(localStorage.getItem(USER_DATA_STORAGE_KEY)).toBeNull();
     expect(localStorage.getItem(APP_STORAGE_KEYS.pending12WeekPlanDraft)).toBeNull();
     expect(localStorage.getItem("visionboard_data_mutation_queue:device_id")).toBeNull();
+    expect(localStorage.getItem("visionboard_local_file_import_recovery:anonymous:test")).toBeNull();
+    expect(localStorage.getItem("visionboard_local_file_import_pending:auth:user_test")).toBeNull();
   });
 });

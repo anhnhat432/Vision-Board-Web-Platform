@@ -18,8 +18,7 @@ import {
   Volume2,
   WifiOff,
 } from "lucide-react";
-import type { ChangeEvent } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { clearMemory } from "@/app/features/assistant/assistantMemory";
@@ -27,6 +26,7 @@ import { usePetPreferences } from "@/app/features/pet/usePetPreferences";
 import { useAutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import { deleteAccount, exportAccountData } from "@/services/syncService";
+import { LocalDataImportManager } from "../components/LocalDataImportManager";
 import { PageBackLink } from "../components/PageBackLink";
 import { PageHero } from "../components/layout/PageHero";
 import { ScreenGuide } from "../components/ScreenGuide";
@@ -45,6 +45,7 @@ import { Button } from "../components/ui/button";
 import { Switch } from "../components/ui/switch";
 import { useSyncedUserData } from "../hooks/useSyncedUserData";
 import { useTheme } from "../hooks/useTheme";
+import { isDemoMode } from "../utils/app-mode";
 import { formatBillingExpiryDate, getBillingExpiryInfo } from "../utils/billing-expiry";
 import { downloadLocalUserDataBackup } from "../utils/local-data-backup";
 import {
@@ -54,13 +55,7 @@ import {
 } from "../utils/local-data-migration";
 import { getLastOutboxSyncSnapshot, type OutboxSyncSnapshot } from "../utils/production";
 import { isSoundEnabled, setSoundEnabled } from "../utils/sound";
-import {
-  deleteAllUserData,
-  getUserData,
-  parseStoredUserData,
-  saveUserData,
-  updateAppPreferences,
-} from "../utils/storage";
+import { deleteAllUserData, getUserData, updateAppPreferences } from "../utils/storage";
 import { inputClass } from "./SMARTGoalSetup/components/formStyles";
 
 const themeOptions = [
@@ -126,7 +121,6 @@ function getAccountInitial(label: string): string {
 
 export function SettingsPage() {
   const navigate = useNavigate();
-  const importFileRef = useRef<HTMLInputElement>(null);
   const [isExportingAccount, setIsExportingAccount] = useState(false);
   const [taskSoundEnabled, setTaskSoundEnabled] = useState(() => isSoundEnabled());
   const [migrationBackups, setMigrationBackups] = useState<MigrationBackupSnapshot[]>(() =>
@@ -210,33 +204,6 @@ export function SettingsPage() {
     } finally {
       setIsExportingAccount(false);
     }
-  };
-
-  const handleImport = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    event.target.value = "";
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      const text = reader.result;
-      if (typeof text !== "string") {
-        toast.error("Không đọc được file.");
-        return;
-      }
-
-      const parsed = parseStoredUserData(text);
-      if (!parsed) {
-        toast.error("File không hợp lệ hoặc bị hỏng.");
-        return;
-      }
-
-      saveUserData(parsed);
-      reloadUserData();
-      toast.success("Đã nhập dữ liệu. Trang chính sẽ dùng dữ liệu mới.");
-    };
-    reader.onerror = () => toast.error("Không đọc được file.");
-    reader.readAsText(file);
   };
 
   const handleTaskSoundEnabledChange = (enabled: boolean) => {
@@ -361,27 +328,33 @@ export function SettingsPage() {
     : !user
       ? "Dữ liệu đang lưu trên thiết bị này. Đăng nhập để sao lưu vào tài khoản và dùng tiếp trên thiết bị khác."
       : null;
-  const syncIcon = syncBlockedByEmailVerification
-    ? ShieldAlert
-    : syncAccountUnavailableMessage
-      ? User2
-      : autoSyncState.syncing
-        ? Loader2
-        : !autoSyncState.online
-          ? WifiOff
-          : autoSyncState.pendingCount > 0
-            ? Upload
-            : CheckCircle2;
+  const syncIcon =
+    autoSyncState.pauseReason === "local_import_pending"
+      ? ShieldAlert
+      : syncBlockedByEmailVerification
+        ? ShieldAlert
+        : syncAccountUnavailableMessage
+          ? User2
+          : autoSyncState.syncing
+            ? Loader2
+            : !autoSyncState.online
+              ? WifiOff
+              : autoSyncState.pendingCount > 0
+                ? Upload
+                : CheckCircle2;
   const SyncIcon = syncIcon;
-  const syncStatusMessage = syncBlockedByEmailVerification
-    ? "Dữ liệu vẫn được lưu trên thiết bị này, nhưng chưa thể sao lưu lên tài khoản cho tới khi email được xác thực."
-    : syncAccountUnavailableMessage
-      ? syncAccountUnavailableMessage
-      : !autoSyncState.online
-        ? "Bạn đang mất kết nối. Dữ liệu vẫn được lưu trên thiết bị và sẽ gửi lên tài khoản khi có mạng."
-        : autoSyncState.syncing
-          ? "Đang sao lưu lên tài khoản. Bạn có thể tiếp tục dùng app."
-          : "Sao lưu sẵn sàng. Hệ thống tự đồng bộ và xử lý chênh lệch; nếu có lỗi, dữ liệu vẫn được giữ trên thiết bị này để thử lại.";
+  const syncStatusMessage =
+    autoSyncState.pauseReason === "local_import_pending"
+      ? "Dữ liệu import đang an toàn trên thiết bị nhưng chưa được đối chiếu với tài khoản."
+      : syncBlockedByEmailVerification
+        ? "Dữ liệu vẫn được lưu trên thiết bị này, nhưng chưa thể sao lưu lên tài khoản cho tới khi email được xác thực."
+        : syncAccountUnavailableMessage
+          ? syncAccountUnavailableMessage
+          : !autoSyncState.online
+            ? "Bạn đang mất kết nối. Dữ liệu vẫn được lưu trên thiết bị và sẽ gửi lên tài khoản khi có mạng."
+            : autoSyncState.syncing
+              ? "Đang sao lưu lên tài khoản. Bạn có thể tiếp tục dùng app."
+              : "Sao lưu sẵn sàng. Hệ thống tự đồng bộ và xử lý chênh lệch; nếu có lỗi, dữ liệu vẫn được giữ trên thiết bị này để thử lại.";
 
   return (
     <div className="mx-auto max-w-6xl px-4 pb-12 pt-8 sm:px-6 lg:px-8">
@@ -713,7 +686,7 @@ export function SettingsPage() {
             </div>
 
             <div
-              data-testid="settings-sync-status-copy"
+              data-testid={autoSyncState.pauseReason === "local_import_pending" ? undefined : "settings-sync-status-copy"}
               className="rounded-lg border border-app-line bg-app-bg p-3 text-sm leading-6 text-app-ink-soft"
             >
               <div className="flex gap-2">
@@ -765,15 +738,19 @@ export function SettingsPage() {
                   Xuất dữ liệu tài khoản
                 </Button>
               ) : null}
-              <Button type="button" variant="outline" onClick={() => importFileRef.current?.click()}>
-                <Upload className="h-4 w-4" />
-                Nhập dữ liệu
-              </Button>
+              <LocalDataImportManager
+                currentData={userData}
+                ownerUid={user?.uid ?? null}
+                demoMode={isDemoMode()}
+                online={autoSyncState.online}
+                onDataChanged={reloadUserData}
+                triggerSyncNow={autoSyncState.triggerSyncNow}
+              />
               <Button
                 type="button"
                 variant="outline"
                 onClick={handleRetrySync}
-                disabled={autoSyncState.syncing || !user}
+                disabled={autoSyncState.syncing || !user || autoSyncState.pauseReason === "local_import_pending"}
               >
                 {autoSyncState.syncing ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -790,7 +767,6 @@ export function SettingsPage() {
                 <CreditCard className="h-4 w-4" />
                 Gói & thanh toán
               </Button>
-              <input ref={importFileRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
             </div>
 
             <div className="rounded-lg border border-app-line bg-app-bg p-4">

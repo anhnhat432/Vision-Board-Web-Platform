@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import {
   clearPullCursor,
+  getPullCursorStorageKey,
   PULL_CURSOR_STORAGE_PREFIX,
   readPullCursorState,
   recordConflictPull,
@@ -101,6 +102,12 @@ describe("pullCursorStore", () => {
     recordSuccessfulPull(userA, "cursor_1", { now });
     const expectedKey = `${PULL_CURSOR_STORAGE_PREFIX}${encodeURIComponent(userA)}`;
     expect(localStorage.getItem(expectedKey)).not.toBeNull();
+  });
+
+  it("exports the encoded auth-scoped storage key", () => {
+    expect(getPullCursorStorageKey("user/a")).toBe(
+      `${PULL_CURSOR_STORAGE_PREFIX}${encodeURIComponent("user/a")}`,
+    );
   });
 
   it("handles corrupt JSON gracefully", () => {

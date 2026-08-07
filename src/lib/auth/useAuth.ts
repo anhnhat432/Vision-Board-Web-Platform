@@ -5,6 +5,7 @@ import { activateAuthenticatedUserData, persistActiveAuthenticatedUserData } fro
 import { clearAuthScopedSensitiveData } from "@/app/utils/storage-auth-scope";
 import { patch, post } from "@/lib/api/apiClient";
 import type { UserProfile } from "@/types/api";
+import { clearLegacyFirebaseToken } from "./legacyFirebaseToken";
 
 type LoginProvider = "google" | "email";
 type EmailLoginMode = "signin" | "signup";
@@ -32,7 +33,6 @@ const DEFAULT_LOGIN_OPTIONS: Required<Pick<LoginOptions, "provider" | "mode">> =
   provider: "google",
   mode: "signin",
 };
-const FIREBASE_TOKEN_STORAGE_KEY = "firebase_id_token";
 
 let firebaseAuthModulePromise: Promise<FirebaseAuthModule> | null = null;
 
@@ -48,19 +48,6 @@ function isFirebaseAuthConfiguredFromEnv(): boolean {
     (import.meta.env.VITE_FIREBASE_PROJECT_ID?.trim() ?? "").length > 0 &&
     (import.meta.env.VITE_FIREBASE_APP_ID?.trim() ?? "").length > 0
   );
-}
-
-function readStoredFirebaseToken(): string | null {
-  if (typeof window === "undefined") return null;
-  try {
-    return localStorage.getItem(FIREBASE_TOKEN_STORAGE_KEY);
-  } catch {
-    return null;
-  }
-}
-
-function hasStoredFirebaseToken(): boolean {
-  return Boolean(readStoredFirebaseToken());
 }
 
 export async function recordSignupTermsAcceptance(now: Date = new Date()): Promise<UserProfile> {
@@ -115,12 +102,15 @@ export function resolveAuthErrorMessage(error: unknown): string {
 }
 
 export function useAuth(): UseAuthResult {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(() => hasStoredFirebaseToken());
-  const [error, setError] = useState<string | null>(null);
-  const [shouldSubscribeAuth, setShouldSubscribeAuth] = useState(() => hasStoredFirebaseToken());
-
   const isConfigured = isFirebaseAuthConfiguredFromEnv();
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(isConfigured);
+  const [error, setError] = useState<string | null>(null);
+  const [shouldSubscribeAuth, setShouldSubscribeAuth] = useState(isConfigured);
+
+  useEffect(() => {
+    clearLegacyFirebaseToken();
+  }, []);
 
   useEffect(() => {
     if (!isConfigured || !shouldSubscribeAuth) {
@@ -223,6 +213,7 @@ export function useAuth(): UseAuthResult {
   const logout = useCallback(async () => {
     setError(null);
     setLoading(true);
+    clearLegacyFirebaseToken();
 
     try {
       const firebase = isConfigured ? await loadFirebaseAuthModule() : null;
@@ -241,6 +232,7 @@ export function useAuth(): UseAuthResult {
       setError(message);
       console.error("Logout failed.", nextError);
     } finally {
+      clearLegacyFirebaseToken();
       setLoading(false);
     }
   }, [isConfigured, user?.uid]);
@@ -250,7 +242,10 @@ export function useAuth(): UseAuthResult {
       setError(null);
 
       try {
-        if (!isConfigured) return readStoredFirebaseToken();
+        if (!isConfigured) {
+          clearLegacyFirebaseToken();
+          return null;
+        }
         const { getFirebaseToken } = await loadFirebaseAuthModule();
         return await getFirebaseToken(forceRefresh);
       } catch (nextError) {

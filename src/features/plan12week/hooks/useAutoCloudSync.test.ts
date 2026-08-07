@@ -46,6 +46,8 @@ const pullCursorStoreMock = vi.hoisted(() => ({
   clearPullCursor: vi.fn(),
 }));
 
+const localImportMock = vi.hoisted(() => ({ pendingOwnerUid: null as string | null }));
+
 const networkStatusMock = vi.hoisted(() => ({
   state: {
     status: "online",
@@ -129,6 +131,11 @@ vi.mock("../persistence/pulledWorkspaceApply", () => ({
 
 vi.mock("../persistence/pullCursorStore", () => ({
   clearPullCursor: pullCursorStoreMock.clearPullCursor,
+}));
+
+vi.mock("../persistence/localDataImportTransaction", () => ({
+  getPendingLocalDataImport: (ownerUid: string | null) =>
+    ownerUid && localImportMock.pendingOwnerUid === ownerUid ? { importId: "pending_import" } : null,
 }));
 
 vi.mock("../persistence/mutationQueue", () => ({
@@ -268,6 +275,7 @@ async function flushMicrotasks() {
 describe("useAutoCloudSync", () => {
   beforeEach(() => {
     setSignedOut();
+    localImportMock.pendingOwnerUid = null;
     visibilityState = "visible";
     queueMock.pendingCount = 0;
     queueMock.store = {
@@ -315,6 +323,80 @@ describe("useAutoCloudSync", () => {
     storageMock.getUserData.mockReturnValue({ goals: [] });
     storageMock.saveUserData.mockReturnValue(true);
     pulledWorkspaceApplyMock.applyPulledWorkspaceToUserData.mockReturnValue({ goals: [{ id: "cloud_goal" }] });
+  });
+
+  it("blocks initial, manual, drain, reconnect, interval, visibility, and mutation-event sync while import is pending", async () => {
+    vi.useFakeTimers();
+    setSignedIn("owner_pending_import");
+    localImportMock.pendingOwnerUid = "owner_pending_import";
+    queueMock.pendingCount = 2;
+
+    const { result, unmount } = renderHook(() =>
+      useAutoCloudSync({ intervalMs: 1_000, minSyncIntervalMs: 0, mutationDebounceMs: 0 }),
+    );
+    await flushMicrotasks();
+
+    expect(result.current.pauseReason).toBe("local_import_pending");
+    expect(manualSyncMock.syncNow).not.toHaveBeenCalled();
+    await act(async () => {
+      await result.current.triggerSyncNow();
+      await result.current.triggerDrainOnly();
+      window.dispatchEvent(new Event(USER_DATA_UPDATED_EVENT_NAME));
+      networkStatusMock.lastOptions?.onReconnect?.();
+      vi.advanceTimersByTime(5_000);
+    });
+    await flushMicrotasks();
+    expect(manualSyncMock.syncNow).not.toHaveBeenCalled();
+    expect(mutationSenderMock.sendPending12WeekMutations).not.toHaveBeenCalled();
+    unmount();
+  });
+
+  it("refreshes pause state from the import-state event and allows immediate convergence after marker clear", async () => {
+    setSignedIn("owner_pending_import");
+    localImportMock.pendingOwnerUid = "owner_pending_import";
+    const { result } = renderHook(() => useAutoCloudSync({ minSyncIntervalMs: 0 }));
+    expect(result.current.pauseReason).toBe("local_import_pending");
+
+    localImportMock.pendingOwnerUid = null;
+    await act(async () => {
+      window.dispatchEvent(new Event("visionboard:local-file-import-state-changed"));
+      await result.current.triggerSyncNow();
+    });
+
+    expect(manualSyncMock.syncNow).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(result.current.pauseReason).toBeNull());
+  });
+
+  it("does not carry the pause to another authenticated owner", async () => {
+    localImportMock.pendingOwnerUid = "owner_a";
+    setSignedIn("owner_a");
+    const { result, rerender } = renderHook(() => useAutoCloudSync());
+    expect(result.current.pauseReason).toBe("local_import_pending");
+
+    setSignedIn("owner_b");
+    rerender();
+    await flushMicrotasks();
+    expect(result.current.pauseReason).toBeNull();
+    expect(manualSyncMock.syncNow).toHaveBeenCalledTimes(1);
+  });
+
+  it("hides stale conflict actions and refuses conflict resolution while import is pending", async () => {
+    setSignedIn("owner_pending_import");
+    localImportMock.pendingOwnerUid = "owner_pending_import";
+    manualSyncMock.useTwelveWeekManualCloudSync.mockReturnValue({
+      loading: false,
+      lastResult: conflictResultWithMutation,
+      syncNow: manualSyncMock.syncNow,
+    });
+    const { result } = renderHook(() => useAutoCloudSync());
+
+    expect(result.current.conflictPending).toBe(false);
+    await act(async () => {
+      await result.current.resolveConflictKeepLocal();
+      await result.current.resolveConflictUseCloud();
+    });
+    expect(storageMock.saveUserData).not.toHaveBeenCalled();
+    expect(mutationSenderMock.sendPending12WeekMutations).not.toHaveBeenCalled();
   });
 
   it("skips when not in real mode", () => {

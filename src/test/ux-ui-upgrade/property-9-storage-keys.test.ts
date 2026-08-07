@@ -76,13 +76,17 @@ describe("Property 9 — Bất biến tập storage key (task 10.1)", () => {
     // giờ được đổi tên trong đợt visual refresh.
     for (const required of [
       "visionboard_user_data",
-      "firebase_id_token",
       "offline-banner-dismissed",
       "selected_focus_area",
     ]) {
       expect(baseline.has(required)).toBe(true);
       expect(current.has(required)).toBe(true);
     }
+  });
+
+  it("không coi Firebase ID token đã retired là storage contract", () => {
+    expect(baseline.has("firebase_id_token")).toBe(false);
+    expect(current.has("firebase_id_token")).toBe(false);
   });
 
   it(PROPERTY_TAG, () => {

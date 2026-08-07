@@ -124,6 +124,35 @@ describe("useAuth logout", () => {
     vi.unstubAllEnvs();
   });
 
+  it("subscribes on a configured cold load without a stored token", async () => {
+    firebaseMock.setCurrentUser(makeAuthUser(USER_A_UID));
+
+    const { result } = renderHook(() => useAuth());
+
+    await waitFor(() => {
+      expect(result.current.user?.uid).toBe(USER_A_UID);
+    });
+    expect(firebaseMock.subscribeIdToken).toHaveBeenCalledTimes(1);
+    expect(localStorage.getItem("firebase_id_token")).toBeNull();
+  });
+
+  it("cleans a legacy token and returns null when Firebase is unconfigured", async () => {
+    vi.stubEnv("VITE_FIREBASE_API_KEY", "");
+    vi.stubEnv("VITE_FIREBASE_AUTH_DOMAIN", "");
+    vi.stubEnv("VITE_FIREBASE_PROJECT_ID", "");
+    vi.stubEnv("VITE_FIREBASE_APP_ID", "");
+    localStorage.setItem("firebase_id_token", "stale-token");
+
+    const { result } = renderHook(() => useAuth());
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false);
+    });
+    await expect(result.current.getToken()).resolves.toBeNull();
+    expect(localStorage.getItem("firebase_id_token")).toBeNull();
+    expect(firebaseMock.subscribeIdToken).not.toHaveBeenCalled();
+  });
+
   it("clears billing, entitlement sync, and UID-scoped mutation queue before signing out", async () => {
     firebaseMock.setCurrentUser(makeAuthUser(USER_A_UID));
     localStorage.setItem("firebase_id_token", "token_a");
@@ -133,6 +162,7 @@ describe("useAuth logout", () => {
     await waitFor(() => {
       expect(result.current.user?.uid).toBe(USER_A_UID);
     });
+    expect(localStorage.getItem("firebase_id_token")).toBeNull();
 
     seedPlusBillingState();
 
