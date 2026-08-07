@@ -1,4 +1,5 @@
-import { get, patch, post } from "@/lib/api/apiClient";
+import { patch, post } from "@/lib/api/apiClient";
+import { getPlanningResource } from "@/services/planningReadRequest";
 import type { Week } from "@/types/plan";
 
 export interface UpdateWeekPayload {
@@ -16,7 +17,7 @@ export interface UpdateWeekReviewPayload {
 }
 
 export function getWeeks(planId: string): Promise<Week[]> {
-  return get<Week[]>(`/plans/${planId}/weeks`);
+  return getPlanningResource<Week[]>(`/plans/${planId}/weeks`);
 }
 
 export function updateWeek(weekId: string, payload: UpdateWeekPayload): Promise<Week> {
