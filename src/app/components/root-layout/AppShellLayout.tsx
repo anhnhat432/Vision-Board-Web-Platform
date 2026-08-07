@@ -102,7 +102,13 @@ import {
 import { GUIDED_PATHS, applyRouteDocumentMetadata, getBreadcrumbTrail, getRouteMeta } from "./routeMeta";
 import { SyncStatusIndicatorContainer } from "./SyncStatusIndicatorContainer";
 import { SyncStatusPill } from "./SyncStatusPill";
-import { buildLoginRedirect, isAuthProtectedPath, isPublicCheckoutPath, useWorkspaceGate } from "./useWorkspaceGate";
+import {
+  buildLoginRedirect,
+  isAuthProtectedPath,
+  isPublicBillingPlanPath,
+  isPublicCheckoutPath,
+  useWorkspaceGate,
+} from "./useWorkspaceGate";
 
 const AIAssistant = lazy(() =>
   import("@/app/features/assistant/AIAssistant").then((module) => ({
@@ -335,7 +341,8 @@ export function RootLayout() {
       !hasServerOnboardingFlag &&
       !hasTwelveWeekPlan &&
       !onboardingDeferred &&
-      location.pathname !== "/onboarding"
+      location.pathname !== "/onboarding" &&
+      !isPublicBillingPlanPath(location.pathname)
     ) {
       navigate("/onboarding");
     }
