@@ -50,9 +50,12 @@ describe("production smoke harness guards", () => {
   });
 
   it("classifies unanswered previous commitments before weekly review submit", () => {
+    expect(smokeScript).toContain("async function readVisibleWeeklyReviewCommitmentState(page, options = {})");
     expect(smokeScript).toContain("async function classifyVisiblePreviousCommitments(page)");
-    expect(smokeScript).toContain('[data-testid="weekly-review-step-commitments"]:visible');
-    expect(smokeScript).toContain('getByRole("button", { name: "Đã giữ", exact: true })');
+    expect(smokeScript).toContain(
+      'document.querySelectorAll(\'[data-testid="weekly-review-step-commitments"]\')',
+    );
+    expect(smokeScript).toContain('button.textContent?.replace(/\\s+/g, " ").trim() === "Đã giữ"');
 
     const classifyIndex = smokeScript.indexOf("await classifyVisiblePreviousCommitments(page);");
     const submitIndex = smokeScript.indexOf('await clickButtonByNormalizedText(page, "chot review tuan nay");');
@@ -60,31 +63,33 @@ describe("production smoke harness guards", () => {
     expect(submitIndex).toBeGreaterThan(classifyIndex);
   });
 
-  it("re-resolves weekly review commitments before bounded atomic DOM clicks", () => {
-    const helperStart = smokeScript.indexOf("async function classifyVisiblePreviousCommitments(page)");
+  it("re-queries the weekly review commitment step across React rerenders", () => {
+    const helperStart = smokeScript.indexOf("async function readVisibleWeeklyReviewCommitmentState(page, options = {})");
     const helperEnd = smokeScript.indexOf("\nasync function readWeeklyReviewSurface(page)", helperStart);
     const helperSource = smokeScript.slice(helperStart, helperEnd);
 
     expect(helperStart).toBeGreaterThan(0);
     expect(helperEnd).toBeGreaterThan(helperStart);
+    expect(helperSource).toContain("for (let attempt = 0; attempt < 10; attempt += 1)");
+    expect(helperSource).toContain("return page.evaluate(({ clickPending }) => {");
     expect(helperSource).toContain(
-      'const buttonCount = await step.getByRole("button", { name: "Đã giữ", exact: true }).count();',
+      "const clickResult = await readVisibleWeeklyReviewCommitmentState(page, { clickPending: true });",
     );
-    expect(helperSource).toContain("for (let attempt = 0; attempt < buttonCount; attempt += 1)");
-    expect(helperSource).toContain("const clickResult = await step.evaluate((container) => {");
+    expect(helperSource).toContain(
+      'document.querySelectorAll(\'[data-testid="weekly-review-step-commitments"]\')',
+    );
+    expect(helperSource).toContain("const container = containers.find(isVisible);");
     expect(helperSource).toContain('button.getAttribute("aria-pressed") !== "true"');
 
-    const atomicClickStart = helperSource.indexOf("const clickResult = await step.evaluate");
-    const atomicClickEnd = helperSource.indexOf("if (!clickResult.clicked)", atomicClickStart);
+    const atomicClickStart = helperSource.indexOf("return page.evaluate(({ clickPending }) => {");
+    const atomicClickEnd = helperSource.indexOf("async function classifyVisiblePreviousCommitments", atomicClickStart);
     const atomicClickSource = helperSource.slice(atomicClickStart, atomicClickEnd);
     expect(atomicClickSource).toContain("pendingButton.click();");
 
     expect(helperSource).toContain("await waitForCondition(");
-    expect(helperSource).toContain("const state = await step.evaluate((container) => {");
+    expect(helperSource).toContain("const state = await readVisibleWeeklyReviewCommitmentState(page);");
     expect(helperSource).toContain("state.done || state.pendingCount < clickResult.pendingCount");
-    expect(helperSource).toContain(
-      '[data-testid="weekly-review-step-commitments"][data-done="true"]:visible',
-    );
+    expect(helperSource).not.toContain("step.evaluate");
     expect(helperSource).not.toContain("keptButtons.nth(index)");
     expect(helperSource).not.toContain("await button.click()");
   });
