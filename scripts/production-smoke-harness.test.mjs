@@ -125,18 +125,17 @@ describe("production smoke harness guards", () => {
     expect(checkoutStartedIndex).toBeGreaterThan(paymentHistoryIndex);
   });
 
-  it("tolerates only expected background rate-limited hydration calls at final aggregation", () => {
-    expect(smokeScript).toContain("function isExpectedBackgroundRateLimit(event)");
-    expect(smokeScript).toContain('String(event.responseBody ?? "").includes(\'"errorCode":"rate_limited"\')');
-    expect(smokeScript).toContain('pathname === "/api/auth/profile"');
-    expect(smokeScript).toContain('pathname === "/api/goals"');
-    expect(smokeScript).toContain('pathname === "/api/billing/entitlement"');
-    expect(smokeScript).toContain('pathname === "/api/plans"');
-    expect(smokeScript).toContain('/^\\/api\\/plans\\/[^/]+$/.test(pathname)');
-    expect(smokeScript).toContain('pathname === "/api/sync/12-week/pull"');
+  it("fails unrecovered 429 responses and accepts only an explicit or later successful retry", () => {
+    expect(smokeScript).toContain("function hasLaterSuccessfulRetry(event, apiEvents)");
+    expect(smokeScript).toContain("candidate.at > event.at");
+    expect(smokeScript).toContain("candidate.method === event.method");
+    expect(smokeScript).toContain("normalizeApiUrl(candidate.url) === normalizeApiUrl(event.url)");
+    expect(smokeScript).toContain("candidate.status >= 200 && candidate.status < 300");
     expect(smokeScript).toContain(
-      "event.status === 429 && !event.handledByRateLimitRetry && !isExpectedBackgroundRateLimit(event)",
+      "event.status === 429 && !event.handledByRateLimitRetry && !hasLaterSuccessfulRetry(event, apiEvents)",
     );
+    expect(smokeScript).not.toContain("function isExpectedBackgroundRateLimit(event)");
+    expect(smokeScript).not.toContain('/^\\/api\\/plans\\/[^/]+$/.test(pathname)');
   });
 
   it("drops only billing page errors linked to a handled payment-history retry", () => {
