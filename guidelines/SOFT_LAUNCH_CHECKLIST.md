@@ -1,15 +1,13 @@
 # Soft Launch Checklist — Vision Board Web Platform
 
-Last updated: 2026-07-30
+Last updated: 2026-08-08
 
-Status note 2026-07-30:
+Status note 2026-08-08:
 
 - Treat this checklist as a gate review, not as proof that old checkmarks are still current.
 - Authoritative current blockers are the D-2 proof ledger below plus `guidelines/CURRENT_PROJECT_STATUS.md`.
-- Known blockers right now:
-  - Production smoke latest default-branch run `28995039420` failed on commit `6ad15aca67c264cbf8ae544dbc45100b6939db01` with HTTP 429 `rate_limited` during 12-week backend-sync proof. Focused checks for the rate-limit isolation fix pass on its fix branch, but D-1 remains blocked until the reviewed commit is deployed and two consecutive full production-smoke runs pass on that same deployed commit.
-  - Staging proof workflows are now available on the default branch, but email verification, account deletion, and LWW still need real staging runs with opt-in inputs.
-  - Live `npm run proof:secrets` on 2026-07-30 reports GitHub repository secret `VERCEL_AUTOMATION_BYPASS_SECRET` missing. The four deployed proof workflows remain blocked until it is configured, then they still need protected-preview runs and recorded pass evidence.
+- Release-proof blockers: none. The final ledger below records four staging passes and two consecutive Production Smoke passes on `fb3873ba11853379f792a5ce006656f523a9322d`.
+- Separate soft-launch controls remain open until their own evidence is collected: 24-hour stability, backup snapshot, Sentry/monitoring, support readiness, rollback drill, and live billing operations.
 - Treat historical tags such as `v1.0-production-ready` as historical markers only, not launch proof for current `main`.
 
 Purpose: hướng dẫn soft-launch cho ~200 user thật (sinh viên Việt Nam) sau khi Phase 1, 2, 4 đã ✅ và Phase 3 bảo mật fin được đóng.
@@ -73,20 +71,20 @@ Nếu bất kỳ điều kiện nào chưa đạt, dừng và xử lý trước.
 
 Runbook: `docs/ops/staging-proof-runbook.md` lists the exact workflow inputs, repository secrets, `gh workflow run` commands, safety markers, and evidence to record.
 
-- [ ] Run `npm run proof:readiness` first; it checks required GitHub secret names, default-branch workflow availability, and the latest production-smoke run status without reading secret values or dispatching workflows.
-- [ ] Run `npm run proof:secrets` and resolve any missing required proof secrets before triggering staging proof workflows.
-- [ ] Run `npm run proof:workflows` and confirm required proof workflows are available on default branch before triggering `gh workflow run`.
+- [x] Run `npm run proof:readiness` first; it checks required GitHub secret names, default-branch workflow availability, and the latest production-smoke run status without reading secret values or dispatching workflows.
+- [x] Run `npm run proof:secrets` and resolve any missing required proof secrets before triggering staging proof workflows.
+- [x] Run `npm run proof:workflows` and confirm required proof workflows are available on default branch before triggering `gh workflow run`.
 - [ ] Run local core-funnel preflight first:
   - `npm run dev -- --host 127.0.0.1 --port 4173`
   - `$env:CORE_QUALITY_URL="http://127.0.0.1:4173"; npm run smoke:core-quality`
   - Treat this as local preflight only; D-2 still needs protected demo-preview evidence in the ledger.
-- [ ] Confirm GitHub repository secret `VERCEL_AUTOMATION_BYPASS_SECRET` exists by name; keep `Require Log In` enabled and do not publish a protection-bypass URL.
-- [ ] Run GitHub Actions workflow `.github/workflows/core-funnel-quality-staging.yml` against the protected demo preview (`VITE_APP_MODE=demo`) with `VERCEL_AUTOMATION_BYPASS_SECRET`. Keep `Require Log In` enabled and do not point this workflow at the production real-mode domain.
+- [x] Confirm GitHub repository secret `VERCEL_AUTOMATION_BYPASS_SECRET` exists by name; keep `Require Log In` enabled and do not publish a protection-bypass URL.
+- [x] Run GitHub Actions workflow `.github/workflows/core-funnel-quality-staging.yml` against the protected demo preview (`VITE_APP_MODE=demo`) with `VERCEL_AUTOMATION_BYPASS_SECRET`. Keep `Require Log In` enabled and do not point this workflow at the production real-mode domain.
 
 - [ ] Chạy production smoke `npm run smoke:prod` từ máy local với credentials thật. Kỳ vọng pass.
 - [ ] Không chạy `npm run smoke:prod` với generated account mặc định. Chỉ set `PROD_SMOKE_ALLOW_GENERATED_ACCOUNT=1` nếu cố ý tạo 1 QA account mới cho run này.
-- [ ] Run GitHub Actions workflow `.github/workflows/email-verification-e2e-staging.yml` against staging/preview with `allow_create=CREATE_TEST_ACCOUNT` to prove signup, unverified-email banner, resend cooldown, and paid-checkout availability.
-- [ ] Run GitHub Actions workflow `.github/workflows/account-delete-e2e-staging.yml` against staging/preview with `allow_delete=DELETE_TEST_ACCOUNT` and a disposable `ACCOUNT_DELETE_E2E_EMAIL` containing `+delete` so the destructive check cannot delete a shared account.
+- [x] Run GitHub Actions workflow `.github/workflows/email-verification-e2e-staging.yml` against staging/preview with `allow_create=CREATE_TEST_ACCOUNT` to prove signup, unverified-email banner, resend cooldown, and paid-checkout availability.
+- [x] Run GitHub Actions workflow `.github/workflows/account-delete-e2e-staging.yml` against staging/preview with `allow_delete=DELETE_TEST_ACCOUNT` and a disposable `ACCOUNT_DELETE_E2E_EMAIL` containing `+delete` so the destructive check cannot delete a shared account.
 - [ ] Manual smoke 30 phút với 1 tài khoản test thật:
   - Đăng ký mới qua Firebase Google Sign-in.
   - Hoàn thành onboarding → SMART goal → feasibility → 12-week setup.
@@ -96,7 +94,7 @@ Runbook: `docs/ops/staging-proof-runbook.md` lists the exact workflow inputs, re
   - Đăng nhập trên thiết bị thứ 2 (mobile) → verify auto-restore + sync indicator.
   - Tắt wifi, check-in 2 task, bật wifi → verify auto-drain queue.
 - [ ] Chạy `npm run test:e2e:lww` với `LWW_E2E_URL`, `LWW_E2E_ALLOW=OVERWRITE_TEST_WORKSPACE`, `LWW_E2E_EMAIL`, `LWW_E2E_PASSWORD` trên staging/preview để chứng minh Last-Write-Wins cross-device trước soft launch.
-- [ ] Or run GitHub Actions workflow `.github/workflows/lww-e2e-staging.yml` with `allow_overwrite=OVERWRITE_TEST_WORKSPACE` and repository secrets `LWW_E2E_EMAIL` / `LWW_E2E_PASSWORD`. `LWW_E2E_EMAIL` must be a dedicated overwrite-safe address containing `+lww`, `.lww`, `_lww`, or `-lww`.
+- [x] Or run GitHub Actions workflow `.github/workflows/lww-e2e-staging.yml` with `allow_overwrite=OVERWRITE_TEST_WORKSPACE` and repository secrets `LWW_E2E_EMAIL` / `LWW_E2E_PASSWORD`. `LWW_E2E_EMAIL` must be a dedicated overwrite-safe address containing `+lww`, `.lww`, `_lww`, or `-lww`.
 - [ ] Stress test nhẹ: 10 request/giây vào `/api/health` trong 1 phút từ 1 IP → verify rate limit không kill server.
 - [ ] Confirm Casso bank account số dư đủ để hoàn tiền nếu user yêu cầu refund.
 
@@ -104,11 +102,11 @@ Blocking rule: do not enter D-1 go/no-go while any required proof row below is s
 
 | Gate | Required evidence before D-1 | Status | Target URL | Commit SHA | Evidence URL / command | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
-| Production smoke | `npm run smoke:prod` or `.github/workflows/production-smoke-e2e.yml` passes with fixed QA credentials | blocked-latest-run-failed | `https://dearourfuture.io.vn` | `6ad15aca67c264cbf8ae544dbc45100b6939db01` | https://github.com/anhnhat432/Vision-Board-Web-Platform/actions/runs/28995039420 | Latest default-branch scheduled run created at `2026-07-09T04:54:41Z` failed on `GET /api/weeks/:weekId/metrics` with HTTP 429 `rate_limited`. The fix replaces stacked/global authenticated quotas with named route-family limits, bounds planning reads, and keeps unrecovered 429 responses fatal. Deploy the reviewed fix, then record two consecutive full-smoke passes on the same deployed commit; until both workflow URLs are present, production evidence remains pending. Previous pass: run `28917039391` on 2026-07-08. |
-| Email verification staging | `.github/workflows/email-verification-e2e-staging.yml` passes with `allow_create=CREATE_TEST_ACCOUNT` | pending-staging-run | | | | Workflow is active on the default branch. Fixed secrets remain optional because the generated disposable signup path is available if staging Firebase allows signup. If fixed secrets are added, `EMAIL_VERIFICATION_E2E_EMAIL` and `EMAIL_VERIFICATION_E2E_PASSWORD` must be configured as a complete pair. |
-| Account deletion staging | `.github/workflows/account-delete-e2e-staging.yml` passes with `allow_delete=DELETE_TEST_ACCOUNT` and delete-marked disposable email | pending-staging-run | | | | Workflow is active on the default branch, and `ACCOUNT_DELETE_E2E_EMAIL` / `ACCOUNT_DELETE_E2E_PASSWORD` are configured by secret name. Actual destructive staging proof still needs explicit `DELETE_TEST_ACCOUNT` opt-in. |
-| LWW sync staging | `.github/workflows/lww-e2e-staging.yml` or equivalent local command passes with dedicated QA credentials | pending-staging-run | | | | Workflow is active on the default branch, and `LWW_E2E_EMAIL` / `LWW_E2E_PASSWORD` are configured by secret name. Actual overwrite proof still needs explicit `OVERWRITE_TEST_WORKSPACE` opt-in and an overwrite-safe test account. |
-| Manual core-flow smoke | `.github/workflows/core-funnel-quality-staging.yml` proves Onboarding -> Life Balance -> Life Insight -> SMART Goal -> Feasibility -> 12-week setup -> Today action -> weekly review on the protected demo preview | pending-protected-preview-run | `https://vision-board-web-platform-git-codex-e17daa-anhnhat432s-projects.vercel.app` | | | Local preflight passed previously. The next run keeps Deployment Protection enabled and uses `VERCEL_AUTOMATION_BYPASS_SECRET`; the row remains pending until a successful workflow URL and commit SHA are recorded. |
+| Production smoke | `npm run smoke:prod` or `.github/workflows/production-smoke-e2e.yml` passes with fixed QA credentials | pass | `https://dearourfuture.io.vn` | `fb3873ba11853379f792a5ce006656f523a9322d` | https://github.com/anhnhat432/Vision-Board-Web-Platform/actions/runs/31227489986; https://github.com/anhnhat432/Vision-Board-Web-Platform/actions/runs/31227851905 | Two consecutive full Production Smoke passes: push run `31227489986` and manual run `31227851905`, both success on the final SHA. |
+| Email verification staging | `.github/workflows/email-verification-e2e-staging.yml` passes with `allow_create=CREATE_TEST_ACCOUNT` | pass | `https://dearourfuture.io.vn` | `fb3873ba11853379f792a5ce006656f523a9322d` | https://github.com/anhnhat432/Vision-Board-Web-Platform/actions/runs/31227583893 | Generated disposable signup path; run completed success with `CREATE_TEST_ACCOUNT`. The generated disposable signup path is available when fixed email/password secrets are omitted. If fixed secrets are added, `EMAIL_VERIFICATION_E2E_EMAIL` and `EMAIL_VERIFICATION_E2E_PASSWORD` must be configured as a complete pair. |
+| Account deletion staging | `.github/workflows/account-delete-e2e-staging.yml` passes with `allow_delete=DELETE_TEST_ACCOUNT` and delete-marked disposable email | pass | `https://dearourfuture.io.vn` | `fb3873ba11853379f792a5ce006656f523a9322d` | https://github.com/anhnhat432/Vision-Board-Web-Platform/actions/runs/31227583868 | Fresh disposable signup/delete path; run completed success with `DELETE_TEST_ACCOUNT` and `auth_mode=signup`. |
+| LWW sync staging | `.github/workflows/lww-e2e-staging.yml` or equivalent local command passes with dedicated QA credentials | pass | `https://dearourfuture.io.vn` | `fb3873ba11853379f792a5ce006656f523a9322d` | https://github.com/anhnhat432/Vision-Board-Web-Platform/actions/runs/31227583866 | Local-wins, cloud-wins, and tombstone-wins scenarios passed with `OVERWRITE_TEST_WORKSPACE`. |
+| Manual core-flow smoke | `.github/workflows/core-funnel-quality-staging.yml` proves Onboarding -> Life Balance -> Life Insight -> SMART Goal -> Feasibility -> 12-week setup -> Today action -> weekly review on the protected demo preview | pass | `https://vision-board-web-platform-49igew648-anhnhat432s-projects.vercel.app` | `fb3873ba11853379f792a5ce006656f523a9322d` | https://github.com/anhnhat432/Vision-Board-Web-Platform/actions/runs/31227583922 | Protected demo preview, exact final tree, `VITE_APP_MODE=demo`; run completed success. |
 
 ## 3. D-1 — Final go/no-go
 
@@ -118,12 +116,12 @@ Bảng ra quyết định launch. Tất cả phải ✅ trước khi mở đăng
 | --- | --- | --- |
 | Code freeze active | | |
 | Production deploy stable 24h | | Vercel + Render |
-| D-2 proof ledger complete | | All required D-2 rows have status `pass`, target URL, commit SHA, and evidence URL / command |
-| Production smoke pass | | Evidence row points to `npm run smoke:prod` or `.github/workflows/production-smoke-e2e.yml` |
-| Email verification staging pass | | Evidence row points to `.github/workflows/email-verification-e2e-staging.yml` |
-| Account deletion staging pass | | Evidence row points to `.github/workflows/account-delete-e2e-staging.yml` |
-| LWW staging e2e pass | | Evidence row points to `.github/workflows/lww-e2e-staging.yml` |
-| Manual core-flow smoke pass | | Evidence row points to `.github/workflows/core-funnel-quality-staging.yml` or equivalent deployed run |
+| D-2 proof ledger complete | pass | All required D-2 rows have status `pass`, target URL, commit SHA, and evidence URL / command |
+| Production smoke pass | pass | Evidence rows point to runs `31227489986` and `31227851905` on the final SHA |
+| Email verification staging pass | pass | Evidence row points to run `31227583893` |
+| Account deletion staging pass | pass | Evidence row points to run `31227583868` |
+| LWW staging e2e pass | pass | Evidence row points to run `31227583866` |
+| Manual core-flow smoke pass | pass | Evidence row points to run `31227583922` and the immutable demo preview |
 | Mongo backup snapshot mới nhất | | Tag `pre-soft-launch-2026-MM-DD` |
 | Sentry FE + BE active | | Capture test pass |
 | Rate limiter live | | 429 response confirmed |
