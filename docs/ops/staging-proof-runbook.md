@@ -218,7 +218,7 @@ Set operator variables first:
 ```powershell
 $env:CORE_QUALITY_URL="https://your-accessible-demo-preview.example"
 $env:STAGING_URL="https://your-staging-url.example"
-$env:PRODUCTION_URL="https://vision-board-web-platform.vercel.app"
+$env:PRODUCTION_URL="https://dearourfuture.io.vn"
 $env:PROOF_REF="main"
 ```
 
@@ -282,6 +282,24 @@ gh run view <run-id> --json workflowName,status,conclusion,headSha,url,createdAt
 gh run view <run-id> --exit-status
 ```
 
+After the rate-limit isolation fix is deployed, run full production smoke twice against the canonical domain. Both runs must report the same deployed commit SHA; quick smoke remains the workflow warmup and does not replace either full-smoke result.
+
+```powershell
+gh workflow run production-smoke-e2e.yml -f target_url=https://dearourfuture.io.vn
+$firstRunId = gh run list --workflow production-smoke-e2e.yml --event workflow_dispatch --limit 1 --json databaseId --jq '.[0].databaseId'
+gh run watch $firstRunId --exit-status
+gh run view $firstRunId --json workflowName,status,conclusion,headSha,url,createdAt
+gh run view $firstRunId --log
+
+gh workflow run production-smoke-e2e.yml -f target_url=https://dearourfuture.io.vn
+$secondRunId = gh run list --workflow production-smoke-e2e.yml --event workflow_dispatch --limit 1 --json databaseId --jq '.[0].databaseId'
+gh run watch $secondRunId --exit-status
+gh run view $secondRunId --json workflowName,status,conclusion,headSha,url,createdAt
+gh run view $secondRunId --log
+```
+
+Record the target URL, deployed commit SHA, both run URLs, conclusions, and dates. Do not change the proof ledger to `pass` when only local checks, quick smoke, or one full-smoke run exists.
+
 Copy these fields into `guidelines/SOFT_LAUNCH_CHECKLIST.md`: target URL,
 `headSha`, `url`, `conclusion`, and date. Status must be `pass` before D-1
 go/no-go.
@@ -314,7 +332,7 @@ Do not point this workflow at the production main domain. The protected demo pre
 Quick production smoke warmup:
 
 ```powershell
-$env:PROD_SMOKE_URL="https://vision-board-web-platform.vercel.app"
+$env:PROD_SMOKE_URL="https://dearourfuture.io.vn"
 $env:PROD_SMOKE_EMAIL="fixed-qa@example.com"
 $env:PROD_SMOKE_PASSWORD="replace-with-fixed-qa-password"
 npm run smoke:prod:quick

@@ -113,6 +113,8 @@ interface TestTaskRecord extends AppliedTaskMutationEntity {
   weekId?: string;
   clientPlanId?: string;
   clientWeekId?: string;
+  lastMutationId?: string;
+  lastClientTimestamp?: Date;
   title?: string;
   scheduledDate?: Date;
 }
@@ -173,21 +175,44 @@ function createSyncTaskMutationRepository() {
       const task = findTask(userId, input);
       if (!task) return null;
 
+      const currentClientTimestamp = task.lastClientTimestamp;
+      const incomingIsNewer =
+        !currentClientTimestamp ||
+        currentClientTimestamp < input.clientTimestamp ||
+        (currentClientTimestamp.getTime() === input.clientTimestamp.getTime() &&
+          input.mutationId > (task.lastMutationId ?? ""));
+      if (!incomingIsNewer) {
+        return {
+          id: task.id,
+          mutationApplied: false,
+          clientTaskId: task.clientTaskId,
+          status: task.status,
+          completedAt: task.completedAt,
+          revision: task.revision,
+          lastClientTimestamp: task.lastClientTimestamp,
+          syncUpdatedAt: task.syncUpdatedAt,
+        };
+      }
+
       const nextTask: TestTaskRecord = {
         ...task,
         status: input.completed ? "done" : "todo",
-        completedAt: input.completed ? input.completedAt ?? input.syncUpdatedAt : undefined,
+        completedAt: input.completed ? input.completedAt ?? input.clientTimestamp : undefined,
         revision: (task.revision ?? 0) + 1,
+        lastMutationId: input.mutationId,
+        lastClientTimestamp: input.clientTimestamp,
         syncUpdatedAt: input.syncUpdatedAt,
       };
       tasks.set(task.id, nextTask);
 
       return {
         id: nextTask.id,
+        mutationApplied: true,
         clientTaskId: nextTask.clientTaskId,
         status: nextTask.status,
         completedAt: nextTask.completedAt,
         revision: nextTask.revision,
+        lastClientTimestamp: nextTask.lastClientTimestamp,
         syncUpdatedAt: nextTask.syncUpdatedAt,
       };
     },
@@ -205,6 +230,8 @@ function createSyncTaskMutationRepository() {
     scheduledDate: new Date("2026-04-30T00:00:00.000Z"),
     status: "todo",
     revision: 1,
+    lastMutationId: "legacy_server_clock_mutation",
+    syncUpdatedAt: new Date("2026-04-30T00:00:10.000Z"),
   });
   seedTask({
     id: "64f000000000000000000002",
@@ -587,7 +614,9 @@ function createSyncWorkspaceMutationRepository() {
   return { repository, getDailyCheckIn, getWeeklyReview, getLeadMetric, getPlan, getWeek };
 }
 
-function createTwelveWeekImportRepository(): TwelveWeekImportRepository {
+function createTwelveWeekImportRepository(
+  onCreateImportLog?: (data: CreateSyncMutationLogData) => void,
+): TwelveWeekImportRepository {
   const mutationLogRepository = createSyncMutationLogRepository();
   const goals = new Map<string, ImportedGoalEntity & { planId?: string }>();
   const plans = new Map<string, ImportedPlanEntity>();
@@ -638,7 +667,10 @@ function createTwelveWeekImportRepository(): TwelveWeekImportRepository {
 
   return {
     findImportLog: mutationLogRepository.findByUserAndMutationId,
-    createImportLog: mutationLogRepository.createMutationLog,
+    async createImportLog(data: CreateSyncMutationLogData) {
+      onCreateImportLog?.(data);
+      return mutationLogRepository.createMutationLog(data);
+    },
     async upsertGoal(data: ImportGoalData): Promise<UpsertResult<ImportedGoalEntity>> {
       const key = goalKey(data.userId, data.clientGoalId);
       const existing = goals.get(key);
@@ -1393,6 +1425,74 @@ describe("12-week sync mutation route", () => {
     assert.equal(task?.status, "done");
     assert.equal(task?.revision, 2);
     assert.equal(task?.completedAt?.toISOString(), "2026-04-30T00:00:02.000Z");
+  });
+
+  it("keeps task delta timestamps on server time when the client clock lags", async () => {
+    const clientTimestamp = "2026-04-30T00:00:01.000Z";
+    const mutation = createValidMutation("dmq_lww_lagging_clock");
+    mutation.mutations[0].clientTimestamp = clientTimestamp;
+    const requestStartedAt = Date.now();
+
+    const response = await requestJson(createRouteTestApp(), "POST", "/api/sync/12-week/mutations", {
+      body: mutation,
+    });
+    const requestFinishedAt = Date.now();
+    const data = getBatchResult(response);
+    const task = syncTaskFixture?.getTask("64f000000000000000000001");
+    const responseSyncUpdatedAt = Date.parse(data.accepted[0].syncUpdatedAt ?? "");
+
+    assert.equal(data.accepted[0].status, "applied");
+    assert.ok(responseSyncUpdatedAt >= requestStartedAt && responseSyncUpdatedAt <= requestFinishedAt);
+    assert.ok(
+      task?.syncUpdatedAt &&
+        task.syncUpdatedAt.getTime() >= requestStartedAt &&
+        task.syncUpdatedAt.getTime() <= requestFinishedAt,
+    );
+    assert.equal(task?.lastClientTimestamp?.toISOString(), clientTimestamp);
+  });
+
+  it("keeps a newer task mutation when an older offline mutation arrives later", async () => {
+    const app = createRouteTestApp();
+    const newer = createValidMutation("dmq_lww_newer");
+    newer.mutations[0].clientTimestamp = "2026-04-30T00:00:05.000Z";
+    newer.mutations[0].payload.completed = false;
+    delete newer.mutations[0].payload.completedAt;
+    const older = createValidMutation("dmq_lww_older");
+    older.mutations[0].clientTimestamp = "2026-04-30T00:00:03.000Z";
+
+    const first = await requestJson(app, "POST", "/api/sync/12-week/mutations", { body: newer });
+    const second = await requestJson(app, "POST", "/api/sync/12-week/mutations", { body: older });
+    const firstData = getBatchResult(first);
+    const secondData = getBatchResult(second);
+    const task = syncTaskFixture?.getTask("64f000000000000000000001");
+
+    assert.equal(firstData.accepted[0].status, "applied");
+    assert.equal(secondData.accepted[0].status, "noop");
+    assert.equal(task?.status, "todo");
+    assert.equal(task?.revision, 2);
+    assert.equal(task?.lastClientTimestamp?.toISOString(), "2026-04-30T00:00:05.000Z");
+  });
+
+  it("uses mutationId as the deterministic tie-break for equal task timestamps", async () => {
+    const app = createRouteTestApp();
+    const winner = createValidMutation("dmq_lww_tie_z");
+    winner.mutations[0].clientTimestamp = "2026-04-30T00:00:05.000Z";
+    winner.mutations[0].payload.completed = false;
+    delete winner.mutations[0].payload.completedAt;
+    const loser = createValidMutation("dmq_lww_tie_a");
+    loser.mutations[0].clientTimestamp = "2026-04-30T00:00:05.000Z";
+
+    await requestJson(app, "POST", "/api/sync/12-week/mutations", { body: winner });
+    const response = await requestJson(app, "POST", "/api/sync/12-week/mutations", { body: loser });
+    const data = getBatchResult(response);
+    const task = syncTaskFixture?.getTask("64f000000000000000000001");
+
+    assert.equal(data.status, "applied");
+    assert.equal(data.appliedCount, 0);
+    assert.equal(data.skippedCount, 1);
+    assert.equal(data.accepted[0].status, "noop");
+    assert.equal(task?.status, "todo");
+    assert.equal(task?.revision, 2);
   });
 
   it("does not accept task_upsert until task creation persistence exists", async () => {
@@ -2363,6 +2463,23 @@ describe("12-week import apply route", () => {
     assert.equal(result.skipped.leadMetrics, 0);
     assert.equal(result.skipped.dailyCheckIns, 0);
     assert.equal(result.skipped.weeklyReviews, 0);
+  });
+
+  it("persists the importId as the mutation-log idempotency key", async () => {
+    let createdLog: CreateSyncMutationLogData | undefined;
+    const importService = new TwelveWeekImportService(
+      createTwelveWeekImportRepository((data) => {
+        createdLog = data;
+      }),
+    );
+
+    await importService.importWorkspace(
+      ownerUserId,
+      createValidImportPayload("import_apply_log_idempotency_1"),
+    );
+
+    assert.equal(createdLog?.mutationId, "import_apply_log_idempotency_1");
+    assert.equal(createdLog?.idempotencyKey, "import_apply_log_idempotency_1");
   });
 
   it("returns duplicate without creating new records for a repeated importId and same payload", async () => {

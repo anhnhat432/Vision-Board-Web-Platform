@@ -22,7 +22,7 @@ jobs:
         with:
           node-version-file: ".nvmrc"
           cache: npm
-      - run: npm run audit:prod
+      - run: node scripts/check-production-dependency-audit.mjs frontend
 
   backend:
     name: Backend audit
@@ -35,4 +35,4 @@ jobs:
           node-version-file: ".nvmrc"
           cache: npm
           cache-dependency-path: backend/package-lock.json
-      - run: npm run audit:prod:backend
+      - run: node scripts/check-production-dependency-audit.mjs backend

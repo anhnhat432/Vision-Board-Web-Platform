@@ -976,7 +976,6 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
       if (!goalId || !system || !enabled) return Promise.resolve(true);
 
       if (shouldEnable12WeekMutationSync()) {
-        enqueueRetry("task_completed", { taskId, completed }, taskId, "task");
         return Promise.resolve(true);
       }
 
@@ -993,6 +992,7 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
   const syncWeeklyReview = useCallback(
     async (input: SyncWeeklyReviewInput): Promise<boolean> => {
       if (!goalId || !system || !enabled) return Promise.resolve(true);
+      if (shouldEnable12WeekMutationSync()) return Promise.resolve(true);
 
       const synced = await syncWeeklyReviewNow(input);
       if (!synced) {
@@ -1007,6 +1007,7 @@ export function usePlanExecutionSync(options: UsePlanExecutionSyncOptions) {
   const syncDailyCheckIn = useCallback(
     async (input: SyncDailyCheckInInput): Promise<boolean> => {
       if (!goalId || !system || !enabled) return Promise.resolve(true);
+      if (shouldEnable12WeekMutationSync()) return Promise.resolve(true);
 
       const synced = await syncDailyCheckInNow(input);
       if (!synced) {

@@ -1,5 +1,10 @@
 import { createRoot } from "react-dom/client";
 import { cleanupLegacyAssistantHistory } from "./app/features/assistant/cleanupLegacyHistory";
+import {
+  createGtagCommandQueue,
+  getConfiguredGaMeasurementId,
+  isGaMeasurementId,
+} from "./app/utils/analytics-config";
 import { getAppMode } from "./app/utils/app-mode";
 import { installChunkLoadRecovery } from "./app/utils/chunkLoad";
 import { reportProductionRuntimeEnvReadiness } from "./app/utils/production-runtime-env";
@@ -35,17 +40,15 @@ function scheduleAfterLoadIdle(task: () => void, timeout = 5_000): void {
 // Inject GA4 script only for explicitly configured real-mode analytics.
 const appMode = getAppMode();
 const analyticsMode = import.meta.env.VITE_ANALYTICS_MODE?.trim().toLowerCase();
-const gaMeasurementId = import.meta.env.VITE_GA_MEASUREMENT_ID?.trim();
-if (appMode === "real" && analyticsMode === "ga4" && gaMeasurementId && /^G-[A-Z0-9]+$/.test(gaMeasurementId)) {
+const gaMeasurementId = getConfiguredGaMeasurementId();
+if (appMode === "real" && analyticsMode === "ga4" && isGaMeasurementId(gaMeasurementId)) {
   const gtagScript = document.createElement("script");
   gtagScript.async = true;
   gtagScript.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(gaMeasurementId)}`;
   document.head.appendChild(gtagScript);
 
   window.dataLayer = window.dataLayer ?? [];
-  window.gtag = (...args: unknown[]) => {
-    window.dataLayer?.push(args as unknown as Record<string, unknown> & { event?: unknown });
-  };
+  window.gtag = createGtagCommandQueue(window.dataLayer);
   window.gtag("js", new Date());
   window.gtag("config", gaMeasurementId, { send_page_view: false });
 }

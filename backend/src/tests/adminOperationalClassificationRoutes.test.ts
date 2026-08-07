@@ -13,7 +13,7 @@ process.env.ADMIN_AUDIT_FINGERPRINT_SECRET ??= "test-admin-audit-fingerprint-sec
 
 import { createAuthMiddleware } from "../middleware/authMiddlewareCore";
 import { errorMiddleware } from "../middleware/errorMiddleware";
-import { generalApiRateLimiter } from "../middleware/rateLimiters";
+import { authenticatedApiRateLimiter } from "../middleware/rateLimiters";
 import { clearAdminRoleCache } from "../middleware/requireAdmin";
 import { AdminAuditOutboxModel } from "../models/AdminAuditOutboxModel";
 import { AuditLogModel } from "../models/auditLogModel";
@@ -34,7 +34,6 @@ const originalPaymentFindOne = (PaymentOrderModel as unknown as { findOne: unkno
 function createApp(): Express {
   const app = express();
   app.use(express.json());
-  app.use("/api", generalApiRateLimiter);
   app.use("/api", createAuthMiddleware({
     async verifyIdToken(token: string) {
       if (token === "admin-token") return { uid: "admin_uid", email: "admin@example.test", emailVerified: true };
@@ -42,6 +41,7 @@ function createApp(): Express {
       throw new Error("Invalid test token");
     },
   }));
+  app.use("/api", authenticatedApiRateLimiter);
   app.use("/api", adminRoutes);
   app.use(errorMiddleware);
   return app;

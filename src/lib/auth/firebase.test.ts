@@ -103,8 +103,8 @@ describe("registerWithEmail", () => {
       "new@example.test",
       "password123",
     );
-    expect(credential.user.getIdToken).toHaveBeenCalledTimes(1);
-    expect(window.localStorage.getItem("firebase_id_token")).toBe("token-test");
+    expect(credential.user.getIdToken).not.toHaveBeenCalled();
+    expect(window.localStorage.getItem("firebase_id_token")).toBeNull();
     expect(firebaseAuthMock.sendEmailVerification).toHaveBeenCalledWith(credential.user);
     expect(window.localStorage.getItem("emailVerificationLastSentAt:user_signup")).toBe("1765000000000");
   });
@@ -129,7 +129,7 @@ describe("registerWithEmail", () => {
 
     await expect(registerWithEmail("new@example.test", "password123")).resolves.toBe(credential);
 
-    expect(window.localStorage.getItem("firebase_id_token")).toBe("token-test");
+    expect(window.localStorage.getItem("firebase_id_token")).toBeNull();
     expect(window.localStorage.getItem("emailVerificationLastSentAt:user_signup")).toBeNull();
     expect(consoleError).toHaveBeenCalledWith("Failed to send initial verification email.", expect.any(Error));
   });
@@ -143,5 +143,78 @@ describe("registerWithEmail", () => {
 
     expect(firebaseAuthMock.createUserWithEmailAndPassword).not.toHaveBeenCalled();
     expect(firebaseAuthMock.sendEmailVerification).not.toHaveBeenCalled();
+  });
+});
+
+describe("getFirebaseToken", () => {
+  beforeEach(() => {
+    window.localStorage.clear();
+    vi.unstubAllEnvs();
+    vi.clearAllMocks();
+    firebaseAppMock.getApps.mockReturnValue([]);
+    firebaseAppMock.initializeApp.mockReturnValue({ name: "firebase-app" });
+    stubConfiguredFirebaseEnv();
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.restoreAllMocks();
+  });
+
+  it("removes the legacy token and reads the current Firebase user token", async () => {
+    const currentUser = {
+      getIdToken: vi.fn().mockResolvedValue("fresh-token"),
+    };
+    const auth = {
+      currentUser,
+      authStateReady: vi.fn().mockResolvedValue(undefined),
+    };
+    firebaseAuthMock.getAuth.mockReturnValue(auth);
+    localStorage.setItem("firebase_id_token", "stale-token");
+    const { getFirebaseToken } = await loadFirebaseModule();
+
+    await expect(getFirebaseToken(true)).resolves.toBe("fresh-token");
+
+    expect(auth.authStateReady).toHaveBeenCalledTimes(1);
+    expect(currentUser.getIdToken).toHaveBeenCalledWith(true);
+    expect(localStorage.getItem("firebase_id_token")).toBeNull();
+  });
+
+  it("returns null instead of falling back to a legacy token when Firebase is signed out", async () => {
+    firebaseAuthMock.getAuth.mockReturnValue({
+      currentUser: null,
+      authStateReady: vi.fn().mockResolvedValue(undefined),
+    });
+    localStorage.setItem("firebase_id_token", "stale-token");
+    const { getFirebaseToken } = await loadFirebaseModule();
+
+    await expect(getFirebaseToken()).resolves.toBeNull();
+    expect(localStorage.getItem("firebase_id_token")).toBeNull();
+  });
+
+  it("returns null instead of falling back when Firebase token refresh fails", async () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    firebaseAuthMock.getAuth.mockReturnValue({
+      currentUser: {
+        getIdToken: vi.fn().mockRejectedValue(new Error("refresh failed")),
+      },
+      authStateReady: vi.fn().mockResolvedValue(undefined),
+    });
+    localStorage.setItem("firebase_id_token", "stale-token");
+    const { getFirebaseToken } = await loadFirebaseModule();
+
+    await expect(getFirebaseToken(true)).resolves.toBeNull();
+    expect(localStorage.getItem("firebase_id_token")).toBeNull();
+    expect(consoleError).toHaveBeenCalledWith("Failed to read Firebase token.", expect.any(Error));
+  });
+
+  it("removes the legacy token and returns null when Firebase is unconfigured", async () => {
+    vi.unstubAllEnvs();
+    stubUnconfiguredFirebaseEnv();
+    localStorage.setItem("firebase_id_token", "stale-token");
+    const { getFirebaseToken } = await loadFirebaseModule();
+
+    await expect(getFirebaseToken()).resolves.toBeNull();
+    expect(localStorage.getItem("firebase_id_token")).toBeNull();
   });
 });

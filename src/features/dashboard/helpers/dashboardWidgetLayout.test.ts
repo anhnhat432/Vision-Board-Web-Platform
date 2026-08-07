@@ -26,6 +26,8 @@ import {
   BACKEND_LINK_LEGACY_OWNER_STORAGE_KEY,
   BACKEND_LINK_STORAGE_KEYS,
   DEMO_FEEDBACK_STORAGE_KEY,
+  LOCAL_DATA_FILE_IMPORT_PENDING_AUTH_STORAGE_PREFIX,
+  LOCAL_DATA_FILE_IMPORT_RECOVERY_STORAGE_PREFIX,
   LOCAL_DATA_IMPORT_BACKUP_STORAGE_PREFIX,
   LOCAL_DATA_MIGRATION_PROMPT_STATE_KEY,
   PAGE_TOUR_SEEN_STORAGE_PREFIX,
@@ -163,11 +165,15 @@ describe("Storage_Contract regression — danh sách storage keys không đổi 
       "visionboard_data_mutation_queue:auth:",
       "visionboard_data_mutation_queue:recovery:",
       "visionboard_local_data_import_backup:",
+      "visionboard_local_file_import_pending:auth:",
+      "visionboard_local_file_import_recovery:",
       "visionboard_mock_billing_session_",
       "visionboard_screen_guide_seen:",
       "visionboard_page_tour_seen:",
     ]);
     expect(LOCAL_DATA_IMPORT_BACKUP_STORAGE_PREFIX).toBe("visionboard_local_data_import_backup:");
+    expect(LOCAL_DATA_FILE_IMPORT_PENDING_AUTH_STORAGE_PREFIX).toBe("visionboard_local_file_import_pending:auth:");
+    expect(LOCAL_DATA_FILE_IMPORT_RECOVERY_STORAGE_PREFIX).toBe("visionboard_local_file_import_recovery:");
     expect(SCREEN_GUIDE_SEEN_STORAGE_PREFIX).toBe("visionboard_screen_guide_seen:");
     expect(PAGE_TOUR_SEEN_STORAGE_PREFIX).toBe("visionboard_page_tour_seen:");
   });

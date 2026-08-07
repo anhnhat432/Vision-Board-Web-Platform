@@ -60,6 +60,35 @@ describe("production smoke harness guards", () => {
     expect(submitIndex).toBeGreaterThan(classifyIndex);
   });
 
+  it("re-resolves weekly review commitments before bounded atomic DOM clicks", () => {
+    const helperStart = smokeScript.indexOf("async function classifyVisiblePreviousCommitments(page)");
+    const helperEnd = smokeScript.indexOf("\nasync function readWeeklyReviewSurface(page)", helperStart);
+    const helperSource = smokeScript.slice(helperStart, helperEnd);
+
+    expect(helperStart).toBeGreaterThan(0);
+    expect(helperEnd).toBeGreaterThan(helperStart);
+    expect(helperSource).toContain(
+      'const buttonCount = await step.getByRole("button", { name: "Đã giữ", exact: true }).count();',
+    );
+    expect(helperSource).toContain("for (let attempt = 0; attempt < buttonCount; attempt += 1)");
+    expect(helperSource).toContain("const clickResult = await step.evaluate((container) => {");
+    expect(helperSource).toContain('button.getAttribute("aria-pressed") !== "true"');
+
+    const atomicClickStart = helperSource.indexOf("const clickResult = await step.evaluate");
+    const atomicClickEnd = helperSource.indexOf("if (!clickResult.clicked)", atomicClickStart);
+    const atomicClickSource = helperSource.slice(atomicClickStart, atomicClickEnd);
+    expect(atomicClickSource).toContain("pendingButton.click();");
+
+    expect(helperSource).toContain("await waitForCondition(");
+    expect(helperSource).toContain("const state = await step.evaluate((container) => {");
+    expect(helperSource).toContain("state.done || state.pendingCount < clickResult.pendingCount");
+    expect(helperSource).toContain(
+      '[data-testid="weekly-review-step-commitments"][data-done="true"]:visible',
+    );
+    expect(helperSource).not.toContain("keptButtons.nth(index)");
+    expect(helperSource).not.toContain("await button.click()");
+  });
+
   it("waits for visible weekly review UI instead of a hidden score container", () => {
     expect(smokeScript).toContain('page.locator("#weekly-insights").waitFor');
     expect(smokeScript).toContain('page.locator("#weekly-next-commitments").waitFor');
@@ -125,18 +154,27 @@ describe("production smoke harness guards", () => {
     expect(checkoutStartedIndex).toBeGreaterThan(paymentHistoryIndex);
   });
 
-  it("tolerates only expected background rate-limited hydration calls at final aggregation", () => {
-    expect(smokeScript).toContain("function isExpectedBackgroundRateLimit(event)");
-    expect(smokeScript).toContain('String(event.responseBody ?? "").includes(\'"errorCode":"rate_limited"\')');
-    expect(smokeScript).toContain('pathname === "/api/auth/profile"');
-    expect(smokeScript).toContain('pathname === "/api/goals"');
-    expect(smokeScript).toContain('pathname === "/api/billing/entitlement"');
-    expect(smokeScript).toContain('pathname === "/api/plans"');
-    expect(smokeScript).toContain('/^\\/api\\/plans\\/[^/]+$/.test(pathname)');
-    expect(smokeScript).toContain('pathname === "/api/sync/12-week/pull"');
+  it("fails unrecovered 429 responses and accepts only an explicit or later successful retry", () => {
+    expect(smokeScript).toContain("function hasLaterSuccessfulRetry(event, apiEvents)");
+    expect(smokeScript).toContain("candidate.at > event.at");
+    expect(smokeScript).toContain("candidate.method === event.method");
+    expect(smokeScript).toContain("normalizeApiUrl(candidate.url) === normalizeApiUrl(event.url)");
+    expect(smokeScript).toContain("candidate.status >= 200 && candidate.status < 300");
     expect(smokeScript).toContain(
-      "event.status === 429 && !event.handledByRateLimitRetry && !isExpectedBackgroundRateLimit(event)",
+      "event.status === 429 && !event.handledByRateLimitRetry && !hasLaterSuccessfulRetry(event, apiEvents)",
     );
+    expect(smokeScript).not.toContain("function isExpectedBackgroundRateLimit(event)");
+    expect(smokeScript).not.toContain('/^\\/api\\/plans\\/[^/]+$/.test(pathname)');
+  });
+
+  it("drops only billing page errors linked to a handled payment-history retry", () => {
+    expect(smokeScript).toContain("function isHandledBillingRateLimitPageError(message, apiEvents)");
+    expect(smokeScript).toContain('message !== "Too many requests. Please wait a moment and try again."');
+    expect(smokeScript).toContain('event.handledByRateLimitRetry !== "billing payment history"');
+    expect(smokeScript).toContain('new URL(event.url).pathname === "/api/billing/payment-history"');
+    expect(smokeScript).toContain("const unhandledPageErrors = pageErrors.filter(");
+    expect(smokeScript).toContain("!isHandledBillingRateLimitPageError(message, apiEvents)");
+    expect(smokeScript).toContain("if (unhandledPageErrors.length > 0)");
   });
 
   it("retries an observed rate-limited 12-week metric request and never allowlists it", () => {

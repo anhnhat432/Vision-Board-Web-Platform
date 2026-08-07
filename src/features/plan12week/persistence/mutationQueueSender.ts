@@ -36,6 +36,7 @@ export interface MutationQueueSyncResult {
   succeededCount: number;
   duplicateCount: number;
   failedCount: number;
+  failedNotFoundCount?: number;
   pendingCount: number;
   error?: unknown;
 }
@@ -210,6 +211,7 @@ function createDrainResult(input: {
   succeededCount: number;
   duplicateCount: number;
   failedCount: number;
+  failedNotFoundCount: number;
   hadRequestError: boolean;
   error?: unknown;
 }): MutationQueueSyncResult {
@@ -226,6 +228,7 @@ function createDrainResult(input: {
     succeededCount: input.succeededCount,
     duplicateCount: input.duplicateCount,
     failedCount: input.failedCount,
+    failedNotFoundCount: input.failedNotFoundCount,
     pendingCount: countRemainingPending(input.latestStore, input.ownerUid, input.now),
     error: input.error,
   };
@@ -274,6 +277,7 @@ export async function sendPending12WeekMutations(
   let succeededCount = 0;
   let duplicateCount = 0;
   let failedCount = 0;
+  let failedNotFoundCount = 0;
   let hadRequestError = false;
   let latestError: unknown;
 
@@ -344,6 +348,7 @@ export async function sendPending12WeekMutations(
               message: "Máy chủ không trả về kết quả cho thay đổi này.",
               retryable: true,
             };
+        if (result?.status === "failed_not_found") failedNotFoundCount += 1;
         const inFlightItem = latestStore.items.find((candidate) => candidate.id === item.id);
         latestStore = markMutationFailed(latestStore, item.id, failure, {
           now,
@@ -387,6 +392,7 @@ export async function sendPending12WeekMutations(
     succeededCount,
     duplicateCount,
     failedCount,
+    failedNotFoundCount,
     hadRequestError,
     error: latestError,
   });

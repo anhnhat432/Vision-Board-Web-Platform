@@ -13,15 +13,18 @@ export interface TaskCompletedChangedApplyInput {
   scheduledDate?: Date;
   completed: boolean;
   completedAt?: Date;
+  clientTimestamp: Date;
   syncUpdatedAt: Date;
 }
 
 export interface AppliedTaskMutationEntity {
   id: string;
+  mutationApplied?: boolean;
   clientTaskId?: string;
   status: "todo" | "doing" | "done";
   completedAt?: Date;
   revision?: number;
+  lastClientTimestamp?: Date;
   syncUpdatedAt?: Date;
 }
 

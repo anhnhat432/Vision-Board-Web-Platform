@@ -79,13 +79,17 @@ describe("Property 11 — Bảo toàn key localStorage (task 1.2)", () => {
     // giờ được đổi tên trong đợt nâng cấp UI (global-ui-upgrade).
     for (const required of [
       "visionboard_user_data",
-      "firebase_id_token",
       "offline-banner-dismissed",
       "selected_focus_area",
     ]) {
       expect(baseline.has(required)).toBe(true);
       expect(current.has(required)).toBe(true);
     }
+  });
+
+  it("không coi Firebase ID token đã retired là storage contract", () => {
+    expect(baseline.has("firebase_id_token")).toBe(false);
+    expect(current.has("firebase_id_token")).toBe(false);
   });
 
   it(PROPERTY_TAG, () => {

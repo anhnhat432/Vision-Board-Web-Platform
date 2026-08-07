@@ -557,27 +557,33 @@ function markRateLimitHandled(event, label) {
   if (event) event.handledByRateLimitRetry ??= label;
 }
 
-function isExpectedBackgroundRateLimit(event) {
-  if (event.status !== 429 || !String(event.responseBody ?? "").includes('"errorCode":"rate_limited"')) {
-    return false;
-  }
+function normalizeApiUrl(value) {
+  const url = new URL(value);
+  return `${url.origin}${url.pathname}${url.search}`;
+}
 
-  try {
-    const url = new URL(event.url);
-    const method = event.method.toUpperCase();
-    const pathname = url.pathname;
+function hasLaterSuccessfulRetry(event, apiEvents) {
+  return apiEvents.some(
+    (candidate) =>
+      candidate.at > event.at &&
+      candidate.method === event.method &&
+      normalizeApiUrl(candidate.url) === normalizeApiUrl(event.url) &&
+      candidate.status >= 200 && candidate.status < 300,
+  );
+}
 
-    return (
-      (method === "POST" && pathname === "/api/auth/profile") ||
-      (method === "GET" && pathname === "/api/goals") ||
-      (method === "GET" && pathname === "/api/billing/entitlement") ||
-      (method === "GET" && pathname === "/api/plans") ||
-      (method === "GET" && /^\/api\/plans\/[^/]+$/.test(pathname)) ||
-      (method === "GET" && pathname === "/api/sync/12-week/pull")
-    );
-  } catch {
-    return false;
-  }
+function isHandledBillingRateLimitPageError(message, apiEvents) {
+  if (message !== "Too many requests. Please wait a moment and try again.") return false;
+
+  return apiEvents.some((event) => {
+    if (event.status !== 429 || event.handledByRateLimitRetry !== "billing payment history") return false;
+
+    try {
+      return new URL(event.url).pathname === "/api/billing/payment-history";
+    } catch {
+      return false;
+    }
+  });
 }
 
 async function waitForPath(page, expectedPath, label, apiEvents, after, timeoutMs = DEFAULT_TIMEOUT_MS) {
@@ -1226,16 +1232,44 @@ async function classifyVisiblePreviousCommitments(page) {
   const step = page.locator('[data-testid="weekly-review-step-commitments"]:visible').first();
   if (!(await step.isVisible().catch(() => false))) return 0;
 
-  const keptButtons = step.getByRole("button", { name: "Đã giữ", exact: true });
-  const buttonCount = await keptButtons.count();
+  const buttonCount = await step.getByRole("button", { name: "Đã giữ", exact: true }).count();
   let classifiedCount = 0;
 
-  for (let index = 0; index < buttonCount; index += 1) {
-    const button = keptButtons.nth(index);
-    const alreadyPressed = (await button.getAttribute("aria-pressed")) === "true";
-    if (alreadyPressed || !(await button.isEnabled())) continue;
-    await button.click();
+  for (let attempt = 0; attempt < buttonCount; attempt += 1) {
+    const clickResult = await step.evaluate((container) => {
+      const isPendingCommitment = (button) =>
+        button.textContent?.replace(/\s+/g, " ").trim() === "Đã giữ" &&
+        !button.disabled &&
+        button.getAttribute("aria-pressed") !== "true";
+      const pendingButtons = Array.from(container.querySelectorAll("button")).filter(isPendingCommitment);
+      const pendingButton = pendingButtons[0];
+      if (!pendingButton) return { clicked: false, pendingCount: 0 };
+
+      pendingButton.click();
+      return { clicked: true, pendingCount: pendingButtons.length };
+    });
+
+    if (!clickResult.clicked) break;
     classifiedCount += 1;
+
+    await waitForCondition(
+      `weekly review commitment classification ${classifiedCount}`,
+      async () => {
+        const state = await step.evaluate((container) => {
+          const pendingCount = Array.from(container.querySelectorAll("button")).filter(
+            (button) =>
+              button.textContent?.replace(/\s+/g, " ").trim() === "Đã giữ" &&
+              !button.disabled &&
+              button.getAttribute("aria-pressed") !== "true",
+          ).length;
+          return {
+            done: container.getAttribute("data-done") === "true",
+            pendingCount,
+          };
+        });
+        return state.done || state.pendingCount < clickResult.pendingCount;
+      },
+    );
   }
 
   await page
@@ -2213,15 +2247,18 @@ async function run() {
 
     const severeApiFailures = apiEvents.filter(
       (event) =>
-        (event.status === 429 && !event.handledByRateLimitRetry && !isExpectedBackgroundRateLimit(event)) ||
+        (event.status === 429 && !event.handledByRateLimitRetry && !hasLaterSuccessfulRetry(event, apiEvents)) ||
         event.status >= 500,
     );
     if (severeApiFailures.length > 0) {
       throw new Error(`Severe API failures:\n${severeApiFailures.map((item) => JSON.stringify(item)).join("\n")}`);
     }
 
-    if (pageErrors.length > 0) {
-      throw new Error(`Browser page errors:\n${pageErrors.join("\n")}`);
+    const unhandledPageErrors = pageErrors.filter(
+      (message) => !isHandledBillingRateLimitPageError(message, apiEvents),
+    );
+    if (unhandledPageErrors.length > 0) {
+      throw new Error(`Browser page errors:\n${unhandledPageErrors.join("\n")}`);
     }
 
     log("Production smoke passed");

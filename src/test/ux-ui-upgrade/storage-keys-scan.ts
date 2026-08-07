@@ -57,6 +57,8 @@ export const STORAGE_KEYS_SNAPSHOT_PATH = "src/test/ux-ui-upgrade/__snapshots__/
 
 const SCANNABLE_EXTENSIONS = new Set([".ts", ".tsx"]);
 
+export const INTENTIONALLY_RETIRED_STORAGE_KEYS: ReadonlySet<string> = new Set(["firebase_id_token"]);
+
 /** Thư mục bị loại khỏi quét (test fixture, mock, harness). */
 const EXCLUDED_DIR_NAMES = new Set<string>(["__tests__", "__mocks__", "test", "tests"]);
 
@@ -295,6 +297,10 @@ export function collectStorageKeys(options: StorageKeyScanOptions = {}): Set<str
     for (const k of scanStorageKeyConstants(content)) all.add(k);
   }
   for (const k of scanStorageConstantsArrays(repoRoot)) all.add(k);
+
+  for (const retiredKey of INTENTIONALLY_RETIRED_STORAGE_KEYS) {
+    all.delete(retiredKey);
+  }
 
   return all;
 }

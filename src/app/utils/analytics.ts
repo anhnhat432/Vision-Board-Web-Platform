@@ -1,6 +1,7 @@
 import { trackAppEvent } from "./storage";
 import type { PricingPlanCode } from "./storage-types";
 import type { PremiumFeatureContext } from "./twelve-week-premium";
+import { getConfiguredGaMeasurementId, isGaMeasurementId } from "./analytics-config";
 
 declare global {
   interface Window {
@@ -380,16 +381,8 @@ function getAppMode(): string {
   return appMode === "demo" ? "demo" : "real";
 }
 
-function getGaMeasurementId(): string {
-  return import.meta.env.VITE_GA_MEASUREMENT_ID?.trim() ?? "";
-}
-
-function isGaMeasurementId(value: string): boolean {
-  return /^G-[A-Z0-9]+$/i.test(value);
-}
-
 function isRemoteAnalyticsEnabled(): boolean {
-  const measurementId = getGaMeasurementId();
+  const measurementId = getConfiguredGaMeasurementId();
   return getAppMode() === "real" && getAnalyticsMode() === "ga4" && isGaMeasurementId(measurementId);
 }
 

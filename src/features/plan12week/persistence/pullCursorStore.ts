@@ -24,7 +24,7 @@ const EMPTY_STATE: PullCursorState = {
   lastPullStatus: null,
 };
 
-function getStorageKey(authUid: string): string {
+export function getPullCursorStorageKey(authUid: string): string {
   return `${PULL_CURSOR_STORAGE_PREFIX}${encodeURIComponent(authUid)}`;
 }
 
@@ -51,7 +51,7 @@ export function readPullCursorState(authUid: string | null | undefined, storage?
   if (!store) return EMPTY_STATE;
 
   try {
-    const raw = store.getItem(getStorageKey(authUid));
+    const raw = store.getItem(getPullCursorStorageKey(authUid));
     if (!raw) return EMPTY_STATE;
 
     const parsed = JSON.parse(raw) as Record<string, unknown>;
@@ -94,7 +94,7 @@ export function writePullCursorState(
       lastPullAt: state.lastPullAt ?? current.lastPullAt,
       lastPullStatus: state.lastPullStatus ?? current.lastPullStatus,
     };
-    store.setItem(getStorageKey(authUid), JSON.stringify(next));
+    store.setItem(getPullCursorStorageKey(authUid), JSON.stringify(next));
   } catch {
     // best-effort storage write
   }
@@ -111,7 +111,7 @@ export function clearPullCursor(authUid: string | null | undefined, storage?: St
   if (!store) return;
 
   try {
-    store.removeItem(getStorageKey(authUid));
+    store.removeItem(getPullCursorStorageKey(authUid));
   } catch {
     // best-effort
   }

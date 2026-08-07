@@ -290,6 +290,9 @@ export class SyncMutationOrchestrator {
       if (result.status === "applied") {
         appliedCount += 1;
         accepted.push(result);
+      } else if (result.status === "noop") {
+        skippedCount += 1;
+        accepted.push(result);
       } else if (result.status === "duplicate") {
         skippedCount += 1;
         duplicate.push(result);
@@ -304,12 +307,10 @@ export class SyncMutationOrchestrator {
     const failedCount = failed.length;
 
     let status: SyncMutationBatchResult["status"];
-    if (appliedCount === totalReceived) {
-      status = "applied";
+    if (failedCount === 0 && appliedCount + skippedCount === totalReceived) {
+      status = duplicate.length === totalReceived ? "duplicate" : "applied";
     } else if (failedCount === totalReceived) {
       status = "failed";
-    } else if (skippedCount === totalReceived && appliedCount === 0) {
-      status = "duplicate";
     } else {
       status = "partial";
     }
@@ -364,6 +365,9 @@ export class SyncMutationOrchestrator {
       if (result.status === "applied") {
         appliedCount += 1;
         accepted.push(result);
+      } else if (result.status === "noop") {
+        skippedCount += 1;
+        accepted.push(result);
       } else if (result.status === "duplicate") {
         skippedCount += 1;
         duplicate.push(result);
@@ -378,12 +382,10 @@ export class SyncMutationOrchestrator {
     const failedCount = failed.length;
 
     let status: SyncMutationBatchResult["status"];
-    if (appliedCount === totalReceived) {
-      status = "applied";
+    if (failedCount === 0 && appliedCount + skippedCount === totalReceived) {
+      status = duplicate.length === totalReceived ? "duplicate" : "applied";
     } else if (failedCount === totalReceived) {
       status = "failed";
-    } else if (skippedCount === totalReceived && appliedCount === 0) {
-      status = "duplicate";
     } else {
       status = "partial";
     }
@@ -493,7 +495,7 @@ export class SyncMutationOrchestrator {
     };
 
     // ─── 5. Log mutation ─────────────────────────────────────
-    const logStatus = finalResult.status === "applied" ? "applied" : "failed";
+    const logStatus = finalResult.status === "applied" || finalResult.status === "noop" ? "applied" : "failed";
     await this.logMutation(userId, mutation, logStatus, finalResult.status, processedAt);
 
     return finalResult;

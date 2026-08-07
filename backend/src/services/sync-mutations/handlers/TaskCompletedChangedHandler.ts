@@ -64,10 +64,12 @@ export class TaskCompletedChangedHandler implements MutationHandlerStrategy {
     }
 
     // ─── Apply ────────────────────────────────────────────────
+    const clientTimestamp = mutation.clientTimestamp ?? processedAt;
+    const syncUpdatedAt = processedAt;
     const completedAt = payload.completedAt
       ? new Date(payload.completedAt as string)
       : payload.completed
-        ? processedAt
+        ? clientTimestamp
         : undefined;
 
     const clientWeekId =
@@ -105,7 +107,8 @@ export class TaskCompletedChangedHandler implements MutationHandlerStrategy {
       scheduledDate: scheduledDate && Number.isFinite(scheduledDate.valueOf()) ? scheduledDate : undefined,
       completed: payload.completed,
       completedAt,
-      syncUpdatedAt: processedAt,
+      clientTimestamp,
+      syncUpdatedAt,
     });
 
     // ─── Result ───────────────────────────────────────────────
@@ -125,13 +128,13 @@ export class TaskCompletedChangedHandler implements MutationHandlerStrategy {
     return {
       mutationId,
       type: "task_completed_changed",
-      status: "applied",
+      status: applied.mutationApplied === false ? "noop" : "applied",
       entityType: "task",
       clientId: applied.clientTaskId ?? clientTaskId,
       serverId: applied.id,
       revision: applied.revision,
-      syncUpdatedAt: (applied.syncUpdatedAt ?? processedAt).toISOString(),
-      message: "Task completion mutation applied.",
+      syncUpdatedAt: (applied.syncUpdatedAt ?? syncUpdatedAt).toISOString(),
+      message: applied.mutationApplied === false ? "Older task mutation ignored by LWW." : "Task completion mutation applied.",
     };
   }
 }

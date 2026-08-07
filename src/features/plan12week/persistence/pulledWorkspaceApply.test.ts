@@ -342,6 +342,7 @@ describe("applyPulledWorkspaceToUserData", () => {
           weekNumber: 1,
           title: "Write",
           status: "todo",
+          syncUpdatedAt: "2026-04-30T02:00:00.000Z",
           scheduledDate: "2026-04-27",
           leadIndicatorName: "Write",
           tacticId: "tactic_write",
@@ -357,6 +358,7 @@ describe("applyPulledWorkspaceToUserData", () => {
 
     expect(task?.completed).toBe(false);
     expect(task?.completedAt).toBeUndefined();
+    expect(task?.lastModifiedAt).toBe(Date.parse("2026-04-30T02:00:00.000Z"));
     expect(nextData.goals[0].twelveWeekSystem?.dailyCheckIns).toHaveLength(1);
   });
 

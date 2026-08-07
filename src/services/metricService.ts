@@ -1,4 +1,5 @@
-import { get, patch, post } from "@/lib/api/apiClient";
+import { patch, post } from "@/lib/api/apiClient";
+import { getPlanningResource } from "@/services/planningReadRequest";
 import type { Metric } from "@/types/plan";
 
 export interface CreateMetricPayload {
@@ -19,7 +20,7 @@ export interface UpdateMetricLogPayload {
 }
 
 export function getMetrics(weekId: string): Promise<Metric[]> {
-  return get<Metric[]>(`/weeks/${weekId}/metrics`);
+  return getPlanningResource<Metric[]>(`/weeks/${weekId}/metrics`);
 }
 
 export function createMetric(weekId: string, payload: CreateMetricPayload): Promise<Metric> {

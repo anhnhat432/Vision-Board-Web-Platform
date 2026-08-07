@@ -1,11 +1,7 @@
 import { Router } from "express";
 
 import { authMiddleware } from "../middleware/authMiddleware";
-import {
-  authProfileRateLimiter,
-  generalApiRateLimiter,
-  healthRateLimiter,
-} from "../middleware/rateLimiters";
+import { authenticatedApiRateLimiter } from "../middleware/rateLimiters";
 import { accountRoutes } from "./accountRoutes";
 import { adminRoutes } from "./adminRoutes";
 import { assistantRoutes } from "./assistantRoutes";
@@ -28,14 +24,14 @@ import { weekRoutes } from "./weekRoutes";
 const apiRoutes = Router();
 
 // Webhook routes BEFORE auth — providers use signature verification, not Firebase auth.
-apiRoutes.use(healthRateLimiter, healthRoutes);
+apiRoutes.use(healthRoutes);
 apiRoutes.use(webhookRoutes);
 apiRoutes.use(publicBillingRoutes);
 apiRoutes.use(publicDiscountRoutes);
 apiRoutes.use("/order-catalog", orderCatalogRoutes);
 apiRoutes.use(authMiddleware);
-apiRoutes.use(generalApiRateLimiter);
-apiRoutes.use(authProfileRateLimiter, authRoutes);
+apiRoutes.use(authenticatedApiRateLimiter);
+apiRoutes.use(authRoutes);
 apiRoutes.use(accountRoutes);
 apiRoutes.use(adminRoutes);
 apiRoutes.use(discountRoutes);
