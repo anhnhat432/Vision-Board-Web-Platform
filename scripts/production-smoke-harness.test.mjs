@@ -94,17 +94,18 @@ describe("production smoke harness guards", () => {
     expect(helperSource).not.toContain("await button.click()");
   });
 
-  it("re-queries the next commitments input after commitment classification", () => {
+  it("keeps visible weekly review inputs live across commitment classification", () => {
     const classifyIndex = smokeScript.indexOf("const classifiedCommitments = await classifyVisiblePreviousCommitments(page);");
     const nextInputIndex = smokeScript.indexOf('const weeklyNextCommitmentsInput = page.locator("#weekly-next-commitments:visible").first();');
 
     expect(classifyIndex).toBeGreaterThan(0);
-    expect(nextInputIndex).toBeGreaterThan(classifyIndex);
+    expect(nextInputIndex).toBeGreaterThan(0);
+    expect(nextInputIndex).toBeLessThan(classifyIndex);
   });
 
   it("waits for visible weekly review UI instead of a hidden score container", () => {
-    expect(smokeScript).toContain('page.locator("#weekly-insights").waitFor');
-    expect(smokeScript).toContain('page.locator("#weekly-next-commitments").waitFor');
+    expect(smokeScript).toContain("await weeklyInsightsInput.waitFor");
+    expect(smokeScript).toContain("await weeklyNextCommitmentsInput.waitFor");
     expect(smokeScript).not.toContain(
       `await page.locator('[data-testid="wam-section-score"]').waitFor({ timeout: DEFAULT_TIMEOUT_MS });`,
     );
