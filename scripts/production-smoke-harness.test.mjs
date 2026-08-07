@@ -94,6 +94,14 @@ describe("production smoke harness guards", () => {
     expect(helperSource).not.toContain("await button.click()");
   });
 
+  it("re-queries the next commitments input after commitment classification", () => {
+    const classifyIndex = smokeScript.indexOf("const classifiedCommitments = await classifyVisiblePreviousCommitments(page);");
+    const nextInputIndex = smokeScript.indexOf('const weeklyNextCommitmentsInput = page.locator("#weekly-next-commitments:visible").first();');
+
+    expect(classifyIndex).toBeGreaterThan(0);
+    expect(nextInputIndex).toBeGreaterThan(classifyIndex);
+  });
+
   it("waits for visible weekly review UI instead of a hidden score container", () => {
     expect(smokeScript).toContain('page.locator("#weekly-insights").waitFor');
     expect(smokeScript).toContain('page.locator("#weekly-next-commitments").waitFor');
