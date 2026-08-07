@@ -11,7 +11,12 @@ import { Router, type RequestHandler } from "express";
 import { getCassoWebhookHealth, handleCassoWebhook } from "../controllers/cassoWebhookController";
 import { getPayosWebhookHealth, handlePayosWebhook } from "../controllers/payosWebhookController";
 import { handleWebhook } from "../controllers/webhookController";
-import { cassoWebhookLimiter, payosWebhookLimiter, webhookRateLimiter } from "../middleware/rateLimiters";
+import {
+  cassoWebhookLimiter,
+  payosWebhookLimiter,
+  webhookHealthRateLimiter,
+  webhookRateLimiter,
+} from "../middleware/rateLimiters";
 import { validateCassoWebhookPayload, validateWebhookProviderParam } from "../middleware/requestValidation";
 import { asyncHandler } from "../utils/asyncHandler";
 
@@ -25,8 +30,8 @@ function setWebhookProvider(provider: string): RequestHandler {
 }
 
 // Casso-specific webhook (matches PaymentOrders by bank transfer description)
-webhookRoutes.get("/billing/webhook/casso/health", asyncHandler(getCassoWebhookHealth));
-webhookRoutes.get("/webhook/casso/health", asyncHandler(getCassoWebhookHealth));
+webhookRoutes.get("/billing/webhook/casso/health", webhookHealthRateLimiter, asyncHandler(getCassoWebhookHealth));
+webhookRoutes.get("/webhook/casso/health", webhookHealthRateLimiter, asyncHandler(getCassoWebhookHealth));
 webhookRoutes.post(
   "/billing/webhook/casso",
   cassoWebhookLimiter,
@@ -46,9 +51,9 @@ webhookRoutes.post(
   asyncHandler(handleCassoWebhook),
 );
 // PayOS-specific webhook (matches local PaymentOrders by PayOS orderCode/paymentLinkId/description)
-webhookRoutes.get("/billing/webhook/payos/health", asyncHandler(getPayosWebhookHealth));
-webhookRoutes.get("/webhook/payos/health", asyncHandler(getPayosWebhookHealth));
-webhookRoutes.get("/webhooks/payos/health", asyncHandler(getPayosWebhookHealth));
+webhookRoutes.get("/billing/webhook/payos/health", webhookHealthRateLimiter, asyncHandler(getPayosWebhookHealth));
+webhookRoutes.get("/webhook/payos/health", webhookHealthRateLimiter, asyncHandler(getPayosWebhookHealth));
+webhookRoutes.get("/webhooks/payos/health", webhookHealthRateLimiter, asyncHandler(getPayosWebhookHealth));
 webhookRoutes.post(
   "/webhooks/payos",
   payosWebhookLimiter,

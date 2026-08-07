@@ -13,7 +13,7 @@ import mongoose, { type ClientSession } from "mongoose";
 
 import { createAuthMiddleware } from "../middleware/authMiddlewareCore";
 import { errorMiddleware } from "../middleware/errorMiddleware";
-import { generalApiRateLimiter } from "../middleware/rateLimiters";
+import { authenticatedApiRateLimiter } from "../middleware/rateLimiters";
 import { clearAdminRoleCache } from "../middleware/requireAdmin";
 import { AdminAuditOutboxModel } from "../models/AdminAuditOutboxModel";
 import { AuditLogModel } from "../models/auditLogModel";
@@ -253,7 +253,6 @@ async function postOrder(app: Express, body: unknown): Promise<JsonResponse> {
 function createAdminClassificationApp(): Express {
   const app = express();
   app.use(express.json());
-  app.use("/api", generalApiRateLimiter);
   app.use(
     "/api",
     createAuthMiddleware({
@@ -264,6 +263,7 @@ function createAdminClassificationApp(): Express {
       },
     }),
   );
+  app.use("/api", authenticatedApiRateLimiter);
   app.use("/api", orderRoutes);
   app.use(errorMiddleware);
   return app;

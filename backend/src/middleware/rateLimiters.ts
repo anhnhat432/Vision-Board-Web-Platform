@@ -1,10 +1,13 @@
+import { createHash } from "node:crypto";
+
 import {
   ipKeyGenerator,
   rateLimit,
+  type RateLimitInfo,
   type RateLimitExceededEventHandler,
   type ValueDeterminingMiddleware,
 } from "express-rate-limit";
-import type { Request } from "express";
+import type { Request, RequestHandler } from "express";
 
 import { captureBackendException } from "../monitoring/sentry";
 import { billingService } from "../services/billingServiceInstance";
@@ -26,7 +29,7 @@ function getMerchantId(req: Request): string | undefined {
 }
 
 function getRetryAfterSeconds(req: Request, windowMs: number): number {
-  const resetTime = (req as Request & { rateLimit?: { resetTime?: Date } }).rateLimit?.resetTime;
+  const resetTime = (req as Request & { rateLimit?: RateLimitInfo }).rateLimit?.resetTime;
   if (resetTime instanceof Date) {
     return Math.max(1, Math.ceil((resetTime.getTime() - Date.now()) / 1000));
   }
@@ -34,29 +37,47 @@ function getRetryAfterSeconds(req: Request, windowMs: number): number {
   return Math.max(1, Math.ceil(windowMs / 1000));
 }
 
-function createRateLimitHandler(errorCode = "rate_limited"): RateLimitExceededEventHandler {
+function sanitizeRoute(req: Request): string {
+  return (req.route?.path ?? req.originalUrl ?? req.path).split("?", 1)[0] ?? req.path;
+}
+
+function hashRateLimitKey(value: string | undefined): string | undefined {
+  if (!value) return undefined;
+  return createHash("sha256").update(value).digest("hex").slice(0, 12);
+}
+
+function createRateLimitHandler(limiter: string, errorCode = "rate_limited"): RateLimitExceededEventHandler {
   return (req, res, _next, options) => {
-    const route = req.route?.path ?? req.originalUrl ?? req.path;
+    const rateLimitInfo = (req as Request & { rateLimit?: RateLimitInfo }).rateLimit;
+    const route = sanitizeRoute(req);
     const merchantId = getMerchantId(req);
+    const retryAfter = getRetryAfterSeconds(req, options.windowMs);
     const context = {
       event: "rate_limit_hit",
+      limiter,
       route,
-      path: req.path,
       method: req.method,
+      authenticated: Boolean(req.user?.uid),
+      keyHash: hashRateLimitKey(rateLimitInfo?.key),
+      limit: rateLimitInfo?.limit ?? (typeof options.limit === "number" ? options.limit : undefined),
+      used: rateLimitInfo?.used,
+      remaining: rateLimitInfo?.remaining,
+      windowMs: options.windowMs,
+      retryAfter,
       ip: req.ip,
       merchantId,
-      userId: req.user?.uid,
       statusCode: options.statusCode,
     };
     console.warn("[rate-limit]", context);
     captureBackendException(new Error("Rate limit exceeded."), {
       tags: {
         event: "rate_limit_hit",
+        limiter,
         route: String(route),
       },
       extra: context,
     });
-    res.setHeader("Retry-After", String(getRetryAfterSeconds(req, options.windowMs)));
+    res.setHeader("Retry-After", String(retryAfter));
     const payload = errorResponse("Too many requests. Please wait a moment and try again.");
     (payload as unknown as Record<string, unknown>).errorCode = errorCode;
     res.status(options.statusCode).json(payload);
@@ -80,8 +101,9 @@ async function getAssistantLimit(req: Request): Promise<number> {
     const entitlement = await billingService.getCurrentEntitlementForUser(userId);
     return entitlement.planCode === "FREE" ? ASSISTANT_FREE_LIMIT : ASSISTANT_PAID_LIMIT;
   } catch (error) {
+    const keyHash = hashRateLimitKey(`user:${userId}`);
     console.warn("[assistant-rate-limit] Entitlement lookup failed", {
-      userId,
+      keyHash,
       error: error instanceof Error ? error.name : "UnknownError",
     });
     captureBackendException(error, {
@@ -89,7 +111,7 @@ async function getAssistantLimit(req: Request): Promise<number> {
         event: "assistant_rate_limit_entitlement_lookup_failed",
       },
       extra: {
-        userId,
+        keyHash,
       },
     });
     return ASSISTANT_FREE_LIMIT;
@@ -97,12 +119,14 @@ async function getAssistantLimit(req: Request): Promise<number> {
 }
 
 function createLimiter({
+  name,
   keyPrefix,
   limit,
   windowMs,
   keyGenerator,
   errorCode,
 }: {
+  name: string;
   keyPrefix: string;
   limit: number | ValueDeterminingMiddleware<number>;
   windowMs: number;
@@ -112,14 +136,16 @@ function createLimiter({
   return rateLimit({
     windowMs,
     limit,
+    identifier: name,
     keyGenerator: (req) => `${keyPrefix}:${keyGenerator(req)}`,
     standardHeaders: "draft-7",
     legacyHeaders: false,
-    handler: createRateLimitHandler(errorCode),
+    handler: createRateLimitHandler(name, errorCode),
   });
 }
 
 export const healthRateLimiter = createLimiter({
+  name: "health",
   keyPrefix: "health",
   windowMs: ONE_MINUTE_MS,
   limit: 120,
@@ -135,6 +161,7 @@ function merchantOrIpKey(headerName: string): (req: Request) => string {
 }
 
 export const webhookRateLimiter = createLimiter({
+  name: "webhook",
   keyPrefix: "webhook",
   windowMs: ONE_MINUTE_MS,
   limit: 300,
@@ -142,6 +169,7 @@ export const webhookRateLimiter = createLimiter({
 });
 
 export const cassoWebhookLimiter = createLimiter({
+  name: "webhook-casso",
   keyPrefix: "webhook:casso",
   windowMs: ONE_MINUTE_MS,
   limit: 600,
@@ -149,17 +177,27 @@ export const cassoWebhookLimiter = createLimiter({
 });
 
 export const payosWebhookLimiter = createLimiter({
+  name: "webhook-payos",
   keyPrefix: "webhook:payos",
   windowMs: ONE_MINUTE_MS,
   limit: 600,
   keyGenerator: merchantOrIpKey("x-payos-merchant-id"),
 });
 
-export const generalApiRateLimiter = createLimiter({
-  keyPrefix: "api",
+export const webhookHealthRateLimiter = createLimiter({
+  name: "webhook-health",
+  keyPrefix: "webhook-health",
   windowMs: ONE_MINUTE_MS,
   limit: 120,
-  keyGenerator: userOrIpKey,
+  keyGenerator: ipKey,
+});
+
+export const publicCatalogRateLimiter = createLimiter({
+  name: "public-catalog",
+  keyPrefix: "public-catalog",
+  windowMs: ONE_MINUTE_MS,
+  limit: 120,
+  keyGenerator: ipKey,
 });
 
 // Bootstrap /api/auth/profile được trigger nhiều lần ngay sau login (auto-sync
@@ -170,6 +208,7 @@ export const generalApiRateLimiter = createLimiter({
 // vẫn an toàn vì keyGenerator là per-user (Firebase UID), không phải per-IP,
 // nên class demo nhiều người login đồng thời không share quota.
 export const authProfileRateLimiter = createLimiter({
+  name: "auth-profile",
   keyPrefix: "auth-profile",
   windowMs: ONE_MINUTE_MS,
   limit: 60,
@@ -177,6 +216,7 @@ export const authProfileRateLimiter = createLimiter({
 });
 
 export const billingCheckoutRateLimiter = createLimiter({
+  name: "billing-checkout",
   keyPrefix: "billing-checkout",
   windowMs: ONE_MINUTE_MS,
   limit: 10,
@@ -184,6 +224,7 @@ export const billingCheckoutRateLimiter = createLimiter({
 });
 
 export const billingStatusRateLimiter = createLimiter({
+  name: "billing-status",
   keyPrefix: "billing-status",
   windowMs: ONE_MINUTE_MS,
   limit: 40,
@@ -191,6 +232,7 @@ export const billingStatusRateLimiter = createLimiter({
 });
 
 export const billingHistoryRateLimiter = createLimiter({
+  name: "billing-history",
   keyPrefix: "billing-history",
   windowMs: ONE_MINUTE_MS,
   limit: 120,
@@ -198,6 +240,7 @@ export const billingHistoryRateLimiter = createLimiter({
 });
 
 export const planBulkSyncRateLimiter = createLimiter({
+  name: "plan-bulk-sync",
   keyPrefix: "plan-bulk-sync",
   windowMs: ONE_MINUTE_MS,
   limit: 10,
@@ -205,9 +248,154 @@ export const planBulkSyncRateLimiter = createLimiter({
 });
 
 export const assistantRateLimiter = createLimiter({
+  name: "assistant",
   keyPrefix: "assistant",
   windowMs: FIFTEEN_MINUTES_MS,
   limit: getAssistantLimit,
   keyGenerator: userOrIpKey,
   errorCode: "ASSISTANT_RATE_LIMITED",
 });
+
+export type AuthenticatedRateLimitPolicy =
+  | "dedicated"
+  | "auth-profile"
+  | "planning-read"
+  | "planning-write"
+  | "sync-read"
+  | "sync-write"
+  | "account-export"
+  | "account-destructive"
+  | "admin-read"
+  | "admin-write"
+  | "order-read"
+  | "order-write"
+  | "authenticated-read-fallback"
+  | "authenticated-write-fallback";
+
+const PLANNING_ROUTE_PREFIX = /^\/(?:goals|plans|weeks|metrics|tasks|vision-boards)(?:\/|$)/;
+const PLAN_BULK_SYNC_ROUTE = /^\/plans\/[^/]+\/bulk-sync$/;
+const ADMIN_ASSISTANT_READ_ROUTES = new Set([
+  "/ai/assistant/telemetry/overview",
+  "/ai/assistant/alerts",
+]);
+
+export function getAuthenticatedRateLimitPolicy(method: string, path: string): AuthenticatedRateLimitPolicy {
+  const normalizedMethod = method.toUpperCase();
+  const normalizedPath = path.split("?", 1)[0] || "/";
+  const isRead = normalizedMethod === "GET";
+
+  if (normalizedPath === "/auth/profile") return "auth-profile";
+  if (normalizedPath === "/billing" || normalizedPath.startsWith("/billing/")) return "dedicated";
+  if (ADMIN_ASSISTANT_READ_ROUTES.has(normalizedPath) && isRead) return "admin-read";
+  if (normalizedPath.startsWith("/assistant/") || normalizedPath === "/ai/assistant" || normalizedPath.startsWith("/ai/assistant/")) {
+    return "dedicated";
+  }
+  if (normalizedMethod === "POST" && PLAN_BULK_SYNC_ROUTE.test(normalizedPath)) return "dedicated";
+  if (normalizedPath.startsWith("/sync/12-week/")) return isRead ? "sync-read" : "sync-write";
+  if (normalizedPath === "/account/export") return "account-export";
+  if (normalizedPath === "/account" || normalizedPath === "/account/delete") return "account-destructive";
+  if (normalizedPath.startsWith("/admin/")) return isRead ? "admin-read" : "admin-write";
+  if (normalizedPath === "/orders" || normalizedPath.startsWith("/orders/")) {
+    return isRead ? "order-read" : "order-write";
+  }
+  if (PLANNING_ROUTE_PREFIX.test(normalizedPath)) return isRead ? "planning-read" : "planning-write";
+  return isRead ? "authenticated-read-fallback" : "authenticated-write-fallback";
+}
+
+const authenticatedPolicyLimiters = {
+  "auth-profile": authProfileRateLimiter,
+  "planning-read": createLimiter({
+    name: "planning-read",
+    keyPrefix: "planning-read",
+    windowMs: ONE_MINUTE_MS,
+    limit: 240,
+    keyGenerator: userOrIpKey,
+  }),
+  "planning-write": createLimiter({
+    name: "planning-write",
+    keyPrefix: "planning-write",
+    windowMs: ONE_MINUTE_MS,
+    limit: 60,
+    keyGenerator: userOrIpKey,
+  }),
+  "sync-read": createLimiter({
+    name: "sync-read",
+    keyPrefix: "sync-read",
+    windowMs: ONE_MINUTE_MS,
+    limit: 60,
+    keyGenerator: userOrIpKey,
+  }),
+  "sync-write": createLimiter({
+    name: "sync-write",
+    keyPrefix: "sync-write",
+    windowMs: ONE_MINUTE_MS,
+    limit: 30,
+    keyGenerator: userOrIpKey,
+  }),
+  "account-export": createLimiter({
+    name: "account-export",
+    keyPrefix: "account-export",
+    windowMs: ONE_MINUTE_MS,
+    limit: 10,
+    keyGenerator: userOrIpKey,
+  }),
+  "account-destructive": createLimiter({
+    name: "account-destructive",
+    keyPrefix: "account-destructive",
+    windowMs: ONE_MINUTE_MS,
+    limit: 3,
+    keyGenerator: userOrIpKey,
+  }),
+  "admin-read": createLimiter({
+    name: "admin-read",
+    keyPrefix: "admin-read",
+    windowMs: ONE_MINUTE_MS,
+    limit: 120,
+    keyGenerator: userOrIpKey,
+  }),
+  "admin-write": createLimiter({
+    name: "admin-write",
+    keyPrefix: "admin-write",
+    windowMs: ONE_MINUTE_MS,
+    limit: 30,
+    keyGenerator: userOrIpKey,
+  }),
+  "order-read": createLimiter({
+    name: "order-read",
+    keyPrefix: "order-read",
+    windowMs: ONE_MINUTE_MS,
+    limit: 120,
+    keyGenerator: userOrIpKey,
+  }),
+  "order-write": createLimiter({
+    name: "order-write",
+    keyPrefix: "order-write",
+    windowMs: ONE_MINUTE_MS,
+    limit: 30,
+    keyGenerator: userOrIpKey,
+  }),
+  "authenticated-read-fallback": createLimiter({
+    name: "authenticated-read-fallback",
+    keyPrefix: "authenticated-read-fallback",
+    windowMs: ONE_MINUTE_MS,
+    limit: 120,
+    keyGenerator: userOrIpKey,
+  }),
+  "authenticated-write-fallback": createLimiter({
+    name: "authenticated-write-fallback",
+    keyPrefix: "authenticated-write-fallback",
+    windowMs: ONE_MINUTE_MS,
+    limit: 30,
+    keyGenerator: userOrIpKey,
+  }),
+} satisfies Record<Exclude<AuthenticatedRateLimitPolicy, "dedicated">, RequestHandler>;
+
+export const authenticatedApiRateLimiter: RequestHandler = (req, res, next) => {
+  const policy = getAuthenticatedRateLimitPolicy(req.method, req.path);
+  if (policy === "dedicated") {
+    next();
+    return;
+  }
+
+  authenticatedPolicyLimiters[policy](req, res, next);
+};
