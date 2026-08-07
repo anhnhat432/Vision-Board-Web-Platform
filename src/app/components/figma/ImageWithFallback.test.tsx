@@ -19,6 +19,15 @@ describe("ImageWithFallback", () => {
     expect(screen.getByAltText("Uploaded image")).toHaveAttribute("src", "data:image/png;base64,QUJD");
   });
 
+  it("URI-encodes an accepted remote source before assigning it to the DOM", () => {
+    render(<ImageWithFallback src="https://images.example.com/vision board.jpg" alt="Encoded image" />);
+
+    expect(screen.getByAltText("Encoded image")).toHaveAttribute(
+      "src",
+      "https://images.example.com/vision%20board.jpg",
+    );
+  });
+
   it("does not retain the failed original source in the fallback DOM", () => {
     render(<ImageWithFallback src="https://images.example.com/broken.jpg" alt="Broken image" />);
 

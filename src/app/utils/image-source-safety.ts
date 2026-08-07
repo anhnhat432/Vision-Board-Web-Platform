@@ -6,11 +6,13 @@ export function getSafeImageSource(source: unknown): string | undefined {
 
   const trimmed = source.trim();
   if (!trimmed) return undefined;
-  if (SAFE_RASTER_DATA_URL.test(trimmed)) return trimmed;
 
   try {
-    const url = new URL(trimmed);
-    return SAFE_REMOTE_IMAGE_PROTOCOLS.has(url.protocol) ? trimmed : undefined;
+    const encoded = encodeURI(trimmed);
+    if (SAFE_RASTER_DATA_URL.test(trimmed)) return encoded;
+
+    const url = new URL(encoded);
+    return SAFE_REMOTE_IMAGE_PROTOCOLS.has(url.protocol) ? encoded : undefined;
   } catch {
     return undefined;
   }
