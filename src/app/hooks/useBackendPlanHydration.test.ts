@@ -325,6 +325,39 @@ describe("hydrateTwelveWeekPlansFromBackend", () => {
     expect(task?.completed).toBe(false);
   });
 
+  it("hydrates plan details with at most four concurrent requests", async () => {
+    const plans = Array.from({ length: 8 }, (_, index) => ({
+      ...createPlanDetails().plan,
+      id: `plan_${index + 1}`,
+      smartGoalId: `goal_${index + 1}`,
+      updatedAt: `2026-04-${String(index + 1).padStart(2, "0")}T00:00:00.000Z`,
+    }));
+    let active = 0;
+    let maximumActive = 0;
+
+    vi.mocked(getGoals).mockResolvedValue([]);
+    vi.mocked(getPlans).mockResolvedValue(plans);
+    vi.mocked(getPlan).mockImplementation(async (planId) => {
+      active += 1;
+      maximumActive = Math.max(maximumActive, active);
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      active -= 1;
+
+      const plan = plans.find((candidate) => candidate.id === planId);
+      if (!plan) throw new Error(`Missing plan fixture: ${planId}`);
+      return clonePlanDetails(createPlanDetails(), {
+        id: plan.id,
+        smartGoalId: plan.smartGoalId,
+        updatedAt: plan.updatedAt,
+      });
+    });
+
+    await hydrateTwelveWeekPlansFromBackend();
+
+    expect(maximumActive).toBeLessThanOrEqual(4);
+    expect(getPlan).toHaveBeenCalledTimes(8);
+  });
+
   it("leaves onboarding untouched when there are no backend plans", async () => {
     vi.mocked(getGoals).mockResolvedValue([]);
     vi.mocked(getPlans).mockResolvedValue([]);
