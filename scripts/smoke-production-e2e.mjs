@@ -1228,53 +1228,69 @@ async function hasVisibleWeeklyReviewForm(page) {
   return page.locator('[data-testid="weekly-review-flow"]:visible').first().isVisible().catch(() => false);
 }
 
-async function classifyVisiblePreviousCommitments(page) {
-  const step = page.locator('[data-testid="weekly-review-step-commitments"]:visible').first();
-  if (!(await step.isVisible().catch(() => false))) return 0;
+async function readVisibleWeeklyReviewCommitmentState(page, options = {}) {
+  const clickPending = options.clickPending ?? false;
+  return page.evaluate(({ clickPending }) => {
+    const isVisible = (element) => {
+      const style = window.getComputedStyle(element);
+      const rect = element.getBoundingClientRect();
+      return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
+    };
+    const containers = Array.from(document.querySelectorAll('[data-testid="weekly-review-step-commitments"]'));
+    const container = containers.find(isVisible);
+    if (!container) return { available: false, clicked: false, done: false, pendingCount: 0 };
 
-  const buttonCount = await step.getByRole("button", { name: "Đã giữ", exact: true }).count();
-  let classifiedCount = 0;
-
-  for (let attempt = 0; attempt < buttonCount; attempt += 1) {
-    const clickResult = await step.evaluate((container) => {
-      const isPendingCommitment = (button) =>
+    const pendingButtons = Array.from(container.querySelectorAll("button")).filter(
+      (button) =>
         button.textContent?.replace(/\s+/g, " ").trim() === "Đã giữ" &&
         !button.disabled &&
-        button.getAttribute("aria-pressed") !== "true";
-      const pendingButtons = Array.from(container.querySelectorAll("button")).filter(isPendingCommitment);
-      const pendingButton = pendingButtons[0];
-      if (!pendingButton) return { clicked: false, pendingCount: 0 };
+        button.getAttribute("aria-pressed") !== "true",
+    );
+    const pendingButton = pendingButtons[0];
+    if (clickPending && pendingButton) pendingButton.click();
 
-      pendingButton.click();
-      return { clicked: true, pendingCount: pendingButtons.length };
-    });
+    return {
+      available: true,
+      clicked: Boolean(clickPending && pendingButton),
+      done: container.getAttribute("data-done") === "true",
+      pendingCount: pendingButtons.length,
+    };
+  }, { clickPending });
+}
 
+async function classifyVisiblePreviousCommitments(page) {
+  let classifiedCount = 0;
+
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    const clickResult = await readVisibleWeeklyReviewCommitmentState(page, { clickPending: true });
+
+    if (!clickResult.available) {
+      await waitForCondition(
+        "weekly review commitment step after rerender",
+        async () => (await readVisibleWeeklyReviewCommitmentState(page)).available,
+        5_000,
+        100,
+      );
+      continue;
+    }
+
+    if (clickResult.done) break;
     if (!clickResult.clicked) break;
     classifiedCount += 1;
 
     await waitForCondition(
       `weekly review commitment classification ${classifiedCount}`,
       async () => {
-        const state = await step.evaluate((container) => {
-          const pendingCount = Array.from(container.querySelectorAll("button")).filter(
-            (button) =>
-              button.textContent?.replace(/\s+/g, " ").trim() === "Đã giữ" &&
-              !button.disabled &&
-              button.getAttribute("aria-pressed") !== "true",
-          ).length;
-          return {
-            done: container.getAttribute("data-done") === "true",
-            pendingCount,
-          };
-        });
-        return state.done || state.pendingCount < clickResult.pendingCount;
+        const state = await readVisibleWeeklyReviewCommitmentState(page);
+        return state.available && (state.done || state.pendingCount < clickResult.pendingCount);
       },
     );
   }
 
-  await page
-    .locator('[data-testid="weekly-review-step-commitments"][data-done="true"]:visible')
-    .waitFor({ timeout: DEFAULT_TIMEOUT_MS });
+  await waitForCondition("weekly review commitments classified", async () => {
+    const state = await readVisibleWeeklyReviewCommitmentState(page);
+    return state.available && state.done;
+  });
   return classifiedCount;
 }
 
