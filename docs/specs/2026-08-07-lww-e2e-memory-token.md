@@ -94,11 +94,11 @@ Writing `firebase_id_token` again would reverse the approved credential hardenin
 
 ## 9. Acceptance Criteria & Traceability
 
-- [ ] AC-1: A focused guard test fails on the current source because `importLwwBaseline` reads `firebase_id_token` and no authorization `WeakMap` exists. Maps to FR-2, FR-4, and FR-6.
-- [ ] AC-2: After implementation, the focused guard test proves the harness defines `WeakMap<Page, string>`, reads `headerValue("authorization")`, validates `Bearer`, and never reads `firebase_id_token`. Maps to FR-1 through FR-6.
-- [ ] AC-3: TypeScript accepts the async `rememberCloudPull` implementation and all call sites await it. Maps to FR-8.
-- [ ] AC-4: Existing safe-diagnostics guards continue to reject `response.headers()`, `response.body()`, raw payload logging, and credential-value logging. Maps to FR-7 and FR-9.
-- [ ] AC-5: `npm run test:ops`, `npm run typecheck`, `npm run lint`, `npm run test:run`, and `npm run build` pass on the implementation branch.
+- [x] AC-1: A focused guard test fails on the current source because `importLwwBaseline` reads `firebase_id_token` and no authorization `WeakMap` exists. Maps to FR-2, FR-4, and FR-6.
+- [x] AC-2: After implementation, the focused guard test proves the harness defines `WeakMap<Page, string>`, reads `headerValue("authorization")`, validates `Bearer`, and never reads `firebase_id_token`. Maps to FR-1 through FR-6.
+- [x] AC-3: TypeScript accepts the async `rememberCloudPull` implementation and all call sites await it. Maps to FR-8.
+- [x] AC-4: Existing safe-diagnostics guards continue to reject `response.headers()`, `response.body()`, raw payload logging, and credential-value logging. Maps to FR-7 and FR-9.
+- [x] AC-5: `npm run test:ops`, `npm run typecheck`, `npm run lint`, `npm run test:run`, and `npm run build` pass on the implementation branch.
 - [ ] AC-6: After merge to `main`, a fresh `LWW e2e staging` run against `https://dearourfuture.io.vn` passes local-wins, cloud-wins, and tombstone-wins. Only this deployed evidence can establish LWW production acceptance.
 
 ## 10. Verification Plan
@@ -141,3 +141,15 @@ gh workflow run lww-e2e-staging.yml \
 
 - Approved design direction: memory-only authorization captured from the Firebase-signed pull request.
 - The user approved this written spec on 2026-08-07; implementation planning may proceed.
+
+## 13. Branch Evidence - 2026-08-07
+
+- TDD RED: `npx vitest run scripts/github-workflow-guards.test.mjs` failed the new memory-only assertion on the unmodified harness (`1 failed`, `22 passed`).
+- TDD GREEN: the same focused command passed after implementation (`23 passed`).
+- `npm run test:ops`: exit code 0.
+- `npm run typecheck`: exit code 0.
+- `npm run lint`: exit code 0; one unrelated informational suggestion remains in `src/app/components/admin/AdminPagination.tsx`.
+- `npm run test:run`: `155` test files and `1436` tests passed.
+- `npm run build`: exit code 0; Vite transformed `3076` modules.
+- Security audit: `e2e/sync-lww.spec.ts` contains no `firebase_id_token`, raw header/body diagnostics, or authorization-value logging; all three `rememberCloudPull` call sites are awaited.
+- Remaining acceptance gate: AC-6 requires a fresh post-merge workflow run against `https://dearourfuture.io.vn`.
