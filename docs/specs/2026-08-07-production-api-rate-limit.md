@@ -1,6 +1,6 @@
 # Feature: Production API Rate-Limit Isolation
 
-Status: Review
+Status: Approved
 Risk: High
 Delivery: SDD Full for Core behavior, bounded ADD for tests and documentation
 
@@ -184,13 +184,15 @@ not be removed.
 Production smoke SHALL continue to fail on unexpected HTTP 429 after legitimate application retry
 behavior is exhausted. The implementation SHALL NOT:
 
-- add plan, week, metric, billing, or auth routes to a blanket 429 allowlist
+- retain or add plan, week, metric, billing, auth, or sync routes in a blanket 429 allowlist
 - skip final severe API failure aggregation
 - special-case the smoke account
 - remove existing assertions
 
-Existing smoke retry helpers may remain unchanged unless a focused assertion must be updated to
-verify the final-failure contract.
+The existing pathname-based `isExpectedBackgroundRateLimit` allowlist SHALL be removed. A recorded
+429 MAY be considered recovered only when it was explicitly marked as handled by an existing smoke
+retry or when a later response for the same method and normalized URL succeeds. An unrecovered 429
+SHALL remain a severe API failure.
 
 ## Acceptance criteria
 
