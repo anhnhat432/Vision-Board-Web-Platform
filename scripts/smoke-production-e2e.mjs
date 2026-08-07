@@ -1978,14 +1978,14 @@ async function exerciseTwelveWeekSaveReloadAndSync(page, apiEvents, getLatestApi
   await page.locator('[data-tour-id="twelve-week-tab-week"]').click();
   await page.locator('[data-testid="weekly-review-shell"]').waitFor({ timeout: DEFAULT_TIMEOUT_MS });
   await ensureWeeklyReviewFormVisible(page);
-  await page.locator("#weekly-insights").waitFor({ timeout: DEFAULT_TIMEOUT_MS });
-  await page.locator("#weekly-next-commitments").waitFor({ timeout: DEFAULT_TIMEOUT_MS });
+  const weeklyInsightsInput = page.locator("#weekly-insights:visible").first();
+  const weeklyNextCommitmentsInput = page.locator("#weekly-next-commitments:visible").first();
+  await weeklyInsightsInput.waitFor({ timeout: DEFAULT_TIMEOUT_MS });
+  await weeklyNextCommitmentsInput.waitFor({ timeout: DEFAULT_TIMEOUT_MS });
   const classifiedCommitments = await classifyVisiblePreviousCommitments(page);
   if (classifiedCommitments > 0) {
     log(`Classified ${classifiedCommitments} previous weekly commitment(s) before submit`);
   }
-  const weeklyInsightsInput = page.locator("#weekly-insights:visible").first();
-  const weeklyNextCommitmentsInput = page.locator("#weekly-next-commitments:visible").first();
   await weeklyInsightsInput.fill(WEEKLY_REVIEW_OUTPUT);
   await weeklyNextCommitmentsInput.fill(WEEKLY_REVIEW_PRIORITY);
   await weeklyNextCommitmentsInput.press("Enter");
