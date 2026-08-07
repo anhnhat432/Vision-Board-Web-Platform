@@ -7,8 +7,10 @@ import { cleanupExpiredMigrationBackups, registerOnImportComplete } from "./loca
 import { addAchievementToData, checkAchievementsInData } from "./storage-achievement-ops";
 import {
   activateAuthenticatedUserDataInStorage,
+  getScopedUserDataStorageKey,
   mirrorUserDataToActiveAuthScope,
   persistActiveAuthenticatedUserDataInStorage,
+  readActiveAuthOwnerUid,
   removeKnownAuxiliaryUserData,
 } from "./storage-auth-scope";
 import {
@@ -808,6 +810,55 @@ export function saveUserData(data: UserData): boolean {
 
     // Re-throw non-quota errors so they surface normally
     throw err;
+  }
+}
+
+function restoreStorageValue(key: string, value: string | null): void {
+  if (value === null) {
+    localStorage.removeItem(key);
+    return;
+  }
+  localStorage.setItem(key, value);
+}
+
+export function replaceUserData(data: UserData): boolean {
+  const normalized = normalizeUserData(data);
+  const serialized = JSON.stringify(normalized);
+  const ownerUid = readActiveAuthOwnerUid();
+  const scopedKey = ownerUid ? getScopedUserDataStorageKey(ownerUid) : null;
+  const activeBefore = localStorage.getItem(STORAGE_KEY);
+  const scopedBefore = scopedKey ? localStorage.getItem(scopedKey) : null;
+  const cacheBefore = _cachedUserData;
+  const cacheHashBefore = _cachedRawHash;
+
+  try {
+    localStorage.setItem(STORAGE_KEY, serialized);
+    if (scopedKey) localStorage.setItem(scopedKey, serialized);
+    _cachedUserData = normalized;
+    _cachedRawHash = serialized;
+    postUserDataMutation({ at: Date.now(), source: userDataMutationSource });
+    notifyUserDataUpdated();
+    return true;
+  } catch (error) {
+    try {
+      restoreStorageValue(STORAGE_KEY, activeBefore);
+      if (scopedKey) restoreStorageValue(scopedKey, scopedBefore);
+    } finally {
+      _cachedUserData = cacheBefore;
+      _cachedRawHash = cacheHashBefore;
+    }
+
+    if (error instanceof DOMException && error.name === "QuotaExceededError") {
+      void import("sonner").then(({ toast }) => {
+        toast.error("Bộ nhớ trên thiết bị này đã đầy. Dữ liệu chưa được lưu.", {
+          description: "Hãy xóa bớt board hoặc ảnh đã tải lên để giải phóng dung lượng, sau đó thử lại.",
+          duration: 8000,
+        });
+      });
+      return false;
+    }
+
+    throw error;
   }
 }
 
