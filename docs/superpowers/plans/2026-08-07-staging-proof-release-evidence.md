@@ -276,7 +276,7 @@ git diff -- guidelines/CURRENT_PROJECT_STATUS.md guidelines/SOFT_LAUNCH_CHECKLIS
 
 Expected: only the plan and evidence documentation are modified; no runtime, workflow, test-harness, dependency, lockfile, or generated artifact changes remain.
 
-- [ ] **Step 3: Commit the verified documentation**
+- [x] **Step 3: Commit the verified documentation**
 
 ```powershell
 git add -- guidelines/CURRENT_PROJECT_STATUS.md guidelines/SOFT_LAUNCH_CHECKLIST.md docs/superpowers/plans/2026-08-07-staging-proof-release-evidence.md
@@ -285,7 +285,7 @@ git commit -m "docs: record staging release proof evidence"
 
 Expected: one doc-only commit.
 
-- [ ] **Step 4: Push and open one draft PR**
+- [x] **Step 4: Push and open one draft PR**
 
 ```powershell
 git push -u origin codex/staging-proof-release-evidence
@@ -294,7 +294,7 @@ gh pr create --draft --repo anhnhat432/Vision-Board-Web-Platform --base main --h
 
 Expected: branch push succeeds and GitHub returns one draft PR URL. Do not merge it in this task.
 
-- [ ] **Step 5: Watch PR checks and report final evidence**
+- [x] **Step 5: Watch PR checks and report final evidence**
 
 ```powershell
 gh pr checks codex/staging-proof-release-evidence --repo anhnhat432/Vision-Board-Web-Platform --watch
