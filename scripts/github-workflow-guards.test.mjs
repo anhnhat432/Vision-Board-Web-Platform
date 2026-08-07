@@ -17,6 +17,16 @@ describe("GitHub workflow safety guards", () => {
     expect(workflow).toContain("npm run test:e2e:email-verification");
   });
 
+  it("dismisses a first-run screen guide through its accessible CTA before billing assertions", () => {
+    const harness = readFileSync(path.resolve("e2e", "email-verification.spec.ts"), "utf8");
+
+    expect(harness).toContain("dismissFirstRunScreenGuide");
+    expect(harness).toContain('getByRole("button", { name: "Tôi đã hiểu" })');
+    expect(harness).toContain("await expect(guideDialog).toBeHidden");
+    expect(harness).not.toContain("addInitScript");
+    expect(harness).not.toContain("localStorage.setItem");
+  });
+
   it("keeps account deletion staging smoke destructive opt-in and disposable", () => {
     const workflow = readWorkflow("account-delete-e2e-staging.yml");
     const harness = readFileSync(path.resolve("e2e", "account-delete.spec.ts"), "utf8");

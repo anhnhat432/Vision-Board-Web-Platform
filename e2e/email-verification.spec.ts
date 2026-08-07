@@ -35,6 +35,19 @@ async function signupDisposableAccount(page: Page) {
   }
 }
 
+async function dismissFirstRunScreenGuide(page: Page) {
+  const guideDialog = page
+    .getByRole("dialog")
+    .filter({ has: page.getByRole("button", { name: "Tôi đã hiểu" }) })
+    .first();
+
+  await guideDialog.waitFor({ state: "visible", timeout: 2_000 }).catch(() => undefined);
+  if (!(await guideDialog.isVisible().catch(() => false))) return;
+
+  await guideDialog.getByRole("button", { name: "Tôi đã hiểu" }).click();
+  await expect(guideDialog).toBeHidden({ timeout: 5_000 });
+}
+
 test.describe("staging email verification", () => {
   test.skip(
     !BASE_URL || !ALLOW_CREATE,
@@ -51,6 +64,7 @@ test.describe("staging email verification", () => {
 
   test("signs up a disposable user and keeps paid checkout available while email is unverified", async ({ page }) => {
     await signupDisposableAccount(page);
+    await dismissFirstRunScreenGuide(page);
 
     await expect(page.getByTestId("email-verification-banner")).toBeVisible({ timeout: 20_000 });
     await expect(page.getByTestId("email-verification-banner")).toContainText(EMAIL);
