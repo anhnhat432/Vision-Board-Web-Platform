@@ -19,7 +19,7 @@ import {
   verifyBeforeUpdateEmail,
 } from "firebase/auth";
 
-const FIREBASE_TOKEN_STORAGE_KEY = "firebase_id_token";
+import { clearLegacyFirebaseToken } from "./legacyFirebaseToken";
 
 type FirebaseConfig = {
   apiKey: string;
@@ -53,6 +53,8 @@ let firebaseApp: FirebaseApp | null = null;
 let firebaseAuth: Auth | null = null;
 
 function getFirebaseBundle(): { app: FirebaseApp; auth: Auth } | null {
+  clearLegacyFirebaseToken();
+
   if (firebaseApp && firebaseAuth) {
     return { app: firebaseApp, auth: firebaseAuth };
   }
@@ -76,44 +78,9 @@ export function getFirebaseAuth(): Auth | null {
   return getFirebaseBundle()?.auth ?? null;
 }
 
-export function getStoredFirebaseToken(): string | null {
-  if (typeof window === "undefined") return null;
-  try {
-    return localStorage.getItem(FIREBASE_TOKEN_STORAGE_KEY);
-  } catch {
-    return null;
-  }
-}
-
-function setStoredFirebaseToken(token: string): void {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.setItem(FIREBASE_TOKEN_STORAGE_KEY, token);
-  } catch {
-    // ignore storage errors
-  }
-}
-
-function clearStoredFirebaseToken(): void {
-  if (typeof window === "undefined") return;
-  try {
-    localStorage.removeItem(FIREBASE_TOKEN_STORAGE_KEY);
-  } catch {
-    // ignore storage errors
-  }
-}
-
-async function persistCurrentUserToken(user: User): Promise<string> {
-  const token = await user.getIdToken();
-  setStoredFirebaseToken(token);
-  return token;
-}
-
 export async function getFirebaseToken(forceRefresh = false): Promise<string | null> {
   const auth = getFirebaseAuth();
-  if (!auth) {
-    return getStoredFirebaseToken();
-  }
+  if (!auth) return null;
 
   // Ngay sau khi tải trang, Firebase khôi phục phiên bất đồng bộ và currentUser
   // tạm thời null. Chờ khôi phục xong để tránh gửi request thiếu token (401 oan)
@@ -126,19 +93,13 @@ export async function getFirebaseToken(forceRefresh = false): Promise<string | n
     }
   }
 
-  if (!auth.currentUser) {
-    // Không xóa token đã lưu ở đây: việc dọn token thuộc luồng đăng xuất
-    // (subscribeAuthState). Trả token đã lưu làm fallback nếu còn.
-    return getStoredFirebaseToken();
-  }
+  if (!auth.currentUser) return null;
 
   try {
-    const token = await auth.currentUser.getIdToken(forceRefresh);
-    setStoredFirebaseToken(token);
-    return token;
+    return await auth.currentUser.getIdToken(forceRefresh);
   } catch (error) {
     console.error("Failed to read Firebase token.", error);
-    return getStoredFirebaseToken();
+    return null;
   }
 }
 
@@ -147,18 +108,14 @@ export async function loginWithGoogle(): Promise<UserCredential | null> {
   if (!auth) return null;
 
   const provider = new GoogleAuthProvider();
-  const credential = await signInWithPopup(auth, provider);
-  await persistCurrentUserToken(credential.user);
-  return credential;
+  return signInWithPopup(auth, provider);
 }
 
 export async function loginWithEmail(email: string, password: string): Promise<UserCredential | null> {
   const auth = getFirebaseAuth();
   if (!auth) return null;
 
-  const credential = await signInWithEmailAndPassword(auth, email, password);
-  await persistCurrentUserToken(credential.user);
-  return credential;
+  return signInWithEmailAndPassword(auth, email, password);
 }
 
 export async function registerWithEmail(email: string, password: string): Promise<UserCredential | null> {
@@ -166,7 +123,6 @@ export async function registerWithEmail(email: string, password: string): Promis
   if (!auth) return null;
 
   const credential = await createUserWithEmailAndPassword(auth, email, password);
-  await persistCurrentUserToken(credential.user);
   if (!credential.user.emailVerified) {
     try {
       await firebaseSendEmailVerification(credential.user);
@@ -179,14 +135,12 @@ export async function registerWithEmail(email: string, password: string): Promis
 }
 
 export async function logoutFirebase(): Promise<void> {
+  clearLegacyFirebaseToken();
   const auth = getFirebaseAuth();
-  if (!auth) {
-    clearStoredFirebaseToken();
-    return;
-  }
+  if (!auth) return;
 
   await signOut(auth);
-  clearStoredFirebaseToken();
+  clearLegacyFirebaseToken();
 }
 
 export async function resetPassword(email: string): Promise<void> {
@@ -218,12 +172,12 @@ export async function reloadCurrentUser(): Promise<User | null> {
   const user = auth?.currentUser ?? null;
   if (!user) return null;
   await user.reload();
-  const token = await user.getIdToken(true);
-  setStoredFirebaseToken(token);
+  await user.getIdToken(true);
   return user;
 }
 
 export function subscribeAuthState(callback: (user: User | null) => void): () => void {
+  clearLegacyFirebaseToken();
   const auth = getFirebaseAuth();
   if (!auth) {
     callback(null);
@@ -231,19 +185,12 @@ export function subscribeAuthState(callback: (user: User | null) => void): () =>
   }
 
   return onAuthStateChanged(auth, (user) => {
-    if (!user) {
-      clearStoredFirebaseToken();
-      callback(null);
-      return;
-    }
-
-    void persistCurrentUserToken(user).finally(() => {
-      callback(user);
-    });
+    callback(user);
   });
 }
 
 export function subscribeIdToken(callback: (user: User | null) => void): () => void {
+  clearLegacyFirebaseToken();
   const auth = getFirebaseAuth();
   if (!auth) {
     callback(null);
@@ -251,14 +198,6 @@ export function subscribeIdToken(callback: (user: User | null) => void): () => v
   }
 
   return onIdTokenChanged(auth, (user) => {
-    if (!user) {
-      clearStoredFirebaseToken();
-      callback(null);
-      return;
-    }
-
-    void persistCurrentUserToken(user).finally(() => {
-      callback(user);
-    });
+    callback(user);
   });
 }
