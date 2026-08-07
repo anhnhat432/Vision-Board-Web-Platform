@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useNetworkStatus } from "@/app/hooks/useNetworkStatus";
 import { isRealMode, shouldEnable12WeekMutationSync, shouldEnable12WeekPullSync } from "@/app/utils/app-mode";
+import { LOCAL_DATA_FILE_IMPORT_STATE_CHANGED_EVENT_NAME } from "@/app/utils/local-data-import";
 import { getUserData, saveUserData } from "@/app/utils/storage";
 import { USER_DATA_UPDATED_EVENT_NAME } from "@/app/utils/storage-constants";
 import type { UserData } from "@/app/utils/storage-types";
@@ -14,6 +15,7 @@ import {
   summarizeMutationQueueStore,
   writeMutationQueueStore,
 } from "../persistence/mutationQueue";
+import { getPendingLocalDataImport } from "../persistence/localDataImportTransaction";
 import { type MutationQueueSyncResult, sendPending12WeekMutations } from "../persistence/mutationQueueSender";
 import { clearPullCursor } from "../persistence/pullCursorStore";
 import { applyPulledWorkspaceToUserData } from "../persistence/pulledWorkspaceApply";
@@ -25,6 +27,8 @@ export interface FirstLoginRestoreSummary {
   checkInCount: number;
   weeklyReviewCount: number;
 }
+
+export type AutoCloudSyncPauseReason = "local_import_pending";
 
 const DEFAULT_INTERVAL_MS = 5 * 60_000;
 const DEFAULT_MIN_SYNC_INTERVAL_MS = 5_000;
@@ -41,6 +45,7 @@ export interface AutoCloudSyncState {
   pendingCount: number;
   online: boolean;
   conflictPending: boolean;
+  pauseReason?: AutoCloudSyncPauseReason | null;
   firstLoginRestoreSummary: FirstLoginRestoreSummary | null;
   triggerSyncNow: () => Promise<TwelveWeekManualCloudSyncResult | null>;
   triggerDrainOnly: () => Promise<MutationQueueSyncResult | null>;
@@ -63,6 +68,10 @@ interface DrainPendingMutationsOptions {
 function getQueuePendingCount(ownerUid: string | null): number {
   if (!ownerUid) return 0;
   return summarizeMutationQueueStore(readMutationQueueStore(ownerUid)).pendingCount;
+}
+
+function hasPendingLocalImport(ownerUid: string | null): boolean {
+  return Boolean(ownerUid && getPendingLocalDataImport(ownerUid));
 }
 
 function isBlockingResult(result: TwelveWeekManualCloudSyncResult | null): boolean {
@@ -238,6 +247,10 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
   } = useTwelveWeekManualCloudSync({ enabled: fullSyncEnabled });
   const ownerUid = user?.uid ?? null;
   const userProfileReady = Boolean(userProfile && !userProfileLoading);
+  const [pausedImportOwnerUid, setPausedImportOwnerUid] = useState<string | null>(() =>
+    hasPendingLocalImport(ownerUid) ? ownerUid : null,
+  );
+  const localImportPaused = Boolean(ownerUid && pausedImportOwnerUid === ownerUid);
   const [documentVisible, setDocumentVisible] = useState(isDocumentVisible);
   const [lastResult, setLastResult] = useState<TwelveWeekManualCloudSyncResult | null>(null);
   const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null);
@@ -270,6 +283,19 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
   const refreshPendingCount = useCallback(() => {
     setPendingCount(drainSyncEnabled ? getQueuePendingCount(ownerUid) : 0);
   }, [drainSyncEnabled, ownerUid]);
+
+  const isImportPausedNow = useCallback(() => hasPendingLocalImport(ownerUid), [ownerUid]);
+
+  useEffect(() => {
+    const refresh = () => setPausedImportOwnerUid(hasPendingLocalImport(ownerUid) ? ownerUid : null);
+    refresh();
+    window.addEventListener(LOCAL_DATA_FILE_IMPORT_STATE_CHANGED_EVENT_NAME, refresh);
+    window.addEventListener("storage", refresh);
+    return () => {
+      window.removeEventListener(LOCAL_DATA_FILE_IMPORT_STATE_CHANGED_EVENT_NAME, refresh);
+      window.removeEventListener("storage", refresh);
+    };
+  }, [ownerUid]);
 
   const clearFirstLoginRestoreSummary = useCallback(() => {
     setFirstLoginRestoreSummary(null);
@@ -315,6 +341,12 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
 
   const drainPendingMutations = useCallback(
     async (drainOptions: DrainPendingMutationsOptions = {}) => {
+      if (isImportPausedNow()) {
+        setPausedImportOwnerUid(ownerUid);
+        refreshPendingCount();
+        return null;
+      }
+
       if (!drainSyncBaseReady || !isDocumentVisible() || !ownerUid) {
         refreshPendingCount();
         return null;
@@ -387,6 +419,7 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
     [
       apiConfigured,
       drainSyncBaseReady,
+      isImportPausedNow,
       minSyncIntervalMs,
       mutationSyncEnabled,
       networkStatusInfo.isOnline,
@@ -398,6 +431,12 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
   );
 
   const triggerSyncNow = useCallback(async () => {
+    if (isImportPausedNow()) {
+      setPausedImportOwnerUid(ownerUid);
+      refreshPendingCount();
+      return null;
+    }
+
     if (fullSyncEnabled && ownerUid && userProfileReady && !networkStatusInfo.isOnline) {
       const result: TwelveWeekManualCloudSyncResult = {
         status: "skipped",
@@ -468,6 +507,7 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
   }, [
     fullSyncBaseReady,
     fullSyncEnabled,
+    isImportPausedNow,
     minSyncIntervalMs,
     networkStatusInfo.isOnline,
     ownerUid,
@@ -483,19 +523,19 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
   triggerDrainOnlyRef.current = triggerDrainOnly;
 
   const effectiveLastResult = manualSyncLastResult ?? lastResult;
-  const conflictPending = isBlockingResult(effectiveLastResult);
+  const conflictPending = !localImportPaused && isBlockingResult(effectiveLastResult);
 
   const resolveConflictKeepLocal = useCallback(async () => {
-    if (!ownerUid) return;
+    if (isImportPausedNow() || !ownerUid) return;
 
     markConflictMutationsForLocalResolution(ownerUid, effectiveLastResult);
     refreshPendingCount();
     lastDrainStartedAtRef.current = null;
     await drainPendingMutations({ bypassRateLimit: true });
-  }, [drainPendingMutations, effectiveLastResult, ownerUid, refreshPendingCount]);
+  }, [drainPendingMutations, effectiveLastResult, isImportPausedNow, ownerUid, refreshPendingCount]);
 
   const resolveConflictUseCloud = useCallback(async () => {
-    if (!ownerUid) return;
+    if (isImportPausedNow() || !ownerUid) return;
     const pullResponse = effectiveLastResult?.pullResponse;
     if (!pullResponse?.workspace) return;
 
@@ -509,7 +549,7 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
     refreshPendingCount();
     lastSyncStartedAtRef.current = null;
     await triggerSyncNow();
-  }, [effectiveLastResult, ownerUid, refreshPendingCount, triggerSyncNow]);
+  }, [effectiveLastResult, isImportPausedNow, ownerUid, refreshPendingCount, triggerSyncNow]);
 
   useEffect(() => {
     const previousUserUid = previousUserUidRef.current;
@@ -517,6 +557,12 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
     if (!fullSyncEnabled || !ownerUid) {
       previousUserUidRef.current = ownerUid;
       triggeredUserUidRef.current = null;
+      return;
+    }
+
+    if (localImportPaused) {
+      previousUserUidRef.current = ownerUid;
+      triggeredUserUidRef.current = ownerUid;
       return;
     }
 
@@ -532,10 +578,10 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
 
     triggeredUserUidRef.current = ownerUid;
     void triggerSyncNow();
-  }, [fullSyncEnabled, ownerUid, triggerSyncNow, userProfileReady]);
+  }, [fullSyncEnabled, localImportPaused, ownerUid, triggerSyncNow, userProfileReady]);
 
   useEffect(() => {
-    if (!fullSyncBaseReady || !documentVisible || !isDocumentVisible()) return;
+    if (localImportPaused || !fullSyncBaseReady || !documentVisible || !isDocumentVisible()) return;
 
     const intervalId = window.setInterval(() => {
       void triggerSyncNow();
@@ -544,10 +590,10 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
     return () => {
       window.clearInterval(intervalId);
     };
-  }, [documentVisible, fullSyncBaseReady, intervalMs, triggerSyncNow]);
+  }, [documentVisible, fullSyncBaseReady, intervalMs, localImportPaused, triggerSyncNow]);
 
   useEffect(() => {
-    if (!fullSyncEnabled || !ownerUid || !userProfileReady || !networkStatusInfo.isOnline) return;
+    if (localImportPaused || !fullSyncEnabled || !ownerUid || !userProfileReady || !networkStatusInfo.isOnline) return;
 
     const clearVisibilityTimer = () => {
       if (visibilityDebounceTimerRef.current !== null) {
@@ -577,10 +623,10 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       clearVisibilityTimer();
     };
-  }, [fullSyncEnabled, networkStatusInfo.isOnline, ownerUid, userProfileReady]);
+  }, [fullSyncEnabled, localImportPaused, networkStatusInfo.isOnline, ownerUid, userProfileReady]);
 
   useEffect(() => {
-    if (!drainSyncReady || !ownerUid) return;
+    if (localImportPaused || !drainSyncReady || !ownerUid) return;
 
     const clearMutationDebounceTimer = () => {
       if (mutationDebounceTimerRef.current !== null) {
@@ -605,7 +651,20 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
       // R4.1 (unmount), R4.2 (đổi ownerUid): hủy trailing flush timer còn chờ.
       clearTrailingFlushTimer();
     };
-  }, [clearTrailingFlushTimer, drainSyncReady, mutationDebounceMs, ownerUid, triggerDrainOnly]);
+  }, [clearTrailingFlushTimer, drainSyncReady, localImportPaused, mutationDebounceMs, ownerUid, triggerDrainOnly]);
+
+  useEffect(() => {
+    if (!localImportPaused) return;
+    clearTrailingFlushTimer();
+    if (mutationDebounceTimerRef.current !== null) {
+      window.clearTimeout(mutationDebounceTimerRef.current);
+      mutationDebounceTimerRef.current = null;
+    }
+    if (visibilityDebounceTimerRef.current !== null) {
+      window.clearTimeout(visibilityDebounceTimerRef.current);
+      visibilityDebounceTimerRef.current = null;
+    }
+  }, [clearTrailingFlushTimer, localImportPaused]);
 
   return useMemo(
     () => ({
@@ -616,6 +675,7 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
       pendingCount,
       online: networkStatusInfo.isOnline,
       conflictPending,
+      pauseReason: localImportPaused ? "local_import_pending" : null,
       firstLoginRestoreSummary,
       triggerSyncNow,
       triggerDrainOnly,
@@ -631,6 +691,7 @@ export function useAutoCloudSync(options: UseAutoCloudSyncOptions = {}): AutoClo
       drainLoading,
       firstLoginRestoreSummary,
       lastSyncedAt,
+      localImportPaused,
       manualSyncLoading,
       networkStatusInfo.isOnline,
       pendingCount,
