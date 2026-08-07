@@ -1232,16 +1232,44 @@ async function classifyVisiblePreviousCommitments(page) {
   const step = page.locator('[data-testid="weekly-review-step-commitments"]:visible').first();
   if (!(await step.isVisible().catch(() => false))) return 0;
 
-  const keptButtons = step.getByRole("button", { name: "Đã giữ", exact: true });
-  const buttonCount = await keptButtons.count();
+  const buttonCount = await step.getByRole("button", { name: "Đã giữ", exact: true }).count();
   let classifiedCount = 0;
 
-  for (let index = 0; index < buttonCount; index += 1) {
-    const button = keptButtons.nth(index);
-    const alreadyPressed = (await button.getAttribute("aria-pressed")) === "true";
-    if (alreadyPressed || !(await button.isEnabled())) continue;
-    await button.click();
+  for (let attempt = 0; attempt < buttonCount; attempt += 1) {
+    const clickResult = await step.evaluate((container) => {
+      const isPendingCommitment = (button) =>
+        button.textContent?.replace(/\s+/g, " ").trim() === "Đã giữ" &&
+        !button.disabled &&
+        button.getAttribute("aria-pressed") !== "true";
+      const pendingButtons = Array.from(container.querySelectorAll("button")).filter(isPendingCommitment);
+      const pendingButton = pendingButtons[0];
+      if (!pendingButton) return { clicked: false, pendingCount: 0 };
+
+      pendingButton.click();
+      return { clicked: true, pendingCount: pendingButtons.length };
+    });
+
+    if (!clickResult.clicked) break;
     classifiedCount += 1;
+
+    await waitForCondition(
+      `weekly review commitment classification ${classifiedCount}`,
+      async () => {
+        const state = await step.evaluate((container) => {
+          const pendingCount = Array.from(container.querySelectorAll("button")).filter(
+            (button) =>
+              button.textContent?.replace(/\s+/g, " ").trim() === "Đã giữ" &&
+              !button.disabled &&
+              button.getAttribute("aria-pressed") !== "true",
+          ).length;
+          return {
+            done: container.getAttribute("data-done") === "true",
+            pendingCount,
+          };
+        });
+        return state.done || state.pendingCount < clickResult.pendingCount;
+      },
+    );
   }
 
   await page

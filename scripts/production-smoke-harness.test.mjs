@@ -60,6 +60,35 @@ describe("production smoke harness guards", () => {
     expect(submitIndex).toBeGreaterThan(classifyIndex);
   });
 
+  it("re-resolves weekly review commitments before bounded atomic DOM clicks", () => {
+    const helperStart = smokeScript.indexOf("async function classifyVisiblePreviousCommitments(page)");
+    const helperEnd = smokeScript.indexOf("\nasync function readWeeklyReviewSurface(page)", helperStart);
+    const helperSource = smokeScript.slice(helperStart, helperEnd);
+
+    expect(helperStart).toBeGreaterThan(0);
+    expect(helperEnd).toBeGreaterThan(helperStart);
+    expect(helperSource).toContain(
+      'const buttonCount = await step.getByRole("button", { name: "Đã giữ", exact: true }).count();',
+    );
+    expect(helperSource).toContain("for (let attempt = 0; attempt < buttonCount; attempt += 1)");
+    expect(helperSource).toContain("const clickResult = await step.evaluate((container) => {");
+    expect(helperSource).toContain('button.getAttribute("aria-pressed") !== "true"');
+
+    const atomicClickStart = helperSource.indexOf("const clickResult = await step.evaluate");
+    const atomicClickEnd = helperSource.indexOf("if (!clickResult.clicked)", atomicClickStart);
+    const atomicClickSource = helperSource.slice(atomicClickStart, atomicClickEnd);
+    expect(atomicClickSource).toContain("pendingButton.click();");
+
+    expect(helperSource).toContain("await waitForCondition(");
+    expect(helperSource).toContain("const state = await step.evaluate((container) => {");
+    expect(helperSource).toContain("state.done || state.pendingCount < clickResult.pendingCount");
+    expect(helperSource).toContain(
+      '[data-testid="weekly-review-step-commitments"][data-done="true"]:visible',
+    );
+    expect(helperSource).not.toContain("keptButtons.nth(index)");
+    expect(helperSource).not.toContain("await button.click()");
+  });
+
   it("waits for visible weekly review UI instead of a hidden score container", () => {
     expect(smokeScript).toContain('page.locator("#weekly-insights").waitFor');
     expect(smokeScript).toContain('page.locator("#weekly-next-commitments").waitFor');
