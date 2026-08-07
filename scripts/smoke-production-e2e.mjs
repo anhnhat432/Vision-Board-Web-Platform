@@ -1984,9 +1984,11 @@ async function exerciseTwelveWeekSaveReloadAndSync(page, apiEvents, getLatestApi
   if (classifiedCommitments > 0) {
     log(`Classified ${classifiedCommitments} previous weekly commitment(s) before submit`);
   }
-  await page.locator("#weekly-insights").fill(WEEKLY_REVIEW_OUTPUT);
-  await page.locator("#weekly-next-commitments").fill(WEEKLY_REVIEW_PRIORITY);
-  await page.locator("#weekly-next-commitments").press("Enter");
+  const weeklyInsightsInput = page.locator("#weekly-insights:visible").first();
+  const weeklyNextCommitmentsInput = page.locator("#weekly-next-commitments:visible").first();
+  await weeklyInsightsInput.fill(WEEKLY_REVIEW_OUTPUT);
+  await weeklyNextCommitmentsInput.fill(WEEKLY_REVIEW_PRIORITY);
+  await weeklyNextCommitmentsInput.press("Enter");
   await clickButtonByNormalizedText(page, "chot review tuan nay");
   await tryClickButtonByNormalizedText(page, "van luu som");
   await waitForGoalSnapshot(page, "weekly review in local storage", (snapshot) => {
