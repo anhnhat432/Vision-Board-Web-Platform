@@ -22,6 +22,7 @@ const {
   setMetricIdForGoal,
   setRemoteTaskIdForGoal,
   bulkSyncPlan,
+  shouldEnableMutationSync,
 } = vi.hoisted(() => ({
   createMetric: vi.fn(),
   createPlan: vi.fn(),
@@ -46,6 +47,7 @@ const {
     status: 404,
     message: "Endpoint not found",
   }),
+  shouldEnableMutationSync: vi.fn(() => false),
 }));
 
 vi.mock("@/services/metricService", () => ({
@@ -93,7 +95,7 @@ vi.mock("@/app/utils/app-mode", () => ({
   isRealMode: () => true,
   shouldSeedDemoData: () => false,
   shouldShowBillingDebugUi: () => false,
-  shouldEnable12WeekMutationSync: () => true,
+  shouldEnable12WeekMutationSync: shouldEnableMutationSync,
   shouldEnable12WeekPullSync: () => true,
   shouldEnable12WeekImportDryRun: () => true,
   shouldEnable12WeekCloudImport: () => true,
@@ -200,6 +202,9 @@ function buildTaskSystem(completed = false): TwelveWeekSystem {
 
 describe("usePlanExecutionSync.syncDailyCheckIn", () => {
   beforeEach(() => {
+    localStorage.clear();
+    shouldEnableMutationSync.mockReset();
+    shouldEnableMutationSync.mockReturnValue(false);
     createMetric.mockReset();
     createPlan.mockReset();
     getPlan.mockReset();
@@ -245,6 +250,54 @@ describe("usePlanExecutionSync.syncDailyCheckIn", () => {
     updateTask.mockResolvedValue(buildTask());
     updateWeek.mockResolvedValue(buildPlanDetails().weeks[0]);
     updateWeekReview.mockResolvedValue(buildPlanDetails().weeks[0]);
+  });
+
+  it("does not enqueue or run legacy task sync when mutation sync is enabled", async () => {
+    shouldEnableMutationSync.mockReturnValue(true);
+    const { result } = renderHook(() =>
+      usePlanExecutionSync({ goalId: "goal_1", system: buildTaskSystem(false) }),
+    );
+
+    let synced = false;
+    await act(async () => {
+      synced = await result.current.actions.syncTaskToggle("local_task_1", true);
+    });
+
+    expect(synced).toBe(true);
+    expect(result.current.queueStatus.queueSummary.totalCount).toBe(0);
+    expect(getPlan).not.toHaveBeenCalled();
+    expect(getPlans).not.toHaveBeenCalled();
+    expect(toggleTask).not.toHaveBeenCalled();
+    expect(updateTask).not.toHaveBeenCalled();
+  });
+
+  it("does not run legacy check-in or review sync when mutation sync is enabled", async () => {
+    shouldEnableMutationSync.mockReturnValue(true);
+    getMetrics.mockResolvedValue([]);
+    const { result } = renderHook(() => usePlanExecutionSync({ goalId: "goal_1", system: buildSystem() }));
+
+    let checkInSynced = false;
+    let reviewSynced = false;
+    await act(async () => {
+      checkInSynced = await result.current.actions.syncDailyCheckIn({
+        weekNumber: 1,
+        date: "2026-08-07",
+        didWorkToday: true,
+      });
+      reviewSynced = await result.current.actions.syncWeeklyReview({
+        weekNumber: 1,
+        executionScore: 80,
+      });
+    });
+
+    expect(checkInSynced).toBe(true);
+    expect(reviewSynced).toBe(true);
+    expect(result.current.queueStatus.queueSummary.totalCount).toBe(0);
+    expect(getPlan).not.toHaveBeenCalled();
+    expect(getMetrics).not.toHaveBeenCalled();
+    expect(logMetric).not.toHaveBeenCalled();
+    expect(updateMetricLog).not.toHaveBeenCalled();
+    expect(updateWeekReview).not.toHaveBeenCalled();
   });
 
   it("creates a metric log on first daily check-in", async () => {

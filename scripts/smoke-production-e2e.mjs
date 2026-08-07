@@ -557,27 +557,19 @@ function markRateLimitHandled(event, label) {
   if (event) event.handledByRateLimitRetry ??= label;
 }
 
-function isExpectedBackgroundRateLimit(event) {
-  if (event.status !== 429 || !String(event.responseBody ?? "").includes('"errorCode":"rate_limited"')) {
-    return false;
-  }
+function normalizeApiUrl(value) {
+  const url = new URL(value);
+  return `${url.origin}${url.pathname}${url.search}`;
+}
 
-  try {
-    const url = new URL(event.url);
-    const method = event.method.toUpperCase();
-    const pathname = url.pathname;
-
-    return (
-      (method === "POST" && pathname === "/api/auth/profile") ||
-      (method === "GET" && pathname === "/api/goals") ||
-      (method === "GET" && pathname === "/api/billing/entitlement") ||
-      (method === "GET" && pathname === "/api/plans") ||
-      (method === "GET" && /^\/api\/plans\/[^/]+$/.test(pathname)) ||
-      (method === "GET" && pathname === "/api/sync/12-week/pull")
-    );
-  } catch {
-    return false;
-  }
+function hasLaterSuccessfulRetry(event, apiEvents) {
+  return apiEvents.some(
+    (candidate) =>
+      candidate.at > event.at &&
+      candidate.method === event.method &&
+      normalizeApiUrl(candidate.url) === normalizeApiUrl(event.url) &&
+      candidate.status >= 200 && candidate.status < 300,
+  );
 }
 
 function isHandledBillingRateLimitPageError(message, apiEvents) {
@@ -2227,7 +2219,7 @@ async function run() {
 
     const severeApiFailures = apiEvents.filter(
       (event) =>
-        (event.status === 429 && !event.handledByRateLimitRetry && !isExpectedBackgroundRateLimit(event)) ||
+        (event.status === 429 && !event.handledByRateLimitRetry && !hasLaterSuccessfulRetry(event, apiEvents)) ||
         event.status >= 500,
     );
     if (severeApiFailures.length > 0) {

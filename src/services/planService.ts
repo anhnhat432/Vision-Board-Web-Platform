@@ -1,4 +1,5 @@
-import { delete as deleteRequest, get, patch, post } from "@/lib/api/apiClient";
+import { delete as deleteRequest, patch, post } from "@/lib/api/apiClient";
+import { getPlanningResource } from "@/services/planningReadRequest";
 import type { BulkSyncRequest, BulkSyncResponse } from "@/types/bulkSync";
 import type { Plan, PlanDetails } from "@/types/plan";
 
@@ -22,11 +23,11 @@ export function createPlan(payload: CreatePlanPayload): Promise<Plan> {
 }
 
 export function getPlans(): Promise<Plan[]> {
-  return get<Plan[]>("/plans");
+  return getPlanningResource<Plan[]>("/plans");
 }
 
 export function getPlan(planId: string): Promise<PlanDetails> {
-  return get<PlanDetails>(`/plans/${planId}`);
+  return getPlanningResource<PlanDetails>(`/plans/${planId}`);
 }
 
 export function getPlanById(planId: string): Promise<PlanDetails> {

@@ -644,6 +644,36 @@ function sortPlansByRecency(plans: Plan[]): Plan[] {
   });
 }
 
+const PLAN_DETAIL_HYDRATION_CONCURRENCY = 4;
+
+async function allSettledWithConcurrency<T, TResult>(
+  inputs: readonly T[],
+  concurrency: number,
+  worker: (input: T) => Promise<TResult>,
+): Promise<PromiseSettledResult<TResult>[]> {
+  const results = new Array<PromiseSettledResult<TResult>>(inputs.length);
+  let nextIndex = 0;
+
+  async function runWorker(): Promise<void> {
+    while (nextIndex < inputs.length) {
+      const index = nextIndex;
+      nextIndex += 1;
+      const input = inputs[index];
+      if (input === undefined) continue;
+
+      try {
+        results[index] = { status: "fulfilled", value: await worker(input) };
+      } catch (reason) {
+        results[index] = { status: "rejected", reason };
+      }
+    }
+  }
+
+  const workerCount = Math.min(Math.max(1, concurrency), inputs.length);
+  await Promise.all(Array.from({ length: workerCount }, () => runWorker()));
+  return results;
+}
+
 export async function hydrateTwelveWeekPlansFromBackend(): Promise<BackendPlanHydrationResult> {
   if (typeof window === "undefined") {
     return createHydrationResult({
@@ -677,7 +707,11 @@ export async function hydrateTwelveWeekPlansFromBackend(): Promise<BackendPlanHy
   }
 
   const plansByRecency = sortPlansByRecency(plans);
-  const detailsPromise = Promise.allSettled(plansByRecency.map((plan) => getPlan(plan.id)));
+  const detailsPromise = allSettledWithConcurrency(
+    plansByRecency,
+    PLAN_DETAIL_HYDRATION_CONCURRENCY,
+    (plan) => getPlan(plan.id),
+  );
   const [apiGoals, detailsResults] = await Promise.all([apiGoalsPromise, detailsPromise]);
   const data = getUserData();
   const knownGoalIds = new Set(data.goals.map((goal) => goal.id));
