@@ -25,6 +25,7 @@ const AUTH_OWNER_STORAGE_KEY = "visionboard_user_data:auth_owner_uid";
 const MANUAL_SYNC_MIN_INTERVAL_MS = 5_000;
 const lastObservedCloudPullAt = new WeakMap<Page, number>();
 const observedApiBaseUrl = new WeakMap<Page, string>();
+const observedAuthorizationHeader = new WeakMap<Page, string>();
 
 interface LwwProofIdentity {
   goalId: string;
@@ -150,13 +151,22 @@ async function expectTaskConvergence(
   expect({ stateA, stateB }, JSON.stringify(diagnostics)).toEqual({ stateA: expected, stateB: expected });
 }
 
-function rememberCloudPull(page: Page, response: Response) {
+async function rememberCloudPull(page: Page, response: Response) {
   lastObservedCloudPullAt.set(page, Date.now());
   const url = new URL(response.url());
   observedApiBaseUrl.set(
     page,
     `${url.origin}${url.pathname.replace(/\/sync\/12-week\/pull$/, "")}`,
   );
+
+  const authorizationHeader = (
+    await response.request().headerValue("authorization")
+  )?.trim();
+  if (authorizationHeader && /^Bearer\s+\S+$/i.test(authorizationHeader)) {
+    observedAuthorizationHeader.set(page, authorizationHeader);
+  } else {
+    observedAuthorizationHeader.delete(page);
+  }
 }
 
 async function waitForManualSyncWindow(page: Page) {
@@ -204,7 +214,7 @@ async function loginPage(page: Page, email: string, password: string) {
     initialPullResponse.ok(),
     `Initial 12-week pull failed: ${JSON.stringify(pullDiagnostics)}`,
   ).toBe(true);
-  rememberCloudPull(page, initialPullResponse);
+  await rememberCloudPull(page, initialPullResponse);
   await expect(page).toHaveURL(/\/settings(?:[?#]|$)/, { timeout: 30_000 });
   await expect(
     page.getByRole("button", {
@@ -441,8 +451,15 @@ async function importLwwBaseline(
   if (!apiBaseUrl) {
     throw new Error("LWW bootstrap could not resolve the deployed backend API base URL.");
   }
+  const authorizationHeader = observedAuthorizationHeader.get(page);
   const diagnostics = await page.evaluate(
-    async ({ apiBaseUrl: backendApiBaseUrl, importId, importPayload, proofIds }) => {
+    async ({
+      apiBaseUrl: backendApiBaseUrl,
+      authorizationHeader,
+      importId,
+      importPayload,
+      proofIds,
+    }) => {
       type EntityCounts = Partial<
         Record<"goals" | "plans" | "weeks" | "tasks" | "leadMetrics", number>
       >;
@@ -462,9 +479,7 @@ async function importLwwBaseline(
           return {} as Envelope<T>;
         }
       };
-      const token = localStorage.getItem("firebase_id_token")?.trim();
-
-      if (!token) {
+      if (!authorizationHeader) {
         return {
           tokenPresent: false,
           importHttpStatus: 0,
@@ -482,7 +497,7 @@ async function importLwwBaseline(
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: authorizationHeader,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
@@ -524,6 +539,7 @@ async function importLwwBaseline(
     },
     {
       apiBaseUrl,
+      authorizationHeader,
       importId: seed.importId,
       importPayload: seed.importPayload,
       proofIds: {
@@ -574,7 +590,7 @@ async function reloadProofGoal(page: Page, seed: LwwProofGoal) {
     pullResponse.ok(),
     `Reload 12-week pull responded ${pullResponse.status()}`,
   ).toBe(true);
-  rememberCloudPull(page, pullResponse);
+  await rememberCloudPull(page, pullResponse);
   await waitForProofGoal(page, seed);
 }
 
@@ -1036,7 +1052,7 @@ async function triggerManualCloudSync(
     pullResponse.ok(),
     `12-week pull failed: ${JSON.stringify(pullDiagnostics)}`,
   ).toBe(true);
-  rememberCloudPull(page, pullResponse);
+  await rememberCloudPull(page, pullResponse);
   await expect(syncButton).toBeEnabled({ timeout: timeoutMs });
   await expect(page.getByTestId("settings-sync-last-result")).toBeVisible({
     timeout: timeoutMs,

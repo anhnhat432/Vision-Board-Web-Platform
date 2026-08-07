@@ -135,6 +135,17 @@ describe("GitHub workflow safety guards", () => {
     expect(harness).toContain("initialPullResponsePromise");
     expect(importBootstrap).not.toContain("triggerManualCloudSync(page)");
     expect(importBootstrap).toContain("observedApiBaseUrl.get(page)");
+    expect(harness).toContain("const observedAuthorizationHeader = new WeakMap<Page, string>();");
+    expect(harness).toContain('await response.request().headerValue("authorization")');
+    expect(harness).toContain("observedAuthorizationHeader.set(page, authorizationHeader)");
+    expect(harness).toContain("observedAuthorizationHeader.delete(page)");
+    expect(importBootstrap).toContain("observedAuthorizationHeader.get(page)");
+    expect(importBootstrap).toContain("Authorization: authorizationHeader");
+    expect(harness).toContain("await rememberCloudPull(page, initialPullResponse)");
+    expect(harness).toContain("await rememberCloudPull(page, pullResponse)");
+    expect(harness).not.toContain("firebase_id_token");
+    expect(harness).not.toContain("console.log(authorizationHeader)");
+    expect(harness).not.toContain("console.error(authorizationHeader)");
     expect(importBootstrap).toContain('`${backendApiBaseUrl}/sync/12-week/import`');
     expect(importBootstrap).toContain('response.path === "/api/sync/12-week/import"');
     expect(harness).toContain("createTwelveWeekImportPayload");
