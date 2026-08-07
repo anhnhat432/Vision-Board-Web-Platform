@@ -935,6 +935,18 @@ describe("RootLayout onboarding redirect", () => {
     });
   });
 
+  it("keeps the public billing plan reachable for signed-in users before onboarding", async () => {
+    setAuthContext({
+      user: { uid: "user_test", email: "test@example.com" },
+      userProfile: { id: "profile_test", email: "test@example.com" },
+    });
+    const { router } = renderAppShell("/billing/plan");
+
+    expect(await screen.findByTestId("billing-plan-page")).toBeInTheDocument();
+    expect(router.state.location.pathname).toBe("/billing/plan");
+    expect(screen.queryByTestId("onboarding-page")).not.toBeInTheDocument();
+  });
+
   it("does not show the local data migration prompt for fresh anonymous data", async () => {
     seedAnonymousData(createFreshUserData());
     setAuthContext({
