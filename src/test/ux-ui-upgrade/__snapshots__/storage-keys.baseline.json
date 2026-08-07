@@ -1,6 +1,6 @@
 {
   "generatedFrom": "production sources under src + src/app/utils/storage-constants.ts",
-  "keyCount": 90,
+  "keyCount": 91,
   "keys": [
     "assistant.action_audit_log",
     "assistant.chat.history",
@@ -36,7 +36,6 @@
     "feasibilityActiveGoal",
     "feasibilityBackupAnswers",
     "feasibilityBackupResult",
-    "firebase_id_token",
     "future_letter_",
     "last_reminder_date",
     "latest_12_week_goal_id",
@@ -80,6 +79,8 @@
     "visionboard_last_restore_access",
     "visionboard_local_data_import_backup:",
     "visionboard_local_data_migration_prompt_state",
+    "visionboard_local_file_import_pending:auth:",
+    "visionboard_local_file_import_recovery:",
     "visionboard_mam_pet_preferences_v1",
     "visionboard_mock_billing_account",
     "visionboard_mock_billing_session_",

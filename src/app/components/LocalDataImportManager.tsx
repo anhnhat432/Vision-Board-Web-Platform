@@ -276,7 +276,7 @@ export function LocalDataImportManager({
       />
 
       {pending ? (
-        <section className="basis-full rounded-lg border border-app-warm-border bg-app-warm-soft p-4 text-app-warm-strong">
+        <section className="basis-full rounded-lg border border-app-status-warning/30 bg-app-status-warning/10 p-4 text-app-status-warning">
           <div className="flex items-start gap-3">
             <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0" />
             <div className="min-w-0 flex-1">

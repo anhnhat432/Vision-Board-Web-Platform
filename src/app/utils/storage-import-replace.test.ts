@@ -12,13 +12,12 @@ function createGoal(completed: boolean, updatedAt: string): Goal {
     description: "Restore exactly",
     deadline: "2026-12-31",
     createdAt: "2026-08-01T00:00:00.000Z",
-    updatedAt,
     tasks: [
       {
         id: "task_import_replace",
         title: "Imported task",
         completed,
-        updatedAt,
+        lastModifiedAt: Date.parse(updatedAt),
       },
     ],
   };

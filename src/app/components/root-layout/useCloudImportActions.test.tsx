@@ -34,7 +34,7 @@ vi.mock("../../utils/local-data-migration", () => ({
 }));
 
 const candidate: LocalDataMigrationCandidate = {
-  data: { goals: [] } as UserData,
+  data: { goals: [] } as unknown as UserData,
   fingerprint: "candidate_fp",
   summary: {
     goalCount: 1,
