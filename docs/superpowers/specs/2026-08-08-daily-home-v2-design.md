@@ -161,7 +161,7 @@ Quote va goal-management content chuyen vao secondary region hien co.
 
 Component moi chiu trach nhiem duy nhat cho primary daily action:
 
-- Hien task title, goal title va contextual overdue badge neu task that su overdue.
+- Hien task title va goal title; overdue warning nam o weekly pulse vi Home primary chi lay task duoc len lich hom nay.
 - Hien dung mot semantic button `Danh dau xong`.
 - Accessible name bao gom task title.
 - Trong luc xu ly, button disabled/`aria-busy` de ngan double click.
@@ -219,6 +219,8 @@ Semantics cua Home:
 - Overdue va task tuan khong duoc fallback thanh task "hom nay". Chúng chi xuat hien nhu factual warning hoac workspace handoff.
 
 Today workspace co the tiep tuc queue contract rong hon hien tai, gom missed/completed-today/fallback tasks. Daily Home V2 khong doi contract do. Neu can extract helper, helper chi chia se raw date/week derivation; phai pure, khong doc/ghi storage va co focused unit tests.
+
+Home daily action derive tu local 12-week system trong `useSyncedUserData`, khong derive tu backend progress overlay. Backend overlay co the tiep tuc phuc vu broader analytics/context; cloud state chi tro thanh Home truth sau khi existing sync apply vao local storage. Dieu nay giu canonical local completion khong bi stale remote overlay ghi de.
 
 ## 8. Canonical completion flow
 
