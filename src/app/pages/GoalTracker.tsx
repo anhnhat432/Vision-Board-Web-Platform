@@ -21,6 +21,7 @@ import { Button } from "@/app/components/ui/button";
 import { useOptionalAutoCloudSyncContext } from "@/features/plan12week/hooks/AutoCloudSyncProvider";
 import { enqueueStoredMutation } from "@/features/plan12week/persistence/mutationQueue";
 import { getPlanLink } from "@/features/plan12week/persistence/planLinkStore";
+import { commitTwelveWeekTaskCompletion } from "@/features/plan12week/persistence/taskCompletionMutation";
 import { getTwelveWeekClientPlanId } from "@/features/plan12week/persistence/twelveWeekImportPayload";
 import { isApiBaseUrlConfigured } from "@/lib/api/apiClient";
 import { getBackendGoalId } from "@/lib/api/goalLinkStore";
@@ -45,7 +46,6 @@ import {
   getUserData,
   recomputeGoalProgressFromWeeks,
   saveUserData,
-  toggleTwelveWeekTask,
   type UserData,
   updateGoal,
 } from "../utils/storage";
@@ -290,22 +290,28 @@ function GoalTrackerContent({
         ),
       };
 
-      setLocallyUpdatedSystemGoalIds((current) => new Set(current).add(goalId));
       setViewUserData((current) => ({
         ...current,
         goals: current.goals.map((item) => (item.id === goalId ? { ...item, twelveWeekSystem: nextSystem } : item)),
       }));
 
-      try {
-        if (!toggleTwelveWeekTask(goalId, taskId, nextCompleted, now)) {
-          throw new Error("Unable to toggle 12-week task");
-        }
-      } catch {
+      const completionResult = commitTwelveWeekTaskCompletion({
+        goalId,
+        taskId,
+        completed: nextCompleted,
+        now,
+      });
+      if (completionResult.status === "local_save_failed") {
         setViewUserData(previousViewUserData);
         toast.error("Không thể cập nhật, vui lòng thử lại");
         return;
       }
+      if (completionResult.status !== "applied") {
+        setViewUserData(getUserData());
+        return;
+      }
 
+      setLocallyUpdatedSystemGoalIds((current) => new Set(current).add(goalId));
       const afterData = getUserData();
       setViewUserData(afterData);
       const refreshedProgress = recomputeGoalProgressFromWeeks(goalId) ?? previousProgress;

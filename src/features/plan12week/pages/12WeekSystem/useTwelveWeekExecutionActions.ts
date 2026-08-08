@@ -13,12 +13,9 @@ import {
   trackAppEvent,
   type UniversalDailyCheckIn,
   type UniversalWeeklyReview,
-  updateGoal,
   upsertReflection,
 } from "@/app/utils/storage";
 import {
-  buildDerivedScoreboard,
-  getDefaultScoreboard,
   getTwelveWeekCurrentWeek,
   getTwelveWeekMissedTasks,
   getTwelveWeekTasksForWeek,
@@ -29,7 +26,7 @@ import {
   rescheduleTwelveWeekTaskWithinWeek,
   skipTwelveWeekNonCoreTask,
 } from "@/app/utils/storage-twelve-week";
-import type { Goal, TwelveWeekSystem, TwelveWeekTaskInstance } from "@/app/utils/storage-types";
+import type { Goal, TwelveWeekSystem } from "@/app/utils/storage-types";
 import type { SuggestedNextWeekPlan } from "@/app/utils/twelve-week-premium";
 import {
   addDaysToDateKey,
@@ -39,11 +36,14 @@ import {
   type ReentryMode,
   type RescuePlanSummary,
 } from "@/app/utils/twelve-week-system-ui";
-import { enqueueLeadMetricUpsertedMutations } from "@/features/plan12week/persistence/leadMetricMutation";
 import { enqueueStoredMutation } from "@/features/plan12week/persistence/mutationQueue";
-import { getPlanLink, getRemoteTaskIdForGoal } from "@/features/plan12week/persistence/planLinkStore";
+import { getPlanLink } from "@/features/plan12week/persistence/planLinkStore";
 import { enqueuePlanSnapshotUpdatedMutation } from "@/features/plan12week/persistence/planSnapshotMutation";
 import { getUniversalWeeklyReviewExecutionScore } from "@/features/plan12week/persistence/reviewExecutionScore";
+import {
+  commitTwelveWeekTaskCompletion,
+  rollbackTwelveWeekTaskCompletion,
+} from "@/features/plan12week/persistence/taskCompletionMutation";
 import { celebrateMedium, celebrateSmall } from "@/lib/effects/celebrate";
 import { getTodayQueueForSystem } from "./helpers";
 import type { WeeklyCommitmentStatus, WeeklyReviewForm } from "./types";
@@ -85,37 +85,6 @@ function getClientPlanId(goalId: string): string {
 
 function getClientWeekId(goalId: string, weekNumber: number): string {
   return `${goalId}:week:${weekNumber}`;
-}
-
-function enqueueTaskCompletionChangedMutation(goalId: string, task: TwelveWeekTaskInstance): void {
-  try {
-    const planLink = getPlanLink(goalId);
-    const backendPlanId = planLink?.planId ?? null;
-    const backendWeekId = planLink?.weekIdByNumber[task.weekNumber] ?? null;
-    enqueueStoredMutation({
-      kind: "task_completed_changed",
-      goalId,
-      planId: backendPlanId,
-      payload: {
-        taskId: task.id,
-        backendTaskId: getRemoteTaskIdForGoal(goalId, task.id),
-        backendPlanId,
-        backendWeekId,
-        clientTaskId: task.id,
-        clientPlanId: getClientPlanId(goalId),
-        clientWeekId: getClientWeekId(goalId, task.weekNumber),
-        weekNumber: task.weekNumber,
-        completed: task.completed,
-        completedAt: task.completedAt,
-        scheduledDate: task.scheduledDate,
-        title: task.title,
-        leadIndicatorName: task.leadIndicatorName,
-        isCore: task.isCore,
-      },
-    });
-  } catch {
-    // Queueing is a best-effort sidecar. The local-first task save stays authoritative.
-  }
 }
 
 function enqueueDailyCheckInUpsertedMutation(goalId: string, weekNumber: number, checkIn: UniversalDailyCheckIn): void {
@@ -235,36 +204,25 @@ export function useTwelveWeekExecutionActions({
 
   const handleToggleTask = useCallback(
     async (taskId: string, completed: boolean) => {
-      if (!activeGoal || !system) return;
+      if (!activeGoal || !system) return false;
       const actionGoalId = activeGoal.id;
-      const toggledTask = system.taskInstances.find((task) => task.id === taskId);
-      const taskCompletedFromIncomplete = Boolean(completed && toggledTask && !toggledTask.completed);
-      const now = Date.now();
-      const completedAt = completed ? new Date(now).toISOString() : undefined;
-      const nextTaskInstances = system.taskInstances.map((task) =>
-        task.id === taskId ? { ...task, completed, completedAt, lastModifiedAt: now } : task,
-      );
-      const nextToggledTask = nextTaskInstances.find((task) => task.id === taskId);
-
-      invalidateOverlay();
-      let savedSystem: TwelveWeekSystem;
-      try {
-        savedSystem = commitSystemUpdate({
-          ...system,
-          taskInstances: nextTaskInstances,
-        });
-      } catch {
+      const completionResult = commitTwelveWeekTaskCompletion({
+        goalId: actionGoalId,
+        taskId,
+        completed,
+      });
+      if (completionResult.status === "local_save_failed") {
         toast.error("Không thể cập nhật, vui lòng thử lại");
-        return;
+        return false;
       }
+      if (completionResult.status !== "applied") return false;
 
-      if (nextToggledTask) {
-        enqueueTaskCompletionChangedMutation(actionGoalId, nextToggledTask);
-        enqueueLeadMetricUpsertedMutations(actionGoalId, savedSystem, "task_progress", {
-          weekNumbers: [nextToggledTask.weekNumber],
-          indicatorIds: nextToggledTask.tacticId ? [nextToggledTask.tacticId] : undefined,
-          indicatorNames: [nextToggledTask.leadIndicatorName],
-        });
+      const toggledTask = completionResult.previousTask;
+      const savedSystem = completionResult.updatedSystem;
+      const taskCompletedFromIncomplete = completed && !toggledTask.completed;
+      invalidateOverlay();
+      if (activeGoalIdRef.current === actionGoalId) {
+        updateActiveSystemState(() => savedSystem);
       }
 
       if (completed) {
@@ -318,64 +276,37 @@ export function useTwelveWeekExecutionActions({
             refreshSnapshotMeta();
           }
         });
+        return true;
       } else {
         const synced = await executionSyncActions.syncTaskToggle(taskId, completed);
         if (!synced) {
-          const latestGoal = getUserData().goals.find((goal) => goal.id === actionGoalId);
-          const latestSystem = latestGoal?.twelveWeekSystem;
-          const latestTask = latestSystem?.taskInstances.find((task) => task.id === taskId);
-          const shouldRollbackTask = Boolean(latestSystem && latestTask && latestTask.completed === completed);
-          if (latestSystem && shouldRollbackTask) {
-            const rollbackSystem = {
-              ...latestSystem,
-              taskInstances: latestSystem.taskInstances.map((task) =>
-                task.id === taskId
-                  ? {
-                      ...task,
-                      completed: !completed,
-                      completedAt: !completed ? undefined : toggledTask?.completedAt,
-                      lastModifiedAt: toggledTask?.lastModifiedAt ?? 0,
-                    }
-                  : task,
-              ),
-            };
-            const normalizedRollbackSystem = {
-              ...rollbackSystem,
-              scoreboard: buildDerivedScoreboard(rollbackSystem, getDefaultScoreboard(rollbackSystem.totalWeeks)),
-            };
-
-            updateGoal(actionGoalId, {
-              twelveWeekSystem: normalizedRollbackSystem,
-            });
+          const rollbackResult = rollbackTwelveWeekTaskCompletion({
+            goalId: actionGoalId,
+            taskId,
+            previousTask: completionResult.previousTask,
+            attemptedTask: completionResult.updatedTask,
+          });
+          if (rollbackResult.status === "applied") {
             if (activeGoalIdRef.current === actionGoalId) {
-              updateActiveSystemState(() => normalizedRollbackSystem);
-            }
-            const rollbackTask = normalizedRollbackSystem.taskInstances.find((task) => task.id === taskId);
-            if (rollbackTask) {
-              enqueueTaskCompletionChangedMutation(actionGoalId, rollbackTask);
-              enqueueLeadMetricUpsertedMutations(actionGoalId, normalizedRollbackSystem, "task_progress", {
-                weekNumbers: [rollbackTask.weekNumber],
-                indicatorIds: rollbackTask.tacticId ? [rollbackTask.tacticId] : undefined,
-                indicatorNames: [rollbackTask.leadIndicatorName],
-              });
+              updateActiveSystemState(() => rollbackResult.updatedSystem);
             }
           }
 
           toast.error("Không thể cập nhật, vui lòng thử lại");
-          return;
+          return false;
         }
 
         if (activeGoalIdRef.current === actionGoalId) {
           refreshBackendProgressOverlay();
           refreshSnapshotMeta();
         }
+        return true;
       }
     },
     [
       activeGoal,
       system,
       executionSyncActions,
-      commitSystemUpdate,
       invalidateOverlay,
       activeGoalIdRef,
       updateActiveSystemState,

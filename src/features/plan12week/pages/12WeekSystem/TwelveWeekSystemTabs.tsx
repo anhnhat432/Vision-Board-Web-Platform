@@ -55,6 +55,8 @@ const TWELVE_WEEK_SECTION_TABS = [
   { value: "settings", label: "Cài đặt", icon: Settings2 },
 ] satisfies Array<{ value: string; label: string; icon: LucideIcon }>;
 
+type TaskToggleResult = boolean | undefined;
+
 interface TwelveWeekSystemTabsProps {
   noticeSlot?: ReactNode;
   activeTab: string;
@@ -98,7 +100,7 @@ interface TwelveWeekSystemTabsProps {
   onReentry: (mode: ReentryMode) => void;
   onApplyRecommendedReentry: () => void;
   onOpenSmartRescue: () => void;
-  onToggleTask: (taskInstanceId: string, completed: boolean) => void;
+  onToggleTask: (taskInstanceId: string, completed: boolean) => TaskToggleResult | Promise<TaskToggleResult>;
   onDailyMoodChange: (mood: DailyMood) => void;
   onDailyNoteChange: (note: string) => void;
   onSaveCheckIn: () => void;
