@@ -3,14 +3,32 @@ import userEvent from "@testing-library/user-event";
 import type { ComponentProps } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { emitPetEvent } from "@/app/features/pet/petEvents";
+import { hapticLight } from "@/app/utils/haptics";
+import { triggerSparkles } from "@/app/utils/sparkles";
 import type { TwelveWeekSystem, TwelveWeekTaskInstance, UniversalDailyCheckIn } from "@/app/utils/storage-types";
+import { playZenBell } from "@/app/utils/zen-bell";
 import { TwelveWeekTodayTab } from "./TwelveWeekTodayTab";
 
 vi.mock("@/app/features/pet/petEvents", () => ({
   emitPetEvent: vi.fn(),
 }));
 
+vi.mock("@/app/utils/haptics", () => ({
+  hapticLight: vi.fn(),
+}));
+
+vi.mock("@/app/utils/sparkles", () => ({
+  triggerSparkles: vi.fn(),
+}));
+
+vi.mock("@/app/utils/zen-bell", () => ({
+  playZenBell: vi.fn(),
+}));
+
 const emitPetEventMock = vi.mocked(emitPetEvent);
+const hapticLightMock = vi.mocked(hapticLight);
+const triggerSparklesMock = vi.mocked(triggerSparkles);
+const playZenBellMock = vi.mocked(playZenBell);
 
 type TodayTabProps = ComponentProps<typeof TwelveWeekTodayTab>;
 
@@ -118,6 +136,9 @@ function makeProps(overrides: Partial<TodayTabProps> = {}): TodayTabProps {
 
 afterEach(() => {
   emitPetEventMock.mockClear();
+  hapticLightMock.mockClear();
+  triggerSparklesMock.mockClear();
+  playZenBellMock.mockClear();
 });
 
 describe("TwelveWeekTodayTab — primary task hero", () => {
@@ -546,6 +567,30 @@ describe("TwelveWeekTodayTab — completion nudge & check-in", () => {
         }),
       );
     });
+  });
+
+  it("leaves completion sound, haptic, and sparkles to the Today action owner", async () => {
+    const onToggleTask = vi.fn().mockResolvedValue(true);
+    render(<TwelveWeekTodayTab {...makeProps({ onToggleTask })} />);
+
+    await userEvent.click(screen.getAllByRole("checkbox")[0]);
+
+    await waitFor(() => expect(emitPetEventMock).toHaveBeenCalledTimes(1));
+    expect(hapticLightMock).not.toHaveBeenCalled();
+    expect(playZenBellMock).not.toHaveBeenCalled();
+    expect(triggerSparklesMock).not.toHaveBeenCalled();
+  });
+
+  it("suppresses pet feedback and clears optimistic state when the canonical action is a noop", async () => {
+    const onToggleTask = vi.fn().mockResolvedValue(false);
+    render(<TwelveWeekTodayTab {...makeProps({ onToggleTask })} />);
+    const checkbox = screen.getAllByRole("checkbox")[0];
+
+    await userEvent.click(checkbox);
+
+    await waitFor(() => expect(onToggleTask).toHaveBeenCalledWith("task_1", true));
+    await waitFor(() => expect(checkbox).toHaveAttribute("data-state", "unchecked"));
+    expect(emitPetEventMock).not.toHaveBeenCalled();
   });
 
   it("emits dailyFocusCompleted after the last open task succeeds", async () => {

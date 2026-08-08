@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -147,6 +147,83 @@ function isTaskCompleted(taskTitle: string): boolean {
   return getTaskToggleButton(taskTitle).getAttribute("aria-label") === "Hủy chốt việc";
 }
 
+async function seedSingleTwelveWeekGoal(input: {
+  goalId: string;
+  goalTitle: string;
+  taskId: string;
+  taskTitle: string;
+}) {
+  const storage = await import("../utils/storage");
+  const data = storage.getUserData();
+  const today = new Date();
+  const todayKey = storage.formatDateInputValue(today);
+  const todayScheduleOffset = (today.getDay() + 6) % 7;
+  const nonTodayReviewDay = today.getDay() === 0 ? "Monday" : "Sunday";
+  const tacticId = `tactic_${input.goalId}`;
+
+  data.onboardingCompleted = true;
+  data.currentWheelOfLife = data.currentWheelOfLife.map((area) => ({ ...area, score: 6 }));
+  data.goals = [
+    {
+      id: input.goalId,
+      category: "Career",
+      title: input.goalTitle,
+      description: "Canonical task completion proof.",
+      deadline: "2026-12-31",
+      tasks: [],
+      createdAt: "2026-08-01T00:00:00.000Z",
+      twelveWeekSystem: {
+        goalType: "Career",
+        vision12Week: "Ship the canonical action",
+        lagMetric: { name: "Progress", unit: "%", target: "100", currentValue: "0" },
+        leadIndicators: [
+          {
+            id: tacticId,
+            name: input.taskTitle,
+            target: "1",
+            unit: "task/week",
+            type: "core" as const,
+            priority: 1,
+            schedule: [todayScheduleOffset],
+          },
+        ],
+        milestones: { week4: "", week8: "", week12: "Ship" },
+        successEvidence: "Live",
+        reviewDay: nonTodayReviewDay,
+        week12Outcome: "Ship",
+        startDate: todayKey,
+        endDate: todayKey,
+        timezone: "Asia/Saigon",
+        weekStartsOn: "Monday" as const,
+        status: "active" as const,
+        currentWeek: 1,
+        totalWeeks: 1,
+        weeklyPlans: [
+          { weekNumber: 1, phaseName: "Start", focus: "Ship", milestone: "Ship", completed: false },
+        ],
+        taskInstances: [
+          {
+            id: input.taskId,
+            weekNumber: 1,
+            scheduledDate: todayKey,
+            title: input.taskTitle,
+            leadIndicatorName: input.taskTitle,
+            tacticId,
+            isCore: true,
+            completed: false,
+            lastModifiedAt: 1,
+          },
+        ],
+        dailyCheckIns: [],
+        weeklyReviews: [],
+        scoreboard: [],
+      },
+    },
+  ];
+  expect(storage.saveUserData(data)).toBe(true);
+  return storage;
+}
+
 describe("GoalTracker multi-tab task updates", () => {
   beforeEach(() => {
     vi.resetModules();
@@ -267,7 +344,108 @@ describe("GoalTracker multi-tab task updates", () => {
 
     expect(channel.postMessage).toHaveBeenCalledWith(expect.objectContaining({ source: expect.any(String) }));
     await waitFor(() => expect(screen.getAllByText("50%")).not.toHaveLength(0));
+    const completedTask = storage
+      .getUserData()
+      .goals[0]?.twelveWeekSystem?.taskInstances.find((task) => task.id === "tw_task_1_tactic_12_week_a_4");
     expect(storage.calculateGoalProgress(storage.getUserData().goals[0])).toBe(50);
+    expect(completedTask).toEqual(
+      expect.objectContaining({
+        completed: true,
+        completedAt: expect.any(String),
+        lastModifiedAt: expect.any(Number),
+      }),
+    );
+    expect(mutationQueueMocks.enqueueStoredMutation).toHaveBeenCalledTimes(2);
+    expect(mutationQueueMocks.enqueueStoredMutation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kind: "task_completed_changed",
+        goalId: "goal_12_week_progress",
+        payload: expect.objectContaining({
+          taskId: "tw_task_1_tactic_12_week_a_4",
+          completed: true,
+          completedAt: completedTask?.completedAt,
+        }),
+      }),
+      expect.any(Object),
+    );
+    expect(mutationQueueMocks.enqueueStoredMutation).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kind: "lead_metric_upserted",
+        goalId: "goal_12_week_progress",
+        payload: expect.objectContaining({
+          leadIndicatorId: "tactic_12_week_a",
+          currentValue: 5,
+          reason: "task_progress",
+        }),
+      }),
+    );
+  });
+
+  it("collapses a rapid duplicate 12-week completion to one task and one lead mutation", async () => {
+    const goalId = "goal_rapid_completion";
+    const taskId = "tw_task_1_tactic_goal_rapid_completion_0";
+    const taskTitle = "Rapid canonical task";
+    const storage = await seedSingleTwelveWeekGoal({
+      goalId,
+      goalTitle: "Rapid completion goal",
+      taskId,
+      taskTitle,
+    });
+    await renderGoalTracker();
+    await within(getGoalsRegion()).findByText(taskTitle);
+    const button = getTaskToggleButton(taskTitle);
+
+    await act(async () => {
+      button.click();
+      button.click();
+      await Promise.resolve();
+    });
+
+    const persistedTask = storage
+      .getUserData()
+      .goals[0]?.twelveWeekSystem?.taskInstances.find((task) => task.id === taskId);
+    expect(persistedTask?.completed).toBe(true);
+    expect(persistedTask?.completedAt).toEqual(expect.any(String));
+    expect(mutationQueueMocks.enqueueStoredMutation).toHaveBeenCalledTimes(2);
+    expect(
+      mutationQueueMocks.enqueueStoredMutation.mock.calls.filter(([mutation]) => mutation.kind === "task_completed_changed"),
+    ).toHaveLength(1);
+    expect(
+      mutationQueueMocks.enqueueStoredMutation.mock.calls.filter(([mutation]) => mutation.kind === "lead_metric_upserted"),
+    ).toHaveLength(1);
+  });
+
+  it("keeps standard-goal task completion outside the canonical 12-week queue", async () => {
+    const storage = await import("../utils/storage");
+    const data = storage.getUserData();
+    data.onboardingCompleted = true;
+    data.currentWheelOfLife = data.currentWheelOfLife.map((area) => ({ ...area, score: 6 }));
+    data.goals = [
+      {
+        id: "goal_standard_task",
+        category: "Career",
+        title: "Standard goal",
+        description: "Must keep the legacy branch.",
+        deadline: "2026-12-31",
+        createdAt: "2026-08-01T00:00:00.000Z",
+        tasks: [
+          {
+            id: "standard_task_1",
+            title: "Standard task stays standard",
+            completed: false,
+            lastModifiedAt: 1,
+          },
+        ],
+      },
+    ];
+    expect(storage.saveUserData(data)).toBe(true);
+    await renderGoalTracker();
+    await within(getGoalsRegion()).findByText("Standard task stays standard");
+
+    await userEvent.click(getTaskToggleButton("Standard task stays standard"));
+
+    expect(storage.getUserData().goals[0]?.tasks[0]?.completed).toBe(true);
+    expect(mutationQueueMocks.enqueueStoredMutation).not.toHaveBeenCalled();
   });
 
   it("broadcasts when all user data is deleted", async () => {

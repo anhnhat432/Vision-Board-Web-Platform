@@ -18,8 +18,6 @@ import { emitPetEvent } from "@/app/features/pet/petEvents";
 import { MotionStaggerItem, MotionStaggerList } from "@/app/components/motion";
 import type { RescueModeStatus } from "@/features/plan12week/logic";
 import { getUpcomingStrategicBlock } from "@/features/plan12week/logic/timeBlocks";
-import { hapticLight } from "../../utils/haptics";
-import { triggerSparkles } from "../../utils/sparkles";
 import { formatCalendarDate } from "../../utils/storage";
 import type { TwelveWeekSystem, TwelveWeekTaskInstance, UniversalDailyCheckIn } from "../../utils/storage-types";
 import {
@@ -29,7 +27,6 @@ import {
   type ReentryMode,
   type RescuePlanSummary,
 } from "../../utils/twelve-week-system-ui";
-import { playZenBell } from "../../utils/zen-bell";
 import { EmptyTaskIllustration, ZenLeafIllustration } from "../illustrations";
 import { EmptyState } from "../states";
 import { Badge } from "../ui/badge";
@@ -50,6 +47,8 @@ interface WeekCompletionSummary {
   total: number;
   percent: number;
 }
+
+type TaskToggleResult = boolean | undefined;
 
 interface TwelveWeekTodayTabProps {
   system: TwelveWeekSystem;
@@ -82,7 +81,7 @@ interface TwelveWeekTodayTabProps {
   onReentry: (mode: ReentryMode) => void;
   onApplyRecommendedReentry: () => void;
   onOpenSmartRescue: () => void;
-  onToggleTask: (taskId: string, completed: boolean) => void | Promise<void>;
+  onToggleTask: (taskId: string, completed: boolean) => TaskToggleResult | Promise<TaskToggleResult>;
   onDailyMoodChange: (value: DailyMood) => void;
   onDailyNoteChange: (value: string) => void;
   onSaveCheckIn: () => void;
@@ -208,17 +207,6 @@ export function TwelveWeekTodayTab({
   const [isHeroDismissed, setIsHeroDismissed] = useState(false);
   const [isCheckInCardInView, setIsCheckInCardInView] = useState(true);
   const checkInCardRef = useRef<HTMLDivElement | null>(null);
-  const lastClickCoords = useRef({ x: 0, y: 0 });
-
-  useEffect(() => {
-    const handleGlobalClick = (e: MouseEvent) => {
-      lastClickCoords.current = { x: e.clientX, y: e.clientY };
-    };
-    window.addEventListener("click", handleGlobalClick, true);
-    return () => {
-      window.removeEventListener("click", handleGlobalClick, true);
-    };
-  }, []);
   const upcomingStrategicBlock = getUpcomingStrategicBlock(system.weeklyTimeBlocks, new Date());
   const prefersReducedMotion = useReducedMotion();
   const fadeInClassName = "min-w-0";
@@ -273,25 +261,27 @@ export function TwelveWeekTodayTab({
       });
     };
 
-    hapticLight();
     setOptimisticTaskCompletionById((current) => ({ ...current, [taskId]: completed }));
 
-    if (completed) {
-      playZenBell();
-      const x = lastClickCoords.current.x || window.innerWidth / 2;
-      const y = lastClickCoords.current.y || window.innerHeight / 2;
-      triggerSparkles(x, y);
-    }
+    const clearOptimisticTaskState = () => {
+      setOptimisticTaskCompletionById((current) => {
+        if (!(taskId in current)) return current;
+        const next = { ...current };
+        delete next[taskId];
+        return next;
+      });
+    };
 
     Promise.resolve(onToggleTask(taskId, completed))
-      .then(emitCompletionEvent)
+      .then((applied) => {
+        if (applied === false) {
+          clearOptimisticTaskState();
+          return;
+        }
+        emitCompletionEvent();
+      })
       .catch((error) => {
-        setOptimisticTaskCompletionById((current) => {
-          if (!(taskId in current)) return current;
-          const next = { ...current };
-          delete next[taskId];
-          return next;
-        });
+        clearOptimisticTaskState();
         console.error("Failed to toggle task:", error);
       });
   };
