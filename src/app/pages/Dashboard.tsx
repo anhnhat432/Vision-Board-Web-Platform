@@ -1,17 +1,14 @@
 import {
-  AlertCircle,
-  ArrowRight,
-  Award,
-  CheckCircle2,
   ChevronDown,
-  Compass,
   Gem,
   Loader2,
   WifiOff,
   X,
 } from "lucide-react";
-import { lazy, type ReactNode, Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, type ReactNode, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router";
+import { toast } from "sonner";
+import { buildDashboardDailyExecutionSnapshot } from "@/features/dashboard/helpers/dashboardDailyExecution";
 import {
   buildCurrentWeekExecutionSnapshot,
   buildGoalProgressSnapshot,
@@ -28,6 +25,7 @@ import { type DashboardWidgetId, getDashboardWidgetIds } from "@/features/dashbo
 import { useDashboardPlanLink } from "@/features/dashboard/hooks/useDashboardPlanLink";
 import { ActiveGoalsCard } from "@/features/dashboard/v2/ActiveGoalsCard";
 import { BalanceCard } from "@/features/dashboard/v2/BalanceCard";
+import { DailyFocusCard } from "@/features/dashboard/v2/DailyFocusCard";
 import { DailyStoicCard } from "@/features/dashboard/v2/DailyStoicCard";
 import { DashboardFooter } from "@/features/dashboard/v2/DashboardFooter";
 import { DashboardHero } from "@/features/dashboard/v2/DashboardHero";
@@ -37,7 +35,9 @@ import { ReflectionPrompt } from "@/features/dashboard/v2/ReflectionPrompt";
 import { RescueAlert } from "@/features/dashboard/v2/RescueAlert";
 import { TodayMiniCard } from "@/features/dashboard/v2/TodayMiniCard";
 import { WeekRhythmCard } from "@/features/dashboard/v2/WeekRhythmCard";
+import { WeeklyPulseCard } from "@/features/dashboard/v2/WeeklyPulseCard";
 import { usePlan12Week } from "@/features/plan12week/hooks";
+import { commitTwelveWeekTaskCompletion } from "@/features/plan12week/persistence/taskCompletionMutation";
 import { useAuthContext } from "@/lib/auth/AuthContext";
 import type { SpotlightTourStep } from "../components/SpotlightTour";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../components/ui/collapsible";
@@ -71,11 +71,7 @@ import {
   type Goal,
   getActiveTwelveWeekGoal,
   getLifeAreaLabel,
-  getTwelveWeekCurrentWeek,
-  getTwelveWeekTasksForWeek,
-  getTwelveWeekTodayTasks,
   getTwelveWeekWeekCompletion,
-  isTwelveWeekReviewDueToday,
   type LifeArea,
   type PricingPlanCode,
   sortReflectionsByDateDesc,
@@ -90,14 +86,14 @@ const DASHBOARD_TOUR_STEPS: SpotlightTourStep[] = [
   {
     id: "hero",
     targetId: "dashboard-next-card",
-    title: "Đây là khối chính của Trang chủ",
-    description: "Hãy nhìn khối này trước để biết mục tiêu hiện tại và nút đi tiếp nhanh nhất.",
+    title: "Đây là việc quan trọng nhất hôm nay",
+    description: "Hoàn thành trực tiếp tại đây để Trang chủ chuyển sang việc tiếp theo trong ngày.",
   },
   {
     id: "plan",
     targetId: "dashboard-plan-card",
-    title: "Đây là mục tiêu đang được ưu tiên",
-    description: "Khối bên phải cho bạn thấy trọng tâm chu kỳ hiện tại và tiến độ của nó.",
+    title: "Đây là nhịp thực tế của tuần",
+    description: "Khối này cho biết tiến độ tuần, việc đang trễ và thời điểm review mà không thay thế việc hôm nay.",
   },
 ];
 
@@ -407,52 +403,26 @@ function useDashboardDerivedData({
       ? [...visibleWheelOfLife].sort((a, b) => a.score - b.score)[0]
       : null;
   const localActiveSystem = visibleActiveTwelveWeekGoal?.twelveWeekSystem ?? null;
-  const { effectiveSystem: activeSystem } = useBackendProgressOverlay(
+  const {
+    effectiveSystem,
+    invalidateOverlay: invalidateBackendProgressOverlay,
+  } = useBackendProgressOverlay(
     visibleActiveTwelveWeekGoal?.id ?? null,
     localActiveSystem,
   );
-  const effectiveSystem = activeSystem;
-  const activeSystemWeek = effectiveSystem ? getTwelveWeekCurrentWeek(effectiveSystem) : null;
-  const activeSystemTodayTasks = effectiveSystem ? getTwelveWeekTodayTasks(effectiveSystem) : [];
-  const activeSystemTodayOpenTasks = activeSystemTodayTasks.filter((task) => !task.completed);
-  const activeSystemTodayCompletedCount = activeSystemTodayTasks.length - activeSystemTodayOpenTasks.length;
-  const activeSystemWeekCompletion =
-    effectiveSystem && activeSystemWeek ? getTwelveWeekWeekCompletion(effectiveSystem, activeSystemWeek) : null;
-  const reviewDueToday = Boolean(effectiveSystem && isTwelveWeekReviewDueToday(effectiveSystem));
-
-  const activeSystemWeekTasks =
-    effectiveSystem && activeSystemWeek
-      ? getTwelveWeekTasksForWeek(effectiveSystem, activeSystemWeek).filter((task) => !task.skipped)
-      : [];
-  const activeSystemWeekOpenTasks = activeSystemWeekTasks.filter((task) => !task.completed);
-
-  // Preview ưu tiên task hôm nay; nếu trống thì fallback sang task tuần này
-  // chưa hoàn thành. Khi fallback, counter cũng đổi sang nguồn tuần để
-  // "0/0 việc" không hiện sai cùng 3 task render từ tuần.
-  const todayPreviewUsesToday = activeSystemTodayOpenTasks.length > 0;
-  const activeSystemTaskPreview =
-    effectiveSystem && activeSystemWeek
-      ? (todayPreviewUsesToday ? activeSystemTodayOpenTasks : activeSystemWeekOpenTasks).slice(0, 3)
-      : [];
-  const todayPreviewTotal = todayPreviewUsesToday ? activeSystemTodayTasks.length : activeSystemWeekTasks.length;
-  const todayPreviewCompleted = todayPreviewUsesToday
-    ? activeSystemTodayCompletedCount
-    : activeSystemWeekTasks.length - activeSystemWeekOpenTasks.length;
-  const todayPreviewTitle = todayPreviewUsesToday ? "Việc hôm nay" : "Việc tuần này";
-  const hasReviewedCurrentWeek = Boolean(
-    effectiveSystem &&
-      activeSystemWeek &&
-      (effectiveSystem.weeklyReviews.some(
-        (review) => review.weekNumber === activeSystemWeek && review.reviewCompleted,
-      ) ||
-        effectiveSystem.scoreboard.some((week) => week.weekNumber === activeSystemWeek && week.reviewDone)),
+  const dailyExecution = useMemo(
+    () => (localActiveSystem ? buildDashboardDailyExecutionSnapshot(localActiveSystem) : null),
+    [localActiveSystem],
   );
+  const activeSystemWeek = dailyExecution?.currentWeek ?? null;
+  const activeSystemWeekCompletion = dailyExecution?.weekCompletion ?? null;
+  const reviewDueToday = Boolean(dailyExecution?.reviewDueToday);
   const baseDashboardNextAction = getDashboardNextAction({
     hasGoal: visibleGoals.length > 0,
     hasTwelveWeekSystem: Boolean(effectiveSystem),
     reviewDueToday,
-    hasOpenTodayTasks: activeSystemTodayOpenTasks.length > 0,
-    hasReviewedCurrentWeek,
+    hasOpenTodayTasks: Boolean(dailyExecution?.homePrimaryTask),
+    hasReviewedCurrentWeek: Boolean(dailyExecution?.hasReviewedCurrentWeek),
     currentWeek: activeSystemWeek,
     totalWeeks: effectiveSystem?.totalWeeks ?? null,
   });
@@ -489,16 +459,15 @@ function useDashboardDerivedData({
   const dashboardKpiCurrentWeek = activeSystemWeek ?? currentWeekExecutionSnapshot.weekNumber ?? null;
   const dashboardKpiTotalWeeks = effectiveSystem?.totalWeeks ?? 12;
   const dashboardKpiStreak = weeklyStreak > 0 ? weeklyStreak : journalStreak;
-  const dashboardOpenTaskCount = activeSystemTodayOpenTasks.length;
-  const hasLocalTwelveWeekSystem = Boolean(effectiveSystem);
+  const dashboardOpenTaskCount = dailyExecution?.todayRemainingCount ?? 0;
+  const hasLocalTwelveWeekSystem = Boolean(localActiveSystem);
   const hasWorkspaceSignals =
     hasRealLifeBalance || visibleGoals.length > 0 || visibleVisionBoards.length > 0 || visibleReflections.length > 0;
   const shouldShowMainDashboardCard =
-    !isSignedOut && !isFreshDemoVisitor && (Boolean(activeSystem) || hasWorkspaceSignals);
-  const showMobileStickyCTA = shouldShowMainDashboardCard && activeSystem && activeSystemTodayOpenTasks.length > 0;
-  const shouldShowSetupGuide = !isSignedOut && !isFreshDemoVisitor && !activeSystem;
+    !isSignedOut && !isFreshDemoVisitor && (Boolean(effectiveSystem) || hasWorkspaceSignals);
+  const shouldShowSetupGuide = !isSignedOut && !isFreshDemoVisitor && !effectiveSystem;
   const shouldShowWorkspaceDetailGrid =
-    !isSignedOut && !isFreshDemoVisitor && (Boolean(activeSystem) || hasWorkspaceSignals);
+    !isSignedOut && !isFreshDemoVisitor && (Boolean(effectiveSystem) || hasWorkspaceSignals);
   const radarData = hasRealLifeBalance
     ? visibleWheelOfLife.map((area) => ({
         subject: getLifeAreaLabel(area.name),
@@ -517,20 +486,13 @@ function useDashboardDerivedData({
     averageLifeScore,
     journalStreak,
     weakestArea,
-    activeSystem,
+    localActiveSystem,
     effectiveSystem,
+    invalidateBackendProgressOverlay,
+    dailyExecution,
     activeSystemWeek,
-    activeSystemTodayTasks,
-    activeSystemTodayOpenTasks,
-    activeSystemWeekOpenTasks,
-    activeSystemTodayCompletedCount,
     activeSystemWeekCompletion,
     reviewDueToday,
-    activeSystemTaskPreview,
-    todayPreviewTotal,
-    todayPreviewCompleted,
-    todayPreviewTitle,
-    hasReviewedCurrentWeek,
     dashboardNextAction,
     dashboardActiveGoals,
     dashboardKpiLeadAverage,
@@ -540,7 +502,6 @@ function useDashboardDerivedData({
     dashboardOpenTaskCount,
     hasLocalTwelveWeekSystem,
     hasWorkspaceSignals,
-    showMobileStickyCTA,
     shouldShowMainDashboardCard,
     shouldShowSetupGuide,
     shouldShowWorkspaceDetailGrid,
@@ -629,11 +590,16 @@ function DashboardContent({
   setIsTourOpen: (open: boolean) => void;
   onReload: () => void;
 }) {
-  const isDesktopViewport = useBreakpoint();
   const navigate = useNavigate();
   const location = useLocation();
   const { isConfigured, user } = useAuthContext();
   const [dismissedTrigger, setDismissedTrigger] = useState<string | null>(null);
+  const [completingTaskId, setCompletingTaskId] = useState<string | null>(null);
+  const completingTaskIdRef = useRef<string | null>(null);
+  const releaseCompletionLock = useCallback(() => {
+    completingTaskIdRef.current = null;
+    setCompletingTaskId(null);
+  }, []);
   const { currentPlanCode } = usePlanEntitlements(userData);
   const demoMode = isDemoMode();
   const isSignedOut = !user;
@@ -716,6 +682,41 @@ function DashboardContent({
     coreFlowCompletion,
     onboardingCompleted: !isSignedOut && userData.onboardingCompleted,
   });
+  useEffect(() => {
+    if (!completingTaskId) return;
+    const task = dashboardData.localActiveSystem?.taskInstances.find((item) => item.id === completingTaskId);
+    if (!task || task.completed) releaseCompletionLock();
+  }, [completingTaskId, dashboardData.localActiveSystem, releaseCompletionLock]);
+
+  const handleCompletePrimaryTask = (taskId: string) => {
+    if (!visibleActiveTwelveWeekGoal || completingTaskIdRef.current) return;
+
+    completingTaskIdRef.current = taskId;
+    setCompletingTaskId(taskId);
+    const result = commitTwelveWeekTaskCompletion({
+      goalId: visibleActiveTwelveWeekGoal.id,
+      taskId,
+      completed: true,
+    });
+
+    if (result.status === "local_save_failed") {
+      releaseCompletionLock();
+      toast.error("Không thể cập nhật, vui lòng thử lại");
+      return;
+    }
+
+    dashboardData.invalidateBackendProgressOverlay();
+    onReload();
+
+    if (result.status === "applied") {
+      toast.success("Đã chốt việc hôm nay.");
+      return;
+    }
+
+    if (result.status === "not_found") {
+      toast.error("Việc này vừa thay đổi. Trang chính đang cập nhật lại.");
+    }
+  };
   const dashboardGreeting = getDashboardGreeting();
   const dashboardDisplayName = getDashboardDisplayName(user);
   const caption = formatDashboardDateCaption(new Date(), dashboardGreeting);
@@ -726,17 +727,14 @@ function DashboardContent({
     currentPlanCode === "FREE" &&
     Number.isFinite(FREE_TIER_LIMITS.maxActiveGoals) &&
     goalLimitUsage.current > 0;
-  const lastSavedLabel = getLastSavedLabel(userData, dashboardData.activeSystemTodayTasks);
+  const lastSavedLabel = getLastSavedLabel(userData, dashboardData.dailyExecution?.scheduledTodayTasks ?? []);
   const balanceRows = getLifeBalanceRows(visibleWheelOfLife);
 
-  const overdueCount = dashboardData.activeSystem
-    ? dashboardData.activeSystemTodayTasks.filter((task) => !task.completed).length
-    : 0;
   const activeTriggers = evaluateRescueTriggers({
-    system: dashboardData.activeSystem,
+    system: dashboardData.effectiveSystem,
     subscription: isSignedOut ? null : (userData.subscription ?? null),
-    missedTasksCount: overdueCount,
-    weekCompletionPercent: dashboardData.activeSystemWeekCompletion?.percent ?? 0,
+    missedTasksCount: dashboardData.dailyExecution?.overdueOpenCount ?? 0,
+    weekCompletionPercent: dashboardData.dailyExecution?.weekCompletion.percent ?? 0,
   }).filter((trigger) => trigger.kind !== dismissedTrigger);
   const topTrigger = activeTriggers[0] ?? null;
 
@@ -753,7 +751,6 @@ function DashboardContent({
   });
 
   const dashboardTourSteps = isSignedOut ? [] : DASHBOARD_TOUR_STEPS;
-  const showMobileStickyCTA = !isDesktopViewport && dashboardData.showMobileStickyCTA;
 
   // Khách chưa đăng nhập: render landing "Dear Our Future" tràn viền, KHÔNG bọc
   // trong container max-w-6xl / lớp nền ambient / nút feedback của bản signed-in,
@@ -773,13 +770,7 @@ function DashboardContent({
   }
 
   return (
-    <div
-      className={
-        showMobileStickyCTA
-          ? "min-h-screen bg-app-bg pb-24 text-app-ink relative overflow-hidden"
-          : "min-h-screen bg-app-bg text-app-ink relative overflow-hidden"
-      }
-    >
+    <div className="min-h-screen bg-app-bg text-app-ink relative overflow-hidden">
       {/* Lớp nền Ambient & Texture nâng cấp (ui-design) */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden z-0">
         {/* Lưới điểm mịn (Dot Grid) */}
@@ -825,7 +816,7 @@ function DashboardContent({
           onOpenPlan={() => navigate("/billing/plan")}
         />
 
-        {!dashboardData.activeSystem ? (
+        {!dashboardData.effectiveSystem ? (
           <NewUserSetupView
             userData={userData}
             displayName={dashboardDisplayName}
@@ -839,14 +830,17 @@ function DashboardContent({
             userData={userData}
             displayName={dashboardDisplayName}
             caption={caption}
+            lastSavedLabel={lastSavedLabel}
             balanceRows={balanceRows}
             topTrigger={topTrigger}
+            completingTaskId={completingTaskId}
             planLoading={planLoading}
             hasPlan={Boolean(plan)}
             planError={planError}
             onRetryPlanLoad={dashboardPlanId ? handleRetryPlanLoad : undefined}
             onSelectGoal={(goal) => navigate(getGoalTarget(goal))}
             onAddGoal={() => navigate("/life-insight")}
+            onCompletePrimaryTask={handleCompletePrimaryTask}
             onTriggerAction={() => {
               if (!topTrigger) return;
               const ctaHref = topTrigger.kind === "trial_ending" ? "/billing/plan" : "/12-week-system";
@@ -897,18 +891,6 @@ function DashboardContent({
         </div>
       </div>
 
-      {showMobileStickyCTA ? (
-        <div className="above-mobile-nav fixed bottom-0 left-0 right-0 z-40 border-t border-app-line/80 bg-app-surface p-3 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] md:hidden">
-          <button
-            type="button"
-            className="w-full rounded-xl bg-app-accent hover:bg-app-accent-hover px-4 py-3 text-sm font-semibold text-white shadow-xs transition-all duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-app-accent/40"
-            onClick={() => navigate("/12-week-system?tab=today")}
-          >
-            Mở Today · {dashboardData.dashboardOpenTaskCount} việc hôm nay
-          </button>
-        </div>
-      ) : null}
-
       {isUpgradeDialogOpen ? (
         <Suspense fallback={null}>
           <UpgradePaywallDialog
@@ -940,130 +922,22 @@ function DashboardContent({
 
 type DashboardData = ReturnType<typeof useDashboardDerivedData>;
 
-function NextBestAction({ data }: { data: DashboardData }) {
-  const navigate = useNavigate();
-  const {
-    activeSystemTodayOpenTasks,
-    reviewDueToday,
-    hasReviewedCurrentWeek,
-    activeSystemWeek,
-    activeSystemWeekOpenTasks,
-    radarData,
-  } = data;
-
-  const hasRadarData = radarData && radarData.length > 0 && radarData.some((d) => d.value > 0);
-
-  // Determine the next best action scenario
-  let title = "";
-  let description = "";
-  let ctaLabel = "";
-  let ctaPath = "";
-  let Icon = Compass;
-  let tone: "accent" | "warning" | "review" = "accent";
-
-  if (!hasRadarData) {
-    title = "Chưa thiết lập bánh xe cuộc sống";
-    description = "Hãy dành 3 phút chấm điểm 8 khía cạnh cuộc sống để tìm ra khía cạnh lệch nhịp cần ưu tiên.";
-    ctaLabel = "Chấm điểm ngay";
-    ctaPath = "/onboarding";
-    Icon = Compass;
-    tone = "warning";
-  } else if (activeSystemTodayOpenTasks.length > 0) {
-    title = `Còn ${activeSystemTodayOpenTasks.length} việc cần hoàn thành hôm nay`;
-    description = "Kiên trì thực hiện các hành động nhỏ để giữ vững chuỗi và hoàn thành mục tiêu 12 tuần.";
-    ctaLabel = "Bắt đầu";
-    ctaPath = "/12-week-system?tab=today";
-    Icon = CheckCircle2;
-  } else if (reviewDueToday && !hasReviewedCurrentWeek) {
-    title = `Đến ngày Phản tư Tuần ${activeSystemWeek}`;
-    description = "Hãy dành 5 phút tĩnh lặng để nhìn nhận lại chặng đường 7 ngày qua và đúc rút bài học.";
-    ctaLabel = "Viết phản tư";
-    ctaPath = "/12-week-system?tab=week";
-    Icon = Award;
-    tone = "review";
-  } else if (activeSystemWeekOpenTasks.length > 0) {
-    title = `Chu kỳ Tuần ${activeSystemWeek} đang chạy`;
-    description = `Bạn còn ${activeSystemWeekOpenTasks.length} hành động chưa hoàn thành trong tuần này. Hãy tiếp tục nỗ lực!`;
-    ctaLabel = "Xem kế hoạch";
-    ctaPath = "/12-week-system?tab=week";
-    Icon = AlertCircle;
-  } else {
-    title = "Mọi việc đã hoàn thành xuất sắc!";
-    description = "Hôm nay bạn không còn nhiệm vụ nào chưa xử lý. Hãy nghỉ ngơi, chuẩn bị cho ngày tiếp theo.";
-    ctaLabel = "Xem mục tiêu";
-    ctaPath = "/goals";
-    Icon = CheckCircle2;
-  }
-
-  const toneStyles = {
-    accent: {
-      card: "bg-app-accent-subtle border-app-accent/20",
-      icon: "bg-app-accent text-app-highlight",
-      label: "text-app-accent",
-      desc: "text-app-accent/75",
-      button: "bg-app-accent text-white hover:bg-app-accent-hover",
-    },
-    warning: {
-      card: "bg-app-status-warning/10 border-app-status-warning/25",
-      icon: "bg-app-status-warning text-white",
-      label: "text-app-status-warning",
-      desc: "text-app-status-warning/80",
-      button: "bg-app-status-warning text-white hover:bg-app-status-warning/85",
-    },
-    review: {
-      card: "bg-purple-500/10 border-purple-500/20 dark:bg-purple-950/20 dark:border-purple-800/30",
-      icon: "bg-purple-600 text-white",
-      label: "text-purple-700 dark:text-purple-300",
-      desc: "text-purple-700/80 dark:text-purple-300/80",
-      button: "bg-purple-700 text-white hover:bg-purple-800",
-    },
-  }[tone];
-
-  return (
-    <section
-      className={`flex flex-col gap-4 rounded-card border p-4.5 px-5 sm:flex-row sm:items-center sm:justify-between ${toneStyles.card} select-none`}
-      aria-label="Hành động đề xuất tiếp theo"
-    >
-      <div className="flex items-center gap-3.5">
-        <span
-          className={`flex size-[42px] shrink-0 items-center justify-center rounded-xl ${toneStyles.icon}`}
-          aria-hidden="true"
-        >
-          <Icon className="h-5 w-5" />
-        </span>
-        <div>
-          <div className={`mb-0.5 text-[10px] font-extrabold uppercase tracking-[0.12em] ${toneStyles.label}`}>
-            Hành động đề xuất
-          </div>
-          <div className="mb-0.5 text-sm font-bold text-app-ink">{title}</div>
-          <p className={`max-w-xl text-[12.5px] leading-relaxed ${toneStyles.desc}`}>{description}</p>
-        </div>
-      </div>
-      <button
-        type="button"
-        onClick={() => navigate(ctaPath)}
-        className={`inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 self-start rounded-full px-5 py-3 text-[13px] font-bold transition-all duration-200 hover:-translate-y-px active:scale-[0.98] sm:self-auto ${toneStyles.button}`}
-      >
-        <span>{ctaLabel}</span>
-        <ArrowRight className="h-3.5 w-3.5" />
-      </button>
-    </section>
-  );
-}
-
 function DashboardActiveLayout({
   data,
   userData,
   displayName,
   caption,
+  lastSavedLabel,
   balanceRows,
   topTrigger,
+  completingTaskId,
   planLoading,
   hasPlan,
   planError,
   onRetryPlanLoad,
   onSelectGoal,
   onAddGoal,
+  onCompletePrimaryTask,
   onTriggerAction,
   onTriggerDismiss,
 }: {
@@ -1071,14 +945,17 @@ function DashboardActiveLayout({
   userData: UserData;
   displayName: string;
   caption: string;
+  lastSavedLabel: string;
   balanceRows: LifeBalanceRow[];
   topTrigger: ReturnType<typeof evaluateRescueTriggers>[number] | null;
+  completingTaskId: string | null;
   planLoading: boolean;
   hasPlan: boolean;
   planError: ReturnType<typeof usePlan12Week>["error"];
   onRetryPlanLoad?: () => void;
   onSelectGoal: (goal: Goal) => void;
   onAddGoal: () => void;
+  onCompletePrimaryTask: (taskId: string) => void;
   onTriggerAction: () => void;
   onTriggerDismiss: () => void;
 }) {
@@ -1091,8 +968,7 @@ function DashboardActiveLayout({
   const trendPoints =
     data.weeklyProgressPoints.length > 0
       ? data.weeklyProgressPoints
-      : buildSystemWeeklyProgressPoints(data.activeSystem);
-  const planHref = "/12-week-system?tab=week";
+      : buildSystemWeeklyProgressPoints(data.effectiveSystem);
   const handleSecondaryInsightsOpenChange = (open: boolean) => {
     setSecondaryInsightsOpen(open);
     try {
@@ -1120,39 +996,13 @@ function DashboardActiveLayout({
     return () => window.clearTimeout(timer);
   }, [data.dashboardGoalTitle, data.dashboardOpenTaskCount]);
 
-  // Thứ tự render lấy từ helper thuần `orderDashboardWidgets` (qua
-  // dashboardWidgetLayout): nhóm core_flow luôn đứng trên nhóm secondary, trong
-  // nhóm sắp theo priority. Cột chỉ là phân bổ trình bày giữ nguyên bố cục bento
-  // — không đổi nguồn dữ liệu / điều kiện hiển thị của widget nào (Req 3.1–3.4).
-  const coreLeadIds = getDashboardWidgetIds("core_flow", "lead");
-  const coreStackIds = getDashboardWidgetIds("core_flow", "stack");
   const secondaryMainIds = getDashboardWidgetIds("secondary", "main");
   const secondarySideIds = getDashboardWidgetIds("secondary", "side");
 
-  // Registry node theo id. Mỗi widget tự giữ trạng thái rỗng tại chỗ (Today,
-  // ActiveGoals dùng khối dashed nội bộ) nên không widget nào bị loại khỏi
-  // layout khi thiếu dữ liệu (Req 3.5). `reflection_prompt` giữ nguyên điều kiện
-  // hiển thị theo ngày review sẵn có (Req 3.4).
-  const widgetNodes: Record<DashboardWidgetId, ReactNode> = {
-    today: (
-      <TodayMiniCard
-        title={data.todayPreviewTitle}
-        tasks={data.activeSystemTaskPreview}
-        completedCount={data.todayPreviewCompleted}
-        totalCount={data.todayPreviewTotal}
-        companion={<LazyMamCompanion initialEvent={data.dashboardOpenTaskCount > 0 ? "gentleNudge" : "welcomeBack"} />}
-      />
-    ),
-    next_action: <NextBestAction data={data} />,
-    active_goals: (
-      <ActiveGoalsCard goals={data.dashboardActiveGoals} onSelectGoal={onSelectGoal} onAddGoal={onAddGoal} />
-    ),
-    reflection_prompt: data.reviewDueToday ? (
-      <ReflectionPrompt currentWeek={data.dashboardKpiCurrentWeek} reviewHref={data.dashboardNextAction.ctaTarget} />
-    ) : null,
+  const widgetNodes: Partial<Record<DashboardWidgetId, ReactNode>> = {
     week_rhythm: (
       <WeekRhythmCard
-        system={data.activeSystem}
+        system={data.effectiveSystem}
         currentWeek={data.dashboardKpiCurrentWeek}
         totalWeeks={data.dashboardKpiTotalWeeks}
         completedCount={data.activeSystemWeekCompletion?.completed ?? data.currentWeekExecutionSnapshot.completedTasks}
@@ -1191,31 +1041,12 @@ function DashboardActiveLayout({
       <div data-tour-id="dashboard-start-card" className="appear-fade-up" style={{ animationDelay: "0ms" }}>
         <DashboardHero
           caption={caption}
-          currentWeek={data.dashboardKpiCurrentWeek}
+          currentWeek={data.dailyExecution?.currentWeek ?? data.dashboardKpiCurrentWeek}
           totalWeeks={data.dashboardKpiTotalWeeks}
           displayName={displayName}
-          featuredGoalTitle={data.dashboardGoalTitle}
-          progressPercent={data.goalProgressSnapshot.percent || data.dashboardKpiLeadAverage}
-          planHref={planHref}
+          lastSavedLabel={lastSavedLabel}
         />
       </div>
-
-      <div className="appear-fade-up animate-delay-100" style={{ animationDelay: "75ms" }}>
-        <Suspense fallback={null}>
-          <NewUserGuideBanner userData={userData} variant="compact" />
-        </Suspense>
-      </div>
-
-      {topTrigger ? (
-        <div className="appear-fade-up" style={{ animationDelay: "var(--duration-instant)" }}>
-          <RescueAlert
-            trigger={topTrigger}
-            ctaLabel={topTrigger.kind === "trial_ending" ? "Mở Plus" : "Xem ngay"}
-            onAction={onTriggerAction}
-            onDismiss={onTriggerDismiss}
-          />
-        </div>
-      ) : null}
 
       <DashboardPlanStateNotice
         planLoading={planLoading}
@@ -1224,14 +1055,54 @@ function DashboardActiveLayout({
         onRetry={onRetryPlanLoad}
       />
 
-      {/* Bento Grid layout for Core Funnel widgets (nhóm core_flow, thứ tự từ helper) */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start">
-        {/* Left Column: Today Tasks (Primary Focus) */}
-        <div className="space-y-6">{renderWidgetSlot(coreLeadIds)}</div>
-
-        {/* Right Column: Next Best Action, Active Goals & Review prompt */}
-        <div className="space-y-6">{renderWidgetSlot(coreStackIds)}</div>
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1.7fr)_minmax(260px,0.8fr)] lg:items-stretch">
+        <DailyFocusCard
+          task={data.dailyExecution?.homePrimaryTask ?? null}
+          goalTitle={data.dashboardGoalTitle}
+          completedCount={data.dailyExecution?.todayCompletedCount ?? 0}
+          totalCount={data.dailyExecution?.todayTotalCount ?? 0}
+          reviewDueToday={Boolean(data.dailyExecution?.reviewDueToday)}
+          completing={completingTaskId === data.dailyExecution?.homePrimaryTask?.id}
+          onComplete={onCompletePrimaryTask}
+        />
+        <WeeklyPulseCard
+          currentWeek={data.dailyExecution?.currentWeek ?? 1}
+          totalWeeks={data.dashboardKpiTotalWeeks}
+          completedCount={data.dailyExecution?.weekCompletion.completed ?? 0}
+          totalCount={data.dailyExecution?.weekCompletion.total ?? 0}
+          percent={data.dailyExecution?.weekCompletion.percent ?? 0}
+          overdueOpenCount={data.dailyExecution?.overdueOpenCount ?? 0}
+          reviewDueToday={Boolean(data.dailyExecution?.reviewDueToday)}
+        />
       </div>
+
+      <TodayMiniCard
+        tasks={data.dailyExecution?.homeSecondaryTasks ?? []}
+        completedCount={data.dailyExecution?.todayCompletedCount ?? 0}
+        totalCount={data.dailyExecution?.todayTotalCount ?? 0}
+        companion={
+          <LazyMamCompanion initialEvent={data.dailyExecution?.todayRemainingCount ? "gentleNudge" : "welcomeBack"} />
+        }
+      />
+
+      {data.dailyExecution?.reviewDueToday && data.dailyExecution.homePrimaryTask ? (
+        <ReflectionPrompt currentWeek={data.dailyExecution.currentWeek} reviewHref="/12-week-system?tab=week" />
+      ) : null}
+
+      {topTrigger ? (
+        <RescueAlert
+          trigger={topTrigger}
+          ctaLabel={topTrigger.kind === "trial_ending" ? "Mở Plus" : "Xem ngay"}
+          onAction={onTriggerAction}
+          onDismiss={onTriggerDismiss}
+        />
+      ) : null}
+
+      <Suspense fallback={null}>
+        <NewUserGuideBanner userData={userData} variant="compact" />
+      </Suspense>
+
+      <ActiveGoalsCard goals={data.dashboardActiveGoals} onSelectGoal={onSelectGoal} onAddGoal={onAddGoal} />
 
       <Collapsible open={secondaryInsightsOpen} onOpenChange={handleSecondaryInsightsOpenChange}>
         <section
