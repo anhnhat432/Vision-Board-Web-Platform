@@ -108,11 +108,11 @@ export interface UniversalWeeklyReview {
   nextWeekPriority: string;
   workloadDecision: "keep same" | "reduce slightly" | "increase slightly" | "";
   reviewCompleted: boolean;
-  progressScore: number;
-  disciplineScore: number;
-  focusScore: number;
-  improvementScore: number;
-  outputQualityScore: number;
+  progressScore?: number;
+  disciplineScore?: number;
+  focusScore?: number;
+  improvementScore?: number;
+  outputQualityScore?: number;
   completedLeadIndicators?: number;
   commitmentsKept?: string[];
   commitmentsMissed?: string[];

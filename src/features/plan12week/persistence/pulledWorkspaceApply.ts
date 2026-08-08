@@ -691,25 +691,74 @@ function buildDailyCheckIns(checkIns: TwelveWeekPulledDailyCheckIn[]): Universal
 function buildWeeklyReviews(reviews: TwelveWeekPulledWeeklyReview[], totalWeeks: number): UniversalWeeklyReview[] {
   const getWorkloadDecision = (value: string | undefined): UniversalWeeklyReview["workloadDecision"] =>
     value === "keep same" || value === "reduce slightly" || value === "increase slightly" ? value : "";
+  const hasOwn = (value: object, key: PropertyKey): boolean => Object.getOwnPropertyDescriptor(value, key) !== undefined;
+  const normalizeOptionalReviewText = (value: unknown): string | undefined =>
+    typeof value === "string" ? value.trim() : undefined;
+  const normalizeReviewList = (value: unknown): string[] => {
+    if (!Array.isArray(value)) return [];
+    return value
+      .filter((item): item is string => typeof item === "string")
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .slice(0, 5);
+  };
 
   return reviews
     .filter((review) => Number.isFinite(review.weekNumber))
-    .map((review) => ({
-      weekNumber: clampWeekNumber(review.weekNumber, totalWeeks),
-      leadCompletionPercent: Number.isFinite(review.leadCompletionPercent) ? Number(review.leadCompletionPercent) : 0,
-      lagProgressValue: review.lagProgressValue?.trim() || "",
-      biggestOutputThisWeek: review.biggestOutputThisWeek?.trim() || review.reflection?.trim() || "",
-      mainObstacle: review.mainObstacle?.trim() || "",
-      nextWeekPriority: review.nextWeekPriority?.trim() || review.adjustments?.trim() || "",
-      workloadDecision: getWorkloadDecision(review.workloadDecision),
-      reviewCompleted: Boolean(review.reviewCompleted),
-      progressScore: Number.isFinite(review.progressScore) ? Number(review.progressScore) : 0,
-      disciplineScore: Number.isFinite(review.disciplineScore) ? Number(review.disciplineScore) : 0,
-      focusScore: Number.isFinite(review.focusScore) ? Number(review.focusScore) : 0,
-      improvementScore: Number.isFinite(review.improvementScore) ? Number(review.improvementScore) : 0,
-      outputQualityScore: Number.isFinite(review.outputQualityScore) ? Number(review.outputQualityScore) : 0,
-      completedLeadIndicators: review.completedLeadIndicators,
-    }))
+    .map((review) => {
+      const hasReflection = hasOwn(review, "reflection");
+      const reflection = normalizeOptionalReviewText(review.reflection);
+      const hasInsights = hasOwn(review, "insights");
+      const insights = hasInsights ? normalizeOptionalReviewText(review.insights) : reflection;
+      const hasAdjustments = hasOwn(review, "adjustments");
+      const adjustments = normalizeOptionalReviewText(review.adjustments);
+      const canonicalCommitments = normalizeReviewList(review.nextWeekCommitments);
+      const hasCanonicalCommitments = hasOwn(review, "nextWeekCommitments");
+      const canonicalPriority = normalizeOptionalReviewText(review.nextWeekPriority);
+      const hasCanonicalPriority = hasOwn(review, "nextWeekPriority");
+      const nextWeekPriority = hasCanonicalPriority
+        ? (canonicalPriority ?? "")
+        : canonicalCommitments[0] || adjustments || "";
+      const nextWeekCommitments =
+        hasCanonicalCommitments
+          ? canonicalCommitments
+          : canonicalPriority
+            ? [canonicalPriority]
+            : adjustments
+              ? [adjustments]
+              : [];
+
+      return {
+        weekNumber: clampWeekNumber(review.weekNumber, totalWeeks),
+        executionScore: Number.isFinite(review.executionScore) ? Number(review.executionScore) : undefined,
+        leadCompletionPercent: Number.isFinite(review.leadCompletionPercent) ? Number(review.leadCompletionPercent) : 0,
+        lagProgressValue: review.lagProgressValue?.trim() || "",
+        biggestOutputThisWeek: review.biggestOutputThisWeek?.trim() || "",
+        mainObstacle: review.mainObstacle?.trim() || "",
+        nextWeekPriority,
+        workloadDecision: getWorkloadDecision(review.workloadDecision),
+        reviewCompleted: Boolean(review.reviewCompleted),
+        commitmentsKept: normalizeReviewList(review.commitmentsKept),
+        commitmentsMissed: normalizeReviewList(review.commitmentsMissed),
+        insights,
+        nextWeekCommitments,
+        keepTactic: normalizeOptionalReviewText(review.keepTactic),
+        reduceTactic: normalizeOptionalReviewText(review.reduceTactic),
+        lastReviewAt: review.lastReviewAt?.trim() || undefined,
+        reflection: hasReflection ? reflection : insights,
+        adjustments: hasAdjustments ? adjustments : nextWeekPriority || undefined,
+        ...(Number.isFinite(review.progressScore) ? { progressScore: Number(review.progressScore) } : {}),
+        ...(Number.isFinite(review.disciplineScore) ? { disciplineScore: Number(review.disciplineScore) } : {}),
+        ...(Number.isFinite(review.focusScore) ? { focusScore: Number(review.focusScore) } : {}),
+        ...(Number.isFinite(review.improvementScore)
+          ? { improvementScore: Number(review.improvementScore) }
+          : {}),
+        ...(Number.isFinite(review.outputQualityScore)
+          ? { outputQualityScore: Number(review.outputQualityScore) }
+          : {}),
+        completedLeadIndicators: review.completedLeadIndicators,
+      };
+    })
     .sort((left, right) => left.weekNumber - right.weekNumber);
 }
 

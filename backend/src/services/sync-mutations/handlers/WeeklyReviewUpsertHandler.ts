@@ -1,6 +1,63 @@
 import type { MutationHandlerStrategy, HandlerApplyContext } from "../MutationHandlerStrategy";
 import type { HandlerResult, SyncMutationType } from "../types";
 
+const MAX_REVIEW_LIST_ITEMS = 5;
+
+function getOptionalNumber(
+  payload: Record<string, unknown>,
+  review: Record<string, unknown>,
+  key: string,
+  min = 0,
+  max = 100,
+): number | undefined {
+  const value = typeof payload[key] === "number" ? payload[key] : review[key];
+  return typeof value === "number" && Number.isFinite(value) && value >= min && value <= max ? value : undefined;
+}
+
+function getOptionalString(
+  payload: Record<string, unknown>,
+  review: Record<string, unknown>,
+  key: string,
+): string | undefined {
+  const value = typeof payload[key] === "string" ? payload[key] : review[key];
+  return typeof value === "string" ? value.trim() : undefined;
+}
+
+function getOptionalStringArray(
+  payload: Record<string, unknown>,
+  review: Record<string, unknown>,
+  key: string,
+): string[] | undefined {
+  const value = Array.isArray(payload[key]) ? payload[key] : Array.isArray(review[key]) ? review[key] : undefined;
+  if (!value) return undefined;
+
+  return value
+    .filter((item): item is string => typeof item === "string")
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, MAX_REVIEW_LIST_ITEMS);
+}
+
+function getOptionalBoolean(
+  payload: Record<string, unknown>,
+  review: Record<string, unknown>,
+  key: string,
+): boolean | undefined {
+  const value = typeof payload[key] === "boolean" ? payload[key] : review[key];
+  return typeof value === "boolean" ? value : undefined;
+}
+
+function getOptionalDate(
+  payload: Record<string, unknown>,
+  review: Record<string, unknown>,
+  key: string,
+): Date | undefined {
+  const value = payload[key] ?? review[key];
+  if (typeof value !== "string" && !(value instanceof Date)) return undefined;
+  const parsed = value instanceof Date ? value : new Date(value);
+  return Number.isFinite(parsed.valueOf()) ? parsed : undefined;
+}
+
 /**
  * Handler xử lý mutation weekly_review_upserted / weekly_review_upsert.
  *
@@ -115,28 +172,13 @@ export class WeeklyReviewUpsertHandler implements MutationHandlerStrategy {
           ? review.clientReviewId
           : undefined;
 
-    const getOptNum = (key: string, min = 0, max = 100): number | undefined => {
-      const v = typeof payload[key] === "number" ? payload[key] : typeof review[key] === "number" ? review[key] : undefined;
-      return typeof v === "number" && v >= min && v <= max ? v : undefined;
-    };
-
-    const getOptStr = (key: string): string | undefined => {
-      const v = typeof payload[key] === "string" ? payload[key] : typeof review[key] === "string" ? review[key] : undefined;
-      return v && v.length > 0 ? v : undefined;
-    };
-
     const workloadDecision: "keep same" | "reduce slightly" | "increase slightly" | "" | undefined = (() => {
-      const v = typeof review.workloadDecision === "string" ? review.workloadDecision : undefined;
+      const v = typeof payload.workloadDecision === "string" ? payload.workloadDecision : review.workloadDecision;
       if (v === "keep same" || v === "reduce slightly" || v === "increase slightly" || v === "") return v;
       return undefined;
     })();
 
-    const reviewCompleted =
-      typeof review.reviewCompleted === "boolean"
-        ? review.reviewCompleted
-        : typeof payload.reviewCompleted === "boolean"
-          ? payload.reviewCompleted
-          : undefined;
+    const reviewCompleted = getOptionalBoolean(payload, review, "reviewCompleted");
 
     // ─── Apply ────────────────────────────────────────────────
     const applied = await workspaceRepo.applyWeeklyReviewUpserted(userId, {
@@ -148,19 +190,28 @@ export class WeeklyReviewUpsertHandler implements MutationHandlerStrategy {
       clientReviewId,
       weekNumber: payload.weekNumber,
       executionScore,
-      leadCompletionPercent: getOptNum("leadCompletionPercent"),
-      lagProgressValue: getOptStr("lagProgressValue"),
-      biggestOutputThisWeek: getOptStr("biggestOutputThisWeek"),
-      mainObstacle: getOptStr("mainObstacle"),
-      nextWeekPriority: getOptStr("nextWeekPriority"),
+      leadCompletionPercent: getOptionalNumber(payload, review, "leadCompletionPercent"),
+      lagProgressValue: getOptionalString(payload, review, "lagProgressValue"),
+      biggestOutputThisWeek: getOptionalString(payload, review, "biggestOutputThisWeek"),
+      mainObstacle: getOptionalString(payload, review, "mainObstacle"),
+      nextWeekPriority: getOptionalString(payload, review, "nextWeekPriority"),
       workloadDecision,
       reviewCompleted,
-      progressScore: getOptNum("progressScore", 0, 10),
-      disciplineScore: getOptNum("disciplineScore", 0, 10),
-      focusScore: getOptNum("focusScore", 0, 10),
-      improvementScore: getOptNum("improvementScore", 0, 10),
-      outputQualityScore: getOptNum("outputQualityScore", 0, 10),
-      completedLeadIndicators: getOptNum("completedLeadIndicators"),
+      commitmentsKept: getOptionalStringArray(payload, review, "commitmentsKept"),
+      commitmentsMissed: getOptionalStringArray(payload, review, "commitmentsMissed"),
+      insights: getOptionalString(payload, review, "insights"),
+      nextWeekCommitments: getOptionalStringArray(payload, review, "nextWeekCommitments"),
+      keepTactic: getOptionalString(payload, review, "keepTactic"),
+      reduceTactic: getOptionalString(payload, review, "reduceTactic"),
+      reflection: getOptionalString(payload, review, "reflection"),
+      adjustments: getOptionalString(payload, review, "adjustments"),
+      lastReviewAt: getOptionalDate(payload, review, "lastReviewAt"),
+      progressScore: getOptionalNumber(payload, review, "progressScore", 0, 10),
+      disciplineScore: getOptionalNumber(payload, review, "disciplineScore", 0, 10),
+      focusScore: getOptionalNumber(payload, review, "focusScore", 0, 10),
+      improvementScore: getOptionalNumber(payload, review, "improvementScore", 0, 10),
+      outputQualityScore: getOptionalNumber(payload, review, "outputQualityScore", 0, 10),
+      completedLeadIndicators: getOptionalNumber(payload, review, "completedLeadIndicators"),
       syncUpdatedAt: processedAt,
     });
 

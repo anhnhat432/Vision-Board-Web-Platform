@@ -305,6 +305,21 @@ interface TestWeeklyReviewRecord extends AppliedWorkspaceMutationEntity {
   nextWeekPriority?: string;
   workloadDecision?: string;
   reviewCompleted?: boolean;
+  commitmentsKept?: string[];
+  commitmentsMissed?: string[];
+  insights?: string;
+  nextWeekCommitments?: string[];
+  keepTactic?: string;
+  reduceTactic?: string;
+  reflection?: string;
+  adjustments?: string;
+  lastReviewAt?: Date;
+  progressScore?: number;
+  disciplineScore?: number;
+  focusScore?: number;
+  improvementScore?: number;
+  outputQualityScore?: number;
+  completedLeadIndicators?: number;
 }
 
 interface TestLeadMetricRecord extends AppliedWorkspaceMutationEntity {
@@ -534,20 +549,14 @@ function createSyncWorkspaceMutationRepository() {
       const key = reviewKey(userId, week.clientPlanId, input.weekNumber);
       const existing = weeklyReviews.get(key);
       const nextRecord: TestWeeklyReviewRecord = {
+        ...existing,
+        ...input,
         id: existing?.id ?? nextId("review"),
         userId,
         clientId: input.clientReviewId ?? `${week.clientPlanId}:review:${input.weekNumber}`,
         clientPlanId: week.clientPlanId,
         clientWeekId: week.clientWeekId,
         weekNumber: input.weekNumber,
-        executionScore: input.executionScore,
-        leadCompletionPercent: input.leadCompletionPercent,
-        lagProgressValue: input.lagProgressValue,
-        biggestOutputThisWeek: input.biggestOutputThisWeek,
-        mainObstacle: input.mainObstacle,
-        nextWeekPriority: input.nextWeekPriority,
-        workloadDecision: input.workloadDecision,
-        reviewCompleted: input.reviewCompleted,
         revision: (existing?.revision ?? 0) + 1,
         syncUpdatedAt: input.syncUpdatedAt,
       };
@@ -1050,11 +1059,41 @@ function createWeeklyReviewMutation(
     clientPlanId?: string;
     clientWeekId?: string;
     weekNumber?: number;
+    payloadOverrides?: Record<string, unknown>;
+    reviewOverrides?: Record<string, unknown>;
+    omitNestedReview?: boolean;
   } = {},
 ): TestMutationRequestBody {
   const clientPlanId = input.clientPlanId ?? "goal_local_1:12-week-system";
   const clientWeekId = input.clientWeekId ?? "goal_local_1:week:1";
   const weekNumber = input.weekNumber ?? 1;
+
+  const review = {
+    weekNumber,
+    leadCompletionPercent: 75,
+    lagProgressValue: "3/5 responses",
+    biggestOutputThisWeek: "One tester completed the loop",
+    mainObstacle: "Setup was long",
+    nextWeekPriority: input.nextWeekPriority ?? "Shorten the setup copy",
+    workloadDecision: "keep same",
+    reviewCompleted: true,
+    progressScore: 8,
+    disciplineScore: 8,
+    focusScore: 7,
+    improvementScore: 8,
+    outputQualityScore: 9,
+    completedLeadIndicators: 3,
+    commitmentsKept: ["Deep work"],
+    commitmentsMissed: ["Exercise"],
+    insights: "Morning work was more reliable",
+    nextWeekCommitments: ["Finish portfolio", "Train twice"],
+    keepTactic: "Morning deep work",
+    reduceTactic: "Optional evening work",
+    reflection: "Legacy reflection",
+    adjustments: "Legacy adjustments",
+    lastReviewAt: "2026-08-08T08:00:00.000Z",
+    ...input.reviewOverrides,
+  };
 
   return {
     batchId: "batch_review_1",
@@ -1076,22 +1115,8 @@ function createWeeklyReviewMutation(
           clientWeekId,
           weekNumber,
           executionScore: 82,
-          review: {
-            weekNumber,
-            leadCompletionPercent: 75,
-            lagProgressValue: "3/5 responses",
-            biggestOutputThisWeek: "One tester completed the loop",
-            mainObstacle: "Setup was long",
-            nextWeekPriority: input.nextWeekPriority ?? "Shorten the setup copy",
-            workloadDecision: "keep same",
-            reviewCompleted: true,
-            progressScore: 8,
-            disciplineScore: 8,
-            focusScore: 7,
-            improvementScore: 8,
-            outputQualityScore: 9,
-            completedLeadIndicators: 3,
-          },
+          ...(input.omitNestedReview ? {} : { review }),
+          ...input.payloadOverrides,
         },
       },
     ],
@@ -1734,7 +1759,78 @@ describe("12-week sync mutation route", () => {
     assert.equal(review?.biggestOutputThisWeek, "One tester completed the loop");
     assert.equal(review?.nextWeekPriority, "Shorten the setup copy");
     assert.equal(review?.reviewCompleted, true);
+    assert.deepEqual(review?.commitmentsKept, ["Deep work"]);
+    assert.deepEqual(review?.commitmentsMissed, ["Exercise"]);
+    assert.equal(review?.insights, "Morning work was more reliable");
+    assert.deepEqual(review?.nextWeekCommitments, ["Finish portfolio", "Train twice"]);
+    assert.equal(review?.keepTactic, "Morning deep work");
+    assert.equal(review?.reduceTactic, "Optional evening work");
+    assert.equal(review?.reflection, "Legacy reflection");
+    assert.equal(review?.adjustments, "Legacy adjustments");
+    assert.equal(review?.lastReviewAt?.toISOString(), "2026-08-08T08:00:00.000Z");
     assert.equal(review?.revision, 1);
+  });
+
+  it("accepts legacy weekly review fields at payload level", async () => {
+    const response = await requestJson(createRouteTestApp(), "POST", "/api/sync/12-week/mutations", {
+      body: createWeeklyReviewMutation("dmq_review_legacy_1", {
+        omitNestedReview: true,
+        payloadOverrides: {
+          executionScore: 55,
+          reflection: "Legacy-only reflection",
+          adjustments: "Legacy-only adjustment",
+          biggestOutputThisWeek: "Legacy output",
+          nextWeekPriority: "Legacy priority",
+        },
+      }),
+    });
+    const review = syncWorkspaceFixture?.getWeeklyReview(ownerUserId, "goal_local_1:12-week-system", 1);
+
+    assert.equal(response.status, 200);
+    assert.equal(review?.executionScore, 55);
+    assert.equal(review?.reflection, "Legacy-only reflection");
+    assert.equal(review?.adjustments, "Legacy-only adjustment");
+    assert.equal(review?.biggestOutputThisWeek, "Legacy output");
+    assert.equal(review?.nextWeekPriority, "Legacy priority");
+  });
+
+  it("normalizes weekly review string arrays and caps them at five items", async () => {
+    const response = await requestJson(createRouteTestApp(), "POST", "/api/sync/12-week/mutations", {
+      body: createWeeklyReviewMutation("dmq_review_arrays_1", {
+        reviewOverrides: {
+          commitmentsKept: [" Deep work ", 42, "", "Exercise", "Plan", "Write", "Ship", "Overflow"],
+          commitmentsMissed: "not-an-array",
+          nextWeekCommitments: [" One ", null, "Two", "", "Three", "Four", "Five", "Six"],
+        },
+      }),
+    });
+    const review = syncWorkspaceFixture?.getWeeklyReview(ownerUserId, "goal_local_1:12-week-system", 1);
+
+    assert.equal(response.status, 200);
+    assert.deepEqual(review?.commitmentsKept, ["Deep work", "Exercise", "Plan", "Write", "Ship"]);
+    assert.equal(review?.commitmentsMissed, undefined);
+    assert.deepEqual(review?.nextWeekCommitments, ["One", "Two", "Three", "Four", "Five"]);
+  });
+
+  it("keeps explicit execution score ahead of legacy rating-derived fallback", async () => {
+    const response = await requestJson(createRouteTestApp(), "POST", "/api/sync/12-week/mutations", {
+      body: createWeeklyReviewMutation("dmq_review_score_priority_1", {
+        payloadOverrides: { executionScore: 20 },
+        reviewOverrides: {
+          executionScore: 90,
+          leadCompletionPercent: 80,
+          progressScore: 8,
+          disciplineScore: 8,
+          focusScore: 8,
+          improvementScore: 8,
+          outputQualityScore: 8,
+        },
+      }),
+    });
+    const review = syncWorkspaceFixture?.getWeeklyReview(ownerUserId, "goal_local_1:12-week-system", 1);
+
+    assert.equal(response.status, 200);
+    assert.equal(review?.executionScore, 20);
   });
 
   it("updates the latest weekly_review_upserted for the same week", async () => {
@@ -2584,6 +2680,23 @@ describe("12-week import apply route", () => {
     assert.equal(response.body.success, false);
     assert.equal(details.status, "invalid");
     assert.ok(details.errors.some((error) => error.path === "body.plan.weeklyReviews[0].progressScore"));
+  });
+
+  it("returns 400 for invalid imported weekly review arrays", async () => {
+    const payload = createValidImportPayload("import_apply_bad_review_arrays_1");
+    const review = payload.plan.weeklyReviews[0] as Record<string, unknown>;
+    review.commitmentsKept = "not-an-array";
+    review.nextWeekCommitments = ["One", "Two", "Three", "Four", "Five", "Six"];
+
+    const response = await requestJson(createRouteTestApp(), "POST", "/api/sync/12-week/import", {
+      body: payload,
+    });
+    const details = response.body.details as TwelveWeekImportValidationReport;
+
+    assert.equal(response.status, 400);
+    assert.equal(details.status, "invalid");
+    assert.ok(details.errors.some((error) => error.path === "body.plan.weeklyReviews[0].commitmentsKept"));
+    assert.ok(details.errors.some((error) => error.path === "body.plan.weeklyReviews[0].nextWeekCommitments"));
   });
 
   it("does not import analytics, billing, or browser-only payload fields", async () => {

@@ -5,29 +5,43 @@ import type { AssistantAction } from "../parseActions";
 // Mock các module liên quan đến storage và feasibility
 vi.mock("@/app/utils/storage", () => {
   const initialMockUserData = {
+    storageVersion: 1,
+    userId: "assistant_test_user",
+    wheelOfLifeHistory: [],
     goals: [
       {
         id: "goal_inactive",
         title: "Inactive Goal",
         category: "career",
+        description: "",
+        deadline: "2026-10-01",
+        createdAt: "2026-06-01T00:00:00.000Z",
         tasks: [],
       },
       {
         id: "goal_123",
         title: "Gym Goal",
         category: "health",
+        description: "",
+        deadline: "2026-10-01",
+        createdAt: "2026-06-01T00:00:00.000Z",
         tasks: [],
         twelveWeekSystem: {
+          lagMetric: { name: "Sessions", unit: "session", target: "12", currentValue: "0" },
           currentWeek: 1,
           totalWeeks: 12,
           taskInstances: [
             {
               id: "task_abc",
               title: "Tập ngực",
+              weekNumber: 1,
               scheduledDate: "2026-06-03",
+              leadIndicatorName: "Tập ngực",
+              isCore: true,
               completed: false,
             },
           ],
+          dailyCheckIns: [],
           weeklyReviews: [],
           scoreboard: [],
         },
@@ -36,24 +50,45 @@ vi.mock("@/app/utils/storage", () => {
         id: "goal_selected",
         title: "Selected Goal",
         category: "learning",
+        description: "",
+        deadline: "2026-10-01",
+        createdAt: "2026-06-01T00:00:00.000Z",
         tasks: [],
         twelveWeekSystem: {
+          lagMetric: { name: "Sessions", unit: "session", target: "12", currentValue: "0" },
           currentWeek: 1,
           totalWeeks: 12,
           taskInstances: [
             {
               id: "task_selected",
               title: "Tập ngực",
+              weekNumber: 1,
               scheduledDate: "2026-06-03",
+              leadIndicatorName: "Tập ngực",
+              isCore: true,
               completed: false,
             },
           ],
+          dailyCheckIns: [],
           weeklyReviews: [],
           scoreboard: [],
         },
       },
     ],
     currentWheelOfLife: [{ name: "Sức khỏe", score: 8, color: "red" }],
+    visionBoards: [],
+    achievements: [],
+    reflections: [],
+    eventLog: [],
+    syncOutbox: [],
+    appPreferences: {
+      allowLocalAnalytics: false,
+      enableInAppReminders: false,
+      enableBrowserNotifications: false,
+      keepLocalOutbox: false,
+      preferredReminderHour: 19,
+    },
+    onboardingCompleted: true,
   };
 
   // Mutable reference: saveUserData updates this, getUserData reads it
@@ -63,6 +98,7 @@ vi.mock("@/app/utils/storage", () => {
     getUserData: vi.fn(() => JSON.parse(JSON.stringify(currentData))),
     saveUserData: vi.fn((data: unknown) => {
       currentData = JSON.parse(JSON.stringify(data));
+      return true;
     }),
     addReflection: vi.fn(),
     addGoal: vi.fn(() => "new_goal_999"),
@@ -102,6 +138,10 @@ vi.mock("@/app/utils/storage-goal-ops", () => ({
   ),
 }));
 
+vi.mock("@/app/utils/storage-achievement-ops", () => ({
+  checkAchievementsInData: vi.fn(),
+}));
+
 vi.mock("@/app/pages/FeasibilityCheck/helpers", () => ({
   buildResult: vi.fn(() => ({
     type: "realistic",
@@ -127,6 +167,7 @@ vi.mock("@/app/pages/FeasibilityCheck/helpers", () => ({
 vi.mock("@/app/utils/storage-twelve-week", () => ({
   buildDerivedScoreboard: vi.fn(() => []),
   getDefaultScoreboard: vi.fn(() => []),
+  getTwelveWeekWeekCompletion: vi.fn(() => ({ completed: 0, total: 1, percent: 0, isEmpty: false })),
   getActiveTwelveWeekGoal: vi.fn((goals: Array<{ id: string }> | null | undefined, preferredGoalId?: string | null) => {
     if (!goals) return null;
     if (preferredGoalId) {
@@ -137,8 +178,9 @@ vi.mock("@/app/utils/storage-twelve-week", () => ({
   }),
 }));
 
-import { APP_STORAGE_KEYS, addGoal, addReflection, saveUserData } from "@/app/utils/storage";
+import { APP_STORAGE_KEYS, addGoal, addReflection, getUserData, saveUserData } from "@/app/utils/storage";
 import { toggleTwelveWeekTaskInData } from "@/app/utils/storage-goal-ops";
+import { listStoredPendingMutations } from "@/features/plan12week/persistence/mutationQueue";
 
 // biome-ignore lint/suspicious/noExplicitAny: test helper reset function
 const { __resetMockData } = (await import("@/app/utils/storage")) as any;
@@ -277,6 +319,102 @@ describe("executeAction - Phase 5 Action Suite", () => {
     expect(result.success).toBe(true);
     expect(result.message).toContain("Đã cập nhật review tuần 1");
     expect(saveUserData).toHaveBeenCalled();
+  });
+
+  it("queues Assistant weekly review through the canonical contract without fake ratings", async () => {
+    const action: AssistantAction = {
+      id: "a5_canonical",
+      type: "add_weekly_review",
+      label: "Add canonical weekly review",
+      payload: {
+        goalId: "goal_123",
+        weekNumber: 1,
+        mainObstacle: "Late meetings",
+        nextWeekPriority: "Ship portfolio",
+        workloadDecision: "reduce slightly",
+        biggestOutputThisWeek: "Finished case study",
+        reflection: "Morning work was more reliable",
+        adjustments: "Train twice",
+      },
+    };
+
+    const result = await executeAction(action);
+    const review = getUserData().goals.find((goal) => goal.id === "goal_123")?.twelveWeekSystem?.weeklyReviews[0];
+    const mutations = listStoredPendingMutations(null).filter((item) => item.kind === "weekly_review_upserted");
+
+    expect(result.success).toBe(true);
+    expect(review).toEqual(
+      expect.objectContaining({
+        executionScore: 0,
+        insights: "Morning work was more reliable",
+        nextWeekCommitments: ["Ship portfolio"],
+      }),
+    );
+    expect(review).not.toHaveProperty("progressScore");
+    expect(review).not.toHaveProperty("disciplineScore");
+    expect(review).not.toHaveProperty("focusScore");
+    expect(review).not.toHaveProperty("improvementScore");
+    expect(review).not.toHaveProperty("outputQualityScore");
+    expect(mutations).toHaveLength(1);
+  });
+
+  it("preserves unrelated existing review fields during a partial Assistant update", async () => {
+    const data = getUserData();
+    const goal = data.goals.find((item) => item.id === "goal_123");
+    if (!goal?.twelveWeekSystem) throw new Error("Expected Assistant test goal");
+    goal.twelveWeekSystem.weeklyReviews = [
+      {
+        weekNumber: 1,
+        leadCompletionPercent: 50,
+        executionScore: 50,
+        lagProgressValue: "20",
+        biggestOutputThisWeek: "Existing output",
+        mainObstacle: "Existing obstacle",
+        nextWeekPriority: "Existing priority",
+        workloadDecision: "keep same",
+        reviewCompleted: true,
+        commitmentsKept: ["Deep work"],
+        commitmentsMissed: ["Exercise"],
+        insights: "Existing insight",
+        nextWeekCommitments: ["Finish portfolio", "Train twice"],
+        keepTactic: "Morning work",
+        reduceTactic: "Late meetings",
+        progressScore: 7,
+      },
+    ];
+    saveUserData(data);
+
+    const action: AssistantAction = {
+      id: "a5_partial",
+      type: "add_weekly_review",
+      label: "Update weekly review partially",
+      payload: {
+        goalId: "goal_123",
+        weekNumber: 1,
+        mainObstacle: "Updated obstacle",
+        nextWeekPriority: "Updated priority",
+        reflection: "Updated reflection",
+      },
+    };
+
+    const result = await executeAction(action);
+    const review = getUserData().goals.find((item) => item.id === "goal_123")?.twelveWeekSystem?.weeklyReviews[0];
+
+    expect(result.success).toBe(true);
+    expect(review).toEqual(
+      expect.objectContaining({
+        mainObstacle: "Updated obstacle",
+        nextWeekPriority: "Updated priority",
+        commitmentsKept: ["Deep work"],
+        commitmentsMissed: ["Exercise"],
+        insights: "Existing insight",
+        nextWeekCommitments: ["Finish portfolio", "Train twice"],
+        keepTactic: "Morning work",
+        reduceTactic: "Late meetings",
+        progressScore: 7,
+      }),
+    );
+    expect(listStoredPendingMutations(null).filter((item) => item.kind === "weekly_review_upserted")).toHaveLength(1);
   });
 
   it("executes reschedule_task successfully", async () => {

@@ -233,6 +233,15 @@ export interface ImportWeeklyReviewData {
   nextWeekPriority?: string;
   workloadDecision?: "keep same" | "reduce slightly" | "increase slightly" | "";
   reviewCompleted?: boolean;
+  commitmentsKept?: string[];
+  commitmentsMissed?: string[];
+  insights?: string;
+  nextWeekCommitments?: string[];
+  keepTactic?: string;
+  reduceTactic?: string;
+  reflection?: string;
+  adjustments?: string;
+  lastReviewAt?: Date;
   progressScore?: number;
   disciplineScore?: number;
   focusScore?: number;

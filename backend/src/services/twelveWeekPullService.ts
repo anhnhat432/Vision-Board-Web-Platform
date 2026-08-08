@@ -154,6 +154,13 @@ export interface PullWeeklyReviewSource extends SyncEntityBase {
   nextWeekPriority?: string | null;
   workloadDecision?: string | null;
   reviewCompleted?: boolean | null;
+  commitmentsKept?: string[] | null;
+  commitmentsMissed?: string[] | null;
+  insights?: string | null;
+  nextWeekCommitments?: string[] | null;
+  keepTactic?: string | null;
+  reduceTactic?: string | null;
+  lastReviewAt?: NullableDate;
   progressScore?: number | null;
   disciplineScore?: number | null;
   focusScore?: number | null;
@@ -333,6 +340,13 @@ export interface TwelveWeekPullWorkspace {
       nextWeekPriority?: string;
       workloadDecision?: string;
       reviewCompleted?: boolean;
+      commitmentsKept?: string[];
+      commitmentsMissed?: string[];
+      insights?: string;
+      nextWeekCommitments?: string[];
+      keepTactic?: string;
+      reduceTactic?: string;
+      lastReviewAt?: string;
       progressScore?: number;
       disciplineScore?: number;
       focusScore?: number;
@@ -527,6 +541,10 @@ function optionalString(value: unknown): string | undefined {
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
 
+function optionalReviewString(value: unknown): string | undefined {
+  return typeof value === "string" ? value.trim() : undefined;
+}
+
 function optionalNumber(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
 }
@@ -540,10 +558,11 @@ function optionalRecord(value: unknown): Record<string, unknown> | undefined {
   return { ...(value as Record<string, unknown>) };
 }
 
-function optionalStringArray(value: unknown): string[] | undefined {
+function optionalStringArray(value: unknown, maxItems?: number, preserveEmpty = false): string[] | undefined {
   if (!Array.isArray(value)) return undefined;
   const items = value.map(optionalString).filter(isString);
-  return items.length > 0 ? items : undefined;
+  const normalizedItems = maxItems === undefined ? items : items.slice(0, maxItems);
+  return normalizedItems.length > 0 || preserveEmpty ? normalizedItems : undefined;
 }
 
 function optionalNumberArray(value: unknown): number[] | undefined {
@@ -722,15 +741,22 @@ function mapWeeklyReview(doc: PullWeeklyReviewSource): TwelveWeekPullWorkspace["
     clientReviewId: optionalString(doc.clientReviewId),
     weekNumber: optionalNumber(doc.weekNumber),
     executionScore: optionalNumber(doc.executionScore),
-    reflection: optionalString(doc.reflection),
-    adjustments: optionalString(doc.adjustments),
+    reflection: optionalReviewString(doc.reflection),
+    adjustments: optionalReviewString(doc.adjustments),
     leadCompletionPercent: optionalNumber(doc.leadCompletionPercent),
-    lagProgressValue: optionalString(doc.lagProgressValue),
-    biggestOutputThisWeek: optionalString(doc.biggestOutputThisWeek),
-    mainObstacle: optionalString(doc.mainObstacle),
-    nextWeekPriority: optionalString(doc.nextWeekPriority),
-    workloadDecision: optionalString(doc.workloadDecision),
+    lagProgressValue: optionalReviewString(doc.lagProgressValue),
+    biggestOutputThisWeek: optionalReviewString(doc.biggestOutputThisWeek),
+    mainObstacle: optionalReviewString(doc.mainObstacle),
+    nextWeekPriority: optionalReviewString(doc.nextWeekPriority),
+    workloadDecision: optionalReviewString(doc.workloadDecision),
     reviewCompleted: optionalBoolean(doc.reviewCompleted),
+    commitmentsKept: optionalStringArray(doc.commitmentsKept, 5, true),
+    commitmentsMissed: optionalStringArray(doc.commitmentsMissed, 5, true),
+    insights: optionalReviewString(doc.insights),
+    nextWeekCommitments: optionalStringArray(doc.nextWeekCommitments, 5, true),
+    keepTactic: optionalReviewString(doc.keepTactic),
+    reduceTactic: optionalReviewString(doc.reduceTactic),
+    lastReviewAt: toIsoString(doc.lastReviewAt),
     progressScore: optionalNumber(doc.progressScore),
     disciplineScore: optionalNumber(doc.disciplineScore),
     focusScore: optionalNumber(doc.focusScore),

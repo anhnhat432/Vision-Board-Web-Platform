@@ -235,6 +235,70 @@ describe("two-device 12-week auto-sync integration", () => {
     expect(mounted.getLatestState()?.firstLoginRestoreSummary).toBeNull();
   });
 
+  it("preserves the full Week 4 review meaning when another device pulls it", async () => {
+    const backend = createMockBackend();
+    configureBackend(backend);
+
+    const weekFourReview = makeWeeklyReview(4, {
+      executionScore: 81,
+      leadCompletionPercent: 81,
+      lagProgressValue: "42",
+      biggestOutputThisWeek: "Finished case study",
+      mainObstacle: "Late meetings",
+      nextWeekPriority: "Ship portfolio",
+      workloadDecision: "reduce slightly",
+      commitmentsKept: ["Deep work"],
+      commitmentsMissed: ["Exercise"],
+      insights: "Morning work was more reliable",
+      nextWeekCommitments: ["Finish portfolio", "Train twice"],
+      keepTactic: "Morning deep work",
+      reduceTactic: "Optional evening work",
+      reflection: "Legacy reflection",
+      adjustments: "Legacy adjustments",
+      reviewCompleted: true,
+      lastReviewAt: "2026-05-31T10:00:00.000Z",
+    });
+
+    const device1 = setupDevice(UID, { setAuthUser: setSignedIn });
+    seedDeviceWithData(device1, {
+      title: "Canonical review round trip",
+      weeklyReviews: [weekFourReview],
+    });
+
+    await drainDeviceToCloud(device1, backend);
+
+    const device2 = setupDevice(UID, { setAuthUser: setSignedIn });
+    device2.mountProvider();
+
+    await waitFor(() => {
+      const restoredReview = device2.getUserData().goals[0]?.twelveWeekSystem?.weeklyReviews.find(
+        (review) => review.weekNumber === 4,
+      );
+      expect(restoredReview).toEqual(
+        expect.objectContaining({
+          weekNumber: 4,
+          executionScore: 81,
+          leadCompletionPercent: 81,
+          lagProgressValue: "42",
+          biggestOutputThisWeek: "Finished case study",
+          mainObstacle: "Late meetings",
+          nextWeekPriority: "Ship portfolio",
+          workloadDecision: "reduce slightly",
+          commitmentsKept: ["Deep work"],
+          commitmentsMissed: ["Exercise"],
+          insights: "Morning work was more reliable",
+          nextWeekCommitments: ["Finish portfolio", "Train twice"],
+          keepTactic: "Morning deep work",
+          reduceTactic: "Optional evening work",
+          reflection: "Legacy reflection",
+          adjustments: "Legacy adjustments",
+          reviewCompleted: true,
+          lastReviewAt: "2026-05-31T10:00:00.000Z",
+        }),
+      );
+    });
+  });
+
   it("surfaces concurrent edits instead of auto-overwriting either side", async () => {
     const backend = createMockBackend();
     configureBackend(backend);

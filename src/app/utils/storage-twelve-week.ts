@@ -294,7 +294,8 @@ function normalizeTextArray(values: unknown): string[] {
   return values
     .filter((value): value is string => typeof value === "string")
     .map((value) => value.trim())
-    .filter(Boolean);
+    .filter(Boolean)
+    .slice(0, 5);
 }
 
 function firstNonEmptyText(...values: unknown[]): string | undefined {
@@ -306,18 +307,26 @@ function firstNonEmptyText(...values: unknown[]): string | undefined {
   return undefined;
 }
 
+function hasOwn(value: object, key: PropertyKey): boolean {
+  return Object.getOwnPropertyDescriptor(value, key) !== undefined;
+}
+
 function normalizeWeeklyReview(review: UniversalWeeklyReview): UniversalWeeklyReview {
   const legacyReview = review as UniversalWeeklyReview & {
     reflection?: string;
     adjustments?: string;
   };
-  const insights = firstNonEmptyText(
-    legacyReview.insights,
-    legacyReview.reflection,
-    legacyReview.biggestOutputThisWeek,
-  );
+  const hasInsights = hasOwn(legacyReview, "insights");
+  const insights = hasInsights
+    ? typeof legacyReview.insights === "string"
+      ? legacyReview.insights.trim()
+      : undefined
+    : firstNonEmptyText(legacyReview.reflection, legacyReview.biggestOutputThisWeek);
+  const hasNextWeekCommitments = hasOwn(legacyReview, "nextWeekCommitments");
   const nextWeekCommitments = normalizeTextArray(legacyReview.nextWeekCommitments);
-  const legacyNextWeekCommitment = firstNonEmptyText(legacyReview.adjustments, legacyReview.nextWeekPriority);
+  const legacyNextWeekCommitment = firstNonEmptyText(legacyReview.nextWeekPriority, legacyReview.adjustments);
+  const hasReflection = hasOwn(legacyReview, "reflection");
+  const hasAdjustments = hasOwn(legacyReview, "adjustments");
 
   return {
     ...review,
@@ -325,10 +334,22 @@ function normalizeWeeklyReview(review: UniversalWeeklyReview): UniversalWeeklyRe
     commitmentsMissed: normalizeTextArray(legacyReview.commitmentsMissed),
     insights,
     nextWeekCommitments:
-      nextWeekCommitments.length > 0 ? nextWeekCommitments : legacyNextWeekCommitment ? [legacyNextWeekCommitment] : [],
+      hasNextWeekCommitments
+        ? nextWeekCommitments
+        : legacyNextWeekCommitment
+          ? [legacyNextWeekCommitment]
+          : [],
     executionScore: legacyReview.executionScore ?? review.leadCompletionPercent,
-    reflection: legacyReview.reflection ?? insights,
-    adjustments: legacyReview.adjustments ?? legacyNextWeekCommitment,
+    reflection: hasReflection
+      ? typeof legacyReview.reflection === "string"
+        ? legacyReview.reflection.trim()
+        : undefined
+      : insights,
+    adjustments: hasAdjustments
+      ? typeof legacyReview.adjustments === "string"
+        ? legacyReview.adjustments.trim()
+        : undefined
+      : firstNonEmptyText(legacyReview.nextWeekPriority),
   };
 }
 

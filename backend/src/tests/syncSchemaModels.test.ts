@@ -175,6 +175,46 @@ describe("sync-ready schema metadata", () => {
     assertIndex(asModelLike(WeekReviewModel), { userId: 1, syncUpdatedAt: 1, _id: 1 });
   });
 
+  it("keeps canonical weekly review fields additive and accepts legacy documents", () => {
+    const optionalFields = [
+      "commitmentsKept",
+      "commitmentsMissed",
+      "insights",
+      "nextWeekCommitments",
+      "keepTactic",
+      "reduceTactic",
+      "lastReviewAt",
+    ];
+
+    for (const field of optionalFields) {
+      assert.equal(getPathOptions(asModelLike(WeekReviewModel), field).required, false);
+    }
+
+    const canonicalReview = new WeekReviewModel({
+      weekId: "64f000000000000000000001",
+      weekNumber: 4,
+      executionScore: 81,
+      commitmentsKept: [" Deep work ", "", "Exercise"],
+      commitmentsMissed: ["Exercise"],
+      insights: "Morning work was more reliable",
+      nextWeekCommitments: ["Finish portfolio", "Train twice"],
+      keepTactic: "Morning deep work",
+      reduceTactic: "Optional evening work",
+      lastReviewAt: new Date("2026-08-08T08:00:00.000Z"),
+    });
+    assert.equal(canonicalReview.validateSync(), undefined);
+    assert.deepEqual(canonicalReview.commitmentsKept, ["Deep work", "Exercise"]);
+
+    const legacyReview = new WeekReviewModel({
+      weekId: "64f000000000000000000002",
+      weekNumber: 3,
+      executionScore: 60,
+      reflection: "Legacy reflection",
+      adjustments: "Legacy adjustment",
+    });
+    assert.equal(legacyReview.validateSync(), undefined);
+  });
+
   it("keeps discount code unique through one schema source", () => {
     const discountModel = asModelLike(DiscountModel);
     assert.equal(getPathOptions(discountModel, "code").unique, true);

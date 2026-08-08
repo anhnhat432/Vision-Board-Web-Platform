@@ -45,7 +45,7 @@ function replaceMethod<T extends object, K extends keyof T>(target: T, key: K, v
   };
 }
 
-function createPullRepository(): TwelveWeekPullRepository {
+function createPullRepository(reviewOverrides: Partial<PullWeeklyReviewSource> = {}): TwelveWeekPullRepository {
   const baseSyncTime = new Date("2026-04-30T01:00:00.000Z");
   const deletedGoalSyncTime = new Date("2026-04-30T01:20:00.000Z");
   const deletedPlanSyncTime = new Date("2026-04-30T01:20:00.000Z");
@@ -272,11 +272,24 @@ function createPullRepository(): TwelveWeekPullRepository {
       weekNumber: 1,
       executionScore: 82,
       leadCompletionPercent: 75,
+      lagProgressValue: "42",
       biggestOutputThisWeek: "One tester completed the loop",
+      mainObstacle: "Late meetings",
       nextWeekPriority: "Shorten setup copy",
+      workloadDecision: "reduce slightly",
       reviewCompleted: true,
+      commitmentsKept: ["Deep work"],
+      commitmentsMissed: ["Exercise"],
+      insights: "Morning work was more reliable",
+      nextWeekCommitments: ["Finish portfolio", "Train twice"],
+      keepTactic: "Morning deep work",
+      reduceTactic: "Optional evening work",
+      reflection: "Legacy reflection",
+      adjustments: "Legacy adjustment",
+      lastReviewAt: new Date("2026-08-08T08:00:00.000Z"),
       revision: 1,
       syncUpdatedAt: baseSyncTime,
+      ...reviewOverrides,
     },
     {
       _id: "review_mismatched_user_1",
@@ -326,8 +339,8 @@ function createPullRepository(): TwelveWeekPullRepository {
   };
 }
 
-function installPullServiceMock(): Restorer {
-  const routedService = new TwelveWeekPullService(createPullRepository());
+function installPullServiceMock(reviewOverrides: Partial<PullWeeklyReviewSource> = {}): Restorer {
+  const routedService = new TwelveWeekPullService(createPullRepository(reviewOverrides));
   return replaceMethod(
     twelveWeekPullService,
     "pullWorkspace",
@@ -467,11 +480,66 @@ describe("12-week pull route", () => {
     assert.equal(data.workspace.tasks[0].completedAt, "2026-04-30T02:00:00.000Z");
     assert.equal(data.workspace.leadMetrics[0].clientMetricId, "metric_owner_1");
     assert.equal(data.workspace.dailyCheckIns[0].amountDone, "One user test");
-    assert.equal(data.workspace.weeklyReviews[0].leadCompletionPercent, 75);
+    assert.deepEqual(data.workspace.weeklyReviews[0], {
+      id: "review_owner_1",
+      planId: "plan_owner_1",
+      weekId: "week_owner_1",
+      clientPlanId: ownerPlanClientId,
+      clientWeekId: ownerWeekClientId,
+      clientReviewId: `${ownerPlanClientId}:review:1`,
+      weekNumber: 1,
+      executionScore: 82,
+      reflection: "Legacy reflection",
+      adjustments: "Legacy adjustment",
+      leadCompletionPercent: 75,
+      lagProgressValue: "42",
+      biggestOutputThisWeek: "One tester completed the loop",
+      mainObstacle: "Late meetings",
+      nextWeekPriority: "Shorten setup copy",
+      workloadDecision: "reduce slightly",
+      reviewCompleted: true,
+      commitmentsKept: ["Deep work"],
+      commitmentsMissed: ["Exercise"],
+      insights: "Morning work was more reliable",
+      nextWeekCommitments: ["Finish portfolio", "Train twice"],
+      keepTactic: "Morning deep work",
+      reduceTactic: "Optional evening work",
+      lastReviewAt: "2026-08-08T08:00:00.000Z",
+      revision: 1,
+      syncUpdatedAt: "2026-04-30T01:00:00.000Z",
+    });
     assert.deepEqual(data.workspace, data.changes);
     assert.equal(data.hasMore, false);
     assert.match(data.nextCursor, /^twpc_v1_/);
     assert.equal(data.cursorStatus, "not_provided");
+  });
+
+  it("preserves explicit weekly review clears in the pull response", async () => {
+    restorePullService();
+    restorePullService = installPullServiceMock({
+      commitmentsKept: [],
+      commitmentsMissed: [],
+      insights: "",
+      nextWeekPriority: "",
+      nextWeekCommitments: [],
+      keepTactic: "",
+      reduceTactic: "",
+      reflection: "",
+      adjustments: "",
+    });
+
+    const response = await requestJson(createRouteTestApp(), "GET", "/api/sync/12-week/pull");
+    const review = getPullResult(response).workspace.weeklyReviews[0];
+
+    assert.deepEqual(review.commitmentsKept, []);
+    assert.deepEqual(review.commitmentsMissed, []);
+    assert.equal(review.insights, "");
+    assert.equal(review.nextWeekPriority, "");
+    assert.deepEqual(review.nextWeekCommitments, []);
+    assert.equal(review.keepTactic, "");
+    assert.equal(review.reduceTactic, "");
+    assert.equal(review.reflection, "");
+    assert.equal(review.adjustments, "");
   });
 
   it("returns only changed task records for an incremental pull cursor", async () => {

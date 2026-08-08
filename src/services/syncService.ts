@@ -256,6 +256,13 @@ export interface TwelveWeekPulledWeeklyReview extends TwelveWeekPullEntityBase {
   nextWeekPriority?: string;
   workloadDecision?: string;
   reviewCompleted?: boolean;
+  commitmentsKept?: string[];
+  commitmentsMissed?: string[];
+  insights?: string;
+  nextWeekCommitments?: string[];
+  keepTactic?: string;
+  reduceTactic?: string;
+  lastReviewAt?: string;
   progressScore?: number;
   disciplineScore?: number;
   focusScore?: number;
