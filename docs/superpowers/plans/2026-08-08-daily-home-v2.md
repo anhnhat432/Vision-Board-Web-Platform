@@ -98,7 +98,7 @@ Run:
 
 ```bash
 npm run test:ui -- src/app/pages/Dashboard.active-system.test.tsx src/app/pages/Dashboard.fresh-state.test.tsx src/app/pages/Dashboard.test.tsx
-npm run test:run -- src/features/plan12week/persistence/taskCompletionMutation.test.ts
+npm run test:sync -- src/features/plan12week/persistence/taskCompletionMutation.test.ts
 ```
 
 Expected: existing Dashboard and canonical completion tests pass. Record exact counts. If a command fails, capture the failure before editing and determine whether it is a baseline blocker.

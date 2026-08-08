@@ -51,7 +51,7 @@ export function WeeklyPulseCard({
       </div>
       <div className="mt-5 space-y-2 text-xs font-semibold">
         {overdueOpenCount > 0 ? (
-          <p className="flex items-center gap-2 rounded-control border border-app-warm-border bg-app-warm-soft px-3 py-2 text-app-warm-strong">
+          <p className="flex items-center gap-2 rounded-control border border-app-status-warning/30 bg-app-status-warning/10 px-3 py-2 text-app-status-warning">
             <AlertTriangle className="h-4 w-4" aria-hidden="true" />
             {overdueOpenCount} việc đang trễ
           </p>
