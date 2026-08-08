@@ -48,6 +48,10 @@ import type {
   UpsertResult,
 } from "./types";
 
+function setDefined(target: Record<string, unknown>, key: string, value: unknown): void {
+  if (value !== undefined) target[key] = value;
+}
+
 export class MongoTwelveWeekImportRepository implements TwelveWeekImportRepository {
   constructor(private readonly mutationLogRepository = new MongoSyncMutationLogRepository()) {}
 
@@ -320,47 +324,54 @@ export class MongoTwelveWeekImportRepository implements TwelveWeekImportReposito
         weekNumber: data.weekNumber,
       }),
     ).lean();
-    const update = {
+    const update: Record<string, unknown> = {
       userId: data.userId,
       planId: data.planId,
       weekId: data.weekId,
       weekNumber: data.weekNumber,
       executionScore: data.executionScore,
-      reflection: data.biggestOutputThisWeek,
-      adjustments: data.nextWeekPriority,
       clientPlanId: data.clientPlanId,
       clientWeekId: data.clientWeekId,
       clientReviewId: data.clientReviewId,
-      leadCompletionPercent: data.leadCompletionPercent,
-      lagProgressValue: data.lagProgressValue,
-      biggestOutputThisWeek: data.biggestOutputThisWeek,
-      mainObstacle: data.mainObstacle,
-      nextWeekPriority: data.nextWeekPriority,
-      workloadDecision: data.workloadDecision,
-      reviewCompleted: data.reviewCompleted,
-      progressScore: data.progressScore,
-      disciplineScore: data.disciplineScore,
-      focusScore: data.focusScore,
-      improvementScore: data.improvementScore,
-      outputQualityScore: data.outputQualityScore,
-      completedLeadIndicators: data.completedLeadIndicators,
       lastMutationId: data.importId,
       syncUpdatedAt: data.syncUpdatedAt,
     };
+    setDefined(update, "leadCompletionPercent", data.leadCompletionPercent);
+    setDefined(update, "lagProgressValue", data.lagProgressValue);
+    setDefined(update, "biggestOutputThisWeek", data.biggestOutputThisWeek);
+    setDefined(update, "mainObstacle", data.mainObstacle);
+    setDefined(update, "nextWeekPriority", data.nextWeekPriority);
+    setDefined(update, "workloadDecision", data.workloadDecision);
+    setDefined(update, "reviewCompleted", data.reviewCompleted);
+    setDefined(update, "commitmentsKept", data.commitmentsKept);
+    setDefined(update, "commitmentsMissed", data.commitmentsMissed);
+    setDefined(update, "insights", data.insights);
+    setDefined(update, "nextWeekCommitments", data.nextWeekCommitments);
+    setDefined(update, "keepTactic", data.keepTactic);
+    setDefined(update, "reduceTactic", data.reduceTactic);
+    setDefined(update, "reflection", data.reflection);
+    setDefined(update, "adjustments", data.adjustments);
+    setDefined(update, "lastReviewAt", data.lastReviewAt);
+    setDefined(update, "progressScore", data.progressScore);
+    setDefined(update, "disciplineScore", data.disciplineScore);
+    setDefined(update, "focusScore", data.focusScore);
+    setDefined(update, "improvementScore", data.improvementScore);
+    setDefined(update, "outputQualityScore", data.outputQualityScore);
+    setDefined(update, "completedLeadIndicators", data.completedLeadIndicators);
+
+    const weekUpdate: Record<string, unknown> = {
+      "review.weekNumber": data.weekNumber,
+      "review.executionScore": data.executionScore,
+      lastMutationId: data.importId,
+      syncUpdatedAt: data.syncUpdatedAt,
+    };
+    setDefined(weekUpdate, "review.reflection", data.reflection);
+    setDefined(weekUpdate, "review.adjustments", data.adjustments);
 
     await WeekModel.findOneAndUpdate(
       withoutTombstones({ _id: data.weekId }),
       {
-        $set: {
-          review: {
-            weekNumber: data.weekNumber,
-            executionScore: data.executionScore,
-            reflection: data.biggestOutputThisWeek,
-            adjustments: data.nextWeekPriority,
-          },
-          lastMutationId: data.importId,
-          syncUpdatedAt: data.syncUpdatedAt,
-        },
+        $set: weekUpdate,
       },
       { runValidators: true },
     );

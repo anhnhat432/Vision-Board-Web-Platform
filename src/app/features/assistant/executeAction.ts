@@ -1,8 +1,9 @@
 import { buildResult } from "@/app/pages/FeasibilityCheck/helpers";
 import { APP_STORAGE_KEYS, addGoal, addReflection, getUserData, saveUserData } from "@/app/utils/storage";
 import { toggleTwelveWeekTaskInData } from "@/app/utils/storage-goal-ops";
-import { buildDerivedScoreboard, getActiveTwelveWeekGoal, getDefaultScoreboard } from "@/app/utils/storage-twelve-week";
+import { getActiveTwelveWeekGoal } from "@/app/utils/storage-twelve-week";
 import type { Goal, TwelveWeekSystem, TwelveWeekTaskInstance } from "@/app/utils/storage-types";
+import { commitTwelveWeekWeeklyReview, type WeeklyReviewCommitPatch } from "@/features/plan12week/persistence/weeklyReviewMutation";
 import { updateAssistantMemoryFromActionResult } from "./assistantMemory";
 import type { AssistantAction } from "./parseActions";
 
@@ -408,14 +409,28 @@ async function runAction(action: AssistantAction): Promise<ActionExecutionResult
       const payloadUpdates = action.payload as {
         goalId: string;
         weekNumber: number;
-        mainObstacle: string;
-        nextWeekPriority: string;
-        workloadDecision: "keep same" | "reduce slightly" | "increase slightly" | "";
-        biggestOutputThisWeek: string;
-        reflection: string;
-        adjustments: string;
+        leadCompletionPercent?: number;
+        executionScore?: number;
+        lagProgressValue?: string;
+        mainObstacle?: string;
+        nextWeekPriority?: string;
+        workloadDecision?: "keep same" | "reduce slightly" | "increase slightly" | "";
+        biggestOutputThisWeek?: string;
+        reflection?: string;
+        adjustments?: string;
+        commitmentsKept?: string[];
+        commitmentsMissed?: string[];
+        insights?: string;
+        nextWeekCommitments?: string[];
+        keepTactic?: string;
+        reduceTactic?: string;
+        reviewCompleted?: boolean;
         disciplineScore?: number;
         progressScore?: number;
+        focusScore?: number;
+        improvementScore?: number;
+        outputQualityScore?: number;
+        completedLeadIndicators?: number;
       };
       const { goalId, weekNumber } = payloadUpdates;
 
@@ -434,42 +449,75 @@ async function runAction(action: AssistantAction): Promise<ActionExecutionResult
         return { success: false, message: "Mục tiêu chưa thiết lập hệ thống 12 tuần." };
       }
 
-      system.weeklyReviews = system.weeklyReviews || [];
-      const index = system.weeklyReviews.findIndex((r) => r.weekNumber === weekNumber);
-
-      const defaultReview = {
+      const existingReview = system.weeklyReviews?.find((review) => review.weekNumber === weekNumber);
+      const reviewPatch: WeeklyReviewCommitPatch = {
         weekNumber,
-        leadCompletionPercent: 0,
-        lagProgressValue: "",
-        biggestOutputThisWeek: "",
-        mainObstacle: "",
-        nextWeekPriority: "",
-        workloadDecision: "" as const,
-        reviewCompleted: true,
-        progressScore: 5,
-        disciplineScore: 5,
-        focusScore: 5,
-        improvementScore: 5,
-        outputQualityScore: 5,
-        lastReviewAt: new Date().toISOString(),
+        reviewCompleted: payloadUpdates.reviewCompleted ?? true,
+        ...(typeof payloadUpdates.leadCompletionPercent === "number"
+          ? { leadCompletionPercent: payloadUpdates.leadCompletionPercent }
+          : {}),
+        ...(typeof payloadUpdates.executionScore === "number" ? { executionScore: payloadUpdates.executionScore } : {}),
+        ...(typeof payloadUpdates.lagProgressValue === "string"
+          ? { lagProgressValue: payloadUpdates.lagProgressValue }
+          : {}),
+        ...(typeof payloadUpdates.biggestOutputThisWeek === "string"
+          ? { biggestOutputThisWeek: payloadUpdates.biggestOutputThisWeek }
+          : {}),
+        ...(typeof payloadUpdates.mainObstacle === "string" ? { mainObstacle: payloadUpdates.mainObstacle } : {}),
+        ...(typeof payloadUpdates.nextWeekPriority === "string"
+          ? { nextWeekPriority: payloadUpdates.nextWeekPriority }
+          : {}),
+        ...(payloadUpdates.workloadDecision !== undefined
+          ? { workloadDecision: payloadUpdates.workloadDecision }
+          : {}),
+        ...(Array.isArray(payloadUpdates.commitmentsKept)
+          ? { commitmentsKept: payloadUpdates.commitmentsKept }
+          : {}),
+        ...(Array.isArray(payloadUpdates.commitmentsMissed)
+          ? { commitmentsMissed: payloadUpdates.commitmentsMissed }
+          : {}),
+        ...(typeof payloadUpdates.insights === "string"
+          ? { insights: payloadUpdates.insights }
+          : !existingReview && typeof payloadUpdates.reflection === "string"
+            ? { insights: payloadUpdates.reflection }
+            : {}),
+        ...(Array.isArray(payloadUpdates.nextWeekCommitments)
+          ? { nextWeekCommitments: payloadUpdates.nextWeekCommitments }
+          : !existingReview && typeof payloadUpdates.nextWeekPriority === "string"
+            ? { nextWeekCommitments: [payloadUpdates.nextWeekPriority] }
+            : !existingReview && typeof payloadUpdates.adjustments === "string"
+              ? { nextWeekCommitments: [payloadUpdates.adjustments] }
+              : {}),
+        ...(typeof payloadUpdates.keepTactic === "string" ? { keepTactic: payloadUpdates.keepTactic } : {}),
+        ...(typeof payloadUpdates.reduceTactic === "string" ? { reduceTactic: payloadUpdates.reduceTactic } : {}),
+        ...(typeof payloadUpdates.reflection === "string" ? { reflection: payloadUpdates.reflection } : {}),
+        ...(typeof payloadUpdates.adjustments === "string" ? { adjustments: payloadUpdates.adjustments } : {}),
+        ...(typeof payloadUpdates.progressScore === "number" ? { progressScore: payloadUpdates.progressScore } : {}),
+        ...(typeof payloadUpdates.disciplineScore === "number"
+          ? { disciplineScore: payloadUpdates.disciplineScore }
+          : {}),
+        ...(typeof payloadUpdates.focusScore === "number" ? { focusScore: payloadUpdates.focusScore } : {}),
+        ...(typeof payloadUpdates.improvementScore === "number"
+          ? { improvementScore: payloadUpdates.improvementScore }
+          : {}),
+        ...(typeof payloadUpdates.outputQualityScore === "number"
+          ? { outputQualityScore: payloadUpdates.outputQualityScore }
+          : {}),
+        ...(typeof payloadUpdates.completedLeadIndicators === "number"
+          ? { completedLeadIndicators: payloadUpdates.completedLeadIndicators }
+          : {}),
       };
-
-      if (index >= 0) {
-        system.weeklyReviews[index] = {
-          ...defaultReview,
-          ...system.weeklyReviews[index],
-          ...payloadUpdates,
-        };
-      } else {
-        system.weeklyReviews.push({
-          ...defaultReview,
-          ...payloadUpdates,
-        });
+      const commitResult = commitTwelveWeekWeeklyReview({
+        goalId,
+        review: reviewPatch,
+        lagMetricCurrentValue: payloadUpdates.lagProgressValue,
+      });
+      if (commitResult.status === "not_found") {
+        return { success: false, message: "Dữ liệu review đã thay đổi. Hãy tải lại và thử lần nữa." };
       }
-
-      system.scoreboard = buildDerivedScoreboard(system, getDefaultScoreboard(system.totalWeeks || 12));
-
-      saveUserData(data);
+      if (commitResult.status === "local_save_failed") {
+        return { success: false, message: "Không thể lưu review tuần trên thiết bị." };
+      }
 
       if (typeof window !== "undefined") {
         window.dispatchEvent(

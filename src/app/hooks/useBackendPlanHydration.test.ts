@@ -282,17 +282,26 @@ describe("hydrateTwelveWeekPlansFromBackend", () => {
 
     expect(result.status).toBe("idle");
     expect(result.skippedCount).toBe(1);
-    expect(result.conflictCount).toBe(1);
-    expect(result.conflicts).toHaveLength(1);
-    expect(result.conflicts[0]).toEqual(
-      expect.objectContaining({
-        goalId: "local_goal_1",
-        goalTitle: apiGoal.title,
-        kind: "task_completion",
-        planId: "plan_1",
-      }),
+    expect(result.conflictCount).toBe(2);
+    expect(result.conflicts).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          goalId: "local_goal_1",
+          goalTitle: apiGoal.title,
+          kind: "task_completion",
+          planId: "plan_1",
+        }),
+        expect.objectContaining({
+          goalId: "local_goal_1",
+          goalTitle: apiGoal.title,
+          kind: "weekly_review_score",
+          localValue: "100",
+          backendValue: "80",
+          planId: "plan_1",
+        }),
+      ]),
     );
-    expect(result.message).toBe("1 khác biệt giữa thiết bị và máy chủ cần xem lại.");
+    expect(result.message).toBe("2 khác biệt giữa thiết bị và máy chủ cần xem lại.");
     expect(getUserData().goals).toHaveLength(1);
   });
 

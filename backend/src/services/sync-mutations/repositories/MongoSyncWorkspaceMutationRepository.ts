@@ -83,6 +83,10 @@ function getObjectIdCandidate(value: unknown): string | undefined {
   return text && isValidObjectId(text) ? text : undefined;
 }
 
+function setDefined(target: Record<string, unknown>, key: string, value: unknown): void {
+  if (value !== undefined) target[key] = value;
+}
+
 function mapDailyCheckInDoc(doc: MongoDailyCheckInDoc): AppliedWorkspaceMutationEntity {
   return {
     id: getDocId(doc),
@@ -306,33 +310,49 @@ export class MongoSyncWorkspaceMutationRepository implements SyncWorkspaceMutati
       }),
     ).lean();
 
-    const update = {
+    const update: Record<string, unknown> = {
       userId,
       planId: ownedWeek.planId,
       weekId: ownedWeek.weekId,
       weekNumber: ownedWeek.weekNumber,
       executionScore: input.executionScore,
-      reflection: input.biggestOutputThisWeek,
-      adjustments: input.nextWeekPriority,
       clientPlanId: ownedWeek.clientPlanId,
       clientWeekId: ownedWeek.clientWeekId,
       clientReviewId: input.clientReviewId ?? `${ownedWeek.clientPlanId}:review:${ownedWeek.weekNumber}`,
-      leadCompletionPercent: input.leadCompletionPercent,
-      lagProgressValue: input.lagProgressValue,
-      biggestOutputThisWeek: input.biggestOutputThisWeek,
-      mainObstacle: input.mainObstacle,
-      nextWeekPriority: input.nextWeekPriority,
-      workloadDecision: input.workloadDecision,
-      reviewCompleted: input.reviewCompleted,
-      progressScore: input.progressScore,
-      disciplineScore: input.disciplineScore,
-      focusScore: input.focusScore,
-      improvementScore: input.improvementScore,
-      outputQualityScore: input.outputQualityScore,
-      completedLeadIndicators: input.completedLeadIndicators,
       lastMutationId: input.mutationId,
       syncUpdatedAt: input.syncUpdatedAt,
     };
+    setDefined(update, "leadCompletionPercent", input.leadCompletionPercent);
+    setDefined(update, "lagProgressValue", input.lagProgressValue);
+    setDefined(update, "biggestOutputThisWeek", input.biggestOutputThisWeek);
+    setDefined(update, "mainObstacle", input.mainObstacle);
+    setDefined(update, "nextWeekPriority", input.nextWeekPriority);
+    setDefined(update, "workloadDecision", input.workloadDecision);
+    setDefined(update, "reviewCompleted", input.reviewCompleted);
+    setDefined(update, "commitmentsKept", input.commitmentsKept);
+    setDefined(update, "commitmentsMissed", input.commitmentsMissed);
+    setDefined(update, "insights", input.insights);
+    setDefined(update, "nextWeekCommitments", input.nextWeekCommitments);
+    setDefined(update, "keepTactic", input.keepTactic);
+    setDefined(update, "reduceTactic", input.reduceTactic);
+    setDefined(update, "reflection", input.reflection);
+    setDefined(update, "adjustments", input.adjustments);
+    setDefined(update, "lastReviewAt", input.lastReviewAt);
+    setDefined(update, "progressScore", input.progressScore);
+    setDefined(update, "disciplineScore", input.disciplineScore);
+    setDefined(update, "focusScore", input.focusScore);
+    setDefined(update, "improvementScore", input.improvementScore);
+    setDefined(update, "outputQualityScore", input.outputQualityScore);
+    setDefined(update, "completedLeadIndicators", input.completedLeadIndicators);
+
+    const weekUpdate: Record<string, unknown> = {
+      "review.weekNumber": ownedWeek.weekNumber,
+      "review.executionScore": input.executionScore,
+      lastMutationId: input.mutationId,
+      syncUpdatedAt: input.syncUpdatedAt,
+    };
+    setDefined(weekUpdate, "review.reflection", input.reflection);
+    setDefined(weekUpdate, "review.adjustments", input.adjustments);
 
     const session = await mongoose.startSession();
 
@@ -342,16 +362,7 @@ export class MongoSyncWorkspaceMutationRepository implements SyncWorkspaceMutati
       const updatedWeek = await WeekModel.findOneAndUpdate(
         withoutTombstones({ _id: ownedWeek.weekId }),
         {
-          $set: {
-            review: {
-              weekNumber: ownedWeek.weekNumber,
-              executionScore: input.executionScore,
-              reflection: input.biggestOutputThisWeek,
-              adjustments: input.nextWeekPriority,
-            },
-            lastMutationId: input.mutationId,
-            syncUpdatedAt: input.syncUpdatedAt,
-          },
+          $set: weekUpdate,
           $inc: { revision: 1 },
         },
         { new: true, runValidators: true, session },

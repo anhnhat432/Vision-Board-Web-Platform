@@ -290,7 +290,7 @@ describe("createTwelveWeekImportPayload", () => {
         improvementScore: 7,
         outputQualityScore: 8,
         completedLeadIndicators: 2,
-        executionScore: 78,
+        executionScore: 100,
       }),
     );
   });

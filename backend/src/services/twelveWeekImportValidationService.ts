@@ -262,6 +262,23 @@ function validateArray(
   return value;
 }
 
+function validateOptionalStringArray(value: unknown, path: string, ctx: ValidationContext, maxItems = 5): void {
+  if (value === undefined || value === null) return;
+  const items = validateArray(value, path, ctx, maxItems);
+  if (!items) return;
+
+  items.forEach((item, index) => {
+    validateOptionalString(item, `${path}[${index}]`, ctx, 1000);
+  });
+}
+
+function validateOptionalIsoDate(value: unknown, path: string, ctx: ValidationContext): void {
+  if (value === undefined || value === null) return;
+  if (typeof value !== "string" || !value.trim() || !Number.isFinite(new Date(value).valueOf())) {
+    addError(ctx, path, "invalid_date", `${path} must be a valid ISO date string.`);
+  }
+}
+
 function validateWeekNumber(value: unknown, path: string, ctx: ValidationContext): number | null {
   if (!Number.isInteger(value)) {
     addError(ctx, path, "invalid_week_number", `${path} must be an integer between 1 and 12.`);
@@ -658,6 +675,15 @@ function validateWeeklyReviews(
     validateOptionalString(review.nextWeekPriority, `${reviewPath}.nextWeekPriority`, ctx, 3000);
     validateOptionalWorkloadDecision(review.workloadDecision, `${reviewPath}.workloadDecision`, ctx);
     validateOptionalBoolean(review.reviewCompleted, `${reviewPath}.reviewCompleted`, ctx);
+    validateOptionalStringArray(review.commitmentsKept, `${reviewPath}.commitmentsKept`, ctx);
+    validateOptionalStringArray(review.commitmentsMissed, `${reviewPath}.commitmentsMissed`, ctx);
+    validateOptionalString(review.insights, `${reviewPath}.insights`, ctx, 3000);
+    validateOptionalStringArray(review.nextWeekCommitments, `${reviewPath}.nextWeekCommitments`, ctx);
+    validateOptionalString(review.keepTactic, `${reviewPath}.keepTactic`, ctx, 3000);
+    validateOptionalString(review.reduceTactic, `${reviewPath}.reduceTactic`, ctx, 3000);
+    validateOptionalString(review.reflection, `${reviewPath}.reflection`, ctx, 3000);
+    validateOptionalString(review.adjustments, `${reviewPath}.adjustments`, ctx, 3000);
+    validateOptionalIsoDate(review.lastReviewAt, `${reviewPath}.lastReviewAt`, ctx);
     validateOptionalNumberRange(review.progressScore, `${reviewPath}.progressScore`, ctx, 0, 10);
     validateOptionalNumberRange(review.disciplineScore, `${reviewPath}.disciplineScore`, ctx, 0, 10);
     validateOptionalNumberRange(review.focusScore, `${reviewPath}.focusScore`, ctx, 0, 10);

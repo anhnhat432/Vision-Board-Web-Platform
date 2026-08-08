@@ -1,5 +1,28 @@
 import { Schema, model } from "mongoose";
 
+const MAX_REVIEW_LIST_ITEMS = 5;
+
+function normalizeOptionalStringArray(value: unknown): unknown {
+  if (!Array.isArray(value)) return value;
+  return value
+    .filter((item): item is string => typeof item === "string")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function createOptionalStringArraySchema() {
+  return {
+    type: [{ type: String, trim: true }],
+    required: false,
+    default: undefined,
+    set: normalizeOptionalStringArray,
+    validate: {
+      validator: (value: unknown) => !Array.isArray(value) || value.length <= MAX_REVIEW_LIST_ITEMS,
+      message: `Weekly review lists cannot exceed ${MAX_REVIEW_LIST_ITEMS} items.`,
+    },
+  };
+}
+
 const weekReviewSchema = new Schema(
   {
     userId: {
@@ -89,6 +112,28 @@ const weekReviewSchema = new Schema(
     },
     reviewCompleted: {
       type: Boolean,
+      required: false,
+    },
+    commitmentsKept: createOptionalStringArraySchema(),
+    commitmentsMissed: createOptionalStringArraySchema(),
+    insights: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    nextWeekCommitments: createOptionalStringArraySchema(),
+    keepTactic: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    reduceTactic: {
+      type: String,
+      required: false,
+      trim: true,
+    },
+    lastReviewAt: {
+      type: Date,
       required: false,
     },
     progressScore: {

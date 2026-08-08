@@ -147,6 +147,16 @@ function buildSystem(): TwelveWeekSystem {
         improvementScore: 7,
         outputQualityScore: 8,
         completedLeadIndicators: 2,
+        commitmentsKept: ["Deep work"],
+        commitmentsMissed: ["Exercise"],
+        insights: "Morning work was more reliable",
+        nextWeekCommitments: ["Finish portfolio", "Train twice"],
+        executionScore: 81,
+        lastReviewAt: "2026-08-08T08:00:00.000Z",
+        reflection: "Legacy reflection",
+        adjustments: "Legacy adjustment",
+        keepTactic: "Morning deep work",
+        reduceTactic: "Optional evening work",
       },
     ],
     scoreboard: [
@@ -343,6 +353,15 @@ function simulateBackendEcho(importPayload: TwelveWeekImportPayload): TwelveWeek
     improvementScore: review.improvementScore,
     outputQualityScore: review.outputQualityScore,
     completedLeadIndicators: review.completedLeadIndicators,
+    commitmentsKept: review.commitmentsKept,
+    commitmentsMissed: review.commitmentsMissed,
+    insights: review.insights,
+    nextWeekCommitments: review.nextWeekCommitments,
+    keepTactic: review.keepTactic,
+    reduceTactic: review.reduceTactic,
+    reflection: review.reflection,
+    adjustments: review.adjustments,
+    lastReviewAt: review.lastReviewAt,
   }));
 
   return {
@@ -572,6 +591,23 @@ describe("round-trip sync: import → backend echo → pull → apply", () => {
       expect(reconstructed.leadCompletionPercent).toBe(original.leadCompletionPercent);
       expect(reconstructed.lagProgressValue).toBe(original.lagProgressValue);
       expect(reconstructed.completedLeadIndicators).toBe(original.completedLeadIndicators);
+    });
+
+    it("does not lose meaningful weekly reflection data", () => {
+      const { originalSystem, reconstructedSystem } = performRoundTrip();
+      const original = originalSystem.weeklyReviews[0];
+      const reconstructed = reconstructedSystem.weeklyReviews.find((review) => review.weekNumber === original.weekNumber)!;
+
+      expect(reconstructed.executionScore).toBe(81);
+      expect(reconstructed.commitmentsKept).toEqual(["Deep work"]);
+      expect(reconstructed.commitmentsMissed).toEqual(["Exercise"]);
+      expect(reconstructed.insights).toBe("Morning work was more reliable");
+      expect(reconstructed.nextWeekCommitments).toEqual(["Finish portfolio", "Train twice"]);
+      expect(reconstructed.keepTactic).toBe("Morning deep work");
+      expect(reconstructed.reduceTactic).toBe("Optional evening work");
+      expect(reconstructed.reflection).toBe("Legacy reflection");
+      expect(reconstructed.adjustments).toBe("Legacy adjustment");
+      expect(reconstructed.lastReviewAt).toBe("2026-08-08T08:00:00.000Z");
     });
   });
 

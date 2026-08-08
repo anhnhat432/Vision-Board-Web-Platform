@@ -39,11 +39,11 @@ import {
 import { enqueueStoredMutation } from "@/features/plan12week/persistence/mutationQueue";
 import { getPlanLink } from "@/features/plan12week/persistence/planLinkStore";
 import { enqueuePlanSnapshotUpdatedMutation } from "@/features/plan12week/persistence/planSnapshotMutation";
-import { getUniversalWeeklyReviewExecutionScore } from "@/features/plan12week/persistence/reviewExecutionScore";
 import {
   commitTwelveWeekTaskCompletion,
   rollbackTwelveWeekTaskCompletion,
 } from "@/features/plan12week/persistence/taskCompletionMutation";
+import { commitTwelveWeekWeeklyReview } from "@/features/plan12week/persistence/weeklyReviewMutation";
 import { celebrateMedium, celebrateSmall } from "@/lib/effects/celebrate";
 import { getTodayQueueForSystem } from "./helpers";
 import type { WeeklyCommitmentStatus, WeeklyReviewForm } from "./types";
@@ -108,35 +108,6 @@ function enqueueDailyCheckInUpsertedMutation(goalId: string, weekNumber: number,
     });
   } catch {
     // Queueing is a best-effort sidecar. The local-first check-in save stays authoritative.
-  }
-}
-
-export function enqueueWeeklyReviewUpsertedMutation(
-  goalId: string,
-  weekNumber: number,
-  review: UniversalWeeklyReview,
-  executionScore: number,
-): void {
-  try {
-    const planLink = getPlanLink(goalId);
-    const backendPlanId = planLink?.planId ?? null;
-    const backendWeekId = planLink?.weekIdByNumber[weekNumber] ?? null;
-    enqueueStoredMutation({
-      kind: "weekly_review_upserted",
-      goalId,
-      planId: backendPlanId,
-      payload: {
-        backendPlanId,
-        backendWeekId,
-        clientPlanId: getClientPlanId(goalId),
-        clientWeekId: getClientWeekId(goalId, weekNumber),
-        weekNumber,
-        executionScore,
-        review,
-      },
-    });
-  } catch {
-    // Queueing is a best-effort sidecar. The local-first weekly review save stays authoritative.
   }
 }
 
@@ -478,20 +449,23 @@ export function useTwelveWeekExecutionActions({
       ...(reduceTacticTrimmed ? { reduceTactic: reduceTacticTrimmed } : {}),
     };
 
-    const updatedReviews = [
-      ...latestSystem.weeklyReviews.filter((review) => review.weekNumber !== reviewWeekNumber),
-      nextReview,
-    ].sort((left, right) => left.weekNumber - right.weekNumber);
-
-    commitSystemUpdate({
-      ...latestSystem,
-      lagMetric: {
-        ...latestSystem.lagMetric,
-        currentValue: weeklyForm.lagProgressValue.trim(),
-      },
-      weeklyReviews: updatedReviews,
+    const commitResult = commitTwelveWeekWeeklyReview({
+      goalId: actionGoalId,
+      review: nextReview,
+      lagMetricCurrentValue: weeklyForm.lagProgressValue,
     });
-    const reviewExecutionScore = getUniversalWeeklyReviewExecutionScore(nextReview, reviewWeekCompletion.percent);
+    if (commitResult.status === "not_found" || commitResult.status === "local_save_failed") {
+      toast.error("Không thể lưu review tuần. Dữ liệu cũ vẫn được giữ nguyên.");
+      return;
+    }
+
+    const committedReview = commitResult.review;
+    const committedSystem =
+      commitResult.status === "applied" ? commitResult.updatedSystem : commitResult.currentSystem;
+    if (activeGoalIdRef.current === actionGoalId) {
+      updateActiveSystemState(() => committedSystem);
+    }
+    const reviewExecutionScore = committedReview.executionScore ?? reviewWeekCompletion.percent;
 
     upsertReflection({
       date: formatDateInputValue(new Date()),
@@ -512,8 +486,6 @@ export function useTwelveWeekExecutionActions({
       linkedGoalId: actionGoalId,
       linkedWeekNumber: reviewWeekNumber,
     });
-
-    enqueueWeeklyReviewUpsertedMutation(actionGoalId, reviewWeekNumber, nextReview, reviewExecutionScore);
 
     trackAnalyticsEvent(
       "weekly_review_submitted",
@@ -581,7 +553,7 @@ export function useTwelveWeekExecutionActions({
     hasPremiumReviewInsights,
     suggestedNextWeekPlan,
     executionSyncActions,
-    commitSystemUpdate,
+    updateActiveSystemState,
     activeGoalIdRef,
     refreshBackendProgressOverlay,
     refreshSnapshotMeta,

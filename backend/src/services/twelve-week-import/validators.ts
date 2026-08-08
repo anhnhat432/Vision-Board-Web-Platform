@@ -85,6 +85,27 @@ export function optionalDate(value: unknown, fieldPath: string): Date | undefine
   return parsed;
 }
 
+export function optionalStringArray(value: unknown, fieldPath: string, maxItems = 5): string[] | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (!Array.isArray(value)) {
+    throw new ApiError(400, `${fieldPath} must be an array.`);
+  }
+  if (value.length > maxItems) {
+    throw new ApiError(400, `${fieldPath} cannot contain more than ${maxItems} items.`);
+  }
+
+  return value.map((item, index) => {
+    if (typeof item !== "string") {
+      throw new ApiError(400, `${fieldPath}[${index}] must be a string.`);
+    }
+    const trimmed = item.trim();
+    if (!trimmed) {
+      throw new ApiError(400, `${fieldPath}[${index}] cannot be blank.`);
+    }
+    return trimmed;
+  });
+}
+
 export function requiredDateKey(value: unknown, fieldPath: string): string {
   if (typeof value !== "string" || !value.trim()) {
     throw new ApiError(400, `${fieldPath} must be a valid date string.`);

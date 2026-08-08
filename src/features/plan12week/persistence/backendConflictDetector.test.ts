@@ -124,7 +124,7 @@ function createPlanDetails(overrides: Partial<PlanDetails["weeks"][number]> = {}
         expectedOutput: "Brief approved",
         review: {
           weekNumber: 1,
-          executionScore: 92,
+          executionScore: 100,
           reflection: "Brief shipped",
           adjustments: "Publish",
         },

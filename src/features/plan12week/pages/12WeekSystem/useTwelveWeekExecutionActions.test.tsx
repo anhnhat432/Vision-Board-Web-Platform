@@ -1,5 +1,5 @@
 import { act, renderHook } from "@testing-library/react";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/app/utils/app-mode", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/app/utils/app-mode")>();
@@ -37,6 +37,9 @@ import { getUserData, resetUserDataCache, saveUserData, updateGoal } from "@/app
 import { getDefaultScoreboard } from "@/app/utils/storage-twelve-week";
 import type { Goal, TwelveWeekSystem, TwelveWeekTaskInstance } from "@/app/utils/storage-types";
 import { listStoredPendingMutations } from "@/features/plan12week/persistence/mutationQueue";
+import { hapticSuccess } from "@/app/utils/haptics";
+import { celebrateMedium } from "@/lib/effects/celebrate";
+import { toast } from "sonner";
 import { useTwelveWeekExecutionActions } from "./useTwelveWeekExecutionActions";
 
 const GOAL_ID = "goal_today_legacy_rollback";
@@ -112,6 +115,13 @@ describe("useTwelveWeekExecutionActions legacy task rollback", () => {
   beforeEach(() => {
     localStorage.clear();
     resetUserDataCache();
+    vi.clearAllMocks();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-08-08T08:00:00.000Z"));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("restores the exact pre-click task snapshot when direct sync fails", async () => {
@@ -172,5 +182,84 @@ describe("useTwelveWeekExecutionActions legacy task rollback", () => {
     );
     expect(taskMutations).toHaveLength(1);
     expect(taskMutations[0]?.payload).toEqual(expect.objectContaining({ completed: false }));
+  });
+
+  it("routes manual Weekly Review through one canonical local write while preserving Journal feedback", async () => {
+    const activeGoal = seedGoal();
+    const system = activeGoal.twelveWeekSystem;
+    if (!system) throw new Error("Expected seeded 12-week system");
+
+    const commitSystemUpdate = vi.fn((nextSystem: TwelveWeekSystem) => nextSystem);
+    const updateActiveSystemState = vi.fn();
+    const syncWeeklyReview = vi.fn().mockResolvedValue(true);
+    const { result } = renderHook(() =>
+      useTwelveWeekExecutionActions({
+        activeGoal,
+        system,
+        activeGoalIdRef: { current: GOAL_ID },
+        dailyMood: "steady",
+        dailyNote: "",
+        weeklyForm: {
+          lagProgressValue: "42",
+          biggestOutputThisWeek: "Finished case study",
+          mainObstacle: "Late meetings",
+          keepTactic: "Morning deep work",
+          reduceTactic: "Optional evening work",
+          nextWeekPriority: "Ship portfolio",
+          commitmentStatuses: {},
+          insights: "Morning work was more reliable",
+          nextWeekCommitments: ["Ship portfolio", "Train twice"],
+          workloadDecision: "reduce slightly",
+        },
+        setWeeklyForm: vi.fn(),
+        hasPremiumReviewInsights: false,
+        suggestedNextWeekPlan: null,
+        rescuePlanSummary: null,
+        executionSyncActions: {
+          syncTaskToggle: vi.fn().mockResolvedValue(true),
+          syncDailyCheckIn: vi.fn().mockResolvedValue(true),
+          syncWeeklyReview,
+        },
+        commitSystemUpdate,
+        updateActiveSystemState,
+        refreshBackendProgressOverlay: vi.fn(),
+        invalidateOverlay: vi.fn(),
+        refreshSnapshotMeta: vi.fn(),
+      }),
+    );
+
+    await act(async () => {
+      await result.current.handleSaveWeeklyReview();
+    });
+
+    const data = getUserData();
+    const savedSystem = data.goals[0]?.twelveWeekSystem;
+    const savedReview = savedSystem?.weeklyReviews[0];
+    expect(savedReview).toEqual(
+      expect.objectContaining({
+        weekNumber: 1,
+        biggestOutputThisWeek: "Finished case study",
+        insights: "Morning work was more reliable",
+        nextWeekCommitments: ["Ship portfolio", "Train twice"],
+        lastReviewAt: "2026-08-08T08:00:00.000Z",
+      }),
+    );
+    expect(savedSystem?.scoreboard[0]?.reviewDone).toBe(true);
+    expect(data.reflections).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ entryType: "weekly-review", linkedGoalId: GOAL_ID, linkedWeekNumber: 1 }),
+      ]),
+    );
+    expect(commitSystemUpdate).not.toHaveBeenCalled();
+    expect(updateActiveSystemState).toHaveBeenCalledTimes(1);
+    expect(syncWeeklyReview).toHaveBeenCalledTimes(1);
+    expect(toast.success).toHaveBeenCalledTimes(1);
+    expect(hapticSuccess).toHaveBeenCalledTimes(1);
+    expect(celebrateMedium).toHaveBeenCalledTimes(1);
+
+    const reviewMutations = listStoredPendingMutations(null).filter(
+      (mutation) => mutation.kind === "weekly_review_upserted",
+    );
+    expect(reviewMutations).toHaveLength(1);
   });
 });

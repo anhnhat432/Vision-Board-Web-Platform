@@ -187,6 +187,7 @@ function createWorkspace(): TwelveWeekPulledWorkspace {
         clientWeekId: "goal_1:week:1",
         clientReviewId: "goal_1:12-week-system:review:1",
         weekNumber: 1,
+        executionScore: 81,
         leadCompletionPercent: 100,
         lagProgressValue: "1/12",
         biggestOutputThisWeek: "Draft completed",
@@ -194,6 +195,15 @@ function createWorkspace(): TwelveWeekPulledWorkspace {
         nextWeekPriority: "Interview users",
         workloadDecision: "keep same",
         reviewCompleted: true,
+        commitmentsKept: ["Deep work"],
+        commitmentsMissed: ["Exercise"],
+        insights: "Morning work was more reliable",
+        nextWeekCommitments: ["Interview users", "Train twice"],
+        keepTactic: "Morning deep work",
+        reduceTactic: "Optional evening work",
+        reflection: "Legacy reflection",
+        adjustments: "Legacy adjustment",
+        lastReviewAt: "2026-08-08T08:00:00.000Z",
         progressScore: 8,
         disciplineScore: 8,
         focusScore: 7,
@@ -305,10 +315,138 @@ describe("applyPulledWorkspaceToUserData", () => {
     expect(nextData.goals[0].twelveWeekSystem?.weeklyReviews[0]).toEqual(
       expect.objectContaining({
         weekNumber: 1,
+        executionScore: 81,
         biggestOutputThisWeek: "Draft completed",
         nextWeekPriority: "Interview users",
+        commitmentsKept: ["Deep work"],
+        commitmentsMissed: ["Exercise"],
+        insights: "Morning work was more reliable",
+        nextWeekCommitments: ["Interview users", "Train twice"],
+        keepTactic: "Morning deep work",
+        reduceTactic: "Optional evening work",
+        reflection: "Legacy reflection",
+        adjustments: "Legacy adjustment",
+        lastReviewAt: "2026-08-08T08:00:00.000Z",
       }),
     );
+  });
+
+  it("hydrates legacy reflection and adjustments without inventing biggest output", () => {
+    const workspace = createWorkspace();
+    workspace.weeklyReviews = [
+      {
+        id: "backend_review_legacy",
+        planId: "backend_plan_1",
+        weekId: "backend_week_1",
+        clientPlanId: "goal_1:12-week-system",
+        clientWeekId: "goal_1:week:1",
+        clientReviewId: "goal_1:12-week-system:review:1",
+        weekNumber: 1,
+        executionScore: 55,
+        reflection: "Legacy insight",
+        adjustments: "Legacy commitment",
+        reviewCompleted: true,
+      },
+    ];
+
+    const nextData = applyPulledWorkspaceToUserData(createUserData(), workspace, { now: baseNow });
+    const review = nextData.goals[0].twelveWeekSystem?.weeklyReviews[0];
+
+    expect(review).toEqual(
+      expect.objectContaining({
+        executionScore: 55,
+        biggestOutputThisWeek: "",
+        insights: "Legacy insight",
+        reflection: "Legacy insight",
+        nextWeekPriority: "Legacy commitment",
+        nextWeekCommitments: ["Legacy commitment"],
+        adjustments: "Legacy commitment",
+        commitmentsKept: [],
+        commitmentsMissed: [],
+      }),
+    );
+  });
+
+  it("preserves explicit empty review fields instead of reviving legacy fallbacks", () => {
+    const workspace = createWorkspace();
+    workspace.weeklyReviews = [
+      {
+        id: "backend_review_clear_canonical",
+        planId: "backend_plan_1",
+        weekId: "backend_week_1",
+        clientPlanId: "goal_1:12-week-system",
+        clientWeekId: "goal_1:week:1",
+        clientReviewId: "goal_1:12-week-system:review:1",
+        weekNumber: 1,
+        executionScore: 55,
+        insights: "",
+        nextWeekPriority: "",
+        nextWeekCommitments: [],
+        keepTactic: "",
+        reduceTactic: "",
+        reflection: "Legacy reflection",
+        adjustments: "Legacy commitment",
+        reviewCompleted: true,
+      },
+      {
+        id: "backend_review_clear_legacy",
+        planId: "backend_plan_1",
+        weekId: "backend_week_2",
+        clientPlanId: "goal_1:12-week-system",
+        clientWeekId: "goal_1:week:2",
+        clientReviewId: "goal_1:12-week-system:review:2",
+        weekNumber: 2,
+        executionScore: 60,
+        insights: "Canonical insight",
+        nextWeekPriority: "Canonical priority",
+        reflection: "",
+        adjustments: "",
+        reviewCompleted: true,
+      },
+    ];
+
+    const nextData = applyPulledWorkspaceToUserData(createUserData(), workspace, { now: baseNow });
+    const reviews = nextData.goals[0]?.twelveWeekSystem?.weeklyReviews ?? [];
+
+    expect(reviews.find((review) => review.weekNumber === 1)).toEqual(
+      expect.objectContaining({
+        insights: "",
+        nextWeekPriority: "",
+        nextWeekCommitments: [],
+        keepTactic: "",
+        reduceTactic: "",
+        reflection: "Legacy reflection",
+        adjustments: "Legacy commitment",
+      }),
+    );
+    expect(reviews.find((review) => review.weekNumber === 2)).toEqual(
+      expect.objectContaining({
+        insights: "Canonical insight",
+        nextWeekPriority: "Canonical priority",
+        reflection: "",
+        adjustments: "",
+      }),
+    );
+  });
+
+  it("does not invent legacy ratings when the pulled review omits them", () => {
+    const workspace = createWorkspace();
+    const pulledReview = workspace.weeklyReviews[0];
+    if (!pulledReview) throw new Error("Expected weekly review fixture");
+    delete pulledReview.progressScore;
+    delete pulledReview.disciplineScore;
+    delete pulledReview.focusScore;
+    delete pulledReview.improvementScore;
+    delete pulledReview.outputQualityScore;
+
+    const nextData = applyPulledWorkspaceToUserData(createUserData(), workspace, { now: baseNow });
+    const review = nextData.goals[0].twelveWeekSystem?.weeklyReviews[0];
+
+    expect(review).not.toHaveProperty("progressScore");
+    expect(review).not.toHaveProperty("disciplineScore");
+    expect(review).not.toHaveProperty("focusScore");
+    expect(review).not.toHaveProperty("improvementScore");
+    expect(review).not.toHaveProperty("outputQualityScore");
   });
 
   it("does not sync billing or analytics state from pulled workspace", () => {
