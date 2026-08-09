@@ -16,7 +16,14 @@
  *   - Backwards compatible: every required input is read-with-default.
  */
 
-import { getCalendarDayDifference, parseCalendarDate } from "@/app/utils/storage-date-utils";
+import {
+  getCalendarDayDifference,
+  isCalendarDateKeyAfter,
+  isCalendarDateKeyBefore,
+  isCalendarDateKeyOnOrBefore,
+  parseCalendarDate,
+} from "@/app/utils/storage-date-utils";
+import { getTwelveWeekWeekRange } from "@/app/utils/storage-twelve-week";
 import type {
   TwelveWeekSystem,
   UniversalDailyCheckIn,
@@ -143,18 +150,49 @@ function nonEmpty(value: string | undefined | null): boolean {
 
 // ---- Aggregation ------------------------------------------------------------
 
+type InsightWeekPhase = "historical" | "active" | "future";
+
+interface InsightWeekTiming {
+  phase: InsightWeekPhase;
+  referenceDateKey: string;
+}
+
+function getInsightWeekTiming(
+  system: TwelveWeekSystem,
+  weekNumber: number,
+  todayDateKey: string,
+): InsightWeekTiming {
+  const range = getTwelveWeekWeekRange(system, weekNumber);
+
+  if (isCalendarDateKeyBefore(todayDateKey, range.start)) {
+    return { phase: "future", referenceDateKey: todayDateKey };
+  }
+  if (isCalendarDateKeyAfter(todayDateKey, range.end)) {
+    return { phase: "historical", referenceDateKey: range.end };
+  }
+  return { phase: "active", referenceDateKey: todayDateKey };
+}
+
+function getCompletionPercent(completed: number, total: number): number | null {
+  return total > 0 ? Math.round((completed / total) * 100) : null;
+}
+
 interface AggregateMetrics {
   weekNumber: number;
   totalWeeks: number;
+  weekPhase: InsightWeekPhase;
+  insightReferenceDateKey: string;
   scoreboardThroughCurrent: UniversalScoreboardWeek[];
   reviewsThroughCurrent: UniversalWeeklyReview[];
   currentWeekScore: number | null;
   previousWeekScore: number | null;
   averageScore: number | null;
   recentAverageScore: number | null;
-  currentWeekTaskCount: number;
-  currentWeekCompletionPercent: number | null;
-  currentWeekLeadCompletionPercent: number | null;
+  fullWeekTaskCount: number;
+  fullWeekCompletionPercent: number | null;
+  executionToDateTaskCount: number;
+  executionToDateCompletionPercent: number | null;
+  executionToDateLeadCompletionPercent: number | null;
   recentLeadCompletionPercent: number | null;
   previousWeekReviewCompleted: boolean | null;
   checkInRate7d: number | null;
@@ -166,6 +204,7 @@ function aggregate(system: TwelveWeekSystem, ctx: ExecutionInsightsContext): Agg
   const weekNumber = Math.max(1, Math.min(ctx.weekNumber ?? system.currentWeek ?? 1, system.totalWeeks));
   const totalWeeks = system.totalWeeks;
   const todayKey = todayKeyDefault(ctx.todayDateKey);
+  const timing = getInsightWeekTiming(system, weekNumber, todayKey);
 
   const scoreboard = system.scoreboard ?? [];
   const reviews = system.weeklyReviews ?? [];
@@ -194,13 +233,30 @@ function aggregate(system: TwelveWeekSystem, ctx: ExecutionInsightsContext): Agg
       ? Math.round(recentScored.reduce((sum, entry) => sum + entry.weeklyScore, 0) / recentScored.length)
       : null;
 
-  const currentWeekTasks = taskInstances.filter((task) => task.weekNumber === weekNumber && !task.skipped);
-  const currentWeekTaskCount = currentWeekTasks.length;
-  const currentWeekCompletedCount = currentWeekTasks.filter((task) => task.completed).length;
-  const currentWeekCompletionPercent =
-    currentWeekTaskCount > 0 ? Math.round((currentWeekCompletedCount / currentWeekTaskCount) * 100) : null;
-
-  const currentWeekLeadCompletionPercent = clampPercent(currentWeekEntry?.leadCompletionPercent ?? null);
+  const fullWeekTasks = taskInstances.filter((task) => task.weekNumber === weekNumber && !task.skipped);
+  const fullWeekTaskCount = fullWeekTasks.length;
+  const fullWeekCompletionPercent = getCompletionPercent(
+    fullWeekTasks.filter((task) => task.completed).length,
+    fullWeekTaskCount,
+  );
+  const executionToDateTasks =
+    timing.phase === "future"
+      ? []
+      : timing.phase === "historical"
+        ? fullWeekTasks
+        : fullWeekTasks.filter((task) =>
+            isCalendarDateKeyOnOrBefore(task.scheduledDate, timing.referenceDateKey),
+          );
+  const executionToDateTaskCount = executionToDateTasks.length;
+  const executionToDateCompletionPercent = getCompletionPercent(
+    executionToDateTasks.filter((task) => task.completed).length,
+    executionToDateTaskCount,
+  );
+  const executionToDateCoreTasks = executionToDateTasks.filter((task) => task.isCore);
+  const executionToDateLeadCompletionPercent = getCompletionPercent(
+    executionToDateCoreTasks.filter((task) => task.completed).length,
+    executionToDateCoreTasks.length,
+  );
   const recentLeadCompletionPercent =
     scoredWeeks.length > 0
       ? clampPercent(
@@ -215,7 +271,7 @@ function aggregate(system: TwelveWeekSystem, ctx: ExecutionInsightsContext): Agg
   const checkInsLast7d = dailyCheckIns.filter((entry) => {
     const date = entry.date?.slice(0, 10) ?? "";
     if (!date) return false;
-    const delta = differenceInDays(todayKey, date);
+    const delta = differenceInDays(timing.referenceDateKey, date);
     return delta >= 0 && delta < 7 && entry.didWorkToday;
   }).length;
   const checkInRate7d =
@@ -233,15 +289,19 @@ function aggregate(system: TwelveWeekSystem, ctx: ExecutionInsightsContext): Agg
   return {
     weekNumber,
     totalWeeks,
+    weekPhase: timing.phase,
+    insightReferenceDateKey: timing.referenceDateKey,
     scoreboardThroughCurrent,
     reviewsThroughCurrent,
     currentWeekScore,
     previousWeekScore,
     averageScore,
     recentAverageScore,
-    currentWeekTaskCount,
-    currentWeekCompletionPercent,
-    currentWeekLeadCompletionPercent,
+    fullWeekTaskCount,
+    fullWeekCompletionPercent,
+    executionToDateTaskCount,
+    executionToDateCompletionPercent,
+    executionToDateLeadCompletionPercent,
     recentLeadCompletionPercent,
     previousWeekReviewCompleted,
     checkInRate7d,
@@ -264,6 +324,8 @@ function makeInsight(
 }
 
 function detectInsights(metrics: AggregateMetrics): ExecutionInsight[] {
+  if (metrics.weekPhase === "future") return [];
+
   const insights: ExecutionInsight[] = [];
 
   // No-data state — handle separately so the UI shows a helpful empty card.
@@ -302,8 +364,8 @@ function detectInsights(metrics: AggregateMetrics): ExecutionInsight[] {
 
   // 2. overloaded_week — current week has many tasks AND completion is low.
   if (
-    metrics.currentWeekTaskCount >= OVERLOADED_TASK_COUNT &&
-    (metrics.currentWeekCompletionPercent ?? 100) < LOW_COMPLETION_PERCENT
+    metrics.executionToDateTaskCount >= OVERLOADED_TASK_COUNT &&
+    (metrics.executionToDateCompletionPercent ?? 100) < LOW_COMPLETION_PERCENT
   ) {
     insights.push(
       makeInsight(
@@ -313,15 +375,15 @@ function detectInsights(metrics: AggregateMetrics): ExecutionInsight[] {
         "Số việc trong tuần khá lớn nhưng phần đã chốt còn thấp. Tuần sau cân nhắc giảm tải, chỉ giữ việc cốt lõi.",
         "reduce_load",
         {
-          taskCount: metrics.currentWeekTaskCount,
-          completionPercent: metrics.currentWeekCompletionPercent,
+          taskCount: metrics.executionToDateTaskCount,
+          completionPercent: metrics.executionToDateCompletionPercent,
         },
       ),
     );
   }
 
   // 3. task_completion_without_progress — high task completion but lag metric is not moving.
-  if ((metrics.currentWeekCompletionPercent ?? 0) >= HIGH_COMPLETION_PERCENT && !metrics.lagMetricMoving) {
+  if ((metrics.executionToDateCompletionPercent ?? 0) >= HIGH_COMPLETION_PERCENT && !metrics.lagMetricMoving) {
     insights.push(
       makeInsight(
         "task_completion_without_progress",
@@ -330,7 +392,7 @@ function detectInsights(metrics: AggregateMetrics): ExecutionInsight[] {
         "Bạn xong nhiều việc, nhưng chỉ số chính chưa được cập nhật. Tuần sau hãy gắn việc tuần với kết quả thực sự đẩy chỉ số.",
         "tighten_scope",
         {
-          completionPercent: metrics.currentWeekCompletionPercent,
+          completionPercent: metrics.executionToDateCompletionPercent,
           lagMoving: 0,
         },
       ),
@@ -339,6 +401,7 @@ function detectInsights(metrics: AggregateMetrics): ExecutionInsight[] {
 
   // 4. consistency_dropping — most recent week dropped vs previous.
   if (
+    metrics.weekPhase === "historical" &&
     metrics.previousWeekScore !== null &&
     metrics.currentWeekScore !== null &&
     metrics.previousWeekScore - metrics.currentWeekScore >= TREND_DELTA_DROP
@@ -361,9 +424,9 @@ function detectInsights(metrics: AggregateMetrics): ExecutionInsight[] {
 
   // 5. needs_scope_reduction — high completion but lead metric % low.
   if (
-    (metrics.currentWeekCompletionPercent ?? 0) >= HIGH_COMPLETION_PERCENT &&
-    metrics.currentWeekLeadCompletionPercent !== null &&
-    metrics.currentWeekLeadCompletionPercent <= LOW_LEAD_COMPLETION_PERCENT
+    (metrics.executionToDateCompletionPercent ?? 0) >= HIGH_COMPLETION_PERCENT &&
+    metrics.executionToDateLeadCompletionPercent !== null &&
+    metrics.executionToDateLeadCompletionPercent <= LOW_LEAD_COMPLETION_PERCENT
   ) {
     insights.push(
       makeInsight(
@@ -373,8 +436,8 @@ function detectInsights(metrics: AggregateMetrics): ExecutionInsight[] {
         "Bạn đang chốt nhiều task nhưng các chỉ số dẫn dắt vẫn thấp. Tuần sau giảm số lượng và tập trung vào 2-3 việc thực sự đẩy chỉ số.",
         "tighten_scope",
         {
-          completionPercent: metrics.currentWeekCompletionPercent,
-          leadCompletionPercent: metrics.currentWeekLeadCompletionPercent,
+          completionPercent: metrics.executionToDateCompletionPercent,
+          leadCompletionPercent: metrics.executionToDateLeadCompletionPercent,
         },
       ),
     );
@@ -401,6 +464,7 @@ function detectInsights(metrics: AggregateMetrics): ExecutionInsight[] {
 
   // 7. consistency_improving — most recent week rose vs previous.
   if (
+    metrics.weekPhase === "historical" &&
     metrics.previousWeekScore !== null &&
     metrics.currentWeekScore !== null &&
     metrics.currentWeekScore - metrics.previousWeekScore >= TREND_DELTA_RISE
@@ -424,8 +488,8 @@ function detectInsights(metrics: AggregateMetrics): ExecutionInsight[] {
   // 8. progress_without_consistency — lag metric moved but completion % is low.
   if (
     metrics.lagMetricMoving &&
-    metrics.currentWeekCompletionPercent !== null &&
-    metrics.currentWeekCompletionPercent < LOW_COMPLETION_PERCENT
+    metrics.executionToDateCompletionPercent !== null &&
+    metrics.executionToDateCompletionPercent < LOW_COMPLETION_PERCENT
   ) {
     insights.push(
       makeInsight(
@@ -435,7 +499,7 @@ function detectInsights(metrics: AggregateMetrics): ExecutionInsight[] {
         "Chỉ số chính có cập nhật, nhưng tuần này khá lệch nhịp. Có vẻ bạn đang dựa vào vài bước lớn hơn là nhịp đều — cần thêm consistency để giữ kết quả.",
         "open_today",
         {
-          completionPercent: metrics.currentWeekCompletionPercent,
+          completionPercent: metrics.executionToDateCompletionPercent,
         },
       ),
     );
@@ -443,6 +507,7 @@ function detectInsights(metrics: AggregateMetrics): ExecutionInsight[] {
 
   // 9. ready_to_push — recent average score strong + check-in consistency strong.
   if (
+    metrics.weekPhase === "historical" &&
     metrics.recentAverageScore !== null &&
     metrics.recentAverageScore >= STRONG_COMPLETION_PERCENT &&
     metrics.checkInRate7d !== null &&
@@ -493,8 +558,8 @@ function sortAndCap(
 
 /**
  * Return up to 3 most-relevant execution insights across the cycle.
- * Sorted by priority. Always returns at least one insight (`no_data` when the
- * system has no execution signals yet).
+ * Sorted by priority. Returns `no_data` when the system has no execution
+ * signals yet, or an empty list when an explicitly requested week is future.
  */
 export function getExecutionInsights(
   system: TwelveWeekSystem | null | undefined,
@@ -518,8 +583,8 @@ export function getExecutionInsights(
 
 /**
  * Return week-scoped insights, useful for the Weekly Review summary card.
- * Sorted by priority. Always returns at least one insight (`no_data` if the
- * given week has no signals).
+ * Sorted by priority. Returns `no_data` if the given week has no signals, or
+ * an empty list when the reviewed week has not started.
  */
 export function getWeeklyReflectionInsights(
   system: TwelveWeekSystem | null | undefined,

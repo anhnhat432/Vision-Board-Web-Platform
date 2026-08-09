@@ -13,6 +13,7 @@ import {
   getNextActionFromInsights,
   getWeeklyReflectionInsights,
 } from "./executionInsights";
+import { getWeeklyReviewEvidence } from "./weeklyReviewEvidence";
 
 function makeScoreboard(overrides: Partial<UniversalScoreboardWeek> = {}): UniversalScoreboardWeek {
   return {
@@ -97,6 +98,40 @@ function makeSystem(overrides: Partial<TwelveWeekSystem> = {}): TwelveWeekSystem
     scoreboard: [],
     ...overrides,
   };
+}
+
+function makeTaskBatch(input: {
+  prefix: string;
+  count: number;
+  completedCount: number;
+  scheduledDate: string;
+  weekNumber?: number;
+  isCore?: boolean;
+}): TwelveWeekTaskInstance[] {
+  return Array.from({ length: input.count }, (_, index) =>
+    makeTask({
+      id: `${input.prefix}_${index}`,
+      weekNumber: input.weekNumber ?? 1,
+      scheduledDate: input.scheduledDate,
+      completed: index < input.completedCount,
+      isCore: input.isCore ?? true,
+    }),
+  );
+}
+
+function makeAugustSystem(
+  taskInstances: TwelveWeekTaskInstance[],
+  overrides: Partial<TwelveWeekSystem> = {},
+): TwelveWeekSystem {
+  return makeSystem({
+    startDate: "2026-08-03",
+    endDate: "2026-10-25",
+    currentWeek: 1,
+    lagMetric: { name: "Lag", unit: "u", target: "100", currentValue: "20" },
+    taskInstances,
+    scoreboard: [makeScoreboard({ weekNumber: 1, weeklyScore: 40, leadCompletionPercent: 0 })],
+    ...overrides,
+  });
 }
 
 function ids(insights: ExecutionInsight[]): ExecutionInsightId[] {
@@ -207,6 +242,38 @@ describe("getExecutionInsights — task_completion_without_progress", () => {
 });
 
 describe("getExecutionInsights — consistency trend", () => {
+  it("suppresses consistency_dropping for an active unfinished week", () => {
+    const insights = getExecutionInsights(
+      makeSystem({
+        currentWeek: 3,
+        scoreboard: [
+          makeScoreboard({ weekNumber: 2, weeklyScore: 85 }),
+          makeScoreboard({ weekNumber: 3, weeklyScore: 50 }),
+        ],
+        weeklyReviews: [makeReview({ weekNumber: 2, reviewCompleted: true })],
+      }),
+      { todayDateKey: "2026-05-01" },
+    );
+
+    expect(ids(insights)).not.toContain("consistency_dropping");
+  });
+
+  it("suppresses consistency_improving for an active unfinished week", () => {
+    const insights = getExecutionInsights(
+      makeSystem({
+        currentWeek: 3,
+        scoreboard: [
+          makeScoreboard({ weekNumber: 2, weeklyScore: 50 }),
+          makeScoreboard({ weekNumber: 3, weeklyScore: 78 }),
+        ],
+        weeklyReviews: [makeReview({ weekNumber: 2, reviewCompleted: true })],
+      }),
+      { todayDateKey: "2026-05-01" },
+    );
+
+    expect(ids(insights)).not.toContain("consistency_improving");
+  });
+
   it("flags consistency_dropping when current week is much lower than previous", () => {
     const insights = getExecutionInsights(
       makeSystem({
@@ -221,7 +288,7 @@ describe("getExecutionInsights — consistency trend", () => {
           makeReview({ weekNumber: 2, reviewCompleted: true }),
         ],
       }),
-      { todayDateKey: "2026-05-01" },
+      { todayDateKey: "2026-05-10" },
     );
     expect(ids(insights)).toContain("consistency_dropping");
   });
@@ -240,7 +307,7 @@ describe("getExecutionInsights — consistency trend", () => {
           makeReview({ weekNumber: 2, reviewCompleted: true }),
         ],
       }),
-      { todayDateKey: "2026-05-01" },
+      { todayDateKey: "2026-05-10" },
     );
     expect(ids(insights)).toContain("consistency_improving");
   });
@@ -269,11 +336,29 @@ describe("getExecutionInsights — strong_lead_metric", () => {
 
 describe("getExecutionInsights — needs_scope_reduction", () => {
   it("flags when completion is high but lead completion is low", () => {
-    const tasks = Array.from({ length: 6 }, (_, i) => makeTask({ id: `task_${i}`, weekNumber: 3, completed: i < 5 }));
+    const tasks = [
+      ...makeTaskBatch({
+        prefix: "scope_optional",
+        count: 8,
+        completedCount: 8,
+        scheduledDate: "2026-05-01",
+        weekNumber: 3,
+        isCore: false,
+      }),
+      ...makeTaskBatch({
+        prefix: "scope_core",
+        count: 2,
+        completedCount: 0,
+        scheduledDate: "2026-05-01",
+        weekNumber: 3,
+        isCore: true,
+      }),
+    ];
     const insights = getExecutionInsights(
       makeSystem({
         currentWeek: 3,
-        scoreboard: [makeScoreboard({ weekNumber: 3, weeklyScore: 70, leadCompletionPercent: 25 })],
+        lagMetric: { name: "Lag", unit: "u", target: "100", currentValue: "20" },
+        scoreboard: [makeScoreboard({ weekNumber: 3, weeklyScore: 70, leadCompletionPercent: 0 })],
         taskInstances: tasks,
         weeklyReviews: [makeReview({ weekNumber: 2, reviewCompleted: true })],
       }),
@@ -301,7 +386,7 @@ describe("getExecutionInsights — progress_without_consistency", () => {
 });
 
 describe("getExecutionInsights — ready_to_push", () => {
-  it("flags when recent avg score is strong AND check-in rate is strong", () => {
+  it("suppresses ready_to_push for an active unfinished week", () => {
     const checkIns = ["2026-04-25", "2026-04-26", "2026-04-27", "2026-04-28", "2026-04-29"].map((date) =>
       makeCheckIn({ date, didWorkToday: true }),
     );
@@ -320,6 +405,30 @@ describe("getExecutionInsights — ready_to_push", () => {
         dailyCheckIns: checkIns,
       }),
       { todayDateKey: "2026-05-01" },
+    );
+
+    expect(ids(insights)).not.toContain("ready_to_push");
+  });
+
+  it("flags when recent avg score is strong AND check-in rate is strong", () => {
+    const checkIns = ["2026-04-27", "2026-04-28", "2026-04-29", "2026-04-30", "2026-05-01"].map((date) =>
+      makeCheckIn({ date, didWorkToday: true }),
+    );
+    const insights = getExecutionInsights(
+      makeSystem({
+        currentWeek: 3,
+        scoreboard: [
+          makeScoreboard({ weekNumber: 1, weeklyScore: 85 }),
+          makeScoreboard({ weekNumber: 2, weeklyScore: 88 }),
+          makeScoreboard({ weekNumber: 3, weeklyScore: 90 }),
+        ],
+        weeklyReviews: [
+          makeReview({ weekNumber: 1, reviewCompleted: true }),
+          makeReview({ weekNumber: 2, reviewCompleted: true }),
+        ],
+        dailyCheckIns: checkIns,
+      }),
+      { todayDateKey: "2026-05-10" },
     );
     expect(ids(insights)).toContain("ready_to_push");
   });
@@ -349,6 +458,33 @@ describe("getExecutionInsights — priority and capping", () => {
 });
 
 describe("getWeeklyReflectionInsights", () => {
+  it("suppresses incomplete-score trend and readiness judgements for an active reviewed week", () => {
+    const checkIns = ["2026-04-25", "2026-04-26", "2026-04-27", "2026-04-28", "2026-04-29"].map((date) =>
+      makeCheckIn({ date, didWorkToday: true }),
+    );
+    const insights = getWeeklyReflectionInsights(
+      makeSystem({
+        currentWeek: 3,
+        scoreboard: [
+          makeScoreboard({ weekNumber: 1, weeklyScore: 85 }),
+          makeScoreboard({ weekNumber: 2, weeklyScore: 88 }),
+          makeScoreboard({ weekNumber: 3, weeklyScore: 50 }),
+        ],
+        weeklyReviews: [
+          makeReview({ weekNumber: 1, reviewCompleted: true }),
+          makeReview({ weekNumber: 2, reviewCompleted: true }),
+        ],
+        dailyCheckIns: checkIns,
+      }),
+      3,
+      { todayDateKey: "2026-05-01" },
+    );
+
+    expect(ids(insights)).not.toContain("consistency_dropping");
+    expect(ids(insights)).not.toContain("consistency_improving");
+    expect(ids(insights)).not.toContain("ready_to_push");
+  });
+
   it("scopes to a specific week and surfaces relevant insights", () => {
     const insights = getWeeklyReflectionInsights(
       makeSystem({
@@ -364,7 +500,7 @@ describe("getWeeklyReflectionInsights", () => {
         ],
       }),
       3,
-      { todayDateKey: "2026-05-01" },
+      { todayDateKey: "2026-05-10" },
     );
     // Week 3 vs week 2 = drop of 20 → consistency_dropping should fire
     expect(ids(insights)).toContain("consistency_dropping");
@@ -391,6 +527,245 @@ describe("getWeeklyReflectionInsights", () => {
     expect(insights).toHaveLength(3);
     expect(ids(insights)).toContain("strong_lead_metric");
     expect(insights.filter((insight) => insight.severity === "warning")).toHaveLength(2);
+  });
+
+  it("keeps whole-week evidence factual while early-review insights use tasks due so far", () => {
+    const dueTasks = [
+      ...makeTaskBatch({ prefix: "mon", count: 1, completedCount: 1, scheduledDate: "2026-08-03" }),
+      ...makeTaskBatch({ prefix: "tue", count: 1, completedCount: 1, scheduledDate: "2026-08-04" }),
+      ...makeTaskBatch({ prefix: "wed", count: 2, completedCount: 2, scheduledDate: "2026-08-05" }),
+    ];
+    const futureTasks = [
+      ...makeTaskBatch({ prefix: "thu", count: 2, completedCount: 0, scheduledDate: "2026-08-06" }),
+      ...makeTaskBatch({ prefix: "fri", count: 2, completedCount: 0, scheduledDate: "2026-08-07" }),
+      ...makeTaskBatch({ prefix: "sat", count: 1, completedCount: 0, scheduledDate: "2026-08-08" }),
+      ...makeTaskBatch({ prefix: "sun", count: 1, completedCount: 0, scheduledDate: "2026-08-09" }),
+    ];
+    const system = makeAugustSystem([...dueTasks, ...futureTasks]);
+
+    expect(getWeeklyReviewEvidence(system, 1, new Date(2026, 7, 5, 12)).completion).toEqual({
+      completed: 4,
+      total: 10,
+      percent: 40,
+      isEmpty: false,
+    });
+
+    const insights = getWeeklyReflectionInsights(system, 1, { todayDateKey: "2026-08-05" });
+    expect(ids(insights)).not.toContain("progress_without_consistency");
+    expect(ids(insights)).not.toContain("overloaded_week");
+  });
+
+  it("does not call an active week overloaded from future workload", () => {
+    const dueTasks = [
+      ...makeTaskBatch({
+        prefix: "overload_mon",
+        count: 1,
+        completedCount: 1,
+        scheduledDate: "2026-08-03",
+      }),
+      ...makeTaskBatch({
+        prefix: "overload_tue",
+        count: 1,
+        completedCount: 1,
+        scheduledDate: "2026-08-04",
+      }),
+      ...makeTaskBatch({
+        prefix: "overload_wed",
+        count: 2,
+        completedCount: 2,
+        scheduledDate: "2026-08-05",
+      }),
+    ];
+    const futureTasks = [
+      ...makeTaskBatch({
+        prefix: "overload_thu",
+        count: 2,
+        completedCount: 0,
+        scheduledDate: "2026-08-06",
+      }),
+      ...makeTaskBatch({
+        prefix: "overload_fri",
+        count: 2,
+        completedCount: 0,
+        scheduledDate: "2026-08-07",
+      }),
+      ...makeTaskBatch({
+        prefix: "overload_sat",
+        count: 2,
+        completedCount: 0,
+        scheduledDate: "2026-08-08",
+      }),
+      ...makeTaskBatch({
+        prefix: "overload_sun",
+        count: 2,
+        completedCount: 0,
+        scheduledDate: "2026-08-09",
+      }),
+    ];
+    const system = makeAugustSystem([...dueTasks, ...futureTasks]);
+
+    expect(ids(getWeeklyReflectionInsights(system, 1, { todayDateKey: "2026-08-05" }))).not.toContain(
+      "overloaded_week",
+    );
+  });
+
+  it("keeps real missed due work eligible during an early review", () => {
+    const dueTasks = [
+      ...makeTaskBatch({ prefix: "miss_mon", count: 2, completedCount: 1, scheduledDate: "2026-08-03" }),
+      ...makeTaskBatch({ prefix: "miss_tue", count: 1, completedCount: 0, scheduledDate: "2026-08-04" }),
+      ...makeTaskBatch({ prefix: "miss_wed", count: 1, completedCount: 0, scheduledDate: "2026-08-05" }),
+    ];
+    const futureTasks = makeTaskBatch({
+      prefix: "miss_future",
+      count: 6,
+      completedCount: 0,
+      scheduledDate: "2026-08-07",
+    });
+    const system = makeAugustSystem([...dueTasks, ...futureTasks]);
+
+    const insight = getWeeklyReflectionInsights(system, 1, { todayDateKey: "2026-08-05" }).find(
+      (item) => item.id === "progress_without_consistency",
+    );
+    expect(insight?.metrics.completionPercent).toBe(25);
+  });
+
+  it("includes tasks scheduled today and excludes tasks scheduled tomorrow", () => {
+    const system = makeAugustSystem(
+      [
+        ...makeTaskBatch({
+          prefix: "boundary_mon",
+          count: 1,
+          completedCount: 1,
+          scheduledDate: "2026-08-03",
+        }),
+        ...makeTaskBatch({
+          prefix: "boundary_today",
+          count: 1,
+          completedCount: 1,
+          scheduledDate: "2026-08-05",
+        }),
+        ...makeTaskBatch({
+          prefix: "boundary_tomorrow",
+          count: 1,
+          completedCount: 0,
+          scheduledDate: "2026-08-06",
+        }),
+      ],
+      {
+        lagMetric: { name: "Lag", unit: "u", target: "100", currentValue: "" },
+        scoreboard: [makeScoreboard({ weekNumber: 1, weeklyScore: 67, leadCompletionPercent: 67 })],
+      },
+    );
+
+    const insight = getWeeklyReflectionInsights(system, 1, { todayDateKey: "2026-08-05" }).find(
+      (item) => item.id === "task_completion_without_progress",
+    );
+    expect(insight?.metrics.completionPercent).toBe(100);
+  });
+
+  it("does not derive a zero-percent warning when no tasks are due yet", () => {
+    const system = makeAugustSystem([
+      ...makeTaskBatch({ prefix: "not_due_tue", count: 2, completedCount: 0, scheduledDate: "2026-08-04" }),
+      ...makeTaskBatch({ prefix: "not_due_wed", count: 2, completedCount: 0, scheduledDate: "2026-08-05" }),
+    ]);
+
+    expect(ids(getWeeklyReflectionInsights(system, 1, { todayDateKey: "2026-08-03" }))).not.toContain(
+      "progress_without_consistency",
+    );
+  });
+
+  it("does not treat future core tasks as low lead execution", () => {
+    const system = makeAugustSystem([
+      ...makeTaskBatch({
+        prefix: "scope_optional_due",
+        count: 8,
+        completedCount: 8,
+        scheduledDate: "2026-08-05",
+        isCore: false,
+      }),
+      ...makeTaskBatch({
+        prefix: "scope_core_future",
+        count: 2,
+        completedCount: 0,
+        scheduledDate: "2026-08-06",
+        isCore: true,
+      }),
+    ]);
+
+    expect(ids(getWeeklyReflectionInsights(system, 1, { todayDateKey: "2026-08-05" }))).not.toContain(
+      "needs_scope_reduction",
+    );
+  });
+
+  it("still flags scope reduction when due core execution is genuinely low", () => {
+    const system = makeAugustSystem([
+      ...makeTaskBatch({
+        prefix: "real_scope_optional",
+        count: 8,
+        completedCount: 8,
+        scheduledDate: "2026-08-05",
+        isCore: false,
+      }),
+      ...makeTaskBatch({
+        prefix: "real_scope_core",
+        count: 2,
+        completedCount: 0,
+        scheduledDate: "2026-08-05",
+        isCore: true,
+      }),
+    ]);
+
+    expect(ids(getWeeklyReflectionInsights(system, 1, { todayDateKey: "2026-08-05" }))).toContain(
+      "needs_scope_reduction",
+    );
+  });
+
+  it("uses the whole ended week for historical completion insights", () => {
+    const system = makeAugustSystem(
+      makeTaskBatch({ prefix: "historical", count: 10, completedCount: 4, scheduledDate: "2026-08-03" }),
+    );
+
+    const insight = getWeeklyReflectionInsights(system, 1, { todayDateKey: "2026-08-19" }).find(
+      (item) => item.id === "progress_without_consistency",
+    );
+    expect(insight?.metrics.completionPercent).toBe(40);
+  });
+
+  it("returns no deterministic insights for a future reviewed week", () => {
+    const system = makeAugustSystem(
+      makeTaskBatch({
+        prefix: "future_week",
+        count: 12,
+        completedCount: 0,
+        scheduledDate: "2026-08-10",
+        weekNumber: 2,
+      }),
+      {
+        scoreboard: [
+          makeScoreboard({ weekNumber: 1, weeklyScore: 80, leadCompletionPercent: 80 }),
+          makeScoreboard({ weekNumber: 2, weeklyScore: 20, leadCompletionPercent: 0 }),
+        ],
+        weeklyReviews: [makeReview({ weekNumber: 1, reviewCompleted: true })],
+      },
+    );
+
+    expect(getWeeklyReflectionInsights(system, 2, { todayDateKey: "2026-08-05" })).toEqual([]);
+  });
+
+  it("uses due-to-date task completion on the Progress surface", () => {
+    const system = makeAugustSystem([
+      ...makeTaskBatch({ prefix: "progress_due", count: 4, completedCount: 4, scheduledDate: "2026-08-05" }),
+      ...makeTaskBatch({
+        prefix: "progress_future",
+        count: 6,
+        completedCount: 0,
+        scheduledDate: "2026-08-07",
+      }),
+    ]);
+
+    expect(ids(getExecutionInsights(system, { weekNumber: 1, todayDateKey: "2026-08-05" }))).not.toContain(
+      "progress_without_consistency",
+    );
   });
 
   it("returns no_data when system is null", () => {
