@@ -39,7 +39,7 @@ describe("production smoke harness guards", () => {
     expect(smokeScript).toContain("async function waitForWeeklyReviewFormVisible(page, label)");
     expect(smokeScript).toContain("async function prepareWeeklyReviewFormData(page)");
     expect(smokeScript).toContain("async function ensureWeeklyReviewFormVisible(page)");
-    expect(smokeScript).toContain('[data-testid="weekly-review-flow"]:visible');
+    expect(smokeScript).toContain('[data-testid="weekly-review-three-questions"]:visible');
     expect(smokeScript).toContain('[data-tour-id="twelve-week-tab-week"]');
     expect(smokeScript).toContain('[data-testid="weekly-review-shell"]');
     expect(smokeScript).toContain('await ensureWeeklyReviewFormVisible(page);');
@@ -47,68 +47,47 @@ describe("production smoke harness guards", () => {
     expect(smokeScript).toContain('tryClickButtonByNormalizedText(page, "chinh sua danh gia")');
     expect(smokeScript).toContain("Prepared weekly review smoke form");
     expect(smokeScript).toContain('await tryClickButtonByNormalizedText(page, "van luu som");');
+    expect(smokeScript).toContain('await clickButtonByNormalizedText(page, "luu review");');
   });
 
-  it("classifies unanswered previous commitments before weekly review submit", () => {
-    expect(smokeScript).toContain("async function readVisibleWeeklyReviewCommitmentState(page, options = {})");
-    expect(smokeScript).toContain("async function classifyVisiblePreviousCommitments(page)");
-    expect(smokeScript).toContain(
-      'document.querySelectorAll(\'[data-testid="weekly-review-step-commitments"]\')',
-    );
-    expect(smokeScript).toContain('button.textContent?.replace(/\\s+/g, " ").trim() === "Đã giữ"');
-
-    const classifyIndex = smokeScript.indexOf("await classifyVisiblePreviousCommitments(page);");
-    const submitIndex = smokeScript.indexOf('await clickButtonByNormalizedText(page, "chot review tuan nay");');
-    expect(classifyIndex).toBeGreaterThan(0);
-    expect(submitIndex).toBeGreaterThan(classifyIndex);
+  it("treats previous commitment classification as optional in the short review flow", () => {
+    expect(smokeScript).not.toContain("async function readVisibleWeeklyReviewCommitmentState(page, options = {})");
+    expect(smokeScript).not.toContain("async function classifyVisiblePreviousCommitments(page)");
+    expect(smokeScript).not.toContain('[data-testid="weekly-review-step-commitments"]');
   });
 
-  it("re-queries the weekly review commitment step across React rerenders", () => {
-    const helperStart = smokeScript.indexOf("async function readVisibleWeeklyReviewCommitmentState(page, options = {})");
-    const helperEnd = smokeScript.indexOf("\nasync function readWeeklyReviewSurface(page)", helperStart);
-    const helperSource = smokeScript.slice(helperStart, helperEnd);
-
-    expect(helperStart).toBeGreaterThan(0);
-    expect(helperEnd).toBeGreaterThan(helperStart);
-    expect(helperSource).toContain("for (let attempt = 0; attempt < 10; attempt += 1)");
-    expect(helperSource).toContain("return page.evaluate(({ clickPending }) => {");
-    expect(helperSource).toContain(
-      "const clickResult = await readVisibleWeeklyReviewCommitmentState(page, { clickPending: true });",
+  it("fills the canonical three-question fields before weekly review submit", () => {
+    const keepInputIndex = smokeScript.indexOf(
+      'const weeklyKeepTacticInput = page.locator("#weekly-keep-tactic:visible").first();',
     );
-    expect(helperSource).toContain(
-      'document.querySelectorAll(\'[data-testid="weekly-review-step-commitments"]\')',
+    const obstacleInputIndex = smokeScript.indexOf(
+      'const weeklyMainObstacleInput = page.locator("#weekly-main-obstacle:visible").first();',
     );
-    expect(helperSource).toContain("const container = containers.find(isVisible);");
-    expect(helperSource).toContain('button.getAttribute("aria-pressed") !== "true"');
-
-    const atomicClickStart = helperSource.indexOf("return page.evaluate(({ clickPending }) => {");
-    const atomicClickEnd = helperSource.indexOf("async function classifyVisiblePreviousCommitments", atomicClickStart);
-    const atomicClickSource = helperSource.slice(atomicClickStart, atomicClickEnd);
-    expect(atomicClickSource).toContain("pendingButton.click();");
-
-    expect(helperSource).toContain("await waitForCondition(");
-    expect(helperSource).toContain("const state = await readVisibleWeeklyReviewCommitmentState(page);");
-    expect(helperSource).toContain("state.done || state.pendingCount < clickResult.pendingCount");
-    expect(helperSource).not.toContain("step.evaluate");
-    expect(helperSource).not.toContain("keptButtons.nth(index)");
-    expect(helperSource).not.toContain("await button.click()");
-  });
-
-  it("keeps visible weekly review inputs live across commitment classification", () => {
-    const classifyIndex = smokeScript.indexOf("const classifiedCommitments = await classifyVisiblePreviousCommitments(page);");
     const nextInputIndex = smokeScript.indexOf('const weeklyNextCommitmentsInput = page.locator("#weekly-next-commitments:visible").first();');
+    const submitIndex = smokeScript.indexOf('await clickButtonByNormalizedText(page, "luu review");');
 
-    expect(classifyIndex).toBeGreaterThan(0);
+    expect(keepInputIndex).toBeGreaterThan(0);
+    expect(obstacleInputIndex).toBeGreaterThan(keepInputIndex);
     expect(nextInputIndex).toBeGreaterThan(0);
-    expect(nextInputIndex).toBeLessThan(classifyIndex);
+    expect(submitIndex).toBeGreaterThan(nextInputIndex);
+    expect(smokeScript).toContain("await weeklyKeepTacticInput.fill(WEEKLY_REVIEW_OUTPUT);");
+    expect(smokeScript).toContain("await weeklyMainObstacleInput.fill(WEEKLY_REVIEW_OBSTACLE);");
   });
 
-  it("waits for visible weekly review UI instead of a hidden score container", () => {
-    expect(smokeScript).toContain("await weeklyInsightsInput.waitFor");
+  it("waits for visible canonical weekly review UI instead of retired inputs", () => {
+    expect(smokeScript).toContain("await weeklyKeepTacticInput.waitFor");
+    expect(smokeScript).toContain("await weeklyMainObstacleInput.waitFor");
     expect(smokeScript).toContain("await weeklyNextCommitmentsInput.waitFor");
+    expect(smokeScript).not.toContain("#weekly-insights:visible");
     expect(smokeScript).not.toContain(
       `await page.locator('[data-testid="wam-section-score"]').waitFor({ timeout: DEFAULT_TIMEOUT_MS });`,
     );
+  });
+
+  it("verifies canonical Weekly Review V2 fields survive local save and reload", () => {
+    expect(smokeScript).toContain("snapshot.latestWeeklyReview?.keepTactic === WEEKLY_REVIEW_OUTPUT");
+    expect(smokeScript).toContain("snapshot.latestWeeklyReview?.mainObstacle === WEEKLY_REVIEW_OBSTACLE");
+    expect(smokeScript).not.toContain("snapshot.latestWeeklyReview?.insights === WEEKLY_REVIEW_OUTPUT");
   });
 
   it("allows responsive progress QA to wait on progress UI instead of the Today queue", () => {
