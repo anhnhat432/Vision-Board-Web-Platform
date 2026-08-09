@@ -67,7 +67,7 @@ function getPrimaryButton(name: string | RegExp) {
 }
 
 async function openWeeklyReviewDetails(_user: ReturnType<typeof userEvent.setup>) {
-  await screen.findByTestId("wam-section-next-commitments", undefined, {
+  await screen.findByTestId("weekly-review-three-questions", undefined, {
     timeout: INTEGRATION_TEST_TIMEOUT_MS,
   });
   await act(async () => {
@@ -77,23 +77,22 @@ async function openWeeklyReviewDetails(_user: ReturnType<typeof userEvent.setup>
 
 async function typeWamReview(
   user: ReturnType<typeof userEvent.setup>,
-  input: { insights: string; nextWeekCommitments: string },
+  input: { keepTactic: string; nextWeekCommitments: string },
 ) {
   await openWeeklyReviewDetails(user);
-  const insightsInput = document.querySelector("#weekly-insights");
-  expect(insightsInput).toBeInTheDocument();
-  fireEvent.change(insightsInput as HTMLElement, { target: { value: input.insights } });
+  const keepTacticInput = screen.getByLabelText(/Điều gì đã giúp bạn tiến lên tuần này/i);
+  fireEvent.change(keepTacticInput, { target: { value: input.keepTactic } });
   await waitFor(() => {
-    expect((document.querySelector("#weekly-insights") as HTMLTextAreaElement | null)?.value).toBe(input.insights);
+    expect(keepTacticInput).toHaveValue(input.keepTactic);
   });
 
-  const commitmentsInput = within(screen.getByTestId("weekly-review-flow")).getByLabelText(/cam kết của tuần tới/i);
+  const commitmentsInput = screen.getByLabelText(/Tuần sau bạn muốn thay đổi điều gì/i);
   fireEvent.change(commitmentsInput, { target: { value: `${input.nextWeekCommitments},` } });
   await screen.findByLabelText(`Cam kết: ${input.nextWeekCommitments}`, undefined, {
     timeout: 3_000,
   });
   await waitFor(() => {
-    expect(screen.getByTestId("weekly-review-readiness")).toHaveTextContent("4/4");
+    expect(screen.getByTestId("weekly-review-readiness")).toHaveTextContent("2/3 câu");
   });
 }
 
@@ -233,7 +232,7 @@ describe("12-week write-path safety", () => {
       const user = userEvent.setup();
       await user.click(screen.getByRole("tab", { name: "Mở tab Tuần" }));
       await typeWamReview(user, {
-        insights: "Weekly review still saves locally.",
+        keepTactic: "Weekly review still saves locally.",
         nextWeekCommitments: "Keep the local review.",
       });
 
@@ -250,7 +249,7 @@ describe("12-week write-path safety", () => {
       });
 
       try {
-        await user.click(getPrimaryButton("Chốt review tuần này"));
+        await user.click(getPrimaryButton("Lưu review"));
         await confirmEarlyReviewIfPrompted(user);
 
         await waitFor(() => {
@@ -263,7 +262,7 @@ describe("12-week write-path safety", () => {
           (item) => item.entryType === "weekly-review" && item.linkedGoalId === goalId,
         );
 
-        expect(system?.weeklyReviews[0]?.insights).toBe("Weekly review still saves locally.");
+        expect(system?.weeklyReviews[0]?.keepTactic).toBe("Weekly review still saves locally.");
         expect(reflection?.content).toContain("Weekly review still saves locally.");
         expect(listStoredPendingMutations(null)).toEqual([]);
       } finally {
@@ -289,10 +288,10 @@ describe("12-week write-path safety", () => {
 
       await user.click(screen.getByRole("tab", { name: "Mở tab Tuần" }));
       await typeWamReview(user, {
-        insights: "Bị phân tán vì đổi context.",
+        keepTactic: "Bị phân tán vì đổi context.",
         nextWeekCommitments: "Chốt xong command center trước.",
       });
-      await user.click(getPrimaryButton("Chốt review tuần này"));
+      await user.click(getPrimaryButton("Lưu review"));
       await confirmEarlyReviewIfPrompted(user);
 
       await waitFor(() => {
@@ -339,10 +338,10 @@ describe("12-week write-path safety", () => {
       expect(screen.queryByLabelText("Reflection")).not.toBeInTheDocument();
       expect(screen.queryByLabelText("Adjustments")).not.toBeInTheDocument();
       await typeWamReview(user, {
-        insights: "Hoàn thành review local trước khi backend kịp trả lời.",
+        keepTactic: "Hoàn thành review local trước khi backend kịp trả lời.",
         nextWeekCommitments: "Giữ review hiển thị trong journal.",
       });
-      await user.click(getPrimaryButton("Chốt review tuần này"));
+      await user.click(getPrimaryButton("Lưu review"));
       await confirmEarlyReviewIfPrompted(user);
 
       await waitFor(() => {

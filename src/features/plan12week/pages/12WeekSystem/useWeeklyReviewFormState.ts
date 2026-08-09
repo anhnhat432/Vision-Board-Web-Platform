@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { TwelveWeekSystem, UniversalDailyCheckIn, UniversalWeeklyReview } from "@/app/utils/storage-types";
 import type { DailyMood } from "@/app/utils/twelve-week-system-ui";
 
@@ -41,6 +41,33 @@ function buildCommitmentStatuses(
   }, {});
 }
 
+export function buildWeeklyReviewForm(
+  system: TwelveWeekSystem,
+  reviewWeekNumber: number,
+  currentLagMetricValue: string,
+): WeeklyReviewForm {
+  const review = system.weeklyReviews.find((item) => item.weekNumber === reviewWeekNumber);
+  const previousReview = system.weeklyReviews.find((item) => item.weekNumber === reviewWeekNumber - 1);
+  const previousCommitments = getReviewNextWeekCommitments(previousReview);
+  const nextWeekCommitments = getReviewNextWeekCommitments(review);
+  const legacyNextPriority = review?.nextWeekPriority ?? "";
+  const insights = review?.insights ?? review?.reflection ?? review?.biggestOutputThisWeek ?? "";
+
+  return {
+    lagProgressValue: review?.lagProgressValue ?? currentLagMetricValue ?? "",
+    biggestOutputThisWeek: review?.biggestOutputThisWeek ?? "",
+    mainObstacle: review?.mainObstacle ?? "",
+    keepTactic: review?.keepTactic ?? "",
+    reduceTactic: review?.reduceTactic ?? "",
+    nextWeekPriority: legacyNextPriority,
+    commitmentStatuses: buildCommitmentStatuses(previousCommitments, review),
+    insights,
+    nextWeekCommitments:
+      nextWeekCommitments.length > 0 ? nextWeekCommitments : legacyNextPriority ? [legacyNextPriority] : [],
+    workloadDecision: review?.workloadDecision ?? "keep same",
+  };
+}
+
 export function useWeeklyReviewFormState({
   activeGoalId,
   system,
@@ -64,32 +91,30 @@ export function useWeeklyReviewFormState({
     workloadDecision: "keep same",
   });
 
+  const loadWeeklyReviewForm = useCallback(
+    (reviewWeekNumber: number) => {
+      if (!system || !activeGoalId) return false;
+      formInitRef.current = `${activeGoalId}::${reviewWeekNumber}`;
+      setWeeklyForm(buildWeeklyReviewForm(system, reviewWeekNumber, currentLagMetricValue));
+      return true;
+    },
+    [activeGoalId, currentLagMetricValue, system],
+  );
+
+  const resetWeeklyReviewForm = useCallback(() => {
+    if (!system || !activeGoalId) return false;
+    formInitRef.current = null;
+    return loadWeeklyReviewForm(system.currentWeek);
+  }, [activeGoalId, loadWeeklyReviewForm, system]);
+
   useEffect(() => {
     if (!system || !activeGoalId) return;
 
-    const initKey = `${activeGoalId}::${currentReview?.weekNumber ?? ""}`;
+    const reviewWeekNumber = currentReview?.weekNumber ?? system.currentWeek;
+    const initKey = `${activeGoalId}::${reviewWeekNumber}`;
     if (formInitRef.current === initKey) return;
     formInitRef.current = initKey;
-
-    const previousReview = system.weeklyReviews.find((review) => review.weekNumber === system.currentWeek - 1);
-    const previousCommitments = getReviewNextWeekCommitments(previousReview);
-    const nextWeekCommitments = getReviewNextWeekCommitments(currentReview);
-    const legacyNextPriority = currentReview?.nextWeekPriority ?? "";
-    const insights = currentReview?.insights ?? currentReview?.reflection ?? currentReview?.biggestOutputThisWeek ?? "";
-
-    setWeeklyForm({
-      lagProgressValue: currentReview?.lagProgressValue ?? currentLagMetricValue ?? "",
-      biggestOutputThisWeek: currentReview?.biggestOutputThisWeek ?? "",
-      mainObstacle: currentReview?.mainObstacle ?? "",
-      keepTactic: currentReview?.keepTactic ?? "",
-      reduceTactic: currentReview?.reduceTactic ?? "",
-      nextWeekPriority: legacyNextPriority,
-      commitmentStatuses: buildCommitmentStatuses(previousCommitments, currentReview),
-      insights,
-      nextWeekCommitments:
-        nextWeekCommitments.length > 0 ? nextWeekCommitments : legacyNextPriority ? [legacyNextPriority] : [],
-      workloadDecision: currentReview?.workloadDecision ?? "keep same",
-    });
+    setWeeklyForm(buildWeeklyReviewForm(system, reviewWeekNumber, currentLagMetricValue));
     setDailyMood((latestCheckIn?.mood as DailyMood | undefined) ?? "steady");
     setDailyNote(latestCheckIn?.optionalNote ?? "");
   }, [system, currentReview, currentLagMetricValue, latestCheckIn, activeGoalId]);
@@ -101,5 +126,7 @@ export function useWeeklyReviewFormState({
     setDailyMood,
     setDailyNote,
     setWeeklyForm,
+    loadWeeklyReviewForm,
+    resetWeeklyReviewForm,
   };
 }

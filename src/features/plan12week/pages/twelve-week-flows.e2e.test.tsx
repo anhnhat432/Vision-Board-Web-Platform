@@ -80,28 +80,27 @@ function getDailyNoteInput() {
 }
 
 async function openWeeklyReviewDetails(_user: ReturnType<typeof userEvent.setup>) {
-  await screen.findByTestId("wam-section-next-commitments");
+  await screen.findByTestId("weekly-review-three-questions");
 }
 
 async function typeWamReview(
   user: ReturnType<typeof userEvent.setup>,
-  input: { insights: string; nextWeekCommitments: string },
+  input: { keepTactic: string; nextWeekCommitments: string },
 ) {
   await openWeeklyReviewDetails(user);
-  const insightsInput = document.querySelector("#weekly-insights");
-  expect(insightsInput).toBeInTheDocument();
-  fireEvent.change(insightsInput as HTMLElement, { target: { value: input.insights } });
+  const keepTacticInput = screen.getByLabelText(/Điều gì đã giúp bạn tiến lên tuần này/i);
+  fireEvent.change(keepTacticInput, { target: { value: input.keepTactic } });
   await waitFor(() => {
-    expect((document.querySelector("#weekly-insights") as HTMLTextAreaElement | null)?.value).toBe(input.insights);
+    expect(keepTacticInput).toHaveValue(input.keepTactic);
   });
 
-  const commitmentsInput = within(screen.getByTestId("weekly-review-flow")).getByLabelText(/cam kết của tuần tới/i);
+  const commitmentsInput = screen.getByLabelText(/Tuần sau bạn muốn thay đổi điều gì/i);
   fireEvent.change(commitmentsInput, { target: { value: `${input.nextWeekCommitments},` } });
   await screen.findByLabelText(`Cam kết: ${input.nextWeekCommitments}`, undefined, {
     timeout: 3_000,
   });
   await waitFor(() => {
-    expect(screen.getByTestId("weekly-review-readiness")).toHaveTextContent("4/4");
+    expect(screen.getByTestId("weekly-review-readiness")).toHaveTextContent("2/3 câu");
   });
 }
 
@@ -508,7 +507,7 @@ describe("12-week core flows", () => {
   });
 
   it(
-    "shows tactic commitment reminders in Today and Weekly Review",
+    "shows tactic commitment context in Today",
     async () => {
       const { goalId } = seedTwelveWeekGoal();
       updateUserData((data) => {
@@ -538,7 +537,6 @@ describe("12-week core flows", () => {
       });
 
       renderAppRoute("/12-week-system");
-      const user = userEvent.setup();
 
       expect(
         await screen.findAllByText((_, element) =>
@@ -546,10 +544,6 @@ describe("12-week core flows", () => {
         ),
       ).not.toHaveLength(0);
 
-      await user.click(screen.getByRole("tab", { name: "Mở tab Tuần" }));
-
-      const commitmentsSection = await screen.findByTestId("wam-section-commitments");
-      expect(commitmentsSection).toHaveTextContent("Tôi muốn ship đều vì đây là lời hứa với chính mình.");
     },
     INTEGRATION_TEST_TIMEOUT_MS,
   );
@@ -659,10 +653,10 @@ describe("12-week core flows", () => {
       await user.click(getPrimaryButton("Lưu check-in hôm nay"));
       await user.click(screen.getByRole("tab", { name: "Mở tab Tuần" }));
       await typeWamReview(user, {
-        insights: "Chốt được một việc thật.",
+        keepTactic: "Chốt được một việc thật.",
         nextWeekCommitments: "Giữ nhịp execution.",
       });
-      await user.click(getPrimaryButton("Chốt review tuần này"));
+      await user.click(getPrimaryButton("Lưu review"));
       await confirmEarlyReviewIfPrompted(user);
 
       await waitFor(() => {
@@ -685,10 +679,10 @@ describe("12-week core flows", () => {
 
       await user.click(screen.getByRole("tab", { name: "Mở tab Tuần" }));
       await typeWamReview(user, {
-        insights: "Bị phân tán vì đổi context.",
+        keepTactic: "Bị phân tán vì đổi context.",
         nextWeekCommitments: "Chốt xong command center trước.",
       });
-      await user.click(getPrimaryButton("Chốt review tuần này"));
+      await user.click(getPrimaryButton("Lưu review"));
       await confirmEarlyReviewIfPrompted(user);
 
       await waitFor(() => {
@@ -729,15 +723,15 @@ describe("12-week core flows", () => {
 
       await user.click(screen.getByRole("tab", { name: "Mở tab Tuần" }));
       await typeWamReview(user, {
-        insights: "Giữ buổi review thứ Năm.",
+        keepTactic: "Giữ buổi review thứ Năm.",
         nextWeekCommitments: "Hoàn thành module sync trước thứ Tư.",
       });
-      await user.click(getPrimaryButton("Chốt review tuần này"));
+      await user.click(getPrimaryButton("Lưu review"));
       await confirmEarlyReviewIfPrompted(user);
 
       await waitFor(() => {
         const review = readGoal(goalId).twelveWeekSystem?.weeklyReviews[0];
-        expect(review?.insights).toBe("Giữ buổi review thứ Năm.");
+        expect(review?.keepTactic).toBe("Giữ buổi review thứ Năm.");
         expect(review?.nextWeekCommitments).toContain("Hoàn thành module sync trước thứ Tư.");
         expect(review?.reviewCompleted).toBe(true);
       });
@@ -790,12 +784,18 @@ describe("12-week core flows", () => {
 
       await openWeeklyReviewDetails(user);
 
-      // Existing legacy fields should hydrate the WAM form
-      expect(await screen.findByDisplayValue("Legacy output")).toBeInTheDocument();
+      // Canonical editable values hydrate; hidden legacy output stays out of the short form.
+      expect(await screen.findByDisplayValue("Legacy obstacle")).toBeInTheDocument();
       expect(screen.getByLabelText("Cam kết: Legacy priority")).toBeInTheDocument();
+      expect(screen.queryByDisplayValue("Legacy output")).toBeNull();
 
-      // Old optional obstacle field is no longer rendered in the WAM form.
-      expect(screen.queryByDisplayValue("Legacy obstacle")).toBeNull();
+      await user.click(getPrimaryButton("Lưu review"));
+      await confirmEarlyReviewIfPrompted(user);
+      await waitFor(() => {
+        const review = readGoal(goalId).twelveWeekSystem?.weeklyReviews[0];
+        expect(review?.biggestOutputThisWeek).toBe("Legacy output");
+        expect(review?.mainObstacle).toBe("Legacy obstacle");
+      });
     },
     INTEGRATION_TEST_TIMEOUT_MS,
   );
@@ -809,49 +809,49 @@ describe("12-week core flows", () => {
 
       await user.click(screen.getByRole("tab", { name: "Mở tab Tuần" }));
       await typeWamReview(user, {
-        insights: "First weekly insight.",
+        keepTactic: "First weekly tactic.",
         nextWeekCommitments: "First priority.",
       });
-      await user.click(getPrimaryButton("Chốt review tuần này"));
+      await user.click(getPrimaryButton("Lưu review"));
       await confirmEarlyReviewIfPrompted(user);
 
       await waitFor(() => {
-        expect(readGoal(goalId).twelveWeekSystem?.weeklyReviews[0]?.insights).toBe("First weekly insight.");
+        expect(readGoal(goalId).twelveWeekSystem?.weeklyReviews[0]?.keepTactic).toBe("First weekly tactic.");
       });
 
       // Click Chỉnh sửa đánh giá to open form since it is completed and hidden
       await user.click(screen.getByRole("button", { name: "Chỉnh sửa đánh giá" }));
 
-      const reviewFlow = await screen.findByTestId("weekly-review-flow");
-      const insightsInput = within(reviewFlow).getByLabelText(/góc nhìn\/điều học được/i);
-      fireEvent.change(insightsInput, { target: { value: "Latest weekly insight." } });
+      const reviewFlow = await screen.findByTestId("weekly-review-three-questions");
+      const keepTacticInput = within(reviewFlow).getByLabelText(/Điều gì đã giúp bạn tiến lên tuần này/i);
+      fireEvent.change(keepTacticInput, { target: { value: "Latest weekly tactic." } });
       await waitFor(() => {
-        expect(insightsInput).toHaveValue("Latest weekly insight.");
+        expect(keepTacticInput).toHaveValue("Latest weekly tactic.");
       });
       await user.click(screen.getByRole("button", { name: "Xóa cam kết: First priority." }));
       await waitFor(() => {
         expect(screen.queryByLabelText("Cam kết: First priority.")).not.toBeInTheDocument();
       });
-      const latestReviewFlow = screen.getByTestId("weekly-review-flow");
+      const latestReviewFlow = screen.getByTestId("weekly-review-three-questions");
       const commitmentsInput = latestReviewFlow.querySelector("#weekly-next-commitments");
       expect(commitmentsInput).toBeInTheDocument();
       fireEvent.change(commitmentsInput as HTMLElement, { target: { value: "Latest priority.," } });
       await screen.findByLabelText("Cam kết: Latest priority.");
       await waitFor(() => {
-        expect(screen.getByTestId("weekly-review-readiness")).toHaveTextContent("4/4");
+        expect(screen.getByTestId("weekly-review-readiness")).toHaveTextContent("2/3 câu");
       });
-      await user.click(getPrimaryButton("Chốt review tuần này"));
+      await user.click(getPrimaryButton("Lưu review"));
       await confirmEarlyReviewIfPrompted(user);
 
       await waitFor(() => {
-        expect(readGoal(goalId).twelveWeekSystem?.weeklyReviews[0]?.insights).toBe("Latest weekly insight.");
+        expect(readGoal(goalId).twelveWeekSystem?.weeklyReviews[0]?.keepTactic).toBe("Latest weekly tactic.");
       });
 
       const weeklyMutations = listStoredPendingMutations(null).filter((item) => item.kind === "weekly_review_upserted");
       expect(weeklyMutations).toHaveLength(1);
       expect(weeklyMutations[0].supersedes).toHaveLength(1);
       if (weeklyMutations[0].kind === "weekly_review_upserted") {
-        expect(weeklyMutations[0].payload.review.insights).toBe("Latest weekly insight.");
+        expect(weeklyMutations[0].payload.review.keepTactic).toBe("Latest weekly tactic.");
         expect(weeklyMutations[0].payload.review.nextWeekPriority).toBe("Latest priority.");
         expect(weeklyMutations[0].payload.executionScore).toEqual(expect.any(Number));
       }

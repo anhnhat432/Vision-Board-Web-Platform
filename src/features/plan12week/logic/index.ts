@@ -31,6 +31,14 @@ export type {
   WorkloadDecisionInput,
 } from "./nextWeekRecommendation";
 export { getNextWeekAdjustmentRecommendation } from "./nextWeekRecommendation";
+export type {
+  AvailableNextWeekHandoffPreview,
+  ConfirmedNextWeekHandoffSelection,
+  NextWeekHandoffApplyResult,
+  NextWeekHandoffPreview,
+  NextWeekHandoffUnavailableReason,
+} from "./nextWeekHandoff";
+export { applyConfirmedNextWeekHandoff, buildNextWeekHandoffPreview } from "./nextWeekHandoff";
 export type { ArchetypePlanFullDefaults } from "./planArchetypeDefaults";
 export {
   getArchetypePlanFullDefaults,

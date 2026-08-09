@@ -313,7 +313,16 @@ export function TwelveWeekSystem() {
   const todayDateKey = formatDateInputValue(new Date());
   const isBackendProfileReady = Boolean(userProfile);
   const latestCheckIn = getLatestCheckIn(system);
-  const { dailyMood, dailyNote, weeklyForm, setDailyMood, setDailyNote, setWeeklyForm } = useWeeklyReviewFormState({
+  const {
+    dailyMood,
+    dailyNote,
+    weeklyForm,
+    setDailyMood,
+    setDailyNote,
+    setWeeklyForm,
+    loadWeeklyReviewForm,
+    resetWeeklyReviewForm,
+  } = useWeeklyReviewFormState({
     activeGoalId: activeGoal?.id ?? null,
     system,
     currentReview,
@@ -731,6 +740,7 @@ export function TwelveWeekSystem() {
     handleToggleTask,
     handleSaveCheckIn,
     handleSaveWeeklyReview,
+    handleApplyNextWeekHandoff,
     handleReentry,
     handleApplyRecommendedReentry,
     handleApplySuggestedPlan,
@@ -745,7 +755,6 @@ export function TwelveWeekSystem() {
     dailyNote,
     weeklyForm,
     setWeeklyForm,
-    hasPremiumReviewInsights,
     suggestedNextWeekPlan,
     rescuePlanSummary,
     executionSyncActions,
@@ -1046,11 +1055,11 @@ export function TwelveWeekSystem() {
         currentWeek={currentWeek}
         syncBadgeClassName={syncBadgeClass}
         syncBadgeLabel={syncBadgeLabel}
-        reviewDueToday={reviewDueToday}
+        reviewDueToday={reviewDueToday && activeTab !== "week"}
         todayRemainingCount={todayRemainingCount}
         todayCompletedCount={todayCompletedCount}
         weekCompletion={weekCompletion}
-        onPrimaryAction={() => handleTabChange(reviewDueToday ? "week" : "today")}
+        onPrimaryAction={() => handleTabChange(activeTab === "week" ? "today" : reviewDueToday ? "week" : "today")}
         onOpenGoals={() => navigate("/goals")}
         onExit={() => navigate("/")}
         onRenameGoal={handleRenameActiveGoal}
@@ -1068,7 +1077,7 @@ export function TwelveWeekSystem() {
             handleTabChange={handleTabChange}
             setActiveTab={setActiveTab}
             activePlanCode={activePlanCode}
-            shouldShowWeeklyReviewBanner={shouldShowWeeklyReviewBanner}
+            shouldShowWeeklyReviewBanner={shouldShowWeeklyReviewBanner && activeTab !== "week"}
             handleSnoozeWeeklyReview={handleSnoozeWeeklyReview}
             hasIncompletePlanStructure={hasIncompletePlanStructure}
             planHasNoLeadMetrics={planHasNoLeadMetrics}
@@ -1152,9 +1161,11 @@ export function TwelveWeekSystem() {
         onApplySuggestedPlan={handleApplySuggestedPlan}
         onOpenPremiumInsights={() => handleOpenUpgradeDialog("review", "PLUS")}
         onSaveWeeklyReview={handleSaveWeeklyReview}
+        onPrepareReviewEdit={loadWeeklyReviewForm}
+        onResetReviewForm={resetWeeklyReviewForm}
+        onApplyNextWeekHandoff={handleApplyNextWeekHandoff}
         onOpenTodayTab={() => handleTabChange("today")}
         nextWeekRecommendation={nextWeekRecommendation}
-        onAcceptNextWeekRecommendation={handleApplySuggestedPlan}
         weeklyReviewViewModels={weeklyReviewViewModels}
         showFullProgress={showFullProgress}
         setShowFullProgress={setShowFullProgress}
