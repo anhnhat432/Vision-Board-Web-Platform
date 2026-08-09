@@ -68,6 +68,7 @@ function makeProps(overrides: Partial<WeekTabProps> = {}): WeekTabProps {
       secondaryTrackItems: ["Stretch task"],
       firstMove: "Open Today",
     },
+    weeklyReviewViewModels: {},
     weeklyForm: {
       lagProgressValue: "",
       biggestOutputThisWeek: "",

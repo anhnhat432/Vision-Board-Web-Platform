@@ -6,8 +6,10 @@ import {
   getNextWeekAdjustmentRecommendation,
   getRescueModeStatus,
   getWeeklyReflectionInsights,
+  getWeeklyReviewEvidence,
   type NextWeekRecommendation,
   type RescueModeStatus,
+  type WeeklyReviewViewModel,
 } from "@/features/plan12week/logic";
 import type { BillingActionSnapshot, BillingProviderStatus } from "../utils/billing-contract";
 import type { BrowserNotificationStatus, OutboxSyncSnapshot } from "../utils/production";
@@ -534,12 +536,24 @@ export function useTwelveWeekSystemSnapshot() {
     });
   }, [effectiveSystem, currentWeek, activeTab]);
 
-  const weeklyReflectionInsights: ExecutionInsight[] = useMemo(() => {
-    if (!effectiveSystem || activeTab !== "week") return [];
-    return getWeeklyReflectionInsights(effectiveSystem, currentWeek, {
-      todayDateKey: formatDateInputValue(new Date()),
-    });
-  }, [effectiveSystem, currentWeek, activeTab]);
+  const weeklyReviewViewModels = useMemo<Readonly<Record<number, WeeklyReviewViewModel>>>(() => {
+    if (!effectiveSystem || activeTab !== "week") return {};
+    const referenceDate = new Date();
+
+    return Object.fromEntries(
+      Array.from({ length: effectiveSystem.totalWeeks }, (_, index) => {
+        const weekNumber = index + 1;
+        const evidence = getWeeklyReviewEvidence(effectiveSystem, weekNumber, referenceDate);
+        const insights = evidence.completion.isEmpty
+          ? []
+          : getWeeklyReflectionInsights(effectiveSystem, weekNumber, {
+              todayDateKey: evidence.dateRange.end,
+            });
+
+        return [weekNumber, { evidence, insights } satisfies WeeklyReviewViewModel];
+      }),
+    );
+  }, [effectiveSystem, activeTab]);
 
   const milestoneItems = useMemo(
     () => [
@@ -612,7 +626,7 @@ export function useTwelveWeekSystemSnapshot() {
     rescueStatus,
     nextWeekRecommendation,
     executionInsights,
-    weeklyReflectionInsights,
+    weeklyReviewViewModels,
     activeTriggers,
     hasPremiumReviewInsights,
     premiumReviewInsight,

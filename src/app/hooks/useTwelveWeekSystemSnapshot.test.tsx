@@ -33,4 +33,19 @@ describe("useTwelveWeekSystemSnapshot route tabs", () => {
       expect(result.current.activeTab).toBe("week");
     });
   });
+
+  it("derives a week-scoped evidence and insight view model on the Week tab", async () => {
+    const { result } = renderHook(() => useTwelveWeekSystemSnapshot(), {
+      wrapper: wrapperFor("/12-week-system?tab=week"),
+    });
+
+    await waitFor(() => {
+      expect(result.current.weeklyReviewViewModels[1]?.evidence.completion.total).toBeGreaterThan(0);
+    });
+    const expectedWeekOneTaskCount =
+      result.current.system?.taskInstances.filter((task) => task.weekNumber === 1 && !task.skipped).length ?? 0;
+    expect(result.current.weeklyReviewViewModels[1]?.evidence.completion.total).toBe(expectedWeekOneTaskCount);
+    expect(result.current.weeklyReviewViewModels[1]?.evidence.dateRange.start).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(result.current.weeklyReviewViewModels[1]?.insights.length).toBeLessThanOrEqual(3);
+  });
 });

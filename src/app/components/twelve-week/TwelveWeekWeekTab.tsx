@@ -1,6 +1,6 @@
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import type { ExecutionInsight, NextWeekRecommendation, RescueModeStatus } from "@/features/plan12week/logic";
+import type { NextWeekRecommendation, RescueModeStatus, WeeklyReviewViewModel } from "@/features/plan12week/logic";
 import { calculateLagScore, interpretWeeklyExecutionScore } from "@/features/plan12week/logic";
 import { formatCalendarDate, getReviewDayLabel } from "../../utils/storage";
 import { getTwelveWeekWeekRange } from "../../utils/storage-twelve-week";
@@ -90,7 +90,7 @@ interface TwelveWeekWeekTabProps {
   onReducePlan?: () => void;
   nextWeekRecommendation?: NextWeekRecommendation | null;
   onAcceptNextWeekRecommendation?: () => void;
-  _weeklyReflectionInsights?: ReadonlyArray<ExecutionInsight>;
+  weeklyReviewViewModels: Readonly<Record<number, WeeklyReviewViewModel>>;
 }
 
 function getLeadScoreTone(level: ReturnType<typeof interpretWeeklyExecutionScore>["level"]): {
@@ -164,7 +164,6 @@ export function TwelveWeekWeekTab({
   onReducePlan,
   nextWeekRecommendation,
   onAcceptNextWeekRecommendation,
-  _weeklyReflectionInsights,
 }: TwelveWeekWeekTabProps) {
   const [selectedWeek, setSelectedWeek] = useState(system.currentWeek);
 
