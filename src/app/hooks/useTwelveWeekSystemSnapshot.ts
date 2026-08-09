@@ -547,13 +547,13 @@ export function useTwelveWeekSystemSnapshot() {
         const insights = evidence.completion.isEmpty
           ? []
           : getWeeklyReflectionInsights(effectiveSystem, weekNumber, {
-              todayDateKey: evidence.dateRange.end,
+              todayDateKey: snapshotTodayDateKey,
             });
 
         return [weekNumber, { evidence, insights } satisfies WeeklyReviewViewModel];
       }),
     );
-  }, [effectiveSystem, activeTab]);
+  }, [effectiveSystem, activeTab, snapshotTodayDateKey]);
 
   const milestoneItems = useMemo(
     () => [
