@@ -375,6 +375,7 @@ describe("TwelveWeekWeekTab review flow", () => {
       "backdrop-blur-md",
       "md:hidden",
     );
+    expect(actionBar.closest(".weekly-stagger-item")).toBeNull();
     expect(within(actionBar).getByText("Tiến độ review 2/4")).toBeInTheDocument();
     expect(within(actionBar).getByText(/Thiếu 2 mục/i)).toBeInTheDocument();
     expect(within(actionBar).getByRole("button", { name: /Chốt review tuần này/i })).toHaveClass("min-h-12");

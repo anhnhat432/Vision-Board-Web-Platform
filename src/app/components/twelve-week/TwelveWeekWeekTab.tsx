@@ -443,46 +443,44 @@ export function TwelveWeekWeekTab({
           )}
 
           {showForm && canShowFormReview && reviewViewModel && (
-            <StaggerSection>
-              <WeeklyReviewForm
-                system={system}
-                currentWeekLimit={currentWeekLimit}
-                totalWeeks={system.totalWeeks}
-                currentWeekRange={currentWeekRange}
-                currentPlanFocus={currentPlanFocus}
-                lagScoreValue={lagScoreValue}
-                lagMetricValue={lagMetricValue}
-                reviewViewModel={reviewViewModel}
-                currentPlanCode={currentPlanCode}
-                hasPremiumInsights={hasPremiumInsights}
-                premiumInsight={premiumInsight}
-                suggestedNextWeekPlan={suggestedNextWeekPlan}
-                weeklyForm={weeklyForm}
-                previousCommitments={previousCommitments}
-                allPreviousCommitmentsAnswered={allPreviousCommitmentsAnswered}
-                nextWeekCommitments={nextWeekCommitments}
-                hasNextWeekCommitment={hasNextWeekCommitment}
-                reviewReadinessItems={reviewReadinessItems}
-                reviewReadyCount={reviewReadyCount}
-                _reviewPendingItems={reviewPendingItems}
-                canSubmitWeeklyReview={canSubmitWeeklyReview}
-                reviewStatusTitle={reviewStatusTitle}
-                reviewStatusHint={reviewStatusHint}
-                reviewStickyStatus={reviewStickyStatus}
-                isSavingReview={isSavingReview}
-                isEditingReview={isEditingReview}
-                isStartingEarly={isStartingEarly}
-                formatCalendarDate={formatCalendarDate}
-                onWeeklyFormChange={onWeeklyFormChange}
-                onApplySuggestedPlan={onApplySuggestedPlan}
-                onOpenPremiumInsights={onOpenPremiumInsights}
-                onSaveWeeklyReview={handleSaveReviewClick}
-                onCancelReview={() => {
-                  setIsEditingReview(false);
-                  setIsStartingEarly(false);
-                }}
-              />
-            </StaggerSection>
+            <WeeklyReviewForm
+              system={system}
+              currentWeekLimit={currentWeekLimit}
+              totalWeeks={system.totalWeeks}
+              currentWeekRange={currentWeekRange}
+              currentPlanFocus={currentPlanFocus}
+              lagScoreValue={lagScoreValue}
+              lagMetricValue={lagMetricValue}
+              reviewViewModel={reviewViewModel}
+              currentPlanCode={currentPlanCode}
+              hasPremiumInsights={hasPremiumInsights}
+              premiumInsight={premiumInsight}
+              suggestedNextWeekPlan={suggestedNextWeekPlan}
+              weeklyForm={weeklyForm}
+              previousCommitments={previousCommitments}
+              allPreviousCommitmentsAnswered={allPreviousCommitmentsAnswered}
+              nextWeekCommitments={nextWeekCommitments}
+              hasNextWeekCommitment={hasNextWeekCommitment}
+              reviewReadinessItems={reviewReadinessItems}
+              reviewReadyCount={reviewReadyCount}
+              _reviewPendingItems={reviewPendingItems}
+              canSubmitWeeklyReview={canSubmitWeeklyReview}
+              reviewStatusTitle={reviewStatusTitle}
+              reviewStatusHint={reviewStatusHint}
+              reviewStickyStatus={reviewStickyStatus}
+              isSavingReview={isSavingReview}
+              isEditingReview={isEditingReview}
+              isStartingEarly={isStartingEarly}
+              formatCalendarDate={formatCalendarDate}
+              onWeeklyFormChange={onWeeklyFormChange}
+              onApplySuggestedPlan={onApplySuggestedPlan}
+              onOpenPremiumInsights={onOpenPremiumInsights}
+              onSaveWeeklyReview={handleSaveReviewClick}
+              onCancelReview={() => {
+                setIsEditingReview(false);
+                setIsStartingEarly(false);
+              }}
+            />
           )}
 
           {summaryReview && !isEditingReview && reviewViewModel && (
