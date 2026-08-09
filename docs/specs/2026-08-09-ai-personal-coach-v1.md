@@ -1,8 +1,8 @@
 # AI Personal Coach V1
 
-Status: Approved for autonomous implementation  
-Date: 2026-08-09  
-Risk: High  
+Status: Approved for autonomous implementation
+Date: 2026-08-09
+Risk: High
 Delivery: Hybrid SDD/ADD, Full specification
 
 ## 1. Context & Goal
