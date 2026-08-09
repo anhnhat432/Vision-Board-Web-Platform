@@ -742,8 +742,9 @@ describe("12-week core flows", () => {
         expect(review?.reviewCompleted).toBe(true);
       });
 
-      expect(await screen.findByTestId("weekly-review-summary")).toBeInTheDocument();
-      expect(screen.getByTestId("weekly-score-interpretation")).toBeInTheDocument();
+      const summary = await screen.findByTestId("weekly-review-summary");
+      expect(within(summary).getByTestId("weekly-evidence-panel")).toBeInTheDocument();
+      expect(within(summary).queryByTestId("weekly-score-interpretation")).not.toBeInTheDocument();
     },
     INTEGRATION_TEST_TIMEOUT_MS,
   );

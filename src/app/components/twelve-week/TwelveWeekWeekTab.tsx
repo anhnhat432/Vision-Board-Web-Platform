@@ -1,7 +1,7 @@
 import { AlertCircle, Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import type { ExecutionInsight, NextWeekRecommendation, RescueModeStatus } from "@/features/plan12week/logic";
-import { calculateLagScore, interpretWeeklyExecutionScore } from "@/features/plan12week/logic";
+import type { NextWeekRecommendation, RescueModeStatus, WeeklyReviewViewModel } from "@/features/plan12week/logic";
+import { calculateLagScore } from "@/features/plan12week/logic";
 import { formatCalendarDate, getReviewDayLabel } from "../../utils/storage";
 import { getTwelveWeekWeekRange } from "../../utils/storage-twelve-week";
 import type {
@@ -90,34 +90,7 @@ interface TwelveWeekWeekTabProps {
   onReducePlan?: () => void;
   nextWeekRecommendation?: NextWeekRecommendation | null;
   onAcceptNextWeekRecommendation?: () => void;
-  _weeklyReflectionInsights?: ReadonlyArray<ExecutionInsight>;
-}
-
-function getLeadScoreTone(level: ReturnType<typeof interpretWeeklyExecutionScore>["level"]): {
-  marker: string;
-  panel: string;
-  text: string;
-} {
-  switch (level) {
-    case "strong":
-      return {
-        marker: "bg-app-status-success",
-        panel: "border-app-status-success/20 bg-app-status-success/5",
-        text: "text-app-status-success",
-      };
-    case "okay":
-      return {
-        marker: "bg-app-status-warning",
-        panel: "border-app-status-warning/20 bg-app-status-warning/5",
-        text: "text-app-status-warning",
-      };
-    default:
-      return {
-        marker: "bg-app-status-error",
-        panel: "border-app-status-error/20 bg-app-status-error/5",
-        text: "text-app-status-error",
-      };
-  }
+  weeklyReviewViewModels: Readonly<Record<number, WeeklyReviewViewModel>>;
 }
 
 function normalizeCommitmentList(values: readonly string[] | undefined): string[] {
@@ -164,7 +137,7 @@ export function TwelveWeekWeekTab({
   onReducePlan,
   nextWeekRecommendation,
   onAcceptNextWeekRecommendation,
-  _weeklyReflectionInsights,
+  weeklyReviewViewModels,
 }: TwelveWeekWeekTabProps) {
   const [selectedWeek, setSelectedWeek] = useState(system.currentWeek);
 
@@ -217,9 +190,6 @@ export function TwelveWeekWeekTab({
   const shouldConfirmEarlyReview = reviewWeekNumber === testWeekLimit && !reviewDueToday;
 
   const leadScoreValue = currentReview?.leadCompletionPercent ?? weekCompletion.percent;
-  const scoreInterpretation = interpretWeeklyExecutionScore(leadScoreValue);
-  const scoreTone = getLeadScoreTone(scoreInterpretation.level);
-
   const lagMetricValue = isCurrentWeekSelected
     ? (currentLagMetricValue || system.lagMetric.currentValue)
     : (currentReview?.lagProgressValue || "");
@@ -260,6 +230,7 @@ export function TwelveWeekWeekTab({
 
   const canShowFormReview = (reviewDueToday || isStartingEarly || isEditingReview) && isCurrentWeekSelected;
   const showForm = (!reviewIsCompleted || isEditingReview) && isCurrentWeekSelected;
+  const reviewViewModel = weeklyReviewViewModels[selectedWeek];
 
   const reviewReadinessItems = [
     { key: "score", label: "Điểm tuần", done: true },
@@ -471,63 +442,55 @@ export function TwelveWeekWeekTab({
             </StaggerSection>
           )}
 
-          {showForm && canShowFormReview && (
-            <StaggerSection>
-              <WeeklyReviewForm
-                system={system}
-                currentWeekLimit={currentWeekLimit}
-                totalWeeks={system.totalWeeks}
-                currentWeekRange={currentWeekRange}
-                currentPlanFocus={currentPlanFocus}
-                weekCompletion={weekCompletion}
-                leadScoreValue={leadScoreValue}
-                lagScoreValue={lagScoreValue}
-                lagMetricValue={lagMetricValue}
-                currentPlanCode={currentPlanCode}
-                hasPremiumInsights={hasPremiumInsights}
-                premiumInsight={premiumInsight}
-                suggestedNextWeekPlan={suggestedNextWeekPlan}
-                weeklyForm={weeklyForm}
-                currentReview={currentReview}
-                previousCommitments={previousCommitments}
-                allPreviousCommitmentsAnswered={allPreviousCommitmentsAnswered}
-                nextWeekCommitments={nextWeekCommitments}
-                hasNextWeekCommitment={hasNextWeekCommitment}
-                reviewReadinessItems={reviewReadinessItems}
-                reviewReadyCount={reviewReadyCount}
-                _reviewPendingItems={reviewPendingItems}
-                canSubmitWeeklyReview={canSubmitWeeklyReview}
-                reviewStatusTitle={reviewStatusTitle}
-                reviewStatusHint={reviewStatusHint}
-                reviewStickyStatus={reviewStickyStatus}
-                isSavingReview={isSavingReview}
-                isEditingReview={isEditingReview}
-                isStartingEarly={isStartingEarly}
-                formatCalendarDate={formatCalendarDate}
-                onWeeklyFormChange={onWeeklyFormChange}
-                onApplySuggestedPlan={onApplySuggestedPlan}
-                onOpenPremiumInsights={onOpenPremiumInsights}
-                onSaveWeeklyReview={handleSaveReviewClick}
-                onCancelReview={() => {
-                  setIsEditingReview(false);
-                  setIsStartingEarly(false);
-                }}
-              />
-            </StaggerSection>
+          {showForm && canShowFormReview && reviewViewModel && (
+            <WeeklyReviewForm
+              system={system}
+              currentWeekLimit={currentWeekLimit}
+              totalWeeks={system.totalWeeks}
+              currentWeekRange={currentWeekRange}
+              currentPlanFocus={currentPlanFocus}
+              lagScoreValue={lagScoreValue}
+              lagMetricValue={lagMetricValue}
+              reviewViewModel={reviewViewModel}
+              currentPlanCode={currentPlanCode}
+              hasPremiumInsights={hasPremiumInsights}
+              premiumInsight={premiumInsight}
+              suggestedNextWeekPlan={suggestedNextWeekPlan}
+              weeklyForm={weeklyForm}
+              previousCommitments={previousCommitments}
+              allPreviousCommitmentsAnswered={allPreviousCommitmentsAnswered}
+              nextWeekCommitments={nextWeekCommitments}
+              hasNextWeekCommitment={hasNextWeekCommitment}
+              reviewReadinessItems={reviewReadinessItems}
+              reviewReadyCount={reviewReadyCount}
+              _reviewPendingItems={reviewPendingItems}
+              canSubmitWeeklyReview={canSubmitWeeklyReview}
+              reviewStatusTitle={reviewStatusTitle}
+              reviewStatusHint={reviewStatusHint}
+              reviewStickyStatus={reviewStickyStatus}
+              isSavingReview={isSavingReview}
+              isEditingReview={isEditingReview}
+              isStartingEarly={isStartingEarly}
+              formatCalendarDate={formatCalendarDate}
+              onWeeklyFormChange={onWeeklyFormChange}
+              onApplySuggestedPlan={onApplySuggestedPlan}
+              onOpenPremiumInsights={onOpenPremiumInsights}
+              onSaveWeeklyReview={handleSaveReviewClick}
+              onCancelReview={() => {
+                setIsEditingReview(false);
+                setIsStartingEarly(false);
+              }}
+            />
           )}
 
-          {summaryReview && !isEditingReview && (
+          {summaryReview && !isEditingReview && reviewViewModel && (
             <StaggerSection>
               <WeeklyReviewSummary
                 system={system}
                 currentWeekLimit={currentWeekLimit}
-                currentWeekRange={currentWeekRange}
-                weekCompletion={weekCompletion}
-                _leadScoreValue={leadScoreValue}
                 lagScoreValue={lagScoreValue}
                 lagMetricValue={lagMetricValue}
-                scoreTone={scoreTone}
-                scoreInterpretation={scoreInterpretation}
+                reviewViewModel={reviewViewModel}
                 mergedIndicators={mergedIndicators}
                 getTacticProgress={getTacticProgress}
                 summaryReview={summaryReview}

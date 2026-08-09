@@ -235,7 +235,7 @@ export function TwelveWeekSystem() {
     rescueStatus,
     nextWeekRecommendation,
     executionInsights,
-    weeklyReflectionInsights,
+    weeklyReviewViewModels,
     activeTriggers,
     hasPremiumReviewInsights,
     premiumReviewInsight,
@@ -1155,7 +1155,7 @@ export function TwelveWeekSystem() {
         onOpenTodayTab={() => handleTabChange("today")}
         nextWeekRecommendation={nextWeekRecommendation}
         onAcceptNextWeekRecommendation={handleApplySuggestedPlan}
-        weeklyReflectionInsights={weeklyReflectionInsights}
+        weeklyReviewViewModels={weeklyReviewViewModels}
         showFullProgress={showFullProgress}
         setShowFullProgress={setShowFullProgress}
         averageScore={averageScore}

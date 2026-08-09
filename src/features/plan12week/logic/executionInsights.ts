@@ -466,9 +466,27 @@ function detectInsights(metrics: AggregateMetrics): ExecutionInsight[] {
   return insights;
 }
 
-function sortAndCap(insights: ExecutionInsight[], cap = MAX_INSIGHTS): ExecutionInsight[] {
+function sortAndCap(
+  insights: ExecutionInsight[],
+  cap = MAX_INSIGHTS,
+  includePositiveWhenAvailable = false,
+): ExecutionInsight[] {
   const indexById = new Map(PRIORITY_ORDER.map((id, index) => [id, index] as const));
-  return [...insights].sort((a, b) => (indexById.get(a.id) ?? 99) - (indexById.get(b.id) ?? 99)).slice(0, cap);
+  const sorted = [...insights].sort((a, b) => (indexById.get(a.id) ?? 99) - (indexById.get(b.id) ?? 99));
+  const selected = sorted.slice(0, cap);
+
+  if (
+    includePositiveWhenAvailable &&
+    selected.length === cap &&
+    selected.every((insight) => insight.severity === "warning")
+  ) {
+    const positive = sorted.find((insight) => insight.severity === "positive");
+    if (positive && !selected.some((insight) => insight.id === positive.id)) {
+      selected[cap - 1] = positive;
+    }
+  }
+
+  return selected;
 }
 
 // ---- Public API -------------------------------------------------------------
@@ -520,7 +538,7 @@ export function getWeeklyReflectionInsights(
       ),
     ];
   }
-  return sortAndCap(detectInsights(aggregate(system, { ...context, weekNumber })));
+  return sortAndCap(detectInsights(aggregate(system, { ...context, weekNumber })), MAX_INSIGHTS, true);
 }
 
 const NEXT_ACTION_LIBRARY: Record<ExecutionInsightNextActionId, Omit<ExecutionInsightNextAction, "id">> = {

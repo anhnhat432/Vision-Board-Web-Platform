@@ -370,6 +370,29 @@ describe("getWeeklyReflectionInsights", () => {
     expect(ids(insights)).toContain("consistency_dropping");
   });
 
+  it("includes the highest-ranked positive when the first three weekly candidates are warnings", () => {
+    const insights = getWeeklyReflectionInsights(
+      makeSystem({
+        currentWeek: 2,
+        lagMetric: { name: "Output", unit: "%", target: "100", currentValue: "" },
+        scoreboard: [
+          makeScoreboard({ weekNumber: 1, leadCompletionPercent: 90, weeklyScore: 80 }),
+          makeScoreboard({ weekNumber: 2, leadCompletionPercent: 90, weeklyScore: 40 }),
+        ],
+        weeklyReviews: [],
+        taskInstances: Array.from({ length: 11 }, (_, index) =>
+          makeTask({ id: `overload_${index}`, weekNumber: 2, completed: false }),
+        ),
+      }),
+      2,
+      { todayDateKey: "2026-05-10" },
+    );
+
+    expect(insights).toHaveLength(3);
+    expect(ids(insights)).toContain("strong_lead_metric");
+    expect(insights.filter((insight) => insight.severity === "warning")).toHaveLength(2);
+  });
+
   it("returns no_data when system is null", () => {
     const insights = getWeeklyReflectionInsights(null, 1);
     expect(ids(insights)).toEqual(["no_data"]);

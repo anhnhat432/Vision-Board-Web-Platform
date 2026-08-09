@@ -43,7 +43,12 @@ import type {
   WeekTrendPoint,
 } from "@/app/utils/twelve-week-system-ui";
 import { TaskBoard } from "@/features/plan12week/components/TaskBoard";
-import type { ExecutionInsight, NextWeekRecommendation, RescueModeStatus } from "@/features/plan12week/logic";
+import type {
+  ExecutionInsight,
+  NextWeekRecommendation,
+  RescueModeStatus,
+  WeeklyReviewViewModel,
+} from "@/features/plan12week/logic";
 import type { CycleSummary } from "@/features/plan12week/logic/cycleReview";
 import { TwelveWeekTabFallback } from "./components";
 import { PlanOverview, WeekEditor, WeeklyReview } from "./lazyTabs";
@@ -131,7 +136,7 @@ interface TwelveWeekSystemTabsProps {
   onOpenTodayTab?: () => void;
   nextWeekRecommendation: NextWeekRecommendation | null;
   onAcceptNextWeekRecommendation?: () => void;
-  weeklyReflectionInsights: ReadonlyArray<ExecutionInsight>;
+  weeklyReviewViewModels: Readonly<Record<number, WeeklyReviewViewModel>>;
   showFullProgress: boolean;
   setShowFullProgress: (show: boolean) => void;
   averageScore: number;
@@ -267,7 +272,7 @@ export function TwelveWeekSystemTabs({
   onOpenTodayTab,
   nextWeekRecommendation,
   onAcceptNextWeekRecommendation,
-  weeklyReflectionInsights,
+  weeklyReviewViewModels,
   showFullProgress,
   setShowFullProgress,
   averageScore,
@@ -509,7 +514,7 @@ export function TwelveWeekSystemTabs({
                   onReducePlan={onApplySuggestedPlan}
                   nextWeekRecommendation={nextWeekRecommendation}
                   onAcceptNextWeekRecommendation={onAcceptNextWeekRecommendation ?? onApplySuggestedPlan}
-                  _weeklyReflectionInsights={weeklyReflectionInsights}
+                  weeklyReviewViewModels={weeklyReviewViewModels}
                 />
               </motion.div>
             </Suspense>

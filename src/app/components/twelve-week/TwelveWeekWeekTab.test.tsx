@@ -4,11 +4,66 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-import type { TwelveWeekSystem } from "@/app/utils/storage-types";
+import type { TwelveWeekSystem, UniversalWeeklyReview } from "@/app/utils/storage-types";
+import type { ExecutionInsight, WeeklyReviewEvidence, WeeklyReviewViewModel } from "@/features/plan12week/logic";
 
 import { TwelveWeekWeekTab } from "./TwelveWeekWeekTab";
 
 type WeekTabProps = ComponentProps<typeof TwelveWeekWeekTab>;
+
+const defaultEvidence: WeeklyReviewEvidence = {
+  weekNumber: 3,
+  totalWeeks: 12,
+  dateRange: { start: "2026-05-18", end: "2026-05-24" },
+  completion: { completed: 17, total: 21, percent: 81, isEmpty: false },
+  core: { completed: 12, total: 14, percent: 86 },
+  optional: { completed: 5, total: 7, percent: 71 },
+  checkIns: { days: 5, possibleDays: 7 },
+  overdueOpenCount: 3,
+  carryOverCount: 1,
+  onTime: { completed: 15, total: 17 },
+  previousWeek: { completed: 18, total: 25, percent: 72, deltaPoints: 9 },
+};
+
+const defaultInsights: ExecutionInsight[] = [
+  {
+    id: "strong_lead_metric",
+    severity: "positive",
+    headline: "Chỉ số dẫn dắt đang chạy mạnh",
+    body: "Các chỉ số chính đang được giữ nhịp tốt.",
+    nextActionId: "celebrate_keep_going",
+    metrics: { recentLeadCompletionPercent: 86 },
+  },
+];
+
+function makeReviewViewModel(input?: {
+  evidence?: WeeklyReviewEvidence;
+  insights?: ExecutionInsight[];
+}): WeeklyReviewViewModel {
+  return {
+    evidence: input?.evidence ?? defaultEvidence,
+    insights: input?.insights ?? defaultInsights,
+  };
+}
+
+function makeCompletedReview(overrides: Partial<UniversalWeeklyReview> = {}): UniversalWeeklyReview {
+  return {
+    weekNumber: 3,
+    leadCompletionPercent: 81,
+    executionScore: 81,
+    lagProgressValue: "25",
+    biggestOutputThisWeek: "Legacy output",
+    mainObstacle: "",
+    nextWeekPriority: "Ship next",
+    workloadDecision: "keep same",
+    reviewCompleted: true,
+    commitmentsKept: ["Publish draft"],
+    commitmentsMissed: ["Send update"],
+    insights: "Protect morning focus.",
+    nextWeekCommitments: ["Ship next"],
+    ...overrides,
+  };
+}
 
 function makeSystem(overrides: Partial<TwelveWeekSystem> = {}): TwelveWeekSystem {
   return {
@@ -37,8 +92,16 @@ function makeSystem(overrides: Partial<TwelveWeekSystem> = {}): TwelveWeekSystem
 }
 
 function makeProps(overrides: Partial<WeekTabProps> = {}): WeekTabProps {
+  const system = overrides.system ?? makeSystem();
+  const currentWeekEvidence = {
+    ...defaultEvidence,
+    weekNumber: system.currentWeek,
+    totalWeeks: system.totalWeeks,
+    previousWeek: system.currentWeek === 1 ? null : defaultEvidence.previousWeek,
+  };
+
   return {
-    system: makeSystem(),
+    system,
     currentWeekRange: { start: "2026-05-04", end: "2026-05-10" },
     currentPlanFocus: "Ship the command center",
     currentPlanMilestone: "Week 4 checkpoint",
@@ -67,6 +130,9 @@ function makeProps(overrides: Partial<WeekTabProps> = {}): WeekTabProps {
       secondaryTrackLabel: "Optional",
       secondaryTrackItems: ["Stretch task"],
       firstMove: "Open Today",
+    },
+    weeklyReviewViewModels: {
+      [system.currentWeek]: makeReviewViewModel({ evidence: currentWeekEvidence }),
     },
     weeklyForm: {
       lagProgressValue: "",
@@ -171,6 +237,26 @@ describe("TwelveWeekWeekTab review flow", () => {
     expect(screen.getByTestId("weekly-review-check-next")).toHaveTextContent(/tuần/i);
   });
 
+  it("renders weekly evidence and supplied insights before human reflection", () => {
+    render(<TwelveWeekWeekTab {...makeProps()} />);
+
+    const evidence = screen.getByTestId("weekly-evidence-panel");
+    const reflection = screen.getByLabelText(/góc nhìn\/điều học được/i);
+
+    expect(screen.getByText("Chỉ số dẫn dắt đang chạy mạnh")).toBeInTheDocument();
+    expect(evidence.compareDocumentPosition(reflection) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("keeps reflection fields and secondary Premium and Emotion content reachable", () => {
+    render(<TwelveWeekWeekTab {...makeProps()} />);
+
+    expect(screen.getByLabelText(/góc nhìn\/điều học được/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/cam kết của tuần tới/i)).toBeInTheDocument();
+    expect(screen.getByText(/Dòng chảy Cảm xúc Tuần 3/i)).toBeInTheDocument();
+    expect(screen.getByText("Upgrade insight")).toBeInTheDocument();
+    expect(screen.getByTestId("weekly-review-mobile-sticky-cta")).toBeInTheDocument();
+  });
+
   it("renders WAM answer fields directly", () => {
     render(<TwelveWeekWeekTab {...makeProps()} />);
 
@@ -245,15 +331,27 @@ describe("TwelveWeekWeekTab review flow", () => {
   });
 
   it("shows an empty-week message instead of a percent when there are no tasks", () => {
+    const emptyEvidence: WeeklyReviewEvidence = {
+      ...defaultEvidence,
+      completion: { completed: 0, total: 0, percent: 0, isEmpty: true },
+      core: null,
+      optional: null,
+      checkIns: { days: 0, possibleDays: 7 },
+      overdueOpenCount: 0,
+      carryOverCount: 0,
+      onTime: null,
+      previousWeek: null,
+    };
     render(
       <TwelveWeekWeekTab
         {...makeProps({
           weekCompletion: { completed: 0, total: 0, percent: 0, isEmpty: true },
+          weeklyReviewViewModels: { 3: makeReviewViewModel({ evidence: emptyEvidence, insights: [] }) },
         })}
       />,
     );
 
-    expect(screen.getAllByText("Chưa có việc trong tuần này").length).toBeGreaterThan(0);
+    expect(screen.getByText("Tuần này chưa có việc được lên lịch.")).toBeInTheDocument();
     expect(screen.queryByText("0%")).not.toBeInTheDocument();
   });
 
@@ -277,6 +375,7 @@ describe("TwelveWeekWeekTab review flow", () => {
       "backdrop-blur-md",
       "md:hidden",
     );
+    expect(actionBar.closest(".weekly-stagger-item")).toBeNull();
     expect(within(actionBar).getByText("Tiến độ review 2/4")).toBeInTheDocument();
     expect(within(actionBar).getByText(/Thiếu 2 mục/i)).toBeInTheDocument();
     expect(within(actionBar).getByRole("button", { name: /Chốt review tuần này/i })).toHaveClass("min-h-12");
@@ -356,18 +455,26 @@ describe("TwelveWeekWeekTab review flow", () => {
     expect(onSaveWeeklyReview).toHaveBeenCalledTimes(1);
   });
 
-  it("shows lead as the weekly hero score and lag progress beside it", () => {
+  it("shows completion evidence as the weekly hero and lag progress as secondary detail", () => {
+    const evidence = {
+      ...defaultEvidence,
+      completion: { completed: 4, total: 5, percent: 80, isEmpty: false },
+    };
+
     render(
       <TwelveWeekWeekTab
         {...makeProps({
           currentScoreValue: 20,
           weekCompletion: { completed: 4, total: 5, percent: 80 },
           currentLagMetricValue: "25",
+          weeklyReviewViewModels: { 3: makeReviewViewModel({ evidence }) },
         })}
       />,
     );
 
-    expect(screen.getByTestId("weekly-lead-score")).toHaveTextContent("80%");
+    const evidencePanel = screen.getByTestId("weekly-evidence-panel");
+    expect(within(evidencePanel).getByText("4 / 5 việc")).toBeInTheDocument();
+    expect(within(evidencePanel).getByText("80%")).toBeInTheDocument();
     expect(screen.getByTestId("weekly-lag-score")).toHaveTextContent("100%");
   });
 
@@ -422,31 +529,15 @@ describe("TwelveWeekWeekTab review flow", () => {
     render(
       <TwelveWeekWeekTab
         {...makeProps({
-          currentReview: {
-            weekNumber: 2,
-            leadCompletionPercent: 80,
-            lagProgressValue: "25",
-            biggestOutputThisWeek: "Legacy output",
-            mainObstacle: "",
-            nextWeekPriority: "Ship next",
-            workloadDecision: "keep same",
-            reviewCompleted: true,
-            progressScore: 4,
-            disciplineScore: 4,
-            focusScore: 6,
-            improvementScore: 6,
-            outputQualityScore: 6,
-            commitmentsKept: ["Publish draft"],
-            commitmentsMissed: ["Send update"],
-            insights: "Protect morning focus.",
-            nextWeekCommitments: ["Ship next"],
-          },
+          currentReview: makeCompletedReview(),
         })}
       />,
     );
 
     const summary = screen.getByTestId("weekly-review-summary");
-    expect(summary).toHaveTextContent("Score");
+    expect(within(summary).getByTestId("weekly-evidence-panel")).toBeInTheDocument();
+    expect(within(summary).getByText("17 / 21 việc")).toBeInTheDocument();
+    expect(within(summary).getByText("Chỉ số dẫn dắt đang chạy mạnh")).toBeInTheDocument();
     expect(summary).toHaveTextContent("Đã giữ 1/2 cam kết");
     expect(summary).toHaveTextContent("Protect morning focus.");
     expect(summary).toHaveTextContent("Ship next");
