@@ -109,3 +109,9 @@ export {
 export type { WeeklyExecutionInterpretation, WeeklyExecutionLevel } from "./weeklyExecutionInterpretation";
 export { interpretWeeklyExecutionScore, WEEKLY_EXECUTION_TARGET } from "./weeklyExecutionInterpretation";
 export { createWeeklyReview } from "./weeklyReview";
+export type {
+  WeeklyReviewEvidence,
+  WeeklyReviewRatio,
+  WeeklyReviewViewModel,
+} from "./weeklyReviewEvidence";
+export { getWeeklyReviewEvidence } from "./weeklyReviewEvidence";
