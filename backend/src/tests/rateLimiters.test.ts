@@ -75,6 +75,7 @@ describe("authenticated API rate-limit policies", () => {
     assert.equal(classify("DELETE", "/account/delete"), "account-destructive");
     assert.equal(classify("GET", "/admin/overview"), "admin-read");
     assert.equal(classify("POST", "/assistant/chat"), "dedicated");
+    assert.equal(classify("POST", "/ai/personal-coach"), "dedicated");
     assert.equal(classify("POST", "/plans/507f1f77bcf86cd799439011/bulk-sync"), "dedicated");
   });
 
