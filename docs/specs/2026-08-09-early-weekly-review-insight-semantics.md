@@ -121,6 +121,8 @@ Additional constraints:
 - Completion-dependent rules SHALL require a non-null eligible-task percentage. No warning may be derived from a zero-task denominator.
 - Historical rule behavior remains whole-week behavior.
 - Future reviewed weeks return no deterministic insights, preventing `overloaded_week`, `progress_without_consistency`, `consistency_dropping`, `review_missing`, `ready_to_push`, or other judgements from pre-start data.
+- Active unfinished weeks SHALL NOT emit `consistency_dropping`, `consistency_improving`, or `ready_to_push` because `scoreboard.weeklyScore` is derived from full-week completion and is not comparable with a completed historical week.
+- Historical weeks preserve existing `consistency_dropping`, `consistency_improving`, and `ready_to_push` behavior.
 - `strong_lead_metric`, trend thresholds, copy, severity, priority ordering, cap of three, and warning/positive balancing remain otherwise unchanged.
 
 ## 8. Snapshot and Data Flow
@@ -155,6 +157,8 @@ actual local today
 - `ERWI-10` - WHEN historical insights evaluate check-ins, THE system SHALL use the reviewed week end as the seven-day reference.
 - `ERWI-11` - WHEN current Progress insights evaluate the active week, THE system SHALL use due-to-date task completion without changing insight copy or ordering.
 - `ERWI-12` - THE system SHALL preserve whole-week Evidence Summary completion, including `4/10 = 40%` while active insight execution can be `4/4 = 100%`.
+- `ERWI-13` - WHILE the reviewed week is active and unfinished, THE system SHALL suppress `consistency_dropping`, `consistency_improving`, and `ready_to_push` because their scoreboard inputs are not time-comparable.
+- `ERWI-14` - WHEN the reviewed week is historical, THE system SHALL preserve existing scoreboard-based trend and readiness insights.
 
 ## 10. Required Regression Scenarios
 
@@ -204,6 +208,11 @@ Expected: empty insight list, with no execution, consistency, review, or readine
 
 Expected: active-week Progress insights use due-to-date task semantics; historical behavior and the existing public insight contract otherwise remain stable.
 
+### 10.7 Scoreboard trend comparability
+
+- Active unfinished week: no `consistency_dropping`, `consistency_improving`, or `ready_to_push`, even when the current derived `weeklyScore` would satisfy their thresholds.
+- Historical week: existing trend and readiness rules continue to use completed weekly scores.
+
 ## 11. Data, Storage, Sync, and Network Constraints
 
 - localStorage keys/shapes touched: none.
@@ -235,6 +244,8 @@ Expected: active-week Progress insights use due-to-date task semantics; historic
 | `ERWI-07` | next week returns no insights |
 | `ERWI-09` | future core tasks do not false-trigger scope reduction |
 | `ERWI-11` | `getExecutionInsights()` active-week regression uses due-to-date semantics |
+| `ERWI-13` | active unfinished week suppresses score-based dropping, improving, and ready-to-push judgements |
+| `ERWI-14` | historical week retains score-based trend and readiness behavior |
 
 ## 14. Verification Plan
 
@@ -290,6 +301,8 @@ Any UI or sync failure must be reproduced against exact `BASE_SHA` before it is 
 - [ ] `progress_without_consistency` does not false-fire from future tasks.
 - [ ] `needs_scope_reduction` does not false-fire from future core tasks.
 - [ ] Progress current-week behavior is covered.
+- [ ] Active unfinished weeks suppress score-based trend and readiness insights.
+- [ ] Historical weeks preserve score-based trend and readiness insights.
 - [ ] Insight copy, priority, cap, and positive-selection behavior remain stable.
 - [ ] Weekly Review evidence UI and review UI remain unchanged.
 - [ ] Backend, API, storage, canonical review, sync, and network behavior remain unchanged.

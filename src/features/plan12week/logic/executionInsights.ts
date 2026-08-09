@@ -401,6 +401,7 @@ function detectInsights(metrics: AggregateMetrics): ExecutionInsight[] {
 
   // 4. consistency_dropping — most recent week dropped vs previous.
   if (
+    metrics.weekPhase === "historical" &&
     metrics.previousWeekScore !== null &&
     metrics.currentWeekScore !== null &&
     metrics.previousWeekScore - metrics.currentWeekScore >= TREND_DELTA_DROP
@@ -463,6 +464,7 @@ function detectInsights(metrics: AggregateMetrics): ExecutionInsight[] {
 
   // 7. consistency_improving — most recent week rose vs previous.
   if (
+    metrics.weekPhase === "historical" &&
     metrics.previousWeekScore !== null &&
     metrics.currentWeekScore !== null &&
     metrics.currentWeekScore - metrics.previousWeekScore >= TREND_DELTA_RISE
@@ -505,6 +507,7 @@ function detectInsights(metrics: AggregateMetrics): ExecutionInsight[] {
 
   // 9. ready_to_push — recent average score strong + check-in consistency strong.
   if (
+    metrics.weekPhase === "historical" &&
     metrics.recentAverageScore !== null &&
     metrics.recentAverageScore >= STRONG_COMPLETION_PERCENT &&
     metrics.checkInRate7d !== null &&

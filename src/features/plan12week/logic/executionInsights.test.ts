@@ -242,6 +242,38 @@ describe("getExecutionInsights — task_completion_without_progress", () => {
 });
 
 describe("getExecutionInsights — consistency trend", () => {
+  it("suppresses consistency_dropping for an active unfinished week", () => {
+    const insights = getExecutionInsights(
+      makeSystem({
+        currentWeek: 3,
+        scoreboard: [
+          makeScoreboard({ weekNumber: 2, weeklyScore: 85 }),
+          makeScoreboard({ weekNumber: 3, weeklyScore: 50 }),
+        ],
+        weeklyReviews: [makeReview({ weekNumber: 2, reviewCompleted: true })],
+      }),
+      { todayDateKey: "2026-05-01" },
+    );
+
+    expect(ids(insights)).not.toContain("consistency_dropping");
+  });
+
+  it("suppresses consistency_improving for an active unfinished week", () => {
+    const insights = getExecutionInsights(
+      makeSystem({
+        currentWeek: 3,
+        scoreboard: [
+          makeScoreboard({ weekNumber: 2, weeklyScore: 50 }),
+          makeScoreboard({ weekNumber: 3, weeklyScore: 78 }),
+        ],
+        weeklyReviews: [makeReview({ weekNumber: 2, reviewCompleted: true })],
+      }),
+      { todayDateKey: "2026-05-01" },
+    );
+
+    expect(ids(insights)).not.toContain("consistency_improving");
+  });
+
   it("flags consistency_dropping when current week is much lower than previous", () => {
     const insights = getExecutionInsights(
       makeSystem({
@@ -256,7 +288,7 @@ describe("getExecutionInsights — consistency trend", () => {
           makeReview({ weekNumber: 2, reviewCompleted: true }),
         ],
       }),
-      { todayDateKey: "2026-05-01" },
+      { todayDateKey: "2026-05-10" },
     );
     expect(ids(insights)).toContain("consistency_dropping");
   });
@@ -275,7 +307,7 @@ describe("getExecutionInsights — consistency trend", () => {
           makeReview({ weekNumber: 2, reviewCompleted: true }),
         ],
       }),
-      { todayDateKey: "2026-05-01" },
+      { todayDateKey: "2026-05-10" },
     );
     expect(ids(insights)).toContain("consistency_improving");
   });
@@ -354,7 +386,7 @@ describe("getExecutionInsights — progress_without_consistency", () => {
 });
 
 describe("getExecutionInsights — ready_to_push", () => {
-  it("flags when recent avg score is strong AND check-in rate is strong", () => {
+  it("suppresses ready_to_push for an active unfinished week", () => {
     const checkIns = ["2026-04-25", "2026-04-26", "2026-04-27", "2026-04-28", "2026-04-29"].map((date) =>
       makeCheckIn({ date, didWorkToday: true }),
     );
@@ -373,6 +405,30 @@ describe("getExecutionInsights — ready_to_push", () => {
         dailyCheckIns: checkIns,
       }),
       { todayDateKey: "2026-05-01" },
+    );
+
+    expect(ids(insights)).not.toContain("ready_to_push");
+  });
+
+  it("flags when recent avg score is strong AND check-in rate is strong", () => {
+    const checkIns = ["2026-04-27", "2026-04-28", "2026-04-29", "2026-04-30", "2026-05-01"].map((date) =>
+      makeCheckIn({ date, didWorkToday: true }),
+    );
+    const insights = getExecutionInsights(
+      makeSystem({
+        currentWeek: 3,
+        scoreboard: [
+          makeScoreboard({ weekNumber: 1, weeklyScore: 85 }),
+          makeScoreboard({ weekNumber: 2, weeklyScore: 88 }),
+          makeScoreboard({ weekNumber: 3, weeklyScore: 90 }),
+        ],
+        weeklyReviews: [
+          makeReview({ weekNumber: 1, reviewCompleted: true }),
+          makeReview({ weekNumber: 2, reviewCompleted: true }),
+        ],
+        dailyCheckIns: checkIns,
+      }),
+      { todayDateKey: "2026-05-10" },
     );
     expect(ids(insights)).toContain("ready_to_push");
   });
@@ -402,6 +458,33 @@ describe("getExecutionInsights — priority and capping", () => {
 });
 
 describe("getWeeklyReflectionInsights", () => {
+  it("suppresses incomplete-score trend and readiness judgements for an active reviewed week", () => {
+    const checkIns = ["2026-04-25", "2026-04-26", "2026-04-27", "2026-04-28", "2026-04-29"].map((date) =>
+      makeCheckIn({ date, didWorkToday: true }),
+    );
+    const insights = getWeeklyReflectionInsights(
+      makeSystem({
+        currentWeek: 3,
+        scoreboard: [
+          makeScoreboard({ weekNumber: 1, weeklyScore: 85 }),
+          makeScoreboard({ weekNumber: 2, weeklyScore: 88 }),
+          makeScoreboard({ weekNumber: 3, weeklyScore: 50 }),
+        ],
+        weeklyReviews: [
+          makeReview({ weekNumber: 1, reviewCompleted: true }),
+          makeReview({ weekNumber: 2, reviewCompleted: true }),
+        ],
+        dailyCheckIns: checkIns,
+      }),
+      3,
+      { todayDateKey: "2026-05-01" },
+    );
+
+    expect(ids(insights)).not.toContain("consistency_dropping");
+    expect(ids(insights)).not.toContain("consistency_improving");
+    expect(ids(insights)).not.toContain("ready_to_push");
+  });
+
   it("scopes to a specific week and surfaces relevant insights", () => {
     const insights = getWeeklyReflectionInsights(
       makeSystem({
@@ -417,7 +500,7 @@ describe("getWeeklyReflectionInsights", () => {
         ],
       }),
       3,
-      { todayDateKey: "2026-05-01" },
+      { todayDateKey: "2026-05-10" },
     );
     // Week 3 vs week 2 = drop of 20 → consistency_dropping should fire
     expect(ids(insights)).toContain("consistency_dropping");

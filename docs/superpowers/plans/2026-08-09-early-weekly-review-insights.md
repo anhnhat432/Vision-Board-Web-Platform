@@ -443,6 +443,47 @@ git commit -m "fix: make execution insights time-aware"
 
 ---
 
+### Task 1B: Suppress incomparable scoreboard trends for active unfinished weeks
+
+**Files:**
+- Modify: `src/features/plan12week/logic/executionInsights.test.ts`
+- Modify: `src/features/plan12week/logic/executionInsights.ts`
+
+**Interfaces:**
+- Consumes: `AggregateMetrics.weekPhase` and existing scoreboard-derived metrics.
+- Produces: active-week suppression for `consistency_dropping`, `consistency_improving`, and `ready_to_push`, while preserving historical behavior.
+
+- [ ] **Step 1: Add active-week regression tests**
+
+Add focused cases proving that an active unfinished week does not emit the three score-comparison insights even when the current full-week-derived scoreboard values satisfy their thresholds. Add historical controls proving those insights remain available after the reviewed week ends.
+
+- [ ] **Step 2: Run the focused suite and verify RED**
+
+```bash
+npm run test:run -- src/features/plan12week/logic/executionInsights.test.ts
+```
+
+Expected: active-week suppression cases fail because score-based rules currently run for every non-future phase.
+
+- [ ] **Step 3: Guard score-comparison rules by week phase**
+
+Use the existing `weekPhase` aggregate value. Do not create partial-week score normalization. Preserve historical thresholds, metrics, priority, and copy.
+
+- [ ] **Step 4: Run the focused suite and verify GREEN**
+
+```bash
+npm run test:run -- src/features/plan12week/logic/executionInsights.test.ts
+```
+
+Expected: active-week score-based insights are suppressed and historical controls remain green.
+
+- [ ] **Step 5: Commit the comparability fix**
+
+```bash
+git add -- docs/specs/2026-08-09-early-weekly-review-insight-semantics.md docs/superpowers/plans/2026-08-09-early-weekly-review-insights.md src/features/plan12week/logic/executionInsights.ts src/features/plan12week/logic/executionInsights.test.ts
+git commit -m "fix: suppress partial-week score trends"
+```
+
 ### Task 2: Pass actual today through the Weekly Review snapshot
 
 **Files:**
