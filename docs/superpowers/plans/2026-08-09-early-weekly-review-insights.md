@@ -503,7 +503,7 @@ it("does not derive insight judgements for a future weekly review view model", a
 Run:
 
 ```bash
-npm run test:run -- src/app/hooks/useTwelveWeekSystemSnapshot.test.tsx
+npm run test:ui -- src/app/hooks/useTwelveWeekSystemSnapshot.test.tsx
 ```
 
 Expected: the new test fails because the caller supplies week 2 end date, causing the engine to evaluate week 2 rather than recognize it as future.
@@ -535,7 +535,8 @@ Keep `referenceDate = new Date()` for `getWeeklyReviewEvidence()` so evidence ov
 Run:
 
 ```bash
-npm run test:run -- src/app/hooks/useTwelveWeekSystemSnapshot.test.tsx src/features/plan12week/logic/executionInsights.test.ts src/features/plan12week/logic/weeklyReviewEvidence.test.ts
+npm run test:ui -- src/app/hooks/useTwelveWeekSystemSnapshot.test.tsx
+npm run test:run -- src/features/plan12week/logic/executionInsights.test.ts src/features/plan12week/logic/weeklyReviewEvidence.test.ts
 ```
 
 Expected: all focused tests pass; evidence tests still prove unchanged whole-week completion semantics.
