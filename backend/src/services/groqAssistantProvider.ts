@@ -59,6 +59,17 @@ export interface GroqRequestOptions {
   structuredOutput?: boolean;
 }
 
+export interface StructuredProviderPromptRequest {
+  systemPrompt: string;
+  contextMessage: string;
+  userMessage: string;
+  maxTokens: number;
+  temperature: number;
+  jsonObject: boolean;
+  signal?: AbortSignal;
+  model?: string;
+}
+
 // G7: timeout configurable qua env (default 30s giữ hành vi cũ).
 function getGroqTimeoutMs(): number {
   const value = env.AI_GROQ_TIMEOUT_MS;
@@ -298,6 +309,115 @@ function buildRequestBody(
   return requestBody;
 }
 
+function buildStructuredPromptRequestBody(
+  request: StructuredProviderPromptRequest,
+  modelName: string,
+): GroqRequest {
+  const body: GroqRequest = {
+    model: modelName,
+    messages: [
+      { role: "system", content: request.systemPrompt },
+      { role: "system", content: request.contextMessage },
+      { role: "user", content: request.userMessage },
+    ],
+    temperature: request.temperature,
+    max_tokens: request.maxTokens,
+  };
+  if (request.jsonObject) {
+    body.response_format = { type: "json_object" };
+  }
+  return body;
+}
+
+function getActiveGroqConfig(): { apiKey: string | undefined; model: string } {
+  return {
+    apiKey: env.AI_PROVIDER === "groq" ? (env.AI_API_KEY || env.GROQ_API_KEY) : env.GROQ_API_KEY,
+    model: env.AI_PROVIDER === "groq" ? (env.AI_MODEL || env.GROQ_MODEL) : env.GROQ_MODEL,
+  };
+}
+
+async function sendGroqRequest(
+  requestBody: GroqRequest,
+  externalSignal?: AbortSignal,
+): Promise<AssistantProviderResponse | AssistantProviderError> {
+  const { apiKey } = getActiveGroqConfig();
+  if (!apiKey) {
+    return {
+      message: "Trợ lý AI hiện chưa được cấu hình. Vui lòng thử lại sau.",
+      errorCode: "ASSISTANT_PROVIDER_NOT_CONFIGURED",
+    };
+  }
+
+  const maxRetries = getMaxRetriesOn429();
+  let lastRateLimitError: AssistantProviderError | null = null;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const abortController = new AbortController();
+    const timeoutId = setTimeout(() => abortController.abort(), getGroqTimeoutMs());
+    const handleExternalAbort = () => abortController.abort();
+    externalSignal?.addEventListener("abort", handleExternalAbort, { once: true });
+
+    try {
+      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify(requestBody),
+        signal: abortController.signal,
+      });
+
+      clearTimeout(timeoutId);
+      externalSignal?.removeEventListener("abort", handleExternalAbort);
+
+      if (!response.ok) {
+        const details = await extractGroqErrorDetails(response);
+        const errorResult = getGroqErrorMessage(details.status, details.parsed);
+        if (details.status === 429 && attempt < maxRetries) {
+          lastRateLimitError = errorResult;
+          console.warn(`[Groq] Rate limited (429), retry ${attempt + 1}/${maxRetries} after backoff`);
+          await delay(getRetryBaseDelayMs() * (attempt + 1), externalSignal);
+          continue;
+        }
+        console.error("[Groq] API error:", { status: details.status, body: details.body });
+        return errorResult;
+      }
+
+      const data = await response.json() as GroqResponse;
+      const text = extractGroqText(data);
+      if (!text) {
+        return {
+          message: "Trợ lý chưa có gợi ý phù hợp cho câu hỏi này. Thử hỏi cụ thể hơn nhé.",
+          errorCode: "ASSISTANT_PROVIDER_ERROR",
+        };
+      }
+      return { message: text };
+    } catch (error) {
+      clearTimeout(timeoutId);
+      externalSignal?.removeEventListener("abort", handleExternalAbort);
+      if (error instanceof Error && error.name === "AbortError") {
+        return {
+          message: "Phản hồi từ trợ lý quá lâu. Thử lại nhé.",
+          errorCode: "ASSISTANT_PROVIDER_TIMEOUT",
+        };
+      }
+      console.error("[Groq] Request failed:", error instanceof Error ? `${error.name}: ${error.message}` : "UnknownError");
+      return {
+        message: "Trợ lý AI đang gặp vấn đề. Thử lại sau nhé.",
+        errorCode: "ASSISTANT_PROVIDER_ERROR",
+      };
+    }
+  }
+
+  return (
+    lastRateLimitError ?? {
+      message: "Trợ lý AI đang quá tải (rate limit). Vui lòng đợi vài giây rồi thử lại.",
+      errorCode: "ASSISTANT_PROVIDER_RATE_LIMIT",
+    }
+  );
+}
+
 function extractGroqText(data: GroqChunkResponse): string {
   return data.choices?.[0]?.message?.content?.trim() ?? "";
 }
@@ -419,87 +539,16 @@ export async function sendToGroq(
   history: Array<{ role: "user" | "assistant"; content: string }>,
   options: GroqRequestOptions = {},
 ): Promise<AssistantProviderResponse | AssistantProviderError> {
-  const activeApiKey = env.AI_PROVIDER === "groq" ? (env.AI_API_KEY || env.GROQ_API_KEY) : env.GROQ_API_KEY;
-  const activeModel = env.AI_PROVIDER === "groq" ? (env.AI_MODEL || env.GROQ_MODEL) : env.GROQ_MODEL;
+  const { model } = getActiveGroqConfig();
+  return sendGroqRequest(buildRequestBody(userMessage, context, history, model, options));
+}
 
-  if (!activeApiKey) {
-    return {
-      message: "Trợ lý AI hiện chưa được cấu hình. Vui lòng thử lại sau.",
-      errorCode: "ASSISTANT_PROVIDER_NOT_CONFIGURED",
-    };
-  }
-
-  // G7: retry nhẹ cho 429. maxRetries=1 nghĩa là tối đa 2 lần thử.
-  const maxRetries = getMaxRetriesOn429();
-  let lastRateLimitError: AssistantProviderError | null = null;
-
-  for (let attempt = 0; attempt <= maxRetries; attempt++) {
-    const abortController = new AbortController();
-    const timeoutId = setTimeout(() => abortController.abort(), getGroqTimeoutMs());
-
-    try {
-      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${activeApiKey}`,
-        },
-        body: JSON.stringify(buildRequestBody(userMessage, context, history, activeModel, options)),
-        signal: abortController.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        const details = await extractGroqErrorDetails(response);
-        const errorResult = getGroqErrorMessage(details.status, details.parsed);
-        // G7: với 429, thử lại có backoff nếu còn lượt.
-        if (details.status === 429 && attempt < maxRetries) {
-          lastRateLimitError = errorResult;
-          console.warn(`[Groq] Rate limited (429), retry ${attempt + 1}/${maxRetries} after backoff`);
-          await delay(getRetryBaseDelayMs() * (attempt + 1));
-          continue;
-        }
-        console.error("[Groq] API error:", { status: details.status, body: details.body });
-        return errorResult;
-      }
-
-      const data = await response.json() as GroqResponse;
-      const text = extractGroqText(data);
-
-      if (!text) {
-        return {
-          message: "Trợ lý chưa có gợi ý phù hợp cho câu hỏi này. Thử hỏi cụ thể hơn nhé.",
-          errorCode: "ASSISTANT_PROVIDER_ERROR",
-        };
-      }
-
-      return { message: text };
-    } catch (error) {
-      clearTimeout(timeoutId);
-
-      if (error instanceof Error && error.name === "AbortError") {
-        return {
-          message: "Phản hồi từ trợ lý quá lâu. Thử lại nhé.",
-          errorCode: "ASSISTANT_PROVIDER_TIMEOUT",
-        };
-      }
-
-      console.error("[Groq] Request failed:", error instanceof Error ? `${error.name}: ${error.message}` : "UnknownError");
-      return {
-        message: "Trợ lý AI đang gặp vấn đề. Thử lại sau nhé.",
-        errorCode: "ASSISTANT_PROVIDER_ERROR",
-      };
-    }
-  }
-
-  // Hết lượt retry mà vẫn 429.
-  return (
-    lastRateLimitError ?? {
-      message: "Trợ lý AI đang quá tải (rate limit). Vui lòng đợi vài giây rồi thử lại.",
-      errorCode: "ASSISTANT_PROVIDER_RATE_LIMIT",
-    }
-  );
+export async function sendPromptToGroq(
+  request: StructuredProviderPromptRequest,
+): Promise<AssistantProviderResponse | AssistantProviderError> {
+  const { model } = getActiveGroqConfig();
+  const selectedModel = request.model?.trim() || model;
+  return sendGroqRequest(buildStructuredPromptRequestBody(request, selectedModel), request.signal);
 }
 
 export async function transcribeAudio(

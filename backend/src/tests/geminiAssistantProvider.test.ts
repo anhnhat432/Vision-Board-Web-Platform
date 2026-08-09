@@ -114,6 +114,49 @@ describe("geminiAssistantProvider prompt", () => {
     assert.match(summary, /Chi co 30 phut moi ngay/);
   });
 
+  it("sends a dedicated structured prompt without generic Assistant context", async () => {
+    ensureBackendEnvForProviderImports();
+    let capturedBody: Record<string, unknown> | null = null;
+    mock.method(globalThis, "fetch", async (_url: string | URL | Request, init?: RequestInit) => {
+      capturedBody = JSON.parse(String(init?.body)) as Record<string, unknown>;
+      return new Response(
+        JSON.stringify({ candidates: [{ content: { parts: [{ text: '{"title":"Ưu tiên hôm nay"}' }] } }] }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      );
+    });
+    const { sendPromptToGemini } = await import("../services/geminiAssistantProvider");
+
+    const result = await sendPromptToGemini({
+      systemPrompt: "COACH_RULES_ONLY",
+      contextMessage: "UNTRUSTED_STRUCTURED_CONTEXT={}",
+      userMessage: "Tạo một khuyến nghị Coach.",
+      maxTokens: 500,
+      temperature: 0.2,
+      jsonObject: true,
+    });
+
+    assert.deepEqual(result, { message: '{"title":"Ưu tiên hôm nay"}' });
+    assert.ok(capturedBody);
+    const body = capturedBody as {
+      system_instruction?: { parts?: Array<{ text?: string }> };
+      contents?: Array<{ role?: string; parts?: Array<{ text?: string }> }>;
+      generationConfig?: { maxOutputTokens?: number; temperature?: number; responseMimeType?: string };
+    };
+    assert.deepEqual(body.system_instruction, { parts: [{ text: "COACH_RULES_ONLY" }] });
+    assert.deepEqual(body.contents, [
+      {
+        role: "user",
+        parts: [{ text: "UNTRUSTED_STRUCTURED_CONTEXT={}\n\nTạo một khuyến nghị Coach." }],
+      },
+    ]);
+    assert.deepEqual(body.generationConfig, {
+      temperature: 0.2,
+      maxOutputTokens: 500,
+      responseMimeType: "application/json",
+    });
+    assert.doesNotMatch(JSON.stringify(body), /create_task|mark_task_done|assistantMemory/);
+  });
+
   it("redacts provider error details before returning or logging Gemini failures", async () => {
     ensureBackendEnvForProviderImports();
     const rawSecret = "AIzaSyAbCdEfGhIjKl123456789";

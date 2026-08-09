@@ -14,6 +14,7 @@ export interface GeminiRequest {
   generationConfig?: {
     temperature: number;
     maxOutputTokens: number;
+    responseMimeType?: "application/json";
   };
 }
 
@@ -36,6 +37,17 @@ export interface AssistantProviderError {
 }
 
 export interface GeminiRequestOptions {
+  model?: string;
+}
+
+export interface StructuredProviderPromptRequest {
+  systemPrompt: string;
+  contextMessage: string;
+  userMessage: string;
+  maxTokens: number;
+  temperature: number;
+  jsonObject: boolean;
+  signal?: AbortSignal;
   model?: string;
 }
 
@@ -141,6 +153,25 @@ function buildRequestBody(
   };
 }
 
+function buildStructuredPromptRequestBody(request: StructuredProviderPromptRequest): GeminiRequest {
+  return {
+    system_instruction: {
+      parts: [{ text: request.systemPrompt }],
+    },
+    contents: [
+      {
+        role: "user",
+        parts: [{ text: `${request.contextMessage}\n\n${request.userMessage}` }],
+      },
+    ],
+    generationConfig: {
+      temperature: request.temperature,
+      maxOutputTokens: request.maxTokens,
+      ...(request.jsonObject ? { responseMimeType: "application/json" as const } : {}),
+    },
+  };
+}
+
 function extractGeminiText(data: GeminiResponse): string {
   return data.candidates?.[0]?.content?.parts
     ?.map((part) => part.text ?? "")
@@ -148,17 +179,20 @@ function extractGeminiText(data: GeminiResponse): string {
     .trim() ?? "";
 }
 
-export async function sendToGemini(
-  userMessage: string,
-  context: AssistantContext,
-  history: Array<{ role: "user" | "assistant"; content: string }>,
-  options: GeminiRequestOptions = {},
-): Promise<AssistantProviderResponse | AssistantProviderError> {
-  const activeApiKey = env.AI_PROVIDER === "gemini" ? (env.AI_API_KEY || env.GEMINI_API_KEY) : env.GEMINI_API_KEY;
-  const configuredModel = env.AI_PROVIDER === "gemini" ? (env.AI_MODEL || env.GEMINI_MODEL) : env.GEMINI_MODEL;
-  const activeModel = options.model?.trim() || configuredModel;
+function getActiveGeminiConfig(): { apiKey: string | undefined; model: string } {
+  return {
+    apiKey: env.AI_PROVIDER === "gemini" ? (env.AI_API_KEY || env.GEMINI_API_KEY) : env.GEMINI_API_KEY,
+    model: env.AI_PROVIDER === "gemini" ? (env.AI_MODEL || env.GEMINI_MODEL) : env.GEMINI_MODEL,
+  };
+}
 
-  if (!activeApiKey) {
+async function sendGeminiRequest(
+  requestBody: GeminiRequest,
+  model: string,
+  externalSignal?: AbortSignal,
+): Promise<AssistantProviderResponse | AssistantProviderError> {
+  const { apiKey } = getActiveGeminiConfig();
+  if (!apiKey) {
     return {
       message: "Trợ lý AI hiện chưa được cấu hình. Vui lòng thử lại sau.",
       errorCode: "ASSISTANT_PROVIDER_NOT_CONFIGURED",
@@ -167,51 +201,70 @@ export async function sendToGemini(
 
   const abortController = new AbortController();
   const timeoutId = setTimeout(() => abortController.abort(), GEMINI_TIMEOUT_MS);
+  const handleExternalAbort = () => abortController.abort();
+  externalSignal?.addEventListener("abort", handleExternalAbort, { once: true });
 
   try {
-    const response = await fetch(getGeminiApiUrl(activeModel), {
+    const response = await fetch(getGeminiApiUrl(model), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-goog-api-key": activeApiKey,
+        "x-goog-api-key": apiKey,
       },
-      body: JSON.stringify(buildRequestBody(userMessage, context, history)),
+      body: JSON.stringify(requestBody),
       signal: abortController.signal,
     });
 
     clearTimeout(timeoutId);
+    externalSignal?.removeEventListener("abort", handleExternalAbort);
 
     if (!response.ok) {
       const details = await extractGeminiErrorDetails(response);
-      console.error("[Gemini] API error:", { model: activeModel, status: details.status, body: details.body });
+      console.error("[Gemini] API error:", { model, status: details.status, body: details.body });
       return getGeminiErrorMessage(details.status, details.parsed);
     }
 
     const data = await response.json() as GeminiResponse;
     const text = extractGeminiText(data);
-
     if (!text) {
       return {
         message: "Trợ lý chưa có gợi ý phù hợp cho câu hỏi này. Thử hỏi cụ thể hơn nhé.",
         errorCode: "ASSISTANT_PROVIDER_ERROR",
       };
     }
-
     return { message: text };
   } catch (error) {
     clearTimeout(timeoutId);
-
+    externalSignal?.removeEventListener("abort", handleExternalAbort);
     if (error instanceof Error && error.name === "AbortError") {
       return {
         message: "Phản hồi từ trợ lý quá lâu. Thử lại nhé.",
         errorCode: "ASSISTANT_PROVIDER_TIMEOUT",
       };
     }
-
     console.error("[Gemini] Request failed:", error instanceof Error ? `${error.name}: ${error.message}` : "UnknownError");
     return {
       message: "Trợ lý AI đang gặp vấn đề. Thử lại sau nhé.",
       errorCode: "ASSISTANT_PROVIDER_ERROR",
     };
   }
+}
+
+export async function sendToGemini(
+  userMessage: string,
+  context: AssistantContext,
+  history: Array<{ role: "user" | "assistant"; content: string }>,
+  options: GeminiRequestOptions = {},
+): Promise<AssistantProviderResponse | AssistantProviderError> {
+  const { model } = getActiveGeminiConfig();
+  const activeModel = options.model?.trim() || model;
+  return sendGeminiRequest(buildRequestBody(userMessage, context, history), activeModel);
+}
+
+export async function sendPromptToGemini(
+  request: StructuredProviderPromptRequest,
+): Promise<AssistantProviderResponse | AssistantProviderError> {
+  const { model } = getActiveGeminiConfig();
+  const activeModel = request.model?.trim() || model;
+  return sendGeminiRequest(buildStructuredPromptRequestBody(request), activeModel, request.signal);
 }
