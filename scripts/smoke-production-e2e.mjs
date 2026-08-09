@@ -24,6 +24,7 @@ const SMOKE_TASK_ID = `task_full_today_${TIMESTAMP}`;
 const TODAY_TASK_TITLE = `Full smoke today task ${TIMESTAMP}`;
 const CHECKIN_NOTE = `Full smoke check-in ${TIMESTAMP}`;
 const WEEKLY_REVIEW_OUTPUT = `Full smoke weekly review ${TIMESTAMP}`;
+const WEEKLY_REVIEW_OBSTACLE = `Full smoke obstacle ${TIMESTAMP}`;
 const WEEKLY_REVIEW_PRIORITY = `Full smoke next commitment ${TIMESTAMP}`;
 
 function log(message) {
@@ -1225,73 +1226,7 @@ async function clickFirstTodayTaskCheckbox(page) {
 }
 
 async function hasVisibleWeeklyReviewForm(page) {
-  return page.locator('[data-testid="weekly-review-flow"]:visible').first().isVisible().catch(() => false);
-}
-
-async function readVisibleWeeklyReviewCommitmentState(page, options = {}) {
-  const clickPending = options.clickPending ?? false;
-  return page.evaluate(({ clickPending }) => {
-    const isVisible = (element) => {
-      const style = window.getComputedStyle(element);
-      const rect = element.getBoundingClientRect();
-      return style.display !== "none" && style.visibility !== "hidden" && rect.width > 0 && rect.height > 0;
-    };
-    const containers = Array.from(document.querySelectorAll('[data-testid="weekly-review-step-commitments"]'));
-    const container = containers.find(isVisible);
-    if (!container) return { available: false, clicked: false, done: false, pendingCount: 0 };
-
-    const pendingButtons = Array.from(container.querySelectorAll("button")).filter(
-      (button) =>
-        button.textContent?.replace(/\s+/g, " ").trim() === "Đã giữ" &&
-        !button.disabled &&
-        button.getAttribute("aria-pressed") !== "true",
-    );
-    const pendingButton = pendingButtons[0];
-    if (clickPending && pendingButton) pendingButton.click();
-
-    return {
-      available: true,
-      clicked: Boolean(clickPending && pendingButton),
-      done: container.getAttribute("data-done") === "true",
-      pendingCount: pendingButtons.length,
-    };
-  }, { clickPending });
-}
-
-async function classifyVisiblePreviousCommitments(page) {
-  let classifiedCount = 0;
-
-  for (let attempt = 0; attempt < 10; attempt += 1) {
-    const clickResult = await readVisibleWeeklyReviewCommitmentState(page, { clickPending: true });
-
-    if (!clickResult.available) {
-      await waitForCondition(
-        "weekly review commitment step after rerender",
-        async () => (await readVisibleWeeklyReviewCommitmentState(page)).available,
-        5_000,
-        100,
-      );
-      continue;
-    }
-
-    if (clickResult.done) break;
-    if (!clickResult.clicked) break;
-    classifiedCount += 1;
-
-    await waitForCondition(
-      `weekly review commitment classification ${classifiedCount}`,
-      async () => {
-        const state = await readVisibleWeeklyReviewCommitmentState(page);
-        return state.available && (state.done || state.pendingCount < clickResult.pendingCount);
-      },
-    );
-  }
-
-  await waitForCondition("weekly review commitments classified", async () => {
-    const state = await readVisibleWeeklyReviewCommitmentState(page);
-    return state.available && state.done;
-  });
-  return classifiedCount;
+  return page.locator('[data-testid="weekly-review-three-questions"]:visible').first().isVisible().catch(() => false);
 }
 
 async function readWeeklyReviewSurface(page) {
@@ -1314,7 +1249,7 @@ async function readWeeklyReviewSurface(page) {
 
     return {
       shellVisible: isVisible(document.querySelector('[data-testid="weekly-review-shell"]')),
-      formVisible: isVisible(document.querySelector('[data-testid="weekly-review-flow"]')),
+      formVisible: isVisible(document.querySelector('[data-testid="weekly-review-three-questions"]')),
       summaryVisible: isVisible(document.querySelector('[data-testid="weekly-review-summary"]')),
       buttons: Array.from(document.querySelectorAll("button"))
         .map((button) => ({
@@ -1978,23 +1913,23 @@ async function exerciseTwelveWeekSaveReloadAndSync(page, apiEvents, getLatestApi
   await page.locator('[data-tour-id="twelve-week-tab-week"]').click();
   await page.locator('[data-testid="weekly-review-shell"]').waitFor({ timeout: DEFAULT_TIMEOUT_MS });
   await ensureWeeklyReviewFormVisible(page);
-  const weeklyInsightsInput = page.locator("#weekly-insights:visible").first();
+  const weeklyKeepTacticInput = page.locator("#weekly-keep-tactic:visible").first();
+  const weeklyMainObstacleInput = page.locator("#weekly-main-obstacle:visible").first();
   const weeklyNextCommitmentsInput = page.locator("#weekly-next-commitments:visible").first();
-  await weeklyInsightsInput.waitFor({ timeout: DEFAULT_TIMEOUT_MS });
+  await weeklyKeepTacticInput.waitFor({ timeout: DEFAULT_TIMEOUT_MS });
+  await weeklyMainObstacleInput.waitFor({ timeout: DEFAULT_TIMEOUT_MS });
   await weeklyNextCommitmentsInput.waitFor({ timeout: DEFAULT_TIMEOUT_MS });
-  const classifiedCommitments = await classifyVisiblePreviousCommitments(page);
-  if (classifiedCommitments > 0) {
-    log(`Classified ${classifiedCommitments} previous weekly commitment(s) before submit`);
-  }
-  await weeklyInsightsInput.fill(WEEKLY_REVIEW_OUTPUT);
+  await weeklyKeepTacticInput.fill(WEEKLY_REVIEW_OUTPUT);
+  await weeklyMainObstacleInput.fill(WEEKLY_REVIEW_OBSTACLE);
   await weeklyNextCommitmentsInput.fill(WEEKLY_REVIEW_PRIORITY);
   await weeklyNextCommitmentsInput.press("Enter");
-  await clickButtonByNormalizedText(page, "chot review tuan nay");
+  await clickButtonByNormalizedText(page, "luu review");
   await tryClickButtonByNormalizedText(page, "van luu som");
   await waitForGoalSnapshot(page, "weekly review in local storage", (snapshot) => {
     return (
       snapshot.weeklyReviewCount >= 1 &&
-      snapshot.latestWeeklyReview?.insights === WEEKLY_REVIEW_OUTPUT &&
+      snapshot.latestWeeklyReview?.keepTactic === WEEKLY_REVIEW_OUTPUT &&
+      snapshot.latestWeeklyReview?.mainObstacle === WEEKLY_REVIEW_OBSTACLE &&
       snapshot.latestWeeklyReview?.nextWeekCommitments?.includes(WEEKLY_REVIEW_PRIORITY)
     );
   });
@@ -2039,7 +1974,8 @@ async function exerciseTwelveWeekSaveReloadAndSync(page, apiEvents, getLatestApi
       snapshot.dailyCheckInCount >= 1 &&
       hasExpectedCheckIn &&
       snapshot.weeklyReviewCount >= 1 &&
-      snapshot.latestWeeklyReview?.insights === WEEKLY_REVIEW_OUTPUT &&
+      snapshot.latestWeeklyReview?.keepTactic === WEEKLY_REVIEW_OUTPUT &&
+      snapshot.latestWeeklyReview?.mainObstacle === WEEKLY_REVIEW_OBSTACLE &&
       snapshot.latestWeeklyReview?.nextWeekCommitments?.includes(WEEKLY_REVIEW_PRIORITY)
     );
   });
