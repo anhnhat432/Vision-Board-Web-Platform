@@ -10,6 +10,7 @@ import type {
   MutationQueueManualSyncStatus,
 } from "@/app/components/twelve-week/TwelveWeekSettingsShared";
 import type { TwelveWeekWeeklyReviewForm } from "@/app/components/twelve-week/TwelveWeekWeekTab";
+import type { WeeklyReviewNextWeekHandoffResult } from "@/app/components/twelve-week/WeeklyReviewNextWeekHandoff";
 import { Tabs, TabsList, TabsTrigger } from "@/app/components/ui/tabs";
 import type { BackendPlanHydrationResult } from "@/app/hooks/useBackendPlanHydration";
 import type { BillingActionSnapshot, BillingProviderStatus } from "@/app/utils/billing-contract";
@@ -132,10 +133,15 @@ interface TwelveWeekSystemTabsProps {
   ) => void;
   onApplySuggestedPlan: () => void;
   onOpenPremiumInsights: () => void;
-  onSaveWeeklyReview: () => void;
+  onSaveWeeklyReview: (weekNumber: number) => Promise<{ status: "saved" | "failed" }>;
+  onPrepareReviewEdit: (weekNumber: number) => boolean;
+  onResetReviewForm: () => boolean;
+  onApplyNextWeekHandoff: (
+    weekNumber: number,
+    selection: { applyPriority: boolean; applyWorkload: boolean },
+  ) => Promise<WeeklyReviewNextWeekHandoffResult>;
   onOpenTodayTab?: () => void;
   nextWeekRecommendation: NextWeekRecommendation | null;
-  onAcceptNextWeekRecommendation?: () => void;
   weeklyReviewViewModels: Readonly<Record<number, WeeklyReviewViewModel>>;
   showFullProgress: boolean;
   setShowFullProgress: (show: boolean) => void;
@@ -269,9 +275,11 @@ export function TwelveWeekSystemTabs({
   onApplySuggestedPlan,
   onOpenPremiumInsights,
   onSaveWeeklyReview,
+  onPrepareReviewEdit,
+  onResetReviewForm,
+  onApplyNextWeekHandoff,
   onOpenTodayTab,
   nextWeekRecommendation,
-  onAcceptNextWeekRecommendation,
   weeklyReviewViewModels,
   showFullProgress,
   setShowFullProgress,
@@ -508,12 +516,14 @@ export function TwelveWeekSystemTabs({
                   onApplySuggestedPlan={onApplySuggestedPlan}
                   onOpenPremiumInsights={onOpenPremiumInsights}
                   onSaveWeeklyReview={onSaveWeeklyReview}
+                  onPrepareReviewEdit={onPrepareReviewEdit}
+                  onResetReviewForm={onResetReviewForm}
+                  onApplyNextWeekHandoff={onApplyNextWeekHandoff}
                   onOpenTodayTab={onOpenTodayTab}
                   rescueStatus={rescueStatus}
                   onPickTinyTask={onPickTinyTask}
                   onReducePlan={onApplySuggestedPlan}
                   nextWeekRecommendation={nextWeekRecommendation}
-                  onAcceptNextWeekRecommendation={onAcceptNextWeekRecommendation ?? onApplySuggestedPlan}
                   weeklyReviewViewModels={weeklyReviewViewModels}
                 />
               </motion.div>

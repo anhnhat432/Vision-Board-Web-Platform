@@ -1,4 +1,4 @@
-import { type Dispatch, type RefObject, type SetStateAction, useCallback, useMemo } from "react";
+import { type Dispatch, type RefObject, type SetStateAction, useCallback, useMemo, useRef } from "react";
 import { toast } from "sonner";
 import { trackAnalyticsEvent } from "@/app/utils/analytics";
 import { shouldEnable12WeekMutationSync } from "@/app/utils/app-mode";
@@ -40,6 +40,10 @@ import { enqueueStoredMutation } from "@/features/plan12week/persistence/mutatio
 import { getPlanLink } from "@/features/plan12week/persistence/planLinkStore";
 import { enqueuePlanSnapshotUpdatedMutation } from "@/features/plan12week/persistence/planSnapshotMutation";
 import {
+  applyConfirmedNextWeekHandoff,
+  type ConfirmedNextWeekHandoffSelection,
+} from "@/features/plan12week/logic";
+import {
   commitTwelveWeekTaskCompletion,
   rollbackTwelveWeekTaskCompletion,
 } from "@/features/plan12week/persistence/taskCompletionMutation";
@@ -57,7 +61,38 @@ interface ExecutionSyncActions {
     reflection?: string;
     adjustments?: string;
   }) => Promise<boolean>;
+  syncLocalSnapshot: (input: {
+    system: TwelveWeekSystem;
+  }) => Promise<{ status: "idle" | "success" | "partial" | "error"; failedCount: number }>;
 }
+
+export type WeeklyReviewSaveResult =
+  | {
+      status: "saved";
+      review: UniversalWeeklyReview;
+      system: TwelveWeekSystem;
+      syncStatus: "synced" | "pending";
+      wasNoop: boolean;
+    }
+  | {
+      status: "failed";
+      reason: "unavailable" | "validation" | "local_save_failed";
+    };
+
+export type NextWeekHandoffCommandResult =
+  | {
+      status: "applied";
+      system: TwelveWeekSystem;
+      syncStatus: "synced" | "pending";
+    }
+  | {
+      status: "noop" | "unavailable";
+      system: TwelveWeekSystem;
+    }
+  | {
+      status: "failed";
+      reason: "unavailable" | "local_save_failed";
+    };
 
 interface UseTwelveWeekExecutionActionsOptions {
   activeGoal: Goal | null;
@@ -67,7 +102,6 @@ interface UseTwelveWeekExecutionActionsOptions {
   dailyNote: string;
   weeklyForm: WeeklyReviewForm;
   setWeeklyForm: Dispatch<SetStateAction<WeeklyReviewForm>>;
-  hasPremiumReviewInsights: boolean;
   suggestedNextWeekPlan: SuggestedNextWeekPlan | null;
   rescuePlanSummary: RescuePlanSummary | null;
   executionSyncActions: ExecutionSyncActions;
@@ -121,7 +155,7 @@ function parseCommitmentInput(value: string): string[] {
     .split(/\r?\n|,/)
     .map((item) => item.trim())
     .filter(Boolean)
-    .slice(0, 5);
+    .slice(0, 3);
 }
 
 function getReviewNextWeekCommitments(review: UniversalWeeklyReview | null | undefined): string[] {
@@ -157,7 +191,6 @@ export function useTwelveWeekExecutionActions({
   dailyNote,
   weeklyForm,
   setWeeklyForm,
-  hasPremiumReviewInsights,
   suggestedNextWeekPlan,
   rescuePlanSummary,
   executionSyncActions,
@@ -168,6 +201,8 @@ export function useTwelveWeekExecutionActions({
   refreshSnapshotMeta,
   onWeekCompleted,
 }: UseTwelveWeekExecutionActionsOptions) {
+  const weeklyReviewSavePromiseRef = useRef<Promise<WeeklyReviewSaveResult> | null>(null);
+  const nextWeekApplyPromiseRef = useRef<Promise<NextWeekHandoffCommandResult> | null>(null);
   const getLatestActiveSystem = useCallback(() => {
     if (!activeGoal || !system) return system;
     return getUserData().goals.find((goal) => goal.id === activeGoal.id)?.twelveWeekSystem ?? system;
@@ -366,200 +401,299 @@ export function useTwelveWeekExecutionActions({
     getLatestActiveSystem,
   ]);
 
-  const handleSaveWeeklyReview = useCallback(async () => {
-    if (!activeGoal || !system) return;
-    const actionGoalId = activeGoal.id;
-    const actionGoalTitle = activeGoal.title;
-    const hasAnyContent =
-      weeklyForm.biggestOutputThisWeek.trim() ||
-      weeklyForm.mainObstacle.trim() ||
-      weeklyForm.keepTactic.trim() ||
-      weeklyForm.reduceTactic.trim() ||
-      weeklyForm.nextWeekPriority.trim() ||
-      weeklyForm.insights.trim() ||
-      weeklyForm.nextWeekCommitments.length > 0 ||
-      Object.values(weeklyForm.commitmentStatuses).some(isCommitmentAnswered) ||
-      weeklyForm.lagProgressValue.trim();
-    if (!hasAnyContent) {
-      toast.error("Cần điền ít nhất một mục trước khi chốt review.");
-      return;
-    }
-    const latestSystem = getLatestActiveSystem() ?? system;
-    const reviewWeekNumber = getTwelveWeekCurrentWeek(latestSystem);
-    const reviewWeekCompletion = getTwelveWeekWeekCompletion(latestSystem, reviewWeekNumber);
-    const previousReview = latestSystem.weeklyReviews.find((review) => review.weekNumber === reviewWeekNumber - 1);
-    const previousCommitments = getReviewNextWeekCommitments(previousReview);
-    const unansweredCommitment = previousCommitments.find(
-      (commitment) => !isCommitmentAnswered(weeklyForm.commitmentStatuses[commitment]),
-    );
-    if (unansweredCommitment) {
-      toast.error("Cần phân loại mọi cam kết tuần trước trước khi chốt review.");
-      return;
-    }
+  const handleSaveWeeklyReview = useCallback(
+    (requestedWeekNumber?: number): Promise<WeeklyReviewSaveResult> => {
+      if (weeklyReviewSavePromiseRef.current) return weeklyReviewSavePromiseRef.current;
 
-    const normalizedFormCommitments = normalizeCommitmentList(weeklyForm.nextWeekCommitments).slice(0, 5);
-    const nextWeekCommitments =
-      normalizedFormCommitments.length > 0
-        ? normalizedFormCommitments
-        : parseCommitmentInput(weeklyForm.nextWeekPriority.trim());
-    if (nextWeekCommitments.length === 0) {
-      toast.error("Cần đặt ít nhất một cam kết tuần tới trước khi chốt review.");
-      return;
-    }
+      const operation = (async (): Promise<WeeklyReviewSaveResult> => {
+        if (!activeGoal || !system) return { status: "failed", reason: "unavailable" };
+        const actionGoalId = activeGoal.id;
+        const actionGoalTitle = activeGoal.title;
+        const latestSystem = getLatestActiveSystem() ?? system;
+        const reviewWeekNumber = requestedWeekNumber ?? getTwelveWeekCurrentWeek(latestSystem);
+        if (reviewWeekNumber > getTwelveWeekCurrentWeek(latestSystem)) {
+          toast.error("Không thể lưu review cho tuần tương lai.");
+          return { status: "failed", reason: "validation" };
+        }
+        const existingReview = latestSystem.weeklyReviews.find((review) => review.weekNumber === reviewWeekNumber);
+        const normalizedFormCommitments = normalizeCommitmentList(weeklyForm.nextWeekCommitments).slice(0, 3);
+        const nextWeekCommitments =
+          normalizedFormCommitments.length > 0
+            ? normalizedFormCommitments
+            : parseCommitmentInput(weeklyForm.nextWeekPriority.trim()).slice(0, 3);
+        const workloadDecisionValue = weeklyForm.workloadDecision || "keep same";
+        const hasNextWeekAdjustment =
+          nextWeekCommitments.length > 0 ||
+          weeklyForm.reduceTactic.trim().length > 0 ||
+          workloadDecisionValue === "reduce slightly" ||
+          workloadDecisionValue === "increase slightly";
+        const hasAnsweredCommitment = Object.values(weeklyForm.commitmentStatuses).some(isCommitmentAnswered);
+        const hasAnyHumanContent = Boolean(
+          existingReview ||
+            weeklyForm.mainObstacle.trim() ||
+            weeklyForm.keepTactic.trim() ||
+            weeklyForm.reduceTactic.trim() ||
+            hasNextWeekAdjustment ||
+            hasAnsweredCommitment,
+        );
+        if (!hasAnyHumanContent) {
+          toast.error("Cần ghi lại ít nhất một điều trước khi lưu review.");
+          return { status: "failed", reason: "validation" };
+        }
+        const currentWeekNumber = getTwelveWeekCurrentWeek(latestSystem);
+        if (
+          reviewWeekNumber === currentWeekNumber &&
+          reviewWeekNumber < latestSystem.totalWeeks &&
+          !hasNextWeekAdjustment
+        ) {
+          toast.error("Cần đặt ít nhất một thay đổi cho tuần tới trước khi lưu review.");
+          return { status: "failed", reason: "validation" };
+        }
 
-    const commitmentsKept = previousCommitments.filter(
-      (commitment) => weeklyForm.commitmentStatuses[commitment] === "kept",
-    );
-    const commitmentsMissed = previousCommitments.filter(
-      (commitment) => weeklyForm.commitmentStatuses[commitment] === "missed",
-    );
-    const insightsValue =
-      weeklyForm.insights.trim() || weeklyForm.mainObstacle.trim() || weeklyForm.biggestOutputThisWeek.trim();
-    const nextWeekPriorityValue = nextWeekCommitments[0] ?? "";
-    const workloadDecisionValue =
-      weeklyForm.workloadDecision ||
-      (hasPremiumReviewInsights && suggestedNextWeekPlan ? suggestedNextWeekPlan.workloadDecision : "keep same");
-    const keepTacticTrimmed = weeklyForm.keepTactic.trim();
-    const reduceTacticTrimmed = weeklyForm.reduceTactic.trim();
-    const nextReview: UniversalWeeklyReview = {
-      weekNumber: reviewWeekNumber,
-      leadCompletionPercent: reviewWeekCompletion.percent,
-      lagProgressValue: weeklyForm.lagProgressValue.trim(),
-      biggestOutputThisWeek:
-        weeklyForm.biggestOutputThisWeek.trim() || (commitmentsKept.length > 0 ? commitmentsKept.join(", ") : ""),
-      mainObstacle:
-        weeklyForm.mainObstacle.trim() || (commitmentsMissed.length > 0 ? commitmentsMissed.join(", ") : ""),
-      nextWeekPriority: nextWeekPriorityValue,
-      workloadDecision: workloadDecisionValue,
-      reviewCompleted: true,
-      progressScore: Math.max(5, Math.round(reviewWeekCompletion.percent / 20)),
-      disciplineScore: Math.max(5, Math.round(reviewWeekCompletion.percent / 20)),
-      focusScore: reviewWeekCompletion.percent >= 70 ? 8 : 6,
-      improvementScore: insightsValue ? 8 : 6,
-      outputQualityScore: commitmentsKept.length > 0 || weeklyForm.biggestOutputThisWeek.trim() ? 8 : 6,
-      completedLeadIndicators: reviewWeekCompletion.completed,
-      commitmentsKept,
-      commitmentsMissed,
-      insights: insightsValue,
-      nextWeekCommitments,
-      executionScore: reviewWeekCompletion.percent,
-      reflection: insightsValue,
-      adjustments: nextWeekPriorityValue,
-      ...(keepTacticTrimmed ? { keepTactic: keepTacticTrimmed } : {}),
-      ...(reduceTacticTrimmed ? { reduceTactic: reduceTacticTrimmed } : {}),
-    };
+        const reviewWeekCompletion = getTwelveWeekWeekCompletion(latestSystem, reviewWeekNumber);
+        const previousReview = latestSystem.weeklyReviews.find((review) => review.weekNumber === reviewWeekNumber - 1);
+        const previousCommitments = getReviewNextWeekCommitments(previousReview);
+        const commitmentsKept = previousCommitments.filter(
+          (commitment) => weeklyForm.commitmentStatuses[commitment] === "kept",
+        );
+        const commitmentsMissed = previousCommitments.filter(
+          (commitment) => weeklyForm.commitmentStatuses[commitment] === "missed",
+        );
+        const nextWeekPriorityValue = nextWeekCommitments[0] ?? "";
+        const reviewPatch: Parameters<typeof commitTwelveWeekWeeklyReview>[0]["review"] = {
+          weekNumber: reviewWeekNumber,
+          leadCompletionPercent: reviewWeekCompletion.percent,
+          lagProgressValue: weeklyForm.lagProgressValue.trim(),
+          mainObstacle: weeklyForm.mainObstacle.trim(),
+          nextWeekPriority: nextWeekPriorityValue,
+          workloadDecision: workloadDecisionValue,
+          reviewCompleted: true,
+          progressScore: Math.max(5, Math.round(reviewWeekCompletion.percent / 20)),
+          disciplineScore: Math.max(5, Math.round(reviewWeekCompletion.percent / 20)),
+          focusScore: reviewWeekCompletion.percent >= 70 ? 8 : 6,
+          improvementScore: weeklyForm.mainObstacle.trim() || weeklyForm.keepTactic.trim() ? 8 : 6,
+          outputQualityScore: weeklyForm.keepTactic.trim() ? 8 : 6,
+          completedLeadIndicators: reviewWeekCompletion.completed,
+          nextWeekCommitments,
+          executionScore: reviewWeekCompletion.percent,
+          keepTactic: weeklyForm.keepTactic.trim(),
+          reduceTactic: weeklyForm.reduceTactic.trim(),
+          ...(nextWeekPriorityValue ? { adjustments: nextWeekPriorityValue } : {}),
+          ...(hasAnsweredCommitment ? { commitmentsKept, commitmentsMissed } : {}),
+        };
 
-    const commitResult = commitTwelveWeekWeeklyReview({
-      goalId: actionGoalId,
-      review: nextReview,
-      lagMetricCurrentValue: weeklyForm.lagProgressValue,
-    });
-    if (commitResult.status === "not_found" || commitResult.status === "local_save_failed") {
-      toast.error("Không thể lưu review tuần. Dữ liệu cũ vẫn được giữ nguyên.");
-      return;
-    }
+        const commitResult = commitTwelveWeekWeeklyReview({
+          goalId: actionGoalId,
+          review: reviewPatch,
+          lagMetricCurrentValue: weeklyForm.lagProgressValue,
+        });
+        if (commitResult.status === "not_found" || commitResult.status === "local_save_failed") {
+          toast.error("Không thể lưu review tuần. Dữ liệu cũ vẫn được giữ nguyên.");
+          return { status: "failed", reason: "local_save_failed" };
+        }
 
-    const committedReview = commitResult.review;
-    const committedSystem =
-      commitResult.status === "applied" ? commitResult.updatedSystem : commitResult.currentSystem;
-    if (activeGoalIdRef.current === actionGoalId) {
-      updateActiveSystemState(() => committedSystem);
-    }
-    const reviewExecutionScore = committedReview.executionScore ?? reviewWeekCompletion.percent;
+        const committedReview = commitResult.review;
+        const committedSystem =
+          commitResult.status === "applied" ? commitResult.updatedSystem : commitResult.currentSystem;
+        if (activeGoalIdRef.current === actionGoalId) {
+          updateActiveSystemState(() => committedSystem);
+        }
+        const reviewExecutionScore = committedReview.executionScore ?? reviewWeekCompletion.percent;
+        const humanReflection = [
+          weeklyForm.keepTactic.trim() ? `Điều nên giữ: ${weeklyForm.keepTactic.trim()}` : "",
+          weeklyForm.mainObstacle.trim() ? `Nguyên nhân lệch nhịp: ${weeklyForm.mainObstacle.trim()}` : "",
+          weeklyForm.reduceTactic.trim() ? `Điều nên giảm: ${weeklyForm.reduceTactic.trim()}` : "",
+        ]
+          .filter(Boolean)
+          .join("\n\n");
 
-    upsertReflection({
-      date: formatDateInputValue(new Date()),
-      title: `Review tuần - ${actionGoalTitle} - tuần ${reviewWeekNumber}`,
-      content: [
-        `Score tuần qua: ${reviewWeekCompletion.percent}%`,
-        `Cam kết đã giữ: ${commitmentsKept.join(", ") || "--"}`,
-        `Cam kết bỏ lỡ: ${commitmentsMissed.join(", ") || "--"}`,
-        `Insight tuần sau: ${insightsValue || "--"}`,
-        `Cam kết tuần tới: ${nextWeekCommitments.join(", ")}`,
-        `Quyết định: ${getWorkloadDecisionLabel(workloadDecisionValue)}`,
-        hasPremiumReviewInsights && suggestedNextWeekPlan ? `Gợi ý hệ thống: ${suggestedNextWeekPlan.firstMove}` : "",
-      ]
-        .filter(Boolean)
-        .join("\n\n"),
-      mood: reviewWeekCompletion.percent >= 70 ? "happy" : reviewWeekCompletion.percent >= 40 ? "neutral" : "sad",
-      entryType: "weekly-review",
-      linkedGoalId: actionGoalId,
-      linkedWeekNumber: reviewWeekNumber,
-    });
+        upsertReflection({
+          date: formatDateInputValue(new Date()),
+          title: `Review tuần - ${actionGoalTitle} - tuần ${reviewWeekNumber}`,
+          content: [
+            `Score tuần qua: ${reviewWeekCompletion.percent}%`,
+            humanReflection,
+            commitmentsKept.length > 0 ? `Cam kết đã giữ: ${commitmentsKept.join(", ")}` : "",
+            commitmentsMissed.length > 0 ? `Cam kết bỏ lỡ: ${commitmentsMissed.join(", ")}` : "",
+            nextWeekCommitments.length > 0 ? `Thay đổi tuần tới: ${nextWeekCommitments.join(", ")}` : "",
+            `Quyết định tải: ${getWorkloadDecisionLabel(workloadDecisionValue)}`,
+          ]
+            .filter(Boolean)
+            .join("\n\n"),
+          mood: reviewWeekCompletion.percent >= 70 ? "happy" : reviewWeekCompletion.percent >= 40 ? "neutral" : "sad",
+          entryType: "weekly-review",
+          linkedGoalId: actionGoalId,
+          linkedWeekNumber: reviewWeekNumber,
+        });
 
-    trackAnalyticsEvent(
-      "weekly_review_submitted",
-      {
-        source: "12_week_system",
-        week_number: reviewWeekNumber,
-        lead_completion_percent: reviewWeekCompletion.percent,
-        execution_score: reviewExecutionScore,
-        workload_decision: workloadDecisionValue || "keep same",
-      },
-      {
-        goalId: actionGoalId,
-        legacyEventName: "12_week_weekly_review_submitted",
-        legacyPayload: {
-          weekNumber: String(reviewWeekNumber),
-          score: String(reviewExecutionScore),
-          decision: workloadDecisionValue || "keep same",
-          usedSuggestedPlan: String(
-            hasPremiumReviewInsights &&
-              weeklyForm.nextWeekCommitments.length === 0 &&
-              weeklyForm.nextWeekPriority.trim().length === 0,
-          ),
-        },
-      },
-    );
+        trackAnalyticsEvent(
+          "weekly_review_submitted",
+          {
+            source: "12_week_system",
+            week_number: reviewWeekNumber,
+            lead_completion_percent: reviewWeekCompletion.percent,
+            execution_score: reviewExecutionScore,
+            workload_decision: workloadDecisionValue,
+          },
+          {
+            goalId: actionGoalId,
+            legacyEventName: "12_week_weekly_review_submitted",
+            legacyPayload: {
+              weekNumber: String(reviewWeekNumber),
+              score: String(reviewExecutionScore),
+              decision: workloadDecisionValue,
+            },
+          },
+        );
 
-    // Feedback NGAY sau local commit: toast success + haptic + confetti. Sync chạy ngầm.
-    // Nếu sync fail bên dưới, ta hiện toast.info đè để user biết "đã lưu local" và sẽ
-    // auto-sync sau.
-    toast.success("Review tuần đã được chốt.", {
-      description:
-        hasPremiumReviewInsights &&
-        weeklyForm.nextWeekCommitments.length === 0 &&
-        weeklyForm.nextWeekPriority.trim().length === 0
-          ? "Mình đã dùng luôn gợi ý Plus để khóa ưu tiên tuần sau cho bạn."
-          : "Tuần sau giờ đã có ưu tiên đủ rõ để bắt đầu gọn hơn.",
-    });
-    hapticSuccess();
-    triggerWeeklyReviewConfetti();
-    onWeekCompleted?.(reviewWeekNumber, actionGoalId);
+        toast.success(reviewWeekNumber === latestSystem.totalWeeks ? "Review tuần cuối đã được lưu." : "Review đã lưu.", {
+          description:
+            reviewWeekNumber === latestSystem.totalWeeks
+              ? "Bạn có thể tiếp tục sang phần tổng kết chu kỳ."
+              : "Kế hoạch tuần sau chưa thay đổi cho đến khi bạn xác nhận.",
+        });
+        hapticSuccess();
+        triggerWeeklyReviewConfetti();
+        if (!existingReview?.reviewCompleted) onWeekCompleted?.(reviewWeekNumber, actionGoalId);
 
-    const synced = await executionSyncActions.syncWeeklyReview({
-      weekNumber: reviewWeekNumber,
-      executionScore: reviewExecutionScore,
-      reflection: insightsValue || undefined,
-      adjustments: nextWeekPriorityValue || undefined,
-    });
+        let synced = false;
+        try {
+          synced = await executionSyncActions.syncWeeklyReview({
+            weekNumber: reviewWeekNumber,
+            executionScore: reviewExecutionScore,
+            reflection: humanReflection || undefined,
+            adjustments: nextWeekPriorityValue || undefined,
+          });
+        } catch {
+          synced = false;
+        }
 
-    if (!synced) {
-      toast.info("Review tuần đã lưu trên thiết bị này. Sẽ tự đồng bộ khi tài khoản sẵn sàng.");
-      if (activeGoalIdRef.current === actionGoalId) {
+        if (!synced) {
+          toast.info("Review tuần đã lưu trên thiết bị này. Sẽ tự đồng bộ khi tài khoản sẵn sàng.");
+          if (activeGoalIdRef.current === actionGoalId) refreshSnapshotMeta();
+          return {
+            status: "saved",
+            review: committedReview,
+            system: committedSystem,
+            syncStatus: "pending",
+            wasNoop: commitResult.status === "noop",
+          };
+        }
+
+        if (activeGoalIdRef.current === actionGoalId) {
+          refreshBackendProgressOverlay();
+          refreshSnapshotMeta();
+        }
+        return {
+          status: "saved",
+          review: committedReview,
+          system: committedSystem,
+          syncStatus: "synced",
+          wasNoop: commitResult.status === "noop",
+        };
+      })();
+
+      weeklyReviewSavePromiseRef.current = operation;
+      void operation.finally(() => {
+        if (weeklyReviewSavePromiseRef.current === operation) weeklyReviewSavePromiseRef.current = null;
+      });
+      return operation;
+    },
+    [
+      activeGoal,
+      system,
+      weeklyForm,
+      executionSyncActions,
+      updateActiveSystemState,
+      activeGoalIdRef,
+      refreshBackendProgressOverlay,
+      refreshSnapshotMeta,
+      getLatestActiveSystem,
+      onWeekCompleted,
+    ],
+  );
+
+  const handleApplyNextWeekHandoff = useCallback(
+    (
+      reviewedWeekNumber: number,
+      selection: Omit<ConfirmedNextWeekHandoffSelection, "now">,
+    ): Promise<NextWeekHandoffCommandResult> => {
+      if (nextWeekApplyPromiseRef.current) return nextWeekApplyPromiseRef.current;
+
+      const operation = (async (): Promise<NextWeekHandoffCommandResult> => {
+        if (!activeGoal || !system) return { status: "failed", reason: "unavailable" };
+        const latestSystem = getLatestActiveSystem() ?? system;
+        const review = latestSystem.weeklyReviews.find((item) => item.weekNumber === reviewedWeekNumber);
+        if (!review?.reviewCompleted) return { status: "failed", reason: "unavailable" };
+
+        const applyResult = applyConfirmedNextWeekHandoff(latestSystem, review, {
+          ...selection,
+          now: Date.now(),
+        });
+        if (applyResult.status === "unavailable") {
+          return { status: "unavailable", system: latestSystem };
+        }
+        if (applyResult.status === "noop") {
+          toast.info("Kế hoạch tuần sau đã khớp với lựa chọn này.");
+          return { status: "noop", system: latestSystem };
+        }
+
+        let savedSystem: TwelveWeekSystem;
+        try {
+          savedSystem = commitSystemUpdate(applyResult.system);
+        } catch {
+          toast.error("Review đã lưu. Thay đổi kế hoạch tuần sau chưa áp dụng được.");
+          return { status: "failed", reason: "local_save_failed" };
+        }
+
+        enqueuePlanSnapshotUpdatedMutation(activeGoal.id, savedSystem, "manual_update");
         refreshSnapshotMeta();
-      }
-      return;
-    }
+        trackAppEvent("12_week_next_week_handoff_applied", activeGoal.id, {
+          reviewedWeekNumber: String(reviewedWeekNumber),
+          nextWeekNumber: String(applyResult.preview.nextWeekNumber),
+          priorityChanged: String(applyResult.appliedPriority),
+          workloadChanged: String(applyResult.appliedWorkload),
+          optionalTasksChanged: String(applyResult.changedOptionalTaskCount),
+        });
 
-    if (activeGoalIdRef.current === actionGoalId) {
-      refreshBackendProgressOverlay();
-      refreshSnapshotMeta();
-    }
-  }, [
-    activeGoal,
-    system,
-    weeklyForm,
-    hasPremiumReviewInsights,
-    suggestedNextWeekPlan,
-    executionSyncActions,
-    updateActiveSystemState,
-    activeGoalIdRef,
-    refreshBackendProgressOverlay,
-    refreshSnapshotMeta,
-    getLatestActiveSystem,
-    onWeekCompleted,
-  ]);
+        let synced = false;
+        try {
+          const snapshot = await executionSyncActions.syncLocalSnapshot({ system: savedSystem });
+          synced = snapshot.status === "success" && snapshot.failedCount === 0;
+        } catch {
+          synced = false;
+        }
+
+        if (!synced) {
+          toast.info("Thay đổi tuần sau đã áp dụng trên thiết bị này. Sẽ tự đồng bộ khi tài khoản sẵn sàng.");
+          return { status: "applied", system: savedSystem, syncStatus: "pending" };
+        }
+
+        if (activeGoalIdRef.current === activeGoal.id) {
+          refreshBackendProgressOverlay();
+          refreshSnapshotMeta();
+        }
+        toast.success("Đã áp dụng thay đổi cho tuần sau.");
+        return { status: "applied", system: savedSystem, syncStatus: "synced" };
+      })();
+
+      nextWeekApplyPromiseRef.current = operation;
+      void operation.finally(() => {
+        if (nextWeekApplyPromiseRef.current === operation) nextWeekApplyPromiseRef.current = null;
+      });
+      return operation;
+    },
+    [
+      activeGoal,
+      activeGoalIdRef,
+      commitSystemUpdate,
+      executionSyncActions,
+      getLatestActiveSystem,
+      refreshBackendProgressOverlay,
+      refreshSnapshotMeta,
+      system,
+    ],
+  );
 
   const handleReentry = useCallback(
     (mode: ReentryMode) => {
@@ -641,12 +775,12 @@ export function useTwelveWeekExecutionActions({
         previousForm.nextWeekCommitments.length > 0 ? previousForm.nextWeekCommitments : [suggestedNextWeekPlan.focus],
       workloadDecision: suggestedNextWeekPlan.workloadDecision,
     }));
-    trackAppEvent("12_week_review_suggestion_applied", activeGoal.id, {
+    trackAppEvent("12_week_review_suggestion_prefilled", activeGoal.id, {
       weekNumber: String(suggestedWeekNumber),
       decision: suggestedNextWeekPlan.workloadDecision,
     });
-    toast.success("Đã áp dụng gợi ý cho tuần sau.", {
-      description: "Bạn có thể chỉnh lại thêm trước khi chốt review.",
+    toast.success("Đã đưa gợi ý vào câu trả lời tuần sau.", {
+      description: "Kế hoạch chưa thay đổi. Bạn sẽ xem trước và xác nhận sau khi lưu review.",
     });
   }, [activeGoal, system, suggestedNextWeekPlan, setWeeklyForm]);
 
@@ -731,6 +865,7 @@ export function useTwelveWeekExecutionActions({
     handleToggleTask,
     handleSaveCheckIn,
     handleSaveWeeklyReview,
+    handleApplyNextWeekHandoff,
     handleReentry,
     handleApplyRecommendedReentry,
     handleApplySuggestedPlan,

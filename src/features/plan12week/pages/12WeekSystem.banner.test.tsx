@@ -41,6 +41,8 @@ describe("12WeekSystem weekly review banner", () => {
     await waitFor(() => {
       expect(screen.getByRole("tab", { name: "Mở tab Tuần" })).toHaveAttribute("aria-selected", "true");
     });
+    expect(screen.queryByText(BANNER_TITLE)).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Xem việc hôm nay" })).toBeInTheDocument();
     const review = readGoal(goalId).twelveWeekSystem?.weeklyReviews.find((item) => item.weekNumber === 1);
     expect(review).toBeUndefined();
 

@@ -1,6 +1,6 @@
 import { type ComponentProps, useState } from "react";
 import "@testing-library/jest-dom/vitest";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -61,6 +61,8 @@ function makeCompletedReview(overrides: Partial<UniversalWeeklyReview> = {}): Un
     commitmentsMissed: ["Send update"],
     insights: "Protect morning focus.",
     nextWeekCommitments: ["Ship next"],
+    keepTactic: "Deep work buổi sáng",
+    reduceTactic: "Việc tùy chọn buổi tối",
     ...overrides,
   };
 }
@@ -149,7 +151,7 @@ function makeProps(overrides: Partial<WeekTabProps> = {}): WeekTabProps {
     onWeeklyFormChange: vi.fn(),
     onApplySuggestedPlan: vi.fn(),
     onOpenPremiumInsights: vi.fn(),
-    onSaveWeeklyReview: vi.fn(),
+    onSaveWeeklyReview: vi.fn().mockResolvedValue({ status: "saved" }),
     ...overrides,
   };
 }
@@ -208,87 +210,49 @@ describe("TwelveWeekWeekTab review flow", () => {
     expect(screen.getByTestId("weekly-tactics-list")).toHaveClass("divide-y", "divide-app-line");
   });
 
-  it("shows four WAM review steps and a readiness summary", () => {
-    render(
-      <TwelveWeekWeekTab
-        {...makeProps({
-          weeklyForm: {
-            lagProgressValue: "",
-            biggestOutputThisWeek: "Shipped a usable Today tab.",
-            mainObstacle: "",
-            keepTactic: "",
-            reduceTactic: "",
-            nextWeekPriority: "Keep the core loop simple.",
-            commitmentStatuses: {},
-            insights: "Keep the loop visible.",
-            nextWeekCommitments: ["Keep the core loop simple."],
-            workloadDecision: "keep same",
-          },
-        })}
-      />,
-    );
-
-    expect(screen.getByTestId("weekly-review-step-score")).toHaveAttribute("data-done", "true");
-    expect(screen.getByTestId("weekly-review-step-commitments")).toHaveAttribute("data-done", "true");
-    expect(screen.getByTestId("weekly-review-step-insights")).toHaveAttribute("data-done", "true");
-    expect(screen.getByTestId("weekly-review-step-next")).toHaveAttribute("data-done", "true");
-    expect(screen.getByTestId("weekly-review-readiness")).toHaveTextContent("4/4");
-    expect(screen.getByTestId("weekly-review-check-commitments")).toHaveTextContent(/cam/i);
-    expect(screen.getByTestId("weekly-review-check-next")).toHaveTextContent(/tuần/i);
-  });
-
-  it("renders weekly evidence and supplied insights before human reflection", () => {
+  it("shows evidence and deterministic insights before exactly three core questions", () => {
     render(<TwelveWeekWeekTab {...makeProps()} />);
 
     const evidence = screen.getByTestId("weekly-evidence-panel");
-    const reflection = screen.getByLabelText(/góc nhìn\/điều học được/i);
+    const questions = screen.getByTestId("weekly-review-three-questions");
 
     expect(screen.getByText("Chỉ số dẫn dắt đang chạy mạnh")).toBeInTheDocument();
-    expect(evidence.compareDocumentPosition(reflection) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(evidence.compareDocumentPosition(questions) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.getByLabelText(/Điều gì đã giúp bạn tiến lên tuần này/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Điều gì khiến kế hoạch lệch khỏi dự kiến/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Tuần sau bạn muốn thay đổi điều gì/i)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/góc nhìn\/điều học được/i)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/ưu tiên số 1/i)).not.toBeInTheDocument();
   });
 
-  it("keeps reflection fields and secondary Premium and Emotion content reachable", () => {
+  it("keeps secondary Premium and Emotion content reachable", () => {
     render(<TwelveWeekWeekTab {...makeProps()} />);
 
-    expect(screen.getByLabelText(/góc nhìn\/điều học được/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/cam kết của tuần tới/i)).toBeInTheDocument();
     expect(screen.getByText(/Dòng chảy Cảm xúc Tuần 3/i)).toBeInTheDocument();
     expect(screen.getByText("Upgrade insight")).toBeInTheDocument();
+    expect(screen.getByTestId("weekly-review-secondary-details")).toBeInTheDocument();
     expect(screen.getByTestId("weekly-review-mobile-sticky-cta")).toBeInTheDocument();
-  });
-
-  it("renders WAM answer fields directly", () => {
-    render(<TwelveWeekWeekTab {...makeProps()} />);
-
-    expect(screen.getByLabelText(/góc nhìn\/điều học được/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/cam kết của tuần tới/i)).toBeInTheDocument();
-    expect(screen.queryByLabelText(/ưu tiên số 1/i)).toBeNull();
   });
 
   it("adds a next-week commitment chip with Enter and clears the input", async () => {
     const user = userEvent.setup();
     render(<StatefulWeekTab />);
 
-    const input = screen.getByLabelText(/cam kết của tuần tới/i);
+    const input = screen.getByLabelText(/Tuần sau bạn muốn thay đổi điều gì/i);
     await user.type(input, "Plan a{Enter}");
 
     const chip = screen.getByLabelText("Cam kết: Plan a");
     expect(chip).toBeInTheDocument();
     expect(within(chip).getByText("Plan a")).toHaveClass("break-words");
-    expect(within(chip).getByRole("button", { name: "Xóa cam kết: Plan a" })).toHaveClass(
-      "size-11",
-      "sm:size-9",
-      "after:h-11",
-      "after:min-w-[44px]",
-    );
-    expect(screen.getByLabelText(/cam kết của tuần tới/i)).toHaveValue("");
+    expect(within(chip).getByRole("button", { name: "Xóa cam kết: Plan a" })).toBeEnabled();
+    expect(input).toHaveValue("");
   });
 
-  it("does not add a case-insensitive duplicate commitment and flags the existing chip", async () => {
+  it("does not add a case-insensitive duplicate commitment", async () => {
     const user = userEvent.setup();
     render(<StatefulWeekTab initialCommitments={["Plan a"]} />);
 
-    const input = screen.getByLabelText(/cam kết của tuần tới/i);
+    const input = screen.getByLabelText(/Tuần sau bạn muốn thay đổi điều gì/i);
     await user.type(input, "plan A{Enter}");
 
     expect(screen.getAllByLabelText("Cam kết: Plan a")).toHaveLength(1);
@@ -296,33 +260,33 @@ describe("TwelveWeekWeekTab review flow", () => {
     expect(input).toHaveFocus();
   });
 
-  it("removes a next-week commitment chip from the editor", async () => {
+  it("removes a next-week commitment chip", async () => {
     const user = userEvent.setup();
     render(<StatefulWeekTab initialCommitments={["Plan a"]} />);
 
     await user.click(screen.getByRole("button", { name: "Xóa cam kết: Plan a" }));
 
     expect(screen.queryByLabelText("Cam kết: Plan a")).not.toBeInTheDocument();
-    expect(screen.getByLabelText(/cam kết của tuần tới/i)).toBeEnabled();
+    expect(screen.getByLabelText(/Tuần sau bạn muốn thay đổi điều gì/i)).toBeEnabled();
   });
 
-  it("caps next-week commitments at five and shows the max-items hint", async () => {
+  it("caps next-week commitments at three", () => {
     render(<StatefulWeekTab />);
 
-    const input = screen.getByLabelText(/cam kết của tuần tới/i);
-    fireEvent.change(input, { target: { value: "Plan 1,Plan 2,Plan 3,Plan 4,Plan 5,Plan 6," } });
+    const input = screen.getByLabelText(/Tuần sau bạn muốn thay đổi điều gì/i);
+    fireEvent.change(input, { target: { value: "Plan 1,Plan 2,Plan 3,Plan 4," } });
 
-    expect(screen.getByLabelText("Cam kết: Plan 5")).toBeInTheDocument();
-    expect(screen.queryByLabelText("Cam kết: Plan 6")).not.toBeInTheDocument();
-    expect(screen.getByLabelText(/cam kết của tuần tới/i)).toBeDisabled();
-    expect(screen.getByText("Đã đạt tối đa 5 cam kết. Xoá bớt chip để thêm mới.")).toBeInTheDocument();
+    expect(screen.getByLabelText("Cam kết: Plan 3")).toBeInTheDocument();
+    expect(screen.queryByLabelText("Cam kết: Plan 4")).not.toBeInTheDocument();
+    expect(input).toBeDisabled();
+    expect(screen.getByText("Đã đạt tối đa 3 cam kết. Xoá bớt chip để thêm mới.")).toBeInTheDocument();
   });
 
-  it("removes the last next-week commitment when Backspace is pressed in an empty input", async () => {
+  it("removes the last commitment when Backspace is pressed in an empty input", async () => {
     const user = userEvent.setup();
     render(<StatefulWeekTab initialCommitments={["Plan a", "Plan b"]} />);
 
-    const input = screen.getByLabelText(/cam kết của tuần tới/i);
+    const input = screen.getByLabelText(/Tuần sau bạn muốn thay đổi điều gì/i);
     await user.click(input);
     await user.keyboard("{Backspace}");
 
@@ -330,7 +294,7 @@ describe("TwelveWeekWeekTab review flow", () => {
     expect(screen.queryByLabelText("Cam kết: Plan b")).not.toBeInTheDocument();
   });
 
-  it("shows an empty-week message instead of a percent when there are no tasks", () => {
+  it("uses neutral copy when a week has no scheduled tasks", () => {
     const emptyEvidence: WeeklyReviewEvidence = {
       ...defaultEvidence,
       completion: { completed: 0, total: 0, percent: 0, isEmpty: true },
@@ -352,10 +316,47 @@ describe("TwelveWeekWeekTab review flow", () => {
     );
 
     expect(screen.getByText("Tuần này chưa có việc được lên lịch.")).toBeInTheDocument();
+    expect(screen.getByLabelText(/Tuần này có điều gì đáng ghi lại/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Điều gì khiến tuần này chưa có việc được lên lịch/i)).toBeInTheDocument();
     expect(screen.queryByText("0%")).not.toBeInTheDocument();
   });
 
-  it("keeps the mobile sticky CTA above the bottom navigation", () => {
+  it("avoids failure framing for a perfect week", () => {
+    const perfectEvidence: WeeklyReviewEvidence = {
+      ...defaultEvidence,
+      completion: { completed: 5, total: 5, percent: 100, isEmpty: false },
+    };
+    render(
+      <TwelveWeekWeekTab
+        {...makeProps({
+          weekCompletion: { completed: 5, total: 5, percent: 100 },
+          weeklyReviewViewModels: { 3: makeReviewViewModel({ evidence: perfectEvidence }) },
+        })}
+      />,
+    );
+
+    expect(screen.getByLabelText(/Có điều gì vẫn làm bạn tốn sức hoặc có thể làm gọn hơn/i)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/thất bại/i)).not.toBeInTheDocument();
+  });
+
+  it("keeps normal causal copy for a low-completion week", () => {
+    const lowEvidence: WeeklyReviewEvidence = {
+      ...defaultEvidence,
+      completion: { completed: 1, total: 5, percent: 20, isEmpty: false },
+    };
+    render(
+      <TwelveWeekWeekTab
+        {...makeProps({
+          weekCompletion: { completed: 1, total: 5, percent: 20 },
+          weeklyReviewViewModels: { 3: makeReviewViewModel({ evidence: lowEvidence }) },
+        })}
+      />,
+    );
+
+    expect(screen.getByLabelText(/Điều gì khiến kế hoạch lệch khỏi dự kiến/i)).toBeInTheDocument();
+  });
+
+  it("keeps the mobile save CTA above bottom navigation with truthful three-question status", () => {
     render(<TwelveWeekWeekTab {...makeProps()} />);
 
     const shell = screen.getByTestId("weekly-review-shell");
@@ -367,37 +368,25 @@ describe("TwelveWeekWeekTab review flow", () => {
       "bottom-[calc(5rem+env(safe-area-inset-bottom))]",
       "left-0",
       "right-0",
-      "border-app-line/80",
-      "bg-app-surface/95",
-      "px-4",
-      "pb-4",
-      "pt-3",
       "backdrop-blur-md",
       "md:hidden",
     );
-    expect(actionBar.closest(".weekly-stagger-item")).toBeNull();
-    expect(within(actionBar).getByText("Tiến độ review 2/4")).toBeInTheDocument();
-    expect(within(actionBar).getByText(/Thiếu 2 mục/i)).toBeInTheDocument();
-    expect(within(actionBar).getByRole("button", { name: /Chốt review tuần này/i })).toHaveClass("min-h-12");
+    expect(within(actionBar).getByText("Đã trả lời 0/3 câu")).toBeInTheDocument();
+    expect(within(actionBar).getByText("Cần hướng tuần sau")).toBeInTheDocument();
+    expect(within(actionBar).getByRole("button", { name: "Lưu review" })).toHaveClass("min-h-12");
   });
 
-  it("blocks weekly review submit for a future week number", async () => {
+  it("blocks review submit for a future week number", async () => {
     const user = userEvent.setup();
-    const onSaveWeeklyReview = vi.fn();
+    const onSaveWeeklyReview = vi.fn().mockResolvedValue({ status: "saved" });
+    const system = makeSystem({ currentWeek: 99 });
 
     render(
       <TwelveWeekWeekTab
         {...makeProps({
-          system: makeSystem({ currentWeek: 99 }),
+          system,
           weeklyForm: {
-            lagProgressValue: "",
-            biggestOutputThisWeek: "",
-            mainObstacle: "",
-            keepTactic: "",
-            reduceTactic: "",
-            nextWeekPriority: "",
-            commitmentStatuses: {},
-            insights: "Keep the review small.",
+            ...makeProps({ system }).weeklyForm,
             nextWeekCommitments: ["Plan next week"],
             workloadDecision: "keep same",
           },
@@ -406,7 +395,10 @@ describe("TwelveWeekWeekTab review flow", () => {
       />,
     );
 
-    await user.click(screen.getAllByRole("button", { name: /chốt review tuần này/i })[0]);
+    for (const button of screen.getAllByRole("button", { name: "Lưu review" })) {
+      expect(button).toBeDisabled();
+    }
+    await user.click(screen.getAllByRole("button", { name: "Lưu review" })[0]);
 
     expect(onSaveWeeklyReview).not.toHaveBeenCalled();
     expect(screen.getByTestId("weekly-review-readiness")).toHaveTextContent(/không thể chốt tuần tương lai/i);
@@ -414,21 +406,14 @@ describe("TwelveWeekWeekTab review flow", () => {
 
   it("asks for confirmation before saving the current week early", async () => {
     const user = userEvent.setup();
-    const onSaveWeeklyReview = vi.fn();
+    const onSaveWeeklyReview = vi.fn().mockResolvedValue({ status: "saved" });
 
     render(
       <TwelveWeekWeekTab
         {...makeProps({
           reviewDueToday: false,
           weeklyForm: {
-            lagProgressValue: "",
-            biggestOutputThisWeek: "",
-            mainObstacle: "",
-            keepTactic: "",
-            reduceTactic: "",
-            nextWeekPriority: "",
-            commitmentStatuses: {},
-            insights: "Keep the review small.",
+            ...makeProps().weeklyForm,
             nextWeekCommitments: ["Plan next week"],
             workloadDecision: "keep same",
           },
@@ -438,108 +423,258 @@ describe("TwelveWeekWeekTab review flow", () => {
     );
 
     await user.click(screen.getByRole("button", { name: /bắt đầu review sớm/i }));
-    const saveButton = screen.getAllByRole("button", { name: /chốt review tuần này/i })[0];
-    await user.click(saveButton);
-    expect(onSaveWeeklyReview).not.toHaveBeenCalled();
+    await user.click(screen.getAllByRole("button", { name: "Lưu review" })[0]);
 
-    // Dialog opens — cancel keeps the review unsaved
-    expect(await screen.findByRole("alertdialog")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: /quay lại chỉnh sửa/i }));
     expect(onSaveWeeklyReview).not.toHaveBeenCalled();
-
-    // Reopen and confirm — save fires
-    const confirmSaveButton = screen.getAllByRole("button", { name: /chốt review tuần này/i })[0];
-    await user.click(confirmSaveButton);
     expect(await screen.findByRole("alertdialog")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /vẫn lưu sớm/i }));
-    expect(onSaveWeeklyReview).toHaveBeenCalledTimes(1);
+
+    await waitFor(() => expect(onSaveWeeklyReview).toHaveBeenCalledWith(3));
   });
 
-  it("shows completion evidence as the weekly hero and lag progress as secondary detail", () => {
-    const evidence = {
-      ...defaultEvidence,
-      completion: { completed: 4, total: 5, percent: 80, isEmpty: false },
-    };
+  it("shows optional previous-commitment classification without gating save", async () => {
+    const user = userEvent.setup();
+    const system = makeSystem({
+      currentWeek: 2,
+      weeklyReviews: [makeCompletedReview({ weekNumber: 1, nextWeekCommitments: ["Publish draft"] })],
+    });
 
     render(
       <TwelveWeekWeekTab
         {...makeProps({
-          currentScoreValue: 20,
-          weekCompletion: { completed: 4, total: 5, percent: 80 },
-          currentLagMetricValue: "25",
-          weeklyReviewViewModels: { 3: makeReviewViewModel({ evidence }) },
+          system,
+          weeklyForm: {
+            ...makeProps({ system }).weeklyForm,
+            nextWeekCommitments: ["Protect two mornings"],
+            workloadDecision: "keep same",
+          },
         })}
       />,
     );
 
-    const evidencePanel = screen.getByTestId("weekly-evidence-panel");
-    expect(within(evidencePanel).getByText("4 / 5 việc")).toBeInTheDocument();
-    expect(within(evidencePanel).getByText("80%")).toBeInTheDocument();
-    expect(screen.getByTestId("weekly-lag-score")).toHaveTextContent("100%");
-  });
-
-  it("renders the 4-question WAM form and a friendly first-week empty state", () => {
-    render(<TwelveWeekWeekTab {...makeProps({ system: makeSystem({ currentWeek: 1 }) })} />);
-
-    expect(screen.getByTestId("wam-section-score")).toBeInTheDocument();
-    expect(screen.getByTestId("wam-section-commitments")).toBeInTheDocument();
-    expect(screen.getByTestId("wam-section-insights")).toBeInTheDocument();
-    expect(screen.getByTestId("wam-section-next-commitments")).toBeInTheDocument();
-    expect(screen.getByText(/tuần đầu chưa có cam kết tuần trước/i)).toBeInTheDocument();
-  });
-
-  it("requires every previous commitment to be classified before submit", () => {
-    const system = makeSystem({
-      currentWeek: 2,
-      weeklyReviews: [
-        {
-          weekNumber: 1,
-          leadCompletionPercent: 80,
-          lagProgressValue: "25",
-          biggestOutputThisWeek: "Week 1 output",
-          mainObstacle: "",
-          nextWeekPriority: "Publish draft",
-          workloadDecision: "keep same",
-          reviewCompleted: true,
-          progressScore: 4,
-          disciplineScore: 4,
-          focusScore: 6,
-          improvementScore: 6,
-          outputQualityScore: 6,
-          commitmentsKept: [],
-          commitmentsMissed: [],
-          insights: "Ship smaller.",
-          nextWeekCommitments: ["Publish draft"],
-        },
-      ],
-    });
-
-    render(<TwelveWeekWeekTab {...makeProps({ system })} />);
-
-    expect(screen.getByText("Publish draft")).toBeInTheDocument();
-    for (const button of screen.getAllByRole("button", { name: /chốt review tuần này/i })) {
-      expect(button).toBeDisabled();
-      if (!button.closest('[data-testid="weekly-review-mobile-sticky-cta"]')) {
-        expect(button).toHaveClass("min-h-11");
-      }
+    for (const button of screen.getAllByRole("button", { name: "Lưu review" })) {
+      expect(button).toBeEnabled();
     }
+    await user.click(screen.getByRole("button", { name: /Phân loại cam kết cũ \(không bắt buộc\)/i }));
+    expect(screen.getByText("Publish draft")).toBeInTheDocument();
   });
 
-  it("summarizes WAM answers after review submit", () => {
+  it("accepts a concrete reduce-only answer as Question 3 without inventing a priority", () => {
     render(
       <TwelveWeekWeekTab
         {...makeProps({
-          currentReview: makeCompletedReview(),
+          weeklyForm: {
+            ...makeProps().weeklyForm,
+            reduceTactic: "Giảm việc tùy chọn buổi tối",
+            workloadDecision: "keep same",
+          },
+        })}
+      />,
+    );
+
+    expect(screen.getByTestId("weekly-review-readiness")).toHaveTextContent("1/3 câu");
+    for (const button of screen.getAllByRole("button", { name: "Lưu review" })) {
+      expect(button).toBeEnabled();
+    }
+  });
+
+  it("counts a workload-only decision as an answered Question 3", () => {
+    render(
+      <TwelveWeekWeekTab
+        {...makeProps({
+          weeklyForm: {
+            ...makeProps().weeklyForm,
+            workloadDecision: "reduce slightly",
+          },
+        })}
+      />,
+    );
+
+    expect(screen.getByTestId("weekly-review-readiness")).toHaveTextContent("1/3 câu");
+    for (const button of screen.getAllByRole("button", { name: "Lưu review" })) {
+      expect(button).toBeEnabled();
+    }
+  });
+
+  it("uses a friendly Week 1 empty state for optional classification", () => {
+    const system = makeSystem({ currentWeek: 1 });
+    render(<TwelveWeekWeekTab {...makeProps({ system })} />);
+
+    expect(screen.getByText(/tuần đầu chưa có cam kết cũ cần phân loại/i)).toBeInTheDocument();
+  });
+
+  it("allows Week 12 reflection without inventing a Week 13 plan", () => {
+    const system = makeSystem({ currentWeek: 12, totalWeeks: 12 });
+    render(
+      <TwelveWeekWeekTab
+        {...makeProps({
+          system,
+          weeklyForm: {
+            ...makeProps({ system }).weeklyForm,
+            keepTactic: "Mang nhịp deep work sang chu kỳ mới",
+          },
+        })}
+      />,
+    );
+
+    expect(screen.getByLabelText(/Bạn muốn mang điều gì sang chu kỳ tiếp theo/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Mức tải bạn muốn thử/i)).not.toBeInTheDocument();
+    for (const button of screen.getAllByRole("button", { name: "Lưu review" })) {
+      expect(button).toBeEnabled();
+    }
+    expect(screen.getByTestId("weekly-review-readiness")).toHaveTextContent(/không tạo hoặc áp dụng kế hoạch Tuần 13/i);
+  });
+
+  it("renders Week 12 closure without an apply action", () => {
+    const review = makeCompletedReview({ weekNumber: 12 });
+    const system = makeSystem({ currentWeek: 12, totalWeeks: 12, weeklyReviews: [review] });
+
+    render(
+      <TwelveWeekWeekTab
+        {...makeProps({
+          system,
+          currentReview: review,
+        })}
+      />,
+    );
+
+    expect(screen.getByText(/Đây là tuần cuối/i)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Xác nhận thay đổi tuần sau/i })).not.toBeInTheDocument();
+  });
+
+  it("targets the selected historical week when editing and saving", async () => {
+    const user = userEvent.setup();
+    const historicalReview = makeCompletedReview({
+      weekNumber: 1,
+      nextWeekPriority: "",
+      nextWeekCommitments: [],
+    });
+    const system = makeSystem({ weeklyReviews: [historicalReview] });
+    const onPrepareReviewEdit = vi.fn().mockReturnValue(true);
+    const onSaveWeeklyReview = vi.fn().mockResolvedValue({ status: "saved" });
+
+    render(
+      <TwelveWeekWeekTab
+        {...makeProps({
+          system,
+          weeklyReviewViewModels: {
+            1: makeReviewViewModel({ evidence: { ...defaultEvidence, weekNumber: 1 } }),
+            3: makeReviewViewModel(),
+          },
+          weeklyForm: {
+            ...makeProps({ system }).weeklyForm,
+            keepTactic: "Historical keep",
+            nextWeekCommitments: [],
+            workloadDecision: "keep same",
+          },
+          onPrepareReviewEdit,
+          onSaveWeeklyReview,
+        })}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /Tuần 1, đã chốt review/i }));
+    expect(screen.getByText(/Review lịch sử đã lưu/i)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Xác nhận thay đổi tuần sau/i })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /Chỉnh sửa đánh giá/i }));
+
+    expect(onPrepareReviewEdit).toHaveBeenCalledWith(1);
+    expect(screen.getByTestId("weekly-review-readiness")).toHaveTextContent(/chỉ cập nhật review lịch sử/i);
+    for (const button of screen.getAllByRole("button", { name: "Lưu review" })) {
+      expect(button).toBeEnabled();
+    }
+    await user.click(screen.getAllByRole("button", { name: "Lưu review" })[0]);
+    await waitFor(() => expect(onSaveWeeklyReview).toHaveBeenCalledWith(1));
+  });
+
+  it("keeps a historical edit form open when local review save fails", async () => {
+    const user = userEvent.setup();
+    const historicalReview = makeCompletedReview({ weekNumber: 1 });
+    const system = makeSystem({ weeklyReviews: [historicalReview] });
+
+    render(
+      <TwelveWeekWeekTab
+        {...makeProps({
+          system,
+          weeklyReviewViewModels: {
+            1: makeReviewViewModel({ evidence: { ...defaultEvidence, weekNumber: 1 } }),
+            3: makeReviewViewModel(),
+          },
+          weeklyForm: {
+            ...makeProps({ system }).weeklyForm,
+            nextWeekCommitments: ["Keep the existing plan"],
+            workloadDecision: "keep same",
+          },
+          onPrepareReviewEdit: vi.fn().mockReturnValue(true),
+          onSaveWeeklyReview: vi.fn().mockResolvedValue({ status: "failed" }),
+        })}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /Tuần 1, đã chốt review/i }));
+    await user.click(screen.getByRole("button", { name: /Chỉnh sửa đánh giá/i }));
+    await user.click(screen.getAllByRole("button", { name: "Lưu review" })[0]);
+
+    expect(await screen.findByTestId("weekly-review-three-questions")).toBeInTheDocument();
+    expect(screen.queryByTestId("weekly-review-summary")).not.toBeInTheDocument();
+  });
+
+  it("resets edit state when the user selects another week", async () => {
+    const user = userEvent.setup();
+    const week1 = makeCompletedReview({ weekNumber: 1 });
+    const week2 = makeCompletedReview({ weekNumber: 2 });
+    const system = makeSystem({ weeklyReviews: [week1, week2] });
+    const onResetReviewForm = vi.fn().mockReturnValue(true);
+
+    render(
+      <TwelveWeekWeekTab
+        {...makeProps({
+          system,
+          weeklyReviewViewModels: {
+            1: makeReviewViewModel({ evidence: { ...defaultEvidence, weekNumber: 1 } }),
+            2: makeReviewViewModel({ evidence: { ...defaultEvidence, weekNumber: 2 } }),
+            3: makeReviewViewModel(),
+          },
+          onPrepareReviewEdit: vi.fn().mockReturnValue(true),
+          onResetReviewForm,
+        })}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /Tuần 1, đã chốt review/i }));
+    expect(onResetReviewForm).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: /Chỉnh sửa đánh giá/i }));
+    expect(screen.getByTestId("weekly-review-three-questions")).toBeInTheDocument();
+
+    await user.click(screen.getByRole("button", { name: /Tuần 2, đã chốt review/i }));
+
+    expect(onResetReviewForm).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId("weekly-review-three-questions")).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Kết quả Tuần 2" })).toBeInTheDocument();
+  });
+
+  it("summarizes saved answers and presents a separate current-week handoff", () => {
+    const review = makeCompletedReview();
+    const system = makeSystem({
+      weeklyPlans: [{ weekNumber: 4, phaseName: "Execute", focus: "Old focus", milestone: "", completed: false }],
+    });
+
+    render(
+      <TwelveWeekWeekTab
+        {...makeProps({
+          system,
+          currentReview: review,
         })}
       />,
     );
 
     const summary = screen.getByTestId("weekly-review-summary");
     expect(within(summary).getByTestId("weekly-evidence-panel")).toBeInTheDocument();
-    expect(within(summary).getByText("17 / 21 việc")).toBeInTheDocument();
-    expect(within(summary).getByText("Chỉ số dẫn dắt đang chạy mạnh")).toBeInTheDocument();
-    expect(summary).toHaveTextContent("Đã giữ 1/2 cam kết");
+    expect(summary).toHaveTextContent("Deep work buổi sáng");
+    expect(summary).toHaveTextContent("Việc tùy chọn buổi tối");
     expect(summary).toHaveTextContent("Protect morning focus.");
     expect(summary).toHaveTextContent("Ship next");
+    expect(screen.getByText("Review đã lưu. Kế hoạch tuần sau chưa thay đổi.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Xác nhận thay đổi tuần sau/i })).toBeInTheDocument();
   });
 });

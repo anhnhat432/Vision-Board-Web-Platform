@@ -136,9 +136,11 @@ export function TwelveWeekPremiumInsightSection({
                   className="w-full sm:w-auto bg-app-warm text-white hover:bg-app-warm/90"
                   onClick={onApplySuggestedPlan}
                 >
-                  Dùng gợi ý này cho tuần sau
+                  Đưa gợi ý vào câu trả lời
                 </Button>
-                <p className="text-sm text-app-ink-muted">Bạn vẫn có thể sửa lại trước khi chốt review.</p>
+                <p className="text-sm text-app-ink-muted">
+                  Chỉ điền trước câu trả lời; kế hoạch chưa đổi cho đến bước xác nhận.
+                </p>
               </div>
             </div>
           </div>

@@ -167,7 +167,7 @@ export function NextWeekCommitmentsEditor({
         </p>
       ) : (
         <p className="text-xs leading-5 text-app-ink-muted">
-          Đây sẽ là tactic chính tuần sau. Tối đa {maxItems} cam kết.
+          Cam kết đầu tiên sẽ là ưu tiên chính tuần sau. Tối đa {maxItems} cam kết.
         </p>
       )}
     </div>

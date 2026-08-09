@@ -1,10 +1,18 @@
 import { Check, Pencil } from "lucide-react";
-import type { NextWeekRecommendation, WeeklyReviewViewModel } from "@/features/plan12week/logic";
+import {
+  buildNextWeekHandoffPreview,
+  type NextWeekRecommendation,
+  type WeeklyReviewViewModel,
+} from "@/features/plan12week/logic";
 import type { LeadIndicator, TwelveWeekSystem, UniversalWeeklyReview } from "../../utils/storage-types";
 import { getWorkloadDecisionLabel } from "../../utils/twelve-week-system-ui";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { WeeklyReviewEvidencePanel } from "./WeeklyReviewEvidencePanel";
+import {
+  WeeklyReviewNextWeekHandoff,
+  type WeeklyReviewNextWeekHandoffResult,
+} from "./WeeklyReviewNextWeekHandoff";
 
 interface WeeklyReviewSummaryProps {
   system: TwelveWeekSystem;
@@ -28,7 +36,10 @@ interface WeeklyReviewSummaryProps {
   formatCalendarDate: (date: string) => string;
   onEditReview: () => void;
   nextWeekRecommendation: NextWeekRecommendation | null;
-  onAcceptNextWeekRecommendation?: () => void;
+  onApplyNextWeekHandoff?: (
+    weekNumber: number,
+    selection: { applyPriority: boolean; applyWorkload: boolean },
+  ) => Promise<WeeklyReviewNextWeekHandoffResult>;
   onOpenTodayTab?: () => void;
 }
 
@@ -49,7 +60,7 @@ export function WeeklyReviewSummary({
   formatCalendarDate,
   onEditReview,
   nextWeekRecommendation,
-  onAcceptNextWeekRecommendation,
+  onApplyNextWeekHandoff,
   onOpenTodayTab,
 }: WeeklyReviewSummaryProps) {
   return (
@@ -80,6 +91,37 @@ export function WeeklyReviewSummary({
           insights={reviewViewModel.insights}
           formatCalendarDate={formatCalendarDate}
         />
+
+        {(summaryReview.keepTactic || summaryReview.mainObstacle || summaryReview.reduceTactic) && (
+          <section aria-labelledby="weekly-review-human-summary" className="space-y-3">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-app-ink-muted">Phần của bạn</p>
+              <h4 id="weekly-review-human-summary" className="mt-1 text-sm font-semibold text-app-ink">
+                Bối cảnh và quyết định đã lưu
+              </h4>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="rounded-xl border border-app-status-success/20 bg-app-status-success/5 p-4">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-app-status-success">Điều nên giữ</p>
+                <p className="mt-2 text-sm leading-relaxed text-app-ink-soft">
+                  {summaryReview.keepTactic?.trim() || "Chưa ghi điều cần giữ."}
+                </p>
+              </div>
+              <div className="rounded-xl border border-app-line bg-app-bg-subtle/30 p-4">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">Nguyên nhân lệch nhịp</p>
+                <p className="mt-2 text-sm leading-relaxed text-app-ink-soft">
+                  {summaryReview.mainObstacle.trim() || "Không có trở ngại đáng kể."}
+                </p>
+              </div>
+            </div>
+            {summaryReview.reduceTactic?.trim() && (
+              <div className="rounded-xl border border-app-warm-border/25 bg-app-warm-soft/25 p-4">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-app-warm">Điều muốn giảm hoặc bỏ</p>
+                <p className="mt-2 text-sm leading-relaxed text-app-ink-soft">{summaryReview.reduceTactic}</p>
+              </div>
+            )}
+          </section>
+        )}
 
         {system.week12Outcome && (
           <p className="rounded-xl border border-app-line bg-app-bg-subtle/50 px-4 py-2.5 text-xs leading-relaxed text-app-ink-soft sm:text-sm">
@@ -268,39 +310,27 @@ export function WeeklyReviewSummary({
         </div>
       </div>
 
-      {nextWeekRecommendation && (
-        <div className="space-y-3 rounded-card-lg border border-app-warm-border/10 bg-app-warm-soft/20 p-4 sm:space-y-4 sm:p-5">
+      {nextWeekRecommendation && currentWeekLimit < system.totalWeeks && (
+        <div className="space-y-3 rounded-card-lg border border-app-line bg-app-bg-subtle/25 p-4 sm:space-y-4 sm:p-5">
           <div className="space-y-1">
-            <span className="block text-[10px] font-bold uppercase tracking-wider text-app-warm">
-              Chuẩn bị tuần sau
+            <span className="block text-[10px] font-bold uppercase tracking-wider text-app-ink-muted">
+              Gợi ý từ dữ liệu tuần
             </span>
             <h4 className="text-sm font-semibold leading-snug text-app-ink">{nextWeekRecommendation.headline}</h4>
           </div>
           <p className="text-xs leading-relaxed text-app-ink-soft sm:text-sm">{nextWeekRecommendation.body}</p>
-
-          <div className="flex flex-col gap-2 pt-1 sm:flex-row sm:items-center">
-            {onAcceptNextWeekRecommendation && (
-              <Button
-                type="button"
-                className="min-h-11 rounded-card bg-app-warm px-4 py-2 text-xs font-semibold text-white shadow-xs hover:bg-app-warm-hover"
-                onClick={onAcceptNextWeekRecommendation}
-              >
-                Áp dụng gợi ý tuần sau
-              </Button>
-            )}
-            {onOpenTodayTab && (
-              <Button
-                type="button"
-                variant="outline"
-                className="min-h-11 rounded-card border-app-line bg-app-surface px-4 py-2 text-xs font-semibold text-app-ink-soft hover:bg-app-bg"
-                onClick={onOpenTodayTab}
-              >
-                Quay lại hôm nay
-              </Button>
-            )}
-          </div>
         </div>
       )}
+
+      <WeeklyReviewNextWeekHandoff
+        preview={buildNextWeekHandoffPreview(system, summaryReview)}
+        onConfirm={(selection) =>
+          onApplyNextWeekHandoff
+            ? onApplyNextWeekHandoff(currentWeekLimit, selection)
+            : Promise.resolve({ status: "unavailable" })
+        }
+        onOpenTodayTab={onOpenTodayTab}
+      />
     </div>
   );
 }

@@ -28,6 +28,7 @@ import { WeeklyHeroBeforeReview } from "./WeeklyHeroBeforeReview";
 import { WeeklyRail } from "./WeeklyRail";
 import { WeeklyReviewForm } from "./WeeklyReviewForm";
 import { WeeklyReviewSummary } from "./WeeklyReviewSummary";
+import type { WeeklyReviewNextWeekHandoffResult } from "./WeeklyReviewNextWeekHandoff";
 
 import "./TwelveWeekWeekTab.css";
 
@@ -83,13 +84,18 @@ interface TwelveWeekWeekTabProps {
   ) => void;
   onApplySuggestedPlan: () => void;
   onOpenPremiumInsights: () => void;
-  onSaveWeeklyReview: () => void;
+  onSaveWeeklyReview: (weekNumber: number) => Promise<{ status: "saved" | "failed" }>;
+  onPrepareReviewEdit?: (weekNumber: number) => boolean;
+  onResetReviewForm?: () => boolean;
+  onApplyNextWeekHandoff?: (
+    weekNumber: number,
+    selection: { applyPriority: boolean; applyWorkload: boolean },
+  ) => Promise<WeeklyReviewNextWeekHandoffResult>;
   onOpenTodayTab?: () => void;
   rescueStatus?: RescueModeStatus | null;
   onPickTinyTask?: () => void;
   onReducePlan?: () => void;
   nextWeekRecommendation?: NextWeekRecommendation | null;
-  onAcceptNextWeekRecommendation?: () => void;
   weeklyReviewViewModels: Readonly<Record<number, WeeklyReviewViewModel>>;
 }
 
@@ -104,10 +110,6 @@ function getReviewNextWeekCommitments(review: UniversalWeeklyReview | null | und
 
   const legacyPriority = review?.nextWeekPriority?.trim();
   return legacyPriority ? [legacyPriority] : [];
-}
-
-function isCommitmentAnswered(status: WeeklyCommitmentStatus | undefined): boolean {
-  return status === "kept" || status === "missed" || status === "not_set";
 }
 
 export function TwelveWeekWeekTab({
@@ -131,12 +133,14 @@ export function TwelveWeekWeekTab({
   onApplySuggestedPlan,
   onOpenPremiumInsights,
   onSaveWeeklyReview,
+  onPrepareReviewEdit,
+  onResetReviewForm,
+  onApplyNextWeekHandoff,
   onOpenTodayTab,
   rescueStatus,
   onPickTinyTask,
   onReducePlan,
   nextWeekRecommendation,
-  onAcceptNextWeekRecommendation,
   weeklyReviewViewModels,
 }: TwelveWeekWeekTabProps) {
   const [selectedWeek, setSelectedWeek] = useState(system.currentWeek);
@@ -181,13 +185,13 @@ export function TwelveWeekWeekTab({
     ? propsPlanMilestone
     : (system.weeklyPlans.find((plan) => plan.weekNumber === selectedWeek)?.milestone ?? "");
 
-  const reviewWeekNumber = system.currentWeek;
+  const reviewWeekNumber = selectedWeek;
   const testWeekLimit = Math.min(
     Math.max(currentWeekNumber ?? system.currentWeek, 1),
     Math.max(system.totalWeeks, 1),
   );
   const isFutureReviewWeek = reviewWeekNumber > testWeekLimit;
-  const shouldConfirmEarlyReview = reviewWeekNumber === testWeekLimit && !reviewDueToday;
+  const shouldConfirmEarlyReview = isCurrentWeekSelected && reviewWeekNumber === testWeekLimit && !reviewDueToday;
 
   const leadScoreValue = currentReview?.leadCompletionPercent ?? weekCompletion.percent;
   const lagMetricValue = isCurrentWeekSelected
@@ -208,11 +212,13 @@ export function TwelveWeekWeekTab({
 
   const previousReview = system.weeklyReviews.find((review) => review.weekNumber === selectedWeek - 1);
   const previousCommitments = getReviewNextWeekCommitments(previousReview);
-  const allPreviousCommitmentsAnswered =
-    previousCommitments.length === 0 ||
-    previousCommitments.every((commitment) => isCommitmentAnswered(weeklyForm.commitmentStatuses[commitment]));
-  const nextWeekCommitments = normalizeCommitmentList(weeklyForm.nextWeekCommitments).slice(0, 5);
+  const nextWeekCommitments = normalizeCommitmentList(weeklyForm.nextWeekCommitments).slice(0, 3);
   const hasNextWeekCommitment = nextWeekCommitments.length > 0;
+  const hasNextWeekAdjustment =
+    hasNextWeekCommitment ||
+    weeklyForm.reduceTactic.trim().length > 0 ||
+    weeklyForm.workloadDecision === "reduce slightly" ||
+    weeklyForm.workloadDecision === "increase slightly";
   const reviewIsCompleted = Boolean(currentReview?.reviewCompleted);
   const summaryReview = reviewIsCompleted ? (currentReview ?? null) : null;
   const summaryCommitmentsKept = normalizeCommitmentList(summaryReview?.commitmentsKept);
@@ -228,47 +234,74 @@ export function TwelveWeekWeekTab({
   const [isEditingReview, setIsEditingReview] = useState(false);
   const [isStartingEarly, setIsStartingEarly] = useState(false);
 
-  const canShowFormReview = (reviewDueToday || isStartingEarly || isEditingReview) && isCurrentWeekSelected;
-  const showForm = (!reviewIsCompleted || isEditingReview) && isCurrentWeekSelected;
+  const canShowFormReview = isEditingReview || ((reviewDueToday || isStartingEarly) && isCurrentWeekSelected);
+  const showForm = !reviewIsCompleted || isEditingReview;
   const reviewViewModel = weeklyReviewViewModels[selectedWeek];
-
-  const reviewReadinessItems = [
-    { key: "score", label: "Điểm tuần", done: true },
-    { key: "commitments", label: "Cam kết cũ", done: allPreviousCommitmentsAnswered },
-    { key: "insights", label: "Bài học", done: weeklyForm.insights.trim().length > 0 },
-    { key: "next", label: "Tuần sau", done: hasNextWeekCommitment },
-  ];
-  const reviewReadyCount = reviewReadinessItems.filter((item) => item.done).length;
-  const reviewPendingItems = reviewReadinessItems.filter((item) => !item.done);
-  const canSubmitWeeklyReview = allPreviousCommitmentsAnswered && hasNextWeekCommitment && !isFutureReviewWeek;
+  const isFinalWeek = selectedWeek === system.totalWeeks;
+  const isHistoricalReviewWeek = selectedWeek < system.currentWeek;
+  const isNoTaskWeek = Boolean(reviewViewModel?.evidence.completion.isEmpty);
+  const isPerfectWeek = !isNoTaskWeek && reviewViewModel?.evidence.completion.percent === 100;
+  const hasHumanReflection = Boolean(
+    weeklyForm.keepTactic.trim() || weeklyForm.mainObstacle.trim() || weeklyForm.reduceTactic.trim(),
+  );
+  const canSubmitWeeklyReview =
+    !isFutureReviewWeek &&
+    (isFinalWeek || isHistoricalReviewWeek
+      ? hasHumanReflection || hasNextWeekAdjustment
+      : hasNextWeekAdjustment);
   const reviewStatusTitle = isFutureReviewWeek
     ? "Không thể chốt tuần tương lai."
+    : isHistoricalReviewWeek
+      ? canSubmitWeeklyReview
+        ? "Review lịch sử đã đủ để lưu."
+        : "Hãy ghi lại ít nhất một điều trước khi lưu."
     : shouldConfirmEarlyReview
       ? "Bạn đang chốt review sớm."
       : canSubmitWeeklyReview
-        ? "Đã đủ 4 bước để lưu review."
-        : `Còn ${reviewPendingItems.length} mục cần hoàn tất.`;
+        ? "Review đã đủ để lưu."
+        : isFinalWeek
+          ? "Hãy ghi lại ít nhất một điều trước khi lưu."
+          : "Hãy chốt ít nhất một thay đổi cho tuần sau.";
   const reviewStatusHint = isFutureReviewWeek
     ? "Quay lại tuần hiện tại để chốt review này."
+    : isHistoricalReviewWeek
+      ? canSubmitWeeklyReview
+        ? "Chỉnh sửa này chỉ cập nhật review lịch sử; kế hoạch các tuần đã bắt đầu không thay đổi."
+        : "Bạn có thể ghi điều nên giữ, nguyên nhân lệch nhịp hoặc bổ sung một thay đổi đã học được."
     : canSubmitWeeklyReview
-      ? "Bạn có thể lưu ngay hoặc rà soát lại câu trả lời trước khi chốt."
-      : `Thiếu: ${reviewPendingItems.map((item) => item.label).join(", ")}.`;
+      ? isFinalWeek
+        ? "Review tuần cuối sẽ không tạo hoặc áp dụng kế hoạch Tuần 13."
+        : "Review sẽ lưu trước. Kế hoạch tuần sau chỉ đổi sau bước xem trước và xác nhận."
+      : isFinalWeek
+        ? "Bạn có thể ghi điều nên giữ, nguyên nhân lệch nhịp hoặc điều muốn mang sang chu kỳ mới."
+        : "Thêm 1-3 thay đổi đủ cụ thể trong câu hỏi số 3.";
   const reviewStickyStatus = canSubmitWeeklyReview
-    ? "Sẵn sàng chốt"
-    : reviewPendingItems.length === 1
-      ? `Thiếu ${reviewPendingItems[0]?.label}`
-      : `Thiếu ${reviewPendingItems.length} mục`;
+    ? "Sẵn sàng lưu"
+    : isFinalWeek || isHistoricalReviewWeek
+      ? "Cần một ghi chú"
+      : "Cần hướng tuần sau";
 
   const saveWeeklyReview = async () => {
     setIsSavingReview(true);
     try {
-      await Promise.resolve(onSaveWeeklyReview());
-      setIsStartingEarly(false);
-      setIsEditingReview(false);
+      const result = await onSaveWeeklyReview(selectedWeek);
+      if (result?.status === "saved") {
+        setIsStartingEarly(false);
+        setIsEditingReview(false);
+      }
     } finally {
       setIsSavingReview(false);
       setShowEarlyReviewConfirm(false);
     }
+  };
+
+  const handleSelectWeek = (weekNumber: number) => {
+    if (weekNumber === selectedWeek) return;
+    if (isEditingReview || isStartingEarly) onResetReviewForm?.();
+    setIsEditingReview(false);
+    setIsStartingEarly(false);
+    setShowEarlyReviewConfirm(false);
+    setSelectedWeek(weekNumber);
   };
 
   const handleSaveReviewClick = async () => {
@@ -394,7 +427,7 @@ export function TwelveWeekWeekTab({
         selectedWeek={selectedWeek}
         reviews={system.weeklyReviews}
         getCompletion={getTwelveWeekCompletion}
-        onSelectWeek={setSelectedWeek}
+        onSelectWeek={handleSelectWeek}
       />
 
       {selectedWeek > system.currentWeek ? (
@@ -437,7 +470,10 @@ export function TwelveWeekWeekTab({
                 formatCalendarDate={formatCalendarDate}
                 getReviewDayLabel={(day) => getReviewDayLabel(String(day))}
                 reviewDay={system.reviewDay}
-                onStartEarlyReview={() => setIsStartingEarly(true)}
+                onStartEarlyReview={() => {
+                  if (onPrepareReviewEdit && !onPrepareReviewEdit(selectedWeek)) return;
+                  setIsStartingEarly(true);
+                }}
               />
             </StaggerSection>
           )}
@@ -458,12 +494,7 @@ export function TwelveWeekWeekTab({
               suggestedNextWeekPlan={suggestedNextWeekPlan}
               weeklyForm={weeklyForm}
               previousCommitments={previousCommitments}
-              allPreviousCommitmentsAnswered={allPreviousCommitmentsAnswered}
               nextWeekCommitments={nextWeekCommitments}
-              hasNextWeekCommitment={hasNextWeekCommitment}
-              reviewReadinessItems={reviewReadinessItems}
-              reviewReadyCount={reviewReadyCount}
-              _reviewPendingItems={reviewPendingItems}
               canSubmitWeeklyReview={canSubmitWeeklyReview}
               reviewStatusTitle={reviewStatusTitle}
               reviewStatusHint={reviewStatusHint}
@@ -471,6 +502,9 @@ export function TwelveWeekWeekTab({
               isSavingReview={isSavingReview}
               isEditingReview={isEditingReview}
               isStartingEarly={isStartingEarly}
+              isFinalWeek={isFinalWeek}
+              isNoTaskWeek={isNoTaskWeek}
+              isPerfectWeek={isPerfectWeek}
               formatCalendarDate={formatCalendarDate}
               onWeeklyFormChange={onWeeklyFormChange}
               onApplySuggestedPlan={onApplySuggestedPlan}
@@ -479,6 +513,7 @@ export function TwelveWeekWeekTab({
               onCancelReview={() => {
                 setIsEditingReview(false);
                 setIsStartingEarly(false);
+                onResetReviewForm?.();
               }}
             />
           )}
@@ -500,10 +535,13 @@ export function TwelveWeekWeekTab({
                 summaryInsights={summaryInsights ?? ""}
                 summaryNextWeekCommitments={summaryNextWeekCommitments}
                 formatCalendarDate={formatCalendarDate}
-                onEditReview={() => setIsEditingReview(true)}
+                onEditReview={() => {
+                  if (onPrepareReviewEdit && !onPrepareReviewEdit(selectedWeek)) return;
+                  setIsEditingReview(true);
+                }}
                 nextWeekRecommendation={nextWeekRecommendation ?? null}
-                onAcceptNextWeekRecommendation={onAcceptNextWeekRecommendation}
                 onOpenTodayTab={onOpenTodayTab}
+                onApplyNextWeekHandoff={onApplyNextWeekHandoff}
               />
             </StaggerSection>
           )}
