@@ -1030,7 +1030,8 @@ Expected: panel, open-review, completed-review, existing fields, save confirmati
 - [ ] **Step 7: Run focused write-safety and flow tests**
 
 ```bash
-npm run test:ui -- src/features/plan12week/pages/twelve-week-write-safety.test.tsx src/features/plan12week/pages/twelve-week-flows.e2e.test.tsx
+npm run test:slow -- src/features/plan12week/pages/twelve-week-write-safety.test.tsx
+npm run test:flows -- src/features/plan12week/pages/twelve-week-flows.e2e.test.tsx
 ```
 
 Expected: canonical review persistence, local-first save, sync failure safety, and existing field behavior remain green.
@@ -1071,7 +1072,9 @@ Expected: no diff for canonical mutation or `backend/`; only the spec, plan, evi
 
 ```bash
 npm run test:run -- src/features/plan12week/logic/weeklyReviewEvidence.test.ts src/features/plan12week/logic/executionInsights.test.ts src/app/utils/storage-twelve-week.test.ts
-npm run test:ui -- src/app/components/twelve-week/WeeklyReviewEvidencePanel.test.tsx src/app/components/twelve-week/TwelveWeekWeekTab.test.tsx src/app/hooks/useTwelveWeekSystemSnapshot.test.tsx src/features/plan12week/pages/twelve-week-write-safety.test.tsx src/features/plan12week/pages/twelve-week-flows.e2e.test.tsx
+npm run test:ui -- src/app/components/twelve-week/WeeklyReviewEvidencePanel.test.tsx src/app/components/twelve-week/TwelveWeekWeekTab.test.tsx src/app/hooks/useTwelveWeekSystemSnapshot.test.tsx
+npm run test:slow -- src/features/plan12week/pages/twelve-week-write-safety.test.tsx
+npm run test:flows -- src/features/plan12week/pages/twelve-week-flows.e2e.test.tsx
 ```
 
 Expected: all focused tests pass with zero failure.

@@ -1,17 +1,16 @@
 import { Check, Loader2 } from "lucide-react";
 import { Fragment } from "react";
-import { interpretWeeklyExecutionScore } from "@/features/plan12week/logic";
+import type { WeeklyReviewViewModel } from "@/features/plan12week/logic";
 import { Button } from "../ui/button";
-import { CountUp } from "../ui/count-up";
 import { Label } from "../ui/label";
-import { Progress } from "../ui/progress";
 import { Textarea } from "../ui/textarea";
 import { cn } from "../ui/utils";
 import { NextWeekCommitmentsEditor } from "./NextWeekCommitmentsEditor";
 import { TwelveWeekEmotionFlow } from "./TwelveWeekEmotionFlow";
 import { TwelveWeekPremiumInsightSection } from "./TwelveWeekPremiumInsightSection";
 import type { TwelveWeekWeeklyReviewForm } from "./TwelveWeekWeekTab";
-import type { PricingPlanCode, TwelveWeekSystem, UniversalWeeklyReview } from "../../utils/storage-types";
+import { WeeklyReviewEvidencePanel } from "./WeeklyReviewEvidencePanel";
+import type { PricingPlanCode, TwelveWeekSystem } from "../../utils/storage-types";
 import type { SuggestedNextWeekPlan, WeeklyReviewPremiumInsight } from "../../utils/twelve-week-premium";
 
 type WeeklyCommitmentStatus = "kept" | "missed" | "not_set" | "unanswered";
@@ -22,16 +21,14 @@ interface WeeklyReviewFormProps {
   totalWeeks: number;
   currentWeekRange: { start: string; end: string } | null;
   currentPlanFocus: string;
-  weekCompletion: { completed: number; total: number; percent: number; isEmpty?: boolean };
-  leadScoreValue: number;
   lagScoreValue: number | null;
   lagMetricValue: string;
+  reviewViewModel: WeeklyReviewViewModel;
   currentPlanCode: PricingPlanCode;
   hasPremiumInsights: boolean;
   premiumInsight: WeeklyReviewPremiumInsight | null;
   suggestedNextWeekPlan: SuggestedNextWeekPlan | null;
   weeklyForm: TwelveWeekWeeklyReviewForm;
-  currentReview: UniversalWeeklyReview | null;
   previousCommitments: string[];
   allPreviousCommitmentsAnswered: boolean;
   nextWeekCommitments: string[];
@@ -108,10 +105,9 @@ export function WeeklyReviewForm({
   totalWeeks,
   currentWeekRange,
   currentPlanFocus,
-  weekCompletion,
-  leadScoreValue,
   lagScoreValue,
   lagMetricValue,
+  reviewViewModel,
   currentPlanCode,
   hasPremiumInsights,
   premiumInsight,
@@ -138,17 +134,17 @@ export function WeeklyReviewForm({
   onSaveWeeklyReview,
   onCancelReview,
 }: WeeklyReviewFormProps) {
-  const scoreInterpretation = interpretWeeklyExecutionScore(leadScoreValue);
   return (
     <div className="space-y-5 sm:space-y-6">
-      {/* Form Hero Card */}
-      <div className="relative overflow-hidden rounded-[var(--app-radius-card-lg)] border border-app-line/70 bg-app-surface p-4 shadow-[var(--app-shadow-card)] sm:p-6">
-        {/* Header metadata */}
-        <div className="relative z-10 flex flex-wrap items-center justify-between gap-2.5 text-[10px] font-bold uppercase tracking-widest text-app-ink-muted">
-          <span className="font-serif text-xs font-bold tracking-normal normal-case text-app-accent bg-app-accent-soft/75 px-3 py-1 rounded-lg border border-app-line/20">
+      <section
+        data-testid="weekly-review-context"
+        className="rounded-[var(--app-radius-card-lg)] border border-app-line/70 bg-app-surface p-4 shadow-[var(--app-shadow-card)] sm:p-6"
+      >
+        <div className="flex flex-wrap items-center justify-between gap-2.5 text-[10px] font-bold uppercase tracking-widest text-app-ink-muted">
+          <span className="rounded-lg border border-app-line/20 bg-app-accent-soft/75 px-3 py-1 font-serif text-xs font-bold tracking-normal text-app-accent normal-case">
             Tuần {currentWeekLimit} / {totalWeeks}
           </span>
-          <span className="min-w-0 bg-app-bg-subtle/80 px-3 py-1 rounded-lg border border-app-line/25 font-mono text-[11px] text-app-ink-soft">
+          <span className="min-w-0 rounded-lg border border-app-line/25 bg-app-bg-subtle/80 px-3 py-1 font-mono text-[11px] text-app-ink-soft">
             {currentWeekRange
               ? `${formatCalendarDate(currentWeekRange.start)} – ${formatCalendarDate(currentWeekRange.end)}`
               : "Chu kỳ hiện tại"}
@@ -156,60 +152,30 @@ export function WeeklyReviewForm({
         </div>
 
         {currentPlanFocus && (
-          <div className="relative z-10 mt-5">
-            <span className="text-[10px] font-bold text-app-accent uppercase tracking-widest block mb-1">
+          <div className="mt-5">
+            <span className="mb-1 block text-[10px] font-bold uppercase tracking-widest text-app-accent">
               Tiêu điểm tuần
             </span>
-            <p className="max-w-[28ch] text-balance font-serif text-xl sm:text-2xl font-bold leading-snug tracking-tight text-app-ink">
+            <h2 className="max-w-[28ch] text-balance font-serif text-xl font-bold leading-snug tracking-tight text-app-ink sm:text-2xl">
               {currentPlanFocus}
-            </p>
+            </h2>
           </div>
         )}
 
-        <div className="relative z-10 flex flex-wrap items-center gap-2 mt-3.5">
-          <span className="inline-flex items-center rounded-full border border-app-line bg-app-bg-subtle/60 px-2.5 py-0.5 text-[10px] font-bold text-app-ink-soft uppercase tracking-wider">
+        <div className="mt-3.5 flex flex-wrap items-center gap-2">
+          <span className="inline-flex items-center rounded-full border border-app-line bg-app-bg-subtle/60 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-app-ink-soft">
             Tiến độ {reviewReadyCount}/4 bước
           </span>
         </div>
+      </section>
 
-        <div className="flex flex-col gap-4 border-t border-app-line/40 pt-5 mt-5 relative z-10 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
-          <div className="flex-1 space-y-2">
-            <div className="flex items-baseline justify-between text-xs font-semibold text-app-ink-soft">
-              <span className="font-serif">Điểm thực thi</span>
-              {weekCompletion.isEmpty ? (
-                <span data-testid="weekly-lead-score" className="font-bold text-app-ink-muted">
-                  Chưa có việc
-                </span>
-              ) : (
-                <CountUp
-                  data-testid="weekly-lead-score"
-                  value={leadScoreValue}
-                  suffix="%"
-                  className="font-bold text-app-accent"
-                />
-              )}
-            </div>
-            {!weekCompletion.isEmpty && (
-              <Progress value={leadScoreValue} className="h-2 bg-app-bg-subtle rounded-full" />
-            )}
-          </div>
-
-          {lagScoreValue !== null && (
-            <div className="flex flex-1 flex-col justify-between space-y-1.5 border-t border-app-line/30 pt-3 sm:border-l sm:border-t-0 sm:pl-6 sm:pt-0">
-              <div className="flex items-baseline justify-between text-xs font-semibold text-app-ink-soft">
-                <span className="font-serif">Chỉ số kết quả</span>
-                <CountUp
-                  data-testid="weekly-lag-score"
-                  value={lagScoreValue ?? 0}
-                  suffix="%"
-                  className="font-bold text-app-ink"
-                />
-              </div>
-              <span className="min-w-0 break-words text-xs font-medium leading-snug text-app-ink-muted">
-                {system.lagMetric.name}: {lagMetricValue}
-              </span>
-            </div>
-          )}
+      <div data-testid="wam-section-score">
+        <div data-testid="weekly-review-step-score" data-done="true">
+          <WeeklyReviewEvidencePanel
+            evidence={reviewViewModel.evidence}
+            insights={reviewViewModel.insights}
+            formatCalendarDate={formatCalendarDate}
+          />
         </div>
       </div>
 
@@ -264,54 +230,7 @@ export function WeeklyReviewForm({
             </div>
           </div>
 
-        <TwelveWeekEmotionFlow system={system} currentWeekRange={currentWeekRange} currentWeek={currentWeekLimit} />
-
         <div id="weekly-review-flow" data-testid="weekly-review-flow" className="space-y-6">
-          {/* Step 1: Execution Score */}
-          <div data-testid="wam-section-score" className="weekly-review-step-card hover:border-app-line-strong transition-all">
-            <div
-              data-testid="weekly-review-step-score"
-              data-done="true"
-              className="space-y-3 bg-transparent"
-            >
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-app-ink-soft">
-                <span className="inline-flex h-5.5 w-5.5 items-center justify-center rounded-full bg-app-accent/10 text-[10px] font-extrabold text-app-accent">
-                  1
-                </span>
-                <span>Điểm thực thi tuần này</span>
-              </div>
-
-              <div className="flex items-center gap-4 pt-1">
-                {weekCompletion.isEmpty ? (
-                  <span data-testid="weekly-lead-score" className="text-xs font-semibold text-app-ink-soft">
-                    Chưa có việc trong tuần này
-                  </span>
-                ) : (
-                  <CountUp
-                    value={leadScoreValue}
-                    suffix="%"
-                    className="text-4xl font-serif font-extrabold text-app-accent leading-none"
-                  />
-                )}
-                {!weekCompletion.isEmpty && (
-                  <div className="text-xs text-app-ink-soft leading-snug border-l border-app-line/60 pl-4 py-0.5">
-                    <span className="font-bold text-app-ink block text-sm">{scoreInterpretation.headline}</span>
-                    <span className="text-xs block mt-0.5 text-app-ink-soft">{scoreInterpretation.advice}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <TwelveWeekPremiumInsightSection
-            currentPlanCode={currentPlanCode}
-            hasPremiumInsights={hasPremiumInsights}
-            premiumInsight={premiumInsight}
-            suggestedNextWeekPlan={suggestedNextWeekPlan}
-            onApplySuggestedPlan={onApplySuggestedPlan}
-            onOpenPremiumInsights={onOpenPremiumInsights}
-          />
-
           {/* Step 2: Commitment Check */}
           <div data-testid="wam-section-commitments" className="weekly-review-step-card hover:border-app-line-strong transition-all">
             <div
@@ -512,6 +431,29 @@ export function WeeklyReviewForm({
             {isSavingReview ? "Đang lưu..." : "Chốt review tuần này"}
           </Button>
         </div>
+      </div>
+
+      <div data-testid="weekly-review-secondary-details" className="space-y-4">
+        <TwelveWeekEmotionFlow system={system} currentWeekRange={currentWeekRange} currentWeek={currentWeekLimit} />
+        <TwelveWeekPremiumInsightSection
+          currentPlanCode={currentPlanCode}
+          hasPremiumInsights={hasPremiumInsights}
+          premiumInsight={premiumInsight}
+          suggestedNextWeekPlan={suggestedNextWeekPlan}
+          onApplySuggestedPlan={onApplySuggestedPlan}
+          onOpenPremiumInsights={onOpenPremiumInsights}
+        />
+        {lagScoreValue !== null && (
+          <div className="flex min-w-0 flex-wrap items-baseline justify-between gap-2 rounded-xl border border-app-line bg-app-bg-subtle/35 px-4 py-3 text-xs text-app-ink-soft">
+            <span className="font-semibold text-app-ink">Chỉ số kết quả</span>
+            <span className="min-w-0 break-words text-right">
+              <span data-testid="weekly-lag-score" className="font-mono font-bold tabular-nums text-app-ink">
+                {lagScoreValue}%
+              </span>
+              {lagMetricValue && ` · ${system.lagMetric.name}: ${lagMetricValue}`}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Sticky Mobile Review CTA */}
