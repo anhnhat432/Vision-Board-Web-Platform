@@ -19,6 +19,7 @@ import {
   assistantAlertsController,
   transcribeController,
 } from "../controllers/assistantController";
+import { personalCoachController } from "../controllers/personalCoachController";
 import { assistantRateLimiter } from "../middleware/rateLimiters";
 import { requireAdmin } from "../middleware/requireAdmin";
 import { asyncHandler } from "../utils/asyncHandler";
@@ -80,6 +81,13 @@ router.post("/ai/assistant", assistantRateLimiter, aiAssistantController);
 
 // POST /ai/assistant/stream - structured assistant route with Groq SSE streaming
 router.post("/ai/assistant/stream", assistantRateLimiter, aiAssistantStreamController);
+
+// POST /ai/personal-coach - read-only contextual recommendation
+router.post(
+  "/ai/personal-coach",
+  assistantRateLimiter,
+  asyncHandler(personalCoachController),
+);
 
 // POST /ai/assistant/telemetry - G4: nhận event observability redacted từ frontend
 router.post("/ai/assistant/telemetry", assistantRateLimiter, assistantTelemetryController);

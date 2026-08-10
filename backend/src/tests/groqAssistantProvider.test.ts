@@ -153,6 +153,46 @@ describe("groqAssistantProvider prompt", () => {
     assert.equal(options.temperature, 0.5);
   });
 
+  it("sends a dedicated structured prompt without generic Assistant instructions", async () => {
+    ensureBackendEnvForProviderImports();
+    let capturedBody: Record<string, unknown> | null = null;
+    mock.method(globalThis, "fetch", async (_url: string | URL | Request, init?: RequestInit) => {
+      capturedBody = JSON.parse(String(init?.body)) as Record<string, unknown>;
+      return new Response(
+        JSON.stringify({ choices: [{ message: { content: '{"title":"Ưu tiên hôm nay"}' } }] }),
+        { status: 200, headers: { "content-type": "application/json" } },
+      );
+    });
+    const { sendPromptToGroq } = await import("../services/groqAssistantProvider");
+
+    const result = await sendPromptToGroq({
+      systemPrompt: "COACH_RULES_ONLY",
+      contextMessage: "UNTRUSTED_STRUCTURED_CONTEXT={}",
+      userMessage: "Tạo một khuyến nghị Coach.",
+      maxTokens: 500,
+      temperature: 0.2,
+      jsonObject: true,
+    });
+
+    assert.deepEqual(result, { message: '{"title":"Ưu tiên hôm nay"}' });
+    assert.ok(capturedBody);
+    const body = capturedBody as {
+      messages?: Array<{ role?: string; content?: string }>;
+      max_tokens?: number;
+      temperature?: number;
+      response_format?: { type?: string };
+    };
+    assert.deepEqual(body.messages, [
+      { role: "system", content: "COACH_RULES_ONLY" },
+      { role: "system", content: "UNTRUSTED_STRUCTURED_CONTEXT={}" },
+      { role: "user", content: "Tạo một khuyến nghị Coach." },
+    ]);
+    assert.equal(body.max_tokens, 500);
+    assert.equal(body.temperature, 0.2);
+    assert.deepEqual(body.response_format, { type: "json_object" });
+    assert.doesNotMatch(JSON.stringify(body), /create_task|mark_task_done|assistantMemory/);
+  });
+
   it("redacts provider error details before returning or logging Groq failures", async () => {
     ensureBackendEnvForProviderImports();
     const rawSecret = "sk_live_AbCdEfGhIjKl123456789";

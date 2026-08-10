@@ -23,4 +23,6 @@ regexes = [
   # Demo/mock placeholder keys used in docs
   '''sk-(demo|mock|example|xxx)[-_a-zA-Z0-9]*''',
   '''AIza(SyDemoKey|MockKey)[-_a-zA-Z0-9]*''',
+  # Exact synthetic Stripe-shaped fixture present in an earlier Coach test commit.
+  '''sk_live_AbCdEfGhIjKl[0-9]{9}''',
 ]

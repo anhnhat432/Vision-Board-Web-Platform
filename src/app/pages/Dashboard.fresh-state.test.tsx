@@ -19,6 +19,14 @@ const appModeMock = vi.hoisted(() => ({
   mode: "real" as "demo" | "real",
 }));
 
+vi.mock("@/features/personalCoach/components/PersonalCoachCard", () => ({
+  PersonalCoachCard: ({ context, setupHref }: { context: unknown; setupHref: string }) => (
+    <section data-testid="personal-coach-card" data-setup-href={setupHref}>
+      {context === null ? "Coach chưa có mục tiêu" : "Coach có mục tiêu"}
+    </section>
+  ),
+}));
+
 vi.mock("@/lib/auth/AuthContext", () => ({
   useAuthContext: authContextMock.useAuthContext,
   useOptionalAuthContext: authContextMock.useOptionalAuthContext,
@@ -187,7 +195,12 @@ describe("Dashboard fresh workspace states", () => {
 
     renderDashboard();
 
-    expect(await screen.findByTestId("fresh-workspace-empty-state")).toBeInTheDocument();
+    const setup = await screen.findByTestId("fresh-workspace-empty-state");
+    const coach = screen.getByTestId("personal-coach-card");
+    expect(setup).toBeInTheDocument();
+    expect(setup.compareDocumentPosition(coach)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(coach).toHaveTextContent("Coach chưa có mục tiêu");
+    expect(coach).toHaveAttribute("data-setup-href", "/onboarding");
     expect(screen.getByText(/Cần xem hướng dẫn nhanh\?/)).toBeInTheDocument();
     expect(screen.queryByText(/Free: 0\/3/)).not.toBeInTheDocument();
     expect(screen.getByText(/Hoàn thành 4 chặng cốt lõi/i)).toBeInTheDocument();

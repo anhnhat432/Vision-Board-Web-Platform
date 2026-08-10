@@ -31,6 +31,17 @@ const dashboardPlanLinkMock = vi.hoisted(() => ({
   planId: null as string | null,
 }));
 
+vi.mock("@/features/personalCoach/components/PersonalCoachCard", () => ({
+  PersonalCoachCard: ({ context }: { context: { today?: { primaryTask?: { title?: string } } } | null }) => (
+    <section
+      data-testid="personal-coach-card"
+      data-primary-title={context?.today?.primaryTask?.title ?? ""}
+    >
+      Coach context
+    </section>
+  ),
+}));
+
 vi.mock("@/lib/auth/AuthContext", () => ({
   useAuthContext: authContextMock.useAuthContext,
   useOptionalAuthContext: authContextMock.useOptionalAuthContext,
@@ -237,6 +248,26 @@ describe("Dashboard active 12-week system UX", () => {
     expect(focus.compareDocumentPosition(goalsHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     expect(goalsHeading.compareDocumentPosition(secondaryTitle)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
     expect(secondaryTitle.compareDocumentPosition(rhythmHeading)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  it("places Coach after Daily Focus and Weekly Pulse, before Today, and refreshes its context", async () => {
+    const user = userEvent.setup();
+    seedActiveDashboard({ tasks: [makeTask("task_a", "Task A"), makeTask("task_b", "Task B")] });
+    renderDashboard();
+
+    const focus = await screen.findByTestId("dashboard-daily-focus");
+    const pulse = screen.getByRole("heading", { name: "Tuần này" });
+    const coach = screen.getByTestId("personal-coach-card");
+    const today = screen.getByRole("heading", { name: "Hôm nay" });
+
+    expect(focus.compareDocumentPosition(coach)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(pulse.compareDocumentPosition(coach)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(coach.compareDocumentPosition(today)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(coach).toHaveAttribute("data-primary-title", "Task A");
+
+    await user.click(screen.getByRole("button", { name: "Đánh dấu xong: Task A" }));
+
+    await waitFor(() => expect(coach).toHaveAttribute("data-primary-title", "Task B"));
   });
 
   it("collapses secondary insights by default on mobile and remembers the disclosure state", async () => {

@@ -287,6 +287,7 @@ export function getAuthenticatedRateLimitPolicy(method: string, path: string): A
   if (normalizedPath === "/auth/profile") return "auth-profile";
   if (normalizedPath === "/billing" || normalizedPath.startsWith("/billing/")) return "dedicated";
   if (ADMIN_ASSISTANT_READ_ROUTES.has(normalizedPath) && isRead) return "admin-read";
+  if (normalizedPath === "/ai/personal-coach") return "dedicated";
   if (normalizedPath.startsWith("/assistant/") || normalizedPath === "/ai/assistant" || normalizedPath.startsWith("/ai/assistant/")) {
     return "dedicated";
   }

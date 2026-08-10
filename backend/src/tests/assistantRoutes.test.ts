@@ -194,6 +194,23 @@ describe("assistantRoutes", () => {
     assert.equal(response.body.errorCode, "ASSISTANT_EMPTY_MESSAGE");
   });
 
+  it("requires auth for the Personal Coach endpoint", async () => {
+    const response = await requestJson(await createTestApp(), "/api/ai/personal-coach", undefined, {
+      context: {},
+    });
+
+    assert.equal(response.status, 401);
+  });
+
+  it("registers the Personal Coach endpoint and rejects invalid context", async () => {
+    const response = await requestJson(await createTestApp(), "/api/ai/personal-coach", "verified-token", {
+      context: {},
+    });
+
+    assert.equal(response.status, 400);
+    assert.equal(response.body.errorCode, "COACH_INVALID_CONTEXT");
+  });
+
   it("allows paid users beyond the free assistant request window", async () => {
     const { billingService } = await import("../services/billingServiceInstance");
     await billingService.createMockOrManualEntitlement("user_paid", "PLUS", "manual");
