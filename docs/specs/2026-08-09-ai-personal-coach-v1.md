@@ -300,7 +300,18 @@ npm run smoke:prod
 
 Production smoke must not depend on exact live LLM prose. It may prove that Daily Home loads, Coach failure does not block the page, and a deterministic/test contract renders where the existing smoke harness supports it.
 
-## 14. Rollout, Assumptions, and Completion Gate
+## 14. Browser Acceptance Evidence
+
+- Environment: local `VITE_APP_MODE=real` harness with fake Firebase/API boundaries; no production credential or real user data was used.
+- Desktop `1440x900`: Daily Focus remains before and visually stronger than Coach; Coach height was approximately `256.5px`; primary CTA measured `44px`; no horizontal overflow.
+- Mobile `390x844`: Coach height was approximately `321.3px`; primary CTA measured `44px`; document `scrollWidth` remained `390px`; Daily Focus remains earlier in the execution hierarchy.
+- Verified states: recommendation, explanation disclosure, trusted navigation, rate limited, provider error, all done, and no active goal.
+
+![AI Personal Coach desktop acceptance](ai-personal-coach-v1/screenshots/coach-desktop-1440x900.png)
+
+![AI Personal Coach mobile acceptance](ai-personal-coach-v1/screenshots/coach-mobile-390x844.png)
+
+## 15. Rollout, Assumptions, and Completion Gate
 
 - Delivery target: one focused feature PR; a second hardening PR is allowed only if CI/production smoke requires an isolated fix.
 - No feature flag is added unless current deployment behavior proves one necessary.
