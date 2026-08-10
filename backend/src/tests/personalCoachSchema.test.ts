@@ -96,7 +96,7 @@ describe("personalCoachSchema", () => {
         journal: [{ content: "private journal entry" }],
         goal: {
           ...makeContext().goal,
-          title: "Gửi buyer@example.test với api_key: sk_live_AbCdEfGhIjKl123456789",
+          title: "Gửi buyer@example.test với api_key: coach_fixture_value_123",
           accountMetadata: "must not survive",
         },
         reflection: {
@@ -113,7 +113,10 @@ describe("personalCoachSchema", () => {
     if (!result.ok) return;
 
     const serialized = JSON.stringify(result.value);
-    assert.doesNotMatch(serialized, /owner@example\.test|buyer@example\.test|hunter2|sk_live_/);
+    assert.doesNotMatch(
+      serialized,
+      /owner@example\.test|buyer@example\.test|hunter2|coach_fixture_value_123/,
+    );
     assert.doesNotMatch(serialized, /billing|authToken|journal|accountMetadata|fullJournal/);
     assert.match(result.value.goal.title, /\[EMAIL_REDACTED\]/);
     assert.match(result.value.reflection?.mainObstacle ?? "", /\[REDACTED\]/);
