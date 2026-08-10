@@ -1,3 +1,4 @@
+import type { PersonalCoachContext } from "@shared/personalCoachSchema";
 import {
   ChevronDown,
   Gem,
@@ -36,6 +37,8 @@ import { RescueAlert } from "@/features/dashboard/v2/RescueAlert";
 import { TodayMiniCard } from "@/features/dashboard/v2/TodayMiniCard";
 import { WeekRhythmCard } from "@/features/dashboard/v2/WeekRhythmCard";
 import { WeeklyPulseCard } from "@/features/dashboard/v2/WeeklyPulseCard";
+import { PersonalCoachCard } from "@/features/personalCoach/components/PersonalCoachCard";
+import { buildPersonalCoachContext } from "@/features/personalCoach/context/buildPersonalCoachContext";
 import { usePlan12Week } from "@/features/plan12week/hooks";
 import { commitTwelveWeekTaskCompletion } from "@/features/plan12week/persistence/taskCompletionMutation";
 import { useAuthContext } from "@/lib/auth/AuthContext";
@@ -682,6 +685,16 @@ function DashboardContent({
     coreFlowCompletion,
     onboardingCompleted: !isSignedOut && userData.onboardingCompleted,
   });
+  const personalCoachContext = useMemo(
+    () =>
+      visibleActiveTwelveWeekGoal && dashboardData.localActiveSystem
+        ? buildPersonalCoachContext({
+            goal: visibleActiveTwelveWeekGoal,
+            system: dashboardData.localActiveSystem,
+          })
+        : null,
+    [dashboardData.localActiveSystem, visibleActiveTwelveWeekGoal],
+  );
   useEffect(() => {
     if (!completingTaskId) return;
     const task = dashboardData.localActiveSystem?.taskInstances.find((item) => item.id === completingTaskId);
@@ -817,16 +830,21 @@ function DashboardContent({
         />
 
         {!dashboardData.effectiveSystem ? (
-          <NewUserSetupView
-            userData={userData}
-            displayName={dashboardDisplayName}
-            onContinue={(href) => navigate(href)}
-            companion={<LazyMamCompanion initialEvent="welcomeBack" />}
-            nextStepGuidance={dashboardData.dashboardNextAction}
-          />
+          <div className="space-y-6">
+            <NewUserSetupView
+              userData={userData}
+              displayName={dashboardDisplayName}
+              onContinue={(href) => navigate(href)}
+              companion={<LazyMamCompanion initialEvent="welcomeBack" />}
+              nextStepGuidance={dashboardData.dashboardNextAction}
+            />
+            <PersonalCoachCard context={null} setupHref={dashboardData.dashboardNextAction.ctaTarget} />
+          </div>
         ) : (
           <DashboardActiveLayout
             data={dashboardData}
+            personalCoachContext={personalCoachContext}
+            personalCoachSetupHref={dashboardData.dashboardNextAction.ctaTarget}
             userData={userData}
             displayName={dashboardDisplayName}
             caption={caption}
@@ -924,6 +942,8 @@ type DashboardData = ReturnType<typeof useDashboardDerivedData>;
 
 function DashboardActiveLayout({
   data,
+  personalCoachContext,
+  personalCoachSetupHref,
   userData,
   displayName,
   caption,
@@ -942,6 +962,8 @@ function DashboardActiveLayout({
   onTriggerDismiss,
 }: {
   data: DashboardData;
+  personalCoachContext: PersonalCoachContext | null;
+  personalCoachSetupHref: string;
   userData: UserData;
   displayName: string;
   caption: string;
@@ -1075,6 +1097,8 @@ function DashboardActiveLayout({
           reviewDueToday={Boolean(data.dailyExecution?.reviewDueToday)}
         />
       </div>
+
+      <PersonalCoachCard context={personalCoachContext} setupHref={personalCoachSetupHref} />
 
       <TodayMiniCard
         tasks={data.dailyExecution?.homeSecondaryTasks ?? []}

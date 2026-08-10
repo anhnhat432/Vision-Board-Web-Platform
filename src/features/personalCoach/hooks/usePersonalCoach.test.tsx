@@ -135,8 +135,10 @@ describe("usePersonalCoach", () => {
     setOnline(false);
     const { result } = renderHook(() => usePersonalCoach(makeContext("offline_goal")));
 
-    expect(result.current.state.status).toBe("offline");
-    expect(result.current.state.recommendation.primaryAction.type).toBe("open_task");
+    const state = result.current.state;
+    expect(state.status).toBe("offline");
+    if (state.status !== "offline") throw new Error("Expected offline Coach state");
+    expect(state.recommendation.primaryAction.type).toBe("open_task");
     expect(mocks.requestRecommendation).not.toHaveBeenCalled();
   });
 
@@ -147,8 +149,10 @@ describe("usePersonalCoach", () => {
 
     const { result } = renderHook(() => usePersonalCoach(context));
 
-    expect(result.current.state.status).toBe("loading");
-    expect(result.current.state.recommendation.primaryAction.type).toBe("open_task");
+    const loadingState = result.current.state;
+    expect(loadingState.status).toBe("loading");
+    if (loadingState.status !== "loading") throw new Error("Expected loading Coach state");
+    expect(loadingState.recommendation.primaryAction.type).toBe("open_task");
 
     pending.resolve(makeAiRecommendation(context));
     await flushMicrotasks();
@@ -193,8 +197,10 @@ describe("usePersonalCoach", () => {
     requestA.resolve(makeAiRecommendation(contextA));
     await flushMicrotasks();
 
-    expect(result.current.state.status).toBe("loading");
-    expect(result.current.state.recommendation.recommendation).toContain("stale_b");
+    const staleLoadingState = result.current.state;
+    expect(staleLoadingState.status).toBe("loading");
+    if (staleLoadingState.status !== "loading") throw new Error("Expected replacement request to be loading");
+    expect(staleLoadingState.recommendation.recommendation).toContain("stale_b");
 
     requestB.resolve(makeAiRecommendation(contextB));
     await flushMicrotasks();
@@ -279,6 +285,8 @@ describe("usePersonalCoach", () => {
       status: "error",
       errorCode: "COACH_PROVIDER_UNAVAILABLE",
     });
-    expect(failed.result.current.state.recommendation.primaryAction.type).toBe("open_task");
+    const failedState = failed.result.current.state;
+    if (failedState.status !== "error") throw new Error("Expected failed Coach state");
+    expect(failedState.recommendation.primaryAction.type).toBe("open_task");
   });
 });

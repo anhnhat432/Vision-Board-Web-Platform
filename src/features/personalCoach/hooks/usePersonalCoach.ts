@@ -182,6 +182,7 @@ export function usePersonalCoach(context: PersonalCoachContext | null): {
           controllerRef.current = null;
           setIsRetrying(false);
         });
+      return controller;
     },
     [],
   );
@@ -224,8 +225,7 @@ export function usePersonalCoach(context: PersonalCoachContext | null): {
       return undefined;
     }
 
-    runRequest(activeContext, activeSignature, fallback, false);
-    const activeController = controllerRef.current;
+    const activeController = runRequest(activeContext, activeSignature, fallback, false);
     return () => {
       if (!activeController || controllerRef.current !== activeController) return;
       activeController.abort();
