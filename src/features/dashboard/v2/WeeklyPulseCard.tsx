@@ -30,6 +30,22 @@ export function WeeklyPulseCard({
       <p className="text-[10px] font-extrabold uppercase tracking-[0.14em] text-app-ink-muted">
         Tuần {currentWeek} / {totalWeeks}
       </p>
+      {/* Nhịp chu kỳ 12 tuần — trực quan hóa vị trí trong chu kỳ (tiết chế, calm) */}
+      <div className="mt-2 flex items-center gap-[3px]" aria-hidden="true">
+        {Array.from({ length: Math.max(1, totalWeeks) }, (_, index) => index + 1).map((week) => {
+          const isDone = week < currentWeek;
+          const isCurrent = week === currentWeek;
+
+          return (
+            <span
+              key={week}
+              className={`h-1 flex-1 rounded-full ${
+                isCurrent ? "bg-app-accent" : isDone ? "bg-app-accent/45" : "bg-app-accent-soft"
+              }`}
+            />
+          );
+        })}
+      </div>
       <div className="mt-3 flex items-end justify-between gap-3">
         <h2 id="dashboard-weekly-pulse-title" className="font-serif text-xl font-bold text-app-ink">
           Tuần này
