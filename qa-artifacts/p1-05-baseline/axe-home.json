@@ -1,1 +1,0 @@
-[{"id":"heading-order","impact":"moderate","nodes":1,"help":"Heading levels should only increase by one","targets":["div:nth-child(2) > h4"]}]

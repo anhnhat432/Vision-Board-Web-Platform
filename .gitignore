@@ -27,3 +27,11 @@ docs/specs/**/screenshots/
 .vercel/
 .aider*
 opencode.json
+
+# Repo cleanup: artifacts & tool scratch (chore/repo-cleanup)
+qa-artifacts/
+.playwright-mcp/
+scratch/
+.kiro/
+.superpowers/
+docs/specs/core-flow-ui-upgrade/screenshots/
