@@ -7,6 +7,7 @@ import {
   ChevronDown,
   Crown,
   Gauge,
+  ListChecks,
   Loader2,
   Sparkles,
   X,
@@ -33,7 +34,6 @@ import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { Checkbox } from "../ui/checkbox";
-import { Progress } from "../ui/progress";
 import { Textarea } from "../ui/textarea";
 import { useReducedMotion } from "../ui/use-reduced-motion";
 import { TwelveWeekRescueNudge } from "./TwelveWeekRescueNudge";
@@ -189,6 +189,7 @@ export function TwelveWeekTodayTab({
   void overdueOpenCount;
   void optionalOpenThisWeekCount;
   void todayRemainingCount;
+  void weekCompletion;
   const secondaryPreviewTasks = secondaryTodayTasks.slice(0, 2);
   const remainingSecondaryTasks = Math.max(secondaryTodayTasks.length - secondaryPreviewTasks.length, 0);
   const _rescueModes: ReentryMode[] = ["restart", "lighten", "push"];
@@ -292,7 +293,6 @@ export function TwelveWeekTodayTab({
   const savedDailyNote = todayCheckIn?.optionalNote?.trim() ?? "";
   const hasUnsavedDailyCheckInEdits = dailyMood !== savedDailyMood || dailyNote.trim() !== savedDailyNote;
   const showMobileStickyCheckIn = !hasSavedTodayCheckIn && hasUnsavedDailyCheckInEdits && !isCheckInCardInView;
-  const todayCompletionLabel = `${todayCompletedCount}/${checkInTotal}`;
 
   useEffect(() => {
     const updateCheckInCardVisibility = () => {
@@ -390,7 +390,7 @@ export function TwelveWeekTodayTab({
   const reviewDuePrompt = reviewDueToday ? (
     <div
       data-testid="today-review-due-prompt"
-      className="rounded-card-lg border-2 border-app-warm-border bg-app-warm-soft/70 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:justify-between transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150"
+      className="rounded-card-lg border border-app-warm-border/70 bg-app-warm-soft/45 p-3.5 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:justify-between transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150"
     >
       <div className="min-w-0">
         <p className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-app-warm-strong">
@@ -422,12 +422,12 @@ export function TwelveWeekTodayTab({
       {hasPrimaryTask && firstPriorityTask && !isHeroDismissed && (
         <div
           data-testid="today-primary-hero"
-          className={`overflow-hidden rounded-[var(--app-radius-card-lg)] border bg-app-surface shadow-[var(--app-shadow-card)] ${
+          className={`overflow-hidden rounded-[var(--app-radius-card-lg)] border shadow-[var(--app-shadow-card)] ${
             isPrimaryTaskCompleted
-              ? "border-app-accent/20"
+              ? "border-app-accent/20 bg-gradient-to-br from-app-accent-subtle/35 via-app-surface to-app-surface"
               : primaryTaskOverdue
-                ? "border-app-warm-border/45"
-                : "border-app-accent/20"
+                ? "border-app-warm-border/45 bg-gradient-to-br from-app-warm-soft/30 via-app-surface to-app-surface"
+                : "border-app-accent/25 bg-gradient-to-br from-app-accent-subtle/40 via-app-surface to-app-surface"
           }`}
         >
           <div className="flex flex-col">
@@ -488,10 +488,10 @@ export function TwelveWeekTodayTab({
                   )}
                   {primaryTaskCommitmentQuote && (
                     <p
-                      className={`mt-4 max-w-2xl rounded-2xl border px-4 py-3 font-serif text-sm italic leading-relaxed ${
+                      className={`mt-4 max-w-2xl rounded-card-lg border px-4 py-3 font-serif text-sm italic leading-relaxed ${
                         primaryTaskOverdue
-                          ? "border-app-warm-border/35 bg-app-warm-soft/30 text-app-warm-strong"
-                          : "border-app-accent/15 bg-app-accent-soft/25 text-app-ink-soft"
+                          ? "border-app-warm-border/35 bg-app-warm-soft/40 text-app-warm-strong"
+                          : "border-app-accent/15 bg-app-surface/70 text-app-ink-soft"
                       }`}
                     >
                       {primaryTaskCommitmentQuote}
@@ -554,51 +554,6 @@ export function TwelveWeekTodayTab({
       )}
 
       {reviewDuePrompt}
-
-      {/* ── Status chips (nhịp hôm nay) — bổ sung cho bảng tiến độ ở header, không lặp lại ── */}
-      <section
-        data-testid="today-dashboard-cards"
-        aria-label="Tình trạng hôm nay"
-        className="grid grid-cols-2 gap-2 rounded-card border border-app-line/70 bg-app-surface/78 p-1.5 shadow-[var(--app-shadow-sm)] sm:flex sm:flex-wrap sm:gap-2.5"
-      >
-        <span className="inline-flex min-w-0 items-center gap-2 rounded-full border border-app-accent/20 bg-app-accent-soft/45 px-3 py-1.5 text-[11px] font-semibold text-app-accent sm:px-3.5 sm:text-xs">
-          <CheckCircle2 className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
-          <span className="min-w-0 break-words leading-tight">
-            <span className="font-mono font-bold tabular-nums">{todayCompletionLabel}</span> hôm nay
-          </span>
-        </span>
-        <span
-          className={`inline-flex min-w-0 items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-semibold sm:px-3.5 sm:text-xs ${
-            overdueOpenCount > 0
-              ? "border-app-warm-border/45 bg-app-warm-soft/35 text-app-warm"
-              : "border-transparent bg-app-bg-subtle/70 text-app-ink-soft"
-          }`}
-        >
-          <span
-            className={`inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 font-mono text-[11px] font-bold tabular-nums ${
-              overdueOpenCount > 0 ? "bg-app-warm text-white" : "bg-app-surface text-app-ink-muted"
-            }`}
-          >
-            {overdueOpenCount}
-          </span>
-          <span className="min-w-0 break-words leading-tight">
-            {overdueOpenCount > 0 ? "việc trễ hạn" : "không có việc trễ"}
-          </span>
-        </span>
-
-        <span
-          className={`col-span-2 inline-flex min-w-0 items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-semibold sm:col-span-1 sm:px-3.5 sm:text-xs ${
-            reviewDueToday
-              ? "border-app-warm-border/45 bg-app-warm-soft/35 text-app-warm"
-              : "border-transparent bg-app-bg-subtle/70 text-app-ink-soft"
-          }`}
-        >
-          <CalendarClock className="h-3.5 w-3.5" aria-hidden="true" />
-          <span className="min-w-0 break-words leading-tight">
-            {reviewDueToday ? "Review tuần đến hạn" : "Review tuần đã xong"}
-          </span>
-        </span>
-      </section>
 
       {missedTasks.length > 0 && (
         <div
@@ -683,7 +638,13 @@ export function TwelveWeekTodayTab({
             <CardHeader className="min-w-0 [&>*+*]:mt-0 px-0 pt-0 pb-0">
               <div className="flex min-w-0 flex-wrap items-end justify-between gap-3">
                 <div className="min-w-0">
-                  <CardTitle as="h2" className="break-words text-app-ink text-[18px] font-bold m-0 mb-1">
+                  <CardTitle
+                    as="h2"
+                    className="flex items-center gap-[9px] break-words text-app-ink text-[18px] font-bold m-0 mb-1"
+                  >
+                    <span className="flex h-[26px] w-[26px] shrink-0 items-center justify-center rounded-lg bg-app-accent-subtle text-app-accent">
+                      <ListChecks className="h-3.5 w-3.5" />
+                    </span>
                     Hàng việc hôm nay
                   </CardTitle>
                   <CardDescription className="m-0 mb-4 break-words text-[12.5px] text-app-ink-muted sm:mb-[22px]">
@@ -761,8 +722,12 @@ export function TwelveWeekTodayTab({
                     return (
                       <MotionStaggerItem
                         key={task.id}
-                        className={`group flex min-w-0 items-start gap-3 rounded-2xl border border-app-line/55 bg-app-bg-subtle/35 px-3 py-3.5 transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 hover:border-app-accent/20 hover:bg-app-bg-subtle/60 ${
-                          taskCompleted ? "opacity-60" : ""
+                        className={`group flex min-w-0 items-start gap-3 rounded-card border px-3 py-3.5 transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-150 ${
+                          taskCompleted
+                            ? "border-app-line/55 bg-app-bg-subtle/35 opacity-60"
+                            : isPrimaryTask
+                              ? "border-app-accent/30 bg-app-accent-subtle/40 hover:border-app-accent/40"
+                              : "border-app-line/55 bg-app-bg-subtle/35 hover:border-app-accent/20 hover:bg-app-bg-subtle/60"
                         }`}
                       >
                         <span className="shrink-0 pt-0.5 font-mono text-xs font-semibold tabular-nums text-app-ink-muted/60">
@@ -787,7 +752,7 @@ export function TwelveWeekTodayTab({
                               <p className="mt-[3px] text-[12px] text-app-ink-muted">
                                 {task.leadIndicatorName}
                                 {task.isCore && (
-                                  <span className="ml-1 inline-flex items-center bg-app-accent-subtle text-app-accent text-[9.5px] font-bold rounded-[5px] px-[7px] py-0.5 tracking-[0.06em]">
+                                  <span className="ml-1 inline-flex items-center bg-app-accent-subtle text-app-accent text-[10px] font-bold rounded-[5px] px-[7px] py-0.5 tracking-[0.06em]">
                                     CỐT LÕI
                                   </span>
                                 )}
@@ -909,7 +874,7 @@ export function TwelveWeekTodayTab({
                         </div>
                         <Badge
                           variant={task.isCore ? "success" : "warning"}
-                          className="text-[9px] px-1.5 py-0 shadow-none rounded-md"
+                          className="text-[10px] px-1.5 py-0 shadow-none rounded-md"
                         >
                           {task.isCore ? "Cốt lõi" : "Tùy chọn"}
                         </Badge>
@@ -923,15 +888,6 @@ export function TwelveWeekTodayTab({
                   )}
                 </details>
               )}
-              <div className="rounded-card border border-app-line dark:border-app-line bg-app-bg-subtle p-[16px_18px]">
-                <div className="flex items-center justify-between mb-[9px]">
-                  <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-app-ink-muted">
-                    Tiến độ tuần {currentWeek}
-                  </span>
-                  <span className="font-mono text-[13px] font-bold text-app-accent">{weekCompletion.percent}%</span>
-                </div>
-                <Progress value={weekCompletion.percent} className="h-2 shadow-none rounded-full" />
-              </div>
               {primaryTaskCompletedToday && (
                 <p
                   data-testid="today-primary-done-nudge"
@@ -1006,7 +962,7 @@ export function TwelveWeekTodayTab({
                         aria-checked={isActive}
                         aria-label={`${option.label}: ${option.hint}`}
                         variant="outline"
-                        className={`h-auto min-w-0 justify-center flex-col gap-[7px] px-[6px] py-[14px] rounded-[13px] border-[1.5px] text-[10px] font-extrabold uppercase tracking-[0.08em] transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-200 ${moodStyle}`}
+                        className={`h-auto min-w-0 justify-center flex-col gap-[7px] px-[6px] py-[14px] border-[1.5px] text-[10px] font-extrabold uppercase tracking-[0.08em] transition-[background-color,color,border-color,box-shadow,opacity,transform] duration-200 ${moodStyle}`}
                         onClick={() => onDailyMoodChange(option.value)}
                       >
                         <span className="text-lg shrink-0">{emoji}</span>

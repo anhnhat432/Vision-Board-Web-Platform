@@ -142,15 +142,13 @@ afterEach(() => {
 });
 
 describe("TwelveWeekTodayTab — primary task hero", () => {
-  it("renders the primary action before secondary status and work regions", () => {
+  it("renders the primary action before the work regions", () => {
     render(<TwelveWeekTodayTab {...makeProps()} />);
 
     const hero = screen.getByTestId("today-primary-hero");
-    const strip = screen.getByTestId("today-dashboard-cards");
     const workGrid = screen.getByTestId("today-main-work-grid");
 
-    expect(hero.compareDocumentPosition(strip)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    expect(strip.compareDocumentPosition(workGrid)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+    expect(hero.compareDocumentPosition(workGrid)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
   });
 
   it("uses h2 for the primary task because the command bar owns h1", () => {
@@ -167,28 +165,6 @@ describe("TwelveWeekTodayTab — primary task hero", () => {
       "lg:grid-cols-[minmax(0,7fr)_minmax(320px,5fr)]",
     );
     expect(screen.getByTestId("today-check-in-column")).toHaveClass("lg:sticky", "lg:top-28");
-  });
-
-  it("lets status chip text wrap instead of truncating on mobile", () => {
-    render(<TwelveWeekTodayTab {...makeProps({ overdueOpenCount: 2, reviewDueToday: true })} />);
-
-    const strip = screen.getByTestId("today-dashboard-cards");
-    const chips = within(strip).getAllByText(/hôm nay|việc trễ hạn|Review tuần đến hạn/i);
-
-    for (const chip of chips) {
-      expect(chip).toHaveClass("break-words");
-      expect(chip).toHaveClass("leading-tight");
-      expect(chip).not.toHaveClass("truncate");
-    }
-  });
-
-  it("groups the current-day status into a labelled region", () => {
-    render(<TwelveWeekTodayTab {...makeProps()} />);
-
-    expect(screen.getByRole("region", { name: "Tình trạng hôm nay" })).toHaveAttribute(
-      "data-testid",
-      "today-dashboard-cards",
-    );
   });
 
   it("renders 'Ưu tiên duy nhất' headline when there is an open primary task", () => {
