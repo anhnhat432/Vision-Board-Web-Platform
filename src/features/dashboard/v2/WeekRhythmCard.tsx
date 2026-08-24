@@ -1,4 +1,4 @@
-import { CalendarDays, Clock3, Flame, TrendingUp, Zap } from "lucide-react";
+import { CalendarDays, Flame, TrendingUp, Zap } from "lucide-react";
 
 import { CountUp } from "@/app/components/ui/count-up";
 import {
@@ -19,6 +19,7 @@ interface WeekDayProgress {
   percent: number;
   isToday: boolean;
   isFuture: boolean;
+  hasCheckIn: boolean;
 }
 
 interface WeekRhythmCardProps {
@@ -55,6 +56,10 @@ const KPI_CARD_STYLES = {
   Chuỗi: { iconBg: "bg-app-energy/10 text-app-energy" },
 };
 
+function hasDailyCheckIn(system: TwelveWeekSystem | null, dateKey: string): boolean {
+  return system?.dailyCheckIns?.some((entry) => entry.date === dateKey && entry.didWorkToday) ?? false;
+}
+
 function buildEmptyWeekDays(today: Date): WeekDayProgress[] {
   const mondayBasedIndex = (today.getDay() + 6) % 7;
 
@@ -66,6 +71,7 @@ function buildEmptyWeekDays(today: Date): WeekDayProgress[] {
     percent: 0,
     isToday: index === mondayBasedIndex,
     isFuture: index > mondayBasedIndex,
+    hasCheckIn: false,
   }));
 }
 
@@ -94,23 +100,46 @@ function buildWeekDays(system: TwelveWeekSystem | null, currentWeek: number | nu
       percent: total === 0 ? 0 : Math.round((completed / total) * 100),
       isToday: dateKey === todayKey,
       isFuture: dateKey > todayKey,
+      hasCheckIn: hasDailyCheckIn(system, dateKey),
     };
   });
 }
 
-function WeekProgressDay({ day }: { day: WeekDayProgress }) {
-  const fillHeight = day.isFuture || day.total === 0 ? 0 : clamp(day.percent, 8, 100);
+/**
+ * Một cột nhịp/ngày thống nhất: chấm check-in (đã làm việc hôm đó) + cột thực
+ * thi (tỷ lệ hoàn thành task) + số việc. Gộp hai hàng cũ (dots và bars) để giảm
+ * trùng lặp thị giác — hợp hướng calm/gọn.
+ */
+function WeekRhythmColumn({ day }: { day: WeekDayProgress }) {
+  const fillHeight = day.isFuture || day.total === 0 ? 0 : clamp(day.percent, 10, 100);
   const fillColor = day.isToday
     ? "var(--app-accent)"
     : day.percent === 100
       ? "var(--app-accent-active)"
-      : "color-mix(in srgb, var(--app-accent) 40%, transparent)";
+      : "color-mix(in srgb, var(--app-accent) 42%, transparent)";
+
+  const checkInClass = day.hasCheckIn
+    ? "bg-app-accent"
+    : day.isToday
+      ? "bg-transparent ring-2 ring-inset ring-app-accent/45"
+      : "bg-app-line-strong/35";
 
   return (
     <div className="flex flex-1 flex-col items-center gap-1.5 text-center">
-      <span className={`text-[10px] font-extrabold ${day.isToday ? "text-app-accent" : "text-app-ink-muted"}`}>
+      <span className={`text-[10.5px] font-extrabold ${day.isToday ? "text-app-accent" : "text-app-ink-muted"}`}>
         {day.label}
       </span>
+      <span
+        className={`h-2 w-2 rounded-full ${checkInClass}`}
+        title={
+          day.isFuture
+            ? `${day.label}: Tương lai`
+            : day.hasCheckIn
+              ? `${day.label}: Đã check-in`
+              : `${day.label}: Chưa check-in`
+        }
+        aria-hidden="true"
+      />
       <div
         className={`flex h-16 w-5 items-end overflow-hidden rounded-full bg-app-bg-subtle ${
           day.isToday ? "border-[1.5px] border-app-accent/50" : "border-[1.5px] border-transparent"
@@ -123,7 +152,7 @@ function WeekProgressDay({ day }: { day: WeekDayProgress }) {
         />
       </div>
       <span
-        className={`font-mono text-[9px] font-bold tabular-nums ${day.isToday ? "text-app-accent" : "text-app-ink-muted"}`}
+        className={`font-mono text-[10px] font-bold tabular-nums ${day.isToday ? "text-app-accent" : "text-app-ink-muted"}`}
       >
         {day.completed}/{day.total}
       </span>
@@ -207,11 +236,16 @@ export function WeekRhythmCard({
           const styles = KPI_CARD_STYLES[item.caption];
 
           return (
-            <div key={item.caption} className="rounded-[14px] border border-app-line p-3.5">
+            <div
+              key={item.caption}
+              className="rounded-[14px] border border-app-line bg-app-bg-subtle/40 p-3.5 transition-colors duration-200 hover:border-app-accent/25"
+            >
               <div className={`mb-2.5 flex size-[30px] items-center justify-center rounded-[9px] ${styles.iconBg}`}>
                 <Icon className="h-4 w-4" />
               </div>
-              <p className="mb-1 text-[9.5px] font-bold uppercase tracking-[0.1em] text-app-ink-muted">{item.caption}</p>
+              <p className="mb-1 text-[10.5px] font-bold uppercase tracking-[0.08em] text-app-ink-muted">
+                {item.caption}
+              </p>
               <p className="font-serif text-2xl font-extrabold leading-none text-app-ink">
                 {item.numericValue !== undefined ? (
                   <CountUp value={item.numericValue} suffix={item.suffix ?? ""} precision={item.precision ?? 0} />
@@ -219,54 +253,26 @@ export function WeekRhythmCard({
                   item.value
                 )}
               </p>
-              <p className="mt-1.5 text-[10.5px] font-medium text-app-ink-muted">{item.subLine}</p>
+              <p className="mt-1.5 text-[11px] font-medium text-app-ink-muted">{item.subLine}</p>
             </div>
           );
         })}
       </div>
 
-      {/* Daily Checkins dots */}
-      <div className="mb-5 flex items-center justify-between rounded-[13px] border border-app-line bg-app-bg-subtle/50 px-4 py-3">
-        <span className="text-xs font-semibold text-app-ink-soft">Nhịp check-in hàng ngày</span>
-        <div className="flex items-center gap-2.5">
-          {days.map((day) => {
-            const hasCheckIn = system?.dailyCheckIns?.some((c) => c.date === day.key && c.didWorkToday) ?? false;
-            const dotColor = day.isToday || hasCheckIn ? "var(--app-accent)" : "#E2DED3";
-            const tooltipText = day.isFuture
-              ? `${day.label}: Tương lai`
-              : hasCheckIn
-                ? `${day.label}: Đã check-in`
-                : `${day.label}: Chưa check-in`;
-
-            return (
-              <div key={day.key} className="flex flex-col items-center gap-1.5" title={tooltipText}>
-                <span
-                  className="h-[11px] w-[11px] rounded-full"
-                  style={{
-                    backgroundColor: dotColor,
-                    boxShadow: day.isToday ? "0 0 0 3px color-mix(in srgb, var(--app-accent) 35%, transparent)" : undefined,
-                  }}
-                  aria-hidden="true"
-                />
-                <span
-                  className={`text-[9.5px] font-bold ${day.isToday ? "text-app-accent" : "text-app-ink-muted"}`}
-                >
-                  {day.label}
-                </span>
-              </div>
-            );
-          })}
+      {/* Nhịp thực thi & check-in tuần — một dải thống nhất theo ngày */}
+      <div className="rounded-[14px] border border-app-line bg-app-bg-subtle/40 px-4 py-3.5">
+        <div className="mb-3.5 flex items-center justify-between">
+          <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-app-ink-muted">
+            Nhịp thực thi & check-in
+          </span>
+          <span className="flex items-center gap-1.5 text-[10.5px] font-semibold text-app-ink-muted">
+            <span className="h-2 w-2 rounded-full bg-app-accent" aria-hidden="true" />
+            Đã check-in
+          </span>
         </div>
-      </div>
-
-      <div>
-        <div className="mb-3.5 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.1em] text-app-ink-muted">
-          <Clock3 className="h-3.5 w-3.5" />
-          Nhịp độ thực thi hàng ngày
-        </div>
-        <div className="flex max-w-[460px] items-end justify-between gap-2.5">
+        <div className="flex items-end justify-between gap-2.5">
           {days.map((day) => (
-            <WeekProgressDay key={day.key} day={day} />
+            <WeekRhythmColumn key={day.key} day={day} />
           ))}
         </div>
       </div>
