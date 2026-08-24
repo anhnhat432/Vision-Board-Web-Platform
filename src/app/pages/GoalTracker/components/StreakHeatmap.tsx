@@ -64,14 +64,17 @@ export function StreakHeatmap({ system }: StreakHeatmapProps) {
         const dateKey = formatDateStr(targetDate);
         const stats = tasksMap.get(dateKey) || { total: 0, completed: 0 };
 
-        let colorClass = "bg-app-bg border border-app-line/5";
+        // Thang một tông xanh + neutral (calm, không phán xét): xong = xanh đậm,
+        // xong dở = xanh nhạt, có việc mà chưa làm = xám trung tính (không đỏ/hồng
+        // gây cảm giác "toàn lỗi"), không có việc = nền rất nhạt.
+        let colorClass = "bg-app-bg-subtle border border-app-line/10";
         if (stats.total > 0) {
           if (stats.completed === stats.total) {
             colorClass = "bg-app-accent";
           } else if (stats.completed > 0) {
-            colorClass = "bg-app-accent/50";
+            colorClass = "bg-app-accent/45";
           } else {
-            colorClass = "bg-app-energy/30";
+            colorClass = "bg-app-line/45";
           }
         }
 
