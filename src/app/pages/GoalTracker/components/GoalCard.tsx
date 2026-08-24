@@ -81,7 +81,7 @@ export function GoalCard({
         <div className="backface-hidden w-full" aria-hidden={isFlipped}>
           <SpotlightCard
             className={cn(
-              "relative overflow-hidden rounded-[24px] border p-0 shadow-[var(--app-shadow-card)]",
+              "relative overflow-hidden rounded-card-lg border p-0 shadow-[var(--app-shadow-card)]",
               cardToneClass,
               completionLiftClass,
             )}
@@ -211,11 +211,11 @@ export function GoalCard({
                   </div>
                 </div>
 
-                <div className="flex-1 space-y-2.5">
+                <div className="flex flex-1 flex-col gap-2.5">
                   {displayTasks.map((task) => (
                     <div
                       key={task.id}
-                      className="group/task flex items-center gap-3 rounded-2xl border border-app-line/55 bg-app-surface px-3.5 py-3 transition-colors duration-150 hover:border-app-accent/25 hover:bg-app-accent-subtle/12 motion-reduce:transition-none"
+                      className="group/task flex items-center gap-3 rounded-card border border-app-line/55 bg-app-surface px-3.5 py-3 transition-colors duration-150 hover:border-app-accent/25 hover:bg-app-accent-subtle/12 motion-reduce:transition-none"
                     >
                       <button
                         type="button"
@@ -241,9 +241,17 @@ export function GoalCard({
                   ))}
 
                   {displayTasks.length === 0 && (
-                    <div className="flex min-h-[128px] items-center justify-center rounded-2xl border border-dashed border-app-line/70 bg-app-surface/72 px-4 text-center">
-                      <p className="text-[12.5px] font-medium text-app-ink-muted">
-                        {system ? "Không có việc hôm nay." : "Đã chốt hết việc chưa xong."}
+                    <div className="flex flex-1 flex-col items-center justify-center gap-2.5 rounded-card border border-dashed border-app-line/70 bg-app-surface/55 px-4 py-8 text-center">
+                      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-app-accent-soft/45 text-app-accent">
+                        <CheckCircle2 className="h-[22px] w-[22px]" />
+                      </span>
+                      <p className="text-[13px] font-semibold text-app-ink-soft">
+                        {system ? "Hôm nay không có việc trong mục tiêu này" : "Đã chốt hết việc chưa xong"}
+                      </p>
+                      <p className="max-w-[26ch] text-[11.5px] leading-relaxed text-app-ink-muted">
+                        {system
+                          ? "Giữ nhịp đều đặn — mở chu kỳ để xem kế hoạch tuần và bước tiếp theo."
+                          : "Tạo thêm nhiệm vụ mới khi bạn sẵn sàng."}
                       </p>
                     </div>
                   )}

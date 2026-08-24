@@ -565,14 +565,10 @@ function GoalTrackerContent({
               loading="lazy"
               decoding="async"
             />
-            <div className="absolute inset-0 bg-gradient-to-br from-app-accent/15 via-transparent to-app-accent/25 lg:bg-gradient-to-l lg:from-transparent lg:via-transparent lg:to-app-surface/40" />
-            <div className="absolute bottom-4 left-4 right-4 rounded-2xl border border-white/35 bg-app-surface/88 p-4 shadow-[0_18px_46px_-32px_rgba(23,21,15,0.55)] backdrop-blur-md dark:border-app-line/60 dark:bg-app-surface/90">
-              <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-app-accent">Nhịp hôm nay</p>
-              <p className="mt-1 text-sm font-semibold leading-snug text-app-ink">
-                {summary.completedTasks}/{summary.totalTasks || 0} việc đã chốt · {summary.activeSystems} chu kỳ đang
-                chạy
-              </p>
-            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-app-ink/45 via-transparent to-transparent lg:bg-gradient-to-l lg:from-transparent lg:via-transparent lg:to-app-surface/40" />
+            <p className="absolute bottom-4 left-5 right-5 font-serif text-sm italic leading-snug text-white drop-shadow-[0_1px_10px_rgba(0,0,0,0.55)]">
+              “Mỗi mục tiêu là một chương bạn đang viết.”
+            </p>
           </div>
         </section>
 
