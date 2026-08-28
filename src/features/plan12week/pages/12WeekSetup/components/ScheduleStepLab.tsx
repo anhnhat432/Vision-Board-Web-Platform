@@ -137,10 +137,10 @@ export function ScheduleStepLab({
           </div>
           <div>
             <h3 id="schedule-main-title" className="text-xs font-extrabold uppercase tracking-wider text-app-accent">
-              Chốt lịch trình cam kết
+              Đặt nhịp cho tuần đầu
             </h3>
             <p className="mt-0.5 text-[11px] text-app-ink-muted">
-              Xây dựng thời gian bắt đầu và nhịp độ kỷ luật cho hành trình 12 tuần của bạn
+              Chọn nhịp bạn có thể giữ đều cùng lịch thật của mình.
             </p>
           </div>
         </div>
@@ -160,14 +160,13 @@ export function ScheduleStepLab({
         <div className="space-y-3">
           <div className={cn(labelClass, "font-bold text-app-ink flex items-center gap-1.5")}>
             <Play className="h-4 w-4 text-app-accent" />
-            <span>Ngày bắt đầu chu kỳ 12 tuần</span>
+            <span>Ngày bắt đầu</span>
           </div>
 
           <div className="rounded-xl border border-app-status-info/20 bg-app-status-info/5 px-3.5 py-2.5 text-xs leading-relaxed text-app-ink-soft space-y-1 mb-2 select-none">
-            <div className="font-semibold text-app-status-info">💡 Gợi ý chọn ngày bắt đầu:</div>
+            <div className="font-semibold text-app-status-info">Gợi ý chọn ngày bắt đầu</div>
             <p>
-              Khuyên dùng chọn **Thứ 2 tuần tới** để bạn có trọn vẹn 1 tuần khởi động từ đầu. Nếu muốn làm ngay hôm nay
-              để lấy đà, hãy chọn **Hôm nay**.
+              Chọn Thứ 2 tuần tới nếu bạn muốn bắt đầu trọn một tuần. Chọn Hôm nay nếu bạn muốn lấy đà ngay.
             </p>
           </div>
 
@@ -276,18 +275,17 @@ export function ScheduleStepLab({
           </p>
         </div>
 
-        {/* Ngày nhìn lại tuần (Reflection Day) - Dải chip tròn dẹt to bản micro-animation */}
+        {/* Ngày xem lại tuần */}
         <fieldset className="space-y-2.5 border-t border-app-line/40 pt-4">
           <legend className={cn(labelClass, "font-bold text-app-ink flex items-center gap-1.5 mb-1")}>
             <Calendar className="h-4 w-4 text-app-accent" />
-            <span>Ngày nhìn lại tuần (Reflection Day)</span>
+            <span>Ngày xem lại tuần</span>
           </legend>
 
           <div className="rounded-xl border border-app-accent/15 bg-app-accent-soft/10 px-3.5 py-2.5 text-xs leading-relaxed text-app-ink-soft space-y-1.5 mb-2 select-none">
-            <div className="font-semibold text-app-accent">📊 Lựa chọn thời điểm phản tư tốt nhất:</div>
+            <div className="font-semibold text-app-accent">Chọn một ngày bạn dễ giữ đều</div>
             <p>
-              Chọn ngày cuối tuần khi tâm trí thư giãn nhất để tổng kết, ví dụ: 9:00–10:00 sáng Chủ nhật (thư thái nhâm
-              nhi cà phê) hoặc 16:00–17:00 chiều thứ Bảy để hoàn thành và tận hưởng tối Chủ Nhật trọn vẹn.
+              Dành vài phút để xem lại việc đã làm và chọn nhịp cho tuần tiếp theo.
             </p>
           </div>
 
@@ -334,7 +332,7 @@ export function ScheduleStepLab({
           >
             <span className="flex items-center gap-1.5">
               <Settings className="h-4 w-4 animate-spin-slow text-app-accent" />
-              <span>⚙️ Tùy chỉnh nâng cao (Đã tự động tối ưu – Customize Later)</span>
+              <span>Tùy chỉnh thêm</span>
             </span>
             <ChevronDown className={cn("h-4 w-4 transition-transform duration-200", isAdvancedOpen && "rotate-180")} />
           </button>
@@ -345,7 +343,7 @@ export function ScheduleStepLab({
               <fieldset className="space-y-2">
                 <legend className={cn(labelClass, "font-bold text-app-ink flex items-center gap-1.5 mb-1.5")}>
                   <Clock className="h-4 w-4 text-app-accent" />
-                  <span>Thời lượng dành cho mục tiêu mỗi ngày</span>
+                  <span>Thời gian bạn có mỗi ngày</span>
                 </legend>
                 <div className="rounded-xl border border-app-status-warning/20 bg-app-status-warning/5 px-3 py-2 text-[10px] text-app-ink-soft leading-normal mb-1">
                   * Ví dụ: Dành 30–60 phút tập trung cao độ mỗi ngày (ví dụ khung giờ cố định 20:00–21:00 tối) để xây
@@ -387,7 +385,7 @@ export function ScheduleStepLab({
               <fieldset className="space-y-2">
                 <legend className={cn(labelClass, "font-bold text-app-ink flex items-center gap-1.5 mb-1.5")}>
                   <Sliders className="h-4 w-4 text-app-accent" />
-                  <span>Mức tải hành động tuần đầu</span>
+                  <span>Mức tải tuần đầu</span>
                 </legend>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                   {[
